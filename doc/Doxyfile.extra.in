@@ -1,0 +1,13 @@
+TAGFILES = @HPP_CORE_DOXYGENDOCDIR@/hpp-core.doxytag=@HPP_CORE_DOXYGENDOCDIR@ \
+TAGFILES = @HPP_CORBASERVER_DOXYGENDOCDIR@/hpp-corbaserver.doxytag=@HPP_CORBASERVER_DOXYGENDOCDIR@ \
+	 @HPP_RBPRM_DOXYGENDOCDIR@/hpp-rbprm.doxytag=@HPP_RBPRM_DOXYGENDOCDIR@
+
+INPUT		= @CMAKE_SOURCE_DIR@/include \
+		  @CMAKE_BINARY_DIR@/include \
+		  @CMAKE_SOURCE_DIR@/idl \
+		  @CMAKE_SOURCE_DIR@/src/hpp/corbaserver/rbprm/rbprmbuilder.py \
+
+
+FILE_PATTERNS   = *.cc *.cpp \
+                  *.hh *.hxx \
+		  *.idl *.py

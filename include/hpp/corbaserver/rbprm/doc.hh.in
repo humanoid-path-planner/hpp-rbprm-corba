@@ -1,0 +1,84 @@
+// Copyright (C) 2014 CNRS-LAAS
+// Author: Florent Lamiraux.
+//
+// This file is part of the hpp-manipulation-corba.
+//
+// hpp-manipulation-corba is free software: you can redistribute
+// it and/or modify it under the terms of the GNU Lesser General
+// Public License as published by the Free Software Foundation, either
+// version 3 of the License, or (at your option) any later version.
+//
+// hpp-manipulation-corba is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with hpp-manipulation-corba.  If not, see
+// <http://www.gnu.org/licenses/>.
+
+/// \mainpage
+///
+/// \section hpp_manipulation_corba_intro Introduction
+///
+/// This package implements a Corba server running hpp-manipulation
+/// package functions and the corresponding client.
+///
+/// The corba server part is compiled into library
+/// \c libhpp-manipulation-corba.so that implements the following
+/// class:
+///   \li hpp::manipulation::Server.
+/// The corba services provided by the library are described in interface
+///   \li hpp::corbaserver::manipulation::Graph.
+///   \li hpp::corbaserver::manipulation::Problem.
+///   \li hpp::corbaserver::manipulation::Robot.
+///
+/// The client part is provided through python module
+/// \c hpp.corbaserver.manipulation
+///
+/// An executable called \c hpp-manipulation-server is installed.
+/// This executable runs
+///   \li the corba server implemented by library
+///       \c libhpp-manipulation-corba.so, as well as
+///   \li the corba server implemented in \htmlonly<a class="el" href="@HPP_WHOLEBODY_STEP_CORBA_DOXYGENDOCDIR@/index.html">hpp-wholebody-step-corba</a>\endhtmlonly,
+///   \li the corba server implemented in \htmlonly<a class="el" href="@HPP_CORBASERVER_DOXYGENDOCDIR@/index.html">hpp-corbaserver</a>\endhtmlonly.
+///
+/// See these package documentations for details.
+///
+/// \section hpp_manipulation_corba_howto_communicate \
+/// How to communicate with the CORBA server
+///
+/// The easiest way is
+///
+///     to launch \c hpp-manipulation-server executable,
+///     open a python terminal and type:
+///     \code
+///     from hpp.corbaserver.manipulation import Client as ManipulationClient
+///     mcl = ManipulationClient ()
+///     \endcode
+/// Then variable mcl contains a member \c problem that can send
+/// requests to the server. For instance
+///
+///     \code
+///     mcl.problem.loadHumanoidModel ("hrp2_14", "freeflyer",
+///                                    "hrp2_14_description", "hrp2_14",
+///                                    "_capsule", "_capsule")
+///     \endcode
+///
+/// Some python classes are provided that embed corba clients and
+/// that forward corba resquest to the server side:
+///   \li manipulation.robot.Robot to load and handle a manipulation robot,
+///   \li manipulation.robot.HumanoidRobot to load and handle a manipulation
+///       robot, containing a humanoid robot at first place,
+///   \li manipulation.problem_solver.ProblemSolver to set and solve a
+///       manipulation planning problem.
+///   \li manipulation.constraint_graph.ConstraintGraph to initialize the
+///       graph of constraint.
+///
+/// \section hpp_manipulation_corba_how_to_embed \
+/// How to embed a server in an application
+///
+/// Embedding the corba server into an application can be done by linking the
+/// application with \c libhpp-manipulation-corba.so in a similar way as
+/// hpp-corbaserver corba server. See documentation of classes
+/// hpp::corbaServer::Server and hpp::manipulation::Server for details.

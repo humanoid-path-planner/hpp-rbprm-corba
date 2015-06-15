@@ -1,0 +1,75 @@
+// Copyright (c) 2015 CNRS
+// Author: Steve Tonneau
+//
+// This file is part of hpp-manipulation-corba.
+// hpp-manipulation-corba is free software: you can redistribute it
+// and/or modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation, either version
+// 3 of the License, or (at your option) any later version.
+//
+// hpp-manipulation-corba is distributed in the hope that it will be
+// useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Lesser Public License for more details.  You should have
+// received a copy of the GNU Lesser General Public License along with
+// hpp-manipulation-corba.  If not, see
+// <http://www.gnu.org/licenses/>.
+
+#ifndef HPP_MANIPULATION_CORBA_ROBOT_IDL
+# define HPP_MANIPULATION_CORBA_ROBOT_IDL
+
+# include <hpp/corbaserver/common.idl>
+
+module hpp
+{
+  module corbaserver {
+  module rbprm {
+  interface RbprmBuilder
+  {
+    /// Create a Device for the ROM of the robot
+
+    /// The device automatically has an anchor joint called "base_joint" as
+    /// root joint.
+    /// \param romRobotName the name of the robot range of motion.
+    ///  Load robot model
+    /// \param rootJointType type of root joint among "anchor", "freeflyer",
+    /// "planar",
+    /// \param packageName Name of the ROS package containing the model,
+    /// \param modelName Name of the package containing the model
+    /// \param urdfSuffix suffix for urdf file,
+    ///
+    /// The ros url are built as follows:
+    /// "package://${packageName}/urdf/${modelName}${urdfSuffix}.urdf"
+    /// "package://${packageName}/srdf/${modelName}${srdfSuffix}.srdf"
+    ///
+    void loadRobotRomModel (in string romRobotName, in string rootJointType,
+             in string packageName, in string modelName,
+             in string urdfSuffix, in string srdfSuffix)
+      raises (Error);
+
+
+    /// Create a RbprmDevice for the robot of the robot
+
+    /// The device automatically has an anchor joint called "base_joint" as
+    /// root joint.
+    /// \param trunkRobotName the name of the robot trunk used for collision.
+    /// \param rootJointType type of root joint among "anchor", "freeflyer",
+    /// "planar",
+    /// \param packageName Name of the ROS package containing the model,
+    /// \param modelName Name of the package containing the model
+    /// \param urdfSuffix suffix for urdf file,
+    ///
+    /// The ros url are built as follows:
+    /// "package://${packageName}/urdf/${modelName}${urdfSuffix}.urdf"
+    /// "package://${packageName}/srdf/${modelName}${srdfSuffix}.srdf"
+    ///
+    void loadRobotCompleteModel (in string trunkRobotName, in string rootJointType,
+             in string packageName, in string modelName,
+             in string urdfSuffix, in string srdfSuffix)
+      raises (Error);
+  }; // interface Robot
+  }; // module rbprm
+  }; // module corbaserver
+}; // module hpp
+
+#endif // HPP_MANIPULATION_CORBA_ROBOT_IDL
