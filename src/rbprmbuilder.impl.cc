@@ -22,9 +22,19 @@
 #include "hpp/model/urdf/util.hh"
 #include <hpp/core/problem-solver.hh>
 
+
+
 namespace hpp {
   namespace rbprm {
     namespace impl {
+
+    RbprmBuilder::RbprmBuilder ()
+    : POA_hpp::corbaserver::rbprm::RbprmBuilder()
+    , romLoaded_(false)
+    , bindShooter_()
+    {
+        // NOTHING
+    }
 
     void RbprmBuilder::loadRobotRomModel(const char* robotName,
          const char* rootJointType,
@@ -83,6 +93,17 @@ namespace hpp {
             hppDout (error, exc.what ());
             throw hpp::Error (exc.what ());
         }
+    }
+
+    void RbprmBuilder::SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver)
+    {
+        problemSolver_ = problemSolver;
+        bindShooter_.problemSolver_ = problemSolver;
+        //bind shooter creator to hide problem as a parameter and respect signature
+
+        // add rbprmshooter
+        problemSolver->addConfigurationShooterType("RbprmShooter",
+                                                   boost::bind(&BindShooter::create, boost::ref(bindShooter_), _1));
     }
 
     } // namespace impl

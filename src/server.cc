@@ -35,7 +35,7 @@ namespace hpp {
 
     void Server::setProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver)
     {
-      rbprmBuilder_->implementation ().problemSolver_ = problemSolver;
+        rbprmBuilder_->implementation ().SetProblemSolver(problemSolver);
     }
 
     /// Start corba server

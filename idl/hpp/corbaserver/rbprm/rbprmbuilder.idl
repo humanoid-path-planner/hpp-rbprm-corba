@@ -15,8 +15,8 @@
 // hpp-manipulation-corba.  If not, see
 // <http://www.gnu.org/licenses/>.
 
-#ifndef HPP_MANIPULATION_CORBA_ROBOT_IDL
-# define HPP_MANIPULATION_CORBA_ROBOT_IDL
+#ifndef HPP_RBPRM_CORBA_BUILDER_IDL
+# define HPP_RBPRM_CORBA_BUILDER_IDL
 
 # include <hpp/corbaserver/common.idl>
 
@@ -48,7 +48,7 @@ module hpp
       raises (Error);
 
 
-    /// Create a RbprmDevice for the robot of the robot
+    /// Create a RbprmDevice for the root of the robot
 
     /// The device automatically has an anchor joint called "base_joint" as
     /// root joint.
@@ -72,4 +72,4 @@ module hpp
   }; // module corbaserver
 }; // module hpp
 
-#endif // HPP_MANIPULATION_CORBA_ROBOT_IDL
+#endif // HPP_RBPRM_CORBA_BUILDER_IDL

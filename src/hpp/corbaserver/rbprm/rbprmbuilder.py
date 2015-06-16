@@ -73,6 +73,14 @@ class Builder (object):
 			self.rankInVelocity [j] = rankInVelocity
 			rankInVelocity += self.client.basic.robot.getJointNumberDof (j)
 
+	## Init RbprmShooter
+    #
+    # \param jointName name of the joint,
+    # \return name of the link.
+    def initshooter (self):
+        return self.client.rbprm.rbprm.initshooter ()
+    ## \}
+
    ## \name Degrees of freedom
     #  \{
 
