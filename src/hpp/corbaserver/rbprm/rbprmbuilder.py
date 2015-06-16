@@ -42,18 +42,36 @@ class Builder (object):
     # \param load whether to actually load urdf files. Set to no if you only
     #        want to initialize a corba client to an already initialized
     #        problem.
-    def __init__ (self, trunkName, romName, rootJointType, load = True):
+    def __init__ (self, load = True):
         self.tf_root = "base_link"
         self.rootJointType = dict()
-        self.name = trunkName
-        self.displayName = trunkName
         self.client = CorbaClient ()
         self.load = load
-        self.loadModel (trunkName, romName, rootJointType)
-
+        
     ## Virtual function to load the robot model
-    def loadModel (self, trunkName, romName, rootJointType):
-        self.client.rbprm.robot.create (trunkName, romName)
+    def loadModel (self, urdfName, rootJointType, packageName, meshPackageName, urdfSuffix, srdfSuffix):
+		self.client.rbprm.rbprm.loadRobotRomModel(urdfName, rootJointType, packageName, urdfName, urdfSuffix, srdfSuffix)
+		self.client.rbprm.rbprm.loadRobotCompleteModel(urdfName, rootJointType, packageName, urdfName, urdfSuffix, srdfSuffix)		
+		self.name = urdfName
+		self.displayName = urdfName
+		self.tf_root = "base_link"
+		self.rootJointType = rootJointType
+		self.jointNames = self.client.basic.robot.getJointNames ()
+		self.allJointNames = self.client.basic.robot.getAllJointNames ()
+		self.client.basic.robot.meshPackageName = meshPackageName
+		self.meshPackageName = meshPackageName
+		self.rankInConfiguration = dict ()
+		self.rankInVelocity = dict ()
+		self.packageName = packageName
+		self.urdfName = urdfName
+		self.urdfSuffix = urdfSuffix
+		self.srdfSuffix = srdfSuffix
+		rankInConfiguration = rankInVelocity = 0
+		for j in self.jointNames:
+			self.rankInConfiguration [j] = rankInConfiguration
+			rankInConfiguration += self.client.basic.robot.getJointConfigSize (j)
+			self.rankInVelocity [j] = rankInVelocity
+			rankInVelocity += self.client.basic.robot.getJointNumberDof (j)
 
    ## \name Degrees of freedom
     #  \{

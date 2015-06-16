@@ -119,6 +119,7 @@ INSTALL(
   FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/client.py
 	${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/rbprmbuilder.py
+	${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/problem_solver.py
   DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm
   )
 
