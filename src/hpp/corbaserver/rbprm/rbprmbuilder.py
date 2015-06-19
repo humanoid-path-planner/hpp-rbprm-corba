@@ -49,9 +49,9 @@ class Builder (object):
         self.load = load
         
     ## Virtual function to load the robot model
-    def loadModel (self, urdfName, rootJointType, packageName, meshPackageName, urdfSuffix, srdfSuffix):
+    def loadModel (self, urdfName, urdfNamerom, rootJointType, packageName, meshPackageName, urdfSuffix, srdfSuffix):
 		self.client.rbprm.rbprm.loadRobotRomModel(urdfName, rootJointType, packageName, urdfName, urdfSuffix, srdfSuffix)
-		self.client.rbprm.rbprm.loadRobotCompleteModel(urdfName, rootJointType, packageName, urdfName, urdfSuffix, srdfSuffix)		
+		self.client.rbprm.rbprm.loadRobotCompleteModel(urdfNamerom, rootJointType, packageName, urdfName, urdfSuffix, srdfSuffix)		
 		self.name = urdfName
 		self.displayName = urdfName
 		self.tf_root = "base_link"

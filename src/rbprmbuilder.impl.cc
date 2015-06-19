@@ -19,8 +19,11 @@
 #include <hpp/util/debug.hh>
 #include "rbprmbuilder.impl.hh"
 #include "hpp/rbprm/rbprm-device.hh"
+#include "hpp/rbprm/rbprm-validation.hh"
 #include "hpp/model/urdf/util.hh"
+#include <hpp/core/collision-path-validation-report.hh>
 #include <hpp/core/problem-solver.hh>
+#include <hpp/core/discretized-collision-checking.hh>
 
 
 
@@ -95,6 +98,17 @@ namespace hpp {
         }
     }
 
+    namespace
+    {
+        hpp::core::PathValidationPtr_t createPathValidation (const hpp::model::DevicePtr_t& robot, const hpp::model::value_type& val)
+        {
+            hpp::model::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::model::RbPrmDevice>(robot);
+            hpp::rbprm::RbPrmValidationPtr_t validation(hpp::rbprm::RbPrmValidation::create(robotcast));
+            hpp::core::CollisionPathValidationReport defaultValidation;
+            return hpp::core::DiscretizedCollisionChecking::createWithValidation(robot,val ,defaultValidation, validation);
+        }
+    }
+
     void RbprmBuilder::SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver)
     {
         problemSolver_ = problemSolver;
@@ -104,6 +118,7 @@ namespace hpp {
         // add rbprmshooter
         problemSolver->addConfigurationShooterType("RbprmShooter",
                                                    boost::bind(&BindShooter::create, boost::ref(bindShooter_), _1));
+        problemSolver->addPathValidationType("RbprmPathValidation", &createPathValidation);
     }
 
     } // namespace impl

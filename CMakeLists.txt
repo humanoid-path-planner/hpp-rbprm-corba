@@ -53,5 +53,31 @@ ADD_SUBDIRECTORY(src)
 
 CONFIG_FILES (include/hpp/corbaserver/rbprm/doc.hh)
 
+SET(CATKIN_PACKAGE_SHARE_DESTINATION
+  ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME})
+
+install(FILES
+  data/package.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  )
+install(FILES
+  data/urdf/box_rom.urdf
+  data/urdf/box.urdf
+  data/urdf/scene.urdf
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
+  )
+install(FILES
+  data/srdf/box_rom.srdf
+  data/srdf/box.srdf
+  data/srdf/scene.srdf
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
+  )
+install(FILES
+  data/meshes/car.stl
+	data/meshes/box.stl
+	data/meshes/box_rom.stl
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
+  )
+  
 SETUP_PROJECT_FINALIZE()
 

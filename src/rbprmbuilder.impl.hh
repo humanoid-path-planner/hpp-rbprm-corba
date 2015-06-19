@@ -33,23 +33,15 @@ namespace hpp {
     struct BindShooter
     {
         BindShooter(const std::size_t shootLimit = 10000,
-                    const std::size_t displacementLimit = 100)
+                    const std::size_t displacementLimit = 10)
             : shootLimit_(shootLimit)
             , displacementLimit_(displacementLimit) {}
 
         hpp::rbprm::RbPrmShooterPtr_t create (const hpp::model::DevicePtr_t& robot)
         {
-            hpp::model::DevicePtr_t pRobot = robot;
             hpp::model::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::model::RbPrmDevice>(robot);
-            hpp::rbprm::RbPrmValidationPtr_t validator = hpp::rbprm::RbPrmValidation::create(robotcast);
-            const hpp::core::ObjectVector_t& obstacles = problemSolver_->collisionObstacles();
-            for(hpp::core::ObjectVector_t::const_iterator cit = obstacles.begin();
-                cit != obstacles.end(); ++cit)
-            {
-                validator->addObstacle(*cit);
-            }
             return hpp::rbprm::RbPrmShooter::create
-                    (robotcast,problemSolver_->collisionObstacles(),validator,shootLimit_,displacementLimit_);
+                    (robotcast,problemSolver_->problem ()->collisionObstacles(),shootLimit_,displacementLimit_);
         }
         hpp::core::ProblemSolverPtr_t problemSolver_;
         std::size_t shootLimit_;

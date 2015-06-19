@@ -3,7 +3,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.05 0.05 0.05"/>
+        <mesh filename="package://hpp-rbprm-corba/meshes/robot_box.stl"/>
       </geometry>
       <material name="white">
         <color rgba="1 1 1 1"/>
@@ -12,7 +12,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.05 0.05 0.05"/>
+        <mesh filename="package://hpp-rbprm-corba/meshes/box.stl"/>
       </geometry>
     </collision>
   </link>
