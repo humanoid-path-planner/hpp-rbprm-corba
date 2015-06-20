@@ -21,7 +21,6 @@
 # define HPP_RBPRM_CORBA_SERVER_HH
 
 # include <hpp/corba/template/server.hh>
-# include <hpp/corbaserver/rbprm/fwd.hh>
 # include <hpp/corbaserver/rbprm/config.hh>
 
 namespace hpp {

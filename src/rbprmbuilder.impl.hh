@@ -18,7 +18,6 @@
 #ifndef HPP_RBPRM_CORBA_BUILDER_IMPL_HH
 # define HPP_RBPRM_CORBA_BUILDER_IMPL_HH
 
-# include <hpp/corbaserver/rbprm/fwd.hh>
 # include <hpp/core/problem-solver.hh>
 # include "rbprmbuilder.hh"
 # include <hpp/rbprm/rbprm-device.hh>

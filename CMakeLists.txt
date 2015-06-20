@@ -34,7 +34,6 @@ SETUP_PROJECT ()
 
 SET(${PROJECT_NAME}_HEADERS
   include/hpp/corbaserver/rbprm/server.hh
-  include/hpp/corbaserver/rbprm/fwd.hh
 )
 
 # Activate hpp-util logging if requested
@@ -47,6 +46,7 @@ ADD_DOC_DEPENDENCY("hpp-core >= 3")
 ADD_REQUIRED_DEPENDENCY("hpp-corbaserver >= 3")
 ADD_REQUIRED_DEPENDENCY("hpp-rbprm")
 ADD_REQUIRED_DEPENDENCY("omniORB4 >= 4.1.4")
+ADD_REQUIRED_DEPENDENCY("hpp-model-urdf >= 3")
 
 PKG_CONFIG_APPEND_LIBS(${PROJECT_NAME})
 ADD_SUBDIRECTORY(src)
@@ -73,9 +73,10 @@ install(FILES
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
   )
 install(FILES
-  data/meshes/car.stl
+	data/meshes/car.stl
 	data/meshes/box.stl
 	data/meshes/box_rom.stl
+	data/meshes/robot_box.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
   )
   
