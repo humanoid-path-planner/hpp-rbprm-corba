@@ -32,7 +32,7 @@ namespace hpp {
     struct BindShooter
     {
         BindShooter(const std::size_t shootLimit = 10000,
-                    const std::size_t displacementLimit = 10)
+                    const std::size_t displacementLimit = 1000)
             : shootLimit_(shootLimit)
             , displacementLimit_(displacementLimit) {}
 

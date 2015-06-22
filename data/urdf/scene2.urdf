@@ -1,0 +1,100 @@
+<robot name="scene">
+	
+  <!-- This is the top level joint /tf frame. -->
+  <link name="base_link">
+    <!--<sphere_inertia radius="0.001" mass="1"/>-->
+  </link>
+  <joint name="ground_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="ground_link"/>
+  </joint>
+  <link name="ground_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package:///../hpp-rbprm-corba/meshes/ground.stl"/>
+      </geometry>
+      <material name="white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://hpp-rbprm-corba/meshes/ground.stl"/>
+      </geometry>
+    </collision>
+  </link> 
+  
+  <joint name="board_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="board_link"/>
+  </joint>
+  <link name="board_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package:///../hpp-rbprm-corba/meshes/board.stl"/>
+      </geometry>
+      <material name="white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://hpp-rbprm-corba/meshes/board.stl"/>
+      </geometry>
+    </collision>
+  </link>
+   
+  
+  <joint name="chair_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="chair_link"/>
+  </joint>
+  <link name="chair_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package:///../hpp-rbprm-corba/meshes/chair_simple.stl"/>
+      </geometry>
+      <material name="white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://hpp-rbprm-corba/meshes/chair_simple.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  
+  <joint name="pedal_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="pedal_link"/>
+  </joint>
+  <link name="pedal_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package:///../hpp-rbprm-corba/meshes/pedal.stl"/>
+      </geometry>
+      <material name="white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://hpp-rbprm-corba/meshes/pedal.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  
+</robot>
