@@ -34,6 +34,7 @@ namespace hpp {
     RbprmBuilder::RbprmBuilder ()
     : POA_hpp::corbaserver::rbprm::RbprmBuilder()
     , romLoaded_(false)
+    , fullBodyLoaded_(false)
     , bindShooter_()
     {
         // NOTHING
@@ -95,6 +96,76 @@ namespace hpp {
         {
             hppDout (error, exc.what ());
             throw hpp::Error (exc.what ());
+        }
+    }
+
+    void RbprmBuilder::loadFullBodyRobot(const char* robotName,
+         const char* rootJointType,
+         const char* packageName,
+         const char* modelName,
+         const char* urdfSuffix,
+         const char* srdfSuffix) throw (hpp::Error)
+    {
+        try
+        {
+            model::DevicePtr_t device = model::Device::create (robotName);
+            hpp::model::urdf::loadRobotModel (romDevice_,
+                    std::string (rootJointType),
+                    std::string (packageName),
+                    std::string (modelName),
+                    std::string (urdfSuffix),
+                    std::string (srdfSuffix));
+            fullBody_ = rbprm::RbPrmFullBody::create(device);
+        }
+        catch (const std::exception& exc)
+        {
+            hppDout (error, exc.what ());
+            throw hpp::Error (exc.what ());
+        }
+        fullBodyLoaded_ = true;
+    }
+
+
+    hpp::floatSeq* RbprmBuilder::getSampleConfig(const char* limb, unsigned short sampleId) throw (hpp::Error)
+    {
+        if(!fullBodyLoaded_)
+            throw Error ("No full body robot was loaded");
+        const T_Limb& limbs = fullBody_->GetLimbs();
+        T_Limb::const_iterator lit = limbs.find(std::string(limb));
+        if(lit == limbs.end())
+        {
+            std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody_->device_->name());
+            throw Error (err.c_str());
+        }
+        const RbPrmLimbPtr_t& limbPtr = lit->second;
+        hpp::floatSeq *dofArray;
+        Eigen::VectorXd config = fullBody_->device_->currentConfiguration ();
+        if(sampleId > limbPtr->sampleContainer_.samples_.size())
+        {
+            std::string err("Limb " + std::string(limb) + "does not have samples.");
+            throw Error (err.c_str());
+        }
+        const sampling::Sample& sample = limbPtr->sampleContainer_.samples_[sampleId];
+        size_t ric = sample.startRank_;
+        config.tail(ric) = sample.configuration_;
+        dofArray = new hpp::floatSeq();
+        dofArray->length(_CORBA_ULong(config.rows()));
+        for(std::size_t i=0; i< _CORBA_ULong(config.rows()); i++)
+          (*dofArray)[(_CORBA_ULong)i] = config [i];
+        return dofArray;
+    }
+
+    void RbprmBuilder::addLimb(const char* limb, unsigned short samples, double resolution) throw (hpp::Error)
+    {
+        if(!fullBodyLoaded_)
+            throw Error ("No full body robot was loaded");
+        try
+        {
+            fullBody_->AddLimb(std::string(limb),samples,resolution);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
         }
     }
 

@@ -21,6 +21,7 @@
 # include <hpp/core/problem-solver.hh>
 # include "rbprmbuilder.hh"
 # include <hpp/rbprm/rbprm-device.hh>
+# include <hpp/rbprm/rbprm-fullbody.hh>
 # include <hpp/rbprm/rbprm-shooter.hh>
 # include <hpp/rbprm/rbprm-validation.hh>
 
@@ -66,6 +67,18 @@ namespace hpp {
                  const char* urdfSuffix,
                  const char* srdfSuffix) throw (hpp::Error);
 
+
+        virtual void loadFullBodyRobot (const char* robotName,
+                 const char* rootJointType,
+                 const char* packageName,
+                 const char* modelName,
+                 const char* urdfSuffix,
+                 const char* srdfSuffix) throw (hpp::Error);
+
+        virtual hpp::floatSeq* getSampleConfig(const char* limb, unsigned short sampleId) throw (hpp::Error);
+
+        virtual void addLimb(const char* limb, unsigned short samples, double resolution) throw (hpp::Error);
+
         public:
         void SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver);
 
@@ -75,7 +88,9 @@ namespace hpp {
 
         private:
         model::DevicePtr_t romDevice_;
+        rbprm::RbPrmFullBodyPtr_t fullBody_;
         bool romLoaded_;
+        bool fullBodyLoaded_;
         BindShooter bindShooter_;
       }; // class RobotBuilder
     } // namespace impl
