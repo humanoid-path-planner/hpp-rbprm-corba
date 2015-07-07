@@ -72,29 +72,6 @@ class Builder (object):
 			rankInConfiguration += self.client.basic.robot.getJointConfigSize (j)
 			self.rankInVelocity [j] = rankInVelocity
 			rankInVelocity += self.client.basic.robot.getJointNumberDof (j)
-			
-	def loadFullBodyModel (self, urdfName, rootJointType, packageName, meshPackageName, urdfSuffix, srdfSuffix):
-		self.client.rbprm.rbprm.loadloadFullBodyRobot(urdfName, rootJointType, packageName, urdfNamerom, urdfSuffix, srdfSuffix)
-		self.name = urdfName
-		self.displayName = urdfName
-		self.tf_root = "base_link"
-		self.rootJointType = rootJointType
-		self.jointNames = self.client.basic.robot.getJointNames ()
-		self.allJointNames = self.client.basic.robot.getAllJointNames ()
-		self.client.basic.robot.meshPackageName = meshPackageName
-		self.meshPackageName = meshPackageName
-		self.rankInConfiguration = dict ()
-		self.rankInVelocity = dict ()
-		self.packageName = packageName
-		self.urdfName = urdfName
-		self.urdfSuffix = urdfSuffix
-		self.srdfSuffix = srdfSuffix
-		rankInConfiguration = rankInVelocity = 0
-		for j in self.jointNames:
-			self.rankInConfiguration [j] = rankInConfiguration
-			rankInConfiguration += self.client.basic.robot.getJointConfigSize (j)
-			self.rankInVelocity [j] = rankInVelocity
-			rankInVelocity += self.client.basic.robot.getJointNumberDof (j)
 
 	## Init RbprmShooter
     #

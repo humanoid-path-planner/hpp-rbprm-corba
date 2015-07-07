@@ -29,11 +29,11 @@ class CorbaClient:
         self.basic = BasicClient ()
         self.rbprm = RbprmClient ()
 
-## Load and handle a RbprmDevice robot for rbprm planning
+## Load and handle a RbprmFullbody robot for rbprm planning
 #
 #  A RbprmDevice robot is a set of two robots. One for the 
 #  trunk of the robot, one for the range of motion
-class Builder (object):
+class FullBody (object):
     ## Constructor
     # \param trunkName name of the first robot that is loaded now,
     # \param romName name of the first robot that is loaded now,
@@ -48,8 +48,8 @@ class Builder (object):
         self.client = CorbaClient ()
         self.load = load
 			
-	def loadFullBodyModel (self, urdfName, rootJointType, packageName, meshPackageName, urdfSuffix, srdfSuffix):
-		self.client.rbprm.rbprm.loadloadFullBodyRobot(urdfName, rootJointType, packageName, urdfNamerom, urdfSuffix, srdfSuffix)
+    def loadFullBodyModel (self, urdfName, rootJointType, packageName, meshPackageName, urdfSuffix, srdfSuffix):
+		self.client.rbprm.rbprm.loadFullBodyRobot(urdfName, rootJointType, packageName, urdfName, urdfSuffix, srdfSuffix)
 		self.name = urdfName
 		self.displayName = urdfName
 		self.tf_root = "base_link"
@@ -70,6 +70,12 @@ class Builder (object):
 			rankInConfiguration += self.client.basic.robot.getJointConfigSize (j)
 			self.rankInVelocity [j] = rankInVelocity
 			rankInVelocity += self.client.basic.robot.getJointNumberDof (j)
+
+    def addLimb(self, name, samples, resolution):
+		self.client.rbprm.rbprm.addLimb(name, samples, resolution)
+
+    def getSample(self, name, idsample):
+		return self.client.rbprm.rbprm.getSampleConfig(name,idsample)
 
    ## \name Degrees of freedom
     #  \{

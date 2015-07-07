@@ -109,13 +109,16 @@ namespace hpp {
         try
         {
             model::DevicePtr_t device = model::Device::create (robotName);
-            hpp::model::urdf::loadRobotModel (romDevice_,
+            hpp::model::urdf::loadRobotModel (device,
                     std::string (rootJointType),
                     std::string (packageName),
                     std::string (modelName),
                     std::string (urdfSuffix),
                     std::string (srdfSuffix));
             fullBody_ = rbprm::RbPrmFullBody::create(device);
+            problemSolver_->robot (fullBody_->device_);
+            problemSolver_->robot ()->controlComputation
+            (model::Device::JOINT_POSITION);
         }
         catch (const std::exception& exc)
         {
@@ -147,7 +150,7 @@ namespace hpp {
         }
         const sampling::Sample& sample = limbPtr->sampleContainer_.samples_[sampleId];
         size_t ric = sample.startRank_;
-        config.tail(ric) = sample.configuration_;
+        config.tail(config.rows() - ric) = sample.configuration_;
         dofArray = new hpp::floatSeq();
         dofArray->length(_CORBA_ULong(config.rows()));
         for(std::size_t i=0; i< _CORBA_ULong(config.rows()); i++)

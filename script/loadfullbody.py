@@ -1,4 +1,5 @@
 from hpp.corbaserver.rbprm.rbprmbuilder import Builder
+from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 
 rootJointType = 'freeflyer'
@@ -9,23 +10,23 @@ urdfNameRom = 'box_rom'
 urdfSuffix = ""
 srdfSuffix = ""
 
-rbprmBuilder = Builder ()
+fullBody = FullBody ()
 
-rbprmBuilder.loadFullBodyModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-rbprmBuilder.setJointBounds ("base_joint_xyz", [0, 2, -2, 0, -1, 1.5])
+fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
+fullBody.setJointBounds ("base_joint_xyz", [0, 2, -2, 0, -1, 1.5])
+fullBody.addLimb("base_joint_SO3", 100, 0.1)
 
 #~ from hpp.corbaserver.rbprm. import ProblemSolver
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 
-ps = ProblemSolver( rbprmBuilder )
+ps = ProblemSolver( fullBody )
 
 r = Viewer (ps)
 
-q_init = rbprmBuilder.getCurrentConfig ()
-q_goal = q_init [::]
-q_init [0:3] = [0, -0.5, 0.3]
-q_goal = [0, -0.5, -0.2, -0.501544,0.431183, 0.662926, -0.350804]
-r (q_goal)
+fullBody.getSample('base_joint_SO3', 1)
+fullBody.client.rbprm.rbprm.getSampleConfig('base_joint_SO3', 1)
+q_init = fullBody.client.rbprm.rbprm.getSampleConfig('base_joint_SO3', 1)
+r (q_init)
 
 
 ps.setInitialConfig (q_init)
