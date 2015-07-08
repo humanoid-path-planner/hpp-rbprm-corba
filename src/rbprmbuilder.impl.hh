@@ -77,6 +77,9 @@ namespace hpp {
 
         virtual hpp::floatSeq* getSampleConfig(const char* limb, unsigned short sampleId) throw (hpp::Error);
 
+        virtual hpp::floatSeq* generateContacts(const hpp::floatSeq& configuration,
+                                                const hpp::floatSeq& direction) throw (hpp::Error);
+
         virtual void addLimb(const char* limb, unsigned short samples, double resolution) throw (hpp::Error);
 
         public:

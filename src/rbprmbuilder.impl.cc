@@ -149,13 +149,60 @@ namespace hpp {
             throw Error (err.c_str());
         }
         const sampling::Sample& sample = limbPtr->sampleContainer_.samples_[sampleId];
-        size_t ric = sample.startRank_;
-        config.tail(config.rows() - ric) = sample.configuration_;
+        config.segment(sample.startRank_, sample.length_) = sample.configuration_;
         dofArray = new hpp::floatSeq();
         dofArray->length(_CORBA_ULong(config.rows()));
         for(std::size_t i=0; i< _CORBA_ULong(config.rows()); i++)
           (*dofArray)[(_CORBA_ULong)i] = config [i];
         return dofArray;
+    }
+
+    model::Configuration_t dofArrayToConfig (const model::DevicePtr_t& robot,
+      const hpp::floatSeq& dofArray)
+    {
+        std::size_t configDim = (std::size_t)dofArray.length();
+        // Get robot
+        if (!robot) {
+            throw hpp::Error ("No robot in problem solver.");
+        }
+        std::size_t deviceDim = robot->configSize ();
+        // Fill dof vector with dof array.
+        model::Configuration_t config; config.resize (configDim);
+        for (std::size_t iDof = 0; iDof < configDim; iDof++) {
+            config [iDof] = dofArray[iDof];
+        }
+        // fill the vector by zero
+        hppDout (info, "config dimension: " <<configDim
+           <<",  deviceDim "<<deviceDim);
+        if(configDim != deviceDim){
+            throw hpp::Error ("dofVector Does not match");
+        }
+        return config;
+    }
+
+
+    hpp::floatSeq* RbprmBuilder::generateContacts(const hpp::floatSeq& configuration, const hpp::floatSeq& direction) throw (hpp::Error)
+    {
+        if(!fullBodyLoaded_)
+            throw Error ("No full body robot was loaded");
+        try
+        {
+            Eigen::Vector3d dir;
+            for(std::size_t i =0; i <3; ++i)
+            {
+                dir[i] = direction[i];
+            }
+            model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
+            rbprm::State state = rbprm::ComputeContacts(fullBody_,config,
+                                            problemSolver_->collisionObstacles(), dir);
+            hpp::floatSeq* dofArray = new hpp::floatSeq();
+            dofArray->length(_CORBA_ULong(config.rows()));
+            for(std::size_t i=0; i< _CORBA_ULong(config.rows()); i++)
+              (*dofArray)[(_CORBA_ULong)i] = state.configuration_ [i];
+            return dofArray;
+        } catch (const std::exception& exc) {
+        throw hpp::Error (exc.what ());
+        }
     }
 
     void RbprmBuilder::addLimb(const char* limb, unsigned short samples, double resolution) throw (hpp::Error)

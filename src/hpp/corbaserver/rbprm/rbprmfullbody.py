@@ -48,7 +48,7 @@ class FullBody (object):
         self.client = CorbaClient ()
         self.load = load
 			
-    def loadFullBodyModel (self, urdfName, rootJointType, packageName, meshPackageName, urdfSuffix, srdfSuffix):
+    def loadFullBodyModel (self, urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix):
 		self.client.rbprm.rbprm.loadFullBodyRobot(urdfName, rootJointType, packageName, urdfName, urdfSuffix, srdfSuffix)
 		self.name = urdfName
 		self.displayName = urdfName
@@ -77,6 +77,8 @@ class FullBody (object):
     def getSample(self, name, idsample):
 		return self.client.rbprm.rbprm.getSampleConfig(name,idsample)
 
+    def generateContacts(self, configuration, direction):
+		return self.client.rbprm.rbprm.generateContacts(configuration, direction)
    ## \name Degrees of freedom
     #  \{
 

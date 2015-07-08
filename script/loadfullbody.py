@@ -2,11 +2,13 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 
-rootJointType = 'freeflyer'
-packageName = 'hpp-rbprm-corba'
-meshPackageName = 'hpp-rbprm-corba'
-urdfName = 'box'
-urdfNameRom = 'box_rom'
+
+packageName = "hpp_tutorial"
+meshPackageName = "pr2_description"
+rootJointType = "freeflyer"
+##
+#  Information to retrieve urdf and srdf files.
+urdfName = "pr2"
 urdfSuffix = ""
 srdfSuffix = ""
 
@@ -14,21 +16,23 @@ fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 fullBody.setJointBounds ("base_joint_xyz", [0, 2, -2, 0, -1, 1.5])
-fullBody.addLimb("base_joint_SO3", 100, 0.1)
+fullBody.addLimb("r_shoulder_pan_joint", 1000, 0.001)
 
-#~ from hpp.corbaserver.rbprm. import ProblemSolver
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 
 ps = ProblemSolver( fullBody )
-
 r = Viewer (ps)
+r.loadObstacleModel ('hpp-rbprm-corba', "scene", "car")
 
-fullBody.getSample('base_joint_SO3', 1)
-fullBody.client.rbprm.rbprm.getSampleConfig('base_joint_SO3', 1)
-q_init = fullBody.client.rbprm.rbprm.getSampleConfig('base_joint_SO3', 1)
+q_init = fullBody.getCurrentConfig ()
+q_init [0:3] = [-0.6, -0.5, -0.4]
+r (q_init)
+fullBody.setCurrentConfig (q_init)
+
+
+q_init = fullBody.generateContacts(q_init, [0,1,0])
 r (q_init)
 
 
-ps.setInitialConfig (q_init)
-ps.addGoalConfig (q_goal)
-
+#~ q_init = fullBody.getSample('r_shoulder_pan_joint', 1)
+#~ r (q_init)
