@@ -79,6 +79,9 @@ class FullBody (object):
 
     def generateContacts(self, configuration, direction):
 		return self.client.rbprm.rbprm.generateContacts(configuration, direction)
+		
+    def getContactSamplesIds(self, name, configuration, direction):
+		return self.client.rbprm.rbprm.getContactSamplesIds(name, configuration, direction)
    ## \name Degrees of freedom
     #  \{
 

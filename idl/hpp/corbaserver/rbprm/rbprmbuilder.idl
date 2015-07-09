@@ -92,6 +92,7 @@ module hpp
     floatSeq getSampleConfig(in string sampleName, in unsigned short sampleId) raises (Error);
 
     floatSeq generateContacts(in floatSeq dofArray, in floatSeq direction) raises (Error);
+    floatSeq getContactSamplesIds(in string name, in floatSeq dofArray, in floatSeq direction) raises (Error);
 
     void addLimb(in string limb, in unsigned short samples, in double resolution) raises (Error);
 
