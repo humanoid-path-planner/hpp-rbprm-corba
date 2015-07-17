@@ -16,7 +16,7 @@ fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 fullBody.setJointBounds ("base_joint_xyz", [0, 2, -2, 0, -1, 1.5])
-fullBody.addLimb("r_shoulder_pan_joint", 10000, 0.001)
+fullBody.addLimb("r_shoulder_pan_joint", 5000, 0.001)
 
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 
@@ -37,4 +37,3 @@ fullBody.getContactSamplesIds("r_shoulder_pan_joint", q_init, [0,1,0])
 
 #~ q_init = fullBody.getSample('r_shoulder_pan_joint', 1)
 #~ r (q_init)
-q_init [0:3] = [-0.6, 0, -0.4]
