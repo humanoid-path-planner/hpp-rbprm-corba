@@ -187,14 +187,16 @@ namespace hpp {
             throw Error ("No full body robot was loaded");
         try
         {
-            Eigen::Vector3d dir;
+            fcl::Vec3f dir;
             for(std::size_t i =0; i <3; ++i)
             {
                 dir[i] = direction[i];
             }
             model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
+            std::cout << "configuration in " << config << std::endl;
             rbprm::State state = rbprm::ComputeContacts(fullBody_,config,
                                             problemSolver_->collisionObstacles(), dir);
+    std::cout << "configuration out" << state.configuration_ << std::endl;
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(_CORBA_ULong(config.rows()));
             for(std::size_t i=0; i< _CORBA_ULong(config.rows()); i++)
@@ -213,7 +215,7 @@ namespace hpp {
             throw Error ("No full body robot was loaded");
         try
         {
-            Eigen::Vector3d dir;
+            fcl::Vec3f dir;
             for(std::size_t i =0; i <3; ++i)
             {
                 dir[i] = direction[i];
@@ -255,13 +257,18 @@ namespace hpp {
         }
     }
 
-    void RbprmBuilder::addLimb(const char* limb, unsigned short samples, double resolution) throw (hpp::Error)
+    void RbprmBuilder::addLimb(const char* limb, const hpp::floatSeq& offset, unsigned short samples, double resolution) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
         try
         {
-            fullBody_->AddLimb(std::string(limb),samples,resolution);
+            fcl::Vec3f off;
+            for(std::size_t i =0; i <3; ++i)
+            {
+                off[i] = offset[i];
+            }
+            fullBody_->AddLimb(std::string(limb), off, problemSolver_->collisionObstacles(), samples,resolution);
         }
         catch(std::runtime_error& e)
         {

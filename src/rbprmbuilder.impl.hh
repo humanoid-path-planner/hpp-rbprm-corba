@@ -84,7 +84,7 @@ namespace hpp {
                                                    const hpp::floatSeq& configuration,
                                                    const hpp::floatSeq& direction) throw (hpp::Error);
 
-        virtual void addLimb(const char* limb, unsigned short samples, double resolution) throw (hpp::Error);
+        virtual void addLimb(const char* limb, const hpp::floatSeq& offset, unsigned short samples, double resolution) throw (hpp::Error);
 
         public:
         void SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver);
