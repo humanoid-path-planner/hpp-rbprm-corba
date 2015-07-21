@@ -95,6 +95,9 @@ module hpp
     floatSeq getContactSamplesIds(in string name, in floatSeq dofArray, in floatSeq direction) raises (Error);
 
     void addLimb(in string limb, in floatSeq offset, in unsigned short samples, in double resolution) raises (Error);
+    void setStartState(in floatSeq dofArray, in Names_t contactLimbs) raises (Error);
+    void setEndState(in floatSeq dofArray, in Names_t contactLimbs) raises (Error);
+    floatSeqSeq interpolate(in double timestep) raises (Error);
 
   }; // interface Robot
   }; // module rbprm

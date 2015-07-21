@@ -20,10 +20,12 @@
 #include "rbprmbuilder.impl.hh"
 #include "hpp/rbprm/rbprm-device.hh"
 #include "hpp/rbprm/rbprm-validation.hh"
+#include "hpp/rbprm/rbprm-path-interpolation.hh"
 #include "hpp/model/urdf/util.hh"
 #include <hpp/core/collision-path-validation-report.hh>
 #include <hpp/core/problem-solver.hh>
 #include <hpp/core/discretized-collision-checking.hh>
+#include <hpp/core/straight-path.hh>
 
 
 
@@ -180,6 +182,16 @@ namespace hpp {
         return config;
     }
 
+    std::vector<std::string> stringConversion(const hpp::Names_t& dofArray)
+    {
+        std::vector<std::string> res;
+        std::size_t dim = (std::size_t)dofArray.length();
+        for (std::size_t iDof = 0; iDof < dim; iDof++)
+        {
+            res.push_back(std::string(dofArray[iDof]));
+        }
+        return res;
+    }
 
     hpp::floatSeq* RbprmBuilder::generateContacts(const hpp::floatSeq& configuration, const hpp::floatSeq& direction) throw (hpp::Error)
     {
@@ -193,10 +205,8 @@ namespace hpp {
                 dir[i] = direction[i];
             }
             model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
-            std::cout << "configuration in " << config << std::endl;
             rbprm::State state = rbprm::ComputeContacts(fullBody_,config,
                                             problemSolver_->collisionObstacles(), dir);
-    std::cout << "configuration out" << state.configuration_ << std::endl;
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(_CORBA_ULong(config.rows()));
             for(std::size_t i=0; i< _CORBA_ULong(config.rows()); i++)
@@ -269,6 +279,110 @@ namespace hpp {
                 off[i] = offset[i];
             }
             fullBody_->AddLimb(std::string(limb), off, problemSolver_->collisionObstacles(), samples,resolution);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    void SetPositionAndNormal(rbprm::State& state, hpp::rbprm::RbPrmFullBodyPtr_t fullBody, const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs)
+    {
+        core::Configuration_t old = fullBody->device_->currentConfiguration();
+        model::Configuration_t config = dofArrayToConfig (fullBody->device_, configuration);
+        fullBody->device_->currentConfiguration(config);
+        std::vector<std::string> names = stringConversion(contactLimbs);
+        for(std::vector<std::string>::const_iterator cit = names.begin(); cit != names.end();++cit)
+        {
+            rbprm::T_Limb::const_iterator lit = fullBody->GetLimbs().find(*cit);
+            if(lit == fullBody->GetLimbs().end())
+            {
+                throw std::runtime_error ("Impossible to find limb for joint "
+                                          + (*cit) + " to robot; limb not defined exists");
+            }
+            const core::JointPtr_t joint = fullBody->device_->getJointByName(lit->second->effector_->name());
+            const fcl::Transform3f& transform =  joint->currentTransformation ();
+            const fcl::Matrix3f& rot = transform.getRotation();
+            state.contactPositions_[*cit] = transform.getTranslation();
+            // TODO this assumes z up
+            state.contactNormals_[*cit] = fcl::Vec3f(rot(0,2),rot(1,2), rot(2,2));
+            state.contacts_[*cit] = true;
+        }
+        state.configuration_ = config;
+        fullBody->device_->currentConfiguration(old);
+    }
+
+    void RbprmBuilder::setStartState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error)
+    {
+        try
+        {
+            SetPositionAndNormal(startState_,fullBody_, configuration, contactLimbs);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    void RbprmBuilder::setEndState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error)
+    {
+        try
+        {
+            SetPositionAndNormal(endState_,fullBody_, configuration, contactLimbs);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+
+    floatSeqSeq* RbprmBuilder::interpolate(double timestep) throw (hpp::Error)
+    {
+        try
+        {
+        if(startState_.configuration_.rows() == 0)
+        {
+            throw std::runtime_error ("Start state not initialized, can not interpolate ");
+        }
+        if(endState_.configuration_.rows() == 0)
+        {
+            throw std::runtime_error ("End state not initialized, can not interpolate ");
+        }
+
+        if(problemSolver_->paths().empty())
+        {
+            throw std::runtime_error ("No path computed, cannot interpolate ");
+        }
+
+        hpp::rbprm::RbPrmInterpolationPtr_t interpolator = rbprm::RbPrmInterpolation::create(problemSolver_->paths().back(),fullBody_,startState_,endState_);
+        std::vector<State> states = interpolator->Interpolate(problemSolver_->collisionObstacles(),timestep);
+
+        hpp::floatSeqSeq *res;
+        res = new hpp::floatSeqSeq ();
+        for(std::vector<State>::const_iterator cit = states.begin(); cit != states.end(); ++cit)
+        {
+            const core::Configuration_t config = cit->configuration_;
+            hpp::floatSeq dofArray;
+            dofArray.length (config.size());
+        }
+
+        res->length (states.size ());
+        std::size_t i=0;
+        for(std::vector<State>::const_iterator cit = states.begin(); cit != states.end(); ++cit)
+        {
+            const core::Configuration_t config = cit->configuration_;
+            _CORBA_ULong size = (_CORBA_ULong) config.size ();
+            double* dofArray = hpp::floatSeq::allocbuf(size);
+            hpp::floatSeq floats (size, size, dofArray, true);
+            //convert the config in dofseq
+            for (model::size_type j=0 ; j < config.size() ; ++j) {
+              dofArray[j] = config [j];
+            }
+            (*res) [i] = floats;
+            ++i;
+        }
+        return res;
         }
         catch(std::runtime_error& e)
         {

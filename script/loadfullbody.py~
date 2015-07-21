@@ -15,7 +15,7 @@ srdfSuffix = ""
 fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz", [-1, 2, -2, 0, -1, 1.5])
+fullBody.setJointBounds ("base_joint_xyz", [0, 2, -2, 0, -1, 1.5])
 fullBody.addLimb("r_shoulder_pan_joint", 5000, 0.001)
 
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver

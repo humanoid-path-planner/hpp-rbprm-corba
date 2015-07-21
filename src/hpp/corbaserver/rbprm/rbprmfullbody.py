@@ -82,6 +82,16 @@ class FullBody (object):
 		
     def getContactSamplesIds(self, name, configuration, direction):
 		return self.client.rbprm.rbprm.getContactSamplesIds(name, configuration, direction)
+		
+    def setStartState(self, configuration, contacts):
+		return self.client.rbprm.rbprm.setStartState(configuration, contacts)
+		
+    def setEndState(self, configuration, contacts):
+		return self.client.rbprm.rbprm.setEndState(configuration, contacts)
+		
+    def interpolate(self, stepsize):
+		return self.client.rbprm.rbprm.interpolate(stepsize)
+		
    ## \name Degrees of freedom
     #  \{
 

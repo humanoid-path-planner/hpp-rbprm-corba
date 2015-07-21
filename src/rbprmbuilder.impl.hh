@@ -86,6 +86,10 @@ namespace hpp {
 
         virtual void addLimb(const char* limb, const hpp::floatSeq& offset, unsigned short samples, double resolution) throw (hpp::Error);
 
+        virtual void setStartState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);
+        virtual void setEndState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);
+        virtual hpp::floatSeqSeq* interpolate(double timestep) throw (hpp::Error);
+
         public:
         void SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver);
 
@@ -99,6 +103,8 @@ namespace hpp {
         bool romLoaded_;
         bool fullBodyLoaded_;
         BindShooter bindShooter_;
+        rbprm::State startState_;
+        rbprm::State endState_;
       }; // class RobotBuilder
     } // namespace impl
   } // namespace manipulation
