@@ -22,14 +22,19 @@ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 ps = ProblemSolver( fullBody )
 r = Viewer (ps)
 r.loadObstacleModel ('hpp-rbprm-corba', "scene", "car")
-#~ 
+
+#~ AFTER loading obstacles
 rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,0,-0.105]
-fullBody.addLimb(rLeg,rLegOffset, 5000, 0.001)
+rLegNormal = [0,0,1]
+rLegx = 0.09; rLegy = 0.05
+fullBody.addLimb(rLeg,rLegOffset,rLegNormal, rLegx, rLegy, 10000, 0.001)
 
 lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,0,-0.105]
-fullBody.addLimb(lLeg,lLegOffset, 10000, 0.001)
+lLegNormal = [0,0,1]
+lLegx = 0.09; lLegy = 0.05
+fullBody.addLimb(lLeg,lLegOffset,rLegNormal, lLegx, lLegy, 10000, 0.001)
 
 fullBody.client.basic.robot.setJointConfig('LARM_JOINT0',[1])
 fullBody.client.basic.robot.setJointConfig('RARM_JOINT0',[-1])
@@ -42,12 +47,23 @@ q_init [0:3] = [0, -0.5, 0.6]
 r (q_init)
 
 q_goal = q_init [::]
-q_goal [0:3] = [0.5, -0.5, 0.7]
+q_goal [0:3] = [1, -0.5, 0.6]
+
+ps.setInitialConfig (q_init)
+ps.addGoalConfig (q_goal)
+r(q_goal)
+ps.solve ()
 
 fullBody.setCurrentConfig (q_init)
-
 q_init = fullBody.generateContacts(q_init, [0,0,1])
 r (q_init)
+
+fullBody.setCurrentConfig (q_goal)
+q_goal = fullBody.generateContacts(q_goal, [0,0,1])
+#~ 
+#~ 
+#~ configs = fullBody.interpolate(0.1)
+
 #~ fullBody.getContactSamplesIds(rLeg, q_init, [0,0,1])
 #~ q_init = fullBody.getSample(rLeg, 1)
 
@@ -58,15 +74,16 @@ r (q_init)
 #~ fullBody.setCurrentConfig (q_goal)
 #~ q_goal = fullBody.generateContacts(q_goal, [0,0,1])
 
-#~ ps.setInitialConfig (q_init)
-#~ ps.addGoalConfig (q_goal)
-#~ ps.solve ()
-
+from hpp.gepetto import PathPlayer
+pp = PathPlayer (fullBody.client.basic, r)
 #~ 
-#~ fullBody.setStartState(q_init,[rLeg,lLeg])
-#~ fullBody.setEndState(q_goal,[rLeg])
+pp (0)
 
-#~ configs = fullBody.interpolate(0.1)
-#~ i = 0; 
-#~ r (configs[i]); i=i+1; i
+fullBody.setStartState(q_init,[rLeg,lLeg])
+fullBody.setEndState(q_goal,[rLeg])
+
+configs = fullBody.interpolate(0.1)
+i = 0; 
+r (configs[i]); i=i+1; i
+#~ pp.toFile(0, "/home/stonneau/test.txt")
 

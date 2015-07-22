@@ -267,18 +267,19 @@ namespace hpp {
         }
     }
 
-    void RbprmBuilder::addLimb(const char* limb, const hpp::floatSeq& offset, unsigned short samples, double resolution) throw (hpp::Error)
+    void RbprmBuilder::addLimb(const char* limb, const hpp::floatSeq& offset, const hpp::floatSeq& normal, double x, double y,  unsigned short samples, double resolution) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
         try
         {
-            fcl::Vec3f off;
+            fcl::Vec3f off, norm;
             for(std::size_t i =0; i <3; ++i)
             {
                 off[i] = offset[i];
+                norm[i] = normal[i];
             }
-            fullBody_->AddLimb(std::string(limb), off, problemSolver_->collisionObstacles(), samples,resolution);
+            fullBody_->AddLimb(std::string(limb), off, norm, x, y, problemSolver_->collisionObstacles(), samples,resolution);
         }
         catch(std::runtime_error& e)
         {
