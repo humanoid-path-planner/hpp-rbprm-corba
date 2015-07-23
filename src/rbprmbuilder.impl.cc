@@ -267,7 +267,7 @@ namespace hpp {
         }
     }
 
-    void RbprmBuilder::addLimb(const char* limb, const hpp::floatSeq& offset, const hpp::floatSeq& normal, double x, double y,  unsigned short samples, double resolution) throw (hpp::Error)
+    void RbprmBuilder::addLimb(const char* limb, const char* effector, const hpp::floatSeq& offset, const hpp::floatSeq& normal, double x, double y,  unsigned short samples, double resolution) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
@@ -279,7 +279,7 @@ namespace hpp {
                 off[i] = offset[i];
                 norm[i] = normal[i];
             }
-            fullBody_->AddLimb(std::string(limb), off, norm, x, y, problemSolver_->collisionObstacles(), samples,resolution);
+            fullBody_->AddLimb(std::string(limb), std::string(effector), off, norm, x, y, problemSolver_->collisionObstacles(), samples,resolution);
         }
         catch(std::runtime_error& e)
         {

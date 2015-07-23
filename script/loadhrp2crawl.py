@@ -25,16 +25,18 @@ r.loadObstacleModel ('hpp-rbprm-corba', "scene", "car")
 
 #~ AFTER loading obstacles
 rLeg = 'RLEG_JOINT0'
-rLegOffset = [0,0,-0.105]
-rLegNormal = [0,0,1]
-rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 20000, 0.01)
+rKnee = 'RLEG_JOINT3'
+rLegOffset = [0.105,0.055,-0.017]
+rLegNormal = [1,0,0]
+rLegx = 0.05; rLegy = 0.05
+fullBody.addLimb(rLeg,rKnee,rLegOffset,rLegNormal, rLegx, rLegy, 5000, 0.01)
 
 lLeg = 'LLEG_JOINT0'
-lLegOffset = [0,0,-0.105]
-lLegNormal = [0,0,1]
-lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 20000, 0.01)
+lKnee = 'RLEG_JOINT0'
+lLegOffset = [0.105,0.055,-0.017]
+lLegNormal = [1,0,0]
+lLegx = 0.05; lLegy = 0.05
+#~ fullBody.addLimb(lLeg,lKnee,lLegOffset,rLegNormal, lLegx, lLegy, 5000, 0.01)
 
 fullBody.client.basic.robot.setJointConfig('LARM_JOINT0',[1])
 fullBody.client.basic.robot.setJointConfig('RARM_JOINT0',[-1])
@@ -49,29 +51,8 @@ r (q_init)
 q_goal = q_init [::]
 q_goal [0:3] = [1, -0.5, 0.6]
 
-ps.setInitialConfig (q_init)
-ps.addGoalConfig (q_goal)
-r(q_goal)
-ps.solve ()
-
-fullBody.setCurrentConfig (q_init)
-q_init = fullBody.generateContacts(q_init, [0,0,-1])
-r (q_init)
-
-fullBody.setCurrentConfig (q_goal)
-q_goal = fullBody.generateContacts(q_goal, [0,0,-1])
-
-
-from hpp.gepetto import PathPlayer
-pp = PathPlayer (fullBody.client.basic, r)
 #~ 
-pp (0)
-
-fullBody.setStartState(q_init,[rLeg,lLeg])
-fullBody.setEndState(q_goal,[rLeg])
-
-configs = fullBody.interpolate(0.2)
-i = 0; 
-r (configs[i]); i=i+1; i-1
-#~ pp.toFile(0, "/home/stonneau/test.txt")
+#~ fullBody.setCurrentConfig (q_init)
+#~ q_init = fullBody.generateContacts(q_init, [0,0,-1])
+#~ r (q_init)
 
