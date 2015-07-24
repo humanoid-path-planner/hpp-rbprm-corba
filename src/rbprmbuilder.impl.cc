@@ -240,7 +240,7 @@ namespace hpp {
                                           + std::string(limbname) + " to robot; limb not defined exists");
             }
             const RbPrmLimbPtr_t& limb = lit->second;
-            fcl::Transform3f transform = limb->limb_->robot()->rootJoint()->currentTransformation (); // get root transform from configuration
+            fcl::Transform3f transform = limb->limb_->robot()->rootJoint()->childJoint(0)->currentTransformation (); // get root transform from configuration
             std::vector<sampling::T_OctreeReport> reports(problemSolver_->collisionObstacles().size());
             std::size_t i (0);
             //#pragma omp parallel for

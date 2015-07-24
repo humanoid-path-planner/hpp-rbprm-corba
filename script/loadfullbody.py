@@ -33,7 +33,7 @@ fullBody.setCurrentConfig (q_init)
 q_init = fullBody.generateContacts(q_init, [0,1,0])
 r (q_init)
 
-fullBody.getContactSamplesIds("r_shoulder_pan_joint", q_init, [0,1,0])
+fullBody.getContactSamplesIds(rLeg, q_init, [0,1,0])
 
 #~ q_init = fullBody.getSample('r_shoulder_pan_joint', 1)
 #~ r (q_init)
