@@ -233,10 +233,12 @@ namespace hpp {
                 dir[i] = direction[i];
             }
             model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
+std::cout << "configuration loaded " << config << std::endl;
             rbprm::State state = rbprm::ComputeContacts(fullBody_,config,
                                             problemSolver_->collisionObstacles(), dir);
             hpp::floatSeq* dofArray = new hpp::floatSeq();
-            dofArray->length(_CORBA_ULong(config.rows()));
+std::cout << "configuration out " << state.configuration_ << std::endl;
+            dofArray->length(_CORBA_ULong(state.configuration_.rows()));
             for(std::size_t i=0; i< _CORBA_ULong(config.rows()); i++)
               (*dofArray)[(_CORBA_ULong)i] = state.configuration_ [i];
             return dofArray;
