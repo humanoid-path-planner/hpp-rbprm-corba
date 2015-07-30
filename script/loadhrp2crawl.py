@@ -24,37 +24,54 @@ r = Viewer (ps)
 r.loadObstacleModel ('hpp-rbprm-corba', "scene", "car")
 
 #~ AFTER loading obstacles
+rLegId = '7rLeg'
+rLeg = 'RLEG_JOINT0'
+rLegOffset = [0,-0.105,0,]
+rLegNormal = [0,1,0]
+rLegx = 0.09; rLegy = 0.05
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 20000, 0.01)
+
+lLegId = '8lLeg'
+lLeg = 'LLEG_JOINT0'
+lLegOffset = [0,-0.105,0]
+lLegNormal = [0,1,0]
+lLegx = 0.09; lLegy = 0.05
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 20000, 0.01)
+
+rarmId = '3RKarm'
+rarm = 'RARM_JOINT0'
+rHand = 'RARM_JOINT5'
+rArmOffset = [-0.05,-0.050,-0.050]
+rArmNormal = [1,0,0]
+rArmx = 0.024; rArmy = 0.024
+fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 5000, 0.01)
+
+
+#~ AFTER loading obstacles
+larmId = '4RKarm'
+larm = 'LARM_JOINT0'
+lHand = 'LARM_JOINT5'
+lArmOffset = [-0.05,-0.050,-0.050]
+lArmNormal = [1,0,0]
+lArmx = 0.024; lArmy = 0.024
+fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 5000, 0.01)
+
+rLegId = '5RKnee'
 rLeg = 'RLEG_JOINT0'
 rKnee = 'RLEG_JOINT3'
 rLegOffset = [0.105,0.055,0.017]
 rLegNormal = [-1,0,0]
 rLegx = 0.05; rLegy = 0.05
-fullBody.addLimb(rLeg,rKnee,rLegOffset,rLegNormal, rLegx, rLegy, 5000, 0.01)
+fullBody.addLimb(rLegId, rLeg,rKnee,rLegOffset,rLegNormal, rLegx, rLegy, 5000, 0.01)
 
+lLegId = '6LKnee'
 lLeg = 'LLEG_JOINT0'
 lKnee = 'LLEG_JOINT3'
 lLegOffset = [0.105,0.055,0.017]
 lLegNormal = [-1,0,0]
 lLegx = 0.05; lLegy = 0.05
-fullBody.addLimb(lLeg,lKnee,lLegOffset,lLegNormal, lLegx, lLegy, 5000, 0.01)
+fullBody.addLimb(lLegId,lLeg,lKnee,lLegOffset,lLegNormal, lLegx, lLegy, 5000, 0.01)
 #~  	
-
-#~ AFTER loading obstacles
-rarm = 'RARM_JOINT0'
-rHand = 'RARM_JOINT5'
-rArmOffset = [0.03,-0.050,-0.050]
-rArmNormal = [1,0,0]
-rArmx = 0.024; rArmy = 0.024
-fullBody.addLimb(rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 5000, 0.01)
-
-
-#~ AFTER loading obstacles
-larm = 'LARM_JOINT0'
-lHand = 'LARM_JOINT5'
-lArmOffset = [0.03,-0.050,-0.050]
-lArmNormal = [1,0,0]
-lArmx = 0.024; lArmy = 0.024
-fullBody.addLimb(larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 5000, 0.01)
 
 
 q_0 = fullBody.getCurrentConfig (); r (q_0)
@@ -71,30 +88,30 @@ q_init [0:3] = [0, -0.5, 0.3]; fullBody.setCurrentConfig (q_init); r (q_init)
 
 
 q_goal = q_init [::]
-q_goal [0:3] = [0.1, -0.5, 0.3]
+q_goal [0:3] = [0.4, -0.5, 0.3]
 
-#~ ps.setInitialConfig (q_init)
-#~ ps.addGoalConfig (q_goal)
-#~ r(q_goal)
-#~ ps.solve ()
-#~ 
-#~ from hpp.gepetto import PathPlayer
-#~ pp = PathPlayer (fullBody.client.basic, r)
+ps.setInitialConfig (q_init)
+ps.addGoalConfig (q_goal)
+r(q_goal)
+ps.solve ()
+
+from hpp.gepetto import PathPlayer
+pp = PathPlayer (fullBody.client.basic, r)
 
 #~ pp (0)
 
 q_init = fullBody.generateContacts(q_init, [0,0,-1])
 r (q_init)
 
-#~ fullBody.setCurrentConfig (q_goal)
-#~ q_goal = fullBody.generateContacts(q_goal, [0,0,-1])
+fullBody.setCurrentConfig (q_goal)
+q_goal = fullBody.generateContacts(q_goal, [0,0,-1])
+
+fullBody.setStartState(q_init,[rLegId,lLegId,rarmId,larmId])
+fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 #~ 
-#~ fullBody.setStartState(q_init,[rLeg,lLeg,rarm,larm])
-#~ fullBody.setEndState(q_goal,[rLeg,lLeg,rarm,larm])
-#~ 
-#~ configs = fullBody.interpolate(0.005)
-#~ i = 0; 
-#~ r (configs[i]); i=i+1; i-1
+configs = fullBody.interpolate(0.05)
+i = 0; 
+r (configs[i]); i=i+1; i-1
 
 #~ configs = fullBody.getContactSamplesIds(rLeg, q_init, [0,1,0])
 #~ i = 0

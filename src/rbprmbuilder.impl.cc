@@ -159,6 +159,34 @@ namespace hpp {
         return dofArray;
     }
 
+
+    hpp::floatSeq* RbprmBuilder::getSamplePosition(const char* limb, unsigned short sampleId) throw (hpp::Error)
+    {
+        if(!fullBodyLoaded_)
+            throw Error ("No full body robot was loaded");
+        const T_Limb& limbs = fullBody_->GetLimbs();
+        T_Limb::const_iterator lit = limbs.find(std::string(limb));
+        if(lit == limbs.end())
+        {
+            std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody_->device_->name());
+            throw Error (err.c_str());
+        }
+        const RbPrmLimbPtr_t& limbPtr = lit->second;
+        hpp::floatSeq *dofArray;
+        if(sampleId > limbPtr->sampleContainer_.samples_.size())
+        {
+            std::string err("Limb " + std::string(limb) + "does not have samples.");
+            throw Error (err.c_str());
+        }
+        const sampling::Sample& sample = limbPtr->sampleContainer_.samples_[sampleId];
+        const fcl::Vec3f& position = sample.effectorPosition_;
+        dofArray = new hpp::floatSeq();
+        dofArray->length(_CORBA_ULong(3));
+        for(std::size_t i=0; i< 3; i++)
+          (*dofArray)[(_CORBA_ULong)i] = position [i];
+        return dofArray;
+    }
+
     model::Configuration_t dofArrayToConfig (const model::DevicePtr_t& robot,
       const hpp::floatSeq& dofArray)
     {
@@ -231,13 +259,15 @@ namespace hpp {
                 dir[i] = direction[i];
             }
             model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
+            model::Configuration_t save = fullBody_->device_->currentConfiguration();
+            fullBody_->device_->currentConfiguration(config);
 
             sampling::T_OctreeReport finalSet;
             rbprm::T_Limb::const_iterator lit = fullBody_->GetLimbs().find(std::string(limbname));
             if(lit == fullBody_->GetLimbs().end())
             {
                 throw std::runtime_error ("Impossible to find limb for joint "
-                                          + std::string(limbname) + " to robot; limb not defined exists");
+                                          + std::string(limbname) + " to robot; limb not defined.");
             }
             const RbPrmLimbPtr_t& limb = lit->second;
             fcl::Transform3f transform = limb->limb_->robot()->rootJoint()->childJoint(0)->currentTransformation (); // get root transform from configuration
@@ -261,13 +291,14 @@ namespace hpp {
             {
               (*dofArray)[(_CORBA_ULong)i] = candCit->sample_->id_;
             }
+            fullBody_->device_->currentConfiguration(save);
             return dofArray;
         } catch (const std::exception& exc) {
         throw hpp::Error (exc.what ());
         }
     }
 
-    void RbprmBuilder::addLimb(const char* limb, const char* effector, const hpp::floatSeq& offset, const hpp::floatSeq& normal, double x, double y,  unsigned short samples, double resolution) throw (hpp::Error)
+    void RbprmBuilder::addLimb(const char* id, const char* limb, const char* effector, const hpp::floatSeq& offset, const hpp::floatSeq& normal, double x, double y,  unsigned short samples, double resolution) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
@@ -279,7 +310,7 @@ namespace hpp {
                 off[i] = offset[i];
                 norm[i] = normal[i];
             }
-            fullBody_->AddLimb(std::string(limb), std::string(effector), off, norm, x, y, problemSolver_->collisionObstacles(), samples,resolution);
+            fullBody_->AddLimb(std::string(id), std::string(limb), std::string(effector), off, norm, x, y, problemSolver_->collisionObstacles(), samples,resolution);
         }
         catch(std::runtime_error& e)
         {
@@ -299,15 +330,17 @@ namespace hpp {
             if(lit == fullBody->GetLimbs().end())
             {
                 throw std::runtime_error ("Impossible to find limb for joint "
-                                          + (*cit) + " to robot; limb not defined exists");
+                                          + (*cit) + " to robot; limb not defined");
             }
             const core::JointPtr_t joint = fullBody->device_->getJointByName(lit->second->effector_->name());
             const fcl::Transform3f& transform =  joint->currentTransformation ();
             const fcl::Matrix3f& rot = transform.getRotation();
             state.contactPositions_[*cit] = transform.getTranslation();
-            // TODO this assumes z up
+            state.contactRotation_[*cit] = rot;
             state.contactNormals_[*cit] = fcl::Vec3f(rot(0,2),rot(1,2), rot(2,2));
             state.contacts_[*cit] = true;
+            state.contactOrder_.push(*cit);
+            state.nbContacts++;
         }
         state.configuration_ = config;
         fullBody->device_->currentConfiguration(old);
@@ -370,8 +403,11 @@ namespace hpp {
 
         res->length (states.size ());
         std::size_t i=0;
-        for(std::vector<State>::const_iterator cit = states.begin(); cit != states.end(); ++cit)
+        std::size_t id = 0;
+        for(std::vector<State>::const_iterator cit = states.begin(); cit != states.end(); ++cit, ++id)
         {
+            std::cout << "ID " << id;
+            cit->print();
             const core::Configuration_t config = cit->configuration_;
             _CORBA_ULong size = (_CORBA_ULong) config.size ();
             double* dofArray = hpp::floatSeq::allocbuf(size);

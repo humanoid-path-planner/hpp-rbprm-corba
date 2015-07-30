@@ -90,11 +90,12 @@ module hpp
     /// Get Sample configuration
     /// \return dofArray Array of degrees of freedom.
     floatSeq getSampleConfig(in string sampleName, in unsigned short sampleId) raises (Error);
+    floatSeq getSamplePosition(in string sampleName, in unsigned short sampleId) raises (Error);
 
     floatSeq generateContacts(in floatSeq dofArray, in floatSeq direction) raises (Error);
     floatSeq getContactSamplesIds(in string name, in floatSeq dofArray, in floatSeq direction) raises (Error);
 
-    void addLimb(in string limb, in string effector, in floatSeq offset, in floatSeq normal,
+    void addLimb(in string id, in string limb, in string effector, in floatSeq offset, in floatSeq normal,
                  in double x, in double y, in unsigned short samples, in double resolution) raises (Error);
     void setStartState(in floatSeq dofArray, in Names_t contactLimbs) raises (Error);
     void setEndState(in floatSeq dofArray, in Names_t contactLimbs) raises (Error);

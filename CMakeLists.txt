@@ -61,30 +61,40 @@ install(FILES
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   )
 install(FILES
+  data/urdf/hrp2_trunk.urdf
+  data/urdf/hrp2_rom.urdf
   data/urdf/box_rom.urdf
   data/urdf/box.urdf
   data/urdf/scene.urdf
   data/urdf/scene_wall.urdf
+  data/urdf/truck.urdf
   #~ data/urdf/scene2.urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
   )
 install(FILES
+  data/srdf/hrp2_trunk.srdf
+  data/srdf/hrp2_rom.srdf
   data/srdf/box_rom.srdf
   data/srdf/box.srdf
   data/srdf/scene.srdf
   data/srdf/scene_wall.srdf
+  data/srdf/truck.srdf
   #~ data/srdf/scene2.srdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
   )
 install(FILES
 	data/meshes/car.stl
 	data/meshes/car_simple.stl
+	data/meshes/hrp2_trunk.stl
+	data/meshes/hrp2_rom.stl
 	data/meshes/box.stl
 	data/meshes/box_rom.stl
 	data/meshes/robot_box.stl
 	data/meshes/chair_simple.stl
 	data/meshes/ground.stl
 	data/meshes/ground_table.stl
+	data/meshes/truck.stl
+	data/meshes/truck_vision.stl
 	#~ data/meshes/pedal.stl
 	#~ data/meshes/board.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes

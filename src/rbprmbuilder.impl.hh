@@ -76,6 +76,7 @@ namespace hpp {
                  const char* srdfSuffix) throw (hpp::Error);
 
         virtual hpp::floatSeq* getSampleConfig(const char* limb, unsigned short sampleId) throw (hpp::Error);
+        virtual hpp::floatSeq* getSamplePosition(const char* limb, unsigned short sampleId) throw (hpp::Error);
 
         virtual hpp::floatSeq* generateContacts(const hpp::floatSeq& configuration,
                                                 const hpp::floatSeq& direction) throw (hpp::Error);
@@ -84,7 +85,7 @@ namespace hpp {
                                                    const hpp::floatSeq& configuration,
                                                    const hpp::floatSeq& direction) throw (hpp::Error);
 
-        virtual void addLimb(const char* limb, const char* effector, const hpp::floatSeq& offset,  const hpp::floatSeq& normal, double x, double y, unsigned short samples, double resolution) throw (hpp::Error);
+        virtual void addLimb(const char* id, const char* limb, const char* effector, const hpp::floatSeq& offset,  const hpp::floatSeq& normal, double x, double y, unsigned short samples, double resolution) throw (hpp::Error);
 
         virtual void setStartState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);
         virtual void setEndState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);

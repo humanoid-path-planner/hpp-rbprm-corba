@@ -15,7 +15,7 @@ srdfSuffix = ""
 fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz", [-5, 5, -5, 5, -5, 5])
+fullBody.setJointBounds ("base_joint_xyz", [-1,1, -4, -1, 1, 2.2])
 
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 
@@ -23,7 +23,7 @@ ps = ProblemSolver( fullBody )
 ps.addPathOptimizer("RandomShortcut")
 ps.addPathOptimizer("GradientBased")
 r = Viewer (ps)
-r.loadObstacleModel ('hpp-rbprm-corba', "scene_wall", "car")
+r.loadObstacleModel ('hpp-rbprm-corba', "truck", "car")
 
 #~ AFTER loading obstacles
 rLegId = '7rLeg'
@@ -83,55 +83,18 @@ q_0 = fullBody.getCurrentConfig (); r (q_0)
 #~ fullBody.client.basic.robot.setJointConfig('LLEG_JOINT3',[1.5])
 #~ fullBody.client.basic.robot.setJointConfig('RLEG_JOINT3',[1.5])
 #~ 
+#~ fullBody.client.basic.robot.setJointConfig('base_joint_SO3',[0.7316888688738209, 0, -0.6816387600233341, 0]); q_init = fullBody.getCurrentConfig (); r (q_init)
+
+q_init = fullBody.getCurrentConfig (); r (q_init)
+
 fullBody.client.basic.robot.setJointConfig('base_joint_SO3',[0.7316888688738209, 0, -0.6816387600233341, 0]); q_init = fullBody.getCurrentConfig (); r (q_init)
 
 q_init = fullBody.getCurrentConfig (); r (q_init)
-q_init [0:3] = [-0.1, 0, 0.3]; fullBody.setCurrentConfig (q_init); r (q_init)
-q_0 [0:3] = [-0.2, 0, 0.3]; r (q_0)
+q_init [0:6] = [0.0, -2.1, 2.0, 0.7316888688738209, 0.0, 0.6816387600233341]; fullBody.setCurrentConfig (q_init); r (q_init)
 
-
-q_goal = q_init [::]
-#~ q_goal [0:3] = [0.2, -0.5, 0.3]
-
-q_goal = [-0.58,
- 0.0,
- 0.6,
- 1.0,
- 0.0,
- 0.0,
- 0.0,
- 0.0,
- 0.0,
- 0.0,
- 0.0,
- 0.8165569353186153,
- 0.01904481617296847,
- 0.5757001393867748,
- 0.0349066,
- -0.5759795881447421,
- -0.8458895038625474,
- 0.0,
- 0.999644764477483,
- -0.27941899714496077,
- 0.7887881502725462,
- -0.3842797425576481,
- -0.8266261474212095,
- -0.7322957359271716,
- 0.0,
- -0.06084265166231969,
- 5.531954151015379e-05,
- 0.07882462690145475,
- 0.9267587094966957,
- 0.5652483098600809,
- -0.06099150171806746,
- -0.2825554499271455,
- 0.0026828522588598323,
- 0.07421013928536811,
- 0.9328970238734515,
- 0.5644449731454055,
- -0.2825451621281345]
-
-
+q_goal = [0.0, -4.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+ 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 1.5, 0.0, 0.0]
+ 
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 r(q_goal)
@@ -141,40 +104,6 @@ from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
 #~ pp (1)
-#~ 
-q_init = fullBody.generateContacts(q_init, [0,0,-1])
-r (q_init)
 
-fullBody.setCurrentConfig (q_goal)
-q_goal = fullBody.generateContacts(q_goal, [0,0,-1])
+#~ pp.toFile(0, "/home/stonneau/test.txt")
 
-fullBody.setStartState(q_init,[rLegId,lLegId,rarmId,larmId])
-fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
-#~ 
-configs = fullBody.interpolate(0.005)
-#~ configs2 = fullBody.interpolate(0.05)
-i = 0; 
-r (configs[i]); i=i+1; i-1
-
-#~ configs = fullBody.getContactSamplesIds(rLeg, q_init, [0,1,0])
-#~ i = 0
-#~ q_init = fullBody.getSample(rLeg, int(configs[i])); i = i+1;r(q_init)
-#~ 
-#~ fullBody.setCurrentConfig (q_init)
-#~ q_init = fullBody.generateContacts(q_init, [-0.1,0,1]) ; r(q_init)
-#~ r (q_init)
-#~ 
-#~ q_goal = q_init [::]
-#~ q_goal [0:3] = [1, -0.5, 0.6]
-
-#~ r (q_0)
-#~ fullBody.setCurrentConfig (q_0)
-#~ fullBody.client.basic.robot.setJointConfig('LARM_JOINT0',[1])
-#~ fullBody.client.basic.robot.setJointConfig('RARM_JOINT0',[1])
-#~ fullBody.client.basic.robot.setJointConfig('LLEG_JOINT3',[1.5])
-#~ fullBody.client.basic.robot.setJointConfig('RLEG_JOINT3',[1.5])
-
-#~ fullBody.client.basic.robot.setJointConfig('base_joint_SO3',[0.7316888688738209, 0, 0.6816387600233341, 0]); q_init = fullBody.getCurrentConfig (); r (q_init)
-#~ q_init = fullBody.getCurrentConfig (); r (q_init)
-#~ q_init [0:3] = [0, -0.5, 0.2]; fullBody.setCurrentConfig (q_init); r (q_init)
-#~ q_init = fullBody.generateContacts(q_init, [-0.1,0,1]) ; r(q_init)

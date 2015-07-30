@@ -71,11 +71,14 @@ class FullBody (object):
 			self.rankInVelocity [j] = rankInVelocity
 			rankInVelocity += self.client.basic.robot.getJointNumberDof (j)
 
-    def addLimb(self, name, effectorname, offset, normal, x, y, samples, resolution):
-		self.client.rbprm.rbprm.addLimb(name, effectorname, offset, normal, x, y, samples, resolution)
+    def addLimb(self, limbId, name, effectorname, offset, normal, x, y, samples, resolution):
+		self.client.rbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, resolution)
 
     def getSample(self, name, idsample):
 		return self.client.rbprm.rbprm.getSampleConfig(name,idsample)
+		
+    def getSamplePosition(self, name, idsample):
+		return self.client.rbprm.rbprm.getSamplePosition(name,idsample)
 
     def generateContacts(self, configuration, direction):
 		return self.client.rbprm.rbprm.generateContacts(configuration, direction)
