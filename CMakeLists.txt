@@ -64,14 +64,16 @@ install(FILES
   data/urdf/box_rom.urdf
   data/urdf/box.urdf
   data/urdf/scene.urdf
-  data/urdf/scene2.urdf
+  data/urdf/scene_wall.urdf
+  #~ data/urdf/scene2.urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
   )
 install(FILES
   data/srdf/box_rom.srdf
   data/srdf/box.srdf
   data/srdf/scene.srdf
-  data/srdf/scene2.srdf
+  data/srdf/scene_wall.srdf
+  #~ data/srdf/scene2.srdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
   )
 install(FILES
@@ -82,6 +84,7 @@ install(FILES
 	data/meshes/robot_box.stl
 	data/meshes/chair_simple.stl
 	data/meshes/ground.stl
+	data/meshes/ground_table.stl
 	#~ data/meshes/pedal.stl
 	#~ data/meshes/board.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes

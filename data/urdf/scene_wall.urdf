@@ -1,9 +1,9 @@
-<robot name="box">
+<robot name="scene_wall">
   <link name="base_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://hpp-rbprm-corba/meshes/robot_box.stl"/>
+        <mesh filename="package:///../hpp-rbprm-corba/meshes/ground_table.stl"/>
       </geometry>
       <material name="white">
         <color rgba="1 1 1 1"/>
@@ -12,7 +12,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://hpp-rbprm-corba/meshes/box.stl"/>
+        <mesh filename="package://hpp-rbprm-corba/meshes/ground_table.stl"/>
       </geometry>
     </collision>
   </link>

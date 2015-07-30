@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot name="scene">
+<robot name="scene_wall">
   <handle name="handle">
     <position> 0 0 0 1 0 0 0 </position>
     <link name="base_link"/>
