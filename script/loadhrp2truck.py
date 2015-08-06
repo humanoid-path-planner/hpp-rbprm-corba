@@ -18,7 +18,7 @@ srdfSuffix = ""
 fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz", [-1,1, -4, -1, 1, 2.2])
+fullBody.setJointBounds ("base_joint_xyz", [0,4, -1, 1, 1, 2.5])
 
 #~ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 
@@ -39,14 +39,14 @@ rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,-0.105,0,]
 rLegNormal = [0,1,0]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 20000, 0.01)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 20000, 0.03)
 
 lLegId = '8lLeg'
 lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,-0.105,0]
 lLegNormal = [0,1,0]
 lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 20000, 0.01)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 20000, 0.03)
 
 rarmId = '3Rarm'
 rarm = 'RARM_JOINT0'
@@ -97,11 +97,9 @@ q_init = fullBody.getCurrentConfig (); r (q_init)
 
 #~ fullBody.client.basic.robot.setJointConfig('base_joint_SO3',[0.7316888688738209, 0, -0.6816387600233341, 0]); q_init = fullBody.getCurrentConfig (); r (q_init)
 
-q_init = fullBody.getCurrentConfig (); r (q_init)
-q_init [0:6] = [0.0, -2.1, 2.0, 0.7316888688738209, 0.0, 0.6816387600233341]; fullBody.setCurrentConfig (q_init); r (q_init)
-q_goal = q_init [::]
-q_goal [0:7] = [0.0, -4.0, 2.0, 1.0, 0.0, 0.0, 0.0]
-
+q_0 = fullBody.getCurrentConfig(); 
+q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.q_init[0:7]
+q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.q_goal[0:7]
 
 q_init = fullBody.generateContacts(q_init, [0,0,-1])
 r (q_init)

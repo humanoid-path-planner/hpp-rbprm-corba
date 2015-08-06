@@ -100,6 +100,7 @@ module hpp
     void setStartState(in floatSeq dofArray, in Names_t contactLimbs) raises (Error);
     void setEndState(in floatSeq dofArray, in Names_t contactLimbs) raises (Error);
     floatSeqSeq interpolate(in double timestep) raises (Error);
+    void saveComputedStates(in string filename) raises (Error);
 
   }; // interface Robot
   }; // module rbprm

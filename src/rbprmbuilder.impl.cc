@@ -26,6 +26,7 @@
 #include <hpp/core/problem-solver.hh>
 #include <hpp/core/discretized-collision-checking.hh>
 #include <hpp/core/straight-path.hh>
+#include <fstream>
 
 
 
@@ -118,7 +119,9 @@ namespace hpp {
                     std::string (urdfSuffix),
                     std::string (srdfSuffix));
             fullBody_ = rbprm::RbPrmFullBody::create(device);
+            problemSolver_->pathValidationType ("Discretized",0.05); // reset to avoid conflict with rbprm path
             problemSolver_->robot (fullBody_->device_);
+            problemSolver_->resetProblem();
             problemSolver_->robot ()->controlComputation
             (model::Device::JOINT_POSITION);
         }
@@ -233,11 +236,9 @@ namespace hpp {
                 dir[i] = direction[i];
             }
             model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
-std::cout << "configuration loaded " << config << std::endl;
             rbprm::State state = rbprm::ComputeContacts(fullBody_,config,
                                             problemSolver_->collisionObstacles(), dir);
             hpp::floatSeq* dofArray = new hpp::floatSeq();
-std::cout << "configuration out " << state.configuration_ << std::endl;
             dofArray->length(_CORBA_ULong(state.configuration_.rows()));
             for(std::size_t i=0; i< _CORBA_ULong(config.rows()); i++)
               (*dofArray)[(_CORBA_ULong)i] = state.configuration_ [i];
@@ -342,8 +343,8 @@ std::cout << "configuration out " << state.configuration_ << std::endl;
             state.contactNormals_[*cit] = fcl::Vec3f(rot(0,2),rot(1,2), rot(2,2));
             state.contacts_[*cit] = true;
             state.contactOrder_.push(*cit);
-            state.nbContacts++;
-        }
+        }        
+        state.nbContacts = state.contactNormals_.size() ;
         state.configuration_ = config;
         fullBody->device_->currentConfiguration(old);
     }
@@ -392,21 +393,21 @@ std::cout << "configuration out " << state.configuration_ << std::endl;
         }
 
         hpp::rbprm::RbPrmInterpolationPtr_t interpolator = rbprm::RbPrmInterpolation::create(problemSolver_->paths().back(),fullBody_,startState_,endState_);
-        std::vector<State> states = interpolator->Interpolate(problemSolver_->collisionObstacles(),timestep);
+        lastStatesComputed_ = interpolator->Interpolate(problemSolver_->collisionObstacles(),timestep);
 
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
-        for(std::vector<State>::const_iterator cit = states.begin(); cit != states.end(); ++cit)
+        for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin(); cit != lastStatesComputed_.end(); ++cit)
         {
             const core::Configuration_t config = cit->configuration_;
             hpp::floatSeq dofArray;
             dofArray.length (config.size());
         }
 
-        res->length (states.size ());
+        res->length (lastStatesComputed_.size ());
         std::size_t i=0;
         std::size_t id = 0;
-        for(std::vector<State>::const_iterator cit = states.begin(); cit != states.end(); ++cit, ++id)
+        for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin(); cit != lastStatesComputed_.end(); ++cit, ++id)
         {
             std::cout << "ID " << id;
             cit->print();
@@ -426,6 +427,29 @@ std::cout << "configuration out " << state.configuration_ << std::endl;
         catch(std::runtime_error& e)
         {
             throw Error(e.what());
+        }
+    }
+
+    void RbprmBuilder::saveComputedStates(const char* outfilename) throw (hpp::Error)
+    {
+        std::stringstream ss;
+        ss << lastStatesComputed_.size() << "\n";
+        for(std::vector<rbprm::State>::const_iterator cit = lastStatesComputed_.begin();
+            cit != lastStatesComputed_.end(); ++cit)
+        {
+            cit->print(ss);
+        }
+        std::ofstream outfile;
+        outfile.open(outfilename);
+        if (outfile.is_open())
+        {
+            outfile << ss.rdbuf();
+            outfile.close();
+        }
+        else
+        {
+            std::string error("Can not open outfile " + std::string(outfilename));
+            throw Error(error.c_str());
         }
     }
 

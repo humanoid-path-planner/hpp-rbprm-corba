@@ -46,7 +46,7 @@ rHand = 'RARM_JOINT5'
 rArmOffset = [-0.05,-0.050,-0.050]
 rArmNormal = [1,0,0]
 rArmx = 0.024; rArmy = 0.024
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 30000, 0.01)
+fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, 0.1)
 
 
 #~ AFTER loading obstacles

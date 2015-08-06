@@ -92,6 +92,9 @@ class FullBody (object):
     def setEndState(self, configuration, contacts):
 		return self.client.rbprm.rbprm.setEndState(configuration, contacts)
 		
+    def saveComputedStates(self, filename):
+		return self.client.rbprm.rbprm.saveComputedStates(filename)
+		
     def interpolate(self, stepsize):
 		return self.client.rbprm.rbprm.interpolate(stepsize)
 		
