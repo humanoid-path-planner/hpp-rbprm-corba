@@ -46,7 +46,7 @@ rHand = 'RARM_JOINT5'
 rArmOffset = [-0.05,-0.050,-0.050]
 rArmNormal = [1,0,0]
 rArmx = 0.024; rArmy = 0.024
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, 0.1)
+fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 30000, 0.05)
 
 
 #~ AFTER loading obstacles
@@ -97,7 +97,12 @@ fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
 #~ 
 #~ configs = fullBody.interpolate(0.1)
 configs = fullBody.interpolate(0.1)
-i = 0; 
+#~ configs = fullBody.interpolate(0.15)
+i = 1; 
 r (configs[i]); i=i+1; i-1
 #~ q_init = fullBody.generateContacts(q_init, [0,0,-1]); r (q_init)
+
+f1 = open("secondchoice","w+")
+f1.write(str(configs))
+f1.close()
 

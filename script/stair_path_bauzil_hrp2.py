@@ -24,6 +24,7 @@ r = Viewer (ps)
 
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init [0:3] = [0, -0.7, 0.6]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+#~ q_init [0:3] = [0, -0.63, 0.6]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 q_init [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
 
 q_goal = q_init [::]
