@@ -71,10 +71,10 @@ def printRootPosition(limbId, effectorName, nbSamples):
 		q = fullBody.getSample(limbId, i)
 		fullBody.setCurrentConfig(q) #setConfiguration matching sample
 		qEffector = fullBody.getJointPosition(effectorName)
-		q0 = quat.Quaternion(qEffector[3:7])
-		rot = q0.toRotationMatrix().transpose() #compute rotation matrix world -> local
-		p = rot.dot(qEffector[0:3]) #(0,0,0) coordinate expressed in effector frame
-		f1.write(str(p[0]) + "," + str(p[1]) + "," + str(p[2]) + "\n")
+		#~ q0 = quat.Quaternion(qEffector[3:7])
+		#~ rot = q0.toRotationMatrix().transpose() #compute rotation matrix world -> local
+		p = qEffector[0:3] #(0,0,0) coordinate expressed in effector frame
+		f1.write(str(-p[0]) + "," + str(-p[1]) + "," + str(-p[2]) + "\n")
 	f1.close()
 
 printRootPosition(rLegId, rfoot, nbSamples)
