@@ -65,16 +65,46 @@ q_0 = fullBody.getCurrentConfig ()
 q_0[0:7] = [0,0,0, 1, 0, 0, 0]
 fullBody.setCurrentConfig (q_0)
 
+import numpy as np
+effectorName = rfoot
+limbId = rLegId
+q = fullBody.getSample(limbId, 1)
+fullBody.setCurrentConfig(q) #setConfiguration matching sample
+qEffector = fullBody.getJointPosition(effectorName)
+q0 = quat.Quaternion(qEffector[3:7])
+rot = q0.toRotationMatrix() #compute rotation matrix world -> local
+p = qEffector[0:3] #(0,0,0) coordinate expressed in effector fram
+rm=np.zeros((4,4))
+for i in range(0,3):
+	for j in range(0,3):
+		rm[i,j] = rot[i,j]
+for i in range(0,3):
+	rm[i,3] = qEffector[i]
+rm[3,3] = 1
+invrm = np.linalg.inv(rm)
+p = invrm.dot([0,0,0,1])
+
+
+
 def printRootPosition(limbId, effectorName, nbSamples):
 	f1=open('../data/roms/com'+limbId+'.erom', 'w+')
 	for i in range(0,nbSamples-1):
 		q = fullBody.getSample(limbId, i)
 		fullBody.setCurrentConfig(q) #setConfiguration matching sample
 		qEffector = fullBody.getJointPosition(effectorName)
-		#~ q0 = quat.Quaternion(qEffector[3:7])
-		#~ rot = q0.toRotationMatrix().transpose() #compute rotation matrix world -> local
-		p = qEffector[0:3] #(0,0,0) coordinate expressed in effector frame
-		f1.write(str(-p[0]) + "," + str(-p[1]) + "," + str(-p[2]) + "\n")
+		q0 = quat.Quaternion(qEffector[3:7])
+		rot = q0.toRotationMatrix() #compute rotation matrix world -> local
+		p = qEffector[0:3] #(0,0,0) coordinate expressed in effector fram
+		rm=np.zeros((4,4))
+		for i in range(0,3):
+			for j in range(0,3):
+				rm[i,j] = rot[i,j]
+		for i in range(0,3):
+			rm[i,3] = qEffector[i]
+		rm[3,3] = 1
+		invrm = np.linalg.inv(rm)
+		p = invrm.dot([0,0,0,1])
+		f1.write(str(p[0]) + "," + str(p[1]) + "," + str(p[2]) + "\n")
 	f1.close()
 
 printRootPosition(rLegId, rfoot, nbSamples)
