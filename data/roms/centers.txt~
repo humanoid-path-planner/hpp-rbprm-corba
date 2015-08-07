@@ -89,3 +89,22 @@ center =
 radius =
     0.2238
 
+
+xc7 =
+
+    0.0025
+    0.1338
+    0.3987
+
+
+Rc7 =
+
+    0.2238
+
+Polyhedron in R^3 with representations:
+    H-rep (irredundant) : Inequalities 528 | Equalities   0
+    V-rep (irredundant) : Vertices 266 | Rays   0
+Functions : none
+
+The @polytope class will be deprecated, use @Polyhedron instead.
+>> 
