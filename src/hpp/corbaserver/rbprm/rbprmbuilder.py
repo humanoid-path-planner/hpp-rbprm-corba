@@ -49,8 +49,12 @@ class Builder (object):
         self.load = load
         
     ## Virtual function to load the robot model
-    def loadModel (self, urdfName, urdfNamerom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix):
-		self.client.rbprm.rbprm.loadRobotRomModel(urdfNamerom, rootJointType, packageName, urdfNamerom, urdfSuffix, srdfSuffix)
+    def loadModel (self, urdfName, urdfNameroms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix):
+		if(isinstance(urdfNameroms, list)):		
+			for urdfNamerom in urdfNameroms:
+				self.client.rbprm.rbprm.loadRobotRomModel(urdfNamerom, rootJointType, packageName, urdfNamerom, urdfSuffix, srdfSuffix)
+		else:
+			self.client.rbprm.rbprm.loadRobotRomModel(urdfNameroms, rootJointType, packageName, urdfNameroms, urdfSuffix, srdfSuffix)
 		self.client.rbprm.rbprm.loadRobotCompleteModel(urdfName, rootJointType, packageName, urdfName, urdfSuffix, srdfSuffix)		
 		self.name = urdfName
 		self.displayName = urdfName
@@ -72,6 +76,8 @@ class Builder (object):
 			rankInConfiguration += self.client.basic.robot.getJointConfigSize (j)
 			self.rankInVelocity [j] = rankInVelocity
 			rankInVelocity += self.client.basic.robot.getJointNumberDof (j)
+
+
 
 	## Init RbprmShooter
     #

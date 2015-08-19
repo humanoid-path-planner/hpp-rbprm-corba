@@ -24,6 +24,10 @@
 # include <hpp/rbprm/rbprm-fullbody.hh>
 # include <hpp/rbprm/rbprm-shooter.hh>
 # include <hpp/rbprm/rbprm-validation.hh>
+# include <hpp/core/collision-path-validation-report.hh>
+# include <hpp/core/problem-solver.hh>
+# include <hpp/core/discretized-collision-checking.hh>
+# include <hpp/core/straight-path.hh>
 
 namespace hpp {
   namespace rbprm {
@@ -43,6 +47,15 @@ namespace hpp {
             return hpp::rbprm::RbPrmShooter::create
                     (robotcast,problemSolver_->problem ()->collisionObstacles(),romFilter_,shootLimit_,displacementLimit_);
         }
+
+        hpp::core::PathValidationPtr_t createPathValidation (const hpp::model::DevicePtr_t& robot, const hpp::model::value_type& val)
+        {
+            hpp::model::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::model::RbPrmDevice>(robot);
+            hpp::rbprm::RbPrmValidationPtr_t validation(hpp::rbprm::RbPrmValidation::create(robotcast, romFilter_));
+            hpp::core::CollisionPathValidationReport defaultValidation;
+            return hpp::core::DiscretizedCollisionChecking::createWithValidation(robot,val ,defaultValidation, validation);
+        }
+
         hpp::core::ProblemSolverPtr_t problemSolver_;
         std::vector<std::string> romFilter_;
         std::size_t shootLimit_;

@@ -5,14 +5,15 @@ rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
 meshPackageName = 'hpp-rbprm-corba'
 urdfName = 'hrp2_trunk'
-urdfNameRom = 'hrp2_rom'
+urdfNameRoms = ['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
 
 rbprmBuilder = Builder ()
 
-rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
+rbprmBuilder.loadModel(urdfName, urdfNameRoms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 rbprmBuilder.setJointBounds ("base_joint_xyz", [-1, 1, -0.5, 0.5, 0, 5])
+rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
 
 #~ from hpp.corbaserver.rbprm. import ProblemSolver
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
@@ -27,7 +28,7 @@ q_goal =  rbprmBuilder.getCurrentConfig ();
 
 q_init = rbprmBuilder.getCurrentConfig ();
 #~ q_init = [-0.15, -0.2, 0.6, 0.99500416527802582, 0.0, 0.099833416646828155, 0.0]
-q_init = [-0.3, -0.2, 0.6, 1, 0.0, 0., 0.0]; r (q_init)
+q_init = [-1, -0.2, 0.6, 1, 0.0, 0., 0.0]; r (q_init)
 rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 
 #~ q_goal = [0, 0, 2, 0.99500416527802582, 0.0, 0.099833416646828155, 0.0]; r (q_goal)
@@ -39,7 +40,7 @@ ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
+ps.client.problem.selectPathValidation("RbprmPathValidation",0.5)
 r.loadObstacleModel (packageName, "stepladder", "planning")
 ps.solve ()
 
