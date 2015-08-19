@@ -69,6 +69,7 @@ install(FILES
   data/urdf/scene_wall.urdf
   data/urdf/truck.urdf
   data/urdf/stair_bauzil.urdf
+  data/urdf/climb.urdf
   #~ data/urdf/scene2.urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
   )
@@ -81,6 +82,7 @@ install(FILES
   data/srdf/scene_wall.srdf
   data/srdf/truck.srdf
   data/srdf/stair_bauzil.srdf
+  data/srdf/climb.srdf
   #~ data/srdf/scene2.srdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
   )
@@ -98,6 +100,7 @@ install(FILES
 	data/meshes/truck.stl
 	data/meshes/truck_vision.stl
 	data/meshes/stair_bauzil.stl
+	data/meshes/climb.stl
 	#~ data/meshes/pedal.stl
 	#~ data/meshes/board.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
