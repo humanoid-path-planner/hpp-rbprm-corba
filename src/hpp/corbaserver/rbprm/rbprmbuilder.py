@@ -81,7 +81,13 @@ class Builder (object):
         return self.client.rbprm.rbprm.initshooter ()
     ## \}
 
-
+	## Init RbprmShooter
+    #
+    # \param jointName name of the joint,
+    # \return name of the link.
+    def setFilter (self, romFilter):
+        return self.client.rbprm.rbprm.setFilter (romFilter)
+    ## \}
 
    ## \name Degrees of freedom
     #  \{

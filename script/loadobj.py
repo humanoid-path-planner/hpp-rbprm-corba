@@ -73,7 +73,9 @@ def test_inequality():
 	else:
 		print("test of inequality successful")
 
-obj = load_obj('../data/roms/comlArmSimplified.obj')
-ineq = asInequalities(obj)
-print(is_inside(ineq, [0,0,0]))
-print(is_inside(ineq, [4,0,0]))
+#~ obj = load_obj('../data/roms/comlArmSimplified.obj')
+#~ ineq = asInequalities(obj)
+#~ print(is_inside(ineq, [0,0,0])) # in
+#~ print(is_inside(ineq, [0.873,-0.03551,-0.1630])) #out
+#~ print(is_inside(ineq, [0.6730,-0.03551,-0.1630])) #in
+#~ print(is_inside(ineq, [-0.08897,0.7172,-0.2494])) #in

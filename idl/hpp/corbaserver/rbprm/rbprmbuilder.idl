@@ -27,7 +27,7 @@ module hpp
   interface RbprmBuilder
   {
     /// Create a Device for the ROM of the robot
-
+    /// This function can be called several times to include several ROMs (one for each limb)
     /// The device automatically has an anchor joint called "base_joint" as
     /// root joint.
     /// \param romRobotName the name of the robot range of motion.
@@ -87,19 +87,81 @@ module hpp
              in string urdfSuffix, in string srdfSuffix)
       raises (Error);
 
-    /// Get Sample configuration
-    /// \return dofArray Array of degrees of freedom.
+    /// Set Rom constraints for the configuration shooter
+    /// a configuration will only be valid if all roms indicated
+    /// are colliding with the environment.
+    /// If no roms are indicated, a configuration will be valid if any rom
+    /// is colliding with the environment.
+    ///
+    void setFilter (in Names_t roms)
+      raises (Error);
+
+    /// Get Sample configuration by its id
+    /// \param sampleName name of the limb from which to retrieve a sample
+    /// \param sampleId id of the desired samples
+    /// \return dofArray Array of degrees of freedom corresponding to the current configuration of the robot
+    /// , to which the desired limb configuration has been assigned.
     floatSeq getSampleConfig(in string sampleName, in unsigned short sampleId) raises (Error);
+
+
+    /// Get the end effector position of a given limb configuration
+    /// \param sampleName name of the limb from which to retrieve a sample
+    /// \param sampleId id of the desired samples
+    /// \return world position of the limb end effector given the current robot configuration and the
+    /// and the selected sample
     floatSeq getSamplePosition(in string sampleName, in unsigned short sampleId) raises (Error);
 
+    /// Generate all possible contact in a given configuration
+    /// \param dofArray initial configuration of the robot
+    /// \param direction desired direction of motion for the robot
+    /// \return transformed configuration for which all possible contacts have been created
     floatSeq generateContacts(in floatSeq dofArray, in floatSeq direction) raises (Error);
+
+    /// Given a configuration and a limb, returns the id of all samples potentially in contact with the
+    /// environment, ordered by their efficiency
+    /// \param name name of the considered limb
+    /// \param dofArray considered configuration of the robot
+    /// \param direction desired direction of motion for the robot
+    /// \return transformed configuration for which all possible contacts have been created
     floatSeq getContactSamplesIds(in string name, in floatSeq dofArray, in floatSeq direction) raises (Error);
 
+    /// Specifies a subchain of the robot as a limb, which can be used to create contacts.
+    /// A limb must consist in a simple kinematic chain, where every node has only one child
+    /// \param id user given name of the new limb
+    /// \param limb robot joint corresponding to the root of the limb (ex a shoulder or ankle joint)
+    /// \param effector robot joint corresponding to the effector of the limb (ex a hand or foot joint)
+    /// \param offset contact point of the effector, expressed as an offset from the joint root
+    /// \param normal normal vector to consider for contact creation. For instance for a foot, typically
+    /// normal is aligned with the -z vertical axis, to create a contact with the plant of the robot
+    /// \param x width of the rectangle surface contact of the effector
+    /// \param y length of the rectangle surface contact of the effector
+    /// \param samples number of samples to generate for the limb (a typical value is 10000)
+    /// \param resolution resolution of the octree used to store the samples (a typical value is 0.01 meters)
     void addLimb(in string id, in string limb, in string effector, in floatSeq offset, in floatSeq normal,
                  in double x, in double y, in unsigned short samples, in double resolution) raises (Error);
+
+    /// Set the start state of a contact generation problem
+    /// environment, ordered by their efficiency
+    /// \param dofArray start configuration of the robot
+    /// \param contactLimbs ids of the limb in contact for the state
     void setStartState(in floatSeq dofArray, in Names_t contactLimbs) raises (Error);
+
+
+    /// Set the end state of a contact generation problem
+    /// environment, ordered by their efficiency
+    /// \param dofArray end configuration of the robot
+    /// \param contactLimbs ids of the limb in contact for the state
     void setEndState(in floatSeq dofArray, in Names_t contactLimbs) raises (Error);
+
+    /// Provided a path has already been computed, interpolates it and generates the statically stable
+    /// constact configurations along it. setStartState and setEndState must have been called prior
+    /// to this function. If these conditions are not met an error is raised.
+    /// \param timestep normalized step for generation along the path (ie the path has a length of 1).
     floatSeqSeq interpolate(in double timestep) raises (Error);
+
+    /// Saves the last computed states by the function interpolate in a filename.
+    /// Raises an error if interpolate has not been called, or the file could not be opened.
+    /// \param filename name of the file used to save the contacts.
     void saveComputedStates(in string filename) raises (Error);
 
   }; // interface Robot

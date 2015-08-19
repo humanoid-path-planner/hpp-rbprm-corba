@@ -52,8 +52,9 @@ namespace hpp {
     {
         try
         {
-            romDevice_ = model::Device::create (robotName);
-            hpp::model::urdf::loadRobotModel (romDevice_,
+            hpp::model::DevicePtr_t romDevice = model::Device::create (robotName);
+            romDevices_.insert(std::make_pair(robotName, romDevice));
+            hpp::model::urdf::loadRobotModel (romDevice,
                     std::string (rootJointType),
                     std::string (packageName),
                     std::string (modelName),
@@ -83,7 +84,7 @@ namespace hpp {
         }
         try
         {
-            hpp::model::RbPrmDevicePtr_t device = hpp::model::RbPrmDevice::create (robotName, romDevice_);
+            hpp::model::RbPrmDevicePtr_t device = hpp::model::RbPrmDevice::create (robotName, romDevices_);
             hpp::model::urdf::loadRobotModel (device,
                     std::string (rootJointType),
                     std::string (packageName),
@@ -132,7 +133,6 @@ namespace hpp {
         }
         fullBodyLoaded_ = true;
     }
-
 
     hpp::floatSeq* RbprmBuilder::getSampleConfig(const char* limb, unsigned short sampleId) throw (hpp::Error)
     {
@@ -222,6 +222,12 @@ namespace hpp {
             res.push_back(std::string(dofArray[iDof]));
         }
         return res;
+    }
+
+
+    void RbprmBuilder::setFilter(const hpp::Names_t& roms) throw (hpp::Error)
+    {
+        bindShooter_.romFilter_ = stringConversion(roms);
     }
 
     hpp::floatSeq* RbprmBuilder::generateContacts(const hpp::floatSeq& configuration, const hpp::floatSeq& direction) throw (hpp::Error)

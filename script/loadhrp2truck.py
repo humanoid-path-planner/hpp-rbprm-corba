@@ -18,7 +18,8 @@ srdfSuffix = ""
 fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz", [0,4, -1, 1, 1, 2.5])
+#~ fullBody.setJointBounds ("base_joint_xyz", [0,4, -1, 1, 1, 2.5])
+fullBody.setJointBounds ("base_joint_xyz", [-1, 1, -4, 0, 1, 2.5])
 
 #~ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 
@@ -39,14 +40,14 @@ rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,-0.105,0,]
 rLegNormal = [0,1,0]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 20000, 0.03)
+#~ fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 20000, 0.03)
 
 lLegId = '8lLeg'
 lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,-0.105,0]
 lLegNormal = [0,1,0]
 lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 20000, 0.03)
+#~ fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 20000, 0.03)
 
 rarmId = '3Rarm'
 rarm = 'RARM_JOINT0'
@@ -66,21 +67,21 @@ lArmNormal = [1,0,0]
 lArmx = 0.024; lArmy = 0.024
 fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 20000, 0.01)
 
-#~ rLegId = '5RKnee'
-#~ rLeg = 'RLEG_JOINT0'
-#~ rKnee = 'RLEG_JOINT3'
-#~ rLegOffset = [0.105,0.055,0.017]
-#~ rLegNormal = [-1,0,0]
-#~ rLegx = 0.05; rLegy = 0.05
-#~ fullBody.addLimb(rLegId, rLeg,rKnee,rLegOffset,rLegNormal, rLegx, rLegy, 5000, 0.01)
+rLegId = '5RKnee'
+rLeg = 'RLEG_JOINT0'
+rKnee = 'RLEG_JOINT3'
+rLegOffset = [0.105,0.055,0.017]
+rLegNormal = [-1,0,0]
+rLegx = 0.05; rLegy = 0.05
+fullBody.addLimb(rLegId, rLeg,rKnee,rLegOffset,rLegNormal, rLegx, rLegy, 20000, 0.01)
 
-#~ lLegId = '6LKnee'
-#~ lLeg = 'LLEG_JOINT0'
-#~ lKnee = 'LLEG_JOINT3'
-#~ lLegOffset = [0.105,0.055,0.017]
-#~ lLegNormal = [-1,0,0]
-#~ lLegx = 0.05; lLegy = 0.05
-#~ fullBody.addLimb(lLegId,lLeg,lKnee,lLegOffset,lLegNormal, lLegx, lLegy, 5000, 0.01)
+lLegId = '6LKnee'
+lLeg = 'LLEG_JOINT0'
+lKnee = 'LLEG_JOINT3'
+lLegOffset = [0.105,0.055,0.017]
+lLegNormal = [-1,0,0]
+lLegx = 0.05; lLegy = 0.05
+fullBody.addLimb(lLegId,lLeg,lKnee,lLegOffset,lLegNormal, lLegx, lLegy, 20000, 0.01)
 #~  	
 
 
