@@ -63,6 +63,10 @@ install(FILES
 install(FILES
   data/urdf/hrp2_trunk.urdf
   data/urdf/hrp2_rom.urdf
+  data/urdf/hrp2_larm_rom.urdf
+  data/urdf/hrp2_rarm_rom.urdf
+  data/urdf/hrp2_lleg_rom.urdf
+  data/urdf/hrp2_rleg_rom.urdf
   data/urdf/box_rom.urdf
   data/urdf/box.urdf
   data/urdf/scene.urdf
@@ -77,6 +81,10 @@ install(FILES
 install(FILES
   data/srdf/hrp2_trunk.srdf
   data/srdf/hrp2_rom.srdf
+  data/srdf/hrp2_larm_rom.srdf
+  data/srdf/hrp2_rarm_rom.srdf
+  data/srdf/hrp2_lleg_rom.srdf
+  data/srdf/hrp2_rleg_rom.srdf
   data/srdf/box_rom.srdf
   data/srdf/box.srdf
   data/srdf/scene.srdf
@@ -93,6 +101,10 @@ install(FILES
 	data/meshes/car_simple.stl
 	data/meshes/hrp2_trunk.stl
 	data/meshes/hrp2_rom.stl
+	data/meshes/hrp2_larm_rom.stl
+	data/meshes/hrp2_rarm_rom.stl
+	data/meshes/hrp2_lleg_rom.stl
+	data/meshes/hrp2_rleg_rom.stl
 	data/meshes/box.stl
 	data/meshes/box_rom.stl
 	data/meshes/robot_box.stl
