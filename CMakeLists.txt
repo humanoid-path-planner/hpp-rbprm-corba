@@ -62,6 +62,7 @@ install(FILES
   )
 install(FILES
   data/urdf/hrp2_trunk.urdf
+  data/urdf/hrp2_trunk_flexible.urdf
   data/urdf/hrp2_rom.urdf
   data/urdf/hrp2_larm_rom.urdf
   data/urdf/hrp2_rarm_rom.urdf
@@ -75,11 +76,13 @@ install(FILES
   data/urdf/stair_bauzil.urdf
   data/urdf/climb.urdf
   data/urdf/stepladder.urdf
+  data/urdf/chair.urdf
   #~ data/urdf/scene2.urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
   )
 install(FILES
   data/srdf/hrp2_trunk.srdf
+  data/srdf/hrp2_trunk_flexible.srdf
   data/srdf/hrp2_rom.srdf
   data/srdf/hrp2_larm_rom.srdf
   data/srdf/hrp2_rarm_rom.srdf
@@ -93,6 +96,7 @@ install(FILES
   data/srdf/stair_bauzil.srdf
   data/srdf/climb.srdf
   data/srdf/stepladder.srdf
+  data/srdf/chair.srdf
   #~ data/srdf/scene2.srdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
   )
@@ -100,6 +104,8 @@ install(FILES
 	data/meshes/car.stl
 	data/meshes/car_simple.stl
 	data/meshes/hrp2_trunk.stl
+	data/meshes/hrp2_trunk_body.stl
+	data/meshes/hrp2_trunk_torso.stl
 	data/meshes/hrp2_rom.stl
 	data/meshes/hrp2_larm_rom.stl
 	data/meshes/hrp2_rarm_rom.stl
@@ -116,6 +122,7 @@ install(FILES
 	data/meshes/stair_bauzil.stl
 	data/meshes/climb.stl
 	data/meshes/stepladder.stl
+	data/meshes/chair.stl
 	#~ data/meshes/pedal.stl
 	#~ data/meshes/board.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes

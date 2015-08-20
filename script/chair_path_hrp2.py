@@ -4,7 +4,7 @@ from hpp.gepetto import Viewer
 rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
 meshPackageName = 'hpp-rbprm-corba'
-urdfName = 'hrp2_trunk08'
+urdfName = 'hrp2_trunk'
 urdfNameRoms = ['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
@@ -27,23 +27,21 @@ q_goal =  rbprmBuilder.getCurrentConfig ();
 #~ rbprmBuilder.client.basic.robot.setJointConfig('base_joint_SO3',[0.7316888688738209, 0, -0.6816387600233341, 0]); q_init = rbprmBuilder.getCurrentConfig (); r (q_init)
 
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init[0:3] =[-0.05,0, 0.5]; r (q_init)
-q_init[0:3] =[-0.1,0, 0.5]; r (q_init)
-
+#~ q_init = [-0.15, -0.2, 0.6, 0.99500416527802582, 0.0, 0.099833416646828155, 0.0]
+q_init = [-0.3, -0.2, 0.6, 1, 0.0, 0., 0.0]; r (q_init)
 rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 
-#~ q_goal[0:3] =[-0.05,0, 2.5]; r (q_goal)
-#~ q_goal[0:3] =[-0,0, 2]; 
-q_goal = [-0.1, 0, 2, 0.99500416527802582, 0.0, 0.099833416646828155, 0.0]; r (q_goal)
-
+#~ q_goal = [0, 0, 2, 0.99500416527802582, 0.0, 0.099833416646828155, 0.0]; r (q_goal)
+#~ q_goal = [0.2, -0.2, 1.6, 0.99500416527802582, 0.0, 0.099833416646828155, 0.0]; r (q_goal)
+q_goal = [0.1, -0.2, 1.6, 0.98877107793604235, 0.0, 0.14943813247359924, 0.0]
 ps.addPathOptimizer("RandomShortcut")
 #~ ps.addPathOptimizer("GradientBased")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmPathValidation",0.3)
-r.loadObstacleModel (packageName, "climb", "planning")
+ps.client.problem.selectPathValidation("RbprmPathValidation",0.1)
+r.loadObstacleModel (packageName, "chair", "planning")
 ps.solve ()
 
 

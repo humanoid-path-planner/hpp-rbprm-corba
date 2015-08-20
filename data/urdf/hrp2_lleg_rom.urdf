@@ -1,5 +1,11 @@
 <robot name="hrp2_lleg_rom">
-  <link name="base_link">
+  <link name="base_link"/>
+  <joint name="WAIST" type="fixed">
+    <parent link="base_link"/>
+    <child link="BODY"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+  <link name="BODY">   
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0.003" />
       <geometry>
@@ -15,5 +21,24 @@
         <mesh filename="package://hpp-rbprm-corba/meshes/hrp2_lleg_rom.stl"/>
       </geometry>
     </collision>
+  </link>
+  <!-- Chest -->
+  <joint name="CHEST_JOINT0" type="revolute">
+    <parent link="BODY"/>
+    <child link="CHEST_LINK0"/>
+    <origin rpy="0 0 0" xyz="0.032 0 0.3507"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="151.1" lower="-0.785398" upper="0.785398" velocity="4.40217"/>
+  </joint>
+  <link name="CHEST_LINK0">
+  </link>
+  <joint name="CHEST_JOINT1" type="revolute">
+    <parent link="CHEST_LINK0"/>
+    <child link="torso"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="278.9" lower="-0.0872665" upper="1.0472" velocity="2.3963"/>
+  </joint>
+  <link name="torso">
   </link>
 </robot>

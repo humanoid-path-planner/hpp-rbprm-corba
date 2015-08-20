@@ -31,14 +31,14 @@ rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,-0.105,0,]
 rLegNormal = [0,1,0]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 20000, 0.03)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 20000, 0.05)
 
 lLegId = '8lLeg'
 lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,-0.105,0]
 lLegNormal = [0,1,0]
 lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 20000, 0.03)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 20000, 0.05)
 
 rarmId = '3Rarm'
 rarm = 'RARM_JOINT0'
@@ -76,7 +76,7 @@ q_goal = fullBody.generateContacts(q_goal, [0,0,-1])
 fullBody.setStartState(q_init,[rLegId,lLegId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])
 #~ 
-configs = fullBody.interpolate(0.1)
+configs = fullBody.interpolate(0.05)
 #~ configs2 = fullBody.interpolate(0.05)
 i = 0; 
 r (configs[i]); i=i+1; i-1

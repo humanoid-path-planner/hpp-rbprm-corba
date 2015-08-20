@@ -76,7 +76,7 @@ q_goal = fullBody.generateContacts(q_goal, [0,0,-1])
 fullBody.setStartState(q_init,[rLegId,lLegId,rarmId,larmId])
 fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 #~ 
-configs = fullBody.interpolate(0.08)
+configs = fullBody.interpolate(0.1)
 #~ configs2 = fullBody.interpolate(0.05)
 i = 0; 
 r (configs[i]); i=i+1; i-1

@@ -1,0 +1,19 @@
+<robot name="hrp2_trunk08">
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0.003" />
+      <geometry>
+        <mesh filename="package://hpp-rbprm-corba/meshes/hrp2_trunk08.stl"/>
+      </geometry>
+      <material name="white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0.003" />
+      <geometry>
+        <mesh filename="package://hpp-rbprm-corba/meshes/hrp2_trunk08.stl"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>

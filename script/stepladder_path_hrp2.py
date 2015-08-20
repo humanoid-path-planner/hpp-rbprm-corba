@@ -13,7 +13,7 @@ rbprmBuilder = Builder ()
 
 rbprmBuilder.loadModel(urdfName, urdfNameRoms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 rbprmBuilder.setJointBounds ("base_joint_xyz", [-1, 1, -0.5, 0.5, 0, 5])
-rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
+rbprmBuilder.setFilter(['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom'])
 
 #~ from hpp.corbaserver.rbprm. import ProblemSolver
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
@@ -28,19 +28,19 @@ q_goal =  rbprmBuilder.getCurrentConfig ();
 
 q_init = rbprmBuilder.getCurrentConfig ();
 #~ q_init = [-0.15, -0.2, 0.6, 0.99500416527802582, 0.0, 0.099833416646828155, 0.0]
-q_init = [-1, -0.2, 0.6, 1, 0.0, 0., 0.0]; r (q_init)
+q_init = [-0.3, -0.2, 0.6, 1, 0.0, 0., 0.0]; r (q_init)
 rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 
 #~ q_goal = [0, 0, 2, 0.99500416527802582, 0.0, 0.099833416646828155, 0.0]; r (q_goal)
 #~ q_goal = [0.2, -0.2, 1.6, 0.99500416527802582, 0.0, 0.099833416646828155, 0.0]; r (q_goal)
-q_goal = [0.15, -0.2, 1.6, 0.98877107793604235, 0.0, 0.14943813247359924, 0.0]
+q_goal = [0.1, -0.2, 1.6, 0.98877107793604235, 0.0, 0.14943813247359924, 0.0]
 ps.addPathOptimizer("RandomShortcut")
 #~ ps.addPathOptimizer("GradientBased")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmPathValidation",0.5)
+ps.client.problem.selectPathValidation("RbprmPathValidation",0.1)
 r.loadObstacleModel (packageName, "stepladder", "planning")
 ps.solve ()
 
