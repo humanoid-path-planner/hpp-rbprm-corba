@@ -13,7 +13,9 @@ rbprmBuilder = Builder ()
 
 rbprmBuilder.loadModel(urdfName, urdfNameRoms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 rbprmBuilder.setJointBounds ("base_joint_xyz", [-1, 1, -4, 0, 1, 2.5])
-rbprmBuilder.setFilter(['hrp2_larm_rom','hrp2_lleg_rom','hrp2_rleg_rom'])
+rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
+rbprmBuilder.setNormalFilter('hrp2_lleg_rom',[0,0,1], 0.7)
+rbprmBuilder.setNormalFilter('hrp2_rleg_rom',[0,0,1], 0.7)
 
 #~ from hpp.corbaserver.rbprm. import ProblemSolver
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver

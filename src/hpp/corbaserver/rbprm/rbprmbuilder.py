@@ -101,7 +101,7 @@ class Builder (object):
     # \param normal 3d vector specifying the normal,
     # \param tolerance expressed as the dot product between the considered obstacle and the ideal normal.
     # if the dot product is greater than the tolerance the surface will be considered valid.
-    def setnormalfilter (self, rom, normal, tolerance):
+    def setNormalFilter (self, rom, normal, tolerance):
         return self.client.rbprm.rbprm.setNormalFilter (rom, normal, tolerance)
 
 	## Specifies a rom constraint for the planner.
