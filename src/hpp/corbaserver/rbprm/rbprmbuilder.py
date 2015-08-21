@@ -48,7 +48,16 @@ class Builder (object):
         self.client = CorbaClient ()
         self.load = load
         
-    ## Virtual function to load the robot model
+    ## Virtual function to load the robot model.
+	#
+    # \param urdfName urdf description of the robot trunk,
+    # \param urdfNameroms either a string, or an array of strings, indicating the urdf of the different roms to add.
+    # \param rootJointType type of root joint among ("freeflyer", "planar",
+    #        "anchor"),
+    # \param meshPackageName name of the meshpackage from where the robot mesh will be loaded
+    # \param packageName name of the package from where the robot will be loaded
+    # \param urdfSuffix optional suffix for the urdf of the robot package
+    # \param srdfSuffix optional suffix for the srdf of the robot package
     def loadModel (self, urdfName, urdfNameroms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix):
 		if(isinstance(urdfNameroms, list)):		
 			for urdfNamerom in urdfNameroms:
@@ -81,19 +90,28 @@ class Builder (object):
 
 	## Init RbprmShooter
     #
-    # \param jointName name of the joint,
-    # \return name of the link.
     def initshooter (self):
         return self.client.rbprm.rbprm.initshooter ()
-    ## \}
 
-	## Init RbprmShooter
-    #
-    # \param jointName name of the joint,
-    # \return name of the link.
+	## Specifies a preferred normal direction for a given rom.
+	# This constrains the planner to accept a rom configuration only if
+	# it collides with a surface the normal of which has these properties.
+	#
+    # \param rom name of the rome,
+    # \param normal 3d vector specifying the normal,
+    # \param tolerance expressed as the dot product between the considered obstacle and the ideal normal.
+    # if the dot product is greater than the tolerance the surface will be considered valid.
+    def setnormalfilter (self, rom, normal, tolerance):
+        return self.client.rbprm.rbprm.setNormalFilter (rom, normal, tolerance)
+
+	## Specifies a rom constraint for the planner.
+	# A configuration will be valid if and only if the considered rom collides
+	# with the environment.
+	#
+    # \param romFilter array of roms indicated by name, which determine the constraint.
     def setFilter (self, romFilter):
         return self.client.rbprm.rbprm.setFilter (romFilter)
-    ## \}
+
 
    ## \name Degrees of freedom
     #  \{

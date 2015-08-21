@@ -226,6 +226,20 @@ namespace hpp {
         bindShooter_.romFilter_ = stringConversion(roms);
     }
 
+
+    void RbprmBuilder::setNormalFilter(const char* romName, const hpp::floatSeq& normal, double range) throw (hpp::Error)
+    {
+        std::string name(romName);
+        bindShooter_.normalFilter_.erase(name);
+        fcl::Vec3f dir;
+        for(std::size_t i =0; i <3; ++i)
+        {
+            dir[i] = normal[i];
+        }
+        NormalFilter filter(dir,range);
+        bindShooter_.normalFilter_.insert(std::make_pair(name,filter));
+    }
+
     hpp::floatSeq* RbprmBuilder::generateContacts(const hpp::floatSeq& configuration, const hpp::floatSeq& direction) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
@@ -454,17 +468,6 @@ namespace hpp {
             throw Error(error.c_str());
         }
     }
-
-    /*namespace
-    {
-        hpp::core::PathValidationPtr_t createPathValidation (const hpp::model::DevicePtr_t& robot, const hpp::model::value_type& val)
-        {
-            hpp::model::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::model::RbPrmDevice>(robot);
-            hpp::rbprm::RbPrmValidationPtr_t validation(hpp::rbprm::RbPrmValidation::create(robotcast));
-            hpp::core::CollisionPathValidationReport defaultValidation;
-            return hpp::core::DiscretizedCollisionChecking::createWithValidation(robot,val ,defaultValidation, validation);
-        }
-    }*/
 
     void RbprmBuilder::SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver)
     {

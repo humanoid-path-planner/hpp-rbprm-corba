@@ -96,6 +96,16 @@ module hpp
     void setFilter (in Names_t roms)
       raises (Error);
 
+    /// Set Rom surface constraints for the configuration shooter
+    /// a Rom configuration will only be valid it collides with a surface
+    /// the normal of which is colinear to the indicated normal,
+    /// modulated by a range value.
+    /// \param normal prefered contact surface normal direction
+    /// \param range tolerance between surface normal and desired surface normal. If the dot
+    /// product of the normal is greater than range then the surface will be accepted.
+    ///
+    void setNormalFilter(in string romName, in floatSeq normal, in double range) raises (Error);
+
     /// Get Sample configuration by its id
     /// \param sampleName name of the limb from which to retrieve a sample
     /// \param sampleId id of the desired samples

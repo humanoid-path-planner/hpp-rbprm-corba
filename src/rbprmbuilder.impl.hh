@@ -45,19 +45,20 @@ namespace hpp {
         {
             hpp::model::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::model::RbPrmDevice>(robot);
             return hpp::rbprm::RbPrmShooter::create
-                    (robotcast,problemSolver_->problem ()->collisionObstacles(),romFilter_,shootLimit_,displacementLimit_);
+                    (robotcast,problemSolver_->problem ()->collisionObstacles(),romFilter_,normalFilter_,shootLimit_,displacementLimit_);
         }
 
         hpp::core::PathValidationPtr_t createPathValidation (const hpp::model::DevicePtr_t& robot, const hpp::model::value_type& val)
         {
             hpp::model::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::model::RbPrmDevice>(robot);
-            hpp::rbprm::RbPrmValidationPtr_t validation(hpp::rbprm::RbPrmValidation::create(robotcast, romFilter_));
+            hpp::rbprm::RbPrmValidationPtr_t validation(hpp::rbprm::RbPrmValidation::create(robotcast, romFilter_, normalFilter_));
             hpp::core::CollisionPathValidationReport defaultValidation;
             return hpp::core::DiscretizedCollisionChecking::createWithValidation(robot,val ,defaultValidation, validation);
         }
 
         hpp::core::ProblemSolverPtr_t problemSolver_;
         std::vector<std::string> romFilter_;
+        std::map<std::string, NormalFilter> normalFilter_;
         std::size_t shootLimit_;
         std::size_t displacementLimit_;
     };
@@ -90,6 +91,7 @@ namespace hpp {
                  const char* srdfSuffix) throw (hpp::Error);
 
         virtual void setFilter(const hpp::Names_t& roms) throw (hpp::Error);
+        virtual void setNormalFilter(const char* romName, const hpp::floatSeq& normal, double range) throw (hpp::Error);
 
         virtual hpp::floatSeq* getSampleConfig(const char* limb, unsigned short sampleId) throw (hpp::Error);
         virtual hpp::floatSeq* getSamplePosition(const char* limb, unsigned short sampleId) throw (hpp::Error);
