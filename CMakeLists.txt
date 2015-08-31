@@ -120,6 +120,7 @@ install(FILES
 	data/meshes/truck.stl
 	data/meshes/truck_vision.stl
 	data/meshes/stair_bauzil.stl
+        data/meshes/stair_bauzil_reduced.stl
 	data/meshes/climb.stl
 	data/meshes/stepladder.stl
 	data/meshes/chair.stl

@@ -21,6 +21,7 @@
 #include "hpp/rbprm/rbprm-device.hh"
 #include "hpp/rbprm/rbprm-validation.hh"
 #include "hpp/rbprm/rbprm-path-interpolation.hh"
+#include "hpp/rbprm/stability/stability.hh"
 #include "hpp/model/urdf/util.hh"
 #include <fstream>
 
@@ -342,6 +343,7 @@ namespace hpp {
         core::Configuration_t old = fullBody->device_->currentConfiguration();
         model::Configuration_t config = dofArrayToConfig (fullBody->device_, configuration);
         fullBody->device_->currentConfiguration(config);
+        fullBody->device_->computeForwardKinematics();
         std::vector<std::string> names = stringConversion(contactLimbs);
         for(std::vector<std::string>::const_iterator cit = names.begin(); cit != names.end();++cit)
         {
@@ -362,6 +364,7 @@ namespace hpp {
         }        
         state.nbContacts = state.contactNormals_.size() ;
         state.configuration_ = config;
+        state.stable = stability::IsStable(fullBody,state);
         fullBody->device_->currentConfiguration(old);
     }
 
