@@ -453,10 +453,15 @@ namespace hpp {
     {
         std::stringstream ss;
         ss << lastStatesComputed_.size() << "\n";
-        for(std::vector<rbprm::State>::const_iterator cit = lastStatesComputed_.begin();
-            cit != lastStatesComputed_.end(); ++cit)
+        std::vector<rbprm::State>::const_iterator cit = lastStatesComputed_.begin();
+        int i = 0;
+        ss << i++ << " ";
+        cit->print(ss);
+        for(std::vector<rbprm::State>::const_iterator cit2 = lastStatesComputed_.begin()+1;
+            cit2 != lastStatesComputed_.end(); ++cit2, ++cit, ++i)
         {
-            cit->print(ss);
+            ss << i<< " ";
+            cit2->print(ss,*cit);
         }
         std::ofstream outfile;
         outfile.open(outfilename);
