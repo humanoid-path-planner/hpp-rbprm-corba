@@ -31,17 +31,10 @@ class CorbaClient:
 
 ## Load and handle a RbprmDevice robot for rbprm planning
 #
-#  A RbprmDevice robot is a set of two robots. One for the 
-#  trunk of the robot, one for the range of motion
+#  A RbprmDevice robot is a dual representation of a robots. One robot describes the 
+#  trunk of the robot, and a set of robots describe the range of motion of each limb of the robot.
 class Builder (object):
     ## Constructor
-    # \param trunkName name of the first robot that is loaded now,
-    # \param romName name of the first robot that is loaded now,
-    # \param rootJointType type of root joint among ("freeflyer", "planar",
-    #        "anchor"),
-    # \param load whether to actually load urdf files. Set to no if you only
-    #        want to initialize a corba client to an already initialized
-    #        problem.
     def __init__ (self, load = True):
         self.tf_root = "base_link"
         self.rootJointType = dict()

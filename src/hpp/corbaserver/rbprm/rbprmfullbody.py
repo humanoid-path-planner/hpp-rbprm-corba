@@ -35,19 +35,21 @@ class CorbaClient:
 #  trunk of the robot, one for the range of motion
 class FullBody (object):
     ## Constructor
-    # \param trunkName name of the first robot that is loaded now,
-    # \param romName name of the first robot that is loaded now,
-    # \param rootJointType type of root joint among ("freeflyer", "planar",
-    #        "anchor"),
-    # \param load whether to actually load urdf files. Set to no if you only
-    #        want to initialize a corba client to an already initialized
-    #        problem.
     def __init__ (self, load = True):
         self.tf_root = "base_link"
         self.rootJointType = dict()
         self.client = CorbaClient ()
         self.load = load
-			
+	
+	## Virtual function to load the fullBody robot model.
+	#
+    # \param urdfName urdf description of the fullBody robot
+    # \param rootJointType type of root joint among ("freeflyer", "planar",
+    #        "anchor"), WARNING. Currently RB-PRM only considerds freeflyer roots
+    # \param meshPackageName name of the meshpackage from where the robot mesh will be loaded
+    # \param packageName name of the package from where the robot will be loaded
+    # \param urdfSuffix optional suffix for the urdf of the robot package
+    # \param srdfSuffix optional suffix for the srdf of the robot package
     def loadFullBodyModel (self, urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix):
 		self.client.rbprm.rbprm.loadFullBodyRobot(urdfName, rootJointType, packageName, urdfName, urdfSuffix, srdfSuffix)
 		self.name = urdfName
@@ -71,30 +73,84 @@ class FullBody (object):
 			self.rankInVelocity [j] = rankInVelocity
 			rankInVelocity += self.client.basic.robot.getJointNumberDof (j)
 
+	## Add a limb to the model
+	#
+	# \param id: user defined id for the limb. Must be unique.
+    #  The id is used if several contact points are defined for the same limb (ex: the knee and the foot)
+    # \param name: name of the joint corresponding to the root of the limb.
+    # \param effectorName name of the joint to be considered as the effector of the limb
+    # \param offset position of the effector in joint coordinates relatively to the effector joint
+    # \param unit normal vector of the contact point, expressed in the effector joint coordinates
+    # \param x width of the default support polygon of the effector
+    # \param y height of the default support polygon of the effector
+    # \param collisionObjects objects to be considered for collisions with the limb. TODO remove
+    # \param nbSamples number of samples to generate for the limb
+    # \param resolution, resolution of the octree voxels. The samples generated are stored in an octree data
+    # structure to perform efficient proximity requests. The resulution of the octree, in meters, specifies the size
+    # of the unit voxel of the octree. The larger they are, the more samples will be considered as candidates for contact.
+    # This can be problematic in terms of performance. The default value is 3 cm.
     def addLimb(self, limbId, name, effectorname, offset, normal, x, y, samples, resolution):
 		self.client.rbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, resolution)
 
+	## Returns the configuration of a limb described by a sample
+	#
+    # \param name name of the limb considered
+    # \param idsample identifiant of the sample considered
     def getSample(self, name, idsample):
 		return self.client.rbprm.rbprm.getSampleConfig(name,idsample)
 		
+	## Returns the end effector position of en effector,
+	# given the current root configuration of the robot and a limb sample
+	#
+    # \param name name of the limb considered
+    # \param idsample identifiant of the sample considered
     def getSamplePosition(self, name, idsample):
 		return self.client.rbprm.rbprm.getSamplePosition(name,idsample)
 
+	## Generates a balanced contact configuration, considering the
+    #  given current configuration of the robot, and a direction of motion.
+    #  Typically used to generate a start and / or goal configuration automatically for a planning problem.
+	#
+    # \param configuration the initial robot configuration
+    # \param direction a 3d vector specifying the desired direction of motion
     def generateContacts(self, configuration, direction):
 		return self.client.rbprm.rbprm.generateContacts(configuration, direction)
 		
+	## Retrieves the contact candidates configurations given a configuration and a limb
+	#
+    # \param name id of the limb considered
+    # \param configuration the considered robot configuration
+    # \param direction a 3d vector specifying the desired direction of motion
     def getContactSamplesIds(self, name, configuration, direction):
 		return self.client.rbprm.rbprm.getContactSamplesIds(name, configuration, direction)
-		
+	
+	## Initialize the first configuration of the path discretization 
+	# with a balanced configuration for the interpolation problem;
+	#
+    # \param configuration the desired start configuration
+    # \param contacts the array of limbs in contact
     def setStartState(self, configuration, contacts):
 		return self.client.rbprm.rbprm.setStartState(configuration, contacts)
 		
+	## Initialize the last configuration of the path discretization 
+	# with a balanced configuration for the interpolation problem;
+	#
+    # \param configuration the desired end configuration
+    # \param contacts the array of limbs in contact		
     def setEndState(self, configuration, contacts):
 		return self.client.rbprm.rbprm.setEndState(configuration, contacts)
-		
+	
+	## Saves a computed contact sequence in a given filename
+	#
+    # \param The file where the configuration must be saved
     def saveComputedStates(self, filename):
 		return self.client.rbprm.rbprm.saveComputedStates(filename)
-		
+	
+	## Discretizes a path return by a motion planner into a discrete
+	# sequence of balanced, contact configurations and returns
+	# the sequence as an array of configurations
+	#
+    # \param stepSize discretization step
     def interpolate(self, stepsize):
 		return self.client.rbprm.rbprm.interpolate(stepsize)
 		
