@@ -89,8 +89,27 @@ class FullBody (object):
     # structure to perform efficient proximity requests. The resulution of the octree, in meters, specifies the size
     # of the unit voxel of the octree. The larger they are, the more samples will be considered as candidates for contact.
     # This can be problematic in terms of performance. The default value is 3 cm.
-    def addLimb(self, limbId, name, effectorname, offset, normal, x, y, samples, resolution):
-		self.client.rbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, resolution)
+    def addLimb(self, limbId, name, effectorname, offset, normal, x, y, samples):
+		self.client.rbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, "EFORT", 0.03)
+
+	## Add a limb to the model
+	#
+	# \param id: user defined id for the limb. Must be unique.
+    #  The id is used if several contact points are defined for the same limb (ex: the knee and the foot)
+    # \param name: name of the joint corresponding to the root of the limb.
+    # \param effectorName name of the joint to be considered as the effector of the limb
+    # \param offset position of the effector in joint coordinates relatively to the effector joint
+    # \param unit normal vector of the contact point, expressed in the effector joint coordinates
+    # \param x width of the default support polygon of the effector
+    # \param y height of the default support polygon of the effector
+    # \param collisionObjects objects to be considered for collisions with the limb. TODO remove
+    # \param nbSamples number of samples to generate for the limb
+    # \param resolution, resolution of the octree voxels. The samples generated are stored in an octree data
+    # structure to perform efficient proximity requests. The resulution of the octree, in meters, specifies the size
+    # of the unit voxel of the octree. The larger they are, the more samples will be considered as candidates for contact.
+    # This can be problematic in terms of performance. The default value is 3 cm.
+    def addLimb(self, limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution):
+		self.client.rbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution)
 
 	## Returns the configuration of a limb described by a sample
 	#

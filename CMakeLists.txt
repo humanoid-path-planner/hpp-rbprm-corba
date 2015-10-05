@@ -76,7 +76,7 @@ install(FILES
   data/urdf/stair_bauzil.urdf
   data/urdf/climb.urdf
   data/urdf/stepladder.urdf
-  data/urdf/chair.urdf
+  data/urdf/ground.urdf
   #~ data/urdf/scene2.urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
   )
@@ -96,7 +96,7 @@ install(FILES
   data/srdf/stair_bauzil.srdf
   data/srdf/climb.srdf
   data/srdf/stepladder.srdf
-  data/srdf/chair.srdf
+  data/srdf/ground.srdf
   #~ data/srdf/scene2.srdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
   )
@@ -111,6 +111,7 @@ install(FILES
 	data/meshes/hrp2_rarm_rom.stl
 	data/meshes/hrp2_lleg_rom.stl
 	data/meshes/hrp2_rleg_rom.stl
+	data/meshes/ground.stl
 	data/meshes/box.stl
 	data/meshes/box_rom.stl
 	data/meshes/robot_box.stl
