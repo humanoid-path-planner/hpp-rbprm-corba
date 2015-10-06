@@ -68,6 +68,12 @@ install(FILES
   data/urdf/hrp2_rarm_rom.urdf
   data/urdf/hrp2_lleg_rom.urdf
   data/urdf/hrp2_rleg_rom.urdf
+  data/urdf/hyq/hyq_trunk.urdf
+  data/urdf/hyq/hyq_rhleg_rom.urdf
+  data/urdf/hyq/hyq_rfleg_rom.urdf
+  data/urdf/hyq/hyq_lhleg_rom.urdf
+  data/urdf/hyq/hyq_lfleg_rom.urdf
+  data/urdf/hyq/hyq_rom.urdf
   data/urdf/box_rom.urdf
   data/urdf/box.urdf
   data/urdf/scene.urdf
@@ -88,6 +94,12 @@ install(FILES
   data/srdf/hrp2_rarm_rom.srdf
   data/srdf/hrp2_lleg_rom.srdf
   data/srdf/hrp2_rleg_rom.srdf
+  data/srdf/hyq/hyq_trunk.srdf
+  data/srdf/hyq/hyq_rhleg_rom.srdf
+  data/srdf/hyq/hyq_rfleg_rom.srdf
+  data/srdf/hyq/hyq_lhleg_rom.srdf
+  data/srdf/hyq/hyq_lfleg_rom.srdf
+  data/srdf/hyq/hyq_rom.srdf
   data/srdf/box_rom.srdf
   data/srdf/box.srdf
   data/srdf/scene.srdf
@@ -121,13 +133,20 @@ install(FILES
 	data/meshes/truck.stl
 	data/meshes/truck_vision.stl
 	data/meshes/stair_bauzil.stl
-        data/meshes/stair_bauzil_reduced.stl
+    data/meshes/stair_bauzil_reduced.stl
 	data/meshes/climb.stl
 	data/meshes/stepladder.stl
 	data/meshes/chair.stl
-	#~ data/meshes/pedal.stl
-	#~ data/meshes/board.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
+  )
+install(FILES
+	data/meshes/hyq/hyq_trunk.stl
+	data/meshes/hyq/hyq_rom.stl
+	data/meshes/hyq/hyq_rhleg_rom.stl
+	data/meshes/hyq/hyq_rfleg_rom.stl
+	data/meshes/hyq/hyq_lhleg_rom.stl
+	data/meshes/hyq/hyq_lfleg_rom.stl
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes/hyq
   )
   
 SETUP_PROJECT_FINALIZE()
