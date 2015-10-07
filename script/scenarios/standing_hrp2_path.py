@@ -44,8 +44,8 @@ ps.addPathOptimizer("RandomShortcut")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
-ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
+#~ ps.client.problem.selectConFigurationShooter("RbprmShooter")
+#~ ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 r.loadObstacleModel (packageName, "scene_wall", "planning")
 ps.solve ()
 

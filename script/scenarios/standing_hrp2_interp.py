@@ -46,7 +46,7 @@ rHand = 'RARM_JOINT5'
 rArmOffset = [-0.05,-0.050,-0.050]
 rArmNormal = [1,0,0]
 rArmx = 0.024; rArmy = 0.024
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "EFORT", 0.01)
+fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 20000, "manipulability", 0.03)
 
 larmId = '4Larm'
 larm = 'LARM_JOINT0'
@@ -54,7 +54,7 @@ lHand = 'LARM_JOINT5'
 lArmOffset = [-0.05,-0.050,-0.050]
 lArmNormal = [1,0,0]
 lArmx = 0.024; lArmy = 0.024
-fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "EFORT", 0.01)
+fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 20000, "manipulability", 0.03)
 
 rKneeId = '0RKnee'
 rLeg = 'RLEG_JOINT0'

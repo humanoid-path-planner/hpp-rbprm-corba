@@ -140,6 +140,7 @@ install(FILES
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
   )
 install(FILES
+	data/meshes/hyq/hyq_all.stl
 	data/meshes/hyq/hyq_trunk.stl
 	data/meshes/hyq/hyq_rom.stl
 	data/meshes/hyq/hyq_rhleg_rom.stl
