@@ -86,6 +86,12 @@ class Builder (object):
     def initshooter (self):
         return self.client.rbprm.rbprm.initshooter ()
 
+	## Sets limits on robot orientation, described according to Euler's ZYX rotation order
+	#
+    # \param bounds 6D vector with the lower and upperBound for each rotation axis in sequence
+    def boundSO3 (self,  bounds):
+        return self.client.rbprm.rbprm.boundSO3 (bounds)
+
 	## Specifies a preferred normal direction for a given rom.
 	# This constrains the planner to accept a rom configuration only if
 	# it collides with a surface the normal of which has these properties.

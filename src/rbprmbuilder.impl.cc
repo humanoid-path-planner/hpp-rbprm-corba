@@ -221,6 +221,17 @@ namespace hpp {
         return res;
     }
 
+    std::vector<double> doubleConversion(const hpp::floatSeq& dofArray)
+    {
+        std::vector<double> res;
+        std::size_t dim = (std::size_t)dofArray.length();
+        for (std::size_t iDof = 0; iDof < dim; iDof++)
+        {
+            res.push_back(dofArray[iDof]);
+        }
+        return res;
+    }
+
 
     void RbprmBuilder::setFilter(const hpp::Names_t& roms) throw (hpp::Error)
     {
@@ -239,6 +250,17 @@ namespace hpp {
         }
         NormalFilter filter(dir,range);
         bindShooter_.normalFilter_.insert(std::make_pair(name,filter));
+    }
+
+    void RbprmBuilder::boundSO3(const hpp::floatSeq& limitszyx) throw (hpp::Error)
+    {
+        std::vector<double> limits = doubleConversion(limitszyx);
+        if(limits.size() !=6)
+        {
+            throw Error ("Can not bound SO3, array of 6 double required");
+        }
+        bindShooter_.so3Bounds_ = limits;
+
     }
 
     hpp::floatSeq* RbprmBuilder::generateContacts(const hpp::floatSeq& configuration, const hpp::floatSeq& direction) throw (hpp::Error)

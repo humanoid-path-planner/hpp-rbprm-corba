@@ -44,8 +44,11 @@ namespace hpp {
         hpp::rbprm::RbPrmShooterPtr_t create (const hpp::model::DevicePtr_t& robot)
         {
             hpp::model::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::model::RbPrmDevice>(robot);
-            return hpp::rbprm::RbPrmShooter::create
+            rbprm::RbPrmShooterPtr_t shooter = hpp::rbprm::RbPrmShooter::create
                     (robotcast,problemSolver_->problem ()->collisionObstacles(),romFilter_,normalFilter_,shootLimit_,displacementLimit_);
+            if(!so3Bounds_.empty())
+                shooter->BoundSO3(so3Bounds_);
+            return shooter;
         }
 
         hpp::core::PathValidationPtr_t createPathValidation (const hpp::model::DevicePtr_t& robot, const hpp::model::value_type& val)
@@ -61,6 +64,7 @@ namespace hpp {
         std::map<std::string, NormalFilter> normalFilter_;
         std::size_t shootLimit_;
         std::size_t displacementLimit_;
+        std::vector<double> so3Bounds_;
     };
 
       class RbprmBuilder : public virtual POA_hpp::corbaserver::rbprm::RbprmBuilder
@@ -92,6 +96,8 @@ namespace hpp {
 
         virtual void setFilter(const hpp::Names_t& roms) throw (hpp::Error);
         virtual void setNormalFilter(const char* romName, const hpp::floatSeq& normal, double range) throw (hpp::Error);
+        virtual void boundSO3(const hpp::floatSeq& limitszyx) throw (hpp::Error);
+
 
         virtual hpp::floatSeq* getSampleConfig(const char* limb, unsigned short sampleId) throw (hpp::Error);
         virtual hpp::floatSeq* getSamplePosition(const char* limb, unsigned short sampleId) throw (hpp::Error);
