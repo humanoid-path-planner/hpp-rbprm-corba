@@ -106,6 +106,13 @@ module hpp
     ///
     void setNormalFilter(in string romName, in floatSeq normal, in double range) raises (Error);
 
+    /// Sets limits on robot orientation, described according to Euler's ZYX rotation order
+    ///
+    /// \param limitszyx 6D vector with the lower and upperBound for each rotation axis in sequence
+    /// expressed in gradients
+    /// [z_inf, z_sup, y_inf, y_sup, x_inf, x_sup]
+    void boundSO3(in floatSeq limitszyx) raises (Error);
+
     /// Get Sample configuration by its id
     /// \param sampleName name of the limb from which to retrieve a sample
     /// \param sampleId id of the desired samples

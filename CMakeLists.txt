@@ -83,6 +83,8 @@ install(FILES
   data/urdf/climb.urdf
   data/urdf/stepladder.urdf
   data/urdf/ground.urdf
+  data/urdf/groundcrouch.urdf
+  data/urdf/darpa.urdf
   #~ data/urdf/scene2.urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
   )
@@ -109,10 +111,14 @@ install(FILES
   data/srdf/climb.srdf
   data/srdf/stepladder.srdf
   data/srdf/ground.srdf
+  data/srdf/groundcrouch.srdf
+  data/srdf/darpa.srdf
   #~ data/srdf/scene2.srdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
   )
 install(FILES
+	data/meshes/darpa.stl
+	data/meshes/darpareduced.stl
 	data/meshes/car.stl
 	data/meshes/car_simple.stl
 	data/meshes/hrp2_trunk.stl
@@ -129,7 +135,7 @@ install(FILES
 	data/meshes/robot_box.stl
 	data/meshes/chair_simple.stl
 	data/meshes/ground.stl
-	data/meshes/ground_table.stl
+	data/meshes/groundcrouch.stl
 	data/meshes/truck.stl
 	data/meshes/truck_vision.stl
 	data/meshes/stair_bauzil.stl
