@@ -110,7 +110,7 @@ r (configs[i]); i=i+1; i-1
 #~ q_init = fullBody.generateContacts(q_init, [0,0,-1]); r (q_init)
 
 #~ f1 = open("secondchoice","w+")
-f1 = open("new","w+")
+f1 = open("hyq_crouch_20_10_15","w+")
 f1.write(str(configs))
 f1.close()
 

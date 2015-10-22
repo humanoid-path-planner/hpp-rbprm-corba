@@ -13,6 +13,12 @@ rbprmBuilder = Builder ()
 
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 rbprmBuilder.setJointBounds ("base_joint_xyz", [0,2, -1, 1, 0, 2.2])
+rbprmBuilder.setFilter(['hyq_lhleg_rom' , 'hyq_rfleg_rom'])
+rbprmBuilder.setNormalFilter('hyq_lhleg_rom', [0,0,1], 0.9)
+rbprmBuilder.setNormalFilter('hyq_rfleg_rom', [0,0,1], 0.9)
+rbprmBuilder.setNormalFilter('hyq_lfleg_rom', [0,0,1], 0.9)
+rbprmBuilder.setNormalFilter('hyq_rhleg_rom', [0,0,1], 0.9)
+rbprmBuilder.boundSO3([-0.,0,-1,1,-1,1])
 
 #~ from hpp.corbaserver.rbprm. import ProblemSolver
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver

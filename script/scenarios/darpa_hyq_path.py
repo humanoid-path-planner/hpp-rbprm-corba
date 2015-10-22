@@ -4,7 +4,7 @@ from hpp.gepetto import Viewer
 rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
 meshPackageName = 'hpp-rbprm-corba'
-urdfName = 'hyq_trunk'
+urdfName = 'hyq_trunk_large'
 urdfNameRom = ['hyq_lhleg_rom','hyq_lfleg_rom','hyq_rfleg_rom','hyq_rhleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
@@ -29,7 +29,7 @@ r = Viewer (ps)
 
 
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init [0:3] = [-1.5, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+q_init [0:3] = [-2, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 #~ q_init [0:3] = [2, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 
 q_goal = q_init [::]
@@ -41,7 +41,7 @@ ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmPathValidation",0.01)
+ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 r.loadObstacleModel (packageName, "darpa", "planning")
 ps.solve ()
 
@@ -53,6 +53,6 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 #~ pp (2)
 #~ pp (0)
 
-pp (1)
+#~ pp (1)
 #~ pp.toFile(1, "/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
 r (q_init)

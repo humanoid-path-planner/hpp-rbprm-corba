@@ -69,6 +69,7 @@ install(FILES
   data/urdf/hrp2_lleg_rom.urdf
   data/urdf/hrp2_rleg_rom.urdf
   data/urdf/hyq/hyq_trunk.urdf
+  data/urdf/hyq/hyq_trunk_large.urdf
   data/urdf/hyq/hyq_rhleg_rom.urdf
   data/urdf/hyq/hyq_rfleg_rom.urdf
   data/urdf/hyq/hyq_lhleg_rom.urdf
@@ -97,6 +98,7 @@ install(FILES
   data/srdf/hrp2_lleg_rom.srdf
   data/srdf/hrp2_rleg_rom.srdf
   data/srdf/hyq/hyq_trunk.srdf
+  data/srdf/hyq/hyq_trunk_large.srdf
   data/srdf/hyq/hyq_rhleg_rom.srdf
   data/srdf/hyq/hyq_rfleg_rom.srdf
   data/srdf/hyq/hyq_lhleg_rom.srdf
@@ -148,12 +150,17 @@ install(FILES
 install(FILES
 	data/meshes/hyq/hyq_all.stl
 	data/meshes/hyq/hyq_trunk.stl
+	data/meshes/hyq/hyq_trunk_large.stl
 	data/meshes/hyq/hyq_rom.stl
 	data/meshes/hyq/hyq_rhleg_rom.stl
 	data/meshes/hyq/hyq_rfleg_rom.stl
 	data/meshes/hyq/hyq_lhleg_rom.stl
 	data/meshes/hyq/hyq_lfleg_rom.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes/hyq
+  )
+  
+install(DIRECTORY data/hyq_description
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/../
   )
   
 SETUP_PROJECT_FINALIZE()

@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<!--This does not replace URDF, and is not an extension of URDF.
+    This is a format for representing semantic information about the robot structure.
+    A URDF file must exist for this robot as well, where the joints and the links that are referenced are defined
+-->
+<robot name="hyq">
+    <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
+<!--
+    <disable_collisions link1="base_link" link2="lf_foot" reason="Adjacent" />
+    <disable_collisions link1="base_link" link2="lh_foot" reason="Adjacent" />
+    <disable_collisions link1="base_link" link2="rf_foot" reason="Adjacent" />
+    <disable_collisions link1="base_link" link2="rh_foot" reason="Adjacent" />
+    <disable_collisions link1="lf_foot" link2="lh_foot" reason="Adjacent" />
+    <disable_collisions link1="lf_foot" link2="rf_foot" reason="Adjacent" />
+    <disable_collisions link1="lf_foot" link2="rh_foot" reason="Adjacent" />
+    <disable_collisions link1="lh_foot" link2="rf_foot" reason="Adjacent" />
+    <disable_collisions link1="lh_foot" link2="rh_foot" reason="Adjacent" />
+    <disable_collisions link1="rf_foot" link2="rh_foot" reason="Adjacent" />
+-->
+    <disable_collisions link1="lf_hipassembly" link2="trunk" reason="Adjacent" />
+    <disable_collisions link1="lh_hipassembly" link2="trunk" reason="Adjacent" />
+    <disable_collisions link1="rf_hipassembly" link2="trunk" reason="Adjacent" />
+    <disable_collisions link1="rh_hipassembly" link2="trunk" reason="Adjacent" />
+    <disable_collisions link1="lf_hipassembly" link2="lf_upperleg" reason="Adjacent" />
+    <disable_collisions link1="lh_hipassembly" link2="lh_upperleg" reason="Adjacent" />
+    <disable_collisions link1="rf_hipassembly" link2="rf_upperleg" reason="Adjacent" />
+    <disable_collisions link1="rh_hipassembly" link2="rh_upperleg" reason="Adjacent" />
+    <disable_collisions link1="lf_lowerleg" link2="lf_upperleg" reason="Adjacent" />
+    <disable_collisions link1="lh_lowerleg" link2="lh_upperleg" reason="Adjacent" />
+    <disable_collisions link1="rf_lowerleg" link2="rf_upperleg" reason="Adjacent" />
+    <disable_collisions link1="rh_lowerleg" link2="rh_upperleg" reason="Adjacent" />
+    <disable_collisions link1="lf_lowerleg" link2="lf_foot" reason="Adjacent" />
+    <disable_collisions link1="lh_lowerleg" link2="lh_foot" reason="Adjacent" />
+    <disable_collisions link1="rf_lowerleg" link2="rf_foot" reason="Adjacent" />
+    <disable_collisions link1="rh_lowerleg" link2="rh_foot" reason="Adjacent" />
+</robot>

@@ -19,7 +19,7 @@ fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName
 
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 
-nbSamples = 10000
+nbSamples = 20000
 
 ps = tp.ProblemSolver( fullBody )
 r = tp.Viewer (ps)
