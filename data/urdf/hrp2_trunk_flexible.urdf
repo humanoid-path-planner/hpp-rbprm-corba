@@ -9,7 +9,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://hpp-rbprm-corba/meshes/hrp2_lleg_rom.stl"/>
+        <mesh filename="package://hpp-rbprm-corba/meshes/hrp2_trunk_body.stl"/>
       </geometry>
       <material name="red">
         <color rgba="1 1 1 1"/>
@@ -41,12 +41,12 @@
   </joint>  
   <link name="torso">  
     <visual>
-      <origin xyz="-0.032 -0 -0.3507" rpy="0 0 0.003" />
+      <origin xyz="0 0 0" rpy="0 0 0.003" />
       <geometry>
         <mesh filename="package://hpp-rbprm-corba/meshes/hrp2_trunk_torso.stl"/>
       </geometry>
       <material name="red">
-        <color rgba="1 1 1 1"/>
+        <color rgba="1 0 0 1"/>
       </material>
     </visual>
     <collision>

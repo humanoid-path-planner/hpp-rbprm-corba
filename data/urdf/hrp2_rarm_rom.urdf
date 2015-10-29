@@ -35,7 +35,7 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0.003" />
+      <origin xyz="-0.032 -0 -0.3507" rpy="0 0 0.003" />
       <geometry>
         <mesh filename="package://hpp-rbprm-corba/meshes/hrp2_rarm_rom.stl"/>
       </geometry>
