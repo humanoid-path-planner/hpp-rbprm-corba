@@ -175,12 +175,26 @@ module hpp
     /// constact configurations along it. setStartState and setEndState must have been called prior
     /// to this function. If these conditions are not met an error is raised.
     /// \param timestep normalized step for generation along the path (ie the path has a length of 1).
-    floatSeqSeq interpolate(in double timestep) raises (Error);
+    /// \param path path computed.
+    floatSeqSeq interpolate(in double timestep, in double path) raises (Error);
 
     /// Saves the last computed states by the function interpolate in a filename.
     /// Raises an error if interpolate has not been called, or the file could not be opened.
     /// \param filename name of the file used to save the contacts.
     void saveComputedStates(in string filename) raises (Error);
+
+    /// returns the size and transforms of all boxes of the octree for a limb
+    /// \param limbname name of the considered limb
+    /// \param dofArray considered configuration of the robot
+    /// \return transformed configuration for which all possible contacts have been created
+    floatSeqSeq GetOctreeBoxes(in string limbname, in floatSeq dofArray) raises (Error);
+
+
+    /// returns octree transform for a given robot configuration
+    /// \param limbname name of the considered limb
+    /// \param dofArray considered configuration of the robot
+    /// \return size 7 position + quaternion of the octree root
+    floatSeq getOctreeTransform(in string limbname, in floatSeq dofArray) raises (Error);
 
   }; // interface Robot
   }; // module rbprm
