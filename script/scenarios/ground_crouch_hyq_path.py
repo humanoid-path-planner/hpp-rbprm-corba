@@ -12,7 +12,7 @@ srdfSuffix = ""
 rbprmBuilder = Builder ()
 
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-rbprmBuilder.setJointBounds ("base_joint_xyz", [-1,5, -0.1, 0.1, 0.35, 2])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [-6,5, -4, 4, 0.6, 2])
 rbprmBuilder.setFilter(['hyq_rhleg_rom', 'hyq_lfleg_rom', 'hyq_rfleg_rom','hyq_lhleg_rom'])
 rbprmBuilder.setNormalFilter('hyq_lhleg_rom', [0,0,1], 0.9)
 rbprmBuilder.setNormalFilter('hyq_rfleg_rom', [0,0,1], 0.9)
@@ -29,7 +29,7 @@ r = Viewer (ps)
 
 
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init [0:3] = [-1, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+q_init [0:3] = [-5, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 
 q_goal = q_init [::]
 
@@ -40,7 +40,7 @@ ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
+ps.client.problem.selectPathValidation("RbprmPathValidation",0.001)
 r.loadObstacleModel (packageName, "groundcrouch", "planning")
 ps.solve ()
 
@@ -48,5 +48,6 @@ ps.solve ()
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 
-pp (1)
+pp (0)
+#~ pp (1)
 r (q_init)

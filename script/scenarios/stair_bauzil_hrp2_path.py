@@ -4,20 +4,20 @@ from hpp.gepetto import Viewer
 rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
 meshPackageName = 'hpp-rbprm-corba'
-urdfName = 'hrp2_trunk'
-urdfNameRom = 'hrp2_rom'
+urdfName = 'hrp2_trunk_flexible'
+urdfNameRoms =  ['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
 
 rbprmBuilder = Builder ()
 
-rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
+rbprmBuilder.loadModel(urdfName, urdfNameRoms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 rbprmBuilder.setJointBounds ("base_joint_xyz", [0,2, -1, 1, 0, 2.2])
-rbprmBuilder.setFilter(['hyq_lhleg_rom' , 'hyq_rfleg_rom'])
-rbprmBuilder.setNormalFilter('hyq_lhleg_rom', [0,0,1], 0.9)
-rbprmBuilder.setNormalFilter('hyq_rfleg_rom', [0,0,1], 0.9)
-rbprmBuilder.setNormalFilter('hyq_lfleg_rom', [0,0,1], 0.9)
-rbprmBuilder.setNormalFilter('hyq_rhleg_rom', [0,0,1], 0.9)
+#~ rbprmBuilder.setFilter(['hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom'])
+#~ rbprmBuilder.setNormalFilter('hrp2_rarm_rom', [0,0,1], 0.5)
+#~ rbprmBuilder.setNormalFilter('hrp2_lleg_rom', [0,0,1], 0.9)
+#~ rbprmBuilder.setNormalFilter('hrp2_rleg_rom', [0,0,1], 0.9)
+#~ rbprmBuilder.setNormalFilter('hyq_rhleg_rom', [0,0,1], 0.9)
 rbprmBuilder.boundSO3([-0.,0,-1,1,-1,1])
 
 #~ from hpp.corbaserver.rbprm. import ProblemSolver
@@ -57,6 +57,6 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 #~ pp (2)
 #~ pp (0)
 
-pp (1)
+#~ pp (1)
 #~ pp.toFile(1, "/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
 r (q_init)

@@ -33,7 +33,7 @@ rfoot = 'rf_foot_joint'
 rLegOffset = [0.,0,0.]
 rLegNormal = [0,1,0]
 rLegx = 0.02; rLegy = 0.02
-fullBody.addLimb(rLegId,rLeg,rfoot,rLegOffset,rLegNormal, rLegx, rLegy, nbSamples, "forward", 0.05)
+fullBody.addLimb(rLegId,rLeg,rfoot,rLegOffset,rLegNormal, rLegx, rLegy, nbSamples, "forward", 0.1)
 #~ fullBody.addLimb(rLegId,rLeg,rfoot,rLegOffset,rLegNormal, rLegx, rLegy, nbSamples, "manipulability", 0.05)
 #~ fullBody.addLimb(rLegId,rLeg,rfoot,rLegOffset,rLegNormal, rLegx, rLegy, nbSamples, "random", 0.05)
 
@@ -74,7 +74,6 @@ q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.q_goal[0:7]
 
 fullBody.setCurrentConfig (q_init)
 q_init = fullBody.generateContacts(q_init, [0,0,1])
-q_0 = fullBody.getCurrentConfig(); 
 
 fullBody.setCurrentConfig (q_goal)
 q_goal = fullBody.generateContacts(q_goal, [0,0,1])
@@ -82,20 +81,23 @@ q_goal = fullBody.generateContacts(q_goal, [0,0,1])
 fullBody.setStartState(q_init,[])
 fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 
+
 r(q_init)
 
-configs = fullBody.interpolate(0.1)
+#~ configs = fullBody.interpolate(0.1)
 
-r.loadObstacleModel ('hpp-rbprm-corba', "darpa", "contact")
+#~ r.loadObstacleModel ('hpp-rbprm-corba', "darpa", "contact")
 
+#~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
+fullBody.createOctreeBoxes(r.client.gui, 1, larmId, q_0,)
 i = 0;
+fullBody.draw(configs[i],r); i=i+1; i-1
 #~ r (configs[i]); i=i+1; i-1
 
-q0 = configs[2]
-q0 = fullBody.generateContacts(q0, [0,0,1])
-#~ r(q0)
-q_init [0:3] = [0, 0, 0.63]; r(q_init)
-c = fullBody.getContactSamplesIds("rfleg",q_init, [1,0,0])
-r(fullBody.getSample("rfleg",int(c[i]))); i = i+1
+#~ q0 = configs[2]
+#~ q0 = fullBody.generateContacts(q0, [0,0,1])
+#~ q_init [0:3] = [0, 0, 0.63]; r(q_init)
+#~ c = fullBody.getContactSamplesIds("rfleg",q_init, [1,0,0])
+#~ r(fullBody.getSample("rfleg",int(c[i]))); i = i+1
 
 

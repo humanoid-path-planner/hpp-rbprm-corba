@@ -51,6 +51,6 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 #~ pp (2)
 #~ pp (0)
 
-pp (1)
+#~ pp (1)
 #~ pp.toFile(1, "/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
 r (q_init)

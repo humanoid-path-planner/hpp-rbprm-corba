@@ -416,10 +416,11 @@ namespace hpp {
     }
 
 
-    floatSeqSeq* RbprmBuilder::interpolate(double timestep) throw (hpp::Error)
+    floatSeqSeq* RbprmBuilder::interpolate(double timestep, double path) throw (hpp::Error)
     {
         try
         {
+        int pathId = int(path);
         if(startState_.configuration_.rows() == 0)
         {
             throw std::runtime_error ("Start state not initialized, can not interpolate ");
@@ -429,22 +430,22 @@ namespace hpp {
             throw std::runtime_error ("End state not initialized, can not interpolate ");
         }
 
-        if(problemSolver_->paths().empty())
+        if(problemSolver_->paths().size() <= pathId)
         {
             throw std::runtime_error ("No path computed, cannot interpolate ");
         }
 
-        hpp::rbprm::RbPrmInterpolationPtr_t interpolator = rbprm::RbPrmInterpolation::create(problemSolver_->paths().back(),fullBody_,startState_,endState_);
+        hpp::rbprm::RbPrmInterpolationPtr_t interpolator = rbprm::RbPrmInterpolation::create(problemSolver_->paths()[pathId],fullBody_,startState_,endState_);
         lastStatesComputed_ = interpolator->Interpolate(problemSolver_->collisionObstacles(),timestep);
 
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
-        for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin(); cit != lastStatesComputed_.end(); ++cit)
+        /*for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin(); cit != lastStatesComputed_.end(); ++cit)
         {
             const core::Configuration_t config = cit->configuration_;
             hpp::floatSeq dofArray;
             dofArray.length (config.size());
-        }
+        }*/
 
         res->length (lastStatesComputed_.size ());
         std::size_t i=0;
@@ -497,6 +498,75 @@ namespace hpp {
         {
             std::string error("Can not open outfile " + std::string(outfilename));
             throw Error(error.c_str());
+        }
+    }
+
+    hpp::floatSeqSeq* RbprmBuilder::GetOctreeBoxes(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error)
+    {
+        try
+        {
+        model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
+        model::Configuration_t save = fullBody_->device_->currentConfiguration();
+        fullBody_->device_->currentConfiguration(config);
+        fullBody_->device_->computeForwardKinematics();
+        const std::map<std::size_t, fcl::CollisionObject*>& boxes =
+                fullBody_->GetLimbs().at(std::string(limbName))->sampleContainer_.boxes_;
+        //const hpp::rbprm::RbPrmLimbPtr_t limb =fullBody_->GetLimbs().at(std::string(limbName));
+        //const fcl::Transform3f transform = limb->octreeRoot();
+        const double resolution = fullBody_->GetLimbs().at(std::string(limbName))->sampleContainer_.resolution_;
+        std::size_t i =0;
+        hpp::floatSeqSeq *res;
+        res = new hpp::floatSeqSeq ();
+        res->length (boxes.size ());
+        for(std::map<std::size_t, fcl::CollisionObject*>::const_iterator cit = boxes.begin();
+            cit != boxes.end();++cit,++i)
+        {
+            fcl::Vec3f position = /*transform.getRotation() **/ (*cit->second).getTranslation() /*+ transform.getTranslation()*/;
+            _CORBA_ULong size = (_CORBA_ULong) 4;
+            double* dofArray = hpp::floatSeq::allocbuf(size);
+            hpp::floatSeq floats (size, size, dofArray, true);
+            //convert the config in dofseq
+            for (model::size_type j=0 ; j < 3 ; ++j) {
+                dofArray[j] = position[j];
+            }
+            dofArray[3] = resolution;
+            (*res) [i] = floats;
+        }
+        fullBody_->device_->currentConfiguration(save);
+        fullBody_->device_->computeForwardKinematics();
+        return res;
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    hpp::floatSeq* RbprmBuilder::getOctreeTransform(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error)
+    {
+        try{
+        model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
+        model::Configuration_t save = fullBody_->device_->currentConfiguration();
+        fullBody_->device_->currentConfiguration(config);
+        fullBody_->device_->computeForwardKinematics();
+        const hpp::rbprm::RbPrmLimbPtr_t limb =fullBody_->GetLimbs().at(std::string(limbName));
+        const fcl::Transform3f transform = limb->octreeRoot();
+        const fcl::Quaternion3f& quat = transform.getQuatRotation();
+        const fcl::Vec3f& position = transform.getTranslation();
+        hpp::floatSeq *dofArray;
+        dofArray = new hpp::floatSeq();
+        dofArray->length(_CORBA_ULong(7));
+        for(std::size_t i=0; i< 3; i++)
+          (*dofArray)[(_CORBA_ULong)i] = position [i];
+        for(std::size_t i=0; i< 4; i++)
+          (*dofArray)[(_CORBA_ULong)i+3] = quat [i];
+        fullBody_->device_->currentConfiguration(save);
+        fullBody_->device_->computeForwardKinematics();
+        return dofArray;
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
         }
     }
 

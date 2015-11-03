@@ -66,6 +66,7 @@ class FullBody (object):
 		self.urdfName = urdfName
 		self.urdfSuffix = urdfSuffix
 		self.srdfSuffix = srdfSuffix
+		self.octrees={}
 		rankInConfiguration = rankInVelocity = 0
 		for j in self.jointNames:
 			self.rankInConfiguration [j] = rankInConfiguration
@@ -170,9 +171,43 @@ class FullBody (object):
 	# the sequence as an array of configurations
 	#
     # \param stepSize discretization step
-    def interpolate(self, stepsize):
-		return self.client.rbprm.rbprm.interpolate(stepsize)
+    # \param pathId Id of the path to compute from
+    def interpolate(self, stepsize, pathId = 1):
+		return self.client.rbprm.rbprm.interpolate(stepsize, pathId)
 		
+	## Create octree nodes representation for a given limb
+	#
+    # \param stepSize discretization step
+    # \param gui gepetoo viewer instance discretization step
+    # \param winId window to draw to step
+    # \param limbName name of the limb considered
+    # \param config initial configuration of the robot, used when created octree
+    # \param color of the octree boxes
+    def createOctreeBoxes(self, gui, winId, limbName, config, color = [1,1,1,0.3]):
+		boxes = self.client.rbprm.rbprm.GetOctreeBoxes(limbName, config)
+		scene = "oct"+limbName
+		gui.createScene(scene)
+		resolution = boxes[0][3]
+		i = 0
+		for box in boxes:
+			boxname = scene+"/b"+str(i)
+			gui.addBox(boxname,resolution,resolution,resolution, color)
+			gui.applyConfiguration(boxname,[box[0],box[1],box[2],1,0,0,0])
+			i = i+1
+		self.octrees[limbName] = scene
+		gui.addSceneToWindow(scene,winId)
+		gui.refresh()
+	
+	## Draws robot configuration, along with octrees associated
+	#
+    # \param viewer gepetto viewer instance
+    def draw(self, configuration, viewer):
+	viewer(configuration)
+	for limb, groupid in self.octrees.iteritems():
+		transform = self.client.rbprm.rbprm.getOctreeTransform(limb, configuration)
+		viewer.client.gui.applyConfiguration(groupid,transform)
+	viewer.client.gui.refresh()
+
    ## \name Degrees of freedom
     #  \{
 

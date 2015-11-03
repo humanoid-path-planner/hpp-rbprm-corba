@@ -23,7 +23,6 @@ fullBody.setJointBounds ("base_joint_xyz", [-0.135,2, -1, 1, 0, 2.2])
 
 ps = tp.ProblemSolver( fullBody )
 r = tp.Viewer (ps)
-r.loadObstacleModel ('hpp-rbprm-corba', "stair_bauzil", "contact")
 
 #~ AFTER loading obstacles
 rLegId = '0rLeg'
@@ -31,14 +30,14 @@ rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,-0.105,0,]
 rLegNormal = [0,1,0]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 20000, "EFORT", 0.01)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 10000, "manipulability", 0.1)
 
 lLegId = '1lLeg'
 lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,-0.105,0]
 lLegNormal = [0,1,0]
 lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "EFORT", 0.01)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.1)
 
 rarmId = '3Rarm'
 rarm = 'RARM_JOINT0'
@@ -46,7 +45,7 @@ rHand = 'RARM_JOINT5'
 rArmOffset = [0,0,-0.1]
 rArmNormal = [0,0,1]
 rArmx = 0.024; rArmy = 0.024
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 30000, "EFORT", 0.05)
+fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.05)
 
 
 #~ AFTER loading obstacles
@@ -79,14 +78,14 @@ lLegx = 0.05; lLegy = 0.05
 #~ fullBody.client.basic.robot.setJointConfig('RARM_JOINT0',[-1])
 
 q_0 = fullBody.getCurrentConfig(); 
+fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.q_init[0:7]
 q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.q_goal[0:7]
 
 
 fullBody.setCurrentConfig (q_init)
-q_0 = fullBody.getCurrentConfig(); 
 q_init =  [
-        0.1, -0.82, 0.648702, 1.0, 0.0 , 0.0, 0.0,                         # Free flyer 0-6
+        0.1, -0.82, 0.648702, 1.0, 0.0 , 0.0, 0.0,                         	 # Free flyer 0-6
         0.0, 0.0, 0.0, 0.0,                                                  # CHEST HEAD 7-10
         0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.174532925, # LARM       11-17
         0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.174532925, # RARM       18-24
@@ -106,11 +105,23 @@ fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
 configs = fullBody.interpolate(0.1)
 #~ configs = fullBody.interpolate(0.15)
 i = 0;
-r (configs[i]); i=i+1; i-1
+fullBody.draw(configs[i],r); i=i+1; i-1
+
+r.loadObstacleModel ('hpp-rbprm-corba', "stair_bauzil", "contact")
+#~ fullBody.client.basic.robot.setJointConfig('LLEG_JOINT0',[-1])
+#~ q_0 = fullBody.getCurrentConfig(); 
+#~ fullBody.draw(q_0,r);
+#~ print(fullBody.client.rbprm.rbprm.getOctreeTransform(rarmId, q_0))
+#~ 
+#~ 
+#~ fullBody.client.basic.robot.setJointConfig('LLEG_JOINT0',[1])
+#~ q_0 = fullBody.getCurrentConfig(); 
+#~ fullBody.draw(q_0,r);
+#~ print(fullBody.client.rbprm.rbprm.getOctreeTransform(rarmId, q_0))
 #~ q_init = fullBody.generateContacts(q_init, [0,0,-1]); r (q_init)
 
 #~ f1 = open("secondchoice","w+")
-f1 = open("hyq_crouch_20_10_15","w+")
-f1.write(str(configs))
-f1.close()
+#~ f1 = open("hrp2_stand_nocone_30_10_15","w+")
+#~ f1.write(str(configs))
+#~ f1.close()
 

@@ -9,7 +9,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://hpp-rbprm-corba/meshes/hrp2_trunk_body.stl"/>
+        <mesh filename="package://hpp-rbprm-corba/meshes/hrp2_trunk_body_view.dae"/>
       </geometry>
       <material name="red">
         <color rgba="1 1 1 1"/>
@@ -43,11 +43,8 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0.003" />
       <geometry>
-        <mesh filename="package://hpp-rbprm-corba/meshes/hrp2_trunk_torso.stl"/>
+        <mesh filename="package://hpp-rbprm-corba/meshes/hrp2_trunk_torso_view.dae"/>
       </geometry>
-      <material name="red">
-        <color rgba="1 0 0 1"/>
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0.003" />

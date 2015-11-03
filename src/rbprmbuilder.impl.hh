@@ -114,9 +114,10 @@ namespace hpp {
 
         virtual void setStartState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);
         virtual void setEndState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);
-        virtual hpp::floatSeqSeq* interpolate(double timestep) throw (hpp::Error);
+        virtual hpp::floatSeqSeq* interpolate(double timestep, double path) throw (hpp::Error);
         virtual void saveComputedStates(const char* filepath) throw (hpp::Error);
-
+        virtual hpp::floatSeqSeq* GetOctreeBoxes(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
+        virtual hpp::floatSeq* getOctreeTransform(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
         public:
         void SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver);
 

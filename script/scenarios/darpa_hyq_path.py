@@ -12,7 +12,7 @@ srdfSuffix = ""
 rbprmBuilder = Builder ()
 
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-rbprmBuilder.setJointBounds ("base_joint_xyz", [-2,5, -1, 1, 0, 4])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [-2,5, -1, 1, 0.3, 4])
 rbprmBuilder.setFilter(['hyq_rhleg_rom', 'hyq_lfleg_rom', 'hyq_rfleg_rom','hyq_lhleg_rom'])
 rbprmBuilder.setNormalFilter('hyq_lhleg_rom', [0,0,1], 0.5)
 rbprmBuilder.setNormalFilter('hyq_rfleg_rom', [0,0,1], 0.5)
@@ -43,7 +43,7 @@ ps.addGoalConfig (q_goal)
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 r.loadObstacleModel (packageName, "darpa", "planning")
-ps.solve ()
+#~ ps.solve ()
 
 
 from hpp.gepetto import PathPlayer
