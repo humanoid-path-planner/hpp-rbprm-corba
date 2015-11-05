@@ -387,7 +387,7 @@ namespace hpp {
         }        
         state.nbContacts = state.contactNormals_.size() ;
         state.configuration_ = config;
-        state.stable = stability::IsStable(fullBody,state);
+        state.stable = stability::IsStable(fullBody,state) >= 0;
         fullBody->device_->currentConfiguration(old);
     }
 

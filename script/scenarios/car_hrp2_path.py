@@ -12,13 +12,13 @@ srdfSuffix = ""
 rbprmBuilder = Builder ()
 
 rbprmBuilder.loadModel(urdfName, urdfNameRoms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-rbprmBuilder.setJointBounds ("base_joint_xyz", [-1.3,1, -0.5, 0.5, 0, 0.9])
-rbprmBuilder.setFilter(['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom'])
-#~ rbprmBuilder.setNormalFilter('hrp2_larm_rom', [-1,0,0], 0.5)
-#~ rbprmBuilder.setNormalFilter('hrp2_rarm_rom', [-1,0,0], 0.5)
-#~ rbprmBuilder.setNormalFilter('hrp2_lleg_rom', [0,0,1], 0.5)
-#~ rbprmBuilder.setNormalFilter('hrp2_rleg_rom', [0,0,1], 0.5)
-rbprmBuilder.boundSO3([-0.4,0.4,-3,3,-3,3])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [-1,2, -1.5, 1, 0.5, 0.9])
+rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
+#~ rbprmBuilder.setNormalFilter('hrp2_larm_rom', [0,0,1], 0.4)
+#~ rbprmBuilder.setNormalFilter('hrp2_rarm_rom', [0,0,1], 0.4)
+rbprmBuilder.setNormalFilter('hrp2_lleg_rom', [0,0,1], 0.6)
+rbprmBuilder.setNormalFilter('hrp2_rleg_rom', [0,0,1], 0.6)
+rbprmBuilder.boundSO3([-1.5,1.5,0,3,-0.0,0.0])
 
 #~ from hpp.corbaserver.rbprm. import ProblemSolver
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
@@ -32,19 +32,17 @@ q_init = rbprmBuilder.getCurrentConfig (); r (q_init)
 q_goal = q_init [::]
 q_goal [0:3] = [0.19, 0.05, 0.9]; r (q_goal)
 
-#~ fullBody.client.basic.robot.setJointConfig('base_joint_SO3',[0.7316888688738209, 0, -0.6816387600233341, 0]); q_init = rbprmBuilder.getCurrentConfig (); r (q_init)
 
-rbprmBuilder.client.basic.robot.setJointConfig('base_joint_SO3',[0.7316888688738209, 0, 0.6816387600233341, 0]); q_init = rbprmBuilder.getCurrentConfig (); r (q_init)
+#~ rbprmBuilder.client.basic.robot.setJointConfig('base_joint_SO3',[0.7316888688738209, 0, 0, 0.6816387600233341]); q_init = rbprmBuilder.getCurrentConfig (); r (q_init)
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init [0:3] = [-1, 0.05, 0.4]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
-#~ q_0 [0:3] = [-0.2, 0, 0.3]; r (q_0)
-
-
-q_goal [0:3] = [0.13, 0.05, 0.8]; r (q_goal)
-#~ q_init [0:6] = [0.0, -2.2, 2.0, 0.7316888688738209, 0.0, 0.6816387600233341]; 
-#~ rbprmBuilder.setCurrentConfig (q_init); r (q_init)
-
-
+q_init[0:3] = [-1,-1.5,0.55];  r(q_init)
+rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+#~ rbprmBuilder.client.basic.robot.setJointConfig('base_joint_SO3',[0.7316888688738209, 0, 0, 0.6816387600233341]); q_goal = rbprmBuilder.getCurrentConfig (); r (q_goal)
+#~ rbprmBuilder.client.basic.robot.setJointConfig('base_joint_SO3',[0.5, 0.5, -0.5, 0.5]); q_goal = rbprmBuilder.getCurrentConfig (); r (q_goal)
+#~ q_goal = [0.5, -1.0, 0.81, 0.5, 0.5, -0.5, 0.5, 0.0, 1.0]
+#~ q_goal = [0.5, -1.0, 0.81, 0.542, 0.455, 0.455, 0.542, 0.0, 1.0]
+#~ q_goal[0:3] = [0.5,-1,0.62]; r(q_goal)
+q_goal[0:3] = [1.2,-1,0.62]; r(q_goal)
 #~ ps.addPathOptimizer("GradientBased")
 ps.addPathOptimizer("RandomShortcut")
 ps.setInitialConfig (q_init)
@@ -52,7 +50,7 @@ ps.addGoalConfig (q_goal)
 
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.01)
-r.loadObstacleModel (packageName, "scene_wall", "planning")
+r.loadObstacleModel (packageName, "car", "planning")
 ps.solve ()
 
 

@@ -86,6 +86,7 @@ install(FILES
   data/urdf/ground.urdf
   data/urdf/groundcrouch.urdf
   data/urdf/darpa.urdf
+  data/urdf/car.urdf
   #~ data/urdf/scene2.urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
   )
@@ -115,6 +116,7 @@ install(FILES
   data/srdf/ground.srdf
   data/srdf/groundcrouch.srdf
   data/srdf/darpa.srdf
+  data/srdf/car.srdf
   #~ data/srdf/scene2.srdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
   )
@@ -147,6 +149,7 @@ install(FILES
 	data/meshes/climb.stl
 	data/meshes/stepladder.stl
 	data/meshes/chair.stl
+	data/meshes/car.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
   )
 install(FILES

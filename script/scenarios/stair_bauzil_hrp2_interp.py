@@ -78,7 +78,7 @@ lLegx = 0.05; lLegy = 0.05
 #~ fullBody.client.basic.robot.setJointConfig('RARM_JOINT0',[-1])
 
 q_0 = fullBody.getCurrentConfig(); 
-fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
+#~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.q_init[0:7]
 q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.q_goal[0:7]
 

@@ -18,6 +18,7 @@
 
 from hpp.corbaserver.rbprm import Client as RbprmClient
 from hpp.corbaserver import Client as BasicClient
+import hpp.gepetto.blender.exportmotion as em
 
 ## Corba clients to the various servers
 #
@@ -207,6 +208,15 @@ class FullBody (object):
 		transform = self.client.rbprm.rbprm.getOctreeTransform(limb, configuration)
 		viewer.client.gui.applyConfiguration(groupid,transform)
 	viewer.client.gui.refresh()
+
+
+	## Export motion to a format readable by the blender
+	# importFromGepetto script
+    # \param viewer gepetto viewer instance
+    # \param configurations list of configurations to save
+    # \param filename outputfile where to export the motion
+    def exportMotion(self, viewer, configurations, filename):
+		em.exportStates(viewer, self.client.basic.robot, configurations, filename)
 
    ## \name Degrees of freedom
     #  \{

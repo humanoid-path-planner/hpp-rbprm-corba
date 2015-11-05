@@ -12,13 +12,15 @@ srdfSuffix = ""
 rbprmBuilder = Builder ()
 
 rbprmBuilder.loadModel(urdfName, urdfNameRoms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-rbprmBuilder.setJointBounds ("base_joint_xyz", [-1.3,1, -0.5, 0.5, 0, 0.9])
-rbprmBuilder.setFilter(['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom'])
-#~ rbprmBuilder.setNormalFilter('hrp2_larm_rom', [-1,0,0], 0.5)
-#~ rbprmBuilder.setNormalFilter('hrp2_rarm_rom', [-1,0,0], 0.5)
-#~ rbprmBuilder.setNormalFilter('hrp2_lleg_rom', [0,0,1], 0.5)
-#~ rbprmBuilder.setNormalFilter('hrp2_rleg_rom', [0,0,1], 0.5)
-rbprmBuilder.boundSO3([-0.4,0.4,-3,3,-3,3])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [0,2.2, -1, 1, 0.7, 2.5])
+#~ rbprmBuilder.setJointBounds ("base_joint_xyz", [-20,20.2, -10, 10, 0.7, 2.5])
+#~ rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
+rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
+#~ rbprmBuilder.setNormalFilter('hrp2_larm_rom', [0,0,1], 0.4)
+#~ rbprmBuilder.setNormalFilter('hrp2_rarm_rom', [0,0,1], 0.4)
+#~ rbprmBuilder.setNormalFilter('hrp2_lleg_rom', [0,0,1], 0.6)
+#~ rbprmBuilder.setNormalFilter('hrp2_rleg_rom', [0,0,1], 0.6)
+rbprmBuilder.boundSO3([-0.1,0.1,-3,3,-0.0,0.0])
 
 #~ from hpp.corbaserver.rbprm. import ProblemSolver
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
@@ -32,15 +34,16 @@ q_init = rbprmBuilder.getCurrentConfig (); r (q_init)
 q_goal = q_init [::]
 q_goal [0:3] = [0.19, 0.05, 0.9]; r (q_goal)
 
-#~ fullBody.client.basic.robot.setJointConfig('base_joint_SO3',[0.7316888688738209, 0, -0.6816387600233341, 0]); q_init = rbprmBuilder.getCurrentConfig (); r (q_init)
 
 rbprmBuilder.client.basic.robot.setJointConfig('base_joint_SO3',[0.7316888688738209, 0, 0.6816387600233341, 0]); q_init = rbprmBuilder.getCurrentConfig (); r (q_init)
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init [0:3] = [-1, 0.05, 0.4]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
-#~ q_0 [0:3] = [-0.2, 0, 0.3]; r (q_0)
+q_init[0:9] = [0.27, -0.15, 1.2, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0472]
+
+rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 
 
-q_goal [0:3] = [0.13, 0.05, 0.8]; r (q_goal)
+q_goal[0:3] = [2,0,1.7]; 
+q_goal[0:3]=[1.6,-0.1,1.5];
 #~ q_init [0:6] = [0.0, -2.2, 2.0, 0.7316888688738209, 0.0, 0.6816387600233341]; 
 #~ rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 
@@ -51,8 +54,8 @@ ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmPathValidation",0.01)
-r.loadObstacleModel (packageName, "scene_wall", "planning")
+ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
+r.loadObstacleModel (packageName, "truck", "planning")
 ps.solve ()
 
 
@@ -63,12 +66,12 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 #~ pp (2)
 #~ pp (0)
 
+pp (0)
 pp (1)
 #~ pp.toFile(1, "/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
 #~ r (q_init)
 
 rob = rbprmBuilder.client.basic.robot
-r(q_init)
 
 
 #~ configs = []

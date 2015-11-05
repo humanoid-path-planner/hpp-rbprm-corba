@@ -1,9 +1,9 @@
-<robot name="truck">
+<robot name="car">
   <link name="base_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://hpp-rbprm-corba/meshes/truck_vision.stl"/>
+        <mesh filename="package://hpp-rbprm-corba/meshes/car.stl"/>
       </geometry>
       <material name="white">
         <color rgba="1 1 1 1"/>
@@ -12,7 +12,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://hpp-rbprm-corba/meshes/truck.stl"/>
+        <mesh filename="package://hpp-rbprm-corba/meshes/car.stl"/>
       </geometry>
     </collision>
   </link>
