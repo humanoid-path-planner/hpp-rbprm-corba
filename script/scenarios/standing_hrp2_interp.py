@@ -102,6 +102,7 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 #~ r(q_init)
 configs = fullBody.interpolate(0.1)
 r.loadObstacleModel ('hpp-rbprm-corba', "scene_wall", "contact")
+#~ fullBody.exportAll(r, configs, 'standing_hrp2_robust_2');
 #~ configs = fullBody.interpolate(0.09)
 #~ configs = fullBody.interpolate(0.08)
 i = 0; 

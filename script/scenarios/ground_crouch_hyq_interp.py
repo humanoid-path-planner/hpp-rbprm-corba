@@ -76,10 +76,10 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 
 r(q_init)
 
-configs = fullBody.interpolate(0.1,0)
+configs = fullBody.interpolate(0.1)
 
 r.loadObstacleModel ('hpp-rbprm-corba', "groundcrouch", "contact")
-
+fullBody.exportAll(r, configs, 'obstacle_hyq_robust_1');
 i = 0;
 r (configs[i]); i=i+1; i-1
 

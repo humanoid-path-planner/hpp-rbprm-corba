@@ -18,6 +18,7 @@
 
 from hpp.corbaserver.rbprm import Client as RbprmClient
 from hpp.corbaserver import Client as BasicClient
+import hpp.gepetto.blender.exportmotion as em
 
 ## Corba clients to the various servers
 #
@@ -111,6 +112,14 @@ class Builder (object):
     def setFilter (self, romFilter):
         return self.client.rbprm.rbprm.setFilter (romFilter)
 
+	## Export a computed path for blender
+    #
+	# \param problem the problem associated with the path computed for the robot
+	# \param stepsize increment along the path
+	# \param pathId if of the considered path
+	# \param filename name of the output file where to save the output
+    def exportPath (self, viewer, problem, pathId, stepsize, filename):
+		em.exportPath(viewer, self.client.basic.robot, problem, pathId, stepsize, filename)
 
    ## \name Degrees of freedom
     #  \{
@@ -267,7 +276,7 @@ class Builder (object):
     # \return whether configuration is valid
     def isConfigValid (self, cfg):
         return self.client.basic.robot.isConfigValid (cfg)
-
+    
     ## Compute distances between bodies and obstacles
     #
     # \return list of distances,

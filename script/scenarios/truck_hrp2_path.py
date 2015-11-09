@@ -20,7 +20,7 @@ rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
 #~ rbprmBuilder.setNormalFilter('hrp2_rarm_rom', [0,0,1], 0.4)
 #~ rbprmBuilder.setNormalFilter('hrp2_lleg_rom', [0,0,1], 0.6)
 #~ rbprmBuilder.setNormalFilter('hrp2_rleg_rom', [0,0,1], 0.6)
-rbprmBuilder.boundSO3([-0.1,0.1,-3,3,-0.0,0.0])
+rbprmBuilder.boundSO3([-0.1,0.1,-3,3,-1.0,1.0])
 
 #~ from hpp.corbaserver.rbprm. import ProblemSolver
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
@@ -37,7 +37,7 @@ q_goal [0:3] = [0.19, 0.05, 0.9]; r (q_goal)
 
 rbprmBuilder.client.basic.robot.setJointConfig('base_joint_SO3',[0.7316888688738209, 0, 0.6816387600233341, 0]); q_init = rbprmBuilder.getCurrentConfig (); r (q_init)
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init[0:9] = [0.27, -0.15, 1.2, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0472]
+q_init[0:9] = [0.27, -0.05, 1.2, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0472]
 
 rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 
@@ -66,13 +66,13 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 #~ pp (2)
 #~ pp (0)
 
-pp (0)
-pp (1)
+#~ pp (0)
+#~ pp (1)
 #~ pp.toFile(1, "/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
 #~ r (q_init)
 
 rob = rbprmBuilder.client.basic.robot
-
+rbprmBuilder.exportPath (r, ps.client.problem, 1, 0.01, "truck_hrp2_path_not_robust.txt")
 
 #~ configs = []
 #~ problem = ps.client.problem

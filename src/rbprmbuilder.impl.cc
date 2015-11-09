@@ -387,7 +387,8 @@ namespace hpp {
         }        
         state.nbContacts = state.contactNormals_.size() ;
         state.configuration_ = config;
-        state.stable = stability::IsStable(fullBody,state) >= 0;
+        state.robustness =  stability::IsStable(fullBody,state);
+        state.stable = state.robustness >= 0;
         fullBody->device_->currentConfiguration(old);
     }
 
@@ -476,12 +477,12 @@ namespace hpp {
     void RbprmBuilder::saveComputedStates(const char* outfilename) throw (hpp::Error)
     {
         std::stringstream ss;
-        ss << lastStatesComputed_.size() << "\n";
-        std::vector<rbprm::State>::const_iterator cit = lastStatesComputed_.begin();
+        ss << lastStatesComputed_.size()-1 << "\n";
+        std::vector<rbprm::State>::const_iterator cit = lastStatesComputed_.begin()+1;
         int i = 0;
         ss << i++ << " ";
         cit->print(ss);
-        for(std::vector<rbprm::State>::const_iterator cit2 = lastStatesComputed_.begin()+1;
+        for(std::vector<rbprm::State>::const_iterator cit2 = lastStatesComputed_.begin()+2;
             cit2 != lastStatesComputed_.end(); ++cit2, ++cit, ++i)
         {
             ss << i<< " ";

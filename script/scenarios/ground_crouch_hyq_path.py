@@ -40,14 +40,15 @@ ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmPathValidation",0.001)
+ps.client.problem.selectPathValidation("RbprmPathValidation",0.01)
 r.loadObstacleModel (packageName, "groundcrouch", "planning")
 ps.solve ()
+rbprmBuilder.exportPath (r, ps.client.problem, 1, 0.1, "obstacle_hyq_path.txt")
 
 
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 
-pp (0)
+#~ pp (0)
 #~ pp (1)
 r (q_init)

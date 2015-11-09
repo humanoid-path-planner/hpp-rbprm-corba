@@ -59,4 +59,5 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 
 #~ pp (1)
 #~ pp.toFile(1, "/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
+#~ rbprmBuilder.exportPath (r, ps.client.problem, 1, 0.01, "stair_bauzil_hrp2_path.txt")
 r (q_init)

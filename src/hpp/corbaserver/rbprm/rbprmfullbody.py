@@ -217,6 +217,18 @@ class FullBody (object):
     # \param filename outputfile where to export the motion
     def exportMotion(self, viewer, configurations, filename):
 		em.exportStates(viewer, self.client.basic.robot, configurations, filename)
+		
+	## Export motion to a format readable by the blender
+	# importFromGepetto script
+    # \param viewer gepetto viewer instance
+    # \param configurations list of configurations to save
+    # \param filename outputfile where to export the motion
+    def exportAll(self, viewer, configurations, testname):
+		self.exportMotion(viewer, configurations, testname+"_motion.txt")
+		self.saveComputedStates(testname+"_states.txt")
+		f1 = open(testname+"_configs.txt","w+")
+		f1.write(str(configurations))
+		f1.close()
 
    ## \name Degrees of freedom
     #  \{

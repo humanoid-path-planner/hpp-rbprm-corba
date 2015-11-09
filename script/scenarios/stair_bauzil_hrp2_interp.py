@@ -108,6 +108,7 @@ i = 0;
 fullBody.draw(configs[i],r); i=i+1; i-1
 
 r.loadObstacleModel ('hpp-rbprm-corba', "stair_bauzil", "contact")
+#~ fullBody.exportAll(r, configs, 'stair_bauzil_hrp2_robust_2');
 #~ fullBody.client.basic.robot.setJointConfig('LLEG_JOINT0',[-1])
 #~ q_0 = fullBody.getCurrentConfig(); 
 #~ fullBody.draw(q_0,r);
@@ -121,7 +122,7 @@ r.loadObstacleModel ('hpp-rbprm-corba', "stair_bauzil", "contact")
 #~ q_init = fullBody.generateContacts(q_init, [0,0,-1]); r (q_init)
 
 #~ f1 = open("secondchoice","w+")
-#~ f1 = open("hrp2_stand_nocone_30_10_15","w+")
+#~ f1 = open("hrp2_stair_not_robust_configs","w+")
 #~ f1.write(str(configs))
 #~ f1.close()
 
