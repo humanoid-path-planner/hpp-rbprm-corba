@@ -477,14 +477,15 @@ namespace hpp {
     void RbprmBuilder::saveComputedStates(const char* outfilename) throw (hpp::Error)
     {
         std::stringstream ss;
-        ss << lastStatesComputed_.size()-1 << "\n";
-        std::vector<rbprm::State>::const_iterator cit = lastStatesComputed_.begin()+1;
+        ss << lastStatesComputed_.size()-2 << "\n";
+        std::vector<rbprm::State>::iterator cit = lastStatesComputed_.begin()+1;
         int i = 0;
         ss << i++ << " ";
         cit->print(ss);
-        for(std::vector<rbprm::State>::const_iterator cit2 = lastStatesComputed_.begin()+2;
-            cit2 != lastStatesComputed_.end(); ++cit2, ++cit, ++i)
+        for(std::vector<rbprm::State>::iterator cit2 = lastStatesComputed_.begin()+2;
+            cit2 != lastStatesComputed_.end()-1; ++cit2, ++cit, ++i)
         {
+            cit2->robustness = stability::IsStable(this->fullBody_, *cit2);
             ss << i<< " ";
             cit2->print(ss,*cit);
         }

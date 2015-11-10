@@ -47,8 +47,13 @@ ps.addGoalConfig (q_goal)
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 r.loadObstacleModel (packageName, "stair_bauzil", "planning")
-ps.solve ()
+#~ ps.solve ()
+t = ps.solve ()
+f = open('log.txt', 'a')
+f.write("path computation " + str(t) + "\n")
+f.close()
 
+print ("solving time " + str(t));
 
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)

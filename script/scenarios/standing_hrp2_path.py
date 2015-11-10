@@ -53,7 +53,10 @@ ps.addGoalConfig (q_goal)
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.01)
 r.loadObstacleModel (packageName, "scene_wall", "planning")
-ps.solve ()
+t = ps.solve ()
+f = open('log.txt', 'a')
+f.write("path computation " + str(t) + "\n")
+f.close()
 
 
 from hpp.gepetto import PathPlayer
