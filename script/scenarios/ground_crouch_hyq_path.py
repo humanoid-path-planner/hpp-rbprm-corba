@@ -46,7 +46,7 @@ t = ps.solve ()
 f = open('log.txt', 'a')
 f.write("path computation " + str(t) + "\n")
 f.close()
-rbprmBuilder.exportPath (r, ps.client.problem, 1, 0.1, "obstacle_hyq_path.txt")
+rbprmBuilder.exportPath (r, ps.client.problem, 1, 0.1, "obstacle_hyq_robust_10_path.txt")
 
 
 from hpp.gepetto import PathPlayer

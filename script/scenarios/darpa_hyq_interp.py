@@ -33,7 +33,7 @@ rfoot = 'rf_foot_joint'
 rLegOffset = [0.,0,0.]
 rLegNormal = [0,1,0]
 rLegx = 0.02; rLegy = 0.02
-fullBody.addLimb(rLegId,rLeg,rfoot,rLegOffset,rLegNormal, rLegx, rLegy, nbSamples, "forward", 0.1)
+fullBody.addLimb(rLegId,rLeg,rfoot,rLegOffset,rLegNormal, rLegx, rLegy, nbSamples, "manipulability", 0.1)
 #~ fullBody.addLimb(rLegId,rLeg,rfoot,rLegOffset,rLegNormal, rLegx, rLegy, nbSamples, "manipulability", 0.05)
 #~ fullBody.addLimb(rLegId,rLeg,rfoot,rLegOffset,rLegNormal, rLegx, rLegy, nbSamples, "random", 0.05)
 
@@ -43,7 +43,7 @@ lfoot = 'lh_foot_joint'
 lLegOffset = [0,0,0]
 lLegNormal = [0,1,0]
 lLegx = 0.02; lLegy = 0.02
-fullBody.addLimb(lLegId,lLeg,lfoot,lLegOffset,rLegNormal, lLegx, lLegy, nbSamples, "forward", 0.05)
+fullBody.addLimb(lLegId,lLeg,lfoot,lLegOffset,rLegNormal, lLegx, lLegy, nbSamples, "manipulability", 0.05)
 #~ fullBody.addLimb(lLegId,lLeg,lfoot,lLegOffset,rLegNormal, lLegx, lLegy, nbSamples, "manipulability", 0.05)
 #~ fullBody.addLimb(lLegId,lLeg,lfoot,lLegOffset,rLegNormal, lLegx, lLegy, nbSamples, "random", 0.05)
 
@@ -53,7 +53,7 @@ rHand = 'rh_foot_joint'
 rArmOffset = [0.,0,-0.]
 rArmNormal = [0,1,0]
 rArmx = 0.02; rArmy = 0.02
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, nbSamples, "forward", 0.05)
+fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, nbSamples, "manipulability", 0.05)
 #~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, nbSamples, "manipulability", 0.05)
 #~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, nbSamples, "random", 0.05)
 

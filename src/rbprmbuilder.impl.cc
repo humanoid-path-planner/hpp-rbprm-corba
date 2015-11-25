@@ -210,6 +210,18 @@ namespace hpp {
         return config;
     }
 
+    std::vector<model::Configuration_t> doubleDofArrayToConfig (const model::DevicePtr_t& robot,
+      const hpp::floatSeqSeq& doubleDofArray)
+    {
+        std::size_t configsDim = (std::size_t)doubleDofArray.length();
+        std::vector<model::Configuration_t> res;
+        for (std::size_t iConfig = 0; iConfig < configsDim; iConfig++)
+        {
+            res.push_back(dofArrayToConfig(robot, doubleDofArray[iConfig]));
+        }
+        return res;
+    }
+
     std::vector<std::string> stringConversion(const hpp::Names_t& dofArray)
     {
         std::vector<std::string> res;
@@ -416,6 +428,49 @@ namespace hpp {
         }
     }
 
+    floatSeqSeq* RbprmBuilder::interpolateConfigs(const hpp::floatSeqSeq& configs) throw (hpp::Error)
+    {
+        try
+        {
+            if(startState_.configuration_.rows() == 0)
+            {
+                throw std::runtime_error ("Start state not initialized, can not interpolate ");
+            }
+            if(endState_.configuration_.rows() == 0)
+            {
+                throw std::runtime_error ("End state not initialized, can not interpolate ");
+            }
+            hpp::rbprm::RbPrmInterpolationPtr_t interpolator = rbprm::RbPrmInterpolation::create(fullBody_,startState_,endState_);
+            std::vector<model::Configuration_t> configurations = doubleDofArrayToConfig(fullBody_->device_, configs);
+            lastStatesComputed_ = interpolator->Interpolate(problemSolver_->collisionObstacles(),configurations);
+            hpp::floatSeqSeq *res;
+            res = new hpp::floatSeqSeq ();
+
+            res->length (lastStatesComputed_.size ());
+            std::size_t i=0;
+            std::size_t id = 0;
+            for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin(); cit != lastStatesComputed_.end(); ++cit, ++id)
+            {
+                std::cout << "ID " << id;
+                cit->print();
+                const core::Configuration_t config = cit->configuration_;
+                _CORBA_ULong size = (_CORBA_ULong) config.size ();
+                double* dofArray = hpp::floatSeq::allocbuf(size);
+                hpp::floatSeq floats (size, size, dofArray, true);
+                //convert the config in dofseq
+                for (model::size_type j=0 ; j < config.size() ; ++j) {
+                  dofArray[j] = config [j];
+                }
+                (*res) [i] = floats;
+                ++i;
+            }
+            return res;
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
 
     floatSeqSeq* RbprmBuilder::interpolate(double timestep, double path) throw (hpp::Error)
     {
@@ -436,7 +491,7 @@ namespace hpp {
             throw std::runtime_error ("No path computed, cannot interpolate ");
         }
 
-        hpp::rbprm::RbPrmInterpolationPtr_t interpolator = rbprm::RbPrmInterpolation::create(problemSolver_->paths()[pathId],fullBody_,startState_,endState_);
+        hpp::rbprm::RbPrmInterpolationPtr_t interpolator = rbprm::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver_->paths()[pathId]);
         lastStatesComputed_ = interpolator->Interpolate(problemSolver_->collisionObstacles(),timestep);
 
         hpp::floatSeqSeq *res;

@@ -178,6 +178,13 @@ module hpp
     /// \param path path computed.
     floatSeqSeq interpolate(in double timestep, in double path) raises (Error);
 
+    /// Provided a path has already been computed, interpolates it and generates the statically stable
+    /// constact configurations along it. setStartState and setEndState must have been called prior
+    /// to this function. If these conditions are not met an error is raised.
+    /// \param timestep normalized step for generation along the path (ie the path has a length of 1).
+    /// \param path path computed.
+    floatSeqSeq interpolateConfigs(in floatSeqSeq configs) raises (Error);
+
     /// Saves the last computed states by the function interpolate in a filename.
     /// Raises an error if interpolate has not been called, or the file could not be opened.
     /// \param filename name of the file used to save the contacts.

@@ -176,6 +176,14 @@ class FullBody (object):
     def interpolate(self, stepsize, pathId = 1):
 		return self.client.rbprm.rbprm.interpolate(stepsize, pathId)
 		
+	## Given start and goal states
+	#  generate a contact sequence over a list of configurations
+	#
+    # \param stepSize discretization step
+    # \param pathId Id of the path to compute from
+    def interpolateConfigs(self, configs):
+		return self.client.rbprm.rbprm.interpolateConfigs(configs)
+		
 	## Create octree nodes representation for a given limb
 	#
     # \param stepSize discretization step
