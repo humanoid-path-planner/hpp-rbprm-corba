@@ -49,6 +49,8 @@ ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 r.loadObstacleModel (packageName, "stair_bauzil", "planning")
 #~ ps.solve ()
 t = ps.solve ()
+if isinstance(t, list):
+	t = t[len(t)-1]
 f = open('log.txt', 'a')
 f.write("path computation " + str(t) + "\n")
 f.close()

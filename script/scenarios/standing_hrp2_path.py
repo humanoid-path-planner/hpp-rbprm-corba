@@ -54,6 +54,8 @@ ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.01)
 r.loadObstacleModel (packageName, "scene_wall", "planning")
 t = ps.solve ()
+if isinstance(t, list):
+	t = t[len(t)-1]
 f = open('log.txt', 'a')
 f.write("path computation " + str(t) + "\n")
 f.close()

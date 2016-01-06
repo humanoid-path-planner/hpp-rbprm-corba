@@ -13,7 +13,7 @@ rbprmBuilder = Builder ()
 
 rbprmBuilder.loadModel(urdfName, urdfNameRoms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 rbprmBuilder.setJointBounds ("base_joint_xyz", [-1,2, -1.5, 1, 0.5, 0.9])
-rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
+rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom','hrp2_larm_rom'])
 #~ rbprmBuilder.setNormalFilter('hrp2_larm_rom', [0,0,1], 0.4)
 #~ rbprmBuilder.setNormalFilter('hrp2_rarm_rom', [0,0,1], 0.4)
 rbprmBuilder.setNormalFilter('hrp2_lleg_rom', [0,0,1], 0.6)
@@ -30,20 +30,14 @@ r = Viewer (ps)
 q0 = rbprmBuilder.getCurrentConfig ();
 q_init = rbprmBuilder.getCurrentConfig (); r (q_init)
 q_goal = q_init [::]
-q_goal [0:3] = [0.19, 0.05, 0.9]; r (q_goal)
 
 
-#~ rbprmBuilder.client.basic.robot.setJointConfig('base_joint_SO3',[0.7316888688738209, 0, 0, 0.6816387600233341]); q_init = rbprmBuilder.getCurrentConfig (); r (q_init)
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init[0:3] = [-1,-1.5,0.55];  r(q_init)
+q_init[0:3] = [0.15, -0.45, 0.8];  r(q_init)
 rbprmBuilder.setCurrentConfig (q_init); r (q_init)
-#~ rbprmBuilder.client.basic.robot.setJointConfig('base_joint_SO3',[0.7316888688738209, 0, 0, 0.6816387600233341]); q_goal = rbprmBuilder.getCurrentConfig (); r (q_goal)
-#~ rbprmBuilder.client.basic.robot.setJointConfig('base_joint_SO3',[0.5, 0.5, -0.5, 0.5]); q_goal = rbprmBuilder.getCurrentConfig (); r (q_goal)
-#~ q_goal = [0.5, -1.0, 0.81, 0.5, 0.5, -0.5, 0.5, 0.0, 1.0]
-#~ q_goal = [0.5, -1.0, 0.81, 0.542, 0.455, 0.455, 0.542, 0.0, 1.0]
-#~ q_goal[0:3] = [0.5,-1,0.62]; r(q_goal)
-q_goal[0:3] = [1.2,-1,0.62]; r(q_goal)
-#~ ps.addPathOptimizer("GradientBased")
+#~ q_goal[0:3] = [1.2,-1,0.5]; r(q_goal)
+q_goal[0:3] = [0.2,-1.1,0.58]; r(q_goal)
+ 
 ps.addPathOptimizer("RandomShortcut")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
@@ -51,19 +45,21 @@ ps.addGoalConfig (q_goal)
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.01)
 r.loadObstacleModel (packageName, "car", "planning")
-ps.solve ()
+t = ps.solve ()
+if isinstance(t, list):
+	t = t[len(t)-1]
+f = open('log.txt', 'a')
+f.write("path computation " + str(t) + "\n")
+f.close()
+
+#~ print ("solving time " + str(t));
 
 
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
-#~ pp.fromFile("/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
-#~ 
-#~ pp (2)
 #~ pp (0)
 
-pp (1)
-#~ pp.toFile(1, "/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
-#~ r (q_init)
+#~ pp (1)
 
 rob = rbprmBuilder.client.basic.robot
 r(q_init)

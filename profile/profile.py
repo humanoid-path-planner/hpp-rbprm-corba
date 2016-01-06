@@ -4,8 +4,10 @@ import subprocess as sp
 import os
 import datetime
 
-scenarios = ['standing_hrp2']#'stair_bauzil_hrp2','standing_hrp2','darpa_hrp2']
-n_trials = 10
+#~ scenarios = ['standing_hrp2']
+scenarios = ['car_hrp2']
+#~ scenarios = ['stair_bauzil_hrp2']
+n_trials = 100
 
 stats = ['balance','collision','ik']
 
@@ -147,4 +149,4 @@ for scenario in scenarios:
 		var = scenario+python_script_extension;
 		sp.check_call(["./profile.sh", str(var)]);
 	parseData(scenario)
-	analyzeData()
+analyzeData()
