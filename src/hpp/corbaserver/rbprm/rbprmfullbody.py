@@ -110,8 +110,9 @@ class FullBody (object):
     # structure to perform efficient proximity requests. The resulution of the octree, in meters, specifies the size
     # of the unit voxel of the octree. The larger they are, the more samples will be considered as candidates for contact.
     # This can be problematic in terms of performance. The default value is 3 cm.
-    def addLimb(self, limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution):
-		self.client.rbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution)
+    # \param contactType whether the contact is punctual ("_3_DOF") or surfacic ("_6_DOF")
+    def addLimb(self, limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution, contactType="_6_DOF"):
+		self.client.rbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution,contactType)
 
 	## Returns the configuration of a limb described by a sample
 	#

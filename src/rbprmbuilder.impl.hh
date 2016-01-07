@@ -110,7 +110,7 @@ namespace hpp {
                                                    const hpp::floatSeq& direction) throw (hpp::Error);
 
         virtual void addLimb(const char* id, const char* limb, const char* effector, const hpp::floatSeq& offset, const hpp::floatSeq& normal, double x, double y,
-                             unsigned short samples, const char *heuristicName, double resolution) throw (hpp::Error);
+                             unsigned short samples, const char *heuristicName, double resolution, const char *contactType) throw (hpp::Error);
 
         virtual void setStartState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);
         virtual void setEndState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);

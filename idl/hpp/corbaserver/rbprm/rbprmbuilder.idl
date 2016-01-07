@@ -155,8 +155,10 @@ module hpp
     /// \param samples number of samples to generate for the limb (a typical value is 10000)
     /// \param heuristicName heuristic used to bias sample selection
     /// \param resolution resolution of the octree used to store the samples (a typical value is 0.01 meters)
+    /// \param contactType whether the contact is punctual ("_3_DOF") or surfacic ("_6_DOF")
     void addLimb(in string id, in string limb, in string effector, in floatSeq offset, in floatSeq normal,
-                 in double x, in double y, in unsigned short samples, in string heuristicName, in double resolution) raises (Error);
+                 in double x, in double y, in unsigned short samples, in string heuristicName,
+                 in double resolution, in string contactType) raises (Error);
 
     /// Set the start state of a contact generation problem
     /// environment, ordered by their efficiency
