@@ -428,7 +428,7 @@ namespace hpp {
         }
     }
 
-    floatSeqSeq* RbprmBuilder::interpolateConfigs(const hpp::floatSeqSeq& configs) throw (hpp::Error)
+    floatSeqSeq* RbprmBuilder::interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold) throw (hpp::Error)
     {
         try
         {
@@ -442,7 +442,7 @@ namespace hpp {
             }
             hpp::rbprm::RbPrmInterpolationPtr_t interpolator = rbprm::RbPrmInterpolation::create(fullBody_,startState_,endState_);
             std::vector<model::Configuration_t> configurations = doubleDofArrayToConfig(fullBody_->device_, configs);
-            lastStatesComputed_ = interpolator->Interpolate(problemSolver_->collisionObstacles(),configurations);
+            lastStatesComputed_ = interpolator->Interpolate(problemSolver_->collisionObstacles(),configurations,robustnessTreshold);
             hpp::floatSeqSeq *res;
             res = new hpp::floatSeqSeq ();
 
@@ -472,7 +472,7 @@ namespace hpp {
         }
     }
 
-    floatSeqSeq* RbprmBuilder::interpolate(double timestep, double path) throw (hpp::Error)
+    floatSeqSeq* RbprmBuilder::interpolate(double timestep, double path, double robustnessTreshold) throw (hpp::Error)
     {
         try
         {
@@ -492,16 +492,10 @@ namespace hpp {
         }
 
         hpp::rbprm::RbPrmInterpolationPtr_t interpolator = rbprm::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver_->paths()[pathId]);
-        lastStatesComputed_ = interpolator->Interpolate(problemSolver_->collisionObstacles(),timestep);
+        lastStatesComputed_ = interpolator->Interpolate(problemSolver_->collisionObstacles(),timestep,robustnessTreshold);
 
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
-        /*for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin(); cit != lastStatesComputed_.end(); ++cit)
-        {
-            const core::Configuration_t config = cit->configuration_;
-            hpp::floatSeq dofArray;
-            dofArray.length (config.size());
-        }*/
 
         res->length (lastStatesComputed_.size ());
         std::size_t i=0;
@@ -568,8 +562,6 @@ namespace hpp {
         fullBody_->device_->computeForwardKinematics();
         const std::map<std::size_t, fcl::CollisionObject*>& boxes =
                 fullBody_->GetLimbs().at(std::string(limbName))->sampleContainer_.boxes_;
-        //const hpp::rbprm::RbPrmLimbPtr_t limb =fullBody_->GetLimbs().at(std::string(limbName));
-        //const fcl::Transform3f transform = limb->octreeRoot();
         const double resolution = fullBody_->GetLimbs().at(std::string(limbName))->sampleContainer_.resolution_;
         std::size_t i =0;
         hpp::floatSeqSeq *res;
@@ -578,7 +570,7 @@ namespace hpp {
         for(std::map<std::size_t, fcl::CollisionObject*>::const_iterator cit = boxes.begin();
             cit != boxes.end();++cit,++i)
         {
-            fcl::Vec3f position = /*transform.getRotation() **/ (*cit->second).getTranslation() /*+ transform.getTranslation()*/;
+            fcl::Vec3f position = (*cit->second).getTranslation();
             _CORBA_ULong size = (_CORBA_ULong) 4;
             double* dofArray = hpp::floatSeq::allocbuf(size);
             hpp::floatSeq floats (size, size, dofArray, true);

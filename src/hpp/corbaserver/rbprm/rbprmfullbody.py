@@ -173,8 +173,9 @@ class FullBody (object):
 	#
     # \param stepSize discretization step
     # \param pathId Id of the path to compute from
-    def interpolate(self, stepsize, pathId = 1):
-		return self.client.rbprm.rbprm.interpolate(stepsize, pathId)
+    # \param robustnessTreshold minimum value of the static equilibrium robustness criterion required to accept the configuration (0 by default).
+    def interpolate(self, stepsize, pathId = 1, robustnessTreshold = 0):
+		return self.client.rbprm.rbprm.interpolate(stepsize, pathId, robustnessTreshold)
 		
 	## Given start and goal states
 	#  generate a contact sequence over a list of configurations
