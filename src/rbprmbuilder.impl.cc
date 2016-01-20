@@ -76,7 +76,7 @@ namespace hpp {
         if(!romLoaded_)
         {
             std::string err("Rom must be loaded before loading complete model") ;
-            hppDout (error, err ());
+            hppDout (error, err );
             throw hpp::Error(err.c_str());
         }
         try
