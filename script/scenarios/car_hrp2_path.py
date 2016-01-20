@@ -46,8 +46,9 @@ ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.01)
 r.loadObstacleModel (packageName, "car", "planning")
 t = ps.solve ()
+print (t)
 if isinstance(t, list):
-	t = t[len(t)-1]
+	t = t[0]* 3600000 + t[1] * 60000 + t[2] * 1000 + t[3]
 f = open('log.txt', 'a')
 f.write("path computation " + str(t) + "\n")
 f.close()
