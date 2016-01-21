@@ -1,5 +1,10 @@
 from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.gepetto import Viewer
+white=[1.0,1.0,1.0,1.0]
+green=[0.23,0.75,0.2,0.5]
+yellow=[0.85,0.75,0.15,1]
+pink=[1,0.6,1,1]
+orange=[1,0.42,0,1]
 
 rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
@@ -46,12 +51,7 @@ r.loadObstacleModel (packageName, "darpa", "planning")
 r(q_init)
 #~ ps.solve ()
 t = ps.solve ()
-if isinstance(t, list):
-  t = t[len(t)-1]
 
-f = open('log.txt', 'a')
-f.write("path computation " + str(t) + "\n")
-f.close()
 r.displayRoadmap("rm",white,0.01,1,green)
 
 
