@@ -66,6 +66,6 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 
 pp (1)
 
-# r.client.gui.removeFromGroup("rm",r.sceneName)
+r.client.gui.removeFromGroup("rm",r.sceneName)
 #~ pp.toFile(1, "/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
 
