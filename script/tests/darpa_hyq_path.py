@@ -5,6 +5,10 @@ green=[0.23,0.75,0.2,0.5]
 yellow=[0.85,0.75,0.15,1]
 pink=[1,0.6,1,1]
 orange=[1,0.42,0,1]
+brown=[0.85,0.75,0.15,0.5]
+blue = [0.0, 0.0, 0.8, 1.0]
+grey = [0.7,0.7,0.7,1.0]
+red = [0.8,0.0,0.0,1.0]
 
 rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
@@ -52,8 +56,9 @@ r(q_init)
 #~ ps.solve ()
 t = ps.solve ()
 
-r.displayRoadmap("rm",white,0.01,1,green)
-
+r.displayRoadmap("rm",white,0.005,1,green)
+r.displayPathMap("rmPath",0,red,0.02,1,red)
+r.displayPathMap("rmPath1",1,blue,0.02,1,blue)
 
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
@@ -67,5 +72,6 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp (1)
 
 r.client.gui.removeFromGroup("rm",r.sceneName)
+r.client.gui.removeFromGroup("rmPath",r.sceneName)
 #~ pp.toFile(1, "/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
 
