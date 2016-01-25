@@ -1,0 +1,19 @@
+<robot name="robot_trunk">
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://hpp-rbprm-corba/meshes/robot_test/robot_trunk_view.stl"/>
+      </geometry>
+      <material name="green">
+        <color rgba="0 0.8 0 0.7"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://hpp-rbprm-corba/meshes/robot_test/robot_trunk.stl"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>
