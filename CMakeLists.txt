@@ -183,8 +183,8 @@ install(FILES
 install(FILES
 	data/meshes/robot_test/robot_trunk_view.stl
 	data/meshes/robot_test/robot_trunk.stl
-	data/meshes/robot_test/robot_lleg_rom.stl
-	data/meshes/robot_test/robot_rleg_rom.stl
+	data/meshes/robot_test/Lleg_rom.stl
+	data/meshes/robot_test/Rleg_rom.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes/robot_test
   )
   
