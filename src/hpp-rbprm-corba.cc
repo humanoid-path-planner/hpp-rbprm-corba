@@ -20,6 +20,7 @@
 #include <hpp/corbaserver/rbprm/server.hh>
 #include <hpp/core/problem-solver.hh>
 #include <hpp/rbprm/planner/steering-dynamic.hh>
+#include <hpp/rbprm/planner/dynamic-planner.hh>
 
 typedef hpp::rbprm::Server RbprmServer;
 typedef hpp::corbaServer::Server CorbaServer;
@@ -28,6 +29,9 @@ int main (int argc, char* argv [])
 {
     hpp::core::ProblemSolverPtr_t problemSolver (hpp::core::ProblemSolver::create());
     problemSolver->addSteeringMethodType("SteeringDynamic", boost::bind(                                                   static_cast<hpp::rbprm::SteeringDynamicPtr_t (*)(const hpp::core::ProblemPtr_t&)>                                                     (&hpp::rbprm::SteeringDynamic::create), _1 ));
+
+    problemSolver->addPathPlannerType("RRTdynamic",hpp::rbprm::DynamicPlanner::createWithRoadmap);
+
 
     CorbaServer corbaServer (problemSolver, argc,
                const_cast<const char**> (argv), true);
