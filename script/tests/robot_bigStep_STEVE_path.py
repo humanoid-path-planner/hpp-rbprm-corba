@@ -34,7 +34,7 @@ ps = ProblemSolver( rbprmBuilder )
 
 r = Viewer (ps)
 
-r.loadObstacleModel (packageName, "ground_bigStep", "planning")
+r.loadObstacleModel (packageName, "ground_jump_easy", "planning")
 
 
 q_init = rbprmBuilder.getCurrentConfig ();
@@ -48,8 +48,8 @@ q_goal [0:3] = [4, -1, 0.9]; r (q_goal) # pont
 
 #~ ps.addPathOptimizer("GradientBased")
 ps.addPathOptimizer("RandomShortcut")
-ps.client.problem.selectSteeringMethod("SteeringDynamic")
-ps.selectPathPlanner("RRTdynamic")
+#ps.client.problem.selectSteeringMethod("SteeringParabola")
+#ps.selectPathPlanner("RRTdynamic")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
@@ -58,14 +58,15 @@ ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 
 r(q_init)
 
-r.solveAndDisplay("rm",1,0.02)
+# (nameRoadmap,numberIt,colorNode,radiusSphere,sizeAxis,colorEdge
+r.solveAndDisplay("rm",10,white,0.02,1,brown)
 
 
 #t = ps.solve ()
 
 #r.displayRoadmap("rm",0.005)
 
-r.displayPathMap("rmPath",0,0.02)
+#r.displayPathMap("rmPath",0,0.02)
 
 
 
@@ -75,14 +76,14 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp(0)
 
 
-pp.displayPath(1,blue)
-r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
+#pp.displayPath(1,blue)
+#r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
 
 
 pp (1)
 
 #r.client.gui.removeFromGroup("rm",r.sceneName)
-r.client.gui.removeFromGroup("rmPath",r.sceneName)
-r.client.gui.removeFromGroup("path_1_root",r.sceneName)
+#r.client.gui.removeFromGroup("rmPath",r.sceneName)
+#r.client.gui.removeFromGroup("path_1_root",r.sceneName)
 #~ pp.toFile(1, "/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
 
