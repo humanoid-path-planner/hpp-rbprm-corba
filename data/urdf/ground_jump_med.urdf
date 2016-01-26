@@ -1,0 +1,19 @@
+<robot name="ground_jump_med">
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://hpp-rbprm-corba/meshes/ground_jump_med.stl"/>
+      </geometry>
+      <material name="white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://hpp-rbprm-corba/meshes/ground_jump_med.stl"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>

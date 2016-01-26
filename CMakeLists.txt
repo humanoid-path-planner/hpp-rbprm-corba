@@ -96,6 +96,9 @@ install(FILES
   data/urdf/robot_test/robot_test_lleg_rom.urdf
   data/urdf/robot_test/robot_test_rleg_rom.urdf
   data/urdf/robot_test/robot_test_trunk.urdf
+	data/urdf/ground_bigStep.urdf
+	data/urdf/ground_jump_easy.urdf
+	data/urdf/ground_jump_med.urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
   )
 install(FILES
@@ -130,6 +133,9 @@ install(FILES
   data/srdf/robot_test/robot_test_lleg_rom.srdf
   data/srdf/robot_test/robot_test_rleg_rom.srdf
   data/srdf/robot_test/robot_test_trunk.srdf
+	data/srdf/ground_bigStep.srdf
+	data/srdf/ground_jump_easy.srdf
+	data/srdf/ground_jump_med.srdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
   )
 install(FILES
@@ -164,8 +170,11 @@ install(FILES
 	data/meshes/stepladder.stl
 	data/meshes/chair.stl
 	data/meshes/car.stl
-        data/meshes/polaris.stl
-        data/meshes/polaris_reduced.stl
+  data/meshes/polaris.stl
+  data/meshes/polaris_reduced.stl
+	data/meshes/ground_bigStep.stl
+	data/meshes/ground_jump_easy.stl
+	data/meshes/ground_jump_med.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
   )
 install(FILES
