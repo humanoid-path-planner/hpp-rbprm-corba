@@ -36,7 +36,7 @@ ps = ProblemSolver( rbprmBuilder )
 
 r = Viewer (ps)
 
-r.loadObstacleModel (packageName, "ground_bigStep", "planning")
+r.loadObstacleModel (packageName, "ground_with_bridge", "planning")
 
 
 
@@ -61,7 +61,7 @@ ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 
 r(q_init)
 
-#r.solveAndDisplay("rm",1,0.02)
+r.solveAndDisplay("rm",1,0.02)
 
 
 t = ps.solve ()
