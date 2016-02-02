@@ -60,22 +60,22 @@ ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 
 r(q_init)
-
 r.solveAndDisplay("rm",1,0.02)
+
 
 
 t = ps.solve ()
 
 r.displayRoadmap("rm",0.005)
 
-#r.displayPathMap("rmPath",0,0.02,colorEdge=blue)
+r.displayPathMap("rmPath",0,0.025)
 
 
 
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 
-pp.displayPath(0,red)
+pp.displayPath(0,v.color.lightGreen)
 
 pp(0)
 
