@@ -64,9 +64,9 @@ r.solveAndDisplay("rm",1,0.02)
 
 
 
-t = ps.solve ()
+#t = ps.solve ()
 
-r.displayRoadmap("rm",0.005)
+#r.displayRoadmap("rm",0.005)
 
 r.displayPathMap("rmPath",0,0.025)
 
@@ -75,7 +75,7 @@ r.displayPathMap("rmPath",0,0.025)
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 
-pp.displayPath(0,v.color.lightGreen)
+pp.displayPath(0,r.color.lightGreen)
 
 pp(0)
 
