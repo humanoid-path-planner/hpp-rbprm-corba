@@ -71,7 +71,7 @@ namespace hpp {
       		  }
             hpp::rbprm::RbPrmValidationPtr_t validation
 							(hpp::rbprm::RbPrmValidation::create(robotcast, romFilter_, affFilter_, affMap_));
-            hpp::core::DiscretizedCollisionCheckingPtr_t collisionChecking = hpp::rbprm::RbPrmPathValidation::create(robot,val);
+            hpp::rbprm::RbPrmPathValidationPtr_t collisionChecking = hpp::rbprm::RbPrmPathValidation::create(robot,val);
             collisionChecking->add (validation);
             return collisionChecking;
         }
