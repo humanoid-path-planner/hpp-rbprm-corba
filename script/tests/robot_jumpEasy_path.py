@@ -20,7 +20,7 @@ srdfSuffix = ""
 
 rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-rbprmBuilder.setJointBounds ("base_joint_xyz", [-6,6, -3, 3, 0, 1.5])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [-6,6, -3, 3, 0, 2.5])
 rbprmBuilder.boundSO3([-0.1,0.1,-3,3,-1.0,1.0])
 rbprmBuilder.setFilter(['robot_test_lleg_rom', 'robot_test_rleg_rom'])
 rbprmBuilder.setNormalFilter('robot_test_lleg_rom', [0,0,1], 0.5)
@@ -43,12 +43,12 @@ q_init [0:3] = [-4, 1, 0.9]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 
 q_goal = q_init [::]
 #q_goal [0:3] = [-2, 0, 0.9]; r (q_goal) # premiere passerelle
-q_goal [0:3] = [4, -1, 0.9]; r (q_goal) # pont
+q_goal [0:3] = [1, 1, 0.9]; r (q_goal) # pont
 
 
 #~ ps.addPathOptimizer("GradientBased")
 ps.addPathOptimizer("RandomShortcut")
-ps.client.problem.selectSteeringMethod("SteeringDynamic")
+#ps.client.problem.selectSteeringMethod("SteeringDynamic")
 ps.selectPathPlanner("RRTdynamic")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
@@ -58,12 +58,14 @@ ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 
 r(q_init)
 
+ps.client.problem.prepareSolveStepByStep()
+
 r.solveAndDisplay("rm",1,0.02)
 
 
 #t = ps.solve ()
 
-#r.displayRoadmap("rm",0.005)
+#r.displayRoadmap("rm",0.02)
 
 r.displayPathMap("rmPath",0,0.02)
 
@@ -72,13 +74,14 @@ r.displayPathMap("rmPath",0,0.02)
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 
+pp.displayPath(0,r.color.lightGreen)
 pp(0)
 
 
 pp.displayPath(1,blue)
 r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
 
-
+pp.displayPath(1,black)
 pp (1)
 
 #r.client.gui.removeFromGroup("rm",r.sceneName)

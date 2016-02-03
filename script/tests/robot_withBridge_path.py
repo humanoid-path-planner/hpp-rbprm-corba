@@ -51,7 +51,7 @@ q_goal [0:3] = [4, -1, 0.9]; r (q_goal)
 
 #~ ps.addPathOptimizer("GradientBased")
 ps.addPathOptimizer("RandomShortcut")
-ps.client.problem.selectSteeringMethod("SteeringParabola")
+#ps.client.problem.selectSteeringMethod("SteeringParabola")
 ps.selectPathPlanner("RRTdynamic")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
@@ -60,14 +60,19 @@ ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 
 r(q_init)
+
 r.solveAndDisplay("rm",1,0.02)
 
 
 
 #t = ps.solve ()
-
 #r.displayRoadmap("rm",0.005)
 
+#####
+# i = 0
+# ps.client.problem.prepareSolveStepByStep()
+# r.displayRoadmap("rm"+str(i),0.02)
+# ps.client.problem.executeOneStep() ; r.displayRoadmap("rm"+str(i),0.005) ; r.client.gui.removeFromGroup("rm"+str(i-1),r.sceneName) ; i = i+1
 r.displayPathMap("rmPath",0,0.025)
 
 
