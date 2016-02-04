@@ -99,6 +99,7 @@ install(FILES
   data/urdf/robot_test/robot_test_trunk.urdf
 	data/urdf/ground_bigStep.urdf
 	data/urdf/ground_jump_easy.urdf
+	data/urdf/ground_jump_bar.urdf
 	data/urdf/ground_jump_med.urdf
 	data/urdf/ground_with_bridge.urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
@@ -137,6 +138,7 @@ install(FILES
   data/srdf/robot_test/robot_test_trunk.srdf
 	data/srdf/ground_bigStep.srdf
 	data/srdf/ground_jump_easy.srdf
+	data/srdf/ground_jump_bar.srdf
 	data/srdf/ground_jump_med.srdf
 	data/srdf/ground_with_bridge.srdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
@@ -177,6 +179,7 @@ install(FILES
   data/meshes/polaris_reduced.stl
 	data/meshes/ground_bigStep.stl
 	data/meshes/ground_jump_easy.stl
+	data/meshes/ground_jump_bar.stl
 	data/meshes/ground_jump_med.stl
 	data/meshes/ground_with_bridge.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
