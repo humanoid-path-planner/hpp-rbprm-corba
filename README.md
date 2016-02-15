@@ -16,10 +16,12 @@ To install hpp-rbprm-corba:
 	- see https://github.com/stonneau/hpp-rbprm
 
   2. Use CMake to install the library. For instance:
-	- mkdir $HPP_RBPRM_CORBA_DIR/build
-	- cd $HPP_RBPRM_CORBA_DIR/build
-	- cd cmake ..
-	- make install
+
+			mkdir $HPP_RBPRM_CORBA_DIR/build
+			cd $HPP_RBPRM_CORBA_DIR/build
+			cd cmake ..	
+			make install
+	
 
 
 ##Documentation
@@ -33,12 +35,12 @@ To install hpp-rbprm-corba:
   To see the planner in action, two examples from our IJRR submission with HyQ are available. Examples with HRP-2 are also provided,
   though they can only be executed if you have access to HRP-2 model.
 
-  ###Model description
+
   - First of all, retrieve and build the HyQ model from its github repository:
 	https://github.com/iit-DLSLab/hyq-description
 
 
-    $ rosrun xacro xacro.py  hyq_description/robots/hyq_model.urdf.xacro -o  hyq.urdf
+    ```$ rosrun xacro xacro.py  hyq_description/robots/hyq_model.urdf.xacro -o  hyq.urdf```
 
   - Make sure to install hyq.urdf in $HPP_DEVEL_DIR/install/share/hpp-rbprm-corba/
 
@@ -47,9 +49,11 @@ To install hpp-rbprm-corba:
   - To only plan and see the root path, run:
 
 
-    $ ./run.sh darpa_hyq_path.py
+    ```$ ./run.sh darpa_hyq_path.py```
 
   - To generate the complete contact sequence, run:
 
-    
-    $ ./run.sh darpa_hyq_interp.py
+
+    ```$ ./run.sh darpa_hyq_interp.py```
+
+  The scripts include comments explaining the different calls to the library.
