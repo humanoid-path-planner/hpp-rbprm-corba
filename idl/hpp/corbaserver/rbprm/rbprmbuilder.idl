@@ -206,6 +206,13 @@ module hpp
     /// \return size 7 position + quaternion of the octree root
     floatSeq getOctreeTransform(in string limbname, in floatSeq dofArray) raises (Error);
 
+    /// returns octree transform for a given robot configuration
+    /// \param config configuration tested on the robot
+    /// \param contacts name of the limbs in contact
+    /// \param robustnessTreshold robustness treshold used
+    /// \return whether the configuration is quasi-statically balanced
+    short isConfigBalanced(in floatSeq config, in Names_t contacts,  in double robustnessTreshold) raises (Error);
+
   }; // interface Robot
   }; // module rbprm
   }; // module corbaserver

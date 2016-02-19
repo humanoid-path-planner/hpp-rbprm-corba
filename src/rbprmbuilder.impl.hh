@@ -120,6 +120,7 @@ namespace hpp {
         virtual void saveComputedStates(const char* filepath) throw (hpp::Error);
         virtual hpp::floatSeqSeq* GetOctreeBoxes(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeTransform(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
+        virtual CORBA::Short isConfigBalanced(const hpp::floatSeq& config, const hpp::Names_t& contactLimbs, double robustnessTreshold) throw (hpp::Error);
         public:
         void SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver);
 

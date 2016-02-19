@@ -186,6 +186,17 @@ class FullBody (object):
     def interpolateConfigs(self, configs):
 		return self.client.rbprm.rbprm.interpolateConfigs(configs)
 		
+	## Given start and goal states
+	#  generate a contact sequence over a list of configurations
+	#
+    # \param stepSize discretization step
+    # \param pathId Id of the path to compute from
+    def isConfigBalanced(self, config, names, robustness = 0):
+		if (self.client.rbprm.rbprm.isConfigBalanced(config, names, robustness) == 1):
+			return True
+		else:
+			return False
+		
 	## Create octree nodes representation for a given limb
 	#
     # \param stepSize discretization step

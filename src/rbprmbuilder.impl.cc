@@ -624,6 +624,43 @@ namespace hpp {
         }
     }
 
+    CORBA::Short RbprmBuilder::isConfigBalanced(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs, double robustnessTreshold) throw (hpp::Error)
+    {
+        try{
+        rbprm::State testedState;
+        model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
+        model::Configuration_t save = fullBody_->device_->currentConfiguration();
+        std::vector<std::string> names = stringConversion(contactLimbs);
+        for(std::vector<std::string>::const_iterator cit = names.begin(); cit != names.end();++cit)
+        {
+            std::cout << "name " << * cit << std::endl;
+            const hpp::rbprm::RbPrmLimbPtr_t limb =fullBody_->GetLimbs().at(std::string(*cit));
+            testedState.contacts_[*cit] = true;
+            testedState.contactPositions_[*cit] = limb->effector_->currentTransformation().getTranslation();
+            testedState.contactRotation_[*cit] = limb->effector_->currentTransformation().getRotation();
+            // normal given by effector normal
+            const fcl::Vec3f normal = limb->effector_->currentTransformation().getRotation() * limb->normal_;
+            testedState.contactNormals_[*cit] = normal;
+            testedState.configuration_ = config;
+            ++testedState.nbContacts;
+        }
+        fullBody_->device_->currentConfiguration(save);
+        fullBody_->device_->computeForwardKinematics();
+        if (stability::IsStable(fullBody_, testedState) >= robustnessTreshold)
+        {
+            return (CORBA::Short)(1);
+        }
+        else
+        {
+            return (CORBA::Short)(0);
+        }
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
     void RbprmBuilder::SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver)
     {
         problemSolver_ = problemSolver;
