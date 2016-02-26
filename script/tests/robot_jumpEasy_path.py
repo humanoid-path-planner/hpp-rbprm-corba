@@ -43,7 +43,7 @@ q_init [0:3] = [-4, 1, 0.9]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 
 q_goal = q_init [::]
 #q_goal [0:3] = [-2, 0, 0.9]; r (q_goal) # premiere passerelle
-q_goal [0:3] = [1, 1, 0.9]; r (q_goal) # pont
+q_goal [0:3] = [3, 1, 0.9]; r (q_goal) # pont
 
 
 #~ ps.addPathOptimizer("GradientBased")
@@ -59,6 +59,10 @@ ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 r(q_init)
 
 ps.client.problem.prepareSolveStepByStep()
+i = 0
+r.displayRoadmap("rm"+str(i),0.02)
+ps.client.problem.executeOneStep() ;i = i+1; r.displayRoadmap("rm"+str(i),0.02) ; r.client.gui.removeFromGroup("rm"+str(i-1),r.sceneName) ;
+
 
 r.solveAndDisplay("rm",1,0.02)
 
@@ -67,8 +71,8 @@ r.solveAndDisplay("rm",1,0.02)
 
 #r.displayRoadmap("rm",0.02)
 
-r.displayPathMap("rmPath",0,0.02)
 
+r.displayPathMap("rmPath",0,0.02)
 
 
 from hpp.gepetto import PathPlayer

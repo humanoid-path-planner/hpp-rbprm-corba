@@ -21,7 +21,7 @@ srdfSuffix = ""
 
 rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-rbprmBuilder.setJointBounds ("base_joint_xyz", [-6,6, -3, 3, 0, 1.5])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [-6,6, -3, 3, 0, 3])
 rbprmBuilder.boundSO3([-0.1,0.1,-3,3,-1.0,1.0])
 rbprmBuilder.setFilter(['robot_test_lleg_rom', 'robot_test_rleg_rom'])
 rbprmBuilder.setNormalFilter('robot_test_lleg_rom', [0,0,1], 0.5)
@@ -41,16 +41,16 @@ r.loadObstacleModel (packageName, "ground_with_bridge", "planning")
 
 
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init [0:3] = [-4, 1, 0.9]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+q_init = [-4,1,0.9,1,0,0,0,0,0,1]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 
 
 q_goal = q_init [::]
 #q_goal [0:3] = [-2, 1, 0.6]; r (q_goal) # tryDirectPath
-q_goal [0:3] = [4, -1, 0.9]; r (q_goal) 
+q_goal= [4,-1,0.9,1,0,0,0,0,0,1]; r (q_goal) 
 
 
 #~ ps.addPathOptimizer("GradientBased")
-ps.addPathOptimizer("RandomShortcut")
+#ps.addPathOptimizer("RandomShortcut")
 #ps.client.problem.selectSteeringMethod("SteeringParabola")
 ps.selectPathPlanner("RRTdynamic")
 ps.setInitialConfig (q_init)
@@ -61,18 +61,20 @@ ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 
 r(q_init)
 
-r.solveAndDisplay("rm",1,0.02)
+#r.solveAndDisplay("rm",1,0.02)
 
 
 
-#t = ps.solve ()
-#r.displayRoadmap("rm",0.005)
+t = ps.solve ()
+r.displayRoadmap("rm",0.005)
 
 #####
-# i = 0
-# ps.client.problem.prepareSolveStepByStep()
-# r.displayRoadmap("rm"+str(i),0.02)
-# ps.client.problem.executeOneStep() ; r.displayRoadmap("rm"+str(i),0.005) ; r.client.gui.removeFromGroup("rm"+str(i-1),r.sceneName) ; i = i+1
+i = 0
+ps.client.problem.prepareSolveStepByStep()
+r.displayRoadmap("rm"+str(i),0.02)
+ps.client.problem.executeOneStep() ;i = i+1; r.displayRoadmap("rm"+str(i),0.02) ; r.client.gui.removeFromGroup("rm"+str(i-1),r.sceneName) ;
+
+
 r.displayPathMap("rmPath",0,0.025)
 
 
@@ -91,6 +93,10 @@ pp (1)
 
 #r.client.gui.removeFromGroup("rm",r.sceneName)
 r.client.gui.removeFromGroup("rmPath",r.sceneName)
-r.client.gui.removeFromGroup("path_1_root",r.sceneName)
+r.client.gui.removeFromGroup("path_0_root",r.sceneName)
 #~ pp.toFile(1, "/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
+
+i=0
+
+ps.clearRoadmap(); ps.solve(); r.client.gui.removeFromGroup("path_"+str(i)+"_root",r.sceneName); pp.displayPath(i+1,r.color.lightGreen); i=i+1;
 

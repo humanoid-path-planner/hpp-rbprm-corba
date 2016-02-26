@@ -67,5 +67,6 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 #~ pp (2)
 r.displayRoadmap("rm",0.02)
 r.displayPathMap("rmPath",0,0.025)
+pp.displayPath(0)
 pp (0)
 

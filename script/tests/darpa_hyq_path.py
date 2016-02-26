@@ -69,12 +69,12 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 #~ 
 #~ pp (2)
 #~ pp (0)
-pp.displayPath(0)
-r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
+pp.displayPath(1)
+r.client.gui.setVisibility("path_1_root","ALWAYS_ON_TOP")
 pp (1)
 
 #r.client.gui.removeFromGroup("rm",r.sceneName)
 r.client.gui.removeFromGroup("rmPath",r.sceneName)
-r.client.gui.removeFromGroup("path_1_root",r.sceneName)
+#r.client.gui.removeFromGroup("path_1_root",r.sceneName)
 #~ pp.toFile(1, "/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
 
