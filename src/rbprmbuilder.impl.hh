@@ -31,9 +31,8 @@
 # include <hpp/core/discretized-collision-checking.hh>
 # include <hpp/core/straight-path.hh>
 # include <hpp/rbprm/rbprm-path-validation.hh>
-
-#include <hpp/fcl/BVH/BVH_model.h>
-
+# include <hpp/fcl/BVH/BVH_model.h>
+# include <hpp/core/config-validations.hh>
 namespace hpp {
   namespace rbprm {
     namespace impl {
@@ -73,6 +72,8 @@ namespace hpp {
 							(hpp::rbprm::RbPrmValidation::create(robotcast, romFilter_, affFilter_, affMap_));
             hpp::rbprm::RbPrmPathValidationPtr_t collisionChecking = hpp::rbprm::RbPrmPathValidation::create(robot,val);
             collisionChecking->add (validation);
+            problemSolver_->problem()->configValidation(core::ConfigValidations::create ());
+            problemSolver_->problem()->configValidations()->add(validation);
             return collisionChecking;
         }
 
