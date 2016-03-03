@@ -21,7 +21,7 @@ srdfSuffix = ""
 
 rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-rbprmBuilder.setJointBounds ("base_joint_xyz", [-6,6, -3, 3, 0, 3])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [-6,6, -3, 3, 0, 2.5])
 rbprmBuilder.boundSO3([-0.1,0.1,-3,3,-1.0,1.0])
 rbprmBuilder.setFilter(['robot_test_lleg_rom', 'robot_test_rleg_rom'])
 rbprmBuilder.setNormalFilter('robot_test_lleg_rom', [0,0,1], 0.5)
@@ -36,7 +36,7 @@ ps = ProblemSolver( rbprmBuilder )
 
 r = Viewer (ps)
 
-r.loadObstacleModel (packageName, "ground_with_bridge", "planning")
+r.loadObstacleModel (packageName, "ground_jump_easy", "planning")
 
 
 
@@ -60,13 +60,15 @@ ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 
 r(q_init)
+#ps.solve()
+
 
 #r.solveAndDisplay("rm",1,0.02)
 
 
 
-t = ps.solve ()
-r.displayRoadmap("rm",0.005)
+#t = ps.solve ()
+#r.displayRoadmap("rm",0.005)
 
 #####
 i = 0
