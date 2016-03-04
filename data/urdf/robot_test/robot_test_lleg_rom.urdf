@@ -1,5 +1,6 @@
+<?xml version="1.0" ?>
 <robot name="robot_lleg_rom">
-  <link name="base_link">
+  <link name="llged_rom">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>

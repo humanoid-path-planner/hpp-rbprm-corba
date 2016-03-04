@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <robot name="robot_trunk">
-  <link name="base_link">
+  <link name="robot_trunk_root">
     <inertial>
       <origin xyz="0.026021 0.004338 -0.692522"/>
       <mass value="10"/>

@@ -65,7 +65,7 @@ r(q_init)
 
 #r.solveAndDisplay("rm",1,0.02)
 
-
+rbprmBuilder.isConfigValid([-4,1,1.9,1,0,0,0,0,0,1])
 
 #t = ps.solve ()
 #r.displayRoadmap("rm",0.005)
@@ -74,7 +74,7 @@ r(q_init)
 i = 0
 ps.client.problem.prepareSolveStepByStep()
 r.displayRoadmap("rm"+str(i),0.02)
-ps.client.problem.executeOneStep() ;i = i+1; r.displayRoadmap("rm"+str(i),0.02) ; r.client.gui.removeFromGroup("rm"+str(i-1),r.sceneName) ;
+ps.client.problem.executeOneStep() ;i = i+1; r.displayRoadmap("rm"+str(i),0.02) ; r.client.gui.removeFromGroup("rm"+str(i-1),r.sceneName); r(ps.node(ps.numberNodes()-1));
 
 
 r.displayPathMap("rmPath",0,0.025)
@@ -101,4 +101,18 @@ r.client.gui.removeFromGroup("path_0_root",r.sceneName)
 i=0
 
 ps.clearRoadmap(); ps.solve(); r.client.gui.removeFromGroup("path_"+str(i)+"_root",r.sceneName); pp.displayPath(i+1,r.color.lightGreen); i=i+1;
+
+
+
+
+
+
+###############################
+
+
+cu=[[-0.379915,0.75376,-0.0935008],[-0.455828,0.116297,-0.0891179],[-0.324647,-0.161917,0.195276],[-0.41015,-3.40644,-0.0576228],[-0.469389,0.0748034,0.572076],[-0.455828,0.116297,-0.0891179],[-0.469389,0.0748034,0.572076],[-0.455828,0.116297,-0.0891179],[-0.469389,0.0748034,0.572076],[-0.469389,0.0748034,0.572076]]
+r.client.gui.addCurve("c2",cu,blue)
+r.client.gui.addToGroup("c2",r.sceneName)
+r.client.gui.setVisibility("c2","ALWAYS_ON_TOP")
+
 
