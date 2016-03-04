@@ -180,6 +180,7 @@ install(FILES
 	data/meshes/ground_bigStep.stl
 	data/meshes/ground_jump_easy.stl
 	data/meshes/ground_jump_easyStart.stl
+	data/meshes/ground_jump_easyStart2.stl
 	data/meshes/ground_jump_easyGoal.stl
 	data/meshes/ground_jump_bar.stl
 	data/meshes/ground_jump_med.stl
