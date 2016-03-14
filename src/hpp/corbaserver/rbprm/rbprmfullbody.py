@@ -213,6 +213,27 @@ class FullBody (object):
 		else:
 			return False
 		
+	## Updates limb databases with a user chosen computation
+	#
+    # \param analysis name of computation
+    # \param isstatic whether the computation should be used to sort samples by default
+    def runSampleAnalysis(self, analysis, isstatic):
+		isStatic = 0.
+		if(isstatic):
+			isStatic = 1.
+		self.client.rbprm.rbprm.runSampleAnalysis(analysis,isStatic)
+		
+	## Updates a limb database with a user chosen computation
+	#
+    # \param limbname name of the limb chosen for computation
+    # \param analysis name of computation
+    # \param isstatic whether the computation should be used to sort samples by default
+    def runLimbSampleAnalysis(self, limbname, analysis, isstatic):
+		isStatic = 0.
+		if(isstatic):
+			isStatic = 1.
+		self.client.rbprm.rbprm.runLimbSampleAnalysis(limbname, analysis,isStatic)
+		
 	## Create octree nodes representation for a given limb
 	#
     # \param gui gepetoo viewer instance discretization step

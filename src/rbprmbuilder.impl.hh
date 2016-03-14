@@ -24,6 +24,7 @@
 # include <hpp/rbprm/rbprm-fullbody.hh>
 # include <hpp/rbprm/rbprm-shooter.hh>
 # include <hpp/rbprm/rbprm-validation.hh>
+# include <hpp/rbprm/sampling/analysis.hh>
 # include <hpp/core/collision-path-validation-report.hh>
 # include <hpp/core/problem-solver.hh>
 # include <hpp/core/discretized-collision-checking.hh>
@@ -123,6 +124,9 @@ namespace hpp {
         virtual hpp::floatSeqSeq* GetOctreeBoxes(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeTransform(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
         virtual CORBA::Short isConfigBalanced(const hpp::floatSeq& config, const hpp::Names_t& contactLimbs, double robustnessTreshold) throw (hpp::Error);
+        virtual void runSampleAnalysis(const char* analysis, double isstatic) throw (hpp::Error);
+        virtual void runLimbSampleAnalysis(const char* limbname, const char* analysis, double isstatic) throw (hpp::Error);
+
         public:
         void SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver);
 
@@ -139,6 +143,7 @@ namespace hpp {
         rbprm::State startState_;
         rbprm::State endState_;
         std::vector<rbprm::State> lastStatesComputed_;
+        sampling::AnalysisFactory analysisFactory_;
       }; // class RobotBuilder
     } // namespace impl
   } // namespace manipulation

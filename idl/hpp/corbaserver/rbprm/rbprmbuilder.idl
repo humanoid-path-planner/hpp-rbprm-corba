@@ -226,6 +226,17 @@ module hpp
     /// \return whether the configuration is quasi-statically balanced
     short isConfigBalanced(in floatSeq config, in Names_t contacts,  in double robustnessTreshold) raises (Error);
 
+    /// run and store an analysis on all limb databases
+    /// \param analysis name of the analysis existing
+    /// \param isstatic 1 is becomes new static value of database, 0 otherwise
+    void runSampleAnalysis(in string analysis, in double isstatic) raises (Error);
+
+    /// run and store an analysis on a limb database
+    /// \param limbname name of the limb to perform the analysis to
+    /// \param analysis name of the analysis existing
+    /// \param isstatic 1 is becomes new static value of database, 0 otherwise
+    void runLimbSampleAnalysis(in string limbname, in string analysis, in double isstatic) raises (Error);
+
   }; // interface Robot
   }; // module rbprm
   }; // module corbaserver

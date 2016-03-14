@@ -695,6 +695,56 @@ namespace hpp {
         }
     }
 
+
+    void RbprmBuilder::runSampleAnalysis(const char* analysis, double isstatic) throw (hpp::Error)
+    {
+        try
+        {
+        std::string eval(analysis);
+        sampling::T_evaluate::const_iterator analysisit = analysisFactory_.evaluate_.find(std::string(eval));
+        if(analysisit == analysisFactory_.evaluate_.end())
+        {
+            std::string err("No analysis named  " + eval + "was defined for analyzing database sample");
+            throw Error (err.c_str());
+        }
+        for(T_Limb::const_iterator cit = fullBody_->GetLimbs().begin(); cit !=fullBody_->GetLimbs().end();++cit)
+        {
+            sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (cit->second->sampleContainer_);
+            sampling::addValue(sampleDB, analysisit->first, analysisit->second, isstatic > 0.5, isstatic > 0.5);
+        }
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    void RbprmBuilder::runLimbSampleAnalysis(const char* limbname, const char* analysis, double isstatic) throw (hpp::Error)
+    {
+        try
+        {
+        std::string eval(analysis);
+        sampling::T_evaluate::const_iterator analysisit = analysisFactory_.evaluate_.find(std::string(eval));
+        if(analysisit == analysisFactory_.evaluate_.end())
+        {
+            std::string err("No analysis named  " + eval + "was defined for analyzing database sample");
+            throw Error (err.c_str());
+        }
+        T_Limb::const_iterator lit = fullBody_->GetLimbs().find(std::string(limbname));
+        if(lit == fullBody_->GetLimbs().end())
+        {
+            std::string err("No limb " + std::string(limbname) + "was defined for robot" + fullBody_->device_->name());
+            throw Error (err.c_str());
+        }
+        sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (lit->second->sampleContainer_);
+        sampling::addValue(sampleDB, analysisit->first, analysisit->second, isstatic > 0.5, isstatic > 0.5);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
     void RbprmBuilder::SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver)
     {
         problemSolver_ = problemSolver;
