@@ -96,6 +96,15 @@ class FullBody (object):
 
 	## Add a limb to the model
 	#
+	# \param databasepath: path to the database describing the robot
+	# \param limbId: user defined id for the limb. Must be unique.
+    #  The id is used if several contact points are defined for the same limb (ex: the knee and the foot)
+    # \param heuristicName: name of the selected heuristic for configuration evaluation
+    def addLimbDatabase(self, databasepath, limbId, heuristicName):
+		self.client.rbprm.rbprm.addLimbDatabase(databasepath, limbId, heuristicName)		
+
+	## Add a limb to the model
+	#
 	# \param id: user defined id for the limb. Must be unique.
     #  The id is used if several contact points are defined for the same limb (ex: the knee and the foot)
     # \param name: name of the joint corresponding to the root of the limb.
@@ -168,6 +177,13 @@ class FullBody (object):
     def saveComputedStates(self, filename):
 		return self.client.rbprm.rbprm.saveComputedStates(filename)
 	
+	## Saves a limb database
+	#
+    # \param limb name of the limb for which the DB must be saved
+    # \param The file where the configuration must be saved
+    def saveLimbDatabase(self, limbName, filename):
+		return self.client.rbprm.rbprm.saveLimbDatabase(limbName, filename)
+	
 	## Discretizes a path return by a motion planner into a discrete
 	# sequence of balanced, contact configurations and returns
 	# the sequence as an array of configurations
@@ -199,7 +215,6 @@ class FullBody (object):
 		
 	## Create octree nodes representation for a given limb
 	#
-    # \param stepSize discretization step
     # \param gui gepetoo viewer instance discretization step
     # \param winId window to draw to step
     # \param limbName name of the limb considered

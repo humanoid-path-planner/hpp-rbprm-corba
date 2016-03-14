@@ -22,6 +22,7 @@
 #include "hpp/rbprm/rbprm-validation.hh"
 #include "hpp/rbprm/rbprm-path-interpolation.hh"
 #include "hpp/rbprm/stability/stability.hh"
+#include "hpp/rbprm/sampling/sample-db.hh"
 #include "hpp/model/urdf/util.hh"
 #include <fstream>
 
@@ -331,7 +332,7 @@ namespace hpp {
             for(model::ObjectVector_t::const_iterator oit = problemSolver_->collisionObstacles().begin();
                 oit != problemSolver_->collisionObstacles().end(); ++oit, ++i)
             {
-                sampling::GetCandidates(limb->sampleContainer_, transform, transform, *oit, dir, reports[i]);
+                sampling::GetCandidates(limb->sampleContainer_, transform, *oit, dir, reports[i]);
             }
             for(std::vector<sampling::T_OctreeReport>::const_iterator cit = reports.begin();
                 cit != reports.end(); ++cit)
@@ -371,6 +372,22 @@ namespace hpp {
                 cType = hpp::rbprm::_3_DOF;
             }
             fullBody_->AddLimb(std::string(id), std::string(limb), std::string(effector), off, norm, x, y, problemSolver_->collisionObstacles(), samples,heuristicName,resolution,cType);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+
+    void RbprmBuilder::addLimbDatabase(const char* databasePath, const char* id, const char* heuristicName) throw (hpp::Error)
+    {
+        if(!fullBodyLoaded_)
+            throw Error ("No full body robot was loaded");
+        try
+        {
+            std::string fileName(databasePath);
+            fullBody_->AddLimb(fileName, std::string(id), problemSolver_->collisionObstacles(), heuristicName);
         }
         catch(std::runtime_error& e)
         {
@@ -554,6 +571,23 @@ namespace hpp {
         {
             std::string error("Can not open outfile " + std::string(outfilename));
             throw Error(error.c_str());
+        }
+    }
+
+    void RbprmBuilder::saveLimbDatabase(const char* limbname,const char* filepath) throw (hpp::Error)
+    {
+        try
+        {
+        std::string limbName(limbname);
+        std::ofstream fout;
+        fout.open(filepath, std::fstream::out | std::fstream::app);
+        rbprm::saveLimbInfoAndDatabase(fullBody_->GetLimbs().at(limbName),fout);
+        //sampling::saveLimbDatabase(fullBody_->GetLimbs().at(limbName)->sampleContainer_,fout);
+        fout.close();
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
         }
     }
 

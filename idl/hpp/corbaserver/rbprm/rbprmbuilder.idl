@@ -160,6 +160,13 @@ module hpp
                  in double x, in double y, in unsigned short samples, in string heuristicName,
                  in double resolution, in string contactType) raises (Error);
 
+    /// Specifies a subchain of the robot as a limb, which can be used to create contacts.
+    /// A limb must consist in a simple kinematic chain, where every node has only one child
+    /// \param databasepath filepath to the database
+    /// \param id user given name of the new limb
+    /// \param heuristicName heuristic used to bias sample selection
+    void addLimbDatabase(in string databasepath, in string id, in string heuristicName) raises (Error);
+
     /// Set the start state of a contact generation problem
     /// environment, ordered by their efficiency
     /// \param dofArray start configuration of the robot
@@ -192,6 +199,12 @@ module hpp
     /// Raises an error if interpolate has not been called, or the file could not be opened.
     /// \param filename name of the file used to save the contacts.
     void saveComputedStates(in string filename) raises (Error);
+
+    /// Saves a sample database into a file
+    /// Raises an ifthe file could not be opened.
+    /// \param limbname name of the limb used to save the samples.
+    /// \param filename name of the file used to save the samples.
+    void saveLimbDatabase(in string limbname, in string filename) raises (Error);
 
     /// returns the size and transforms of all boxes of the octree for a limb
     /// \param limbname name of the considered limb
