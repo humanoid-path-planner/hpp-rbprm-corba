@@ -154,7 +154,21 @@ class FullBody (object):
     # \param direction a 3d vector specifying the desired direction of motion
     def getContactSamplesIds(self, name, configuration, direction):
 		return self.client.rbprm.rbprm.getContactSamplesIds(name, configuration, direction)
-	
+		
+	## Get the number of samples generated for a limb
+	#
+    # \param limbName name of the limb from which to retrieve a sample
+    def getNumSamples(self, limbName):
+		return self.client.rbprm.rbprm.getNumSamples(limbName)
+		
+	## Get the sample value for a given analysis
+	#
+    # \param limbName name of the limb from which to retrieve a sample
+    # \param valueName name of the analytic measure desired
+    # \param sampleId id of the considered sample
+    def getSampleValue(self, limbName, valueName, sampleId):
+		return self.client.rbprm.rbprm.getSampleValue(limbName, valueName, sampleId)
+		
 	## Initialize the first configuration of the path discretization 
 	# with a balanced configuration for the interpolation problem;
 	#
@@ -162,7 +176,7 @@ class FullBody (object):
     # \param contacts the array of limbs in contact
     def setStartState(self, configuration, contacts):
 		return self.client.rbprm.rbprm.setStartState(configuration, contacts)
-		
+			
 	## Initialize the last configuration of the path discretization 
 	# with a balanced configuration for the interpolation problem;
 	#

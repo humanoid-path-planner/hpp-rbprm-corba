@@ -103,6 +103,8 @@ namespace hpp {
 
         virtual hpp::floatSeq* getSampleConfig(const char* limb, unsigned short sampleId) throw (hpp::Error);
         virtual hpp::floatSeq* getSamplePosition(const char* limb, unsigned short sampleId) throw (hpp::Error);
+        virtual CORBA::UShort getNumSamples(const char* limb) throw (hpp::Error);
+        virtual double getSampleValue(const char* limb, const char* valueName, unsigned short sampleId) throw (hpp::Error);
 
         virtual hpp::floatSeq* generateContacts(const hpp::floatSeq& configuration,
                                                 const hpp::floatSeq& direction) throw (hpp::Error);
@@ -143,7 +145,7 @@ namespace hpp {
         rbprm::State startState_;
         rbprm::State endState_;
         std::vector<rbprm::State> lastStatesComputed_;
-        sampling::AnalysisFactory analysisFactory_;
+        sampling::AnalysisFactory* analysisFactory_;
       }; // class RobotBuilder
     } // namespace impl
   } // namespace manipulation

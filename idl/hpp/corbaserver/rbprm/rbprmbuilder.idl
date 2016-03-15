@@ -128,6 +128,18 @@ module hpp
     /// and the selected sample
     floatSeq getSamplePosition(in string sampleName, in unsigned short sampleId) raises (Error);
 
+    /// Get the end effector position of a given limb configuration
+    /// \param limbName name of the limb from which to retrieve a sample
+    /// \return number of samples generated for the limb
+    unsigned short getNumSamples(in string limbName) raises (Error);
+
+    /// Get the sample value for a given analysis
+    /// \param limbName name of the limb from which to retrieve a sample
+    /// \param valueName name of the analytic measure desired
+    /// \param sampleId id of the considered sample
+    /// \return the value computed for the given sample and analytics
+    double getSampleValue(in string limbName, in string valueName, in unsigned short sampleId) raises (Error);
+
     /// Generate all possible contact in a given configuration
     /// \param dofArray initial configuration of the robot
     /// \param direction desired direction of motion for the robot
@@ -227,13 +239,15 @@ module hpp
     short isConfigBalanced(in floatSeq config, in Names_t contacts,  in double robustnessTreshold) raises (Error);
 
     /// run and store an analysis on all limb databases
-    /// \param analysis name of the analysis existing
+    /// \param analysis name of the analysis existing if analysis ="all",
+    /// all tests are run.
     /// \param isstatic 1 is becomes new static value of database, 0 otherwise
     void runSampleAnalysis(in string analysis, in double isstatic) raises (Error);
 
     /// run and store an analysis on a limb database
     /// \param limbname name of the limb to perform the analysis to
-    /// \param analysis name of the analysis existing
+    /// \param analysis name of the analysis existing if analysis ="all",
+    /// all tests are run.
     /// \param isstatic 1 is becomes new static value of database, 0 otherwise
     void runLimbSampleAnalysis(in string limbname, in string analysis, in double isstatic) raises (Error);
 

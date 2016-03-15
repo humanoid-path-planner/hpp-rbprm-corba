@@ -37,6 +37,7 @@ namespace hpp {
     , romLoaded_(false)
     , fullBodyLoaded_(false)
     , bindShooter_()
+    , analysisFactory_(0)
     {
         // NOTHING
     }
@@ -129,7 +130,9 @@ namespace hpp {
             hppDout (error, exc.what ());
             throw hpp::Error (exc.what ());
         }
-        fullBodyLoaded_ = true;
+        fullBodyLoaded_ = true;        
+        if(!analysisFactory_)
+            analysisFactory_ = new sampling::AnalysisFactory(fullBody_);
     }
 
     hpp::floatSeq* RbprmBuilder::getSampleConfig(const char* limb, unsigned short sampleId) throw (hpp::Error)
@@ -186,6 +189,43 @@ namespace hpp {
         for(std::size_t i=0; i< 3; i++)
           (*dofArray)[(_CORBA_ULong)i] = position [i];
         return dofArray;
+    }
+
+
+    CORBA::UShort RbprmBuilder::getNumSamples(const char* limb) throw (hpp::Error)
+    {
+        const T_Limb& limbs = fullBody_->GetLimbs();
+        T_Limb::const_iterator lit = limbs.find(std::string(limb));
+        if(lit == limbs.end())
+        {
+            std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody_->device_->name());
+            throw Error (err.c_str());
+        }
+        return lit->second->sampleContainer_.samples_.size();
+    }
+
+    double RbprmBuilder::getSampleValue(const char* limb, const char* valueName, unsigned short sampleId) throw (hpp::Error)
+    {
+        const T_Limb& limbs = fullBody_->GetLimbs();
+        T_Limb::const_iterator lit = limbs.find(std::string(limb));
+        if(lit == limbs.end())
+        {
+            std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody_->device_->name());
+            throw Error (err.c_str());
+        }
+        const sampling::SampleDB& database = lit->second->sampleContainer_;
+        if (database.samples_.size() <= sampleId)
+        {
+            std::string err("unexisting sample id " + sampleId);
+            throw Error (err.c_str());
+        }
+        sampling::T_Values::const_iterator cit = database.values_.find(std::string(valueName));
+        if(cit == database.values_.end())
+        {
+            std::string err("value not existing in database " + std::string(valueName));
+            throw Error (err.c_str());
+        }
+        return cit->second[sampleId];
     }
 
     model::Configuration_t dofArrayToConfig (const model::DevicePtr_t& robot,
@@ -700,17 +740,34 @@ namespace hpp {
     {
         try
         {
+        if(!fullBodyLoaded_)
+            throw Error ("No full body robot was loaded");
         std::string eval(analysis);
-        sampling::T_evaluate::const_iterator analysisit = analysisFactory_.evaluate_.find(std::string(eval));
-        if(analysisit == analysisFactory_.evaluate_.end())
+        if (eval == "all")
         {
-            std::string err("No analysis named  " + eval + "was defined for analyzing database sample");
-            throw Error (err.c_str());
+            for(sampling::T_evaluate::const_iterator analysisit = analysisFactory_->evaluate_.begin();
+                analysisit != analysisFactory_->evaluate_.end(); ++ analysisit)
+            {
+                for(T_Limb::const_iterator cit = fullBody_->GetLimbs().begin(); cit !=fullBody_->GetLimbs().end();++cit)
+                {
+                    sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (cit->second->sampleContainer_);
+                    sampling::addValue(sampleDB, analysisit->first, analysisit->second, isstatic > 0.5, isstatic > 0.5);
+                }
+            }
         }
-        for(T_Limb::const_iterator cit = fullBody_->GetLimbs().begin(); cit !=fullBody_->GetLimbs().end();++cit)
+        else
         {
-            sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (cit->second->sampleContainer_);
-            sampling::addValue(sampleDB, analysisit->first, analysisit->second, isstatic > 0.5, isstatic > 0.5);
+            sampling::T_evaluate::const_iterator analysisit = analysisFactory_->evaluate_.find(std::string(eval));
+            if(analysisit == analysisFactory_->evaluate_.end())
+            {
+                std::string err("No analysis named  " + eval + "was defined for analyzing database sample");
+                throw Error (err.c_str());
+            }
+            for(T_Limb::const_iterator cit = fullBody_->GetLimbs().begin(); cit !=fullBody_->GetLimbs().end();++cit)
+            {
+                sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (cit->second->sampleContainer_);
+                sampling::addValue(sampleDB, analysisit->first, analysisit->second, isstatic > 0.5, isstatic > 0.5);
+            }
         }
         }
         catch(std::runtime_error& e)
@@ -723,21 +780,35 @@ namespace hpp {
     {
         try
         {
-        std::string eval(analysis);
-        sampling::T_evaluate::const_iterator analysisit = analysisFactory_.evaluate_.find(std::string(eval));
-        if(analysisit == analysisFactory_.evaluate_.end())
-        {
-            std::string err("No analysis named  " + eval + "was defined for analyzing database sample");
-            throw Error (err.c_str());
-        }
+        if(!fullBodyLoaded_)
+            throw Error ("No full body robot was loaded");
         T_Limb::const_iterator lit = fullBody_->GetLimbs().find(std::string(limbname));
         if(lit == fullBody_->GetLimbs().end())
         {
             std::string err("No limb " + std::string(limbname) + "was defined for robot" + fullBody_->device_->name());
             throw Error (err.c_str());
         }
-        sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (lit->second->sampleContainer_);
-        sampling::addValue(sampleDB, analysisit->first, analysisit->second, isstatic > 0.5, isstatic > 0.5);
+        std::string eval(analysis);
+        if (eval == "all")
+        {
+            for(sampling::T_evaluate::const_iterator analysisit = analysisFactory_->evaluate_.begin();
+                analysisit != analysisFactory_->evaluate_.end(); ++ analysisit)
+            {
+                sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (lit->second->sampleContainer_);
+                sampling::addValue(sampleDB, analysisit->first, analysisit->second, isstatic > 0.5, isstatic > 0.5);
+            }
+        }
+        else
+        {
+            sampling::T_evaluate::const_iterator analysisit = analysisFactory_->evaluate_.find(std::string(eval));
+            if(analysisit == analysisFactory_->evaluate_.end())
+            {
+                std::string err("No analysis named  " + eval + "was defined for analyzing database sample");
+                throw Error (err.c_str());
+            }
+            sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (lit->second->sampleContainer_);
+            sampling::addValue(sampleDB, analysisit->first, analysisit->second, isstatic > 0.5, isstatic > 0.5);
+            }
         }
         catch(std::runtime_error& e)
         {
