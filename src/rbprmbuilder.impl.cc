@@ -204,6 +204,26 @@ namespace hpp {
         return lit->second->sampleContainer_.samples_.size();
     }
 
+    floatSeq *RbprmBuilder::getOctreeNodeIds(const char* limb) throw (hpp::Error)
+    {
+        const T_Limb& limbs = fullBody_->GetLimbs();
+        T_Limb::const_iterator lit = limbs.find(std::string(limb));
+        if(lit == limbs.end())
+        {
+            std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody_->device_->name());
+            throw Error (err.c_str());
+        }
+        const sampling::T_VoxelSampleId& ids =  lit->second->sampleContainer_.samplesInVoxels_;
+        hpp::floatSeq* dofArray = new hpp::floatSeq();
+        dofArray->length(ids.size());
+        sampling::T_VoxelSampleId::const_iterator it = ids.begin();
+        for(std::size_t i=0; i< _CORBA_ULong(ids.size()); ++i, ++it)
+        {
+          (*dofArray)[(_CORBA_ULong)i] = it->first;
+        }
+        return dofArray;
+    }
+
     double RbprmBuilder::getSampleValue(const char* limb, const char* valueName, unsigned short sampleId) throw (hpp::Error)
     {
         const T_Limb& limbs = fullBody_->GetLimbs();
@@ -387,6 +407,43 @@ namespace hpp {
               (*dofArray)[(_CORBA_ULong)i] = candCit->sample_->id_;
             }
             fullBody_->device_->currentConfiguration(save);
+            return dofArray;
+        } catch (const std::exception& exc) {
+        throw hpp::Error (exc.what ());
+        }
+    }
+
+    hpp::floatSeq* RbprmBuilder::getSamplesIdsInOctreeNode(const char* limb,
+                                                           double octreeNodeId) throw (hpp::Error)
+    {
+        if(!fullBodyLoaded_)
+            throw Error ("No full body robot was loaded");
+        try
+        {
+            long ocId (octreeNodeId);
+            const T_Limb& limbs = fullBody_->GetLimbs();
+            T_Limb::const_iterator lit = limbs.find(std::string(limb));
+            if(lit == limbs.end())
+            {
+                std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody_->device_->name());
+                throw Error (err.c_str());
+            }
+            const sampling::T_VoxelSampleId& sampleIds =  lit->second->sampleContainer_.samplesInVoxels_;
+            sampling::T_VoxelSampleId::const_iterator cit = sampleIds.find(ocId);
+            if(cit == sampleIds.end())
+            {
+                std::stringstream ss; ss << ocId;
+                std::string err("No octree node with id " + ss.str() + "was defined for robot" + fullBody_->device_->name());
+                throw Error (err.c_str());
+            }
+            const sampling::VoxelSampleId& ids = cit->second;
+            hpp::floatSeq* dofArray = new hpp::floatSeq();
+            dofArray->length(ids.second);
+            std::size_t sampleId = ids.first;
+            for(std::size_t i=0; i< _CORBA_ULong(ids.second); ++i, ++sampleId)
+            {
+              (*dofArray)[(_CORBA_ULong)i] = sampleId;
+            }
             return dofArray;
         } catch (const std::exception& exc) {
         throw hpp::Error (exc.what ());
@@ -631,7 +688,7 @@ namespace hpp {
         }
     }
 
-    hpp::floatSeqSeq* RbprmBuilder::GetOctreeBoxes(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error)
+    hpp::floatSeqSeq* RbprmBuilder::getOctreeBoxes(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error)
     {
         try
         {
@@ -663,6 +720,46 @@ namespace hpp {
         fullBody_->device_->currentConfiguration(save);
         fullBody_->device_->computeForwardKinematics();
         return res;
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    hpp::floatSeq* RbprmBuilder::getOctreeBox(const char* limbName, double octreeNodeId) throw (hpp::Error)
+    {
+        try
+        {
+        if(!fullBodyLoaded_)
+            throw Error ("No full body robot was loaded");
+        long ocId (octreeNodeId);
+        const T_Limb& limbs = fullBody_->GetLimbs();
+        T_Limb::const_iterator lit = limbs.find(std::string(limbName));
+        if(lit == limbs.end())
+        {
+            std::string err("No limb " + std::string(limbName) + "was defined for robot" + fullBody_->device_->name());
+            throw Error (err.c_str());
+        }
+        const std::map<std::size_t, fcl::CollisionObject*>& boxes =
+                fullBody_->GetLimbs().at(std::string(limbName))->sampleContainer_.boxes_;
+        std::map<std::size_t, fcl::CollisionObject*>::const_iterator cit = boxes.find(ocId);
+        if(cit == boxes.end())
+        {
+            std::stringstream ss; ss << ocId;
+            std::string err("No octree node with id " + ss.str() + "was defined for robot" + fullBody_->device_->name());
+            throw Error (err.c_str());
+        }
+        const fcl::CollisionObject* box = cit->second;
+        const fcl::Vec3f& pos = box->getTransform().getTranslation();
+        hpp::floatSeq* dofArray = new hpp::floatSeq();
+        dofArray->length(4);
+        for(std::size_t i=0; i< 3; ++i)
+        {
+          (*dofArray)[(_CORBA_ULong)i] = pos[i];
+        }
+        (*dofArray)[(_CORBA_ULong)3] = fullBody_->GetLimbs().at(std::string(limbName))->sampleContainer_.resolution_;
+        return dofArray;
         }
         catch(std::runtime_error& e)
         {

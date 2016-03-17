@@ -133,6 +133,11 @@ module hpp
     /// \return number of samples generated for the limb
     unsigned short getNumSamples(in string limbName) raises (Error);
 
+    /// Get the number of octree nodes for a limb database
+    /// \param limbName name of the limb from which to retrieve octree number
+    /// \return ids of the nodes in the octree
+    floatSeq getOctreeNodeIds(in string limbName) raises (Error);
+
     /// Get the sample value for a given analysis
     /// \param limbName name of the limb from which to retrieve a sample
     /// \param valueName name of the analytic measure desired
@@ -154,7 +159,12 @@ module hpp
     /// \return transformed configuration for which all possible contacts have been created
     floatSeq getContactSamplesIds(in string name, in floatSeq dofArray, in floatSeq direction) raises (Error);
 
-    /// Specifies a subchain of the robot as a limb, which can be used to create contacts.
+    /// get Ids of limb in an octree cell
+    /// \param name name of the considered limb
+    /// \param octreeNodeId considered configuration of the robot
+    /// \return list of ids in the cell
+    floatSeq getSamplesIdsInOctreeNode(in string name, in double octreeNodeId) raises (Error);
+
     /// A limb must consist in a simple kinematic chain, where every node has only one child
     /// \param id user given name of the new limb
     /// \param limb robot joint corresponding to the root of the limb (ex a shoulder or ankle joint)
@@ -222,8 +232,13 @@ module hpp
     /// \param limbname name of the considered limb
     /// \param dofArray considered configuration of the robot
     /// \return transformed configuration for which all possible contacts have been created
-    floatSeqSeq GetOctreeBoxes(in string limbname, in floatSeq dofArray) raises (Error);
+    floatSeqSeq getOctreeBoxes(in string limbname, in floatSeq dofArray) raises (Error);
 
+    /// returns the size and transforms of all boxes of the octree for a limb
+    /// \param limbname name of the considered limb
+    /// \param dofArray considered configuration of the robot
+    /// \return transformed configuration for which all possible contacts have been created
+    floatSeq getOctreeBox(in string limbname, in double sampleId) raises (Error);
 
     /// returns octree transform for a given robot configuration
     /// \param limbname name of the considered limb

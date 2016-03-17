@@ -2,24 +2,76 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import cm
-#~ 
-#~ def randrange(n, vmin, vmax):
-    #~ return (vmax - vmin)*np.random.rand(n) + vmin
-#~ 
-#~ fig = plt.figure()
-#~ ax = fig.add_subplot(111, projection='3d')
-#~ n = 100
-#~ for c, m, zl, zh in [('r', 'o', -50, -25), ('b', '^', -30, -5)]:
-    #~ xs = randrange(n, 23, 32)
-    #~ ys = randrange(n, 0, 100)
-    #~ zs = randrange(n, zl, zh)
-    #~ ax.scatter(xs, ys, zs, c=c, marker=m)
-#~ 
-#~ ax.set_xlabel('X Label')
-#~ ax.set_ylabel('Y Label')
-#~ ax.set_zlabel('Z Label')
-#~ 
-#~ plt.show()
+
+
+cma = cm.autumn
+
+## Display a 3d plot of the values computed for a limb database
+# where all samples take the maximum value of the octree they belong to
+# \param robot FullBody object
+# \param valueName name of the plotted analytics
+# \param limb name of the considered limb
+def plotcube(plt, ax, c, pos):
+	x = pos[0];	y = pos[1];	z = pos[2]
+	r = (float)(pos[3])/2
+	
+	x1 = [x - r, x + r]
+	y1 = [y - r, y + r]
+	z1 = [z -r, z - r]
+	X, Y = np.meshgrid(x1, y1)
+	ax.plot_surface(X,Y,z1, color = cma(c))
+
+	x1 = [x - r, x + r]
+	y1 = [y - r, y + r]
+	z1 = [z + r, z + r]
+	X, Y = np.meshgrid(x1, y1)
+	ax.plot_surface(X,Y,z1, color = cma(c))
+
+	x1 = [x - r, x + r]
+	y1 = [y + r, y + r]
+	z1 = [z + r, z - r]
+	X, Z = np.meshgrid(x1, z1)
+	ax.plot_surface(X,y1,Z, color = cma(c))
+
+	x1 = [x - r, x + r]
+	y1 = [y - r, y - r]
+	z1 = [z + r, z - r]
+	X, Z = np.meshgrid(x1, z1)
+	ax.plot_surface(X,y1,Z, color = cma(c))
+
+	x1 = [x - r, x - r]
+	y1 = [y - r, y + r]
+	z1 = [z + r, z - r]
+	Y, Z = np.meshgrid(y1, z1)
+	ax.plot_surface(x1,Y,Z, color = cma(c))
+
+	x1 = [x + r, x + r]
+	y1 = [y - r, y + r]
+	z1 = [z + r, z - r]
+	Y, Z = np.meshgrid(y1, z1)
+	ax.plot_surface(x1,Y,Z, color = cma(c))
+
+def plotOctreeValues(robot, valueName, limb):
+	fig = plt.figure()
+	ax = fig.add_subplot(111, projection='3d')
+	#first iterate over octree.
+	octreeIds = robot.getOctreeNodeIds(limb)
+	for ocId in octreeIds:
+		sampleIds = robot.getSamplesIdsInOctreeNode(limb, ocId)
+		max_val = 0;
+		for sId in sampleIds:
+			i = int(sId)
+			g = robot.getSampleValue(limb, valueName, i)
+			max_val = max(max_val, g)
+		box = robot.getOctreeBox(limb, (int)(ocId))
+		plotcube(plt,ax,max_val, box)
+		#~ if box[2] < -0.15 and box[2] > -0.25:
+			#~ plotcube(plt,ax,max_val, box)
+	ax.set_xlabel('X Label')
+	ax.set_ylabel('Y Label')
+	ax.set_zlabel('Z Label')
+	plt.title(valueName)
+	plt.show()
 
 ## Display a 3d plot of the values computed for a limb database
 #
@@ -34,17 +86,17 @@ def plotValues(robot, valueName, limb):
 	fig = plt.figure()
 	ax = fig.add_subplot(111, projection='3d')
 	numSamples = robot.getNumSamples(limb)	
-	for i in range(0,numSamples):
+	for i in range(0,numSamples):		
+		g = robot.getSampleValue(limb, valueName, i)
 		pos = robot.getSamplePosition(limb, i)
 		xs.append(pos[0])
 		ys.append(pos[1])
 		zs.append(pos[2])
 		g = robot.getSampleValue(limb, valueName, i)
-		print g
-		vals.append([1-g,g,0])
-		#~ ax.scatter(pos[0], pos[1], pos[2], c=robot.getSampleValue(limb, valueName, i))
-	ax.scatter(xs, ys, zs, c=vals)
+		vals.append(cma(g))
+	ax.scatter(xs, ys, zs, color=vals)
 	ax.set_xlabel('X Label')
 	ax.set_ylabel('Y Label')
-	ax.set_zlabel('Z Label')
+	ax.set_zlabel('Z Label')	
+	plt.title(valueName)
 	plt.show()

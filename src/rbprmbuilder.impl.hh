@@ -104,6 +104,7 @@ namespace hpp {
         virtual hpp::floatSeq* getSampleConfig(const char* limb, unsigned short sampleId) throw (hpp::Error);
         virtual hpp::floatSeq* getSamplePosition(const char* limb, unsigned short sampleId) throw (hpp::Error);
         virtual CORBA::UShort getNumSamples(const char* limb) throw (hpp::Error);
+        virtual hpp::floatSeq* getOctreeNodeIds(const char* limb) throw (hpp::Error);
         virtual double getSampleValue(const char* limb, const char* valueName, unsigned short sampleId) throw (hpp::Error);
 
         virtual hpp::floatSeq* generateContacts(const hpp::floatSeq& configuration,
@@ -112,6 +113,9 @@ namespace hpp {
         virtual hpp::floatSeq* getContactSamplesIds(const char* limb,
                                                    const hpp::floatSeq& configuration,
                                                    const hpp::floatSeq& direction) throw (hpp::Error);
+
+        virtual hpp::floatSeq* getSamplesIdsInOctreeNode(const char* limb,
+                                                   double octreeNodeId) throw (hpp::Error);
 
         virtual void addLimb(const char* id, const char* limb, const char* effector, const hpp::floatSeq& offset, const hpp::floatSeq& normal, double x, double y,
                              unsigned short samples, const char *heuristicName, double resolution, const char *contactType) throw (hpp::Error);
@@ -123,7 +127,8 @@ namespace hpp {
         virtual hpp::floatSeqSeq* interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold) throw (hpp::Error);
         virtual void saveComputedStates(const char* filepath) throw (hpp::Error);
         virtual void saveLimbDatabase(const char* limbname,const char* filepath) throw (hpp::Error);
-        virtual hpp::floatSeqSeq* GetOctreeBoxes(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
+        virtual hpp::floatSeq* getOctreeBox(const char* limbName, double sampleId) throw (hpp::Error);
+        virtual hpp::floatSeqSeq* getOctreeBoxes(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeTransform(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
         virtual CORBA::Short isConfigBalanced(const hpp::floatSeq& config, const hpp::Names_t& contactLimbs, double robustnessTreshold) throw (hpp::Error);
         virtual void runSampleAnalysis(const char* analysis, double isstatic) throw (hpp::Error);

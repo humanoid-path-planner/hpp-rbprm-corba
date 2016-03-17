@@ -155,11 +155,25 @@ class FullBody (object):
     def getContactSamplesIds(self, name, configuration, direction):
 		return self.client.rbprm.rbprm.getContactSamplesIds(name, configuration, direction)
 		
+	## Retrieves the samples IDs In a given octree cell
+	#
+    # \param name id of the limb considered
+    # \param configuration the considered robot configuration
+    # \param direction a 3d vector specifying the desired direction of motion
+    def getSamplesIdsInOctreeNode(self, limbName, octreeNodeId):
+		return self.client.rbprm.rbprm.getSamplesIdsInOctreeNode(limbName, octreeNodeId)
+		
 	## Get the number of samples generated for a limb
 	#
     # \param limbName name of the limb from which to retrieve a sample
     def getNumSamples(self, limbName):
 		return self.client.rbprm.rbprm.getNumSamples(limbName)
+		
+	## Get the number of octreeNodes
+	#
+    # \param limbName name of the limb from which to retrieve a sample
+    def getOctreeNodeIds(self, limbName):
+		return self.client.rbprm.rbprm.getOctreeNodeIds(limbName)
 		
 	## Get the sample value for a given analysis
 	#
@@ -256,7 +270,7 @@ class FullBody (object):
     # \param config initial configuration of the robot, used when created octree
     # \param color of the octree boxes
     def createOctreeBoxes(self, gui, winId, limbName, config, color = [1,1,1,0.3]):
-		boxes = self.client.rbprm.rbprm.GetOctreeBoxes(limbName, config)
+		boxes = self.client.rbprm.rbprm.getOctreeBoxes(limbName, config)
 		scene = "oct"+limbName
 		gui.createScene(scene)
 		resolution = boxes[0][3]
@@ -269,6 +283,13 @@ class FullBody (object):
 		self.octrees[limbName] = scene
 		gui.addSceneToWindow(scene,winId)
 		gui.refresh()
+		
+	## Create octree nodes representation for a given limb
+	#
+    # \param limbName name of the limb considered
+    # \param ocId of the octree box
+    def getOctreeBox(self, limbName, ocId):
+		return self.client.rbprm.rbprm.getOctreeBox(limbName, ocId)
 	
 	## Draws robot configuration, along with octrees associated
 	#
