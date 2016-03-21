@@ -93,3 +93,6 @@ r.client.gui.removeFromGroup("rmPath",r.sceneName)
 r.client.gui.removeFromGroup("path_1_root",r.sceneName)
 #~ pp.toFile(1, "/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
 
+
+
+

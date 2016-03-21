@@ -1,4 +1,5 @@
-<robot name="ground_jump_easy">
+<?xml version="1.0" ?>
+<robot name="ground_with_bridge">
   <link name="base_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
