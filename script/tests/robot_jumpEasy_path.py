@@ -58,10 +58,10 @@ ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 
 r(q_init)
 
-ps.client.problem.prepareSolveStepByStep()
-i = 0
-r.displayRoadmap("rm"+str(i),0.02)
-ps.client.problem.executeOneStep() ;i = i+1; r.displayRoadmap("rm"+str(i),0.02) ; r.client.gui.removeFromGroup("rm"+str(i-1),r.sceneName) ;
+#ps.client.problem.prepareSolveStepByStep()
+#i = 0
+#r.displayRoadmap("rm"+str(i),0.02)
+#ps.client.problem.executeOneStep() ;i = i+1; r.displayRoadmap("rm"+str(i),0.02) ; r.client.gui.removeFromGroup("rm"+str(i-1),r.sceneName) ;
 
 
 r.solveAndDisplay("rm",1,0.02)
