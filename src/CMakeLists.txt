@@ -120,10 +120,16 @@ INSTALL(
 	${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/client.py
 	${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/rbprmbuilder.py
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/rbprmfullbody.py
-	${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/problem_solver.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/problem_solver.py
   DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm
   )
-
+INSTALL(
+  FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/__init__.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools//generateROMs.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/plot_analytics.py
+  DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm/tools
+  )
 # Stand alone corba server
 ADD_EXECUTABLE (hpp-rbprm-server hpp-rbprm-corba.cc)
 TARGET_LINK_LIBRARIES (hpp-rbprm-server ${LIBRARY_NAME} hpp-rbprm)

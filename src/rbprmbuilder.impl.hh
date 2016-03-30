@@ -24,6 +24,7 @@
 # include <hpp/rbprm/rbprm-fullbody.hh>
 # include <hpp/rbprm/rbprm-shooter.hh>
 # include <hpp/rbprm/rbprm-validation.hh>
+# include <hpp/rbprm/sampling/analysis.hh>
 # include <hpp/core/collision-path-validation-report.hh>
 # include <hpp/core/problem-solver.hh>
 # include <hpp/core/discretized-collision-checking.hh>
@@ -102,6 +103,9 @@ namespace hpp {
 
         virtual hpp::floatSeq* getSampleConfig(const char* limb, unsigned short sampleId) throw (hpp::Error);
         virtual hpp::floatSeq* getSamplePosition(const char* limb, unsigned short sampleId) throw (hpp::Error);
+        virtual CORBA::UShort getNumSamples(const char* limb) throw (hpp::Error);
+        virtual hpp::floatSeq* getOctreeNodeIds(const char* limb) throw (hpp::Error);
+        virtual double getSampleValue(const char* limb, const char* valueName, unsigned short sampleId) throw (hpp::Error);
 
         virtual hpp::floatSeq* generateContacts(const hpp::floatSeq& configuration,
                                                 const hpp::floatSeq& direction) throw (hpp::Error);
@@ -110,16 +114,26 @@ namespace hpp {
                                                    const hpp::floatSeq& configuration,
                                                    const hpp::floatSeq& direction) throw (hpp::Error);
 
+        virtual hpp::floatSeq* getSamplesIdsInOctreeNode(const char* limb,
+                                                   double octreeNodeId) throw (hpp::Error);
+
         virtual void addLimb(const char* id, const char* limb, const char* effector, const hpp::floatSeq& offset, const hpp::floatSeq& normal, double x, double y,
                              unsigned short samples, const char *heuristicName, double resolution, const char *contactType) throw (hpp::Error);
+        virtual void addLimbDatabase(const char* databasePath, const char* id, const char* heuristicName) throw (hpp::Error);
 
         virtual void setStartState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);
         virtual void setEndState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);
         virtual hpp::floatSeqSeq* interpolate(double timestep, double path, double robustnessTreshold) throw (hpp::Error);
         virtual hpp::floatSeqSeq* interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold) throw (hpp::Error);
         virtual void saveComputedStates(const char* filepath) throw (hpp::Error);
-        virtual hpp::floatSeqSeq* GetOctreeBoxes(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
+        virtual void saveLimbDatabase(const char* limbname,const char* filepath) throw (hpp::Error);
+        virtual hpp::floatSeq* getOctreeBox(const char* limbName, double sampleId) throw (hpp::Error);
+        virtual hpp::floatSeqSeq* getOctreeBoxes(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeTransform(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
+        virtual CORBA::Short isConfigBalanced(const hpp::floatSeq& config, const hpp::Names_t& contactLimbs, double robustnessTreshold) throw (hpp::Error);
+        virtual void runSampleAnalysis(const char* analysis, double isstatic) throw (hpp::Error);
+        virtual void runLimbSampleAnalysis(const char* limbname, const char* analysis, double isstatic) throw (hpp::Error);
+
         public:
         void SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver);
 
@@ -136,6 +150,7 @@ namespace hpp {
         rbprm::State startState_;
         rbprm::State endState_;
         std::vector<rbprm::State> lastStatesComputed_;
+        sampling::AnalysisFactory* analysisFactory_;
       }; // class RobotBuilder
     } // namespace impl
   } // namespace manipulation

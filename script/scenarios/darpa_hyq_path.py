@@ -1,68 +1,60 @@
+# Importing helper class for setting up a reachability planning problem
 from hpp.corbaserver.rbprm.rbprmbuilder import Builder
+
+# Importing Gepetto viewer helper class
 from hpp.gepetto import Viewer
 
 rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
 meshPackageName = 'hpp-rbprm-corba'
+# URDF file describing the trunk of the robot HyQ
 urdfName = 'hyq_trunk_large'
+# URDF files describing the reachable workspace of each limb of HyQ
 urdfNameRom = ['hyq_lhleg_rom','hyq_lfleg_rom','hyq_rfleg_rom','hyq_rhleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
 
+# Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Builder ()
-
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 rbprmBuilder.setJointBounds ("base_joint_xyz", [-2,5, -1, 1, 0.3, 4])
+# The following lines set constraint on the valid configurations:
+# a configuration is valid only if all limbs can create a contact ...
 rbprmBuilder.setFilter(['hyq_rhleg_rom', 'hyq_lfleg_rom', 'hyq_rfleg_rom','hyq_lhleg_rom'])
+# ... and only if a contact surface includes the gravity
 rbprmBuilder.setNormalFilter('hyq_lhleg_rom', [0,0,1], 0.5)
 rbprmBuilder.setNormalFilter('hyq_rfleg_rom', [0,0,1], 0.5)
 rbprmBuilder.setNormalFilter('hyq_lfleg_rom', [0,0,1], 0.5)
 rbprmBuilder.setNormalFilter('hyq_rhleg_rom', [0,0,1], 0.5)
+# We also bound the rotations of the torso.
 rbprmBuilder.boundSO3([-0.4,0.4,-3,3,-3,3])
 
-#~ from hpp.corbaserver.rbprm. import ProblemSolver
+# Creating an instance of HPP problem solver and the viewer
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
-
 ps = ProblemSolver( rbprmBuilder )
-
 r = Viewer (ps)
 
-
+# Setting initial and goal configurations
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init [0:3] = [-2, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
-#~ q_init [0:3] = [2, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
-
 q_goal = q_init [::]
 q_goal [0:3] = [3, 0, 0.63]; r (q_goal)
 
-#~ ps.addPathOptimizer("GradientBased")
+# Choosing a path optimizer
 ps.addPathOptimizer("RandomShortcut")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
+# Choosing RBPRM shooter and path validation methods.
+# Note that the standard RRT algorithm is used.
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 r.loadObstacleModel (packageName, "darpa", "planning")
-#~ ps.solve ()
+
+# Solve the problem
 t = ps.solve ()
 
-#~ print t;
-if isinstance(t, list):
-	t = t[0]* 3600000 + t[1] * 60000 + t[2] * 1000 + t[3]
-f = open('log.txt', 'a')
-f.write("path computation " + str(t) + "\n")
-f.close()
-
-
+# Playing the computed path
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
-
-#~ rbprmBuilder.exportPath (r, ps.client.problem, 1, 0.1, "darpa_hyq_robust_20_path.txt")
-#~ pp.fromFile("/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
-#~ 
-#~ pp (2)
-#~ pp (0)
-
-#~ pp (1)
-#~ pp.toFile(1, "/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
-r (q_init)
+pp (1)

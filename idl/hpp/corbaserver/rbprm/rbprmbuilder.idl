@@ -128,6 +128,23 @@ module hpp
     /// and the selected sample
     floatSeq getSamplePosition(in string sampleName, in unsigned short sampleId) raises (Error);
 
+    /// Get the end effector position of a given limb configuration
+    /// \param limbName name of the limb from which to retrieve a sample
+    /// \return number of samples generated for the limb
+    unsigned short getNumSamples(in string limbName) raises (Error);
+
+    /// Get the number of octree nodes for a limb database
+    /// \param limbName name of the limb from which to retrieve octree number
+    /// \return ids of the nodes in the octree
+    floatSeq getOctreeNodeIds(in string limbName) raises (Error);
+
+    /// Get the sample value for a given analysis
+    /// \param limbName name of the limb from which to retrieve a sample
+    /// \param valueName name of the analytic measure desired
+    /// \param sampleId id of the considered sample
+    /// \return the value computed for the given sample and analytics
+    double getSampleValue(in string limbName, in string valueName, in unsigned short sampleId) raises (Error);
+
     /// Generate all possible contact in a given configuration
     /// \param dofArray initial configuration of the robot
     /// \param direction desired direction of motion for the robot
@@ -142,7 +159,12 @@ module hpp
     /// \return transformed configuration for which all possible contacts have been created
     floatSeq getContactSamplesIds(in string name, in floatSeq dofArray, in floatSeq direction) raises (Error);
 
-    /// Specifies a subchain of the robot as a limb, which can be used to create contacts.
+    /// get Ids of limb in an octree cell
+    /// \param name name of the considered limb
+    /// \param octreeNodeId considered configuration of the robot
+    /// \return list of ids in the cell
+    floatSeq getSamplesIdsInOctreeNode(in string name, in double octreeNodeId) raises (Error);
+
     /// A limb must consist in a simple kinematic chain, where every node has only one child
     /// \param id user given name of the new limb
     /// \param limb robot joint corresponding to the root of the limb (ex a shoulder or ankle joint)
@@ -159,6 +181,13 @@ module hpp
     void addLimb(in string id, in string limb, in string effector, in floatSeq offset, in floatSeq normal,
                  in double x, in double y, in unsigned short samples, in string heuristicName,
                  in double resolution, in string contactType) raises (Error);
+
+    /// Specifies a subchain of the robot as a limb, which can be used to create contacts.
+    /// A limb must consist in a simple kinematic chain, where every node has only one child
+    /// \param databasepath filepath to the database
+    /// \param id user given name of the new limb
+    /// \param heuristicName heuristic used to bias sample selection
+    void addLimbDatabase(in string databasepath, in string id, in string heuristicName) raises (Error);
 
     /// Set the start state of a contact generation problem
     /// environment, ordered by their efficiency
@@ -193,18 +222,49 @@ module hpp
     /// \param filename name of the file used to save the contacts.
     void saveComputedStates(in string filename) raises (Error);
 
+    /// Saves a sample database into a file
+    /// Raises an ifthe file could not be opened.
+    /// \param limbname name of the limb used to save the samples.
+    /// \param filename name of the file used to save the samples.
+    void saveLimbDatabase(in string limbname, in string filename) raises (Error);
+
     /// returns the size and transforms of all boxes of the octree for a limb
     /// \param limbname name of the considered limb
     /// \param dofArray considered configuration of the robot
     /// \return transformed configuration for which all possible contacts have been created
-    floatSeqSeq GetOctreeBoxes(in string limbname, in floatSeq dofArray) raises (Error);
+    floatSeqSeq getOctreeBoxes(in string limbname, in floatSeq dofArray) raises (Error);
 
+    /// returns the size and transforms of all boxes of the octree for a limb
+    /// \param limbname name of the considered limb
+    /// \param dofArray considered configuration of the robot
+    /// \return transformed configuration for which all possible contacts have been created
+    floatSeq getOctreeBox(in string limbname, in double sampleId) raises (Error);
 
     /// returns octree transform for a given robot configuration
     /// \param limbname name of the considered limb
     /// \param dofArray considered configuration of the robot
     /// \return size 7 position + quaternion of the octree root
     floatSeq getOctreeTransform(in string limbname, in floatSeq dofArray) raises (Error);
+
+    /// returns octree transform for a given robot configuration
+    /// \param config configuration tested on the robot
+    /// \param contacts name of the limbs in contact
+    /// \param robustnessTreshold robustness treshold used
+    /// \return whether the configuration is quasi-statically balanced
+    short isConfigBalanced(in floatSeq config, in Names_t contacts,  in double robustnessTreshold) raises (Error);
+
+    /// run and store an analysis on all limb databases
+    /// \param analysis name of the analysis existing if analysis ="all",
+    /// all tests are run.
+    /// \param isstatic 1 is becomes new static value of database, 0 otherwise
+    void runSampleAnalysis(in string analysis, in double isstatic) raises (Error);
+
+    /// run and store an analysis on a limb database
+    /// \param limbname name of the limb to perform the analysis to
+    /// \param analysis name of the analysis existing if analysis ="all",
+    /// all tests are run.
+    /// \param isstatic 1 is becomes new static value of database, 0 otherwise
+    void runLimbSampleAnalysis(in string limbname, in string analysis, in double isstatic) raises (Error);
 
   }; // interface Robot
   }; // module rbprm

@@ -22,6 +22,7 @@
 #include "hpp/rbprm/rbprm-validation.hh"
 #include "hpp/rbprm/rbprm-path-interpolation.hh"
 #include "hpp/rbprm/stability/stability.hh"
+#include "hpp/rbprm/sampling/sample-db.hh"
 #include "hpp/model/urdf/util.hh"
 #include <fstream>
 
@@ -36,6 +37,7 @@ namespace hpp {
     , romLoaded_(false)
     , fullBodyLoaded_(false)
     , bindShooter_()
+    , analysisFactory_(0)
     {
         // NOTHING
     }
@@ -128,7 +130,9 @@ namespace hpp {
             hppDout (error, exc.what ());
             throw hpp::Error (exc.what ());
         }
-        fullBodyLoaded_ = true;
+        fullBodyLoaded_ = true;        
+        if(!analysisFactory_)
+            analysisFactory_ = new sampling::AnalysisFactory(fullBody_);
     }
 
     hpp::floatSeq* RbprmBuilder::getSampleConfig(const char* limb, unsigned short sampleId) throw (hpp::Error)
@@ -185,6 +189,63 @@ namespace hpp {
         for(std::size_t i=0; i< 3; i++)
           (*dofArray)[(_CORBA_ULong)i] = position [i];
         return dofArray;
+    }
+
+
+    CORBA::UShort RbprmBuilder::getNumSamples(const char* limb) throw (hpp::Error)
+    {
+        const T_Limb& limbs = fullBody_->GetLimbs();
+        T_Limb::const_iterator lit = limbs.find(std::string(limb));
+        if(lit == limbs.end())
+        {
+            std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody_->device_->name());
+            throw Error (err.c_str());
+        }
+        return lit->second->sampleContainer_.samples_.size();
+    }
+
+    floatSeq *RbprmBuilder::getOctreeNodeIds(const char* limb) throw (hpp::Error)
+    {
+        const T_Limb& limbs = fullBody_->GetLimbs();
+        T_Limb::const_iterator lit = limbs.find(std::string(limb));
+        if(lit == limbs.end())
+        {
+            std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody_->device_->name());
+            throw Error (err.c_str());
+        }
+        const sampling::T_VoxelSampleId& ids =  lit->second->sampleContainer_.samplesInVoxels_;
+        hpp::floatSeq* dofArray = new hpp::floatSeq();
+        dofArray->length(ids.size());
+        sampling::T_VoxelSampleId::const_iterator it = ids.begin();
+        for(std::size_t i=0; i< _CORBA_ULong(ids.size()); ++i, ++it)
+        {
+          (*dofArray)[(_CORBA_ULong)i] = it->first;
+        }
+        return dofArray;
+    }
+
+    double RbprmBuilder::getSampleValue(const char* limb, const char* valueName, unsigned short sampleId) throw (hpp::Error)
+    {
+        const T_Limb& limbs = fullBody_->GetLimbs();
+        T_Limb::const_iterator lit = limbs.find(std::string(limb));
+        if(lit == limbs.end())
+        {
+            std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody_->device_->name());
+            throw Error (err.c_str());
+        }
+        const sampling::SampleDB& database = lit->second->sampleContainer_;
+        if (database.samples_.size() <= sampleId)
+        {
+            std::string err("unexisting sample id " + sampleId);
+            throw Error (err.c_str());
+        }
+        sampling::T_Values::const_iterator cit = database.values_.find(std::string(valueName));
+        if(cit == database.values_.end())
+        {
+            std::string err("value not existing in database " + std::string(valueName));
+            throw Error (err.c_str());
+        }
+        return cit->second[sampleId];
     }
 
     model::Configuration_t dofArrayToConfig (const model::DevicePtr_t& robot,
@@ -331,7 +392,7 @@ namespace hpp {
             for(model::ObjectVector_t::const_iterator oit = problemSolver_->collisionObstacles().begin();
                 oit != problemSolver_->collisionObstacles().end(); ++oit, ++i)
             {
-                sampling::GetCandidates(limb->sampleContainer_, transform, transform, *oit, dir, reports[i]);
+                sampling::GetCandidates(limb->sampleContainer_, transform, *oit, dir, reports[i]);
             }
             for(std::vector<sampling::T_OctreeReport>::const_iterator cit = reports.begin();
                 cit != reports.end(); ++cit)
@@ -346,6 +407,43 @@ namespace hpp {
               (*dofArray)[(_CORBA_ULong)i] = candCit->sample_->id_;
             }
             fullBody_->device_->currentConfiguration(save);
+            return dofArray;
+        } catch (const std::exception& exc) {
+        throw hpp::Error (exc.what ());
+        }
+    }
+
+    hpp::floatSeq* RbprmBuilder::getSamplesIdsInOctreeNode(const char* limb,
+                                                           double octreeNodeId) throw (hpp::Error)
+    {
+        if(!fullBodyLoaded_)
+            throw Error ("No full body robot was loaded");
+        try
+        {
+            long ocId (octreeNodeId);
+            const T_Limb& limbs = fullBody_->GetLimbs();
+            T_Limb::const_iterator lit = limbs.find(std::string(limb));
+            if(lit == limbs.end())
+            {
+                std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody_->device_->name());
+                throw Error (err.c_str());
+            }
+            const sampling::T_VoxelSampleId& sampleIds =  lit->second->sampleContainer_.samplesInVoxels_;
+            sampling::T_VoxelSampleId::const_iterator cit = sampleIds.find(ocId);
+            if(cit == sampleIds.end())
+            {
+                std::stringstream ss; ss << ocId;
+                std::string err("No octree node with id " + ss.str() + "was defined for robot" + fullBody_->device_->name());
+                throw Error (err.c_str());
+            }
+            const sampling::VoxelSampleId& ids = cit->second;
+            hpp::floatSeq* dofArray = new hpp::floatSeq();
+            dofArray->length(ids.second);
+            std::size_t sampleId = ids.first;
+            for(std::size_t i=0; i< _CORBA_ULong(ids.second); ++i, ++sampleId)
+            {
+              (*dofArray)[(_CORBA_ULong)i] = sampleId;
+            }
             return dofArray;
         } catch (const std::exception& exc) {
         throw hpp::Error (exc.what ());
@@ -371,6 +469,22 @@ namespace hpp {
                 cType = hpp::rbprm::_3_DOF;
             }
             fullBody_->AddLimb(std::string(id), std::string(limb), std::string(effector), off, norm, x, y, problemSolver_->collisionObstacles(), samples,heuristicName,resolution,cType);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+
+    void RbprmBuilder::addLimbDatabase(const char* databasePath, const char* id, const char* heuristicName) throw (hpp::Error)
+    {
+        if(!fullBodyLoaded_)
+            throw Error ("No full body robot was loaded");
+        try
+        {
+            std::string fileName(databasePath);
+            fullBody_->AddLimb(fileName, std::string(id), problemSolver_->collisionObstacles(), heuristicName);
         }
         catch(std::runtime_error& e)
         {
@@ -557,7 +671,24 @@ namespace hpp {
         }
     }
 
-    hpp::floatSeqSeq* RbprmBuilder::GetOctreeBoxes(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error)
+    void RbprmBuilder::saveLimbDatabase(const char* limbname,const char* filepath) throw (hpp::Error)
+    {
+        try
+        {
+        std::string limbName(limbname);
+        std::ofstream fout;
+        fout.open(filepath, std::fstream::out | std::fstream::app);
+        rbprm::saveLimbInfoAndDatabase(fullBody_->GetLimbs().at(limbName),fout);
+        //sampling::saveLimbDatabase(fullBody_->GetLimbs().at(limbName)->sampleContainer_,fout);
+        fout.close();
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    hpp::floatSeqSeq* RbprmBuilder::getOctreeBoxes(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error)
     {
         try
         {
@@ -596,6 +727,46 @@ namespace hpp {
         }
     }
 
+    hpp::floatSeq* RbprmBuilder::getOctreeBox(const char* limbName, double octreeNodeId) throw (hpp::Error)
+    {
+        try
+        {
+        if(!fullBodyLoaded_)
+            throw Error ("No full body robot was loaded");
+        long ocId (octreeNodeId);
+        const T_Limb& limbs = fullBody_->GetLimbs();
+        T_Limb::const_iterator lit = limbs.find(std::string(limbName));
+        if(lit == limbs.end())
+        {
+            std::string err("No limb " + std::string(limbName) + "was defined for robot" + fullBody_->device_->name());
+            throw Error (err.c_str());
+        }
+        const std::map<std::size_t, fcl::CollisionObject*>& boxes =
+                fullBody_->GetLimbs().at(std::string(limbName))->sampleContainer_.boxes_;
+        std::map<std::size_t, fcl::CollisionObject*>::const_iterator cit = boxes.find(ocId);
+        if(cit == boxes.end())
+        {
+            std::stringstream ss; ss << ocId;
+            std::string err("No octree node with id " + ss.str() + "was defined for robot" + fullBody_->device_->name());
+            throw Error (err.c_str());
+        }
+        const fcl::CollisionObject* box = cit->second;
+        const fcl::Vec3f& pos = box->getTransform().getTranslation();
+        hpp::floatSeq* dofArray = new hpp::floatSeq();
+        dofArray->length(4);
+        for(std::size_t i=0; i< 3; ++i)
+        {
+          (*dofArray)[(_CORBA_ULong)i] = pos[i];
+        }
+        (*dofArray)[(_CORBA_ULong)3] = fullBody_->GetLimbs().at(std::string(limbName))->sampleContainer_.resolution_;
+        return dofArray;
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
     hpp::floatSeq* RbprmBuilder::getOctreeTransform(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error)
     {
         try{
@@ -617,6 +788,124 @@ namespace hpp {
         fullBody_->device_->currentConfiguration(save);
         fullBody_->device_->computeForwardKinematics();
         return dofArray;
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    CORBA::Short RbprmBuilder::isConfigBalanced(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs, double robustnessTreshold) throw (hpp::Error)
+    {
+        try{
+        rbprm::State testedState;
+        model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
+        model::Configuration_t save = fullBody_->device_->currentConfiguration();
+        std::vector<std::string> names = stringConversion(contactLimbs);
+        for(std::vector<std::string>::const_iterator cit = names.begin(); cit != names.end();++cit)
+        {
+            std::cout << "name " << * cit << std::endl;
+            const hpp::rbprm::RbPrmLimbPtr_t limb =fullBody_->GetLimbs().at(std::string(*cit));
+            testedState.contacts_[*cit] = true;
+            testedState.contactPositions_[*cit] = limb->effector_->currentTransformation().getTranslation();
+            testedState.contactRotation_[*cit] = limb->effector_->currentTransformation().getRotation();
+            // normal given by effector normal
+            const fcl::Vec3f normal = limb->effector_->currentTransformation().getRotation() * limb->normal_;
+            testedState.contactNormals_[*cit] = normal;
+            testedState.configuration_ = config;
+            ++testedState.nbContacts;
+        }
+        fullBody_->device_->currentConfiguration(save);
+        fullBody_->device_->computeForwardKinematics();
+        if (stability::IsStable(fullBody_, testedState) >= robustnessTreshold)
+        {
+            return (CORBA::Short)(1);
+        }
+        else
+        {
+            return (CORBA::Short)(0);
+        }
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+
+    void RbprmBuilder::runSampleAnalysis(const char* analysis, double isstatic) throw (hpp::Error)
+    {
+        try
+        {
+        if(!fullBodyLoaded_)
+            throw Error ("No full body robot was loaded");
+        std::string eval(analysis);
+        if (eval == "all")
+        {
+            for(sampling::T_evaluate::const_iterator analysisit = analysisFactory_->evaluate_.begin();
+                analysisit != analysisFactory_->evaluate_.end(); ++ analysisit)
+            {
+                for(T_Limb::const_iterator cit = fullBody_->GetLimbs().begin(); cit !=fullBody_->GetLimbs().end();++cit)
+                {
+                    sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (cit->second->sampleContainer_);
+                    sampling::addValue(sampleDB, analysisit->first, analysisit->second, isstatic > 0.5, isstatic > 0.5);
+                }
+            }
+        }
+        else
+        {
+            sampling::T_evaluate::const_iterator analysisit = analysisFactory_->evaluate_.find(std::string(eval));
+            if(analysisit == analysisFactory_->evaluate_.end())
+            {
+                std::string err("No analysis named  " + eval + "was defined for analyzing database sample");
+                throw Error (err.c_str());
+            }
+            for(T_Limb::const_iterator cit = fullBody_->GetLimbs().begin(); cit !=fullBody_->GetLimbs().end();++cit)
+            {
+                sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (cit->second->sampleContainer_);
+                sampling::addValue(sampleDB, analysisit->first, analysisit->second, isstatic > 0.5, isstatic > 0.5);
+            }
+        }
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    void RbprmBuilder::runLimbSampleAnalysis(const char* limbname, const char* analysis, double isstatic) throw (hpp::Error)
+    {
+        try
+        {
+        if(!fullBodyLoaded_)
+            throw Error ("No full body robot was loaded");
+        T_Limb::const_iterator lit = fullBody_->GetLimbs().find(std::string(limbname));
+        if(lit == fullBody_->GetLimbs().end())
+        {
+            std::string err("No limb " + std::string(limbname) + "was defined for robot" + fullBody_->device_->name());
+            throw Error (err.c_str());
+        }
+        std::string eval(analysis);
+        if (eval == "all")
+        {
+            for(sampling::T_evaluate::const_iterator analysisit = analysisFactory_->evaluate_.begin();
+                analysisit != analysisFactory_->evaluate_.end(); ++ analysisit)
+            {
+                sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (lit->second->sampleContainer_);
+                sampling::addValue(sampleDB, analysisit->first, analysisit->second, isstatic > 0.5, isstatic > 0.5);
+            }
+        }
+        else
+        {
+            sampling::T_evaluate::const_iterator analysisit = analysisFactory_->evaluate_.find(std::string(eval));
+            if(analysisit == analysisFactory_->evaluate_.end())
+            {
+                std::string err("No analysis named  " + eval + "was defined for analyzing database sample");
+                throw Error (err.c_str());
+            }
+            sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (lit->second->sampleContainer_);
+            sampling::addValue(sampleDB, analysisit->first, analysisit->second, isstatic > 0.5, isstatic > 0.5);
+            }
         }
         catch(std::runtime_error& e)
         {
