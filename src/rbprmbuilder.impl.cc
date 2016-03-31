@@ -477,14 +477,14 @@ namespace hpp {
     }
 
 
-    void RbprmBuilder::addLimbDatabase(const char* databasePath, const char* id, const char* heuristicName) throw (hpp::Error)
+    void RbprmBuilder::addLimbDatabase(const char* databasePath, const char* id, const char* heuristicName, double loadValues) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
         try
         {
             std::string fileName(databasePath);
-            fullBody_->AddLimb(fileName, std::string(id), problemSolver_->collisionObstacles(), heuristicName);
+            fullBody_->AddLimb(fileName, std::string(id), problemSolver_->collisionObstacles(), heuristicName, loadValues > 0.5);
         }
         catch(std::runtime_error& e)
         {

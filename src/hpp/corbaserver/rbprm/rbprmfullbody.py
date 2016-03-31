@@ -100,8 +100,12 @@ class FullBody (object):
 	# \param limbId: user defined id for the limb. Must be unique.
     #  The id is used if several contact points are defined for the same limb (ex: the knee and the foot)
     # \param heuristicName: name of the selected heuristic for configuration evaluation
-    def addLimbDatabase(self, databasepath, limbId, heuristicName):
-		self.client.rbprm.rbprm.addLimbDatabase(databasepath, limbId, heuristicName)		
+    # \param loadValues: whether values computed, other than the static ones, should be loaded in memory
+    def addLimbDatabase(self, databasepath, limbId, heuristicName, loadValues = True):		
+		boolVal = 0.
+		if(loadValues):
+			boolVal = 1.
+		self.client.rbprm.rbprm.addLimbDatabase(databasepath, limbId, heuristicName, boolVal)		
 
 	## Add a limb to the model
 	#
