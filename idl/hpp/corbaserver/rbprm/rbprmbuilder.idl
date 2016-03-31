@@ -187,7 +187,8 @@ module hpp
     /// \param databasepath filepath to the database
     /// \param id user given name of the new limb
     /// \param heuristicName heuristic used to bias sample selection
-    void addLimbDatabase(in string databasepath, in string id, in string heuristicName) raises (Error);
+    /// \param loadValues whether other values computed for the limb database should be loaded
+    void addLimbDatabase(in string databasepath, in string id, in string heuristicName, in double loadValues) raises (Error);
 
     /// Set the start state of a contact generation problem
     /// environment, ordered by their efficiency
