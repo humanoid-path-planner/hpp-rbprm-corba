@@ -130,9 +130,8 @@ namespace hpp {
             hppDout (error, exc.what ());
             throw hpp::Error (exc.what ());
         }
-        fullBodyLoaded_ = true;        
-        if(!analysisFactory_)
-            analysisFactory_ = new sampling::AnalysisFactory(fullBody_);
+        fullBodyLoaded_ = true;
+        analysisFactory_ = new sampling::AnalysisFactory(fullBody_);
     }
 
     hpp::floatSeq* RbprmBuilder::getSampleConfig(const char* limb, unsigned short sampleId) throw (hpp::Error)
