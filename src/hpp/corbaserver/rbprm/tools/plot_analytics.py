@@ -75,8 +75,8 @@ def plotOctreeValues(robot, valueName, limb):
 	fig = plt.figure()
 	ax = fig.add_subplot(111, projection='3d')
 	boxesValues = getOctreeValues(robot, valueName, limb)
-	boxes = res['boxes']
-	values = res['values']
+	boxes = boxesValues['boxes']
+	values = boxesValues['values']
 	for i in range(0,len(boxes)):
 		plotcube(plt,ax,values[i], boxes[i])
 	ax.set_xlabel('X Label')
