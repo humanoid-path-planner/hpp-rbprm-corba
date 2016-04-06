@@ -264,7 +264,7 @@ class FullBody (object):
 		isStatic = 0.
 		if(isstatic):
 			isStatic = 1.
-		self.client.rbprm.rbprm.runLimbSampleAnalysis(limbname, analysis,isStatic)
+		return self.client.rbprm.rbprm.runLimbSampleAnalysis(limbname, analysis,isStatic)
 		
 	## Create octree nodes representation for a given limb
 	#

@@ -265,7 +265,8 @@ module hpp
     /// \param analysis name of the analysis existing if analysis ="all",
     /// all tests are run.
     /// \param isstatic 1 is becomes new static value of database, 0 otherwise
-    void runLimbSampleAnalysis(in string limbname, in string analysis, in double isstatic) raises (Error);
+    /// \return min and max values obtained
+    floatSeq runLimbSampleAnalysis(in string limbname, in string analysis, in double isstatic) raises (Error);
 
   }; // interface Robot
   }; // module rbprm
