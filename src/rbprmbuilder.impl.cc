@@ -873,10 +873,11 @@ namespace hpp {
         }
     }
 
-    void RbprmBuilder::runLimbSampleAnalysis(const char* limbname, const char* analysis, double isstatic) throw (hpp::Error)
+    hpp::floatSeq* RbprmBuilder::runLimbSampleAnalysis(const char* limbname, const char* analysis, double isstatic) throw (hpp::Error)
     {
         try
         {
+        rbprm::sampling::ValueBound bounds;
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
         T_Limb::const_iterator lit = fullBody_->GetLimbs().find(std::string(limbname));
@@ -893,6 +894,7 @@ namespace hpp {
             {
                 sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (lit->second->sampleContainer_);
                 sampling::addValue(sampleDB, analysisit->first, analysisit->second, isstatic > 0.5, isstatic > 0.5);
+                bounds = sampleDB.valueBounds_[analysisit->first];
             }
         }
         else
@@ -905,7 +907,13 @@ namespace hpp {
             }
             sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (lit->second->sampleContainer_);
             sampling::addValue(sampleDB, analysisit->first, analysisit->second, isstatic > 0.5, isstatic > 0.5);
-            }
+            bounds = sampleDB.valueBounds_[analysisit->first];
+        }
+        hpp::floatSeq* dofArray = new hpp::floatSeq();
+        dofArray->length(2);
+        (*dofArray)[0] = bounds.first;
+        (*dofArray)[1] = bounds.second;
+        return dofArray;
         }
         catch(std::runtime_error& e)
         {
