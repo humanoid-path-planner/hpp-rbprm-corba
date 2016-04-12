@@ -27,7 +27,7 @@ int main (int argc, char* argv [])
     hpp::core::ProblemSolverPtr_t problemSolver (hpp::core::ProblemSolver::create());
     CorbaServer corbaServer (problemSolver, argc,
                const_cast<const char**> (argv), true);
-    RbprmServer rbprmServer (argc, argv, true, "rbprmChild");
+    RbprmServer rbprmServer (argc, const_cast<const char**> (argv), true, "rbprmChild");
     rbprmServer.setProblemSolver (problemSolver);
 
     corbaServer.startCorbaServer ();
