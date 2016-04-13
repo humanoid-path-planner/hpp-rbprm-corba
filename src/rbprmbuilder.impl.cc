@@ -20,7 +20,7 @@
 #include "rbprmbuilder.impl.hh"
 #include "hpp/rbprm/rbprm-device.hh"
 #include "hpp/rbprm/rbprm-validation.hh"
-#include "hpp/rbprm/rbprm-path-interpolation.hh"
+#include "hpp/rbprm/interpolation/rbprm-path-interpolation.hh"
 #include "hpp/rbprm/stability/stability.hh"
 #include "hpp/rbprm/sampling/sample-db.hh"
 #include "hpp/model/urdf/util.hh"
@@ -200,7 +200,7 @@ namespace hpp {
             std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody_->device_->name());
             throw Error (err.c_str());
         }
-        return lit->second->sampleContainer_.samples_.size();
+        return (CORBA::UShort)(lit->second->sampleContainer_.samples_.size());
     }
 
     floatSeq *RbprmBuilder::getOctreeNodeIds(const char* limb) throw (hpp::Error)
@@ -214,11 +214,11 @@ namespace hpp {
         }
         const sampling::T_VoxelSampleId& ids =  lit->second->sampleContainer_.samplesInVoxels_;
         hpp::floatSeq* dofArray = new hpp::floatSeq();
-        dofArray->length(ids.size());
+        dofArray->length((_CORBA_ULong)ids.size());
         sampling::T_VoxelSampleId::const_iterator it = ids.begin();
         for(std::size_t i=0; i< _CORBA_ULong(ids.size()); ++i, ++it)
         {
-          (*dofArray)[(_CORBA_ULong)i] = it->first;
+          (*dofArray)[(_CORBA_ULong)i] = (double)it->first;
         }
         return dofArray;
     }
@@ -259,7 +259,7 @@ namespace hpp {
         // Fill dof vector with dof array.
         model::Configuration_t config; config.resize (configDim);
         for (std::size_t iDof = 0; iDof < configDim; iDof++) {
-            config [iDof] = dofArray[iDof];
+            config [iDof] = (_CORBA_ULong)dofArray[(_CORBA_ULong)iDof];
         }
         // fill the vector by zero
         hppDout (info, "config dimension: " <<configDim
@@ -275,7 +275,7 @@ namespace hpp {
     {
         std::size_t configsDim = (std::size_t)doubleDofArray.length();
         std::vector<model::Configuration_t> res;
-        for (std::size_t iConfig = 0; iConfig < configsDim; iConfig++)
+        for (_CORBA_ULong iConfig = 0; iConfig < configsDim; iConfig++)
         {
             res.push_back(dofArrayToConfig(robot, doubleDofArray[iConfig]));
         }
@@ -286,7 +286,7 @@ namespace hpp {
     {
         std::vector<std::string> res;
         std::size_t dim = (std::size_t)dofArray.length();
-        for (std::size_t iDof = 0; iDof < dim; iDof++)
+        for (_CORBA_ULong iDof = 0; iDof < dim; iDof++)
         {
             res.push_back(std::string(dofArray[iDof]));
         }
@@ -297,7 +297,7 @@ namespace hpp {
     {
         std::vector<double> res;
         std::size_t dim = (std::size_t)dofArray.length();
-        for (std::size_t iDof = 0; iDof < dim; iDof++)
+        for (_CORBA_ULong iDof = 0; iDof < dim; iDof++)
         {
             res.push_back(dofArray[iDof]);
         }
@@ -316,7 +316,7 @@ namespace hpp {
         std::string name(romName);
         bindShooter_.normalFilter_.erase(name);
         fcl::Vec3f dir;
-        for(std::size_t i =0; i <3; ++i)
+        for(_CORBA_ULong i =0; i <3; ++i)
         {
             dir[i] = normal[i];
         }
@@ -344,7 +344,7 @@ namespace hpp {
             fcl::Vec3f dir;
             for(std::size_t i =0; i <3; ++i)
             {
-                dir[i] = direction[i];
+                dir[i] = direction[(_CORBA_ULong)i];
             }
             model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
             rbprm::State state = rbprm::ComputeContacts(fullBody_,config,
@@ -370,7 +370,7 @@ namespace hpp {
             fcl::Vec3f dir;
             for(std::size_t i =0; i <3; ++i)
             {
-                dir[i] = direction[i];
+                dir[i] = direction[(_CORBA_ULong)i];
             }
             model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
             model::Configuration_t save = fullBody_->device_->currentConfiguration();
@@ -399,11 +399,11 @@ namespace hpp {
                 finalSet.insert(cit->begin(), cit->end());
             }
             hpp::floatSeq* dofArray = new hpp::floatSeq();
-            dofArray->length(finalSet.size());
+            dofArray->length((_CORBA_ULong)finalSet.size());
             sampling::T_OctreeReport::const_iterator candCit = finalSet.begin();
             for(std::size_t i=0; i< _CORBA_ULong(finalSet.size()); ++i, ++candCit)
             {
-              (*dofArray)[(_CORBA_ULong)i] = candCit->sample_->id_;
+              (*dofArray)[(_CORBA_ULong)i] = (double)candCit->sample_->id_;
             }
             fullBody_->device_->currentConfiguration(save);
             return dofArray;
@@ -419,7 +419,7 @@ namespace hpp {
             throw Error ("No full body robot was loaded");
         try
         {
-            long ocId (octreeNodeId);
+            long ocId ((long)octreeNodeId);
             const T_Limb& limbs = fullBody_->GetLimbs();
             T_Limb::const_iterator lit = limbs.find(std::string(limb));
             if(lit == limbs.end())
@@ -437,11 +437,11 @@ namespace hpp {
             }
             const sampling::VoxelSampleId& ids = cit->second;
             hpp::floatSeq* dofArray = new hpp::floatSeq();
-            dofArray->length(ids.second);
+            dofArray->length((_CORBA_ULong)ids.second);
             std::size_t sampleId = ids.first;
             for(std::size_t i=0; i< _CORBA_ULong(ids.second); ++i, ++sampleId)
             {
-              (*dofArray)[(_CORBA_ULong)i] = sampleId;
+              (*dofArray)[(_CORBA_ULong)i] = (double)sampleId;
             }
             return dofArray;
         } catch (const std::exception& exc) {
@@ -459,8 +459,8 @@ namespace hpp {
             fcl::Vec3f off, norm;
             for(std::size_t i =0; i <3; ++i)
             {
-                off[i] = offset[i];
-                norm[i] = normal[i];
+                off[i] = offset[(_CORBA_ULong)i];
+                norm[i] = normal[(_CORBA_ULong)i];
             }
             ContactType cType = hpp::rbprm::_6_DOF;
             if(std::string(contactType) == "_3_DOF")
@@ -558,13 +558,13 @@ namespace hpp {
             {
                 throw std::runtime_error ("End state not initialized, can not interpolate ");
             }
-            hpp::rbprm::RbPrmInterpolationPtr_t interpolator = rbprm::RbPrmInterpolation::create(fullBody_,startState_,endState_);
+            hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_);
             std::vector<model::Configuration_t> configurations = doubleDofArrayToConfig(fullBody_->device_, configs);
             lastStatesComputed_ = interpolator->Interpolate(problemSolver_->collisionObstacles(),configurations,robustnessTreshold);
             hpp::floatSeqSeq *res;
             res = new hpp::floatSeqSeq ();
 
-            res->length (lastStatesComputed_.size ());
+            res->length ((_CORBA_ULong)lastStatesComputed_.size ());
             std::size_t i=0;
             std::size_t id = 0;
             for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin(); cit != lastStatesComputed_.end(); ++cit, ++id)
@@ -579,7 +579,7 @@ namespace hpp {
                 for (model::size_type j=0 ; j < config.size() ; ++j) {
                   dofArray[j] = config [j];
                 }
-                (*res) [i] = floats;
+                (*res) [(_CORBA_ULong)i] = floats;
                 ++i;
             }
             return res;
@@ -594,7 +594,7 @@ namespace hpp {
     {
         try
         {
-        int pathId = int(path);
+        unsigned int pathId = int(path);
         if(startState_.configuration_.rows() == 0)
         {
             throw std::runtime_error ("Start state not initialized, can not interpolate ");
@@ -609,13 +609,13 @@ namespace hpp {
             throw std::runtime_error ("No path computed, cannot interpolate ");
         }
 
-        hpp::rbprm::RbPrmInterpolationPtr_t interpolator = rbprm::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver_->paths()[pathId]);
+        hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver_->paths()[pathId]);
         lastStatesComputed_ = interpolator->Interpolate(problemSolver_->collisionObstacles(),timestep,robustnessTreshold);
 
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
 
-        res->length (lastStatesComputed_.size ());
+        res->length ((_CORBA_ULong)lastStatesComputed_.size ());
         std::size_t i=0;
         std::size_t id = 0;
         for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin(); cit != lastStatesComputed_.end(); ++cit, ++id)
@@ -630,7 +630,7 @@ namespace hpp {
             for (model::size_type j=0 ; j < config.size() ; ++j) {
               dofArray[j] = config [j];
             }
-            (*res) [i] = floats;
+            (*res) [(_CORBA_ULong)i] = floats;
             ++i;
         }
         return res;
@@ -701,7 +701,7 @@ namespace hpp {
         std::size_t i =0;
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
-        res->length (boxes.size ());
+        res->length ((_CORBA_ULong)boxes.size ());
         for(std::map<std::size_t, fcl::CollisionObject*>::const_iterator cit = boxes.begin();
             cit != boxes.end();++cit,++i)
         {
@@ -714,7 +714,7 @@ namespace hpp {
                 dofArray[j] = position[j];
             }
             dofArray[3] = resolution;
-            (*res) [i] = floats;
+            (*res) [(_CORBA_ULong)i] = floats;
         }
         fullBody_->device_->currentConfiguration(save);
         fullBody_->device_->computeForwardKinematics();
@@ -732,7 +732,7 @@ namespace hpp {
         {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
-        long ocId (octreeNodeId);
+        long ocId ((long)octreeNodeId);
         const T_Limb& limbs = fullBody_->GetLimbs();
         T_Limb::const_iterator lit = limbs.find(std::string(limbName));
         if(lit == limbs.end())
@@ -927,9 +927,9 @@ namespace hpp {
         //bind shooter creator to hide problem as a parameter and respect signature
 
         // add rbprmshooter
-        problemSolver->addConfigurationShooterType("RbprmShooter",
+        problemSolver->add<core::ConfigurationShooterBuilder_t>("RbprmShooter",
                                                    boost::bind(&BindShooter::create, boost::ref(bindShooter_), _1));
-        problemSolver->addPathValidationType("RbprmPathValidation",
+        problemSolver->add<core::PathValidationBuilder_t>("RbprmPathValidation",
                                                    boost::bind(&BindShooter::createPathValidation, boost::ref(bindShooter_), _1, _2));
     }
 
