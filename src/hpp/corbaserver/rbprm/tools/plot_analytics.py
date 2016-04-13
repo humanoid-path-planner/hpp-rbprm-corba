@@ -104,6 +104,7 @@ def compareOctreeValues(robotName1, robotName2, boxesValues1, boxesValues2, valu
 	bx.set_title(robotName2)
 	plotOctreeValuesCompare(bx, boxesValues2)
 	#~ plt.title(valueName)
+	plt.savefig(valueName+'.png')
 	plt.draw()
 
 ## Display a 3d plot of the values computed for a limb database
