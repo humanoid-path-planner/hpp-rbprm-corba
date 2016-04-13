@@ -25,6 +25,9 @@ rbprmBuilder.boundSO3([-0.1,0.1,-3,3,-1.0,1.0])
 rbprmBuilder.setFilter(['robot_test_lleg_rom', 'robot_test_rleg_rom'])
 rbprmBuilder.setNormalFilter('robot_test_lleg_rom', [0,0,1], 0.5)
 rbprmBuilder.setNormalFilter('robot_test_rleg_rom', [0,0,1], 0.5)
+rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(3)
+rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([0,0,0,0,0,0])
+
 
 
 #~ from hpp.corbaserver.rbprm. import ProblemSolver
@@ -38,6 +41,7 @@ r.loadObstacleModel (packageName, "groundcrouch", "planning")
 
 
 q_init = rbprmBuilder.getCurrentConfig ();
+q_init[(len(q_init)-3):]=[0,0,1] # set normal for init / goal config
 q_init [0:3] = [-6, 0, 0.9]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 
 
@@ -48,7 +52,6 @@ q_goal [0:3] = [4, 0, 0.9]; r (q_goal) # pont
 
 #~ ps.addPathOptimizer("GradientBased")
 ps.addPathOptimizer("RandomShortcut")
-ps.client.problem.selectSteeringMethod("SteeringDynamic")
 ps.selectPathPlanner("RRTdynamic")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)

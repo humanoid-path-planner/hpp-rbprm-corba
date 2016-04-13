@@ -41,6 +41,7 @@ r.loadObstacleModel (packageName, "ground_bigStep", "planning")
 
 
 q_init = rbprmBuilder.getCurrentConfig ();
+#q_init[(len(q_init)-3):]=[0,0,1] # set normal for init / goal config
 q_init [0:3] = [-4, 1, 0.9]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 
 
@@ -50,8 +51,7 @@ q_goal [0:3] = [4, -1, 0.9]; r (q_goal)
 
 
 #~ ps.addPathOptimizer("GradientBased")
-ps.addPathOptimizer("RandomShortcut")
-ps.client.problem.selectSteeringMethod("SteeringParabola")
+#ps.addPathOptimizer("RandomShortcut")
 ps.selectPathPlanner("RRTdynamic")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
