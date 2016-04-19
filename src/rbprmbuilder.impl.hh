@@ -29,6 +29,8 @@
 # include <hpp/core/discretized-collision-checking.hh>
 # include <hpp/core/straight-path.hh>
 
+#include <hpp/fcl/BVH/BVH_model.h>
+
 namespace hpp {
   namespace rbprm {
     namespace impl {
@@ -44,8 +46,15 @@ namespace hpp {
         hpp::rbprm::RbPrmShooterPtr_t create (const hpp::model::DevicePtr_t& robot)
         {
             hpp::model::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::model::RbPrmDevice>(robot);
+						std::map<std::string, std::vector<boost::shared_ptr<model::CollisionObject> > > affMap =
+						problemSolver_->map
+							<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
+		        if (affMap.empty ()) {
+    	        throw hpp::Error ("No affordances found. Unable to create shooter object.");
+      		  }
             rbprm::RbPrmShooterPtr_t shooter = hpp::rbprm::RbPrmShooter::create
-                    (robotcast,problemSolver_->problem ()->collisionObstacles(),romFilter_,normalFilter_,shootLimit_,displacementLimit_);
+                    (robotcast, problemSolver_->problem ()->collisionObstacles(), affMap,
+										romFilter_,affFilter_,shootLimit_,displacementLimit_);
             if(!so3Bounds_.empty())
                 shooter->BoundSO3(so3Bounds_);
             return shooter;
@@ -54,7 +63,7 @@ namespace hpp {
         hpp::core::PathValidationPtr_t createPathValidation (const hpp::model::DevicePtr_t& robot, const hpp::model::value_type& val)
         {
             hpp::model::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::model::RbPrmDevice>(robot);
-            hpp::rbprm::RbPrmValidationPtr_t validation(hpp::rbprm::RbPrmValidation::create(robotcast, romFilter_, normalFilter_));
+            hpp::rbprm::RbPrmValidationPtr_t validation(hpp::rbprm::RbPrmValidation::create(robotcast, romFilter_, affFilter_));
             hpp::core::DiscretizedCollisionCheckingPtr_t collisionChecking = hpp::core::DiscretizedCollisionChecking::create(robot,val);
             collisionChecking->add (validation);
             return collisionChecking;
@@ -62,7 +71,7 @@ namespace hpp {
 
         hpp::core::ProblemSolverPtr_t problemSolver_;
         std::vector<std::string> romFilter_;
-        std::map<std::string, NormalFilter> normalFilter_;
+        std::map<std::string, std::vector<std::string> > affFilter_;
         std::size_t shootLimit_;
         std::size_t displacementLimit_;
         std::vector<double> so3Bounds_;
@@ -96,7 +105,7 @@ namespace hpp {
                  const char* srdfSuffix) throw (hpp::Error);
 
         virtual void setFilter(const hpp::Names_t& roms) throw (hpp::Error);
-        virtual void setNormalFilter(const char* romName, const hpp::floatSeq& normal, double range) throw (hpp::Error);
+				virtual void setAffordanceFilter(const char* romName, const hpp::Names_t& affordances) throw (hpp::Error);
         virtual void boundSO3(const hpp::floatSeq& limitszyx) throw (hpp::Error);
 
 

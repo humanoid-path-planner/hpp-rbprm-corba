@@ -98,13 +98,11 @@ module hpp
 
     /// Set Rom surface constraints for the configuration shooter
     /// a Rom configuration will only be valid it collides with a surface
-    /// the normal of which is colinear to the indicated normal,
-    /// modulated by a range value.
-    /// \param normal prefered contact surface normal direction
-    /// \param range tolerance between surface normal and desired surface normal. If the dot
-    /// product of the normal is greater than range then the surface will be accepted.
-    ///
-    void setNormalFilter(in string romName, in floatSeq normal, in double range) raises (Error);
+    /// that forms a given affordance (support, lean, etc.)
+    /// \param affordances a list of affordances accepted for 
+		/// validation of given Rom
+		///
+    void setAffordanceFilter(in string romName, in Names_t affordances) raises (Error);
 
     /// Sets limits on robot orientation, described according to Euler's ZYX rotation order
     ///

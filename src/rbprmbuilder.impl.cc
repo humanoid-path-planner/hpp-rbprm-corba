@@ -251,17 +251,12 @@ namespace hpp {
     }
 
 
-    void RbprmBuilder::setNormalFilter(const char* romName, const hpp::floatSeq& normal, double range) throw (hpp::Error)
+    void RbprmBuilder::setAffordanceFilter(const char* romName, const hpp::Names_t& affordances) throw (hpp::Error)
     {
-        std::string name(romName);
-        bindShooter_.normalFilter_.erase(name);
-        fcl::Vec3f dir;
-        for(std::size_t i =0; i <3; ++i)
-        {
-            dir[i] = normal[i];
-        }
-        NormalFilter filter(dir,range);
-        bindShooter_.normalFilter_.insert(std::make_pair(name,filter));
+        std::string name (romName);
+				std::vector<std::string> affNames = stringConversion(affordances);
+        bindShooter_.affFilter_.erase(name);
+        bindShooter_.affFilter_.insert(std::make_pair(name,affNames));
     }
 
     void RbprmBuilder::boundSO3(const hpp::floatSeq& limitszyx) throw (hpp::Error)
