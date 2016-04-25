@@ -33,6 +33,7 @@ rbprmBuilder.boundSO3([-0.4,0.4,-3,3,-3,3])
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 ps = ProblemSolver( rbprmBuilder )
 r = Viewer (ps)
+r.loadObstacleModel (packageName, "darpa", "planning")
 
 # Setting initial and goal configurations
 q_init = rbprmBuilder.getCurrentConfig ();
@@ -44,12 +45,6 @@ q_goal [0:3] = [3, 0, 0.63]; r (q_goal)
 ps.addPathOptimizer("RandomShortcut")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
-
-# Choosing RBPRM shooter and path validation methods.
-# Note that the standard RRT algorithm is used.
-ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
-r.loadObstacleModel (packageName, "darpa", "planning")
 
 from hpp.corbaserver.affordance import Client
 c = Client ()
@@ -65,6 +60,11 @@ for aff in objs:
 		r.client.gui.addTriangleFace('tri' + str(count), tri[0], tri[1], tri[2], [colour, 1, 0.5, 1])
 		r.client.gui.addToGroup('tri' + str(count), 'planning')
 		count += 1
+
+# Choosing RBPRM shooter and path validation methods.
+# Note that the standard RRT algorithm is used.
+ps.client.problem.selectConFigurationShooter("RbprmShooter")
+ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 
 # Solve the problem
 t = ps.solve ()
