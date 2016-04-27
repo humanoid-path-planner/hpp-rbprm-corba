@@ -218,6 +218,12 @@ module hpp
     /// \param robustnessTreshold minimum value of the static equilibrium robustness criterion required to accept the configuration (0 by default).
     floatSeqSeq interpolateConfigs(in floatSeqSeq configs, in double robustnessTreshold) raises (Error);
 
+    /// Provided a path has already been computed and interpolated, generate a continuous path
+    /// between two indicated states. Will fail if the index of the states do not exist
+    /// \param state1
+    /// \param state2 index of second state.
+    void interpolateBetweenStates(in double state1, in double state2) raises (Error);
+
     /// Saves the last computed states by the function interpolate in a filename.
     /// Raises an error if interpolate has not been called, or the file could not be opened.
     /// \param filename name of the file used to save the contacts.
