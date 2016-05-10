@@ -22,7 +22,8 @@ srdfSuffix = ""
 rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 rbprmBuilder.setJointBounds ("base_joint_xyz", [-6,6, -3, 3, 0, 2.5])
-rbprmBuilder.boundSO3([-0.1,0.1,-3,3,-1.0,1.0])
+# limits zyx
+rbprmBuilder.boundSO3([-3,3,-1.0,1.0,-0.1,0.1])
 rbprmBuilder.setFilter(['robot_test_lleg_rom', 'robot_test_rleg_rom'])
 rbprmBuilder.setNormalFilter('robot_test_lleg_rom', [0,0,1], 0.5)
 rbprmBuilder.setNormalFilter('robot_test_rleg_rom', [0,0,1], 0.5)
@@ -63,9 +64,9 @@ r(q_init)
 #ps.solve()
 
 
-#r.solveAndDisplay("rm",1,0.02)
+r.solveAndDisplay("rm",1,0.02)
 
-rbprmBuilder.isConfigValid([-4,1,1.9,1,0,0,0,0,0,1])
+#rbprmBuilder.isConfigValid([-4,1,1.9,1,0,0,0,0,0,1])
 
 #t = ps.solve ()
 #r.displayRoadmap("rm",0.005)
