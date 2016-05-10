@@ -38,9 +38,25 @@ ps.addGoalConfig (q_goal)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
-# afftool.loadObstacleModel (packageName, "darpa", "planning", r)
+afftool.loadObstacleModel (packageName, "darpa", "planning", r)
 afftool.loadObstacleModel ("hpp-ompl-benchmark", "cubicles_robot", "robo", r)
 afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 
-afftool.deleteAffordancesByType('Support', r, 'robo/base_link_0')
+afftool.deleteAffordances(r,'robo/base_link_0')
+ps.moveObstacle('robo/base_link_0', [0,-0.75,0, 0.5,0.5,0.5,0.5])
+r.computeObjectPosition()
+afftool.analyseObject('robo/base_link_0')
+afftool.visualiseAffordances('Support', r, [0.75, 0.75, 0.1], 'robo/base_link_0')
 
+# Choosing RBPRM shooter and path validation methods.
+# Note that the standard RRT algorithm is used.
+ps.client.problem.selectConFigurationShooter("RbprmShooter")
+ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
+
+# Solve the problem
+t = ps.solve ()
+
+# Playing the computed path
+from hpp.gepetto import PathPlayer
+pp = PathPlayer (rbprmBuilder.client.basic, r)
+pp (0)
