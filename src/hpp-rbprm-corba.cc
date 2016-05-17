@@ -38,7 +38,6 @@ int main (int argc, char* argv [])
 
     CorbaServer corbaServer (problemSolver, argc,
                const_cast<const char**> (argv), true);
-
 		AffordanceServer affordanceServer (argc, const_cast<const char**> (argv),
 																				true);
 		affordanceServer.setProblemSolver (problemSolver);
