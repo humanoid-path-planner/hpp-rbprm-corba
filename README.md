@@ -40,7 +40,7 @@ To install hpp-rbprm-corba:
 	https://github.com/iit-DLSLab/hyq-description
 
 
-    ```$ rosrun xacro xacro.py  hyq_description/robots/hyq_model.urdf.xacro -o  hyq.urdf```
+    ```$ rosrun xacro xacro.py  hyq_description/robots/hyq.urdf.xacro  -o  hyq.urdf```
 
   - Make sure to install hyq.urdf in $HPP_DEVEL_DIR/install/share/hpp-rbprm-corba/
 
