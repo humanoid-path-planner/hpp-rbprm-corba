@@ -43,6 +43,8 @@ To install hpp-rbprm-corba:
     ```$ rosrun xacro xacro.py  hyq_description/robots/hyq.urdf.xacro  -o  hyq.urdf```
 
   - Make sure to install hyq.urdf in $HPP_DEVEL_DIR/install/share/hpp-rbprm-corba/
+  
+  - Also, create an empty hyq.srdf file in  $HPP_DEVEL_DIR/install/share/hpp-rbprm-corba/srdf
 
   - The planning is decomposed in two phases / scripts. First, a root path is computed (\*_path.py files). Then, the contacts are generated along the computed path (\*_interp.py files). The scripts are located in the folder /scripts/scenarios.
 
