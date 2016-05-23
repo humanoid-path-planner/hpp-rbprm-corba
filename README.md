@@ -14,12 +14,20 @@ To install hpp-rbprm-corba:
 
   1. install HPP-RBPRM
 	- see https://github.com/stonneau/hpp-rbprm
+	-
+
+  2. If necessary, install hpp-corba-template
+  	- git clone --recursive https://github.com/laas/hpp-template-corba.git
+  	- cd hpp-template-corba/
+  	- mkdir build && cd build
+  	- cmake ..
+  	- make install
 
   2. Use CMake to install the library. For instance:
 
 			mkdir $HPP_RBPRM_CORBA_DIR/build
 			cd $HPP_RBPRM_CORBA_DIR/build
-			cd cmake ..	
+			cmake ..	
 			make install
 	
 
