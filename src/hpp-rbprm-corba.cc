@@ -22,7 +22,7 @@
 typedef hpp::rbprm::Server RbprmServer;
 typedef hpp::corbaServer::Server CorbaServer;
 
-int main (int argc, char* argv [])
+int main (int argc, const char* argv [])
 {
     hpp::core::ProblemSolverPtr_t problemSolver (hpp::core::ProblemSolver::create());
     CorbaServer corbaServer (problemSolver, argc,

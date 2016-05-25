@@ -23,7 +23,7 @@
 
 namespace hpp {
   namespace rbprm {
-    Server::Server (int argc, char *argv[], bool multiThread,
+    Server::Server (int argc, const char *argv[], bool multiThread,
             const std::string& poaName) :
       rbprmBuilder_ (new corba::Server <impl::RbprmBuilder>
           (argc, argv, multiThread, poaName)) {}
