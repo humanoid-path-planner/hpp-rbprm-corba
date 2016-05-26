@@ -7,8 +7,8 @@ from hpp.gepetto import Viewer
 #calling script darpa_hyq_path to compute root path
 import darpa_hyq_path as tp
 
-packageName = "hpp-rbprm-corba"
-meshPackageName = "hpp-rbprm-corba"
+packageName = "hyq_description"
+meshPackageName = "hyq_description"
 rootJointType = "freeflyer"
 
 #  Information to retrieve urdf and srdf files.
