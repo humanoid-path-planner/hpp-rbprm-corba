@@ -35,6 +35,7 @@ namespace hpp {
   namespace rbprm {
     namespace impl {
       using CORBA::Short;
+			typedef std::map<std::string, std::vector<boost::shared_ptr<model::CollisionObject> > > affMap_t;
 
     struct BindShooter
     {
@@ -78,7 +79,7 @@ namespace hpp {
         std::size_t shootLimit_;
         std::size_t displacementLimit_;
         std::vector<double> so3Bounds_;
-				std::map<std::string, std::vector<boost::shared_ptr<model::CollisionObject> > > affMap_;
+				affMap_t affMap_;
     };
 
       class RbprmBuilder : public virtual POA_hpp::corbaserver::rbprm::RbprmBuilder
