@@ -286,8 +286,7 @@ namespace hpp {
     	        throw hpp::Error ("No affordances found. Unable to generate Contacts.");
       		  }
             model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
-            rbprm::State state = rbprm::ComputeContacts(fullBody_,config, bindShooter_.affMap_,
-                                            problemSolver_->collisionObstacles(), dir);
+            rbprm::State state = rbprm::ComputeContacts(fullBody_,config, bindShooter_.affMap_,dir);
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(_CORBA_ULong(state.configuration_.rows()));
             for(std::size_t i=0; i< _CORBA_ULong(config.rows()); i++)
@@ -324,6 +323,7 @@ namespace hpp {
             }
             const RbPrmLimbPtr_t& limb = lit->second;
             fcl::Transform3f transform = limb->limb_->robot()->rootJoint()->childJoint(0)->currentTransformation (); // get root transform from configuration
+						// TODO fix as in rbprm-fullbody.cc!!
             std::vector<sampling::T_OctreeReport> reports(problemSolver_->collisionObstacles().size());
             std::size_t i (0);
             //#pragma omp parallel for
@@ -459,7 +459,7 @@ namespace hpp {
 							rbprm::RbPrmInterpolation::create(fullBody_,startState_,endState_);
             std::vector<model::Configuration_t> configurations = doubleDofArrayToConfig(fullBody_->device_, configs);
             lastStatesComputed_ = interpolator->Interpolate(bindShooter_.affMap_,
-							problemSolver_->collisionObstacles(),configurations,robustnessTreshold);
+							configurations,robustnessTreshold);
             hpp::floatSeqSeq *res;
             res = new hpp::floatSeqSeq ();
 
@@ -514,7 +514,7 @@ namespace hpp {
         hpp::rbprm::RbPrmInterpolationPtr_t interpolator = 
 					rbprm::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver_->paths()[pathId]);
         lastStatesComputed_ = interpolator->Interpolate(bindShooter_.affMap_,
-					problemSolver_->collisionObstacles(),timestep,robustnessTreshold);
+					timestep,robustnessTreshold);
 
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
