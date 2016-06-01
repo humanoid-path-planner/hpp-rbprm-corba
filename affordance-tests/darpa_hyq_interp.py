@@ -97,4 +97,9 @@ r.loadObstacleModel ('hpp-rbprm-corba', "darpa", "contact")
 i = 0;
 fullBody.draw(configs[i],r); i=i+1; i-1
 
+collisions = 0;
+for config in configs:
+  if fullBody.isConfigValid(config)[0] == False:
+    collisions += 1
 
+collisions
