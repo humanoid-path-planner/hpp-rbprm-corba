@@ -282,11 +282,14 @@ namespace hpp {
             {
                 dir[i] = direction[i];
             }
-		        if (bindShooter_.affMap_.empty ()) {
+						const affMap_t &affMap = problemSolver_->map
+							<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
+		        if (affMap.empty ()) {
     	        throw hpp::Error ("No affordances found. Unable to generate Contacts.");
       		  }
             model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
-            rbprm::State state = rbprm::ComputeContacts(fullBody_,config, bindShooter_.affMap_,dir);
+            rbprm::State state = rbprm::ComputeContacts(fullBody_,config,
+							affMap, bindShooter_.affFilter_, dir);
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(_CORBA_ULong(state.configuration_.rows()));
             for(std::size_t i=0; i< _CORBA_ULong(config.rows()); i++)
@@ -451,14 +454,16 @@ namespace hpp {
             {
                 throw std::runtime_error ("End state not initialized, can not interpolate ");
             }
-				    if (bindShooter_.affMap_.empty ()) {
+						const affMap_t &affMap = problemSolver_->map
+							<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
+				    if (affMap.empty ()) {
   		      	throw hpp::Error ("No affordances found. Unable to interpolate.");
   		    	}
 
             hpp::rbprm::RbPrmInterpolationPtr_t interpolator =
 							rbprm::RbPrmInterpolation::create(fullBody_,startState_,endState_);
             std::vector<model::Configuration_t> configurations = doubleDofArrayToConfig(fullBody_->device_, configs);
-            lastStatesComputed_ = interpolator->Interpolate(bindShooter_.affMap_,
+            lastStatesComputed_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
 							configurations,robustnessTreshold);
             hpp::floatSeqSeq *res;
             res = new hpp::floatSeqSeq ();
@@ -507,13 +512,15 @@ namespace hpp {
         {
             throw std::runtime_error ("No path computed, cannot interpolate ");
         }
-		    if (bindShooter_.affMap_.empty ()) {
+				const affMap_t &affMap = problemSolver_->map
+					<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
+		    if (affMap.empty ()) {
         	throw hpp::Error ("No affordances found. Unable to interpolate.");
       	}
 
         hpp::rbprm::RbPrmInterpolationPtr_t interpolator = 
 					rbprm::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver_->paths()[pathId]);
-        lastStatesComputed_ = interpolator->Interpolate(bindShooter_.affMap_,
+        lastStatesComputed_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
 					timestep,robustnessTreshold);
 
         hpp::floatSeqSeq *res;
