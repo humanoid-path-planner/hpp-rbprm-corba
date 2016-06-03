@@ -57,4 +57,4 @@ t = ps.solve ()
 # Playing the computed path
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
-pp (1)
+#~ pp (1)
