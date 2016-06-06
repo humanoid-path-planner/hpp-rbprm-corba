@@ -235,6 +235,17 @@ class FullBody (object):
 		return self.client.rbprm.rbprm.interpolateConfigs(configs)
 		
 	## Given start and goal states
+	#  Provided a path has already been computed and interpolated, generate a continuous path
+    #  between two indicated states. Will fail if the index of the states do not exist
+	#
+    # \param index of first state.
+    # \param index of second state.
+    def interpolateBetweenStates(self, state1, state2):
+		return self.client.rbprm.rbprm.interpolateBetweenStates(state1, state2)
+		
+		
+		
+	## Given start and goal states
 	#  generate a contact sequence over a list of configurations
 	#
     # \param stepSize discretization step

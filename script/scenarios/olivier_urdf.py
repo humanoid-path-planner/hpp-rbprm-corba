@@ -9,7 +9,7 @@ def loadRobot(packageName,meshPackageName,rootJointType,urdfName,urdfSuffix,srdf
 	limbOffset = [0,0,0] #inutile ici
 	limbNormal = [0,1,0] #inutile ici
 	limbx = 0.09; limby = 0.05 #inutile ici
-	fullBody.addLimb(limbId,limbRoot,'',limbOffset,limbNormal, limbx, limby, 10000, "manipulability", 0.1)
+	fullBody.addLimb(limbId,limbRoot,'',limbOffset,limbNormal, limbx, limby, 1000, "manipulability", 0.1)
 	return fullBody
 
 def runall(lid, valueNames):	
@@ -32,7 +32,7 @@ def rescaleOctreeValue(valueName, robotData):
 	r1_max = robotData[0]["valueBounds"][valueName][1]
 	r2_max = robotData[1]["valueBounds"][valueName][1]
 	r_min = min(r1_min, r2_min)
-	r_max = min(r1_max, r2_max)
+	r_max = max(r1_max, r2_max)
 	
 	for i in range(0,len(robotData[0]["octreeValues"][valueName]['values'])):
 		val = robotData[0]["octreeValues"][valueName]['values'][i]
@@ -48,34 +48,34 @@ def rescaleOctreeValues(valueNames, robotData):
 
 #define values to analyze #EDIT
 valueNames = [
-"isotropy", 	#whole jacobian
-"isotropyRot", 	#rotation jacobian
-"isotropyTr", 	#translation jacobian
-#~ "minimumSingularValue",
-#~ "minimumSingularValueRot",
-#~ "minimumSingularValueTr",
-#~ "maximumSingularValue",
-#~ "maximumSingularValueRot",
-#~ "maximumSingularValueTr",
-#~ "manipulabilityRot",
-#~ "manipulabilityTr",
-#~ "manipulability"
+#~ "isotropy", 	#whole jacobian
+#~ "isotropyRot", 	#rotation jacobian
+#~ "isotropyTr", 	#translation jacobian
+"minimumSingularValue",
+"minimumSingularValueRot",
+"minimumSingularValueTr",
+"maximumSingularValue",
+"maximumSingularValueRot",
+"maximumSingularValueTr",
+"manipulabilityRot",
+"manipulabilityTr",
+"manipulability"
 ]
 
 robotData = [{},{}]
 
 #first load first robot data
-packageName = "hrp2_14_description" #EDIT
-meshPackageName = "hrp2_14_description" #EDIT
+packageName = "laas_design" #EDIT
+meshPackageName = "laas_design" #EDIT
 rootJointType = "freeflyer" #EDIT
 
 #  Information to retrieve urdf and srdf files.
-urdfName = "hrp2_14" #EDIT
-urdfSuffix = "_reduced" #EDIT
+urdfName = "laas_arm_wrist_ZXZ" #EDIT
+urdfSuffix = "" #EDIT
 srdfSuffix = "" #EDIT
 
-limbId = '0rLeg' #nom que tu souhaites, peu importe #EDIT
-limbRoot = 'RLEG_JOINT0' #joint racine de la chaine a analyser #EDIT
+limbId = '0' #nom que tu souhaites, peu importe #EDIT
+limbRoot = 'shoulder_joint' #joint racine de la chaine a analyser #EDIT
 limbEffector = '' # joint qui correspond a l'effecteur, laisse vide si dernier joint #EDIT
 fullBody = loadRobot(packageName,meshPackageName,rootJointType,urdfName,urdfSuffix,srdfSuffix, limbId, limbRoot, limbEffector)
 
@@ -89,18 +89,18 @@ robotData[0]["name"] = urdfName + limbId
 
 #now to the second robot
 
-packageName = "hrp2_14_description" #EDIT
-meshPackageName = "hrp2_14_description" #EDIT
+packageName = "laas_design" #EDIT
+meshPackageName = "laas_design" #EDIT
 rootJointType = "freeflyer" #EDIT
 
 #  Information to retrieve urdf and srdf files.
-urdfName = "hrp2_14" #EDIT
-urdfSuffix = "_reduced" #EDIT
+urdfName = "laas_arm_wrist_ZXY" #EDIT
+urdfSuffix = "" #EDIT
 srdfSuffix = "" #EDIT
 
-limbId = '3Rarm' #EDIT
-limbRoot = 'RARM_JOINT0' #EDIT
-limbEffector = 'RARM_JOINT5' #EDIT
+limbId = '1' #EDIT
+limbRoot = 'shoulder_joint' #EDIT
+limbEffector = '' #EDIT
 fullBody = loadRobot(packageName,meshPackageName,rootJointType,urdfName,urdfSuffix,srdfSuffix, limbId, limbRoot, limbEffector)
 
 # run analysis

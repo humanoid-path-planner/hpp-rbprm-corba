@@ -21,6 +21,7 @@
 #include "hpp/rbprm/rbprm-device.hh"
 #include "hpp/rbprm/rbprm-validation.hh"
 #include "hpp/rbprm/interpolation/rbprm-path-interpolation.hh"
+#include "hpp/rbprm/interpolation/limb-rrt-helper.hh"
 #include "hpp/rbprm/stability/stability.hh"
 #include "hpp/rbprm/sampling/sample-db.hh"
 #include "hpp/model/urdf/util.hh"
@@ -558,7 +559,7 @@ namespace hpp {
             {
                 throw std::runtime_error ("End state not initialized, can not interpolate ");
             }
-            hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_);
+            hpp::rbprm::RbPrmInterpolationPtr_t interpolator = rbprm::RbPrmInterpolation::create(fullBody_,startState_,endState_);
             std::vector<model::Configuration_t> configurations = doubleDofArrayToConfig(fullBody_->device_, configs);
             lastStatesComputed_ = interpolator->Interpolate(problemSolver_->collisionObstacles(),configurations,robustnessTreshold);
             hpp::floatSeqSeq *res;
@@ -609,7 +610,7 @@ namespace hpp {
             throw std::runtime_error ("No path computed, cannot interpolate ");
         }
 
-        hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver_->paths()[pathId]);
+        hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = hpp::rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver_->paths()[pathId]);
         lastStatesComputed_ = interpolator->Interpolate(problemSolver_->collisionObstacles(),timestep,robustnessTreshold);
 
         hpp::floatSeqSeq *res;
@@ -634,6 +635,28 @@ namespace hpp {
             ++i;
         }
         return res;
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    void RbprmBuilder::interpolateBetweenStates(double state1, double state2) throw (hpp::Error)
+    {
+        try
+        {
+            std::size_t s1(state1), s2(state2);
+            if(lastStatesComputed_.size () < s1 || lastStatesComputed_.size () < s2 )
+            {
+                throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
+            }
+            //create helper
+//            /interpolation::LimbRRTHelper helper(fullBody_, problemSolver_->problem());
+            core::PathVectorPtr_t path = interpolation::interpolateStates(fullBody_,problemSolver_->problem(),
+                                                                          lastStatesComputed_.begin()+s1,lastStatesComputed_.begin()+s2);
+            problemSolver_->addPath(path);
+            problemSolver_->robot()->setDimensionExtraConfigSpace(problemSolver_->robot()->extraConfigSpace().dimension()+1);
         }
         catch(std::runtime_error& e)
         {
