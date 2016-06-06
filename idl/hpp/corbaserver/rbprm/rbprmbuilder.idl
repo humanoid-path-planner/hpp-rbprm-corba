@@ -178,9 +178,10 @@ module hpp
     /// \param heuristicName heuristic used to bias sample selection
     /// \param resolution resolution of the octree used to store the samples (a typical value is 0.01 meters)
     /// \param contactType whether the contact is punctual ("_3_DOF") or surfacic ("_6_DOF")
+    /// \param disableEffectorCollision whether collision detection should be disabled for the end effector bones
     void addLimb(in string id, in string limb, in string effector, in floatSeq offset, in floatSeq normal,
                  in double x, in double y, in unsigned short samples, in string heuristicName,
-                 in double resolution, in string contactType) raises (Error);
+                 in double resolution, in string contactType,  in double disableEffectorCollision) raises (Error);
 
     /// Specifies a subchain of the robot as a limb, which can be used to create contacts.
     /// A limb must consist in a simple kinematic chain, where every node has only one child
@@ -188,7 +189,9 @@ module hpp
     /// \param id user given name of the new limb
     /// \param heuristicName heuristic used to bias sample selection
     /// \param loadValues whether other values computed for the limb database should be loaded
-    void addLimbDatabase(in string databasepath, in string id, in string heuristicName, in double loadValues) raises (Error);
+    /// \param disableEffectorCollision whether collision detection should be disabled for the end effector bones
+    void addLimbDatabase(in string databasepath, in string id, in string heuristicName, in double loadValues,
+                         in double disableEffectorCollision) raises (Error);
 
     /// Set the start state of a contact generation problem
     /// environment, ordered by their efficiency

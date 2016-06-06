@@ -30,9 +30,7 @@ r = Viewer (ps)
 
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init [0:3] = [-5, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
-
 q_goal = q_init [::]
-
 q_goal [0:3] = [5, 0, 0.63]; r (q_goal)
 
 ps.addPathOptimizer("RandomShortcut")
@@ -44,6 +42,8 @@ ps.client.problem.selectPathValidation("RbprmPathValidation",0.01)
 r.loadObstacleModel (packageName, "groundcrouch", "planning")
 #~ ps.solve ()
 t = ps.solve ()
+
+
 if isinstance(t, list):
 	t = t[0]* 3600000 + t[1] * 60000 + t[2] * 1000 + t[3]
 f = open('log.txt', 'a')
