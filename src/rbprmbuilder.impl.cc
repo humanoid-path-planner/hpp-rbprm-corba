@@ -260,7 +260,7 @@ namespace hpp {
         // Fill dof vector with dof array.
         model::Configuration_t config; config.resize (configDim);
         for (std::size_t iDof = 0; iDof < configDim; iDof++) {
-            config [iDof] = (_CORBA_ULong)dofArray[(_CORBA_ULong)iDof];
+            config [iDof] = (double)dofArray[(_CORBA_ULong)iDof];
         }
         // fill the vector by zero
         hppDout (info, "config dimension: " <<configDim
