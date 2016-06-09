@@ -27,7 +27,9 @@ rbprmBuilder.setNormalFilter('hyq_lhleg_rom', [0,0,1], 0.5)
 rbprmBuilder.setNormalFilter('hyq_rfleg_rom', [0,0,1], 0.5)
 rbprmBuilder.setNormalFilter('hyq_lfleg_rom', [0,0,1], 0.5)
 rbprmBuilder.setNormalFilter('hyq_rhleg_rom', [0,0,1], 0.5)
-rbprmBuilder.boundSO3([-0.4,0.4,-3,3,-3,3])
+rbprmBuilder.boundSO3([-0.4,0.4,-0.5,0.5,-0.5,0.5])
+rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(3)
+rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([0,0,0,0,0,0])
 
 #~ from hpp.corbaserver.rbprm. import ProblemSolver
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
@@ -53,8 +55,9 @@ ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 r.loadObstacleModel (packageName, "darpa", "planning")
 r(q_init)
-#~ ps.solve ()
-t = ps.solve ()
+
+#t = ps.solve ()
+r.solveAndDisplay("rm",1,0.02)
 
 #r.displayRoadmap("rm",0.005)
 r.displayPathMap("rmPath",0,0.02)

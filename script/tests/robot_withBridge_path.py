@@ -23,7 +23,7 @@ rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 rbprmBuilder.setJointBounds ("base_joint_xyz", [-6,6, -3, 3, 0, 2.5])
 # limits zyx
-rbprmBuilder.boundSO3([-0.1,0.1,-0.1,0.1,-0.1,0.1])
+rbprmBuilder.boundSO3([-1,1,-0.2,0.2,-0.2,0.2])
 rbprmBuilder.setFilter(['robot_test_lleg_rom', 'robot_test_rleg_rom'])
 rbprmBuilder.setNormalFilter('robot_test_lleg_rom', [0,0,1], 0.5)
 rbprmBuilder.setNormalFilter('robot_test_rleg_rom', [0,0,1], 0.5)
