@@ -21,7 +21,10 @@
 #include "hpp/rbprm/rbprm-device.hh"
 #include "hpp/rbprm/rbprm-validation.hh"
 #include "hpp/rbprm/interpolation/rbprm-path-interpolation.hh"
+<<<<<<< HEAD
+=======
 #include "hpp/rbprm/interpolation/limb-rrt-helper.hh"
+>>>>>>> rb-rrt
 #include "hpp/rbprm/stability/stability.hh"
 #include "hpp/rbprm/sampling/sample-db.hh"
 #include "hpp/model/urdf/util.hh"
@@ -53,6 +56,7 @@ namespace hpp {
         try
         {
             hpp::model::DevicePtr_t romDevice = model::Device::create (robotName);
+std::cout << romDevice->currentConfiguration() << std::endl;
             romDevices_.insert(std::make_pair(robotName, romDevice));
             hpp::model::urdf::loadRobotModel (romDevice,
                     std::string (rootJointType),
@@ -260,7 +264,7 @@ namespace hpp {
         // Fill dof vector with dof array.
         model::Configuration_t config; config.resize (configDim);
         for (std::size_t iDof = 0; iDof < configDim; iDof++) {
-            config [iDof] = (double)dofArray[(_CORBA_ULong)iDof];
+            config [iDof] = (_CORBA_ULong)dofArray[(_CORBA_ULong)iDof];
         }
         // fill the vector by zero
         hppDout (info, "config dimension: " <<configDim
@@ -312,12 +316,17 @@ namespace hpp {
     }
 
 
-    void RbprmBuilder::setAffordanceFilter(const char* romName, const hpp::Names_t& affordances) throw (hpp::Error)
+    void RbprmBuilder::setNormalFilter(const char* romName, const hpp::floatSeq& normal, double range) throw (hpp::Error)
     {
-        std::string name (romName);
-				std::vector<std::string> affNames = stringConversion(affordances);
-        bindShooter_.affFilter_.erase(name);
-        bindShooter_.affFilter_.insert(std::make_pair(name,affNames));
+        std::string name(romName);
+        bindShooter_.normalFilter_.erase(name);
+        fcl::Vec3f dir;
+        for(_CORBA_ULong i =0; i <3; ++i)
+        {
+            dir[i] = normal[i];
+        }
+        NormalFilter filter(dir,range);
+        bindShooter_.normalFilter_.insert(std::make_pair(name,filter));
     }
 
     void RbprmBuilder::boundSO3(const hpp::floatSeq& limitszyx) throw (hpp::Error)
@@ -331,8 +340,7 @@ namespace hpp {
 
     }
 
-    hpp::floatSeq* RbprmBuilder::generateContacts(const hpp::floatSeq& configuration,
-			const hpp::floatSeq& direction) throw (hpp::Error)
+    hpp::floatSeq* RbprmBuilder::generateContacts(const hpp::floatSeq& configuration, const hpp::floatSeq& direction) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
@@ -343,14 +351,9 @@ namespace hpp {
             {
                 dir[i] = direction[(_CORBA_ULong)i];
             }
-						const affMap_t &affMap = problemSolver_->map
-							<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
-		        if (affMap.empty ()) {
-    	        throw hpp::Error ("No affordances found. Unable to generate Contacts.");
-      		  }
             model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
             rbprm::State state = rbprm::ComputeContacts(fullBody_,config,
-							affMap, bindShooter_.affFilter_, dir);
+                                            problemSolver_->collisionObstacles(), dir);
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(_CORBA_ULong(state.configuration_.rows()));
             for(std::size_t i=0; i< _CORBA_ULong(config.rows()); i++)
@@ -387,7 +390,6 @@ namespace hpp {
             }
             const RbPrmLimbPtr_t& limb = lit->second;
             fcl::Transform3f transform = limb->limb_->robot()->rootJoint()->childJoint(0)->currentTransformation (); // get root transform from configuration
-						// TODO fix as in rbprm-fullbody.cc!!
             std::vector<sampling::T_OctreeReport> reports(problemSolver_->collisionObstacles().size());
             std::size_t i (0);
             //#pragma omp parallel for
@@ -453,7 +455,7 @@ namespace hpp {
     }
 
     void RbprmBuilder::addLimb(const char* id, const char* limb, const char* effector, const hpp::floatSeq& offset, const hpp::floatSeq& normal, double x, double y,
-                               unsigned short samples, const char* heuristicName, double resolution, const char *contactType, double disableEffectorCollision) throw (hpp::Error)
+                               unsigned short samples, const char* heuristicName, double resolution, const char *contactType) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
@@ -470,8 +472,7 @@ namespace hpp {
             {
                 cType = hpp::rbprm::_3_DOF;
             }
-            fullBody_->AddLimb(std::string(id), std::string(limb), std::string(effector), off, norm, x, y,
-                               problemSolver_->collisionObstacles(), samples,heuristicName,resolution,cType,disableEffectorCollision > 0.5);
+            fullBody_->AddLimb(std::string(id), std::string(limb), std::string(effector), off, norm, x, y, problemSolver_->collisionObstacles(), samples,heuristicName,resolution,cType);
         }
         catch(std::runtime_error& e)
         {
@@ -480,15 +481,14 @@ namespace hpp {
     }
 
 
-    void RbprmBuilder::addLimbDatabase(const char* databasePath, const char* id, const char* heuristicName, double loadValues, double disableEffectorCollision) throw (hpp::Error)
+    void RbprmBuilder::addLimbDatabase(const char* databasePath, const char* id, const char* heuristicName, double loadValues) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
         try
         {
             std::string fileName(databasePath);
-            fullBody_->AddLimb(fileName, std::string(id), problemSolver_->collisionObstacles(), heuristicName, loadValues > 0.5,
-                               disableEffectorCollision > 0.5);
+            fullBody_->AddLimb(fileName, std::string(id), problemSolver_->collisionObstacles(), heuristicName, loadValues > 0.5);
         }
         catch(std::runtime_error& e)
         {
@@ -496,9 +496,7 @@ namespace hpp {
         }
     }
 
-    void SetPositionAndNormal(rbprm::State& state,
-			hpp::rbprm::RbPrmFullBodyPtr_t fullBody, const hpp::floatSeq& configuration,
-			const hpp::Names_t& contactLimbs)
+    void SetPositionAndNormal(rbprm::State& state, hpp::rbprm::RbPrmFullBodyPtr_t fullBody, const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs)
     {
         core::Configuration_t old = fullBody->device_->currentConfiguration();
         model::Configuration_t config = dofArrayToConfig (fullBody->device_, configuration);
@@ -553,8 +551,7 @@ namespace hpp {
         }
     }
 
-    floatSeqSeq* RbprmBuilder::interpolateConfigs(const hpp::floatSeqSeq& configs,
-			double robustnessTreshold) throw (hpp::Error)
+    floatSeqSeq* RbprmBuilder::interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold) throw (hpp::Error)
     {
         try
         {
@@ -566,25 +563,20 @@ namespace hpp {
             {
                 throw std::runtime_error ("End state not initialized, can not interpolate ");
             }
-						const affMap_t &affMap = problemSolver_->map
-							<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
-				    if (affMap.empty ()) {
-  		      	throw hpp::Error ("No affordances found. Unable to interpolate.");
-  		    	}
-
-            hpp::rbprm::RbPrmInterpolationPtr_t interpolator =
-							rbprm::RbPrmInterpolation::create(fullBody_,startState_,endState_);
+<<<<<<< HEAD
+            hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_);
+=======
+            hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = hpp::rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_);
+>>>>>>> rb-rrt
             std::vector<model::Configuration_t> configurations = doubleDofArrayToConfig(fullBody_->device_, configs);
-            lastStatesComputed_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
-							configurations,robustnessTreshold);
+            lastStatesComputed_ = interpolator->Interpolate(problemSolver_->collisionObstacles(),configurations,robustnessTreshold);
             hpp::floatSeqSeq *res;
             res = new hpp::floatSeqSeq ();
 
             res->length ((_CORBA_ULong)lastStatesComputed_.size ());
             std::size_t i=0;
             std::size_t id = 0;
-            for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin();
-							cit != lastStatesComputed_.end(); ++cit, ++id)
+            for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin(); cit != lastStatesComputed_.end(); ++cit, ++id)
             {
                 std::cout << "ID " << id;
                 cit->print();
@@ -614,26 +606,24 @@ namespace hpp {
         unsigned int pathId = int(path);
         if(startState_.configuration_.rows() == 0)
         {
-            throw std::runtime_error ("Start state not initialized, cannot interpolate ");
+            throw std::runtime_error ("Start state not initialized, can not interpolate ");
         }
         if(endState_.configuration_.rows() == 0)
         {
-            throw std::runtime_error ("End state not initialized, cannot interpolate ");
+            throw std::runtime_error ("End state not initialized, can not interpolate ");
         }
+
         if(problemSolver_->paths().size() <= pathId)
         {
             throw std::runtime_error ("No path computed, cannot interpolate ");
         }
-				const affMap_t &affMap = problemSolver_->map
-					<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
-		    if (affMap.empty ()) {
-        	throw hpp::Error ("No affordances found. Unable to interpolate.");
-      	}
 
-        hpp::rbprm::RbPrmInterpolationPtr_t interpolator = 
-					rbprm::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver_->paths()[pathId]);
-        lastStatesComputed_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
-					timestep,robustnessTreshold);
+<<<<<<< HEAD
+        hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver_->paths()[pathId]);
+=======
+        hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = hpp::rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver_->paths()[pathId]);
+>>>>>>> rb-rrt
+        lastStatesComputed_ = interpolator->Interpolate(problemSolver_->collisionObstacles(),timestep,robustnessTreshold);
 
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
@@ -641,8 +631,7 @@ namespace hpp {
         res->length ((_CORBA_ULong)lastStatesComputed_.size ());
         std::size_t i=0;
         std::size_t id = 0;
-        for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin();
-					cit != lastStatesComputed_.end(); ++cit, ++id)
+        for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin(); cit != lastStatesComputed_.end(); ++cit, ++id)
         {
             std::cout << "ID " << id;
             cit->print();
@@ -669,7 +658,7 @@ namespace hpp {
     {
         try
         {
-            std::size_t s1((std::size_t)state1), s2((std::size_t)state2);
+            std::size_t s1(state1), s2(state2);
             if(lastStatesComputed_.size () < s1 || lastStatesComputed_.size () < s2 )
             {
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
@@ -711,7 +700,7 @@ namespace hpp {
         }
         else
         {
-            std::string error("Cannot open outfile " + std::string(outfilename));
+            std::string error("Can not open outfile " + std::string(outfilename));
             throw Error(error.c_str());
         }
     }

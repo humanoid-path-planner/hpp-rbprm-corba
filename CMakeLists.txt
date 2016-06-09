@@ -167,6 +167,6 @@ install(FILES
 	data/meshes/hyq/hyq_lfleg_rom.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes/hyq
   )
-  
+
 SETUP_PROJECT_FINALIZE()
 
