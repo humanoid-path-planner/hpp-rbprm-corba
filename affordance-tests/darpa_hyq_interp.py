@@ -38,37 +38,28 @@ rLeg = 'rf_haa_joint'
 # Last joint of the limb, as in urdf file
 rfoot = 'rf_foot_joint'
 # Specifying the distance between last joint and contact surface
-rLegOffset = [0.,0,0.]
+offset = [0.,-0.021,0.]
 # Specifying the contact surface direction when the limb is in rest pose
-rLegNormal = [0,1,0]
+normal = [0,1,0]
 # Specifying the rectangular contact surface length
-rLegx = 0.02; rLegy = 0.02
+legx = 0.02; legy = 0.02
 # remaining parameters are the chosen heuristic (here, manipulability), and the resolution of the octree (here, 10 cm).
-fullBody.addLimb(rLegId,rLeg,rfoot,rLegOffset,rLegNormal, rLegx, rLegy, nbSamples, "manipulability", 0.1, cType)
+fullBody.addLimb(rLegId,rLeg,rfoot,offset,normal, legx, legy, nbSamples, "manipulability", 0.1, cType)
 
 lLegId = 'lhleg'
 lLeg = 'lh_haa_joint'
 lfoot = 'lh_foot_joint'
-lLegOffset = [0,0,0]
-lLegNormal = [0,1,0]
-lLegx = 0.02; lLegy = 0.02
-fullBody.addLimb(lLegId,lLeg,lfoot,lLegOffset,rLegNormal, lLegx, lLegy, nbSamples, "manipulability", 0.05, cType)
+fullBody.addLimb(lLegId,lLeg,lfoot,offset,normal, legx, legy, nbSamples, "manipulability", 0.05, cType)
 
 rarmId = 'rhleg'
 rarm = 'rh_haa_joint'
 rHand = 'rh_foot_joint'
-rArmOffset = [0.,0,-0.]
-rArmNormal = [0,1,0]
-rArmx = 0.02; rArmy = 0.02
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, nbSamples, "manipulability", 0.05, cType)
+fullBody.addLimb(rarmId,rarm,rHand,offset,normal, legx, legy, nbSamples, "manipulability", 0.05, cType)
 
 larmId = 'lfleg'
 larm = 'lf_haa_joint'
 lHand = 'lf_foot_joint'
-lArmOffset = [0.,0,-0.]
-lArmNormal = [0,1,0]
-lArmx = 0.02; lArmy = 0.02
-fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, nbSamples, "forward", 0.05, cType)
+fullBody.addLimb(larmId,larm,lHand,offset,normal, legx, legy, nbSamples, "forward", 0.05, cType)
 
 q_0 = fullBody.getCurrentConfig(); 
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.q_init[0:7]
@@ -103,3 +94,4 @@ for config in configs:
     collisions += 1
 
 collisions
+

@@ -572,8 +572,8 @@ namespace hpp {
   		      	throw hpp::Error ("No affordances found. Unable to interpolate.");
   		    	}
 
-            hpp::rbprm::RbPrmInterpolationPtr_t interpolator =
-							rbprm::RbPrmInterpolation::create(fullBody_,startState_,endState_);
+            hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator =
+							rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_);
             std::vector<model::Configuration_t> configurations = doubleDofArrayToConfig(fullBody_->device_, configs);
             lastStatesComputed_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
 							configurations,robustnessTreshold);
@@ -630,8 +630,8 @@ namespace hpp {
         	throw hpp::Error ("No affordances found. Unable to interpolate.");
       	}
 
-        hpp::rbprm::RbPrmInterpolationPtr_t interpolator = 
-					rbprm::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver_->paths()[pathId]);
+        hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = 
+					rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver_->paths()[pathId]);
         lastStatesComputed_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
 					timestep,robustnessTreshold);
 
