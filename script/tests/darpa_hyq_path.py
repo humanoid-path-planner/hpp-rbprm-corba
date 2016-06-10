@@ -39,15 +39,16 @@ ps = ProblemSolver( rbprmBuilder )
 r = Viewer (ps)
 
 
-q_init = rbprmBuilder.getCurrentConfig ();
-q_init [0:3] = [-2, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+
+q_init = [-2, 0, 0.63,1,0,0,0,0,0,1]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 #~ q_init [0:3] = [2, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 
 q_goal = q_init [::]
 q_goal [0:3] = [3, 0, 0.63]; r (q_goal)
 
 #~ ps.addPathOptimizer("GradientBased")
-ps.addPathOptimizer("RandomShortcut")
+# ps.addPathOptimizer("RandomShortcut")
+ps.selectPathPlanner("RRTdynamic")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
@@ -56,8 +57,8 @@ ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 r.loadObstacleModel (packageName, "darpa", "planning")
 r(q_init)
 
-#t = ps.solve ()
-r.solveAndDisplay("rm",1,0.02)
+ps.solve ()
+#r.solveAndDisplay("rm",1,0.02)
 
 #r.displayRoadmap("rm",0.005)
 r.displayPathMap("rmPath",0,0.02)
@@ -72,9 +73,9 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 #~ 
 #~ pp (2)
 #~ pp (0)
-pp.displayPath(1)
-r.client.gui.setVisibility("path_1_root","ALWAYS_ON_TOP")
-pp (1)
+pp.displayPath(0)
+r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
+pp (0)
 
 #r.client.gui.removeFromGroup("rm",r.sceneName)
 r.client.gui.removeFromGroup("rmPath",r.sceneName)
