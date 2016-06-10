@@ -1,5 +1,5 @@
  <robot name="hyq_lhleg_rom">
-  <link name="base_link">
+  <link name="hyq_lhleg_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>

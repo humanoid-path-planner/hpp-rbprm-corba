@@ -75,6 +75,7 @@ install(FILES
   data/urdf/hrp2_rleg_rom.urdf
   data/urdf/hyq/hyq_trunk.urdf
   data/urdf/hyq/hyq_trunk_large.urdf
+  data/urdf/hyq/hyq_trunk_large_realist.urdf
   data/urdf/hyq/hyq_rhleg_rom.urdf
   data/urdf/hyq/hyq_rfleg_rom.urdf
   data/urdf/hyq/hyq_lhleg_rom.urdf
@@ -114,6 +115,7 @@ install(FILES
   data/srdf/hrp2_rleg_rom.srdf
   data/srdf/hyq/hyq_trunk.srdf
   data/srdf/hyq/hyq_trunk_large.srdf
+  data/srdf/hyq/hyq_trunk_large_realist.srdf
   data/srdf/hyq/hyq_rhleg_rom.srdf
   data/srdf/hyq/hyq_rfleg_rom.srdf
   data/srdf/hyq/hyq_lhleg_rom.srdf
@@ -189,6 +191,7 @@ install(FILES
   )
 install(FILES
 	data/meshes/hyq/hyq_all.stl
+	data/meshes/hyq/hyq_all_realist.stl
 	data/meshes/hyq/hyq_trunk.stl
 	data/meshes/hyq/hyq_trunk_large.stl
 	data/meshes/hyq/hyq_rom.stl
