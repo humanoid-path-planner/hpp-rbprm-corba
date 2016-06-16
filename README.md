@@ -12,10 +12,13 @@ Please refer to this [link](https://github.com/stonneau/hpp-rbprm) for informati
 
 To install hpp-rbprm-corba:
 
-  1. install HPP-RBPRM
+  1. Install HPP-RBPRM and its dependencies
 	- see https://github.com/stonneau/hpp-rbprm
 
-  2. Use CMake to install the library. For instance:
+  2. Install HPP-AFFORDANCE-CORBA along with its dependencies
+  - see https://github.com/anna-seppala/hpp-affordance-corba
+
+  3. Use CMake to install the library. For instance:
 
 			mkdir $HPP_RBPRM_CORBA_DIR/build
 			cd $HPP_RBPRM_CORBA_DIR/build
