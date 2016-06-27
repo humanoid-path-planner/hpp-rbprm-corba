@@ -223,7 +223,8 @@ module hpp
     /// between two indicated states. Will fail if the index of the states do not exist
     /// \param state1
     /// \param state2 index of second state.
-    void interpolateBetweenStates(in double state1, in double state2) raises (Error);
+    /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
+    void interpolateBetweenStates(in double state1, in double state2, in unsigned short numOptimizations) raises (Error);
 
     /// Saves the last computed states by the function interpolate in a filename.
     /// Raises an error if interpolate has not been called, or the file could not be opened.

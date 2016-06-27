@@ -248,8 +248,9 @@ class FullBody (object):
 	#
     # \param index of first state.
     # \param index of second state.
-    def interpolateBetweenStates(self, state1, state2):
-		return self.client.rbprm.rbprm.interpolateBetweenStates(state1, state2)
+    # \param numOptim Number of iterations of the shortcut algorithm to apply between each states
+    def interpolateBetweenStates(self, state1, state2, numOptim = 10):
+		return self.client.rbprm.rbprm.interpolateBetweenStates(state1, state2, numOptim)
 		
 		
 		
