@@ -549,6 +549,16 @@ namespace hpp {
         }
     }
 
+    std::vector<State> TimeStatesToStates(const T_StateFrame& ref)
+    {
+        std::vector<State> res;
+        for(CIT_StateFrame cit = ref.begin(); cit != ref.end(); ++cit)
+        {
+            res.push_back(cit->second);
+        }
+        return res;
+    }
+
     floatSeqSeq* RbprmBuilder::interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold) throw (hpp::Error)
     {
         try
@@ -563,7 +573,8 @@ namespace hpp {
             }
             hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_);
             std::vector<model::Configuration_t> configurations = doubleDofArrayToConfig(fullBody_->device_, configs);
-            lastStatesComputed_ = interpolator->Interpolate(problemSolver_->collisionObstacles(),configurations,robustnessTreshold);
+            lastStatesComputedTime_ = interpolator->Interpolate(problemSolver_->collisionObstacles(),configurations,robustnessTreshold);
+            lastStatesComputed_ = TimeStatesToStates(lastStatesComputedTime_);
             hpp::floatSeqSeq *res;
             res = new hpp::floatSeqSeq ();
 
@@ -613,8 +624,8 @@ namespace hpp {
         }
 
         hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = hpp::rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver_->paths()[pathId]);
-        lastStatesComputed_ = interpolator->Interpolate(problemSolver_->collisionObstacles(),timestep,robustnessTreshold);
-
+        lastStatesComputedTime_ = interpolator->Interpolate(problemSolver_->collisionObstacles(),timestep,robustnessTreshold);
+        lastStatesComputed_ = TimeStatesToStates(lastStatesComputedTime_);
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
 
@@ -657,6 +668,31 @@ namespace hpp {
 //            /interpolation::LimbRRTHelper helper(fullBody_, problemSolver_->problem());
             core::PathVectorPtr_t path = interpolation::interpolateStates(fullBody_,problemSolver_->problem(),
                                                                           lastStatesComputed_.begin()+s1,lastStatesComputed_.begin()+s2, numOptimizations);
+            problemSolver_->addPath(path);
+            problemSolver_->robot()->setDimensionExtraConfigSpace(problemSolver_->robot()->extraConfigSpace().dimension()+1);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    void RbprmBuilder::interpolateBetweenStatesFromPath(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error)
+    {
+        try
+        {
+            std::size_t s1((std::size_t)state1), s2((std::size_t)state2);
+            if(lastStatesComputed_.size () < s1 || lastStatesComputed_.size () < s2 )
+            {
+                throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
+            }
+            unsigned int pathId = (unsigned int)(path);
+            if(problemSolver_->paths().size() <= pathId)
+            {
+                throw std::runtime_error ("No path computed, cannot interpolate ");
+            }
+            core::PathVectorPtr_t path = interpolation::interpolateStates(fullBody_,problemSolver_->problem(), problemSolver_->paths()[pathId],
+                                                                          lastStatesComputedTime_.begin()+s1,lastStatesComputedTime_.begin()+s2, numOptimizations);
             problemSolver_->addPath(path);
             problemSolver_->robot()->setDimensionExtraConfigSpace(problemSolver_->robot()->extraConfigSpace().dimension()+1);
         }

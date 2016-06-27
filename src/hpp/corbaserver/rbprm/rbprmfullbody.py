@@ -252,6 +252,18 @@ class FullBody (object):
     def interpolateBetweenStates(self, state1, state2, numOptim = 10):
 		return self.client.rbprm.rbprm.interpolateBetweenStates(state1, state2, numOptim)
 		
+	## Provided a path has already been computed and interpolated, generate a continuous path                        
+	# between two indicated states. The states do not need to be consecutive, but increasing in Id.                 
+	# Will fail if the index of the states do not exist                                                             
+	# The path of the root and limbs not considered by the contact transitions between                              
+	# two states is assumed to be already computed, and registered in the solver under the id specified by the user.
+	# It must be valid in the sense of the active PathValidation.                                                   
+	# \param state1 index of first state.                                                                           
+	# \param state2 index of second state.                                                                          
+	# \param path index of the path considered for the generation                                                   
+	# \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states 
+    def interpolateBetweenStatesFromPath(self, state1, state2, path, numOptim = 10):
+		return self.client.rbprm.rbprm.interpolateBetweenStatesFromPath(state1, state2, path, numOptim)		
 		
 		
 	## Given start and goal states
