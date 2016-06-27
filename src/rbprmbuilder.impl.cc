@@ -675,7 +675,6 @@ namespace hpp {
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
             }
             //create helper
-//            /interpolation::LimbRRTHelper helper(fullBody_, problemSolver_->problem());
             core::PathVectorPtr_t path = interpolation::interpolateStates(fullBody_,problemSolver_->problem(),
                                                                           lastStatesComputed_.begin()+s1,lastStatesComputed_.begin()+s2);
             problemSolver_->addPath(path);

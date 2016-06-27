@@ -88,4 +88,5 @@ r.loadObstacleModel ('hpp-rbprm-corba', "darpa", "contact")
 i = 0;
 fullBody.draw(configs[i],r); i=i+1; i-1
 
-
+from hpp.gepetto import PathPlayer
+pp = PathPlayer (ps.robot.client.basic, r)

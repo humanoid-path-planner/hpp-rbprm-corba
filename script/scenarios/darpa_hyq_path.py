@@ -21,11 +21,10 @@ rbprmBuilder.setJointBounds ("base_joint_xyz", [-2,5, -1, 1, 0.3, 4])
 # The following lines set constraint on the valid configurations:
 # a configuration is valid only if all limbs can create a contact ...
 rbprmBuilder.setFilter(['hyq_rhleg_rom', 'hyq_lfleg_rom', 'hyq_rfleg_rom','hyq_lhleg_rom'])
-# ... and only if a contact surface includes the gravity
-rbprmBuilder.setNormalFilter('hyq_lhleg_rom', [0,0,1], 0.5)
-rbprmBuilder.setNormalFilter('hyq_rfleg_rom', [0,0,1], 0.5)
-rbprmBuilder.setNormalFilter('hyq_lfleg_rom', [0,0,1], 0.5)
-rbprmBuilder.setNormalFilter('hyq_rhleg_rom', [0,0,1], 0.5)
+rbprmBuilder.setAffordanceFilter('hyq_rhleg_rom', ['Support'])
+rbprmBuilder.setAffordanceFilter('hyq_rfleg_rom', ['Support',])
+rbprmBuilder.setAffordanceFilter('hyq_lhleg_rom', ['Support'])
+rbprmBuilder.setAffordanceFilter('hyq_lfleg_rom', ['Support',])
 # We also bound the rotations of the torso.
 rbprmBuilder.boundSO3([-0.4,0.4,-3,3,-3,3])
 
@@ -44,6 +43,11 @@ q_goal [0:3] = [3, 0, 0.63]; r (q_goal)
 ps.addPathOptimizer("RandomShortcut")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
+
+from hpp.corbaserver.affordance.affordance import AffordanceTool
+afftool = AffordanceTool ()
+afftool.loadObstacleModel (packageName, "darpa", "planning", r)
+afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 
 # Choosing RBPRM shooter and path validation methods.
 # Note that the standard RRT algorithm is used.
