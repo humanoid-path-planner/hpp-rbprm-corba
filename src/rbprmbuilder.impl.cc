@@ -644,7 +644,7 @@ namespace hpp {
         }
     }
 
-    void RbprmBuilder::interpolateBetweenStates(double state1, double state2) throw (hpp::Error)
+    void RbprmBuilder::interpolateBetweenStates(double state1, double state2, unsigned short numOptimizations) throw (hpp::Error)
     {
         try
         {
@@ -656,7 +656,7 @@ namespace hpp {
             //create helper
 //            /interpolation::LimbRRTHelper helper(fullBody_, problemSolver_->problem());
             core::PathVectorPtr_t path = interpolation::interpolateStates(fullBody_,problemSolver_->problem(),
-                                                                          lastStatesComputed_.begin()+s1,lastStatesComputed_.begin()+s2);
+                                                                          lastStatesComputed_.begin()+s1,lastStatesComputed_.begin()+s2, numOptimizations);
             problemSolver_->addPath(path);
             problemSolver_->robot()->setDimensionExtraConfigSpace(problemSolver_->robot()->extraConfigSpace().dimension()+1);
         }
