@@ -553,8 +553,17 @@ namespace hpp {
         }
     }
 
-    floatSeqSeq* RbprmBuilder::interpolateConfigs(const hpp::floatSeqSeq& configs,
-			double robustnessTreshold) throw (hpp::Error)
+    std::vector<State> TimeStatesToStates(const T_StateFrame& ref)
+    {
+        std::vector<State> res;
+        for(CIT_StateFrame cit = ref.begin(); cit != ref.end(); ++cit)
+        {
+            res.push_back(cit->second);
+        }
+        return res;
+    }
+
+    floatSeqSeq* RbprmBuilder::interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold) throw (hpp::Error)
     {
         try
         {
@@ -566,25 +575,23 @@ namespace hpp {
             {
                 throw std::runtime_error ("End state not initialized, can not interpolate ");
             }
-						const affMap_t &affMap = problemSolver_->map
-							<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
-				    if (affMap.empty ()) {
-  		      	throw hpp::Error ("No affordances found. Unable to interpolate.");
-  		    	}
-
-            hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator =
-							rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_);
             std::vector<model::Configuration_t> configurations = doubleDofArrayToConfig(fullBody_->device_, configs);
-            lastStatesComputed_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
-							configurations,robustnessTreshold);
+            const affMap_t &affMap = problemSolver_->map
+                        <std::vector<boost::shared_ptr<model::CollisionObject> > > ();
+            if (affMap.empty ())
+            {
+                throw hpp::Error ("No affordances found. Unable to interpolate.");
+            }
+            hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_);
+            lastStatesComputedTime_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,configurations,robustnessTreshold);
+            lastStatesComputed_ = TimeStatesToStates(lastStatesComputedTime_);
             hpp::floatSeqSeq *res;
             res = new hpp::floatSeqSeq ();
 
             res->length ((_CORBA_ULong)lastStatesComputed_.size ());
             std::size_t i=0;
             std::size_t id = 0;
-            for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin();
-							cit != lastStatesComputed_.end(); ++cit, ++id)
+            for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin(); cit != lastStatesComputed_.end(); ++cit, ++id)
             {
                 std::cout << "ID " << id;
                 cit->print();
@@ -620,20 +627,23 @@ namespace hpp {
         {
             throw std::runtime_error ("End state not initialized, cannot interpolate ");
         }
+
         if(problemSolver_->paths().size() <= pathId)
         {
             throw std::runtime_error ("No path computed, cannot interpolate ");
         }
-				const affMap_t &affMap = problemSolver_->map
+        const affMap_t &affMap = problemSolver_->map
 					<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
-		    if (affMap.empty ()) {
-        	throw hpp::Error ("No affordances found. Unable to interpolate.");
-      	}
+        if (affMap.empty ())
+        {
+            throw hpp::Error ("No affordances found. Unable to interpolate.");
+        }
 
         hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = 
 					rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver_->paths()[pathId]);
-        lastStatesComputed_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
+        lastStatesComputedTime_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
 					timestep,robustnessTreshold);
+		lastStatesComputed_ = TimeStatesToStates(lastStatesComputedTime_);
 
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
@@ -675,8 +685,34 @@ namespace hpp {
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
             }
             //create helper
+//            /interpolation::LimbRRTHelper helper(fullBody_, problemSolver_->problem());
             core::PathVectorPtr_t path = interpolation::interpolateStates(fullBody_,problemSolver_->problem(),
                                                                           lastStatesComputed_.begin()+s1,lastStatesComputed_.begin()+s2, numOptimizations);
+            problemSolver_->addPath(path);
+            problemSolver_->robot()->setDimensionExtraConfigSpace(problemSolver_->robot()->extraConfigSpace().dimension()+1);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    void RbprmBuilder::interpolateBetweenStatesFromPath(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error)
+    {
+        try
+        {
+            std::size_t s1((std::size_t)state1), s2((std::size_t)state2);
+            if(lastStatesComputed_.size () < s1 || lastStatesComputed_.size () < s2 )
+            {
+                throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
+            }
+            unsigned int pathId = (unsigned int)(path);
+            if(problemSolver_->paths().size() <= pathId)
+            {
+                throw std::runtime_error ("No path computed, cannot interpolate ");
+            }
+            core::PathVectorPtr_t path = interpolation::interpolateStates(fullBody_,problemSolver_->problem(), problemSolver_->paths()[pathId],
+                                                                          lastStatesComputedTime_.begin()+s1,lastStatesComputedTime_.begin()+s2, numOptimizations);
             problemSolver_->addPath(path);
             problemSolver_->robot()->setDimensionExtraConfigSpace(problemSolver_->robot()->extraConfigSpace().dimension()+1);
         }
