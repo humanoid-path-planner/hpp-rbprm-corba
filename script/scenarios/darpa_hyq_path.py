@@ -20,7 +20,6 @@ rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, pa
 rbprmBuilder.setJointBounds ("base_joint_xyz", [-2,5, -1, 1, 0.3, 4])
 # The following lines set constraint on the valid configurations:
 # a configuration is valid only if all limbs can create a contact ...
-rbprmBuilder.setFilter(['hyq_rhleg_rom', 'hyq_lfleg_rom', 'hyq_rfleg_rom','hyq_lhleg_rom'])
 rbprmBuilder.setAffordanceFilter('hyq_rhleg_rom', ['Support'])
 rbprmBuilder.setAffordanceFilter('hyq_rfleg_rom', ['Support',])
 rbprmBuilder.setAffordanceFilter('hyq_lhleg_rom', ['Support'])
@@ -53,7 +52,7 @@ afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 # Note that the standard RRT algorithm is used.
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
-r.loadObstacleModel (packageName, "darpa", "planning")
+
 
 # Solve the problem
 t = ps.solve ()
