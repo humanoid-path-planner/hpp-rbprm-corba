@@ -655,6 +655,13 @@ namespace hpp {
         }
     }
 
+    void AddPath(core::PathPtr_t path, core::ProblemSolverPtr_t ps)
+    {
+        core::PathVectorPtr_t resPath = core::PathVector::create(path->outputSize(), path->outputDerivativeSize());
+        resPath->appendPath(path);
+        ps->addPath(resPath);
+    }
+
     void RbprmBuilder::interpolateBetweenStates(double state1, double state2, unsigned short numOptimizations) throw (hpp::Error)
     {
         try
@@ -666,10 +673,9 @@ namespace hpp {
             }
             //create helper
 //            /interpolation::LimbRRTHelper helper(fullBody_, problemSolver_->problem());
-            core::PathVectorPtr_t path = interpolation::interpolateStates(fullBody_,problemSolver_->problem(),
+            core::PathPtr_t path = interpolation::interpolateStates(fullBody_,problemSolver_->problem(),
                                                                           lastStatesComputed_.begin()+s1,lastStatesComputed_.begin()+s2, numOptimizations);
-            problemSolver_->addPath(path);
-            problemSolver_->robot()->setDimensionExtraConfigSpace(problemSolver_->robot()->extraConfigSpace().dimension()+1);
+            AddPath(path,problemSolver_);
         }
         catch(std::runtime_error& e)
         {
@@ -691,10 +697,9 @@ namespace hpp {
             {
                 throw std::runtime_error ("No path computed, cannot interpolate ");
             }
-            core::PathVectorPtr_t path = interpolation::interpolateStates(fullBody_,problemSolver_->problem(), problemSolver_->paths()[pathId],
+            core::PathPtr_t path = interpolation::interpolateStates(fullBody_,problemSolver_->problem(), problemSolver_->paths()[pathId],
                                                                           lastStatesComputedTime_.begin()+s1,lastStatesComputedTime_.begin()+s2, numOptimizations);
-            problemSolver_->addPath(path);
-            problemSolver_->robot()->setDimensionExtraConfigSpace(problemSolver_->robot()->extraConfigSpace().dimension()+1);
+            AddPath(path,problemSolver_);
         }
         catch(std::runtime_error& e)
         {
