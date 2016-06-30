@@ -5,9 +5,11 @@ import os
 import datetime
 
 #~ scenarios = ['standing_hrp2']
-scenarios = ['car_hrp2']
+#~ scenarios = ['car_hrp2']
 #~ scenarios = ['stair_bauzil_hrp2']
-n_trials = 100
+scenarios = ['darpa_hyq', 'stair_bauzil_hrp2']
+
+n_trials = 100 
 
 stats = ['balance','collision','ik']
 
