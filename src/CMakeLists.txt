@@ -28,27 +28,45 @@ OMNIIDL_INCLUDE_DIRECTORIES(
   ${HPP_CORBASERVER_DATAROOTDIR}/idl ${CMAKE_SOURCE_DIR}/idl
   )
 
+# search for python
+FINDPYTHON(2.7 EXACT REQUIRED)
+
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/src)
+FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/hpp/corbaserver/rbprm)
 FOREACH(IDL ${IDL_SOURCES})
-  GENERATE_IDL_CPP (${IDL}
-    ${CMAKE_SOURCE_DIR}/idl/hpp/corbaserver/rbprm
-    )
+  GENERATE_IDL_CPP (hpp/corbaserver/rbprm/${IDL}
+    ${CMAKE_SOURCE_DIR}/idl/hpp/corbaserver/rbprm)
+  GENERATE_IDL_PYTHON (hpp/corbaserver/rbprm/${IDL}
+    ${CMAKE_SOURCE_DIR}/idl/hpp/corbaserver/rbprm)
+
+  INSTALL(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/hpp/corbaserver/rbprm/${IDL}.hh
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/hpp/corbaserver/rbprm)
+  INSTALL(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/hpp/corbaserver/rbprm/${IDL}_idl.py
+    DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm)
 ENDFOREACH()
 
 FOREACH(IDL ${HPP_CORBASERVER_IDL_SOURCES})
   GENERATE_IDL_CPP (${IDL}
     ${HPP_CORBASERVER_DATAROOTDIR}/idl/hpp/corbaserver
     )
+  GENERATE_IDL_PYTHON (${IDL}
+    ${HPP_CORBASERVER_DATAROOTDIR}/idl/hpp/corbaserver
+    )
+  INSTALL(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/${IDL}_idl.py
+    DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm)
 ENDFOREACH()
 
 ADD_LIBRARY(${LIBRARY_NAME} SHARED
   common.hh
   commonSK.cc
-	rbprmbuilder.hh
-	rbprmbuilderSK.cc
-	rbprmbuilder.impl.cc
-	rbprmbuilder.impl.hh
-	server.cc
+  ${CMAKE_CURRENT_BINARY_DIR}/hpp/corbaserver/rbprm/rbprmbuilder.hh
+  ${CMAKE_CURRENT_BINARY_DIR}/hpp/corbaserver/rbprm/rbprmbuilderSK.cc
+  rbprmbuilder.impl.cc
+  rbprmbuilder.impl.hh
+  server.cc
 )
 
 ADD_CUSTOM_TARGET(generate_idl_cpp DEPENDS ${ALL_IDL_CPP_STUBS})
@@ -63,9 +81,6 @@ PKG_CONFIG_USE_DEPENDENCY(${LIBRARY_NAME} omniORB4)
 PKG_CONFIG_USE_DEPENDENCY(${LIBRARY_NAME} hpp-rbprm)
 
 INSTALL(TARGETS ${LIBRARY_NAME} DESTINATION lib)
-
-# search for python
-FINDPYTHON()
 
 INSTALL(
   FILES

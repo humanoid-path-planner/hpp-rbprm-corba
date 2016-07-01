@@ -19,7 +19,7 @@
 # define HPP_RBPRM_CORBA_BUILDER_IMPL_HH
 
 # include <hpp/core/problem-solver.hh>
-# include "rbprmbuilder.hh"
+# include "hpp/corbaserver/rbprm/rbprmbuilder.hh"
 # include <hpp/rbprm/rbprm-device.hh>
 # include <hpp/rbprm/rbprm-fullbody.hh>
 # include <hpp/rbprm/rbprm-shooter.hh>
