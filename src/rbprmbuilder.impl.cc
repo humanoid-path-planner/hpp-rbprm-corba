@@ -17,7 +17,9 @@
 
 //#include <hpp/fcl/math/transform.h>
 #include <hpp/util/debug.hh>
+#include "hpp/corbaserver/rbprm/rbprmbuilder.hh"
 #include "rbprmbuilder.impl.hh"
+#include "hpp/rbprm/rbprm-device.hh"
 #include "hpp/rbprm/rbprm-device.hh"
 #include "hpp/rbprm/rbprm-validation.hh"
 #include "hpp/rbprm/interpolation/rbprm-path-interpolation.hh"
