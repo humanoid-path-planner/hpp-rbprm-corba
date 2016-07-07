@@ -306,6 +306,27 @@ namespace hpp {
     }
 
 
+  const model::CollisionObjectPtr_t getReachability (const model::JointVector_t jointVector)
+  {
+      std::vector<model::ObjectVector_t> reachability;
+      std::vector<std::string> addedJoints;
+      for (unsigned int i = 0; i < jointVector.size (); ++i) {
+         const model::BodyPtr_t & body = jointVector[i]->linkedBody ();
+         if (body) {
+                        if (std::find (addedJoints.begin (), addedJoints.end (), 
+                  body->name ()) != addedJoints.end ()) {
+              reachability.push_back (body->innerObjects (model::COLLISION));
+              addedJoints.push_back (body->name ());
+           }
+         }
+      }
+  }
+
+  void RbprmBuilder::getReachableAffordances () throw (hpp::Error)
+  {
+    
+  }
+
     void RbprmBuilder::setFilter(const hpp::Names_t& roms) throw (hpp::Error)
     {
         bindShooter_.romFilter_ = stringConversion(roms);
