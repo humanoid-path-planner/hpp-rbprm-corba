@@ -306,25 +306,37 @@ namespace hpp {
     }
 
 
-  const model::CollisionObjectPtr_t getReachability (const model::JointVector_t jointVector)
+  const model::ObjectVector_t getReachability (const model::JointVector_t jointVector)
   {
-      std::vector<model::ObjectVector_t> reachability;
+      model::ObjectVector_t reachability;
       std::vector<std::string> addedJoints;
       for (unsigned int i = 0; i < jointVector.size (); ++i) {
          const model::BodyPtr_t & body = jointVector[i]->linkedBody ();
          if (body) {
-                        if (std::find (addedJoints.begin (), addedJoints.end (), 
-                  body->name ()) != addedJoints.end ()) {
-              reachability.push_back (body->innerObjects (model::COLLISION));
-              addedJoints.push_back (body->name ());
+              if (std::find (addedJoints.begin (), addedJoints.end (), 
+                  body->name ()) == addedJoints.end () &&
+                  body->innerObjects (model::COLLISION).size () > 0) {
+                  // for now only saving the first collision object in vector: 
+                reachability.push_back (body->innerObjects (model::COLLISION).front ());
+                addedJoints.push_back (body->name ());
            }
          }
       }
+      return reachability;
   }
 
-  void RbprmBuilder::getReachableAffordances () throw (hpp::Error)
+  void RbprmBuilder::getReachableContactArea (const char* limbname) throw (hpp::Error)
   {
-    
+      model::T_Rom::const_iterator limbRomIt = romDevices_.find (limbname);
+      if (limbRomIt == romDevices_.end ()) {
+          std::string err ("No Rom of name " + std::string(limbname) + " found!");
+          throw Error (err.c_str());
+      }
+      model::DevicePtr_t limbRom = limbRomIt->second;
+      const model::ObjectVector_t& reachability = getReachability (limbRom->getJointVector ());
+
+   // find affordance object in contact with given limb
+   // call hpp-intersect with found aff object and reachability --> get intersection
   }
 
   hpp::floatSeq* RbprmBuilder::getApproximatedEffector (const char* limbname,
@@ -372,9 +384,9 @@ namespace hpp {
       poseVec [6] = w_T_offset.getQuatRotation ().getZ ();
       
       hpp::floatSeq* poseOut = new hpp::floatSeq();
-      poseOut->length (poseVec.size ());
+      poseOut->length ((CORBA::ULong) poseVec.size ());
       for (std::size_t i=0; i<7; ++i) {
-        (*poseOut) [(CORBA::ULong)i] = poseVec [i];
+        (*poseOut) [(CORBA::ULong) i] = poseVec [i];
       }
       pose = poseOut;
       return radii;
