@@ -104,6 +104,14 @@ module hpp
 		///
     void setAffordanceFilter(in string romName, in Names_t affordances) raises (Error);
 
+    /// Get a 2D circular or elliptic approximation of the end effector contact area
+    /// of a given limb. Returns the radius or radii of the approximated shape.
+    /// \param limbname the name of the limb for which the approximation is done
+    /// \param ellipse a boolean value specifying the shape of the approximation.
+    /// If ellipse == false, the approximation will have a circular shape.
+    floatSeq getApproximatedEffector (in string limbname, in boolean ellipse,
+            out floatSeq transform) raises (Error);
+
     /// Sets limits on robot orientation, described according to Euler's ZYX rotation order
     ///
     /// \param limitszyx 6D vector with the lower and upperBound for each rotation axis in sequence

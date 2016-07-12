@@ -110,6 +110,13 @@ class Builder (object):
     def setFilter (self, romFilter):
         return self.client.rbprm.rbprm.setFilter (romFilter)
 
+  ## Get frame and radius of end effector contact area approximation
+    # \param limbname the name of the limb for which the approximation is done
+    # \param ellipsebool a boolean value specifying the shape of the approximation.
+    # If ellipse == false, the approximation will have a circular shape.
+    def getApproximatedEffector (self, limbname, ellipsebool = False):
+        return self.client.rbprm.rbprm.getApproximatedEffector (limbname, ellipsebool)
+
 	## Export a computed path for blender
     #
 	# \param problem the problem associated with the path computed for the robot

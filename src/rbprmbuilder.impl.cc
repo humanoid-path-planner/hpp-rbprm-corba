@@ -327,6 +327,59 @@ namespace hpp {
     
   }
 
+  hpp::floatSeq* RbprmBuilder::getApproximatedEffector (const char* limbname,
+          CORBA::Boolean ellipse, hpp::floatSeq_out pose) throw (hpp::Error)
+  {
+    if(!fullBodyLoaded_) {
+        throw Error ("No full body robot was loaded");
+      }
+      T_Limb::const_iterator lit = fullBody_->GetLimbs().find(std::string(limbname));
+      if(lit == fullBody_->GetLimbs().end()) {
+         std::string err("No limb " + std::string(limbname) + "was defined for robot" + fullBody_->device_->name());
+         throw Error (err.c_str());
+      }
+      hpp::floatSeq* radii = new hpp::floatSeq();
+      const RbPrmLimbPtr_t& limbPtr = lit->second;
+      const double x = limbPtr->x_;
+      const double y = limbPtr->y_;
+      const model::Transform3f& w_T_effector = limbPtr->effector_->currentTransformation ();
+      model::matrix_t R = model::matrix_t::Identity (3, 3);
+      const model::Transform3f w_T_offset = w_T_effector * model::Transform3f (R, limbPtr->offset_);
+      if (ellipse) { // approximate end effector contact area as elliptical
+          const double a = 0; // x-direction radius
+          const double b = 0; // y-direction radius
+
+          radii->length(1);
+          (*radii)[0] = a;
+          (*radii)[1] = b;
+      } else { // approximate end effector contact area as circular
+          // simple approximation that fully encloses a rectangular area:
+          const double r = sqrt (x*x + y*y);
+          radii->length(1);
+          (*radii)[0] = r;
+      }
+      // TODO: only effectors on one side of body are correctly approximated
+      //std::cout << limbPtr->effectorDefaultRotation_() << std::endl;
+      //std::cout << limbPtr->normal_ << std::endl;
+      model::vector_t poseVec; poseVec.resize(7);
+      poseVec [0] = w_T_offset.getTranslation () [0];
+      poseVec [1] = w_T_offset.getTranslation () [1];
+      poseVec [2] = w_T_offset.getTranslation () [2];
+
+      poseVec [3] = w_T_offset.getQuatRotation ().getW ();
+      poseVec [4] = w_T_offset.getQuatRotation ().getX ();
+      poseVec [5] = w_T_offset.getQuatRotation ().getY ();
+      poseVec [6] = w_T_offset.getQuatRotation ().getZ ();
+      
+      hpp::floatSeq* poseOut = new hpp::floatSeq();
+      poseOut->length (poseVec.size ());
+      for (std::size_t i=0; i<7; ++i) {
+        (*poseOut) [(CORBA::ULong)i] = poseVec [i];
+      }
+      pose = poseOut;
+      return radii;
+  }
+
     void RbprmBuilder::setFilter(const hpp::Names_t& roms) throw (hpp::Error)
     {
         bindShooter_.romFilter_ = stringConversion(roms);
