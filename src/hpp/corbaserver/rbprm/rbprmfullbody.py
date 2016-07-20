@@ -96,6 +96,23 @@ class FullBody (object):
 
 	## Add a limb to the model
 	#
+	# \param databasepath: path to the database describing the robot
+	# \param limbId: user defined id for the limb. Must be unique.
+    #  The id is used if several contact points are defined for the same limb (ex: the knee and the foot)
+    # \param heuristicName: name of the selected heuristic for configuration evaluation
+    # \param loadValues: whether values computed, other than the static ones, should be loaded in memory
+    # \param disableEffectorCollision: whether collision detection should be disabled for end effector bones
+    def addLimbDatabase(self, databasepath, limbId, heuristicName, loadValues = True, disableEffectorCollision = False):		
+		boolVal = 0.
+		boolValEff = 0.
+		if(loadValues):
+			boolVal = 1.
+		if(disableEffectorCollision):
+			boolValEff = 1.
+		self.client.rbprm.rbprm.addLimbDatabase(databasepath, limbId, heuristicName, boolVal,boolValEff)		
+
+	## Add a limb to the model
+	#
 	# \param id: user defined id for the limb. Must be unique.
     #  The id is used if several contact points are defined for the same limb (ex: the knee and the foot)
     # \param name: name of the joint corresponding to the root of the limb.
@@ -111,8 +128,12 @@ class FullBody (object):
     # of the unit voxel of the octree. The larger they are, the more samples will be considered as candidates for contact.
     # This can be problematic in terms of performance. The default value is 3 cm.
     # \param contactType whether the contact is punctual ("_3_DOF") or surfacic ("_6_DOF")
-    def addLimb(self, limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution, contactType="_6_DOF"):
-		self.client.rbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution,contactType)
+    # \param disableEffectorCollision: whether collision detection should be disabled for end effector bones
+    def addLimb(self, limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution, contactType="_6_DOF",disableEffectorCollision = False):
+		boolValEff = 0.
+		if(disableEffectorCollision):
+			boolValEff = 1.
+		self.client.rbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution,contactType, boolValEff)
 
 	## Returns the configuration of a limb described by a sample
 	#
@@ -145,7 +166,35 @@ class FullBody (object):
     # \param direction a 3d vector specifying the desired direction of motion
     def getContactSamplesIds(self, name, configuration, direction):
 		return self.client.rbprm.rbprm.getContactSamplesIds(name, configuration, direction)
-	
+		
+	## Retrieves the samples IDs In a given octree cell
+	#
+    # \param name id of the limb considered
+    # \param configuration the considered robot configuration
+    # \param direction a 3d vector specifying the desired direction of motion
+    def getSamplesIdsInOctreeNode(self, limbName, octreeNodeId):
+		return self.client.rbprm.rbprm.getSamplesIdsInOctreeNode(limbName, octreeNodeId)
+		
+	## Get the number of samples generated for a limb
+	#
+    # \param limbName name of the limb from which to retrieve a sample
+    def getNumSamples(self, limbName):
+		return self.client.rbprm.rbprm.getNumSamples(limbName)
+		
+	## Get the number of octreeNodes
+	#
+    # \param limbName name of the limb from which to retrieve a sample
+    def getOctreeNodeIds(self, limbName):
+		return self.client.rbprm.rbprm.getOctreeNodeIds(limbName)
+		
+	## Get the sample value for a given analysis
+	#
+    # \param limbName name of the limb from which to retrieve a sample
+    # \param valueName name of the analytic measure desired
+    # \param sampleId id of the considered sample
+    def getSampleValue(self, limbName, valueName, sampleId):
+		return self.client.rbprm.rbprm.getSampleValue(limbName, valueName, sampleId)
+		
 	## Initialize the first configuration of the path discretization 
 	# with a balanced configuration for the interpolation problem;
 	#
@@ -153,7 +202,7 @@ class FullBody (object):
     # \param contacts the array of limbs in contact
     def setStartState(self, configuration, contacts):
 		return self.client.rbprm.rbprm.setStartState(configuration, contacts)
-		
+			
 	## Initialize the last configuration of the path discretization 
 	# with a balanced configuration for the interpolation problem;
 	#
@@ -167,6 +216,13 @@ class FullBody (object):
     # \param The file where the configuration must be saved
     def saveComputedStates(self, filename):
 		return self.client.rbprm.rbprm.saveComputedStates(filename)
+	
+	## Saves a limb database
+	#
+    # \param limb name of the limb for which the DB must be saved
+    # \param The file where the configuration must be saved
+    def saveLimbDatabase(self, limbName, filename):
+		return self.client.rbprm.rbprm.saveLimbDatabase(limbName, filename)
 	
 	## Discretizes a path return by a motion planner into a discrete
 	# sequence of balanced, contact configurations and returns
@@ -187,6 +243,30 @@ class FullBody (object):
 		return self.client.rbprm.rbprm.interpolateConfigs(configs)
 		
 	## Given start and goal states
+	#  Provided a path has already been computed and interpolated, generate a continuous path
+    #  between two indicated states. Will fail if the index of the states do not exist
+	#
+    # \param index of first state.
+    # \param index of second state.
+    # \param numOptim Number of iterations of the shortcut algorithm to apply between each states
+    def interpolateBetweenStates(self, state1, state2, numOptim = 10):
+		return self.client.rbprm.rbprm.interpolateBetweenStates(state1, state2, numOptim)
+		
+	## Provided a path has already been computed and interpolated, generate a continuous path                        
+	# between two indicated states. The states do not need to be consecutive, but increasing in Id.                 
+	# Will fail if the index of the states do not exist                                                             
+	# The path of the root and limbs not considered by the contact transitions between                              
+	# two states is assumed to be already computed, and registered in the solver under the id specified by the user.
+	# It must be valid in the sense of the active PathValidation.                                                   
+	# \param state1 index of first state.                                                                           
+	# \param state2 index of second state.                                                                          
+	# \param path index of the path considered for the generation                                                   
+	# \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states 
+    def interpolateBetweenStatesFromPath(self, state1, state2, path, numOptim = 10):
+		return self.client.rbprm.rbprm.interpolateBetweenStatesFromPath(state1, state2, path, numOptim)		
+		
+		
+	## Given start and goal states
 	#  generate a contact sequence over a list of configurations
 	#
     # \param stepSize discretization step
@@ -197,16 +277,36 @@ class FullBody (object):
 		else:
 			return False
 		
+	## Updates limb databases with a user chosen computation
+	#
+    # \param analysis name of computation
+    # \param isstatic whether the computation should be used to sort samples by default
+    def runSampleAnalysis(self, analysis, isstatic):
+		isStatic = 0.
+		if(isstatic):
+			isStatic = 1.
+		self.client.rbprm.rbprm.runSampleAnalysis(analysis,isStatic)
+		
+	## Updates a limb database with a user chosen computation
+	#
+    # \param limbname name of the limb chosen for computation
+    # \param analysis name of computation
+    # \param isstatic whether the computation should be used to sort samples by default
+    def runLimbSampleAnalysis(self, limbname, analysis, isstatic):
+		isStatic = 0.
+		if(isstatic):
+			isStatic = 1.
+		return self.client.rbprm.rbprm.runLimbSampleAnalysis(limbname, analysis,isStatic)
+		
 	## Create octree nodes representation for a given limb
 	#
-    # \param stepSize discretization step
     # \param gui gepetoo viewer instance discretization step
     # \param winId window to draw to step
     # \param limbName name of the limb considered
     # \param config initial configuration of the robot, used when created octree
     # \param color of the octree boxes
     def createOctreeBoxes(self, gui, winId, limbName, config, color = [1,1,1,0.3]):
-		boxes = self.client.rbprm.rbprm.GetOctreeBoxes(limbName, config)
+		boxes = self.client.rbprm.rbprm.getOctreeBoxes(limbName, config)
 		scene = "oct"+limbName
 		gui.createScene(scene)
 		resolution = boxes[0][3]
@@ -219,6 +319,13 @@ class FullBody (object):
 		self.octrees[limbName] = scene
 		gui.addSceneToWindow(scene,winId)
 		gui.refresh()
+		
+	## Create octree nodes representation for a given limb
+	#
+    # \param limbName name of the limb considered
+    # \param ocId of the octree box
+    def getOctreeBox(self, limbName, ocId):
+		return self.client.rbprm.rbprm.getOctreeBox(limbName, ocId)
 	
 	## Draws robot configuration, along with octrees associated
 	#
