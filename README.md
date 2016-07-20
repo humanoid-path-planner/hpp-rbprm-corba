@@ -15,11 +15,19 @@ To install hpp-rbprm-corba:
   1. install HPP-RBPRM
 	- see https://github.com/stonneau/hpp-rbprm
 
+  2. If necessary, install hpp-corba-template
+
+			git clone --recursive https://github.com/laas/hpp-template-corba.git
+			cd hpp-template-corba/
+			mkdir build && cd build
+			cmake ..
+			make install
+
   2. Use CMake to install the library. For instance:
 
 			mkdir $HPP_RBPRM_CORBA_DIR/build
 			cd $HPP_RBPRM_CORBA_DIR/build
-			cd cmake ..	
+			cmake ..	
 			make install
 	
 
@@ -40,9 +48,11 @@ To install hpp-rbprm-corba:
 	https://github.com/iit-DLSLab/hyq-description
 
 
-    ```$ rosrun xacro xacro.py  hyq_description/robots/hyq_model.urdf.xacro -o  hyq.urdf```
+    ```$ rosrun xacro xacro.py  hyq_description/robots/hyq.urdf.xacro  -o  hyq.urdf```
 
   - Make sure to install hyq.urdf in $HPP_DEVEL_DIR/install/share/hpp-rbprm-corba/
+  
+  - Also, create an empty hyq.srdf file in  $HPP_DEVEL_DIR/install/share/hpp-rbprm-corba/srdf
 
   - The planning is decomposed in two phases / scripts. First, a root path is computed (\*_path.py files). Then, the contacts are generated along the computed path (\*_interp.py files). The scripts are located in the folder /scripts/scenarios.
 
