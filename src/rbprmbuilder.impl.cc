@@ -695,7 +695,7 @@ namespace hpp {
             }
             //create helper
 //            /interpolation::LimbRRTHelper helper(fullBody_, problemSolver_->problem());
-            core::PathPtr_t path = interpolation::interpolateStates<rbprm::interpolation::LimbRRTPath>(fullBody_,problemSolver_->problem(),
+            core::PathPtr_t path = interpolation::interpolateStates<rbprm::interpolation::LimbRRTPath, CIT_State>(fullBody_,problemSolver_->problem(),
                                                                           lastStatesComputed_.begin()+s1,lastStatesComputed_.begin()+s2, numOptimizations);
             AddPath(path,problemSolver_);
         }
