@@ -17,11 +17,13 @@
 
 //#include <hpp/fcl/math/transform.h>
 #include <hpp/util/debug.hh>
+#include "hpp/corbaserver/rbprm/rbprmbuilder.hh"
 #include "rbprmbuilder.impl.hh"
 #include "hpp/rbprm/rbprm-device.hh"
 #include "hpp/rbprm/rbprm-validation.hh"
 #include "hpp/rbprm/interpolation/rbprm-path-interpolation.hh"
 #include "hpp/rbprm/interpolation/limb-rrt-helper.hh"
+#include "hpp/rbprm/interpolation/limb-rrt-path.hh"
 #include "hpp/rbprm/stability/stability.hh"
 #include "hpp/rbprm/sampling/sample-db.hh"
 #include "hpp/model/urdf/util.hh"
@@ -779,7 +781,7 @@ namespace hpp {
             }
             //create helper
 //            /interpolation::LimbRRTHelper helper(fullBody_, problemSolver_->problem());
-            core::PathPtr_t path = interpolation::interpolateStates(fullBody_,problemSolver_->problem(),
+            core::PathPtr_t path = interpolation::interpolateStates<rbprm::interpolation::LimbRRTPath, CIT_State>(fullBody_,problemSolver_->problem(),
                                                                           lastStatesComputed_.begin()+s1,lastStatesComputed_.begin()+s2, numOptimizations);
             AddPath(path,problemSolver_);
         }
@@ -803,7 +805,7 @@ namespace hpp {
             {
                 throw std::runtime_error ("No path computed, cannot interpolate ");
             }
-            core::PathPtr_t path = interpolation::interpolateStates(fullBody_,problemSolver_->problem(), problemSolver_->paths()[pathId],
+            core::PathPtr_t path = interpolation::interpolateStates<rbprm::interpolation::LimbRRTPath>(fullBody_,problemSolver_->problem(), problemSolver_->paths()[pathId],
                                                                           lastStatesComputedTime_.begin()+s1,lastStatesComputedTime_.begin()+s2, numOptimizations);
             AddPath(path,problemSolver_);
         }
