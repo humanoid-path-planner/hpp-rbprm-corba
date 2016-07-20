@@ -373,8 +373,8 @@ namespace hpp {
           (*radii)[0] = r;
       }
       // TODO: only effectors on one side of body are correctly approximated
-      //std::cout << limbPtr->effectorDefaultRotation_() << std::endl;
-      //std::cout << limbPtr->normal_ << std::endl;
+      std::cout << limbPtr->effectorDefaultRotation_ << std::endl;
+      std::cout << limbPtr->normal_ << std::endl;
       model::vector_t poseVec; poseVec.resize(7);
       poseVec [0] = w_T_offset.getTranslation () [0];
       poseVec [1] = w_T_offset.getTranslation () [1];
