@@ -104,6 +104,11 @@ module hpp
 		///
     void setAffordanceFilter(in string romName, in Names_t affordances) raises (Error);
 
+    // TODO: Add documentation / edit parameters
+    floatSeqSeq getReachableContactArea (in string libname) raises (Error);
+    // void getReachableContactArea (in string libname) raises (Error);
+
+
     /// Get a 2D circular or elliptic approximation of the end effector contact area
     /// of a given limb. Returns the radius or radii of the approximated shape.
     /// \param limbname the name of the limb for which the approximation is done
