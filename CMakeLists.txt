@@ -91,6 +91,7 @@ install(FILES
   data/urdf/groundcrouch.urdf
   data/urdf/darpa.urdf
   data/urdf/car.urdf
+  data/urdf/polaris.urdf
   #~ data/urdf/scene2.urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
   )
@@ -121,6 +122,7 @@ install(FILES
   data/srdf/groundcrouch.srdf
   data/srdf/darpa.srdf
   data/srdf/car.srdf
+  data/srdf/polaris.srdf
   #~ data/srdf/scene2.srdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
   )
@@ -156,6 +158,8 @@ install(FILES
 	data/meshes/stepladder.stl
 	data/meshes/chair.stl
 	data/meshes/car.stl
+        data/meshes/polaris.stl
+        data/meshes/polaris_reduced.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
   )
 install(FILES
