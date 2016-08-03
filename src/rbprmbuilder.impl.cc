@@ -661,20 +661,29 @@ namespace hpp {
         const State& firstState = lastStatesComputed_[cId], thirdState = lastStatesComputed_[cId+1];
         std::vector<std::vector<fcl::Vec3f> > allStates;
         allStates.push_back(computeRectangleContact(fullBody_, firstState));
-        std::vector<std::string> variations =thirdState.contactVariations(firstState);
-        if(variations.size() >1)
+        std::vector<std::string> breaks, creations;
+        thirdState.contactBreaks(firstState, breaks);
+        if(breaks.size() > 1)
         {
-            throw std::runtime_error ("too many state variation between states" + std::string(""+cId) +
+            throw std::runtime_error ("too many contact breaks between states" + std::string(""+cId) +
                                       "and " + std::string(""+(cId + 1)));
         }
-        if(!variations.empty())
+        if(breaks.size() == 1)
         {
-std::cout << "variation " << variations[0] << std::endl;
             State intermediary(firstState);
-            intermediary.RemoveContact(*variations.begin());
+            intermediary.RemoveContact(*breaks.begin());
             allStates.push_back(computeRectangleContact(fullBody_, intermediary));
         }
-        allStates.push_back(computeRectangleContact(fullBody_, thirdState));
+        thirdState.contactCreations(firstState, creations);
+        if(creations.size() == 1)
+        {
+            allStates.push_back(computeRectangleContact(fullBody_, thirdState));
+        }
+        if(creations.size() > 1)
+        {
+            throw std::runtime_error ("too many contact creations between states" + std::string(""+cId) +
+                                      "and " + std::string(""+(cId + 1)));
+        }
 
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();

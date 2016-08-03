@@ -242,7 +242,9 @@ class FullBody (object):
     # \param pathId Id of the path to compute from
     # \param robustnessTreshold minimum value of the static equilibrium robustness criterion required to accept the configuration (0 by default).
     def computeContactPoints(self, stateId):
-		return self.client.rbprm.rbprm.computeContactPoints(stateId)
+		rawdata = self.client.rbprm.rbprm.computeContactPoints(stateId)
+		return [[b[i:i+6] for i in range(0, len(b), 6)] for b in rawdata]
+
 		
 	## Given start and goal states
 	#  generate a contact sequence over a list of configurations
