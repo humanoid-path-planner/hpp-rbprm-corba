@@ -139,6 +139,7 @@ namespace hpp {
 
         virtual void setStartState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);
         virtual void setEndState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);
+        virtual hpp::floatSeqSeq* computeContactPoints(unsigned short cId) throw (hpp::Error);
         virtual hpp::floatSeqSeq* interpolate(double timestep, double path, double robustnessTreshold) throw (hpp::Error);
         virtual hpp::floatSeqSeq* interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold) throw (hpp::Error);
         virtual void interpolateBetweenStates(double state1, double state2, unsigned short numOptimizations) throw (hpp::Error);

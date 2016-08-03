@@ -233,6 +233,16 @@ class FullBody (object):
     # \param robustnessTreshold minimum value of the static equilibrium robustness criterion required to accept the configuration (0 by default).
     def interpolate(self, stepsize, pathId = 1, robustnessTreshold = 0):
 		return self.client.rbprm.rbprm.interpolate(stepsize, pathId, robustnessTreshold)
+	
+	## Discretizes a path return by a motion planner into a discrete
+	# sequence of balanced, contact configurations and returns
+	# the sequence as an array of configurations
+	#
+    # \param stateId id of the first state
+    # \param pathId Id of the path to compute from
+    # \param robustnessTreshold minimum value of the static equilibrium robustness criterion required to accept the configuration (0 by default).
+    def computeContactPoints(self, stateId):
+		return self.client.rbprm.rbprm.computeContactPoints(stateId)
 		
 	## Given start and goal states
 	#  generate a contact sequence over a list of configurations

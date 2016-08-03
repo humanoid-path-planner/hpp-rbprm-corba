@@ -616,6 +616,94 @@ namespace hpp {
         }
     }
 
+
+    typedef Eigen::Matrix <value_type, 4, 3, Eigen::RowMajor> Matrix43;
+    typedef Eigen::Matrix <value_type, 4, 3, Eigen::RowMajor> Rotation;
+    typedef Eigen::Ref<Matrix43> Ref_matrix43;
+
+    std::vector<fcl::Vec3f> computeRectangleContact(const rbprm::RbPrmFullBodyPtr_t device,
+                                                    const rbprm::State& state)
+    {
+        std::vector<fcl::Vec3f> res;
+        const rbprm::T_Limb& limbs = device->GetLimbs();
+        rbprm::RbPrmLimbPtr_t limb;
+        Matrix43 p; Eigen::Matrix3d R;
+        for(std::map<std::string, fcl::Vec3f>::const_iterator cit = state.contactPositions_.begin();
+            cit != state.contactPositions_.end(); ++cit)
+        {
+            const std::string& name = cit->first;
+            const fcl::Vec3f& position = cit->second;
+            limb = limbs.at(name);
+            const double& lx = limb->x_, ly = limb->y_;
+            p << lx,  ly, 0,
+                 lx, -ly, 0,
+                -lx, -ly, 0,
+                -lx,  ly, 0;
+            const fcl::Matrix3f& fclRotation = state.contactRotation_.at(name);
+            for(int i =0; i< 3; ++i)
+                for(int j =0; j<3;++j)
+                    R(i,j) = fclRotation(i,j);
+            for(std::size_t i =0; i<4; ++i)
+            {
+                res.push_back(position + (R*p.row(i).transpose()));
+                res.push_back(state.contactNormals_.at(name));
+            }
+        }
+        return res;
+    }
+
+    floatSeqSeq* RbprmBuilder::computeContactPoints(unsigned short cId) throw (hpp::Error)
+    {
+        if(lastStatesComputed_.size() <= cId + 1)
+        {
+            throw std::runtime_error ("Unexisting state " + std::string(""+(cId+1)));
+        }
+        const State& firstState = lastStatesComputed_[cId], thirdState = lastStatesComputed_[cId+1];
+        std::vector<std::vector<fcl::Vec3f> > allStates;
+        allStates.push_back(computeRectangleContact(fullBody_, firstState));
+        std::vector<std::string> variations =thirdState.contactVariations(firstState);
+        if(variations.size() >1)
+        {
+            throw std::runtime_error ("too many state variation between states" + std::string(""+cId) +
+                                      "and " + std::string(""+(cId + 1)));
+        }
+        if(!variations.empty())
+        {
+std::cout << "variation " << variations[0] << std::endl;
+            State intermediary(firstState);
+            intermediary.RemoveContact(*variations.begin());
+            allStates.push_back(computeRectangleContact(fullBody_, intermediary));
+        }
+        allStates.push_back(computeRectangleContact(fullBody_, thirdState));
+
+        hpp::floatSeqSeq *res;
+        res = new hpp::floatSeqSeq ();
+
+        // compute array of contact positions
+
+        res->length ((_CORBA_ULong)allStates.size());
+        std::size_t i=0;
+        for(std::vector<std::vector<fcl::Vec3f> >::const_iterator cit = allStates.begin();
+                    cit != allStates.end(); ++cit, ++i)
+        {
+            const std::vector<fcl::Vec3f>& positions = *cit;
+            _CORBA_ULong size = (_CORBA_ULong) positions.size () * 3;
+            double* dofArray = hpp::floatSeq::allocbuf(size);
+            hpp::floatSeq floats (size, size, dofArray, true);
+            //convert the config in dofseq
+            for(std::size_t h = 0; h<positions.size(); ++h)
+            {
+                for(std::size_t k =0; k<3; ++k)
+                {
+                    model::size_type j (h*3 + k);
+                    dofArray[j] = positions[h][k];
+                }
+            }
+            (*res) [(_CORBA_ULong)i] = floats;
+        }
+        return res;
+    }
+
     floatSeqSeq* RbprmBuilder::interpolate(double timestep, double path, double robustnessTreshold) throw (hpp::Error)
     {
         try
