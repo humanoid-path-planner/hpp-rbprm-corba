@@ -112,8 +112,9 @@ namespace hpp {
 
         virtual void setFilter(const hpp::Names_t& roms) throw (hpp::Error);
 				virtual void setAffordanceFilter(const char* romName, const hpp::Names_t& affordances) throw (hpp::Error);
+        virtual hpp::floatSeqSeq * getDebugContactPoints (const char* limbname) throw (hpp::Error);
+        //virtual void getContactPoints (const char* limbname);
         virtual hpp::floatSeqSeq * getReachableContactArea (const char* limbname) throw (hpp::Error);
-        // virtual void getReachableContactArea (const char* limbname) throw (hpp::Error);
         virtual hpp::floatSeq* getApproximatedEffector (const char* limbname, 
                 CORBA::Boolean ellipse, floatSeq_out pose) throw (hpp::Error);
         virtual void boundSO3(const hpp::floatSeq& limitszyx) throw (hpp::Error);

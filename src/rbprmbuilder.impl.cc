@@ -327,59 +327,71 @@ namespace hpp {
       }
       return reachability;
   }
-  hpp::floatSeqSeq* RbprmBuilder::getReachableContactArea (const char* limbname) throw (hpp::Error)
-  //void RbprmBuilder::getReachableContactArea (const char* limbname) throw (hpp::Error)
+
+  std::vector<fcl::Vec3f> getContactPoints (const char* limbname, const model::T_Rom& romDevices,
+          const core::ProblemSolverPtr_t& problemSolver)
   {
-      model::T_Rom::const_iterator limbRomIt = romDevices_.find (limbname);
-      if (limbRomIt == romDevices_.end ()) {
+       model::T_Rom::const_iterator limbRomIt = romDevices.find (limbname);
+      if (limbRomIt == romDevices.end ()) {
           std::string err ("No Rom of name " + std::string(limbname) + " found!");
           throw Error (err.c_str());
       }
       model::DevicePtr_t limbRom = limbRomIt->second;
       const model::ObjectVector_t &reachability = getReachability (limbRom->getJointVector ());
 
-      const affMap_t &affMap = problemSolver_->map
+      const affMap_t &affMap = problemSolver->map
 					<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
 		  if (affMap.empty ()) {
     	    throw hpp::Error ("No affordances found. Unable to find intersection.");
       }
 
-   // TODO: add real funcitonality, this is just a test
-   // find affordance object in contact with given limb
-   for (model::ObjectVector_t::const_iterator objIt = reachability.begin ();
+     // TODO: add real funcitonality, this is just a test
+     // find affordance object in contact with given limb
+     for (model::ObjectVector_t::const_iterator objIt = reachability.begin ();
            objIt != reachability.end (); ++objIt) {
-       std::cout << (*objIt)->name () << std::endl;
        for (affMap_t::const_iterator affIt = affMap.begin (); affIt != affMap.end (); ++affIt) {
            std::cout << affIt->first << std::endl;
            for (unsigned int j = 0; j < affIt->second.size (); ++j) {
                std::cout << "looking at new aff object" << std::endl;
-               std::vector<fcl::Vec3f> intersect = intersect::getIntersection ((*objIt)->fcl(), affIt->second[j]->fcl());
-
-               //Debug:
-               if (intersect.size() > 0) {
-                  hpp::floatSeqSeq *res;
-                  res = new hpp::floatSeqSeq ();
-                  res->length ((_CORBA_ULong)intersect.size ());
-                  for (unsigned int k = 0; k < intersect.size (); ++k) {
-                      hpp::floatSeq point;
-                      point.length(3);
-                      point[0] = intersect[(_CORBA_ULong)k][0];
-                      point[1] = intersect[(_CORBA_ULong)k][1];
-                      point[2] = intersect[(_CORBA_ULong)k][2];
-                      (*res)[k] = point;
-                  }
-                  return res;
-               }
+               return intersect::getIntersectionPoints ((*objIt)->fcl(), affIt->second[j]->fcl());
            }
        }
-       // debug
+     }
+  }
+
+  // function for debugging purposes
+  hpp::floatSeqSeq* RbprmBuilder::getDebugContactPoints (const char* limbname) throw (hpp::Error)
+  {
+    std::vector<fcl::Vec3f> intersect = getContactPoints (limbname,
+            romDevices_, problemSolver_);
+              
+    //Debug:
+    if (intersect.size() > 0) {
        hpp::floatSeqSeq *res;
        res = new hpp::floatSeqSeq ();
-       res->length(0);
+       res->length ((_CORBA_ULong)intersect.size ());
+       for (unsigned int k = 0; k < intersect.size (); ++k) {
+           hpp::floatSeq point;
+           point.length(3);
+           point[0] = intersect[(_CORBA_ULong)k][0];
+           point[1] = intersect[(_CORBA_ULong)k][1];
+           point[2] = intersect[(_CORBA_ULong)k][2];
+           (*res)[k] = point;
+       }
        return res;
+    }
+    hpp::floatSeqSeq *res;
+    res = new hpp::floatSeqSeq ();
+    res->length(0);
+    return res;
 
-   }
+  }
    // call hpp-intersect with found aff object and reachability --> get intersection
+  
+
+  hpp::floatSeqSeq* RbprmBuilder::getReachableContactArea (const char* limbname) throw (hpp::Error)
+  {
+      
   }
 
   hpp::floatSeq* RbprmBuilder::getApproximatedEffector (const char* limbname,

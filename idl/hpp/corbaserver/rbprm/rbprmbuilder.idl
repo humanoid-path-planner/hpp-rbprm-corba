@@ -105,7 +105,7 @@ module hpp
     void setAffordanceFilter(in string romName, in Names_t affordances) raises (Error);
 
     // TODO: Add documentation / edit parameters
-    floatSeqSeq getReachableContactArea (in string libname) raises (Error);
+    floatSeqSeq getDebugContactPoints (in string libname) raises (Error);
     // void getReachableContactArea (in string libname) raises (Error);
 
 
