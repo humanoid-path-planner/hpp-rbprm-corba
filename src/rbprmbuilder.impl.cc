@@ -347,16 +347,23 @@ namespace hpp {
 
      // TODO: add real funcitonality, this is just a test
      // find affordance object in contact with given limb
+     std::vector<fcl::Vec3f> intersect;
      for (model::ObjectVector_t::const_iterator objIt = reachability.begin ();
            objIt != reachability.end (); ++objIt) {
        for (affMap_t::const_iterator affIt = affMap.begin (); affIt != affMap.end (); ++affIt) {
            std::cout << affIt->first << std::endl;
            for (unsigned int j = 0; j < affIt->second.size (); ++j) {
                std::cout << "looking at new aff object" << std::endl;
-               return intersect::getIntersectionPoints ((*objIt)->fcl(), affIt->second[j]->fcl());
+               intersect = intersect::getIntersectionPoints (
+                       (*objIt)->fcl(), affIt->second[j]->fcl());
+               if (intersect.size() > 0) {
+                   return intersect;
+               }
            }
        }
      }
+     intersect.clear ();
+     return intersect;
   }
 
   // function for debugging purposes
@@ -366,7 +373,6 @@ namespace hpp {
             romDevices_, problemSolver_);
               
     //Debug:
-    if (intersect.size() > 0) {
        hpp::floatSeqSeq *res;
        res = new hpp::floatSeqSeq ();
        res->length ((_CORBA_ULong)intersect.size ());
@@ -379,19 +385,12 @@ namespace hpp {
            (*res)[k] = point;
        }
        return res;
-    }
-    hpp::floatSeqSeq *res;
-    res = new hpp::floatSeqSeq ();
-    res->length(0);
-    return res;
+   }
 
-  }
-   // call hpp-intersect with found aff object and reachability --> get intersection
-  
-
-  hpp::floatSeqSeq* RbprmBuilder::getReachableContactArea (const char* limbname) throw (hpp::Error)
+  hpp::floatSeqSeq* RbprmBuilder::getReachableContactArea (const char* limbname,
+          CORBA::Boolean ellipse) throw (hpp::Error)
   {
-      
+     //  
   }
 
   hpp::floatSeq* RbprmBuilder::getApproximatedEffector (const char* limbname,
