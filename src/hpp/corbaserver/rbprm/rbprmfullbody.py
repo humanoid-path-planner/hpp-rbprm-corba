@@ -243,7 +243,7 @@ class FullBody (object):
     # \param robustnessTreshold minimum value of the static equilibrium robustness criterion required to accept the configuration (0 by default).
     def computeContactPoints(self, stateId):
 		rawdata = self.client.rbprm.rbprm.computeContactPoints(stateId)
-		return [[b[i:i+6] for i in range(0, len(b), 6)] for b in rawdata]
+		return [[b[i:i+3] for i in range(0, len(b), 6)] for b in rawdata], [[b[i+3:i+6] for i in range(0, len(b), 6)] for b in rawdata]
 
 		
 	## Given start and goal states
