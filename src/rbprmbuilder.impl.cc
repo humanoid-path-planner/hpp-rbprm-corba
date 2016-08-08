@@ -345,15 +345,12 @@ namespace hpp {
     	    throw hpp::Error ("No affordances found. Unable to find intersection.");
       }
 
-     // TODO: add real funcitonality, this is just a test
-     // find affordance object in contact with given limb
+     // TODO: find affordance object in contact with given limb -> no need to go through whole vector
      std::vector<fcl::Vec3f> intersect;
      for (model::ObjectVector_t::const_iterator objIt = reachability.begin ();
            objIt != reachability.end (); ++objIt) {
        for (affMap_t::const_iterator affIt = affMap.begin (); affIt != affMap.end (); ++affIt) {
-           std::cout << affIt->first << std::endl;
            for (unsigned int j = 0; j < affIt->second.size (); ++j) {
-               std::cout << "looking at new aff object" << std::endl;
                intersect = intersect::getIntersectionPoints (
                        (*objIt)->fcl(), affIt->second[j]->fcl());
                if (intersect.size() > 0) {
@@ -371,8 +368,10 @@ namespace hpp {
   {
     std::vector<fcl::Vec3f> intersect = getContactPoints (limbname,
             romDevices_, problemSolver_);
+    Eigen::Vector3d normal_plane = intersect::projectToPlane (intersect);
+
+    std::cout << "plane normal: " << normal_plane.transpose () << std::endl;
               
-    //Debug:
        hpp::floatSeqSeq *res;
        res = new hpp::floatSeqSeq ();
        res->length ((_CORBA_ULong)intersect.size ());
@@ -387,10 +386,61 @@ namespace hpp {
        return res;
    }
 
+    void printEllipseFunction (const Eigen::VectorXd& ellipse)
+    {
+      std::cout << "Ellipse function: " << "(" << ellipse(0) << ")*x^2 + (" << ellipse(1) 
+                << ")*x*y + (" << ellipse(2) << ")*y^2 + (" << ellipse(3) << ")*x+ ("
+                << ellipse(4) << ")*y + (" << ellipse(5) << ")" << std::endl;
+    }
+
+// TODO: Find a suitable return type! 
   hpp::floatSeqSeq* RbprmBuilder::getReachableContactArea (const char* limbname,
           CORBA::Boolean ellipse) throw (hpp::Error)
   {
-     //  
+      std::vector<fcl::Vec3f> intersect = getContactPoints (limbname,
+            romDevices_, problemSolver_);
+     
+      std::vector<double> radii;
+      Eigen::Vector2d centroid2d;
+      Eigen::Vector3d centroid3d;
+      double tau(0.0);
+
+      // compute rotation of the plane the points approximately lie in; project all
+      // points to the found plane.
+      Eigen::VectorXd planeParams = intersect::projectToPlane(intersect);
+      Eigen::Vector3d normal (planeParams(0), planeParams(1), planeParams(2));
+      normal.normalize ();
+      
+      // Create Quaternion only based on normal vector: TODO: Check whether this is right
+      Eigen::Vector3d Z_up (0.0, 0.0, 1.0);
+      Z_up.normalize ();
+      normal.normalize ();
+      double angle = acos (Z_up.dot (normal));
+      Eigen::Vector3d axis = Z_up.cross (normal);
+      axis.normalize ();
+      Eigen::Quaternion<double> Q (Eigen::AngleAxisd (angle, axis));
+      Q.normalize ();
+      if (ellipse) {
+         Eigen::VectorXd ellipse = intersect::directEllipse (intersect);
+         printEllipseFunction (ellipse);
+
+         radii = intersect::getRadius (ellipse,
+                 centroid2d, tau);
+         centroid3d << centroid2d, planeParams (0)*centroid2d (0) +
+             planeParams (1) * centroid2d (1) + planeParams (2);
+         Q = Q * Eigen::AngleAxisd (tau, normal);
+         // DEBUG:
+         std::cout << "radii: " << radii[0] << ", " << radii[1] << std::endl << "centroid: " 
+             << centroid3d.transpose () << std::endl << "tau: " << tau << std::endl;
+     } else {
+         std::cout << "no implementation for circle yet!!" << std::endl;
+     }
+
+
+     hpp::floatSeqSeq *res;
+     res = new hpp::floatSeqSeq ();
+     res->length (0);
+     return res;
   }
 
   hpp::floatSeq* RbprmBuilder::getApproximatedEffector (const char* limbname,

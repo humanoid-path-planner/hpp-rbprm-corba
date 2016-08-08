@@ -106,7 +106,8 @@ module hpp
 
     // TODO: Add documentation / edit parameters
     floatSeqSeq getDebugContactPoints (in string libname) raises (Error);
-    // void getReachableContactArea (in string libname) raises (Error);
+    floatSeqSeq getReachableContactArea (in string libname,
+                in boolean ellipse) raises (Error);
 
 
     /// Get a 2D circular or elliptic approximation of the end effector contact area
