@@ -19,6 +19,7 @@
 from hpp.corbaserver.rbprm import Client as RbprmClient
 from hpp.corbaserver import Client as BasicClient
 import hpp.gepetto.blender.exportmotion as em
+from numpy import array
 
 ## Corba clients to the various servers
 #
@@ -234,13 +235,11 @@ class FullBody (object):
     def interpolate(self, stepsize, pathId = 1, robustnessTreshold = 0):
 		return self.client.rbprm.rbprm.interpolate(stepsize, pathId, robustnessTreshold)
 	
-	## Discretizes a path return by a motion planner into a discrete
-	# sequence of balanced, contact configurations and returns
-	# the sequence as an array of configurations
-	#
-    # \param stateId id of the first state
-    # \param pathId Id of the path to compute from
-    # \param robustnessTreshold minimum value of the static equilibrium robustness criterion required to accept the configuration (0 by default).
+	## Provided a discrete contact sequence has already been computed, computes
+    # all the contact positions and normals for a given state, the next one, and the intermediate between them.
+    #
+    # \param stateId normalized step for generation along the path (ie the path has a length of 1).
+    # \return list of 2 or 3 lists of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
     def computeContactPoints(self, stateId):
 		rawdata = self.client.rbprm.rbprm.computeContactPoints(stateId)
 		return [[b[i:i+3] for i in range(0, len(b), 6)] for b in rawdata], [[b[i+3:i+6] for i in range(0, len(b), 6)] for b in rawdata]
@@ -253,6 +252,51 @@ class FullBody (object):
     # \param pathId Id of the path to compute from
     def interpolateConfigs(self, configs):
 		return self.client.rbprm.rbprm.interpolateConfigs(configs)
+		
+	## returns the CWC of the robot at a given state
+    #
+    # \param stateId The considered state
+    # \return H matrix and h column, such that H w <= h
+    def getContactCone(self, stateId):
+		H_h =  array(self.client.rbprm.rbprm.getContactCone(stateId))
+		# now decompose cone 
+		return H_h[:,:-1], H_h[:, -1]
+		
+	## returns the CWC of the robot  between two states
+    #
+    # \param stateId The first considered state
+    # \return H matrix and h column, such that H w <= h
+    def getContactIntermediateCone(self, stateId):
+		H_h =  array(self.client.rbprm.rbprm.getContactIntermediateCone(stateId))
+		# now decompose cone 
+		return H_h[:,:-1], H_h[:, -1]
+		
+	## Create a path for the root given
+    #  a set of 3d key points
+    #  The path is composed of n+1 linear interpolations
+    #  between the n positions.
+    #  The rotation is linearly interpolated as well,
+    #  between a start and a goal rotation. The resulting path
+    #  is added to the problem solver
+    #  \param positions array of positions
+    #  \param quat_1 quaternion of 1st rotation
+    #  \param quat_2 quaternion of 2nd rotation
+    def generateRootPath(self, positions, quat_1, quat_2):
+		return self.client.rbprm.rbprm.generateRootPath(positions, quat_1, quat_2)
+		
+	## Create a path for the root given
+    #  a set of 3d key points
+    #  The path is composed of n+1 linear interpolations
+    #  between the n positions.
+    #  The rotation is linearly interpolated as well,
+    #  between a start and a goal configuration. Assuming the robot is a
+    #  free-flyer, rotations are extracted automatically. The resulting path
+    #  is added to the problem solver
+    #  \param positions array of positions
+    #  \param configState1 configuration of 1st rotation
+    #  \param configState2 configuration of 2nd rotation
+    def generateRootPathStates(self, positions, configState1, configState2):
+		return self.client.rbprm.rbprm.generateRootPath(positions, configState1[3:7], configState2[3:7])
 		
 	## Given start and goal states
 	#  Provided a path has already been computed and interpolated, generate a continuous path

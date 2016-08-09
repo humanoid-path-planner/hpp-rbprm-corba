@@ -27,6 +27,7 @@
 #include "hpp/rbprm/stability/stability.hh"
 #include "hpp/rbprm/sampling/sample-db.hh"
 #include "hpp/model/urdf/util.hh"
+#include "hpp/core/straight-path.hh"
 #include <fstream>
 
 
@@ -250,15 +251,10 @@ namespace hpp {
         return cit->second[sampleId];
     }
 
-    model::Configuration_t dofArrayToConfig (const model::DevicePtr_t& robot,
+    model::Configuration_t dofArrayToConfig (const std::size_t& deviceDim,
       const hpp::floatSeq& dofArray)
     {
         std::size_t configDim = (std::size_t)dofArray.length();
-        // Get robot
-        if (!robot) {
-            throw hpp::Error ("No robot in problem solver.");
-        }
-        std::size_t deviceDim = robot->configSize ();
         // Fill dof vector with dof array.
         model::Configuration_t config; config.resize (configDim);
         for (std::size_t iDof = 0; iDof < configDim; iDof++) {
@@ -273,16 +269,28 @@ namespace hpp {
         return config;
     }
 
-    std::vector<model::Configuration_t> doubleDofArrayToConfig (const model::DevicePtr_t& robot,
+    model::Configuration_t dofArrayToConfig (const model::DevicePtr_t& robot,
+      const hpp::floatSeq& dofArray)
+    {
+        return dofArrayToConfig(robot->configSize(), dofArray);
+    }
+
+    T_Configuration doubleDofArrayToConfig (const std::size_t& deviceDim,
       const hpp::floatSeqSeq& doubleDofArray)
     {
         std::size_t configsDim = (std::size_t)doubleDofArray.length();
-        std::vector<model::Configuration_t> res;
+        T_Configuration res;
         for (_CORBA_ULong iConfig = 0; iConfig < configsDim; iConfig++)
         {
-            res.push_back(dofArrayToConfig(robot, doubleDofArray[iConfig]));
+            res.push_back(dofArrayToConfig(deviceDim, doubleDofArray[iConfig]));
         }
         return res;
+    }
+
+    T_Configuration doubleDofArrayToConfig (const model::DevicePtr_t& robot,
+      const hpp::floatSeqSeq& doubleDofArray)
+    {
+        return doubleDofArrayToConfig(robot->configSize(), doubleDofArray);
     }
 
     std::vector<std::string> stringConversion(const hpp::Names_t& dofArray)
@@ -577,7 +585,7 @@ namespace hpp {
             {
                 throw std::runtime_error ("End state not initialized, can not interpolate ");
             }
-            std::vector<model::Configuration_t> configurations = doubleDofArrayToConfig(fullBody_->device_, configs);
+            T_Configuration configurations = doubleDofArrayToConfig(fullBody_->device_, configs);
             const affMap_t &affMap = problemSolver_->map
                         <std::vector<boost::shared_ptr<model::CollisionObject> > > ();
             if (affMap.empty ())
@@ -616,6 +624,142 @@ namespace hpp {
         }
     }
 
+    hpp::floatSeqSeq* contactCone(RbPrmFullBodyPtr_t& fullBody, State& state)
+    {
+        hpp::floatSeqSeq *res;
+        res = new hpp::floatSeqSeq ();
+
+        std::pair<stability::MatrixXX, stability::VectorX> cone = stability::ComputeCentroidalCone(fullBody, state);
+        res->length ((_CORBA_ULong)cone.first.rows());
+        _CORBA_ULong size = (_CORBA_ULong) cone.first.cols()+1;
+        for(int i=0; i < cone.first.rows(); ++i)
+        {
+            double* dofArray = hpp::floatSeq::allocbuf(size);
+            hpp::floatSeq floats (size, size, dofArray, true);
+            //convert the row in dofseq
+            for (int j=0 ; j < cone.first.cols() ; ++j)
+            {
+                dofArray[j] = cone.first(i,j);
+            }
+            dofArray[size-1] =cone.second[i];
+            (*res) [(_CORBA_ULong)i] = floats;
+        }
+        return res;
+    }
+
+    hpp::floatSeqSeq* RbprmBuilder::getContactCone(unsigned short stateId) throw (hpp::Error)
+    {
+        try
+        {
+            if(lastStatesComputed_.size() <= stateId)
+            {
+                throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
+            }
+            return contactCone(fullBody_, lastStatesComputed_[stateId]);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    State intermediary(const State& firstState, const State& thirdState, unsigned short& cId, bool& success)
+    {
+        success = false;
+        std::vector<std::string> breaks;
+        thirdState.contactBreaks(firstState, breaks);
+        if(breaks.size() > 1)
+        {
+            throw std::runtime_error ("too many contact breaks between states" + std::string(""+cId) +
+                                      "and " + std::string(""+(cId + 1)));
+        }
+        if(breaks.size() == 1)
+        {
+            State intermediary(firstState);
+            intermediary.RemoveContact(*breaks.begin());
+            success = true;
+        }
+        return firstState;
+    }
+
+    hpp::floatSeqSeq* RbprmBuilder::getContactIntermediateCone(unsigned short stateId) throw (hpp::Error)
+    {
+        try
+        {
+            if(lastStatesComputed_.size() <= stateId+1)
+            {
+                throw std::runtime_error ("Unexisting state " + std::string(""+(stateId+1)));
+            }
+            bool success;
+            State intermediaryState = intermediary(lastStatesComputed_[stateId], lastStatesComputed_[stateId+1],stateId,success);
+            if(!success)
+            {
+                throw std::runtime_error ("No contact breaks, hence no intermediate state from state " + std::string(""+(stateId)));
+            }
+            return contactCone(fullBody_,intermediaryState);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    core::PathPtr_t makePath(DevicePtr_t device,
+                             const ProblemPtr_t& problem,
+                             model::ConfigurationIn_t q1,
+                             model::ConfigurationIn_t q2)
+    {
+        return StraightPath::create(device, q1, q2, (*problem->distance()) (q1, q2));
+    }
+
+    model::Configuration_t addRotation(CIT_Configuration& pit, const model::value_type& u,
+                              model::ConfigurationIn_t q1, model::ConfigurationIn_t q2,
+                              model::ConfigurationIn_t ref)
+    {
+        model::Configuration_t res = ref;
+        res.head(3) = *pit;
+        res.segment<4>(3) = tools::interpolate(q1, q2, u);
+        return res;
+    }
+
+    core::PathVectorPtr_t addRotations(const T_Configuration& positions,
+                                       model::ConfigurationIn_t q1, model::ConfigurationIn_t q2,
+                                       model::ConfigurationIn_t ref, DevicePtr_t device,
+                                       const ProblemPtr_t& problem)
+    {
+        core::PathVectorPtr_t res = core::PathVector::create(device->configSize(), device->numberDof());
+        model::value_type size_step = 1 /(model::value_type)(positions.size());
+        model::value_type u = 0.;
+        CIT_Configuration pit = positions.begin();
+        model::Configuration_t previous = addRotation(pit, 0., q1, q2, ref), current;
+        ++pit;
+        for(;pit != positions.end()-1; ++pit, u+=size_step)
+        {
+            current = addRotation(pit, u, q1, q2, ref);
+            res->appendPath(makePath(device,problem, previous, current));
+            previous = current;
+        }
+        // last configuration is exactly q2
+        current = addRotation(pit, 1., q1, q2, ref);
+        res->appendPath(makePath(device,problem, previous, current));
+        return res;
+    }
+
+    void RbprmBuilder::generateRootPath(const hpp::floatSeqSeq& rootPositions,
+                          const hpp::floatSeq& q1Seq, const hpp::floatSeq& q2Seq) throw (hpp::Error)
+    {
+        try
+        {
+            model::Configuration_t q1 = dofArrayToConfig(4, q1Seq), q2 = dofArrayToConfig(4, q2Seq);
+            T_Configuration positions = doubleDofArrayToConfig(3, rootPositions);
+            problemSolver_->addPath(addRotations(positions,q1,q2,fullBody_->device_->currentConfiguration(),
+                                                 fullBody_->device_,problemSolver_->problem()));
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
 
     typedef Eigen::Matrix <value_type, 4, 3, Eigen::RowMajor> Matrix43;
     typedef Eigen::Matrix <value_type, 4, 3, Eigen::RowMajor> Rotation;
@@ -661,18 +805,12 @@ namespace hpp {
         const State& firstState = lastStatesComputed_[cId], thirdState = lastStatesComputed_[cId+1];
         std::vector<std::vector<fcl::Vec3f> > allStates;
         allStates.push_back(computeRectangleContact(fullBody_, firstState));
-        std::vector<std::string> breaks, creations;
-        thirdState.contactBreaks(firstState, breaks);
-        if(breaks.size() > 1)
+        std::vector<std::string> creations;
+        bool success(false);
+        State intermediaryState = intermediary(firstState, thirdState, cId, success);
+        if(success)
         {
-            throw std::runtime_error ("too many contact breaks between states" + std::string(""+cId) +
-                                      "and " + std::string(""+(cId + 1)));
-        }
-        if(breaks.size() == 1)
-        {
-            State intermediary(firstState);
-            intermediary.RemoveContact(*breaks.begin());
-            allStates.push_back(computeRectangleContact(fullBody_, intermediary));
+            allStates.push_back(computeRectangleContact(fullBody_, intermediaryState));
         }
         thirdState.contactCreations(firstState, creations);
         if(creations.size() == 1)

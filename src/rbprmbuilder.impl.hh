@@ -142,6 +142,10 @@ namespace hpp {
         virtual hpp::floatSeqSeq* computeContactPoints(unsigned short cId) throw (hpp::Error);
         virtual hpp::floatSeqSeq* interpolate(double timestep, double path, double robustnessTreshold) throw (hpp::Error);
         virtual hpp::floatSeqSeq* interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold) throw (hpp::Error);
+        virtual hpp::floatSeqSeq* getContactCone(unsigned short stateId) throw (hpp::Error);
+        virtual hpp::floatSeqSeq* getContactIntermediateCone(unsigned short stateId) throw (hpp::Error);
+        virtual void generateRootPath(const hpp::floatSeqSeq& rootPositions,
+                                      const hpp::floatSeq& q1, const hpp::floatSeq& q2) throw (hpp::Error);
         virtual void interpolateBetweenStates(double state1, double state2, unsigned short numOptimizations) throw (hpp::Error);
         virtual void interpolateBetweenStatesFromPath(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error);
         virtual void saveComputedStates(const char* filepath) throw (hpp::Error);
