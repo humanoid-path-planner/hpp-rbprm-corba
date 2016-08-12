@@ -319,7 +319,7 @@ namespace hpp {
               if (std::find (addedJoints.begin (), addedJoints.end (), 
                   body->name ()) == addedJoints.end () &&
                   body->innerObjects (model::COLLISION).size () > 0) {
-                  // for now only saving the first collision object in vector: 
+                  // for now only saving the first collision object in vector:
                 reachability.push_back (body->innerObjects (model::COLLISION).front ());
                 addedJoints.push_back (body->name ());
            }
@@ -328,7 +328,7 @@ namespace hpp {
       return reachability;
   }
 
-  std::vector<fcl::Vec3f> getContactPoints (const char* limbname, const model::T_Rom& romDevices,
+  std::vector<fcl::Vec3f> getContactPoints (const char* limbname, model::T_Rom& romDevices,
           const core::ProblemSolverPtr_t& problemSolver)
   {
        model::T_Rom::const_iterator limbRomIt = romDevices.find (limbname);
@@ -337,6 +337,12 @@ namespace hpp {
           throw Error (err.c_str());
       }
       model::DevicePtr_t limbRom = limbRomIt->second;
+
+      //TODO: is this the only way of updating romDevices? Is the pose of a romDevice always
+      // that of the full robot? If not -> another method required
+      const Configuration_t& configuration = problemSolver->robot ()->currentConfiguration ();
+      limbRom->currentConfiguration (configuration.block(0,0,7,1));
+      limbRom->computeForwardKinematics ();
       const model::ObjectVector_t &reachability = getReachability (limbRom->getJointVector ());
 
       const affMap_t &affMap = problemSolver->map
@@ -393,9 +399,41 @@ namespace hpp {
                 << ellipse(4) << ")*y + (" << ellipse(5) << ")" << std::endl;
     }
 
+    hpp::floatSeqSeq* RbprmBuilder::getPointsOnCurve (const hpp::floatSeq& radiiIn,
+            const hpp::floatSeq& trafo) throw (hpp::Error)
+    {
+      model::Transform3f w_T_CurveOrigin (fcl::Quaternion3f (trafo[3],trafo[4],trafo[5],trafo[6]),
+              fcl::Vec3f (trafo[0], trafo[1], trafo[2]));
+      hpp::floatSeqSeq* pointsOut = new hpp::floatSeqSeq();
+      pointsOut->length(0);
+      std::vector<double> radii;
+      if (radii.size () > 1) {
+          radii.push_back(std::max (radiiIn[0], radiiIn[1]));
+          radii.push_back(std::min (radiiIn[0], radiiIn[1]));
+      } else {
+          radii.push_back(radiiIn[0]); 
+          radii.push_back(radiiIn[0]);
+      }
+      hpp::floatSeq pointOut;
+      pointOut.length(3);
+      fcl::Vec3f point (0,0,0);
+      for (unsigned int deg = 0; deg < 360; deg +=5) {
+          double theta = (((double) deg)/180.0)*M_PI;
+          fcl::Vec3f point =  (w_T_CurveOrigin *
+                  model::Transform3f (fcl::Quaternion3f (1.0,0.0,0.0,0.0),
+              fcl::Vec3f (radii[0]*sin(theta), radii[1]*cos(theta), 0.0) )).getTranslation ();
+          pointOut[0] = point[0];
+          pointOut[1] = point[1];
+          pointOut[2] = point[2];
+          pointsOut->length(pointsOut->length()+1);
+          (*pointsOut)[pointsOut->length() -1] = pointOut;
+      }
+      return pointsOut;
+    }
+
 // TODO: Find a suitable return type! 
-  hpp::floatSeqSeq* RbprmBuilder::getReachableContactArea (const char* limbname,
-          CORBA::Boolean ellipse) throw (hpp::Error)
+  hpp::floatSeq* RbprmBuilder::getReachableContactArea (const char* limbname,
+          CORBA::Boolean ellipse, hpp::floatSeq_out pose) throw (hpp::Error)
   {
       std::vector<fcl::Vec3f> intersect = getContactPoints (limbname,
             romDevices_, problemSolver_);
@@ -420,27 +458,46 @@ namespace hpp {
       axis.normalize ();
       Eigen::Quaternion<double> Q (Eigen::AngleAxisd (angle, axis));
       Q.normalize ();
+      Eigen::VectorXd shape;
+
       if (ellipse) {
-         Eigen::VectorXd ellipse = intersect::directEllipse (intersect);
-         printEllipseFunction (ellipse);
+         shape = intersect::directEllipse (intersect);
+      } else {
+          shape = intersect::directCircle (intersect);
+      }
 
-         radii = intersect::getRadius (ellipse,
-                 centroid2d, tau);
-         centroid3d << centroid2d, planeParams (0)*centroid2d (0) +
+      printEllipseFunction(shape);    
+      radii = intersect::getRadius (shape,
+                  centroid2d, tau);
+      centroid3d << centroid2d, planeParams (0)*centroid2d (0) +
              planeParams (1) * centroid2d (1) + planeParams (2);
-         Q = Q * Eigen::AngleAxisd (tau, normal);
-         // DEBUG:
-         std::cout << "radii: " << radii[0] << ", " << radii[1] << std::endl << "centroid: " 
-             << centroid3d.transpose () << std::endl << "tau: " << tau << std::endl;
-     } else {
-         std::cout << "no implementation for circle yet!!" << std::endl;
-     }
+      Q = Q * Eigen::AngleAxisd (tau, normal);
+      // DEBUG:
+      std::cout << "radii: ";
+      for (unsigned int k = 0; k < radii.size (); ++k) {
+          std::cout << radii[k] << ", ";
+      }
+      std::cout << std::endl << "centroid: " 
+           << centroid3d.transpose () << std::endl << "tau: " << tau << std::endl;
 
+      hpp::floatSeq trafo;
+      trafo.length(7);
+      trafo[0] = centroid3d(0);
+      trafo[1] = centroid3d(1);
+      trafo[2] = centroid3d(2);
+      trafo[3] = Q.w();
+      trafo[4] = Q.x();
+      trafo[5] = Q.y();
+      trafo[6] = Q.z();
 
-     hpp::floatSeqSeq *res;
-     res = new hpp::floatSeqSeq ();
-     res->length (0);
-     return res;
+      hpp::floatSeq* poseOut = new hpp::floatSeq(trafo);
+      pose = poseOut;
+      hpp::floatSeq *res = new hpp::floatSeq ();
+      res->length ((CORBA::ULong) radii.size ());
+      for (unsigned int k = 0; k < radii.size (); ++k) {
+          (*res)[(CORBA::ULong) k] = radii[k];
+      }
+      return res;
   }
 
   hpp::floatSeq* RbprmBuilder::getApproximatedEffector (const char* limbname,
