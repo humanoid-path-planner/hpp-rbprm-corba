@@ -146,8 +146,9 @@ namespace hpp {
         virtual hpp::floatSeqSeq* getContactIntermediateCone(unsigned short stateId) throw (hpp::Error);
         virtual void generateRootPath(const hpp::floatSeqSeq& rootPositions,
                                       const hpp::floatSeq& q1, const hpp::floatSeq& q2) throw (hpp::Error);
-        virtual void interpolateBetweenStates(double state1, double state2, unsigned short numOptimizations) throw (hpp::Error);
-        virtual void interpolateBetweenStatesFromPath(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error);
+        virtual void limbRRT(double state1, double state2, unsigned short numOptimizations) throw (hpp::Error);
+        virtual void limbRRTFromRootPath(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error);
+        virtual void comRRT(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error);
         virtual void saveComputedStates(const char* filepath) throw (hpp::Error);
         virtual void saveLimbDatabase(const char* limbname,const char* filepath) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeBox(const char* limbName, double sampleId) throw (hpp::Error);

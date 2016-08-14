@@ -5,7 +5,10 @@ def __get_com(robot, config):
 	save = robot.getCurrentConfig()
 	robot.setCurrentConfig(config)
 	com = robot.getCenterOfMass()
-	com = config[0:3]	 #assimilate root and com
+	print 'debut', com
+	print 'debut c ', config[0:3]
+	print 'z_diff', config[2] - com[2]
+	#~ com = config[0:3]	 #assimilate root and com
 	robot.setCurrentConfig(save)
 	return com
 
@@ -20,7 +23,7 @@ def gen_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, red
 	cones = None
 	if(computeCones):
 		cones = [fullBody.getContactCone(state_id)[0]]
-		if(len(p) > 1):
+		if(len(p) > 2):
 			cones.append(fullBody.getContactIntermediateCone(state_id)[0])
 		if(len(p) > len(cones)):
 			cones.append(fullBody.getContactCone(state_id+1)[0])
@@ -29,7 +32,6 @@ def gen_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, red
 def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, reduce_ineq = True):
 	var_final, params = gen_trajectory(fullBody, states, state_id, computeCones, mu , reduce_ineq)
 	p, N = fullBody.computeContactPoints(state_id)
-	print var_final
 	import numpy as np
 	from mpl_toolkits.mplot3d import Axes3D
 	import matplotlib.pyplot as plt

@@ -22,8 +22,8 @@
 #include "hpp/rbprm/rbprm-device.hh"
 #include "hpp/rbprm/rbprm-validation.hh"
 #include "hpp/rbprm/interpolation/rbprm-path-interpolation.hh"
-#include "hpp/rbprm/interpolation/limb-rrt-helper.hh"
-#include "hpp/rbprm/interpolation/limb-rrt-path.hh"
+#include "hpp/rbprm/interpolation/limb-rrt.hh"
+#include "hpp/rbprm/interpolation/com-rrt.hh"
 #include "hpp/rbprm/stability/stability.hh"
 #include "hpp/rbprm/sampling/sample-db.hh"
 #include "hpp/model/urdf/util.hh"
@@ -709,7 +709,8 @@ namespace hpp {
                              model::ConfigurationIn_t q1,
                              model::ConfigurationIn_t q2)
     {
-        return StraightPath::create(device, q1, q2, (*problem->distance()) (q1, q2));
+        // TODO DT
+        return StraightPath::create(device, q1, q2, 0.1);
     }
 
     model::Configuration_t addRotation(CIT_Configuration& pit, const model::value_type& u,
@@ -735,6 +736,11 @@ namespace hpp {
         ++pit;
         for(;pit != positions.end()-1; ++pit, u+=size_step)
         {
+            std::cout << "position added \n" << ((*pit).head(3)) << std::endl;
+            if((*pit)(0) > 0.552368)
+            {
+                std::cout << "pos devant \n" << (*pit)(0) << std::endl;
+            }
             current = addRotation(pit, u, q1, q2, ref);
             res->appendPath(makePath(device,problem, previous, current));
             previous = current;
@@ -919,7 +925,7 @@ namespace hpp {
         ps->addPath(resPath);
     }
 
-    void RbprmBuilder::interpolateBetweenStates(double state1, double state2, unsigned short numOptimizations) throw (hpp::Error)
+    void RbprmBuilder::limbRRT(double state1, double state2, unsigned short numOptimizations) throw (hpp::Error)
     {
         try
         {
@@ -929,8 +935,8 @@ namespace hpp {
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
             }
             //create helper
-//            /interpolation::LimbRRTHelper helper(fullBody_, problemSolver_->problem());
-            core::PathPtr_t path = interpolation::interpolateStates<rbprm::interpolation::LimbRRTPath, CIT_State>(fullBody_,problemSolver_->problem(),
+//            /interpolation::TimeConstraintHelper helper(fullBody_, problemSolver_->problem());
+            core::PathPtr_t path = interpolation::limbRRT(fullBody_,problemSolver_->problem(),
                                                                           lastStatesComputed_.begin()+s1,lastStatesComputed_.begin()+s2, numOptimizations);
             AddPath(path,problemSolver_);
         }
@@ -940,7 +946,7 @@ namespace hpp {
         }
     }
 
-    void RbprmBuilder::interpolateBetweenStatesFromPath(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error)
+    void RbprmBuilder::limbRRTFromRootPath(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error)
     {
         try
         {
@@ -954,8 +960,34 @@ namespace hpp {
             {
                 throw std::runtime_error ("No path computed, cannot interpolate ");
             }
-            core::PathPtr_t path = interpolation::interpolateStates<rbprm::interpolation::LimbRRTPath>(fullBody_,problemSolver_->problem(), problemSolver_->paths()[pathId],
+            core::PathPtr_t path = interpolation::limbRRTFromPath(fullBody_,problemSolver_->problem(), problemSolver_->paths()[pathId],
                                                                           lastStatesComputedTime_.begin()+s1,lastStatesComputedTime_.begin()+s2, numOptimizations);
+            AddPath(path,problemSolver_);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    void RbprmBuilder::comRRT(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error)
+    {
+        try
+        {
+            std::size_t s1((std::size_t)state1), s2((std::size_t)state2);            
+// temp
+assert(s2 == s1 +1);
+            if(lastStatesComputed_.size () < s1 || lastStatesComputed_.size () < s2 )
+            {
+                throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
+            }
+            unsigned int pathId = (unsigned int)(path);
+            if(problemSolver_->paths().size() <= pathId)
+            {
+                throw std::runtime_error ("No path computed, cannot interpolate ");
+            }
+            core::PathPtr_t path = interpolation::comRRT(fullBody_,problemSolver_->problem(), problemSolver_->paths()[pathId],
+                                                                          *(lastStatesComputed_.begin()+s1),*(lastStatesComputed_.begin()+s2), numOptimizations);
             AddPath(path,problemSolver_);
         }
         catch(std::runtime_error& e)

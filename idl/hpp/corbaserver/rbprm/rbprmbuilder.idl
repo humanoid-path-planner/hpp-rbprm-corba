@@ -260,7 +260,7 @@ module hpp
     /// \param state1 index of first state.
     /// \param state2 index of second state.
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
-    void interpolateBetweenStates(in double state1, in double state2, in unsigned short numOptimizations) raises (Error);
+    void limbRRT(in double state1, in double state2, in unsigned short numOptimizations) raises (Error);
 
     /// Provided a path has already been computed and interpolated, generate a continuous path
     /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
@@ -272,7 +272,19 @@ module hpp
     /// \param state2 index of second state.
     /// \param path index of the path considered for the generation
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
-    void interpolateBetweenStatesFromPath(in double state1, in double state2,  in  unsigned short path, in unsigned short numOptimizations) raises (Error);
+    void limbRRTFromRootPath(in double state1, in double state2,  in  unsigned short path, in unsigned short numOptimizations) raises (Error);
+
+    /// Provided a path has already been computed and interpolated, generate a continuous path
+    /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
+    /// Will fail if the index of the states do not exist
+    /// The path of the COM of thr robot and limbs not considered by the contact transitions between
+    /// two states is assumed to be already computed, and registered in the solver under the id specified by the user.
+    /// It must be valid in the sense of the active PathValidation.
+    /// \param state1 index of first state.
+    /// \param state2 index of second state.
+    /// \param comPath index of the path considered of the com path
+    /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
+    void comRRT(in double state1, in double state2,  in  unsigned short comPath, in unsigned short numOptimizations) raises (Error);
 
     /// Saves the last computed states by the function interpolate in a filename.
     /// Raises an error if interpolate has not been called, or the file could not be opened.

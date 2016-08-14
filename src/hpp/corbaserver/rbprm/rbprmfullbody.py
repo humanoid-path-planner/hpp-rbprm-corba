@@ -305,8 +305,8 @@ class FullBody (object):
     # \param index of first state.
     # \param index of second state.
     # \param numOptim Number of iterations of the shortcut algorithm to apply between each states
-    def interpolateBetweenStates(self, state1, state2, numOptim = 10):
-		return self.client.rbprm.rbprm.interpolateBetweenStates(state1, state2, numOptim)
+    def limbRRT(self, state1, state2, numOptim = 10):
+		return self.client.rbprm.rbprm.limbRRT(state1, state2, numOptim)
 		
 	## Provided a path has already been computed and interpolated, generate a continuous path                        
 	# between two indicated states. The states do not need to be consecutive, but increasing in Id.                 
@@ -318,8 +318,22 @@ class FullBody (object):
 	# \param state2 index of second state.                                                                          
 	# \param path index of the path considered for the generation                                                   
 	# \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states 
-    def interpolateBetweenStatesFromPath(self, state1, state2, path, numOptim = 10):
-		return self.client.rbprm.rbprm.interpolateBetweenStatesFromPath(state1, state2, path, numOptim)		
+    def limbRRTFromRootPath(self, state1, state2, path, numOptim = 10):
+		return self.client.rbprm.rbprm.limbRRTFromRootPath(state1, state2, path, numOptim)		
+		
+		
+	## Provided a center of mass trajectory has already been computed and interpolated, generate a continuous full body path                        
+	# between two indicated states. The states do not need to be consecutive, but increasing in Id.                 
+	# Will fail if the index of the states do not exist                                                             
+	# The path of the COM  between                              
+	# two states is assumed to be already computed, and registered in the solver under the id specified by the user.
+	# It must be valid in the sense of the active PathValidation.                                                   
+	# \param state1 index of first state.                                                                           
+	# \param state2 index of second state.                                                                          
+	# \param path index of the com path considered for the generation                                                   
+	# \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states 
+    def comRRT(self, state1, state2, path, numOptim = 10):
+		return self.client.rbprm.rbprm.comRRT(state1, state2, path, numOptim)		
 		
 		
 	## Given start and goal states
