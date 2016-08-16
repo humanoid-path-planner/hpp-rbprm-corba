@@ -59,3 +59,10 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, re
 
 	plt.show()
 	return var_final, params
+	
+def solve_com_RRT(fullBody, states, state_id, computeCones = False, mu = 1, reduce_ineq = True, num_optims = 0):
+	res = gen_trajectory(fullBody, configs, state_id, computeCones, 0.5, False)
+	c0 = configs[i][0:3]
+	pos = [c0] + [c.tolist() for c in res[0]['c']]
+	pid = fullBody.generateRootPathStates(pos, configs[i], configs[i+1])
+	fullBody.comRRT(i,i+1,pid,num_optims)

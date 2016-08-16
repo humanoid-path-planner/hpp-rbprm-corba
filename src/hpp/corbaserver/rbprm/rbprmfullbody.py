@@ -295,6 +295,7 @@ class FullBody (object):
     #  \param positions array of positions
     #  \param configState1 configuration of 1st rotation
     #  \param configState2 configuration of 2nd rotation
+    #  \return id of the resulting path
     def generateRootPathStates(self, positions, configState1, configState2):
 		return self.client.rbprm.rbprm.generateRootPath(positions, configState1[3:7], configState2[3:7])
 		
@@ -305,6 +306,7 @@ class FullBody (object):
     # \param index of first state.
     # \param index of second state.
     # \param numOptim Number of iterations of the shortcut algorithm to apply between each states
+    #  \return id of the resulting path
     def limbRRT(self, state1, state2, numOptim = 10):
 		return self.client.rbprm.rbprm.limbRRT(state1, state2, numOptim)
 		
@@ -318,6 +320,7 @@ class FullBody (object):
 	# \param state2 index of second state.                                                                          
 	# \param path index of the path considered for the generation                                                   
 	# \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states 
+    #  \return id of the resulting path
     def limbRRTFromRootPath(self, state1, state2, path, numOptim = 10):
 		return self.client.rbprm.rbprm.limbRRTFromRootPath(state1, state2, path, numOptim)		
 		
@@ -332,6 +335,7 @@ class FullBody (object):
 	# \param state2 index of second state.                                                                          
 	# \param path index of the com path considered for the generation                                                   
 	# \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states 
+    #  \return id of the resulting path
     def comRRT(self, state1, state2, path, numOptim = 10):
 		return self.client.rbprm.rbprm.comRRT(state1, state2, path, numOptim)		
 		

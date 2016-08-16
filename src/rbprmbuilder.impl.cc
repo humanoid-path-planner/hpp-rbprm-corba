@@ -751,14 +751,14 @@ namespace hpp {
         return res;
     }
 
-    void RbprmBuilder::generateRootPath(const hpp::floatSeqSeq& rootPositions,
+    CORBA::Short RbprmBuilder::generateRootPath(const hpp::floatSeqSeq& rootPositions,
                           const hpp::floatSeq& q1Seq, const hpp::floatSeq& q2Seq) throw (hpp::Error)
     {
         try
         {
             model::Configuration_t q1 = dofArrayToConfig(4, q1Seq), q2 = dofArrayToConfig(4, q2Seq);
             T_Configuration positions = doubleDofArrayToConfig(3, rootPositions);
-            problemSolver_->addPath(addRotations(positions,q1,q2,fullBody_->device_->currentConfiguration(),
+            return problemSolver_->addPath(addRotations(positions,q1,q2,fullBody_->device_->currentConfiguration(),
                                                  fullBody_->device_,problemSolver_->problem()));
         }
         catch(std::runtime_error& e)
@@ -918,14 +918,14 @@ namespace hpp {
         }
     }
 
-    void AddPath(core::PathPtr_t path, core::ProblemSolverPtr_t ps)
+    CORBA::Short AddPath(core::PathPtr_t path, core::ProblemSolverPtr_t ps)
     {
         core::PathVectorPtr_t resPath = core::PathVector::create(path->outputSize(), path->outputDerivativeSize());
         resPath->appendPath(path);
-        ps->addPath(resPath);
+        return ps->addPath(resPath);
     }
 
-    void RbprmBuilder::limbRRT(double state1, double state2, unsigned short numOptimizations) throw (hpp::Error)
+    CORBA::Short RbprmBuilder::limbRRT(double state1, double state2, unsigned short numOptimizations) throw (hpp::Error)
     {
         try
         {
@@ -938,7 +938,7 @@ namespace hpp {
 //            /interpolation::TimeConstraintHelper helper(fullBody_, problemSolver_->problem());
             core::PathPtr_t path = interpolation::limbRRT(fullBody_,problemSolver_->problem(),
                                                                           lastStatesComputed_.begin()+s1,lastStatesComputed_.begin()+s2, numOptimizations);
-            AddPath(path,problemSolver_);
+            return AddPath(path,problemSolver_);
         }
         catch(std::runtime_error& e)
         {
@@ -946,7 +946,7 @@ namespace hpp {
         }
     }
 
-    void RbprmBuilder::limbRRTFromRootPath(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error)
+    CORBA::Short RbprmBuilder::limbRRTFromRootPath(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error)
     {
         try
         {
@@ -962,7 +962,7 @@ namespace hpp {
             }
             core::PathPtr_t path = interpolation::limbRRTFromPath(fullBody_,problemSolver_->problem(), problemSolver_->paths()[pathId],
                                                                           lastStatesComputedTime_.begin()+s1,lastStatesComputedTime_.begin()+s2, numOptimizations);
-            AddPath(path,problemSolver_);
+            return AddPath(path,problemSolver_);
         }
         catch(std::runtime_error& e)
         {
@@ -970,7 +970,7 @@ namespace hpp {
         }
     }
 
-    void RbprmBuilder::comRRT(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error)
+    CORBA::Short RbprmBuilder::comRRT(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error)
     {
         try
         {
@@ -988,7 +988,7 @@ assert(s2 == s1 +1);
             }
             core::PathPtr_t path = interpolation::comRRT(fullBody_,problemSolver_->problem(), problemSolver_->paths()[pathId],
                                                                           *(lastStatesComputed_.begin()+s1),*(lastStatesComputed_.begin()+s2), numOptimizations);
-            AddPath(path,problemSolver_);
+            return AddPath(path,problemSolver_);
         }
         catch(std::runtime_error& e)
         {
