@@ -329,7 +329,7 @@ namespace hpp {
   }
 
   std::vector<fcl::Vec3f> getContactPoints (const char* limbname, model::T_Rom& romDevices,
-          const core::ProblemSolverPtr_t& problemSolver)
+          const core::ProblemSolverPtr_t& problemSolver, const unsigned int refine)
   {
        model::T_Rom::const_iterator limbRomIt = romDevices.find (limbname);
       if (limbRomIt == romDevices.end ()) {
@@ -357,8 +357,9 @@ namespace hpp {
            objIt != reachability.end (); ++objIt) {
        for (affMap_t::const_iterator affIt = affMap.begin (); affIt != affMap.end (); ++affIt) {
            for (unsigned int j = 0; j < affIt->second.size (); ++j) {
-               intersect = intersect::getIntersectionPoints (
-                       (*objIt)->fcl(), affIt->second[j]->fcl());
+               // DEBUG!! change back to getIntersectionPoints
+               intersect = intersect::getIntersectionPointsCustom (
+                       (*objIt)->fcl(), affIt->second[j]->fcl(), refine);
                if (intersect.size() > 0) {
                    return intersect;
                }
@@ -370,10 +371,11 @@ namespace hpp {
   }
 
   // function for debugging purposes
-  hpp::floatSeqSeq* RbprmBuilder::getDebugContactPoints (const char* limbname) throw (hpp::Error)
+  hpp::floatSeqSeq* RbprmBuilder::getDebugContactPoints (const char* limbname,
+          unsigned short refine) throw (hpp::Error)
   {
     std::vector<fcl::Vec3f> intersect = getContactPoints (limbname,
-            romDevices_, problemSolver_);
+            romDevices_, problemSolver_, refine);
     Eigen::Vector3d normal_plane = intersect::projectToPlane (intersect);
 
     std::cout << "plane normal: " << normal_plane.transpose () << std::endl;
@@ -433,10 +435,10 @@ namespace hpp {
 
 // TODO: Find a suitable return type! 
   hpp::floatSeq* RbprmBuilder::getReachableContactArea (const char* limbname,
-          CORBA::Boolean ellipse, hpp::floatSeq_out pose) throw (hpp::Error)
+          CORBA::Boolean ellipse, hpp::floatSeq_out pose, unsigned short refine) throw (hpp::Error)
   {
       std::vector<fcl::Vec3f> intersect = getContactPoints (limbname,
-            romDevices_, problemSolver_);
+            romDevices_, problemSolver_, refine);
      
       std::vector<double> radii;
       Eigen::Vector2d centroid2d;
@@ -445,10 +447,13 @@ namespace hpp {
 
       // compute rotation of the plane the points approximately lie in; project all
       // points to the found plane.
+      for (unsigned int i = 0; i < intersect.size (); ++i) {
+        std::cout << "before: " << intersect[i]<< std::endl;
+      }
       Eigen::VectorXd planeParams = intersect::projectToPlane(intersect);
       Eigen::Vector3d normal (planeParams(0), planeParams(1), planeParams(2));
       normal.normalize ();
-      
+
       // Create Quaternion only based on normal vector: TODO: Check whether this is right
       Eigen::Vector3d Z_up (0.0, 0.0, 1.0);
       Z_up.normalize ();
@@ -458,8 +463,16 @@ namespace hpp {
       axis.normalize ();
       Eigen::Quaternion<double> Q (Eigen::AngleAxisd (angle, axis));
       Q.normalize ();
+      std::cout << "normal: " << normal << std::endl;
+      std::cout << "Q: " << Q.toRotationMatrix () << std::endl;
+
+      for (unsigned int i = 0; i < intersect.size (); ++i) {
+        std::cout << "after: " << Q.toRotationMatrix () * intersect[i] << std::endl;
+      }
+     
       Eigen::VectorXd shape;
 
+      // express points' coordinates in plane frame
       if (ellipse) {
          shape = intersect::directEllipse (intersect);
       } else {
