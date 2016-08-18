@@ -376,7 +376,8 @@ namespace hpp {
   {
     std::vector<fcl::Vec3f> intersect = getContactPoints (limbname,
             romDevices_, problemSolver_, refine);
-    Eigen::Vector3d normal_plane = intersect::projectToPlane (intersect);
+    Eigen::Vector3d planeCentroid;
+    Eigen::Vector3d normal_plane = intersect::projectToPlane (intersect, planeCentroid);
 
     std::cout << "plane normal: " << normal_plane.transpose () << std::endl;
               
@@ -409,7 +410,7 @@ namespace hpp {
       hpp::floatSeqSeq* pointsOut = new hpp::floatSeqSeq();
       pointsOut->length(0);
       std::vector<double> radii;
-      if (radii.size () > 1) {
+      if (radiiIn.length () > 1) {
           radii.push_back(std::max (radiiIn[0], radiiIn[1]));
           radii.push_back(std::min (radiiIn[0], radiiIn[1]));
       } else {
@@ -419,11 +420,12 @@ namespace hpp {
       hpp::floatSeq pointOut;
       pointOut.length(3);
       fcl::Vec3f point (0,0,0);
+      std::cout << "ellipse centre in world: " << w_T_CurveOrigin.getRotation () << std::endl
+          << w_T_CurveOrigin.getTranslation () << std::endl;
       for (unsigned int deg = 0; deg < 360; deg +=5) {
           double theta = (((double) deg)/180.0)*M_PI;
-          fcl::Vec3f point =  (w_T_CurveOrigin *
-                  model::Transform3f (fcl::Quaternion3f (1.0,0.0,0.0,0.0),
-              fcl::Vec3f (radii[0]*sin(theta), radii[1]*cos(theta), 0.0) )).getTranslation ();
+          fcl::Vec3f point =  fcl::Vec3f (radii[0]*sin(theta), radii[1]*cos(theta), 0.0);
+          point = w_T_CurveOrigin.getRotation () * point + w_T_CurveOrigin.getTranslation();
           pointOut[0] = point[0];
           pointOut[1] = point[1];
           pointOut[2] = point[2];
@@ -447,10 +449,8 @@ namespace hpp {
 
       // compute rotation of the plane the points approximately lie in; project all
       // points to the found plane.
-      for (unsigned int i = 0; i < intersect.size (); ++i) {
-        std::cout << "before: " << intersect[i]<< std::endl;
-      }
-      Eigen::VectorXd planeParams = intersect::projectToPlane(intersect);
+      Eigen::Vector3d planeCentroid;
+      Eigen::VectorXd planeParams = intersect::projectToPlane(intersect, planeCentroid);
       Eigen::Vector3d normal (planeParams(0), planeParams(1), planeParams(2));
       normal.normalize ();
 
@@ -460,21 +460,25 @@ namespace hpp {
       normal.normalize ();
       double angle = acos (Z_up.dot (normal));
       Eigen::Vector3d axis = Z_up.cross (normal);
-      axis.normalize ();
+      if (axis.isZero(0.0) && angle == 0.0) {
+          // if axis = [0,0,0] -> no rotation
+          axis << 0.0,0.0,1.0; // give any axis that is non-zero to avoid NaNs
+      }
       Eigen::Quaternion<double> Q (Eigen::AngleAxisd (angle, axis));
       Q.normalize ();
-      std::cout << "normal: " << normal << std::endl;
       std::cout << "Q: " << Q.toRotationMatrix () << std::endl;
 
+      // Rotate all points to plane coordinates TODO: full trafo
       for (unsigned int i = 0; i < intersect.size (); ++i) {
-        std::cout << "after: " << Q.toRotationMatrix () * intersect[i] << std::endl;
+          intersect[i] = ((Q.inverse ()).toRotationMatrix ()) * Eigen::Vector3d (intersect[i][0],
+                 intersect[i][1], intersect[i][2]);
+         // std::cout << "intersect point in world: " << (intersect[i]) << std::endl;
       }
      
       Eigen::VectorXd shape;
-
       // express points' coordinates in plane frame
       if (ellipse) {
-         shape = intersect::directEllipse (intersect);
+          shape = intersect::directEllipse (intersect);
       } else {
           shape = intersect::directCircle (intersect);
       }
@@ -482,15 +486,19 @@ namespace hpp {
       printEllipseFunction(shape);    
       radii = intersect::getRadius (shape,
                   centroid2d, tau);
-      centroid3d << centroid2d, planeParams (0)*centroid2d (0) +
-             planeParams (1) * centroid2d (1) + planeParams (2);
-      Q = Q * Eigen::AngleAxisd (tau, normal);
+      // This is the 3d centroid of the ellipse in the plane frame (or world frame with plane rotation?)
+      // in the plane rotation, its normal is always (0,0,1)
+      centroid3d << centroid2d, planeParams.dot (planeCentroid);
+      // go back to world rotation:
+      centroid3d = Q.toRotationMatrix () * centroid3d;
+      // add rotation in plane frame to global quaternion (in plane frame rotation is always around z axis)
+      Q = Q.toRotationMatrix () * (Eigen::AngleAxisd (tau, Eigen::Vector3d (0,0,1))).toRotationMatrix ();
       // DEBUG:
       std::cout << "radii: ";
       for (unsigned int k = 0; k < radii.size (); ++k) {
           std::cout << radii[k] << ", ";
       }
-      std::cout << std::endl << "centroid: " 
+      std::cout << std::endl << "centroid in world: " 
            << centroid3d.transpose () << std::endl << "tau: " << tau << std::endl;
 
       hpp::floatSeq trafo;
