@@ -257,8 +257,8 @@ class FullBody (object):
     #
     # \param stateId The considered state
     # \return H matrix and h column, such that H w <= h
-    def getContactCone(self, stateId):
-		H_h =  array(self.client.rbprm.rbprm.getContactCone(stateId))
+    def getContactCone(self, stateId, friction = 0.5):
+		H_h =  array(self.client.rbprm.rbprm.getContactCone(stateId, friction))
 		# now decompose cone 
 		return H_h[:,:-1], H_h[:, -1]
 		
@@ -266,8 +266,8 @@ class FullBody (object):
     #
     # \param stateId The first considered state
     # \return H matrix and h column, such that H w <= h
-    def getContactIntermediateCone(self, stateId):
-		H_h =  array(self.client.rbprm.rbprm.getContactIntermediateCone(stateId))
+    def getContactIntermediateCone(self, stateId, friction = 0.5):
+		H_h =  array(self.client.rbprm.rbprm.getContactIntermediateCone(stateId, friction))
 		# now decompose cone 
 		return H_h[:,:-1], H_h[:, -1]
 		
@@ -339,6 +339,15 @@ class FullBody (object):
     def comRRT(self, state1, state2, path, numOptim = 10):
 		return self.client.rbprm.rbprm.comRRT(state1, state2, path, numOptim)		
 		
+		
+	## Project a given state into a given COM position
+    # between two indicated states. The states do not need to be consecutive, but increasing in Id.
+    # Will fail if the index of the state does not exist.
+    # \param state index of first state.
+    # \param targetCom 3D vector for the com position
+    # \return projected configuration
+    def projectToCom(self, state, targetCom):
+		return self.client.rbprm.rbprm.projectToCom(state, targetCom)	
 		
 	## Given start and goal states
 	#  generate a contact sequence over a list of configurations

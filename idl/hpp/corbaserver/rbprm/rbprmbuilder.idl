@@ -229,14 +229,15 @@ module hpp
     /// returns the CWC of the robot at a given state
     ///
     /// \param stateId The considered state
+    /// \param friction The friction coefficient
     /// \return H matrix, such that H w <= h. h is added as the last column
-    floatSeqSeq getContactCone(in unsigned short stateId) raises (Error);
+    floatSeqSeq getContactCone(in unsigned short stateId, in double friction) raises (Error);
 
     /// returns the CWC of the robot between two states
     ///
     /// \param stateId The considered state
     /// \return H matrix, such that H w <= h. h is added as the last column
-    floatSeqSeq getContactIntermediateCone(in unsigned short stateId) raises (Error);
+    floatSeqSeq getContactIntermediateCone(in unsigned short stateId, in double friction) raises (Error);
 
     /// Create a path for the root given
     /// a set of 3d key points
@@ -289,6 +290,14 @@ module hpp
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
     /// \return id of the root path computed
     short comRRT(in double state1, in double state2,  in  unsigned short comPath, in unsigned short numOptimizations) raises (Error);
+
+    /// Project a given state into a given COM position
+    /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
+    /// Will fail if the index of the state does not exist.
+    /// \param state index of first state.
+    /// \param targetCom 3D vector for the com position
+    /// \return projected configuration
+    floatSeq projectToCom(in double state, in floatSeq targetCom) raises (Error);
 
     /// Saves the last computed states by the function interpolate in a filename.
     /// Raises an error if interpolate has not been called, or the file could not be opened.

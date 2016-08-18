@@ -624,12 +624,12 @@ namespace hpp {
         }
     }
 
-    hpp::floatSeqSeq* contactCone(RbPrmFullBodyPtr_t& fullBody, State& state)
+    hpp::floatSeqSeq* contactCone(RbPrmFullBodyPtr_t& fullBody, State& state, const double friction)
     {
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
 
-        std::pair<stability::MatrixXX, stability::VectorX> cone = stability::ComputeCentroidalCone(fullBody, state);
+        std::pair<stability::MatrixXX, stability::VectorX> cone = stability::ComputeCentroidalCone(fullBody, state, friction);
         res->length ((_CORBA_ULong)cone.first.rows());
         _CORBA_ULong size = (_CORBA_ULong) cone.first.cols()+1;
         for(int i=0; i < cone.first.rows(); ++i)
@@ -647,7 +647,7 @@ namespace hpp {
         return res;
     }
 
-    hpp::floatSeqSeq* RbprmBuilder::getContactCone(unsigned short stateId) throw (hpp::Error)
+    hpp::floatSeqSeq* RbprmBuilder::getContactCone(unsigned short stateId, double friction) throw (hpp::Error)
     {
         try
         {
@@ -655,7 +655,7 @@ namespace hpp {
             {
                 throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
             }
-            return contactCone(fullBody_, lastStatesComputed_[stateId]);
+            return contactCone(fullBody_, lastStatesComputed_[stateId],friction);
         }
         catch(std::runtime_error& e)
         {
@@ -682,7 +682,7 @@ namespace hpp {
         return firstState;
     }
 
-    hpp::floatSeqSeq* RbprmBuilder::getContactIntermediateCone(unsigned short stateId) throw (hpp::Error)
+    hpp::floatSeqSeq* RbprmBuilder::getContactIntermediateCone(unsigned short stateId, double friction) throw (hpp::Error)
     {
         try
         {
@@ -696,7 +696,7 @@ namespace hpp {
             {
                 throw std::runtime_error ("No contact breaks, hence no intermediate state from state " + std::string(""+(stateId)));
             }
-            return contactCone(fullBody_,intermediaryState);
+            return contactCone(fullBody_,intermediaryState, friction);
         }
         catch(std::runtime_error& e)
         {
@@ -989,6 +989,31 @@ assert(s2 == s1 +1);
             core::PathPtr_t path = interpolation::comRRT(fullBody_,problemSolver_->problem(), problemSolver_->paths()[pathId],
                                                                           *(lastStatesComputed_.begin()+s1),*(lastStatesComputed_.begin()+s2), numOptimizations);
             return AddPath(path,problemSolver_);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    hpp::floatSeq* RbprmBuilder::projectToCom(double state, const hpp::floatSeq& targetCom) throw (hpp::Error)
+    {
+        try
+        {
+            if(lastStatesComputed_.size () < state)
+            {
+                throw std::runtime_error ("did not find a states at indicated index: " + std::string(""+(std::size_t)(state)));
+            }
+            model::Configuration_t config = dofArrayToConfig (std::size_t(3), targetCom);
+            fcl::Vec3f comTarget; for(int i =0; i<3; ++i) comTarget[i] = config[i];
+            model::Configuration_t  res = interpolation::projectOnCom(fullBody_,problemSolver_->problem(), lastStatesComputed_[state],comTarget);
+            hpp::floatSeq* dofArray = new hpp::floatSeq();
+            dofArray->length(res.rows());
+            for(std::size_t i=0; i< res.rows(); ++i)
+            {
+              (*dofArray)[(_CORBA_ULong)i] = res[i];
+            }
+            return dofArray;
         }
         catch(std::runtime_error& e)
         {

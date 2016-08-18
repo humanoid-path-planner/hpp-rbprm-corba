@@ -5,9 +5,7 @@ def __get_com(robot, config):
 	save = robot.getCurrentConfig()
 	robot.setCurrentConfig(config)
 	com = robot.getCenterOfMass()
-	print 'debut', com
-	print 'debut c ', config[0:3]
-	print 'z_diff', config[2] - com[2]
+	print 'COM', com
 	#~ com = config[0:3]	 #assimilate root and com
 	robot.setCurrentConfig(save)
 	return com
@@ -22,11 +20,11 @@ def gen_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, red
 	dt = 0.1
 	cones = None
 	if(computeCones):
-		cones = [fullBody.getContactCone(state_id)[0]]
+		cones = [fullBody.getContactCone(state_id, mu)[0]]
 		if(len(p) > 2):
-			cones.append(fullBody.getContactIntermediateCone(state_id)[0])
+			cones.append(fullBody.getContactIntermediateCone(state_id, mu)[0])
 		if(len(p) > len(cones)):
-			cones.append(fullBody.getContactCone(state_id+1)[0])
+			cones.append(fullBody.getContactCone(state_id+1, mu)[0])
 	return cone_optimization(p, N, [init_com + [0,0,0], end_com + [0,0,0]], t_end_phases[1:], dt, cones, mu, mass, 9.81, reduce_ineq)
 
 def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, reduce_ineq = True):
@@ -60,9 +58,27 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, re
 	plt.show()
 	return var_final, params
 	
-def solve_com_RRT(fullBody, states, state_id, computeCones = False, mu = 1, reduce_ineq = True, num_optims = 0):
-	res = gen_trajectory(fullBody, configs, state_id, computeCones, 0.5, False)
-	c0 = configs[i][0:3]
-	pos = [c0] + [c.tolist() for c in res[0]['c']]
-	pid = fullBody.generateRootPathStates(pos, configs[i], configs[i+1])
-	fullBody.comRRT(i,i+1,pid,num_optims)
+def solve_com_RRT(fullBody, states, state_id, computeCones = False, mu = 1, reduce_ineq = True, num_optims = 0, draw = False):
+	print "callgin gen ",state_id
+	if(draw):
+		res = draw_trajectory(fullBody, states, state_id, computeCones, mu, reduce_ineq)		
+	else:
+		res = gen_trajectory(fullBody, states, state_id, computeCones, mu, reduce_ineq)
+	t = res[1]["t_init_phases"];
+	dt = res[1]["dt"];
+	final_state = res[0]
+	c0 =  res[1]["x_init"][0:3]
+	print "c0", c0
+	comPos = [c0] + [c.tolist() for c in final_state['c']]
+	comPosPerPhase = [[comPos[(int)(t_id/dt)] for t_id in np.arange(t[index],t[index+1],dt)] for index, _ in enumerate(t[:-1]) ]
+	comPosPerPhase[-1].append(comPos[-1])
+	assert(len(comPos) == len(comPosPerPhase[0]) + len(comPosPerPhase[1]) + len(comPosPerPhase[2]))
+	assert(comPos == [item for sublist in comPosPerPhase for item in sublist])
+	print "done. generating state path ",state_id
+	
+	pid = fullBody.generateRootPathStates(comPos, states[state_id], states[state_id+1])
+	print "done. shortcuting ",state_id	
+	
+	return fullBody.comRRT(state_id,state_id+1,pid,num_optims)
+
+	

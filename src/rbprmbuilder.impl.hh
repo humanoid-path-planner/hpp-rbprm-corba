@@ -142,13 +142,14 @@ namespace hpp {
         virtual hpp::floatSeqSeq* computeContactPoints(unsigned short cId) throw (hpp::Error);
         virtual hpp::floatSeqSeq* interpolate(double timestep, double path, double robustnessTreshold) throw (hpp::Error);
         virtual hpp::floatSeqSeq* interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold) throw (hpp::Error);
-        virtual hpp::floatSeqSeq* getContactCone(unsigned short stateId) throw (hpp::Error);
-        virtual hpp::floatSeqSeq* getContactIntermediateCone(unsigned short stateId) throw (hpp::Error);
+        virtual hpp::floatSeqSeq* getContactCone(unsigned short stateId, double friction) throw (hpp::Error);
+        virtual hpp::floatSeqSeq* getContactIntermediateCone(unsigned short stateId, double friction) throw (hpp::Error);
         virtual CORBA::Short generateRootPath(const hpp::floatSeqSeq& rootPositions,
                                       const hpp::floatSeq& q1, const hpp::floatSeq& q2) throw (hpp::Error);
         virtual CORBA::Short limbRRT(double state1, double state2, unsigned short numOptimizations) throw (hpp::Error);
         virtual CORBA::Short limbRRTFromRootPath(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error);
         virtual CORBA::Short comRRT(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error);
+        virtual hpp::floatSeq* projectToCom(double state, const hpp::floatSeq& targetCom) throw (hpp::Error);
         virtual void saveComputedStates(const char* filepath) throw (hpp::Error);
         virtual void saveLimbDatabase(const char* limbname,const char* filepath) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeBox(const char* limbName, double sampleId) throw (hpp::Error);
