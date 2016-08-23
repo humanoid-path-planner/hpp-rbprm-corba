@@ -129,11 +129,13 @@ install(FILES
 	data/meshes/darpareduced.stl
 	data/meshes/car.stl
 	data/meshes/car_simple.stl
+	data/meshes/ground.stl
+	data/meshes/ground_table.stl
 	data/meshes/hrp2_trunk.stl
 	data/meshes/hrp2_trunk_body.stl
 	data/meshes/hrp2_trunk_torso.stl
-        data/meshes/hrp2_trunk_body_view.dae
-        data/meshes/hrp2_trunk_torso_view.dae
+	data/meshes/hrp2_trunk_body_view.dae
+	data/meshes/hrp2_trunk_torso_view.dae
 	data/meshes/hrp2_rom.stl
 	data/meshes/hrp2_larm_rom.stl
 	data/meshes/hrp2_rarm_rom.stl
@@ -149,7 +151,7 @@ install(FILES
 	data/meshes/truck.stl
 	data/meshes/truck_vision.stl
 	data/meshes/stair_bauzil.stl
-        data/meshes/stair_bauzil_reduced.stl
+	data/meshes/stair_bauzil_reduced.stl
 	data/meshes/climb.stl
 	data/meshes/stepladder.stl
 	data/meshes/chair.stl

@@ -149,6 +149,11 @@ namespace hpp {
         virtual CORBA::Short limbRRT(double state1, double state2, unsigned short numOptimizations) throw (hpp::Error);
         virtual CORBA::Short limbRRTFromRootPath(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error);
         virtual CORBA::Short comRRT(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error);
+        virtual CORBA::Short comRRTFromPos(double state1,
+                                           const hpp::floatSeqSeq& rootPositions1,
+                                           const hpp::floatSeqSeq& rootPositions2,
+                                           const hpp::floatSeqSeq& rootPositions3,
+                                           unsigned short numOptimizations) throw (hpp::Error);
         virtual hpp::floatSeq* projectToCom(double state, const hpp::floatSeq& targetCom) throw (hpp::Error);
         virtual void saveComputedStates(const char* filepath) throw (hpp::Error);
         virtual void saveLimbDatabase(const char* limbname,const char* filepath) throw (hpp::Error);

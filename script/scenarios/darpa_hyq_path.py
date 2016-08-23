@@ -46,7 +46,7 @@ ps.addGoalConfig (q_goal)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
-afftool.loadObstacleModel (packageName, "darpa", "planning", r)
+afftool.loadObstacleModel (packageName, "darpa", "pling", r)
 afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 
 # Choosing RBPRM shooter and path validation methods.
@@ -62,3 +62,7 @@ t = ps.solve ()
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 #~ pp (1)
+
+q_far = q_init [::]
+q_far [0:3] = [-2, -3, 0.63]; 
+r(q_far)

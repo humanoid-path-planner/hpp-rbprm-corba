@@ -736,11 +736,6 @@ namespace hpp {
         ++pit;
         for(;pit != positions.end()-1; ++pit, u+=size_step)
         {
-            std::cout << "position added \n" << ((*pit).head(3)) << std::endl;
-            if((*pit)(0) > 0.552368)
-            {
-                std::cout << "pos devant \n" << (*pit)(0) << std::endl;
-            }
             current = addRotation(pit, u, q1, q2, ref);
             res->appendPath(makePath(device,problem, previous, current));
             previous = current;
@@ -751,15 +746,29 @@ namespace hpp {
         return res;
     }
 
+   core::PathVectorPtr_t generateComPath(RbPrmFullBodyPtr_t& fullBody, core::ProblemSolverPtr_t problemSolver, const hpp::floatSeqSeq& rootPositions,
+                          const model::Configuration_t q1, const model::Configuration_t q2) throw (hpp::Error)
+    {
+        try
+        {
+            T_Configuration positions = doubleDofArrayToConfig(3, rootPositions);
+            return addRotations(positions,q1,q2,fullBody->device_->currentConfiguration(),
+                                                 fullBody->device_,problemSolver->problem());
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+
     CORBA::Short RbprmBuilder::generateRootPath(const hpp::floatSeqSeq& rootPositions,
                           const hpp::floatSeq& q1Seq, const hpp::floatSeq& q2Seq) throw (hpp::Error)
     {
         try
         {
             model::Configuration_t q1 = dofArrayToConfig(4, q1Seq), q2 = dofArrayToConfig(4, q2Seq);
-            T_Configuration positions = doubleDofArrayToConfig(3, rootPositions);
-            return problemSolver_->addPath(addRotations(positions,q1,q2,fullBody_->device_->currentConfiguration(),
-                                                 fullBody_->device_,problemSolver_->problem()));
+            return problemSolver_->addPath(generateComPath(fullBody_, problemSolver_, rootPositions, q1, q2));
         }
         catch(std::runtime_error& e)
         {
@@ -789,10 +798,29 @@ namespace hpp {
                  lx, -ly, 0,
                 -lx, -ly, 0,
                 -lx,  ly, 0;
-            const fcl::Matrix3f& fclRotation = state.contactRotation_.at(name);
-            for(int i =0; i< 3; ++i)
+            //create rotation matrix from normal
+            fcl::Vec3f z_fcl = state.contactNormals_.at(name);
+            Eigen::Vector3d z,x,y;
+            for(int i =0; i<3; ++i) z[i] = z_fcl[i];
+            x = z.cross(Eigen::Vector3d(0,-1,0));
+            if(x.norm() < 10e-6)
+            {
+                y = z.cross(fcl::Vec3f(1,0,0));
+                y.normalize();
+                x = y.cross(z);
+            }
+            else
+            {
+                x.normalize();
+                y = z.cross(x);
+            }
+            R.block<3,1>(0,0) = x;
+            R.block<3,1>(0,1) = y;
+            R.block<3,1>(0,2) = z;
+            //const fcl::Matrix3f& fclRotation = state.contactRotation_.at(name);
+            /*for(int i =0; i< 3; ++i)
                 for(int j =0; j<3;++j)
-                    R(i,j) = fclRotation(i,j);
+                    R(i,j) = fclRotation(i,j);*/
             for(std::size_t i =0; i<4; ++i)
             {
                 res.push_back(position + (R*p.row(i).transpose()));
@@ -989,6 +1017,79 @@ assert(s2 == s1 +1);
             core::PathPtr_t path = interpolation::comRRT(fullBody_,problemSolver_->problem(), problemSolver_->paths()[pathId],
                                                                           *(lastStatesComputed_.begin()+s1),*(lastStatesComputed_.begin()+s2), numOptimizations);
             return AddPath(path,problemSolver_);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    CORBA::Short RbprmBuilder::comRRTFromPos(double state1,
+                                       const hpp::floatSeqSeq& rootPositions1,
+                                       const hpp::floatSeqSeq& rootPositions2,
+                                       const hpp::floatSeqSeq& rootPositions3,
+                                       unsigned short numOptimizations) throw (hpp::Error)
+    {
+        try
+        {
+            std::size_t s1((std::size_t)state1), s2((std::size_t)state1+1);
+            if(lastStatesComputed_.size () < s1 || lastStatesComputed_.size () < s2 )
+            {
+                throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
+            }
+            const State& state1=lastStatesComputed_[s1], state2=lastStatesComputed_[s2];
+            // first compute com paths.
+            std::vector<core::PathVectorPtr_t> paths;
+            paths.push_back(generateComPath(fullBody_,problemSolver_,rootPositions1,state1.configuration_.segment<4>(3), state2.configuration_.segment<4>(3)));
+            paths.push_back(generateComPath(fullBody_,problemSolver_,rootPositions2,state1.configuration_.segment<4>(3), state2.configuration_.segment<4>(3)));
+            paths.push_back(generateComPath(fullBody_,problemSolver_,rootPositions3,state1.configuration_.segment<4>(3), state2.configuration_.segment<4>(3)));
+
+            std::vector<State> states;
+            states.push_back(state1);
+            State s1Bis(state1);
+            s1Bis.configuration_ = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s1Bis,paths[0]->end().head<3>());
+            states.push_back(s1Bis);
+
+            State s1Ter(s1Bis);
+            s1Ter.configuration_ = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s1Ter,paths[1]->initial().head<3>());
+            states.push_back(s1Ter);
+
+            State s2Bis(state2);
+            s2Bis.configuration_ = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s2Bis,paths[1]->end().head<3>());
+            states.push_back(s2Bis);
+
+            State s2Ter(s2Bis);
+            s2Ter.configuration_ = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s2Ter,paths[2]->initial().head<3>());
+            states.push_back(s2Ter);
+
+            states.push_back(state2);
+            std::size_t i =0;
+            core::PathVectorPtr_t resPath = core::PathVector::create(fullBody_->device_->configSize(), fullBody_->device_->numberDof());
+            /*for(std::vector<State>::const_iterator cit = states.begin(); cit != states.end();cit=cit+2, ++i)
+            {
+                resPath->appendPath(interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[i],
+                                                        *(cit),*(cit+1), numOptimizations));
+            }*/
+            core::WeighedDistancePtr_t distance = core::WeighedDistance::create(fullBody_->device_);
+            /*resPath->appendPath(core::StraightPath::create(fullBody_->device_,state1.configuration_,s1Bis.configuration_,
+                                                           (*distance)(state1.configuration_,s1Bis.configuration_)));
+            resPath->appendPath(core::StraightPath::create(fullBody_->device_,s1Bis.configuration_,s1Ter.configuration_,
+                                                           (*distance)(s1Bis.configuration_,s1Ter.configuration_)));*/
+            resPath->appendPath(core::StraightPath::create(fullBody_->device_,state1.configuration_,s1Ter.configuration_, 0.5));
+                                                                       //(*distance)(state1.configuration_,s1Ter.configuration_)));
+            resPath->appendPath(interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[1],
+            s1Ter,s2Bis, numOptimizations));
+            /*resPath->appendPath(core::StraightPath::create(fullBody_->device_,s2Bis.configuration_,s2Ter.configuration_,
+                                                           (*distance)(s2Bis.configuration_,s2Ter.configuration_)));
+            resPath->appendPath(core::StraightPath::create(fullBody_->device_,s2Ter.configuration_,state2.configuration_,
+                                                           (*distance)(s2Ter.configuration_,state2.configuration_)));*/
+            resPath->appendPath(core::StraightPath::create(fullBody_->device_,s2Bis.configuration_,state2.configuration_, 0.5));
+                                                           //(*distance)(s2Bis.configuration_,state2.configuration_)));
+            /*T_State tg; tg.push_back(s1Bis);
+            tg.push_back(s2Bis);
+            resPath->appendPath(interpolation::limbRRT(fullBody_,problemSolver_->problem(),
+                                                    tg.begin(),tg.begin()+1, numOptimizations));*/
+            return AddPath(resPath,problemSolver_);
         }
         catch(std::runtime_error& e)
         {

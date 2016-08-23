@@ -82,7 +82,7 @@ r(q_init)
 # computing the contact sequence
 configs = fullBody.interpolate(0.1, 1, 0)
 
-r.loadObstacleModel ('hpp-rbprm-corba', "darpa", "contact")
+#~ r.loadObstacleModel ('hpp-rbprm-corba', "darpa", "contact")
 
 # calling draw with increasing i will display the sequence
 i = 0;
@@ -90,3 +90,106 @@ fullBody.draw(configs[i],r); i=i+1; i-1
 
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (ps.robot.client.basic, r)
+
+
+from hpp.corbaserver.rbprm.tools.cwc_trajectory import *
+
+pid = 3
+
+def optimize_animate(i):
+	res = draw_trajectory(fullBody, configs, i, False, 0.5, False)
+	#~ res = gen_trajectory(fullBody, configs, i, False, 1, False)
+	pos = [c.tolist() for c in res[0]['c']]
+	fullBody.generateRootPathStates(pos, configs[i], configs[i+1])
+	fullBody.interpolateBetweenStatesFromPath(i,i+1,2,0)
+	fullBody.interpolateBetweenStatesFromPath(i,i+1,2,1)
+	fullBody.interpolateBetweenStatesFromPath(i,i+1,2,10)
+	fullBody.interpolateBetweenStatesFromPath(i,i+1,2,50)
+	global pid
+	#~ pp(pid);pp(pid+1);pp(pid+2);
+	pid = pid + 3
+
+print "diff position"
+from numpy import array
+#~ print (array(pos[-1]) - array(configs[6][0:3]))
+#~ print (array(pos[-1]) - array(configs[6][0:3])).norm()
+def play(i):
+	fullBody.setCurrentConfig(configs[i])
+	r(configs[i])
+	import time
+	for j,_ in enumerate (pos):
+		q=fullBody.getCurrentConfig()
+		q[0:3] = pos[j]
+		r(q)
+		time.sleep(0.25)		
+	q[3:] = configs[i+1][3:]
+	r(q)
+	
+res = []
+
+def displayComPath(pathId,color=[0.,0.75,0.15,0.9]) :
+	pathPos=[]
+	length = pp.end*pp.client.problem.pathLength (pathId)
+	t = pp.start*pp.client.problem.pathLength (pathId)
+	while t < length :
+		q = pp.client.problem.configAtParam (pathId, t)
+		pp.publisher.robot.setCurrentConfig(q)
+		q = pp.publisher.robot.getCenterOfMass()
+		pathPos = pathPos + [q[:3]]
+		t += pp.dt
+	nameCurve = "path_"+str(pathId)+"_com"
+	pp.publisher.client.gui.addCurve(nameCurve,pathPos,color)
+	pp.publisher.client.gui.addToGroup(nameCurve,pp.publisher.sceneName)
+	pp.publisher.client.gui.refresh()
+
+res = []
+from hpp import Error as hpperr
+import sys
+def act(i, optim):
+	try:
+		pid = solve_com_RRT(fullBody, configs, i, True, 0.3, 0.2, False, optim, False, True)
+		displayComPath(pid)
+		#~ pp(pid)
+		global res
+		res = res + [pid]
+	except hpperr as e:
+		print "failed at id " + str(i) , e.strerror
+	except ValueError as e:
+		print "failed at id " + str(i) , e
+	except IndexError as e:
+		print "failed at id " + str(i) , e
+	except Exception as e:
+		print e
+	except:
+		return
+	
+for i in range(30,47):
+	act(i, 50)
+#~ for i in range(5,35):
+	#~ act(i, 50)
+
+
+	
+def displayInSave(pp, pathId, configs):
+	length = pp.end*pp.client.problem.pathLength (pathId)
+	t = pp.start*pp.client.problem.pathLength (pathId)
+	while t < length :
+		q = pp.client.problem.configAtParam (pathId, t)
+		configs.append(q)
+		t += (pp.dt * pp.speed)
+
+respath = []
+for p in res:
+	print p
+	displayInSave(pp,p, respath)
+
+for p in res:
+	pp(p)
+	
+fullBody.exportAll(r, respath, 'darpa_hyq_full');
+
+#~ from hpp.gepetto.blender.exportmotion import exportPath
+#~ for p in res:
+	#~ exportPath(r,fullBody.client.basic.robot,fullBody.client.basic.problem,p,0.1,'test'+str(p)+'.txt')
+
+print "tg"
