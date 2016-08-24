@@ -2,6 +2,7 @@
 import numpy as np
 from collections import namedtuple
 ObjectData = namedtuple("ObjectData", "V T N F")
+Inequalities = namedtuple("Inequality", "A b N V")
 
 def toFloat(stringArray):
 	res= np.zeros(len(stringArray))
@@ -41,41 +42,92 @@ def load_obj(filename) :
  
 def inequality(v, n): 
 	#the plan has for equation ax + by + cz = d, with a b c coordinates of the normal
-	#inequality is then ax + by +cz -d <= 0
-	return [n[0], n[1], n[2], -np.array(v).dot(np.array(n))]
+	#inequality is then ax + by +cz -d <= 0 
+	# last var is v because we need it
+	return [n[0], n[1], n[2], np.array(v).dot(np.array(n))]
 	
-def asInequalities(obj):
+def as_inequalities(obj):
 	#for each face, find first three points and deduce plane
 	#inequality is given by normal
-	res=[]
+	A= np.empty([len(obj.F), 3])
+	b = np.empty(len(obj.F))
+	V = np.ones([len(obj.F), 4])
+	N = np.empty([len(obj.F), 3])
 	for f in range(0, len(obj.F)):
 		face = obj.F[f]
 		v = obj.V[face[0][0]]
 		# assume normals are in obj
 		n = obj.N[face[0][2]]
-		res.append(inequality(v,n))
-	return np.array(res)
+		ineq = inequality(v,n)
+		A[f,:] = ineq[0:3]
+		b[f] = ineq[3]
+		V[f,0:3] = v
+		N[f,:] = n
+	return Inequalities(A,b, N, V)
 	
 def is_inside(inequalities, pt):
-	p4 = [pt[0], pt[1], pt[2], 1]
-	for i in range(0, len(inequalities)):
-		if inequalities[i].dot(p4) > 0:
-			return 0
-	return 1
+	return ((inequalities.A.dot(pt) - inequalities.b) < 0).all()
 
+#~ def rotate_inequalities_q():
+
+# TODO this is naive, should be a way to simply update d
+def rotate_inequalities(ineq, transform):
+	#for each face, find first three points and deduce plane
+	#inequality is given by normal
+	A = np.empty([len(ineq.A), 3])
+	b = np.empty(len(ineq.b))
+	V = np.ones([len(ineq.V), 4])
+	N = np.ones([len(ineq.N), 3])
+	for i in range(0, len(b)):
+		v = transform.dot(ineq.V[i,:])
+		n = transform[0:3,0:3].dot(ineq.N[i,0:3])
+		ine = inequality(v[0:3],n[0:3])
+		A[i,:] = ine[0:3]
+		b[i] = ine[3]
+		V[i,:] = v
+		N[i,:] = n
+	return Inequalities(A,b, N, V)
 
 def test_inequality():
 	n = np.array([0,-1,0])
 	v = np.array([0,1,1])
-	print(inequality(v,n))
-	if inequality(v,n) != [0,-1,0,1]:
-		print("error in inequality")
+	if inequality(v,n) != [0,-1,0,-1]:
+		print("error in test_inequality")
 	else:
-		print("test of inequality successful")
+		print("test_inequality successful")
 
-#~ obj = load_obj('../data/roms/comlArmSimplified.obj')
-#~ ineq = asInequalities(obj)
-#~ print(is_inside(ineq, [0,0,0])) # in
-#~ print(is_inside(ineq, [0.873,-0.03551,-0.1630])) #out
-#~ print(is_inside(ineq, [0.6730,-0.03551,-0.1630])) #in
-#~ print(is_inside(ineq, [-0.08897,0.7172,-0.2494])) #in
+def __gen_data():
+	obj = load_obj('./hrp2/RL_com._reduced.obj')
+	ineq = as_inequalities(obj)
+	ok_points = [[0,0,0], [0.0813, 0.0974, 0.2326], [-0.3387, 0.1271, -0.5354]]
+	not_ok_points = [[-0.3399, 0.2478, -0.722],[-0.1385,-0.4401,-0.1071]]
+	return obj, ineq, ok_points, not_ok_points
+
+def test_belonging():
+	data = __gen_data()
+	ineq = data[1]
+	ok_points = data[2]
+	not_ok_points = data[3]
+	for p in ok_points:
+		assert (is_inside(ineq, np.array(p))), "point " + str(p) + " should be inside object"
+	for p in not_ok_points:
+		assert (not is_inside(ineq, np.array(p))), "point " + str(p) + " should NOT be inside object"
+	print("test_belonging successful")
+	
+def test_rotate_inequalities():
+	
+	tr = np.array([[ 1.        ,  0.        ,  0.        ,  0.        ],
+				   [ 0.        ,  0.98006658, -0.19866933,  2.        ],
+				   [ 0.        ,  0.19866933,  0.98006658,  0.        ],
+				   [ 0.        ,  0.        ,  0.        ,  1.        ]])
+	
+	data = __gen_data()
+	ineq = rotate_inequalities(data[1], tr)
+	ok_points =  [tr.dot(np.array(el + [1]))[0:3] for el in data[2]]
+	not_ok_points = [tr.dot(np.array(el + [1]))[0:3] for el in data[3]]
+	for p in ok_points:
+		assert (is_inside(ineq, p)), "point " + str(p) + " should be inside object"
+	for p in not_ok_points:
+		assert (not is_inside(ineq, p)), "point " + str(p) + " should NOT be inside object"
+	print("test_rotate_inequalities successful")
+	
