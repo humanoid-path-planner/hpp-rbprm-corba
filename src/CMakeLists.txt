@@ -110,8 +110,28 @@ INSTALL(
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools//generateROMs.py
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/plot_analytics.py
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/cwc_trajectory.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/obj_to_constraints.py
   DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm/tools
   )
+  
+install(FILES
+	${CMAKE_CURRENT_SOURCE_DIR}/../data/com_inequalities/hrp2/__init__.py
+	${CMAKE_CURRENT_SOURCE_DIR}/../data/com_inequalities/hrp2/LA_com.ineq
+	${CMAKE_CURRENT_SOURCE_DIR}/../data/com_inequalities/hrp2/LL_com.ineq
+	${CMAKE_CURRENT_SOURCE_DIR}/../data/com_inequalities/hrp2/RA_com.ineq
+	${CMAKE_CURRENT_SOURCE_DIR}/../data/com_inequalities/hrp2/RL_com.ineq
+	DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm/data/com_inequalities/hrp2
+)
+
+install(FILES
+	${CMAKE_CURRENT_SOURCE_DIR}/../data/com_inequalities/hrp2/__init__.py
+	DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm/data/com_inequalities/
+)
+
+install(FILES
+	${CMAKE_CURRENT_SOURCE_DIR}/../data/com_inequalities/hrp2/__init__.py
+	DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm/data/
+)
 # Stand alone corba server
 ADD_EXECUTABLE (hpp-rbprm-server hpp-rbprm-corba.cc)
 TARGET_LINK_LIBRARIES (hpp-rbprm-server ${LIBRARY_NAME} hpp-rbprm)

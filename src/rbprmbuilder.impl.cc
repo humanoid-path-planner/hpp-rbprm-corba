@@ -678,6 +678,7 @@ namespace hpp {
             State intermediary(firstState);
             intermediary.RemoveContact(*breaks.begin());
             success = true;
+            return intermediary;
         }
         return firstState;
     }
@@ -1240,6 +1241,52 @@ assert(s2 == s1 +1);
         }
         (*dofArray)[(_CORBA_ULong)3] = fullBody_->GetLimbs().at(std::string(limbName))->sampleContainer_.resolution_;
         return dofArray;
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+
+    CORBA::Short RbprmBuilder::isLimbInContact(const char* limbName, double state1) throw (hpp::Error)
+    {
+        try
+        {
+            std::size_t s((std::size_t)state1);
+            if(lastStatesComputed_.size () < s)
+            {
+                throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s));
+            }
+            const std::map<std::string, fcl::Vec3f> & contacts = lastStatesComputed_[s].contactPositions_;
+            if(contacts.find(std::string(limbName))!= contacts.end())
+                return 1;
+            return 0;
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    CORBA::Short RbprmBuilder::isLimbInContactIntermediary(const char* limbName, double state1) throw (hpp::Error)
+    {
+        try
+        {
+            std::size_t s((std::size_t)state1);
+            if(lastStatesComputed_.size () < s+1)
+            {
+                throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s));
+            }
+            const State& state1 = lastStatesComputed_[s];
+            const State& state2 = lastStatesComputed_[s+1];
+            bool unused;
+            short unsigned cId = s;
+            const State state = intermediary(state1, state2,cId,unused);
+            const std::map<std::string, fcl::Vec3f> & contacts = state.contactPositions_;
+            if(contacts.find(std::string(limbName))!= contacts.end())
+                return 1;
+            return 0;
         }
         catch(std::runtime_error& e)
         {

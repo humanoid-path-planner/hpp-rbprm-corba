@@ -253,6 +253,38 @@ class FullBody (object):
     def interpolateConfigs(self, configs):
 		return self.client.rbprm.rbprm.interpolateConfigs(configs)
 		
+	##
+    # 
+    # \param state1 current state considered
+    # \param limb name of the limb for which the request aplies
+    # \return whether the limb is in contact at this state
+    def isLimbInContact(self, limbname, state1):
+		return self.client.rbprm.rbprm.isLimbInContact(limbname, state1) >0
+		
+	##
+    # 
+    # \param state1 current state considered
+    # \param limb name of the limb for which the request aplies
+    # \return whether the limb is in contact at this state
+    def isLimbInContactIntermediary(self, limbname, state1):
+		return self.client.rbprm.rbprm.isLimbInContactIntermediary(limbname, state1) >0
+		
+	##
+    # 
+    # \param state1 current state considered
+    # \param limb name of the limb for which the request aplies
+    # \return all limbs in contact at this state
+    def getLimbsInContact(self, limbNames, state1):
+		return [limbName for limbName in limbNames if self.isLimbInContact(limbname, state1)]
+		
+	##
+    # 
+    # \param state1 current state considered
+    # \param limb name of the limb for which the request aplies
+    # \return all limbs in contact at this state
+    def getLimbsInContactIntermediary(self, limbNames, state1):
+		return [limbName for limbName in limbNames if self.isLimbInContactIntermediary(limbname, state1)]
+	
 	## returns the CWC of the robot at a given state
     #
     # \param stateId The considered state

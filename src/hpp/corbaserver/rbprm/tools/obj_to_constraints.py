@@ -88,6 +88,19 @@ def rotate_inequalities(ineq, transform):
 		N[i,:] = n
 	return Inequalities(A,b, N, V)
 
+from pickle import dump
+def ineq_to_file(ineq, filename):
+	f1=open(filename, 'w+')
+	res = { 'A' : ineq.A, 'b' : ineq.b, 'N' : ineq.N, 'V' : ineq.V}
+	dump(res, f1)
+	f1.close()
+	
+from pickle import load
+def ineq_from_file(filename):
+	f1=open(filename, 'r')
+	res = load(f1)
+	return Inequalities(res['A'], res['b'],res['N'],res['V'])
+	
 def test_inequality():
 	n = np.array([0,-1,0])
 	v = np.array([0,1,1])
@@ -131,3 +144,13 @@ def test_rotate_inequalities():
 		assert (not is_inside(ineq, p)), "point " + str(p) + " should NOT be inside object"
 	print("test_rotate_inequalities successful")
 	
+
+def load_obj_and_save_ineq(in_name, out_name):
+	obj = load_obj(in_name)
+	ineq = as_inequalities(obj)
+	ineq_to_file (ineq, out_name)	
+	
+#~ load_obj_and_save_ineq('./hrp2/LA_com_reduced.obj','./hrp2/LA_com.ineq')
+#~ load_obj_and_save_ineq('./hrp2/RA_com_reduced.obj','./hrp2/RA_com.ineq')
+#~ load_obj_and_save_ineq('./hrp2/LL_com_reduced.obj','./hrp2/LL_com.ineq')
+#~ load_obj_and_save_ineq('./hrp2/RL_com_reduced.obj','./hrp2/RL_com.ineq')
