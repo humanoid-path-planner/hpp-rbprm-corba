@@ -125,6 +125,15 @@ install(FILES
 
 install(FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/../data/com_inequalities/hrp2/__init__.py
+	${CMAKE_CURRENT_SOURCE_DIR}/../data/com_inequalities/hyq/lfleg_com.ineq
+	${CMAKE_CURRENT_SOURCE_DIR}/../data/com_inequalities/hyq/lhleg_com.ineq
+	${CMAKE_CURRENT_SOURCE_DIR}/../data/com_inequalities/hyq/rhleg_com.ineq
+	${CMAKE_CURRENT_SOURCE_DIR}/../data/com_inequalities/hyq/rfleg_com.ineq
+	DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm/data/com_inequalities/hyq
+)
+
+install(FILES
+	${CMAKE_CURRENT_SOURCE_DIR}/../data/com_inequalities/hrp2/__init__.py
 	DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm/data/com_inequalities/
 )
 
