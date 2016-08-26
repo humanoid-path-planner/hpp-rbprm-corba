@@ -4,6 +4,8 @@ from collections import namedtuple
 ObjectData = namedtuple("ObjectData", "V T N F")
 Inequalities = namedtuple("Inequality", "A b N V")
 
+__EPS = 0.0
+
 def toFloat(stringArray):
 	res= np.zeros(len(stringArray))
 	for i in range(0,len(stringArray)):
@@ -44,7 +46,7 @@ def inequality(v, n):
 	#the plan has for equation ax + by + cz = d, with a b c coordinates of the normal
 	#inequality is then ax + by +cz -d <= 0 
 	# last var is v because we need it
-	return [n[0], n[1], n[2], np.array(v).dot(np.array(n))]
+	return [n[0], n[1], n[2], np.array(v).dot(np.array(n)) + __EPS]
 	
 def as_inequalities(obj):
 	#for each face, find first three points and deduce plane
