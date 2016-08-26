@@ -317,6 +317,17 @@ module hpp
     /// \return projected configuration
     floatSeq projectToCom(in double state, in floatSeq targetCom) raises (Error);
 
+    /// \param limb name of the limb for which the request aplies
+    /// \param state1 current state considered
+    /// \return whether the limb is in contact at this state
+    short isLimbInContact(in string limbname, in double state1) raises (Error);
+
+    /// Is limb in contact during the motion from the current state to the next one
+    /// \param limb name of the limb for which the request aplies
+    /// \param state1 current state considered
+    /// \return whether the limb is in contact at this state
+    short isLimbInContactIntermediary(in string limbname, in double state1) raises (Error);
+
     /// Saves the last computed states by the function interpolate in a filename.
     /// Raises an error if interpolate has not been called, or the file could not be opened.
     /// \param filename name of the file used to save the contacts.

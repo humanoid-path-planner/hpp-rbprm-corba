@@ -693,6 +693,12 @@ namespace hpp {
             }
             bool success;
             State intermediaryState = intermediary(lastStatesComputed_[stateId], lastStatesComputed_[stateId+1],stateId,success);
+            for(std::map<std::string, fcl::Vec3f>::const_iterator cit = intermediaryState.contactPositions_.begin();
+                cit != intermediaryState.contactPositions_.end(); ++cit)
+            {
+                std::cout << cit->first << std::endl;
+                std::cout << "WTF " << std::endl;
+            }
             if(!success)
             {
                 throw std::runtime_error ("No contact breaks, hence no intermediate state from state " + std::string(""+(stateId)));

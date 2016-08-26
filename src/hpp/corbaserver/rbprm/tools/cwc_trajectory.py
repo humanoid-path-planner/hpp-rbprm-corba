@@ -35,16 +35,24 @@ def __get_com_constraint(fullBody, state, config, limbsCOMConstraints, interm = 
 	global constraintsLoaded
 	As = [];	bs = []
 	fullBody.setCurrentConfig(config)
+	contacts = []
 	for i, v in limbsCOMConstraints.iteritems():
 		if not constraintsComLoaded.has_key(i):
 			constraintsComLoaded[i] = ineq_from_file(ineqPath+v['file'])
+		print "inter", interm
+		print "intermed", fullBody.isLimbInContactIntermediary(i, state)
+		print "inter", fullBody.isLimbInContact(i, state)
 		contact = (interm and fullBody.isLimbInContactIntermediary(i, state)) or (not interm and fullBody.isLimbInContact(i, state))
 		if contact:
 			ineq = constraintsComLoaded[i]
 			qEffector = fullBody.getJointPosition(v['effector'])
-			tr = quaternion_matrix(qEffector[3:7])
+			tr = quaternion_matrix(qEffector[3:7])			
+			tr[:3,3] = np.array(qEffector[0:3])
 			ineq_r = rotate_inequalities(ineq, tr)
 			As.append(ineq_r.A); bs.append(ineq_r.b);
+			print 'contact', v['effector']
+			contacts.append(v['effector'])
+	print 'contacts', contacts
 	return [np.vstack(As), np.hstack(bs)]
 		
 
