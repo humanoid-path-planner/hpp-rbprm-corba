@@ -124,6 +124,8 @@ namespace hpp {
         virtual hpp::floatSeq* generateContacts(const hpp::floatSeq& configuration,
                                                 const hpp::floatSeq& direction) throw (hpp::Error);
 
+        virtual hpp::floatSeq* generateGroundContact(const hpp::Names_t& contactLimbs) throw (hpp::Error);
+
         virtual hpp::floatSeq* getContactSamplesIds(const char* limb,
                                                    const hpp::floatSeq& configuration,
                                                    const hpp::floatSeq& direction) throw (hpp::Error);
@@ -149,7 +151,7 @@ namespace hpp {
         virtual CORBA::Short limbRRT(double state1, double state2, unsigned short numOptimizations) throw (hpp::Error);
         virtual CORBA::Short limbRRTFromRootPath(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error);
         virtual CORBA::Short comRRT(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error);
-        virtual CORBA::Short comRRTFromPos(double state1,
+        virtual hpp::floatSeq* comRRTFromPos(double state1,
                                            const hpp::floatSeqSeq& rootPositions1,
                                            const hpp::floatSeqSeq& rootPositions2,
                                            const hpp::floatSeqSeq& rootPositions3,

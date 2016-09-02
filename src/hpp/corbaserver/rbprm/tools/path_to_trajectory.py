@@ -1,5 +1,5 @@
 __24fps = 1. / 24.
-__EPS = 0.1
+__EPS = 0.0001
 from numpy.linalg import norm
 
 def __linear_interpolation(p0,p1,dist_p0_p1, val):
@@ -17,43 +17,27 @@ def __gen_frame_positions(com_waypoints, dt, dt_framerate=__24fps):
 
 
 def __find_q_t(robot, path_player, path_id, t):
-	u = t
 	current_t = -1
+	pp = path_player
 	length = pp.client.problem.pathLength (path_id)
+	u = min(t, length)
 	q = []
 	a = 0.
 	b = length
 	#~ print [pp.client.problem.configAtParam (path_id, i)[-1] for i in [length / 5. *j for j in range(6)]]
-	while(abs(current_t -t )> __EPS):
-		current_t = pp.client.problem.configAtParam (path_id, u)[-1]
-		print "current_t",current_t
-		print "t",t
-		if(current_t - t) > __EPS:
-			print "upb",b
-			b = u
-			print "upb",b
-		elif (t - current_t) > __EPS:
-			print "upa",a
+	while(True):
+		q = pp.client.problem.configAtParam (path_id, u)
+		current_t = q[-1]
+		if(a >= b):
+			print "ERROR, a > b, t does not exist"
+		if abs(current_t - t) < __EPS:
+			return q[:-1]
+		elif(current_t - t) < __EPS:
 			a = u
-			print "upa",a
-		if  (pp.client.problem.configAtParam (path_id, a)[-1]) > t and (pp.client.problem.configAtParam (path_id, b)[-1] > t):
-			print "error, tout au dessus!!!!!!!!!!!!!!!"
-			return 0
-		if  (pp.client.problem.configAtParam (path_id, a)[-1]) < t and (pp.client.problem.configAtParam (path_id, b)[-1] < t):
-			print "error, tout en dessous!!!!!!!!!!!!!!!"
-			return 0
-		#~ print "cassos"
-		print "current_l", u
-		u = (b-a)/2.		
-		print "current_l", u
-		#~ return 0
-		#~ print "current_t", current_t
-		#~ print "t", t
-		#~ print "a", a
-		#~ print "b", b
-		#~ print "length", length
-	print "gagne"
-	return q[:-1]
+		elif (current_t - t) > __EPS:
+			b = u
+		u = (b+a)/2.
+	return u
 		
 def linear_interpolate_path(robot, path_player, path_id, total_time, dt_framerate=__24fps):
 	pp = path_player
@@ -72,24 +56,32 @@ def follow_trajectory_path(robot, path_player, path_id, total_time, dt_framerate
 	dt_finals = [dt*i / length for i in range(int(num_frames_required))] + [1]
 	return[__find_q_t(robot, path_player, path_id, t) for t in dt_finals]
 	
-#~ def playCOM(pathId):
-	#~ length = pp.end*pp.client.problem.pathLength (pathId)
-	#~ t = pp.start*pp.client.problem.pathLength (pathId)
-	#~ while t < length :
-		#~ start = time.time()
-		#~ q = pp.client.problem.configAtParam (pathId, t)
-		#~ fullBody.setCurrentConfig(q)
-		#~ q[0:3] = fullBody.getCenterOfMass()
-		#~ pp.publisher.robotConfig = q
-		#~ pp.publisher.publishRobots ()
-		#~ t += (pp.dt * pp.speed)
-		#~ elapsed = time.time() - pp.start
-		#~ if elapsed < pp.dt :
-		  #~ time.sleep(pp.dt-elapsed))
+def gen_trajectory_to_play(robot, path_player, path_ids, total_time_per_path, dt_framerate=__24fps):
+	config_size = len(robot.getCurrentConfig())
+	res = []
+	pp = path_player
+	for path_id in path_ids:
+		config_size_path = len(path_player.client.problem.configAtParam (path_id, 0))
+		if(config_size_path > config_size):
+			res+= follow_trajectory_path(robot, path_player, path_id, total_time_per_path, dt_framerate)
+		else:
+			res+= linear_interpolate_path(robot, path_player, path_id, total_time_per_path, dt_framerate)
+	return res
+	
+import time
+def play_trajectory(fullBody, path_player, configs, dt_framerate=__24fps):
+	for q in configs:
+		start = time.time()
+		path_player.publisher.robotConfig = q
+		path_player.publisher.publishRobots ()
+		elapsed = time.time() - start  
+		if elapsed < dt_framerate :
+			time.sleep(dt_framerate-elapsed)
 
-import numpy as np	
-com_waypoints = [np.array([i,i,i]) for i in range(6)]
-dt = 0.2
-dt_framerate = __24fps
 
-res = __gen_frame_positions(com_waypoints, dt, dt_framerate)
+#~ import numpy as np	
+#~ com_waypoints = [np.array([i,i,i]) for i in range(6)]
+#~ dt = 0.2
+#~ dt_framerate = __24fps
+#~ 
+#~ res = __gen_frame_positions(com_waypoints, dt, dt_framerate)

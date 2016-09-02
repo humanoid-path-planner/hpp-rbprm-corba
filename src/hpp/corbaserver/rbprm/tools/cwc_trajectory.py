@@ -4,6 +4,8 @@ import numpy as np
 import math
 
 import hpp.corbaserver.rbprm.data.com_inequalities as ine
+from hpp.corbaserver.rbprm.tools.path_to_trajectory import gen_trajectory_to_play
+
 ineqPath = ine.__path__[0] +"/"
 
 # epsilon for testing whether a number is close to zero
@@ -39,9 +41,9 @@ def __get_com_constraint(fullBody, state, config, limbsCOMConstraints, interm = 
 	for i, v in limbsCOMConstraints.iteritems():
 		if not constraintsComLoaded.has_key(i):
 			constraintsComLoaded[i] = ineq_from_file(ineqPath+v['file'])
-		print "inter", interm
-		print "intermed", fullBody.isLimbInContactIntermediary(i, state)
-		print "inter", fullBody.isLimbInContact(i, state)
+		#~ print "inter", interm
+		#~ print "intermed", fullBody.isLimbInContactIntermediary(i, state)
+		#~ print "inter", fullBody.isLimbInContact(i, state)
 		contact = (interm and fullBody.isLimbInContactIntermediary(i, state)) or (not interm and fullBody.isLimbInContact(i, state))
 		if contact:
 			ineq = constraintsComLoaded[i]
@@ -50,9 +52,9 @@ def __get_com_constraint(fullBody, state, config, limbsCOMConstraints, interm = 
 			tr[:3,3] = np.array(qEffector[0:3])
 			ineq_r = rotate_inequalities(ineq, tr)
 			As.append(ineq_r.A); bs.append(ineq_r.b);
-			print 'contact', v['effector']
+			#~ print 'contact', v['effector']
 			contacts.append(v['effector'])
-	print 'contacts', contacts
+	#~ print 'contacts', contacts
 	return [np.vstack(As), np.hstack(bs)]
 		
 
@@ -74,13 +76,13 @@ def gen_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, dt=
 	
 	COMConstraints = None
 	if(not (limbsCOMConstraints == None)):
-		print "retrieving COM constraints"
+		#~ print "retrieving COM constraints"
 		COMConstraints = [__get_com_constraint(fullBody, state_id, states[state_id], limbsCOMConstraints)]
 		if(len(p) > 2):
 			COMConstraints.append(__get_com_constraint(fullBody, state_id, states[state_id], limbsCOMConstraints, True))
 		if(len(p) > len(COMConstraints)):
 			COMConstraints.append(__get_com_constraint(fullBody, state_id + 1, states[state_id + 1], limbsCOMConstraints))
-		print "num com constraints", len(COMConstraints)
+		#~ print "num com constraints", len(COMConstraints)
 		
 	return cone_optimization(p, N, [init_com + [0,0,0], end_com + [0,0,0]], t_end_phases[1:], dt, cones, COMConstraints, mu, mass, 9.81, reduce_ineq, verbose)
 
@@ -129,9 +131,8 @@ def solve_com_RRT(fullBody, states, state_id, computeCones = False, mu = 1, dt =
 	comPosPerPhase[-1].append(comPos[-1])
 	assert(len(comPos) == len(comPosPerPhase[0]) + len(comPosPerPhase[1]) + len(comPosPerPhase[2]))
 	#~ assert(comPos == [item for sublist in comPosPerPhase for item in sublist])
-	print "done. generating state path ",state_id
-	
-	return fullBody.comRRTFromPos(state_id,comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims)
-	
-
+	print "done. generating state trajectory ",state_id	
+	paths_ids = [int(el) for el in fullBody.comRRTFromPos(state_id,comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims)]
+	print "done. computing final trajectory to display ",state_id
+	return paths_ids[-1], paths_ids[:-1]
 	

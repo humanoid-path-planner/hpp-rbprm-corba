@@ -160,6 +160,12 @@ class FullBody (object):
     def generateContacts(self, configuration, direction):
 		return self.client.rbprm.rbprm.generateContacts(configuration, direction)
 		
+	## Generate an autocollision free configuration with limbs in contact with the ground
+    # \param contactLimbs name of the limbs to project in contact
+    # \return a sampled contact configuration
+    def generateGroundContact(self, contactLimbs):
+		return self.client.rbprm.rbprm.generateGroundContact(contactLimbs)
+		
 	## Retrieves the contact candidates configurations given a configuration and a limb
 	#
     # \param name id of the limb considered

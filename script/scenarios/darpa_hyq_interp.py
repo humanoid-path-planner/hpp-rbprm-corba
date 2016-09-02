@@ -19,6 +19,7 @@ srdfSuffix = ""
 #  This time we load the full body model of HyQ
 fullBody = FullBody () 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
+fullBody.setJointBounds ("base_joint_xyz", [-2,5, -1, 1, 0.3, 4])
 
 #  Setting a number of sample configurations used
 nbSamples = 20000
@@ -80,7 +81,7 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 
 r(q_init)
 # computing the contact sequence
-configs = fullBody.interpolate(0.1, 1, 0)
+configs = fullBody.interpolate(0.1, 1, 5)
 
 #~ r.loadObstacleModel ('hpp-rbprm-corba', "darpa", "contact")
 
@@ -93,39 +94,7 @@ pp = PathPlayer (ps.robot.client.basic, r)
 
 
 from hpp.corbaserver.rbprm.tools.cwc_trajectory import *
-
-pid = 3
-
-def optimize_animate(i):
-	res = draw_trajectory(fullBody, configs, i, False, 0.5, False)
-	#~ res = gen_trajectory(fullBody, configs, i, False, 1, False)
-	pos = [c.tolist() for c in res[0]['c']]
-	fullBody.generateRootPathStates(pos, configs[i], configs[i+1])
-	fullBody.interpolateBetweenStatesFromPath(i,i+1,2,0)
-	fullBody.interpolateBetweenStatesFromPath(i,i+1,2,1)
-	fullBody.interpolateBetweenStatesFromPath(i,i+1,2,10)
-	fullBody.interpolateBetweenStatesFromPath(i,i+1,2,50)
-	global pid
-	#~ pp(pid);pp(pid+1);pp(pid+2);
-	pid = pid + 3
-
-print "diff position"
-from numpy import array
-#~ print (array(pos[-1]) - array(configs[6][0:3]))
-#~ print (array(pos[-1]) - array(configs[6][0:3])).norm()
-def play(i):
-	fullBody.setCurrentConfig(configs[i])
-	r(configs[i])
-	import time
-	for j,_ in enumerate (pos):
-		q=fullBody.getCurrentConfig()
-		q[0:3] = pos[j]
-		r(q)
-		time.sleep(0.25)		
-	q[3:] = configs[i+1][3:]
-	r(q)
-	
-res = []
+from hpp.corbaserver.rbprm.tools.path_to_trajectory import *
 
 def displayComPath(pathId,color=[0.,0.75,0.15,0.9]) :
 	pathPos=[]
@@ -143,32 +112,34 @@ def displayComPath(pathId,color=[0.,0.75,0.15,0.9]) :
 	pp.publisher.client.gui.refresh()
 
 res = []
+trajec = []
 from hpp import Error as hpperr
 import sys
+numerror = 0
 def act(i, optim):
+	global numerror
 	try:
-		pid = solve_com_RRT(fullBody, configs, i, True, 0.3, 0.2, False, optim, False, True)
+		pid, trajectory = solve_com_RRT(fullBody, configs, i, True, 0.6, 0.2, False, optim, False, True)
 		displayComPath(pid)
 		#~ pp(pid)
 		global res
 		res = res + [pid]
+		global trajec
+		trajec = trajec + gen_trajectory_to_play(fullBody, pp, trajectory, 1)
 	except hpperr as e:
 		print "failed at id " + str(i) , e.strerror
+		numerror+=1
 	except ValueError as e:
 		print "failed at id " + str(i) , e
+		numerror+=1
 	except IndexError as e:
 		print "failed at id " + str(i) , e
+		numerror+=1
 	except Exception as e:
 		print e
+		numerror+=1
 	except:
 		return
-	
-for i in range(30,47):
-	act(i, 50)
-#~ for i in range(5,35):
-	#~ act(i, 50)
-
-
 	
 def displayInSave(pp, pathId, configs):
 	length = pp.end*pp.client.problem.pathLength (pathId)
@@ -178,15 +149,41 @@ def displayInSave(pp, pathId, configs):
 		configs.append(q)
 		t += (pp.dt * pp.speed)
 
-respath = []
-for p in res:
-	print p
-	displayInSave(pp,p, respath)
+	
+#~ fullBody.exportAll(r, respath, 'darpa_hyq_full');
+	
+for i in range(11,20):
+	act(i, 60)
+	#~ if i % 10 == 0:			
+		#~ respath = []
+		#~ for p in res:
+			#~ print p
+			#~ displayInSave(pp,p, respath)
+		#~ fullBody.exportAll(r, respath, 'darpa_hyq_full');
+
+
+
+pp.setSpeed(2)
 
 for p in res:
 	pp(p)
+		
+
+import time
+
+respath = []
+for p in res:
+	print p
+	#~ displayInSave(pp,p, respath)
+#~ fullBody.exportAll(r, respath, 'darpa_hyq_full'+str(time()))
+
+
+
+#~ for i in range(5,35):
+	#~ act(i, 50)
+
+
 	
-fullBody.exportAll(r, respath, 'darpa_hyq_full');
 
 #~ from hpp.gepetto.blender.exportmotion import exportPath
 #~ for p in res:
