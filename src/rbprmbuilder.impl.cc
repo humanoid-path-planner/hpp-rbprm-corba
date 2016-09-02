@@ -28,6 +28,9 @@
 #include "hpp/rbprm/sampling/sample-db.hh"
 #include "hpp/model/urdf/util.hh"
 #include "hpp/core/straight-path.hh"
+#include "hpp/core/config-validations.hh"
+#include "hpp/core/collision-validation-report.hh"
+#include <hpp/core/subchain-path.hh>
 #include <fstream>
 
 
@@ -693,12 +696,6 @@ namespace hpp {
             }
             bool success;
             State intermediaryState = intermediary(lastStatesComputed_[stateId], lastStatesComputed_[stateId+1],stateId,success);
-            for(std::map<std::string, fcl::Vec3f>::const_iterator cit = intermediaryState.contactPositions_.begin();
-                cit != intermediaryState.contactPositions_.end(); ++cit)
-            {
-                std::cout << cit->first << std::endl;
-                std::cout << "WTF " << std::endl;
-            }
             if(!success)
             {
                 throw std::runtime_error ("No contact breaks, hence no intermediate state from state " + std::string(""+(stateId)));
@@ -1077,26 +1074,58 @@ assert(s2 == s1 +1);
                 resPath->appendPath(interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[i],
                                                         *(cit),*(cit+1), numOptimizations));
             }*/
+            ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
+            fullBody_->device_->currentConfiguration(s1Ter.configuration_);
+            if(!(problemSolver_->problem()->configValidations()->validate(s1Ter.configuration_, rport)
+                    && problemSolver_->problem()->configValidations()->validate(s2Bis.configuration_, rport)))
+            {
+                //std::cout << "could not project without collision at state " << std::string(""+s1)  << std::endl;
+                throw std::runtime_error ("could not project without collision at state " + std::string(""+s1));
+                // fallback to limbRRT instead
+                //return -1; //limbRRT(s1, s2, numOptimizations);
+            }
+
             core::WeighedDistancePtr_t distance = core::WeighedDistance::create(fullBody_->device_);
             /*resPath->appendPath(core::StraightPath::create(fullBody_->device_,state1.configuration_,s1Bis.configuration_,
                                                            (*distance)(state1.configuration_,s1Bis.configuration_)));
             resPath->appendPath(core::StraightPath::create(fullBody_->device_,s1Bis.configuration_,s1Ter.configuration_,
                                                            (*distance)(s1Bis.configuration_,s1Ter.configuration_)));*/
-            resPath->appendPath(core::StraightPath::create(fullBody_->device_,state1.configuration_,s1Ter.configuration_, 0.5));
-                                                                       //(*distance)(state1.configuration_,s1Ter.configuration_)));
-            resPath->appendPath(interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[1],
-            s1Ter,s2Bis, numOptimizations));
+//resPath->appendPath(core::StraightPath::create(fullBody_->device_,state1.configuration_,s1Ter.configuration_, 0.5));
+            if(state1.configuration_ != s1Ter.configuration_)
+            {
+                core::PathPtr_t p1 = interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[0],
+                        state1,s1Ter, numOptimizations,false);
+                resPath->appendPath(p1);
+                AddPath(p1,problemSolver_);
+            }
+
+            core::PathPtr_t p2 =interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[1],
+                    s1Ter,s2Bis, numOptimizations,true);
+            AddPath(p2,problemSolver_);
+            // reduce path to remove extradof
+            core::SizeInterval_t interval(0, p2->initial().rows()-1);
+            core::SizeIntervals_t intervals;
+            intervals.push_back(interval);
+            PathPtr_t reducedPath = core::SubchainPath::create(p2,intervals);
+            resPath->appendPath(reducedPath);
             /*resPath->appendPath(core::StraightPath::create(fullBody_->device_,s2Bis.configuration_,s2Ter.configuration_,
                                                            (*distance)(s2Bis.configuration_,s2Ter.configuration_)));
             resPath->appendPath(core::StraightPath::create(fullBody_->device_,s2Ter.configuration_,state2.configuration_,
                                                            (*distance)(s2Ter.configuration_,state2.configuration_)));*/
-            resPath->appendPath(core::StraightPath::create(fullBody_->device_,s2Bis.configuration_,state2.configuration_, 0.5));
-                                                           //(*distance)(s2Bis.configuration_,state2.configuration_)));
+//resPath->appendPath(core::StraightPath::create(fullBody_->device_,s2Bis.configuration_,state2.configuration_, 0.5));;
+            if(s2Bis.configuration_ != state2.configuration_)
+            {
+                core::PathPtr_t p3= interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[1],
+                        s2Bis,state2, numOptimizations,false);
+                resPath->appendPath(p3);
+                AddPath(p3,problemSolver_);
+            }
+
             /*T_State tg; tg.push_back(s1Bis);
             tg.push_back(s2Bis);
             resPath->appendPath(interpolation::limbRRT(fullBody_,problemSolver_->problem(),
                                                     tg.begin(),tg.begin()+1, numOptimizations));*/
-            return AddPath(resPath,problemSolver_);
+            return AddPath(reducedPath,problemSolver_);
         }
         catch(std::runtime_error& e)
         {
