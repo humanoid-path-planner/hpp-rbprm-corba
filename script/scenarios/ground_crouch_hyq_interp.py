@@ -17,6 +17,7 @@ srdfSuffix = ""
 fullBody = FullBody ()
  
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
+fullBody.setJointBounds ("base_joint_xyz", [-6,5, -4, 4, 0.6, 2])
 
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 
@@ -76,16 +77,100 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 
 r(q_init)
 
-configs = fullBody.interpolate(0.1)
+configs = fullBody.interpolate(0.1,1,5)
 
 r.loadObstacleModel ('hpp-rbprm-corba', "groundcrouch", "contact")
 #~ fullBody.exportAll(r, configs, 'obstacle_hyq_robust_10');
 i = 0;
 r (configs[i]); i=i+1; i-1
 
-#~ q0 = configs[2]
-#~ q0 = fullBody.generateContacts(q0, [0,0,1])
-#~ r(q0)
-c = fullBody.getContactSamplesIds("rfleg",q_init, [0,0,1])
-#~ r(fullBody.getSample("rfleg",int(c[i]))); i = i+1
+
+from hpp.gepetto import PathPlayer
+pp = PathPlayer (fullBody.client.basic, r)
+
+
+from hpp.corbaserver.rbprm.tools.cwc_trajectory import *
+
+from hpp import Error as hpperr
+
+def displayComPath(pathId,color=[0.,0.75,0.15,0.9]) :
+	pathPos=[]
+	length = pp.end*pp.client.problem.pathLength (pathId)
+	t = pp.start*pp.client.problem.pathLength (pathId)
+	while t < length :
+		q = pp.client.problem.configAtParam (pathId, t)
+		pp.publisher.robot.setCurrentConfig(q)
+		q = pp.publisher.robot.getCenterOfMass()
+		pathPos = pathPos + [q[:3]]
+		t += pp.dt
+	nameCurve = "path_"+str(pathId)+"_com"
+	pp.publisher.client.gui.addCurve(nameCurve,pathPos,color)
+	pp.publisher.client.gui.addToGroup(nameCurve,pp.publisher.sceneName)
+	pp.publisher.client.gui.refresh()
+
+
+def displayIn(pp, pathId,length):
+	t = 0
+	while t < length :
+		start = time.time()
+		q = pp.client.problem.configAtParam (pathId, t)
+		pp.publisher.robotConfig = q
+		pp.publisher.publishRobots ()
+		t += (pp.dt * pp.speed)
+		elapsed = time.time() - start
+		if elapsed < pp.dt :
+		  time.sleep(pp.dt-elapsed)
+
+res = []
+import sys
+numerror = 0
+def act(i, optim):
+	try:
+		pid = solve_com_RRT(fullBody, configs, i, True, 0.5, 0.2, False, optim, False, True)
+		displayComPath(pid, [0.9,0.,0.15,0.9])
+		#~ pp(pid)
+		global res
+		res = res + [pid]
+		global numerror
+	except hpperr as e:
+		print "failed at id " + str(i) , e.strerror
+		numerror+=1
+	except ValueError as e:
+		print "failed at id " + str(i) , e
+		numerror+=1
+	except IndexError as e:
+		print "failed at id " + str(i) , e
+		numerror+=1
+	except Exception as e:
+		print e
+		numerror+=1
+	except:
+		print "smthg wrong"
+		return
+	
+	
+	
+
+def displayInSave(pp, pathId, configs):
+	length = pp.end*pp.client.problem.pathLength (pathId)
+	t = pp.start*pp.client.problem.pathLength (pathId)
+	while t < length :
+		q = pp.client.problem.configAtParam (pathId, t)
+		configs.append(q)
+		t += (pp.dt * pp.speed)
+
+pp.setSpeed(2)
+
+respath = []
+for p in res:
+	print p
+	displayInSave(pp,p, respath)
+	
+#~ for p in res:
+	#~ displayIn(pp,p,1.5)
+import time
+#~ fullBody.exportAll(r, respath, 'groun_crouch_hyq_full_bridge_05');
+#~ fullBody.exportAll(r, respath, 'groun_crouch_hyq_full_hole_05');
+
+
 

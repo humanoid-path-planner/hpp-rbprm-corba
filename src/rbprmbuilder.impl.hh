@@ -117,6 +117,7 @@ namespace hpp {
 
         virtual hpp::floatSeq* getSampleConfig(const char* limb, unsigned short sampleId) throw (hpp::Error);
         virtual hpp::floatSeq* getSamplePosition(const char* limb, unsigned short sampleId) throw (hpp::Error);
+        virtual hpp::floatSeqSeq* getEffectorPosition(const char* limb, const hpp::floatSeq& configuration) throw (hpp::Error);
         virtual CORBA::UShort getNumSamples(const char* limb) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeNodeIds(const char* limb) throw (hpp::Error);
         virtual double getSampleValue(const char* limb, const char* valueName, unsigned short sampleId) throw (hpp::Error);

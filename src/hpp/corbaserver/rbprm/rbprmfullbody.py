@@ -150,6 +150,14 @@ class FullBody (object):
     # \param idsample identifiant of the sample considered
     def getSamplePosition(self, name, idsample):
 		return self.client.rbprm.rbprm.getSamplePosition(name,idsample)
+		
+	## Get the end effector position for a given configuration, assuming z normal
+    # \param limbName name of the limb from which to retrieve a sample
+    # \param configuration configuration of the robot
+    # \return world position of the limb end effector given the current robot configuration.
+    # array of size 4, where each entry is the position of a corner of the contact surface
+    def getEffectorPosition(self, limbName, configuration):
+		return self.client.rbprm.rbprm.getEffectorPosition(limbName,configuration)
 
 	## Generates a balanced contact configuration, considering the
     #  given current configuration of the robot, and a direction of motion.

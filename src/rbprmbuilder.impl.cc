@@ -201,6 +201,154 @@ namespace hpp {
     }
 
 
+    typedef Eigen::Matrix <value_type, 4, 3, Eigen::RowMajor> Matrix43;
+    typedef Eigen::Matrix <value_type, 4, 3, Eigen::RowMajor> Rotation;
+    typedef Eigen::Ref<Matrix43> Ref_matrix43;
+
+    std::vector<fcl::Vec3f> computeRectangleContact(const rbprm::RbPrmFullBodyPtr_t device,
+                                                    const rbprm::State& state)
+    {
+        std::vector<fcl::Vec3f> res;
+        const rbprm::T_Limb& limbs = device->GetLimbs();
+        rbprm::RbPrmLimbPtr_t limb;
+        Matrix43 p; Eigen::Matrix3d R;
+        for(std::map<std::string, fcl::Vec3f>::const_iterator cit = state.contactPositions_.begin();
+            cit != state.contactPositions_.end(); ++cit)
+        {
+            const std::string& name = cit->first;
+            const fcl::Vec3f& position = cit->second;
+            limb = limbs.at(name);
+            const double& lx = limb->x_, ly = limb->y_;
+            p << lx,  ly, 0,
+                 lx, -ly, 0,
+                -lx, -ly, 0,
+                -lx,  ly, 0;
+            if(limb->contactType_ == _3_DOF)
+            {
+                //create rotation matrix from normal
+                fcl::Vec3f z_fcl = state.contactNormals_.at(name);
+                Eigen::Vector3d z,x,y;
+                for(int i =0; i<3; ++i) z[i] = z_fcl[i];
+                x = z.cross(Eigen::Vector3d(0,-1,0));
+                if(x.norm() < 10e-6)
+                {
+                    y = z.cross(fcl::Vec3f(1,0,0));
+                    y.normalize();
+                    x = y.cross(z);
+                }
+                else
+                {
+                    x.normalize();
+                    y = z.cross(x);
+                }
+                R.block<3,1>(0,0) = x;
+                R.block<3,1>(0,1) = y;
+                R.block<3,1>(0,2) = z;
+            }
+            else
+            {
+                const fcl::Matrix3f& fclRotation = state.contactRotation_.at(name);
+                for(int i =0; i< 3; ++i)
+                    for(int j =0; j<3;++j)
+                        R(i,j) = fclRotation(i,j);
+            }
+            for(std::size_t i =0; i<4; ++i)
+            {
+                res.push_back(position + (R*p.row(i).transpose()));
+                res.push_back(state.contactNormals_.at(name));
+            }
+        }
+        return res;
+    }
+
+    model::Configuration_t dofArrayToConfig (const std::size_t& deviceDim,
+      const hpp::floatSeq& dofArray)
+    {
+        std::size_t configDim = (std::size_t)dofArray.length();
+        // Fill dof vector with dof array.
+        model::Configuration_t config; config.resize (configDim);
+        for (std::size_t iDof = 0; iDof < configDim; iDof++) {
+            config [iDof] = (double)dofArray[(_CORBA_ULong)iDof];
+        }
+        // fill the vector by zero
+        hppDout (info, "config dimension: " <<configDim
+           <<",  deviceDim "<<deviceDim);
+        if(configDim != deviceDim){
+            throw hpp::Error ("dofVector Does not match");
+        }
+        return config;
+    }
+
+    model::Configuration_t dofArrayToConfig (const model::DevicePtr_t& robot,
+      const hpp::floatSeq& dofArray)
+    {
+        return dofArrayToConfig(robot->configSize(), dofArray);
+    }
+
+    T_Configuration doubleDofArrayToConfig (const std::size_t& deviceDim,
+      const hpp::floatSeqSeq& doubleDofArray)
+    {
+        std::size_t configsDim = (std::size_t)doubleDofArray.length();
+        T_Configuration res;
+        for (_CORBA_ULong iConfig = 0; iConfig < configsDim; iConfig++)
+        {
+            res.push_back(dofArrayToConfig(deviceDim, doubleDofArray[iConfig]));
+        }
+        return res;
+    }
+
+    T_Configuration doubleDofArrayToConfig (const model::DevicePtr_t& robot,
+      const hpp::floatSeqSeq& doubleDofArray)
+    {
+        return doubleDofArrayToConfig(robot->configSize(), doubleDofArray);
+    }
+
+    hpp::floatSeqSeq* RbprmBuilder::getEffectorPosition(const char* lb, const hpp::floatSeq& configuration) throw (hpp::Error)
+    {
+        try
+        {
+            const std::string limbName(lb);
+            const RbPrmLimbPtr_t limb = fullBody_->GetLimbs().at(limbName);
+            model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
+            fullBody_->device_->currentConfiguration(config);
+            fullBody_->device_->computeForwardKinematics();
+            State state;
+            state.configuration_ = config;
+            state.contacts_[limbName] = true;
+            const fcl::Vec3f z = limb->effector_->currentTransformation().getRotation() * limb->normal_;
+            const fcl::Vec3f position = limb->effector_->currentTransformation().getTranslation();
+            const fcl::Matrix3f alignRotation = tools::GetRotationMatrix(z,fcl::Vec3f(0,0,1));
+            fcl::Matrix3f rotation = alignRotation * limb->effector_->initialPosition ().getRotation();
+            fcl::Vec3f posOffset = position + rotation * limb->offset_;
+            state.contactPositions_[limbName] = posOffset;
+            state.contactNormals_[limbName] = fcl::Vec3f(0,0,1);
+            state.contactRotation_[limbName] = limb->effector_->currentTransformation().getRotation();
+            std::vector<fcl::Vec3f> poss = (computeRectangleContact(fullBody_, state));
+
+            hpp::floatSeqSeq *res;
+            res = new hpp::floatSeqSeq ();
+            res->length ((_CORBA_ULong)poss.size ());
+            for(std::size_t i = 0; i < poss.size(); ++i)
+            {
+                _CORBA_ULong size = (_CORBA_ULong) (3);
+                double* dofArray = hpp::floatSeq::allocbuf(size);
+                hpp::floatSeq floats (size, size, dofArray, true);
+                //convert the config in dofseq
+                for(std::size_t j=0; j<3; j++)
+                {
+                    dofArray[j] = poss[i][j];
+                }
+                (*res) [(_CORBA_ULong)i] = floats;
+            }
+            return res;
+        }
+        catch (const std::exception& exc)
+        {
+            throw hpp::Error (exc.what ());
+        }
+    }
+
+
     CORBA::UShort RbprmBuilder::getNumSamples(const char* limb) throw (hpp::Error)
     {
         const T_Limb& limbs = fullBody_->GetLimbs();
@@ -255,48 +403,6 @@ namespace hpp {
             throw Error (err.c_str());
         }
         return cit->second[sampleId];
-    }
-
-    model::Configuration_t dofArrayToConfig (const std::size_t& deviceDim,
-      const hpp::floatSeq& dofArray)
-    {
-        std::size_t configDim = (std::size_t)dofArray.length();
-        // Fill dof vector with dof array.
-        model::Configuration_t config; config.resize (configDim);
-        for (std::size_t iDof = 0; iDof < configDim; iDof++) {
-            config [iDof] = (double)dofArray[(_CORBA_ULong)iDof];
-        }
-        // fill the vector by zero
-        hppDout (info, "config dimension: " <<configDim
-           <<",  deviceDim "<<deviceDim);
-        if(configDim != deviceDim){
-            throw hpp::Error ("dofVector Does not match");
-        }
-        return config;
-    }
-
-    model::Configuration_t dofArrayToConfig (const model::DevicePtr_t& robot,
-      const hpp::floatSeq& dofArray)
-    {
-        return dofArrayToConfig(robot->configSize(), dofArray);
-    }
-
-    T_Configuration doubleDofArrayToConfig (const std::size_t& deviceDim,
-      const hpp::floatSeqSeq& doubleDofArray)
-    {
-        std::size_t configsDim = (std::size_t)doubleDofArray.length();
-        T_Configuration res;
-        for (_CORBA_ULong iConfig = 0; iConfig < configsDim; iConfig++)
-        {
-            res.push_back(dofArrayToConfig(deviceDim, doubleDofArray[iConfig]));
-        }
-        return res;
-    }
-
-    T_Configuration doubleDofArrayToConfig (const model::DevicePtr_t& robot,
-      const hpp::floatSeqSeq& doubleDofArray)
-    {
-        return doubleDofArrayToConfig(robot->configSize(), doubleDofArray);
     }
 
     std::vector<std::string> stringConversion(const hpp::Names_t& dofArray)
@@ -395,6 +501,7 @@ namespace hpp {
                 {
                     rbprm::RbPrmLimbPtr_t limb = fullBody_->GetLimbs().at(*cit);
                     fcl::Transform3f localFrame, globalFrame;
+                    localFrame.setTranslation(-limb->offset_);
                     std::vector<bool> posConstraints;
                     std::vector<bool> rotConstraints;
                     posConstraints.push_back(false);posConstraints.push_back(false);posConstraints.push_back(true);
@@ -861,59 +968,6 @@ namespace hpp {
         }
     }
 
-    typedef Eigen::Matrix <value_type, 4, 3, Eigen::RowMajor> Matrix43;
-    typedef Eigen::Matrix <value_type, 4, 3, Eigen::RowMajor> Rotation;
-    typedef Eigen::Ref<Matrix43> Ref_matrix43;
-
-    std::vector<fcl::Vec3f> computeRectangleContact(const rbprm::RbPrmFullBodyPtr_t device,
-                                                    const rbprm::State& state)
-    {
-        std::vector<fcl::Vec3f> res;
-        const rbprm::T_Limb& limbs = device->GetLimbs();
-        rbprm::RbPrmLimbPtr_t limb;
-        Matrix43 p; Eigen::Matrix3d R;
-        for(std::map<std::string, fcl::Vec3f>::const_iterator cit = state.contactPositions_.begin();
-            cit != state.contactPositions_.end(); ++cit)
-        {
-            const std::string& name = cit->first;
-            const fcl::Vec3f& position = cit->second;
-            limb = limbs.at(name);
-            const double& lx = limb->x_, ly = limb->y_;
-            p << lx,  ly, 0,
-                 lx, -ly, 0,
-                -lx, -ly, 0,
-                -lx,  ly, 0;
-            //create rotation matrix from normal
-            fcl::Vec3f z_fcl = state.contactNormals_.at(name);
-            Eigen::Vector3d z,x,y;
-            for(int i =0; i<3; ++i) z[i] = z_fcl[i];
-            x = z.cross(Eigen::Vector3d(0,-1,0));
-            if(x.norm() < 10e-6)
-            {
-                y = z.cross(fcl::Vec3f(1,0,0));
-                y.normalize();
-                x = y.cross(z);
-            }
-            else
-            {
-                x.normalize();
-                y = z.cross(x);
-            }
-            R.block<3,1>(0,0) = x;
-            R.block<3,1>(0,1) = y;
-            R.block<3,1>(0,2) = z;
-            //const fcl::Matrix3f& fclRotation = state.contactRotation_.at(name);
-            /*for(int i =0; i< 3; ++i)
-                for(int j =0; j<3;++j)
-                    R(i,j) = fclRotation(i,j);*/
-            for(std::size_t i =0; i<4; ++i)
-            {
-                res.push_back(position + (R*p.row(i).transpose()));
-                res.push_back(state.contactNormals_.at(name));
-            }
-        }
-        return res;
-    }
 
     floatSeqSeq* RbprmBuilder::computeContactPoints(unsigned short cId) throw (hpp::Error)
     {

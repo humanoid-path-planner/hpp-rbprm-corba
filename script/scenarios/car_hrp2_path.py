@@ -16,8 +16,11 @@ rbprmBuilder.setJointBounds ("base_joint_xyz", [-1,2, -1.5, 1, 0.5, 0.9])
 rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom','hrp2_larm_rom'])
 #~ rbprmBuilder.setNormalFilter('hrp2_larm_rom', [0,0,1], 0.4)
 #~ rbprmBuilder.setNormalFilter('hrp2_rarm_rom', [0,0,1], 0.4)
-rbprmBuilder.setNormalFilter('hrp2_lleg_rom', [0,0,1], 0.6)
-rbprmBuilder.setNormalFilter('hrp2_rleg_rom', [0,0,1], 0.6)
+rbprmBuilder.setAffordanceFilter('3Rarm', ['Support','Lean'])
+rbprmBuilder.setAffordanceFilter('4Larm', ['Support','Lean'])
+rbprmBuilder.setAffordanceFilter('0rLeg', ['Support'])
+rbprmBuilder.setAffordanceFilter('1lLeg', ['Support'])
+
 rbprmBuilder.boundSO3([-1.5,1.5,0,3,-0.0,0.0])
 
 #~ from hpp.corbaserver.rbprm. import ProblemSolver
@@ -42,9 +45,14 @@ ps.addPathOptimizer("RandomShortcut")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
-ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmPathValidation",0.01)
-r.loadObstacleModel (packageName, "car", "planning")
+from hpp.corbaserver.affordance.affordance import AffordanceTool
+afftool = AffordanceTool ()
+afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
+afftool.loadObstacleModel (packageName, "car", "planning", r)
+#~ afftool.analyseAll()
+afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
+afftool.visualiseAffordances('Lean', r, [0, 0, 0.9])
+
 t = ps.solve ()
 print (t)
 if isinstance(t, list):
@@ -64,6 +72,9 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 
 rob = rbprmBuilder.client.basic.robot
 r(q_init)
+q_loin = q_init[::]
+q_loin[0:3] = [100,100,100]
+r (q_loin)
 
 
 #~ configs = []
