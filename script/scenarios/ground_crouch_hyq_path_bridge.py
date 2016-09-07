@@ -29,11 +29,11 @@ r = Viewer (ps)
 
 
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init [0:3] = [-5, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
-#~ q_init [0:3] = [-2,  0.47, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+#~ q_init [0:3] = [-5, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+q_init [0:3] = [-2,  0.47, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 q_goal = q_init [::]
-q_goal [0:3] = [5, 0, 0.63]; r (q_goal)
-#~ q_goal [0:3] = [-2, 0, 0.63]; r (q_goal)
+#~ q_goal [0:3] = [5, 0, 0.63]; r (q_goal)
+q_goal [0:3] = [3, 0.47, 0.63]; r (q_goal)
 
 ps.addPathOptimizer("RandomShortcut")
 ps.setInitialConfig (q_init)

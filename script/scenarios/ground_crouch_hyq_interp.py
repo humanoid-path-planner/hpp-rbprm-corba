@@ -77,7 +77,8 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 
 r(q_init)
 
-configs = fullBody.interpolate(0.1,1,10)
+configs = fullBody.interpolate(0.1,1,10) #hole 
+#~ configs = fullBody.interpolate(0.08,1,5) # bridge
 
 r.loadObstacleModel ('hpp-rbprm-corba', "groundcrouch", "contact")
 #~ fullBody.exportAll(r, configs, 'obstacle_hyq_robust_10');
@@ -271,4 +272,9 @@ def clean():
 	normals = []
 
 #~ saveToPinocchio('darpahyq_andrea')
+#~ fullBody.exportAll(r, trajec, 'bridge_hyq_1s_05f_andrea');
+#~ saveToPinocchio('bridge_hyq_1s_05f_andrea')
+#~ fullBody.exportAll(r, trajec, 'hole_hyq_1s_05f_andrea');
+#~ saveToPinocchio('hole_hyq_1s_05f_andrea')
+#~ print "don"
 
