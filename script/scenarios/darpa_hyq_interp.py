@@ -81,7 +81,7 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 
 r(q_init)
 # computing the contact sequence
-configs = fullBody.interpolate(0.1, 1, 5)
+configs = fullBody.interpolate(0.09, 1, 10)
 
 #~ r.loadObstacleModel ('hpp-rbprm-corba', "darpa", "contact")
 
@@ -110,36 +110,127 @@ def displayComPath(pathId,color=[0.,0.75,0.15,0.9]) :
 	pp.publisher.client.gui.addCurve(nameCurve,pathPos,color)
 	pp.publisher.client.gui.addToGroup(nameCurve,pp.publisher.sceneName)
 	pp.publisher.client.gui.refresh()
+	
+limbsCOMConstraints = { rLegId : {'file': "hyq/"+rLegId+"_com.ineq", 'effector' : rfoot},  
+					lLegId : {'file': "hyq/"+lLegId+"_com.ineq", 'effector' : lfoot},  
+					rarmId : {'file': "hyq/"+rarmId+"_com.ineq", 'effector' : rHand},  
+					larmId : {'file': "hyq/"+larmId+"_com.ineq", 'effector' : lHand} }
+
+
+	
 
 res = []
 trajec = []
+contacts = []
+pos = []
+normals = []
+errorid = []
+
+def getContactPerPhase(stateid):
+	contacts = [[],[],[]]
+	global limbsCOMConstraints
+	for k, v in limbsCOMConstraints.iteritems():
+		if(fullBody.isLimbInContact(k, stateid)):
+			contacts[0]+=[v['effector']]
+		if(fullBody.isLimbInContactIntermediary(k, stateid)):
+			contacts[1]+=[v['effector']]
+		if(fullBody.isLimbInContact(k, stateid+1)):
+			contacts[2]+=[v['effector']]
+	return contacts
+
+def gencontactsPerFrame(stateid, path_ids, total_time_per_path, dt_framerate=1./24.):
+	contactsPerPhase = getContactPerPhase(stateid)
+	config_size = len(fullBody.getCurrentConfig())
+	interpassed = False
+	res = []
+	for path_id in path_ids:		
+		length = pp.client.problem.pathLength (path_id)
+		num_frames_required = total_time_per_path / dt_framerate
+		dt = float(length) / num_frames_required
+		dt_finals = [dt*i for i in range(int(num_frames_required))] + [1]		
+		config_size_path = len(pp.client.problem.configAtParam (path_id, 0))
+		if(config_size_path > config_size):
+			interpassed = True
+			res+= [contactsPerPhase[1] for t in dt_finals]
+		elif interpassed:			
+			res+= [contactsPerPhase[2] for t in dt_finals]
+		else:
+			res+= [contactsPerPhase[0] for t in dt_finals]
+	return res
+
+def genPandNperFrame(stateid, path_ids, total_time_per_path, dt_framerate=1./24.):
+	p, N= fullBody.computeContactPoints(stateid)
+	config_size = len(fullBody.getCurrentConfig())
+	interpassed = False
+	pRes = []
+	nRes = []
+	for path_id in path_ids:		
+		length = pp.client.problem.pathLength (path_id)
+		num_frames_required = total_time_per_path / dt_framerate
+		dt = float(length) / num_frames_required
+		dt_finals = [dt*i for i in range(int(num_frames_required))] + [1]		
+		config_size_path = len(pp.client.problem.configAtParam (path_id, 0))
+		if(config_size_path > config_size):
+			interpassed = True
+			pRes+= [p[1] for t in dt_finals]
+			nRes+= [N[1] for t in dt_finals]
+		elif interpassed:			
+			pRes+= [p[2] for t in dt_finals]
+			nRes+= [N[2] for t in dt_finals]
+		else:
+			pRes+= [p[0] for t in dt_finals]
+			nRes+= [N[0] for t in dt_finals]
+	return pRes, nRes
+
 from hpp import Error as hpperr
 import sys
 numerror = 0
 def act(i, optim):
 	global numerror
+	global errorid
+	fail = 0
 	try:
-		pid, trajectory = solve_com_RRT(fullBody, configs, i, True, 0.6, 0.2, False, optim, False, True)
+		total_time_per_path = 1.2
+		pid, trajectory = solve_com_RRT(fullBody, configs, i, True, 0.4, 0.2, total_time_per_path, False, optim, False, False)
 		displayComPath(pid)
 		#~ pp(pid)
 		global res
 		res = res + [pid]
 		global trajec
-		trajec = trajec + gen_trajectory_to_play(fullBody, pp, trajectory, 1)
+		trajec = trajec + gen_trajectory_to_play(fullBody, pp, trajectory, total_time_per_path)
+		global contacts
+		contacts += gencontactsPerFrame(i, trajectory, total_time_per_path)	
+		Ps, Ns = genPandNperFrame(i, trajectory, total_time_per_path)	
+		global pos
+		pos += Ps
+		global normals
+		normals+= Ns
+		assert(len(contacts) == len(trajec) and len(contacts) == len(pos) and len(normals) == len(pos))
 	except hpperr as e:
 		print "failed at id " + str(i) , e.strerror
 		numerror+=1
+		errorid += [i]
+		fail+=1
 	except ValueError as e:
 		print "failed at id " + str(i) , e
 		numerror+=1
+		errorid += [i]
+		fail+=1
 	except IndexError as e:
 		print "failed at id " + str(i) , e
 		numerror+=1
+		errorid += [i]
+		fail+=1
 	except Exception as e:
 		print e
 		numerror+=1
+		errorid += [i]
+		fail+=1
 	except:
-		return
+		numerror+=1
+		errorid += [i]
+		fail+=1
+	return fail
 	
 def displayInSave(pp, pathId, configs):
 	length = pp.end*pp.client.problem.pathLength (pathId)
@@ -150,43 +241,37 @@ def displayInSave(pp, pathId, configs):
 		t += (pp.dt * pp.speed)
 
 	
-#~ fullBody.exportAll(r, respath, 'darpa_hyq_full');
-	
-for i in range(11,20):
-	act(i, 60)
-	#~ if i % 10 == 0:			
-		#~ respath = []
-		#~ for p in res:
-			#~ print p
-			#~ displayInSave(pp,p, respath)
-		#~ fullBody.exportAll(r, respath, 'darpa_hyq_full');
-
-
-
-pp.setSpeed(2)
-
-for p in res:
-	pp(p)
-		
 
 import time
+#~ play_trajectory(fullBody,pp,trajec)		
 
-respath = []
-for p in res:
-	print p
-	#~ displayInSave(pp,p, respath)
-#~ fullBody.exportAll(r, respath, 'darpa_hyq_full'+str(time()))
+from pickle import dump
+def saveToPinocchio(filename):
+	res = []
+	for i, q_gep in enumerate(trajec):
+		#invert to pinocchio config:
+		q = q_gep[:]
+		quat_end = q[4:7]
+		q[6] = q[3]
+		q[3:6] = quat_end
+		data = {'q':q, 'contacts': contacts[i], 'P' : pos[i], 'N' : normals[i]}
+		res += [data]
+	f1=open(filename, 'w+')
+	dump(res, f1)
+	f1.close()
+		
+def clean():
+	global res
+	global trajec
+	global contacts
+	global errorid
+	global pos
+	global normals
+	res = []
+	trajec = []
+	contacts = []
+	errorid = []
+	pos = []
+	normals = []
 
-
-
-#~ for i in range(5,35):
-	#~ act(i, 50)
-
-
-	
-
-#~ from hpp.gepetto.blender.exportmotion import exportPath
-#~ for p in res:
-	#~ exportPath(r,fullBody.client.basic.robot,fullBody.client.basic.problem,p,0.1,'test'+str(p)+'.txt')
-
-print "tg"
+#~ saveToPinocchio('darpahyq_andrea')
