@@ -467,12 +467,13 @@ namespace hpp {
       Eigen::Quaternion<double> Q (Eigen::AngleAxisd (angle, axis));
       Q.normalize ();
       std::cout << "Q: " << Q.toRotationMatrix () << std::endl;
-
       // Rotate all points to plane coordinates TODO: full trafo
       for (unsigned int i = 0; i < intersect.size (); ++i) {
-          intersect[i] = ((Q.inverse ()).toRotationMatrix ()) * Eigen::Vector3d (intersect[i][0],
-                 intersect[i][1], intersect[i][2]);
-         // std::cout << "intersect point in world: " << (intersect[i]) << std::endl;
+      //   std::cout << "intersect point in world: " << (intersect[i]) << std::endl;
+         intersect[i] = ((Q.inverse ()).toRotationMatrix ()) * (Eigen::Vector3d (intersect[i][0],
+                 intersect[i][1], intersect[i][2]) - planeCentroid);
+        //  std::cout << "intersect point in plane: " << (intersect[i]) << std::endl;
+          // TODO: z should always be 0 for points in plane frame!!
       }
      
       Eigen::VectorXd shape;
@@ -486,11 +487,12 @@ namespace hpp {
       printEllipseFunction(shape);    
       radii = intersect::getRadius (shape,
                   centroid2d, tau);
-      // This is the 3d centroid of the ellipse in the plane frame (or world frame with plane rotation?)
+      // This is the 3d centroid of the ellipse in the plane frame 
       // in the plane rotation, its normal is always (0,0,1)
-      centroid3d << centroid2d, planeParams.dot (planeCentroid);
-      // go back to world rotation:
-      centroid3d = Q.toRotationMatrix () * centroid3d;
+      //centroid3d << centroid2d, planeParams.dot (planeCentroid);
+      centroid3d << centroid2d, 0.0;
+      // go back to world frame:
+      centroid3d = Q.toRotationMatrix () * centroid3d + planeCentroid;
       // add rotation in plane frame to global quaternion (in plane frame rotation is always around z axis)
       Q = Q.toRotationMatrix () * (Eigen::AngleAxisd (tau, Eigen::Vector3d (0,0,1))).toRotationMatrix ();
       // DEBUG:
