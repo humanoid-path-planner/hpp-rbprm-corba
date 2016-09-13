@@ -459,10 +459,12 @@ namespace hpp {
       normal.normalize ();
       double angle = acos (Z_up.dot (normal));
       Eigen::Vector3d axis = Z_up.cross (normal);
-      if (axis.isZero(0.0) && angle == 0.0) {
+           if (axis.isZero(0.0) && angle == 0.0) {
           // if axis = [0,0,0] -> no rotation
           axis << 0.0,0.0,1.0; // give any axis that is non-zero to avoid NaNs
       }
+      axis.normalize ();
+      std::cout << "axis: " << axis.transpose () << ", angle: " << angle << std::endl;
       Eigen::Quaternion<double> Q (Eigen::AngleAxisd (angle, axis));
       Q.normalize ();
       std::cout << "Q: " << Q.toRotationMatrix () << std::endl;
