@@ -450,8 +450,7 @@ namespace hpp {
       // compute rotation of the plane the points approximately lie in; project all
       // points to the found plane.
       Eigen::Vector3d planeCentroid;
-      Eigen::VectorXd planeParams = intersect::projectToPlane(intersect, planeCentroid);
-      Eigen::Vector3d normal (planeParams(0), planeParams(1), planeParams(2));
+      Eigen::Vector3d normal = intersect::projectToPlane(intersect, planeCentroid);
       normal.normalize ();
 
       // Create Quaternion only based on normal vector: TODO: Check whether this is right
@@ -467,7 +466,7 @@ namespace hpp {
       Eigen::Quaternion<double> Q (Eigen::AngleAxisd (angle, axis));
       Q.normalize ();
       std::cout << "Q: " << Q.toRotationMatrix () << std::endl;
-      // Rotate all points to plane coordinates TODO: full trafo
+      // Rotate all points to plane frame 
       for (unsigned int i = 0; i < intersect.size (); ++i) {
       //   std::cout << "intersect point in world: " << (intersect[i]) << std::endl;
          intersect[i] = ((Q.inverse ()).toRotationMatrix ()) * (Eigen::Vector3d (intersect[i][0],
@@ -489,7 +488,6 @@ namespace hpp {
                   centroid2d, tau);
       // This is the 3d centroid of the ellipse in the plane frame 
       // in the plane rotation, its normal is always (0,0,1)
-      //centroid3d << centroid2d, planeParams.dot (planeCentroid);
       centroid3d << centroid2d, 0.0;
       // go back to world frame:
       centroid3d = Q.toRotationMatrix () * centroid3d + planeCentroid;
