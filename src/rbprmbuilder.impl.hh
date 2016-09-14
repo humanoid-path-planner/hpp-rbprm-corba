@@ -112,12 +112,15 @@ namespace hpp {
 
         virtual void setFilter(const hpp::Names_t& roms) throw (hpp::Error);
 				virtual void setAffordanceFilter(const char* romName, const hpp::Names_t& affordances) throw (hpp::Error);
+        virtual std::vector<fcl::Vec3f> getContactPoints (const char* limbname, model::T_Rom& romDevices,
+                const core::ProblemSolverPtr_t& problemSolver,const unsigned int stateId, const unsigned int refine);
         virtual hpp::floatSeqSeq * getDebugContactPoints (const char* limbname,
-                unsigned short refine) throw (hpp::Error);
+                unsigned short stateId, unsigned short refine) throw (hpp::Error);
         virtual hpp::floatSeqSeq* getPointsOnCurve (const hpp::floatSeq& radii,
                 const hpp::floatSeq& trafo) throw (hpp::Error);
         virtual hpp::floatSeq * getReachableContactArea (const char* limbname,
-                CORBA::Boolean ellipse, hpp::floatSeq_out pose, unsigned short refine) throw (hpp::Error);
+                CORBA::Boolean ellipse, hpp::floatSeq_out pose, unsigned short stateId,
+                unsigned short refine) throw (hpp::Error);
         virtual hpp::floatSeq* getApproximatedEffector (const char* limbname, 
                 CORBA::Boolean ellipse, floatSeq_out pose) throw (hpp::Error);
         virtual void boundSO3(const hpp::floatSeq& limitszyx) throw (hpp::Error);

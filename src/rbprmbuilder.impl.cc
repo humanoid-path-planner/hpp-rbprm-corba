@@ -319,7 +319,7 @@ namespace hpp {
               if (std::find (addedJoints.begin (), addedJoints.end (), 
                   body->name ()) == addedJoints.end () &&
                   body->innerObjects (model::COLLISION).size () > 0) {
-                  // for now only saving the first collision object in vector:
+                  // TODO: for now only saving the first collision object in vector:
                 reachability.push_back (body->innerObjects (model::COLLISION).front ());
                 addedJoints.push_back (body->name ());
            }
@@ -328,8 +328,8 @@ namespace hpp {
       return reachability;
   }
 
-  std::vector<fcl::Vec3f> getContactPoints (const char* limbname, model::T_Rom& romDevices,
-          const core::ProblemSolverPtr_t& problemSolver, const unsigned int refine)
+  std::vector<fcl::Vec3f> RbprmBuilder::getContactPoints (const char* limbname, model::T_Rom& romDevices,
+          const core::ProblemSolverPtr_t& problemSolver, const unsigned int stateId, const unsigned int refine)
   {
        model::T_Rom::const_iterator limbRomIt = romDevices.find (limbname);
       if (limbRomIt == romDevices.end ()) {
@@ -338,44 +338,51 @@ namespace hpp {
       }
       model::DevicePtr_t limbRom = limbRomIt->second;
 
-      //TODO: is this the only way of updating romDevices? Is the pose of a romDevice always
-      // that of the full robot? If not -> another method required
       const Configuration_t& configuration = problemSolver->robot ()->currentConfiguration ();
       limbRom->currentConfiguration (configuration.block(0,0,7,1));
       limbRom->computeForwardKinematics ();
       const model::ObjectVector_t &reachability = getReachability (limbRom->getJointVector ());
 
-      const affMap_t &affMap = problemSolver->map
-					<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
-		  if (affMap.empty ()) {
-    	    throw hpp::Error ("No affordances found. Unable to find intersection.");
+      std::map<std::string, fcl::CollisionObjectPtr_t>::const_iterator affIt = 
+          lastStatesComputed_[stateId].contactSurfaces_.end();
+      for(std::map<std::string,fcl::CollisionObjectPtr_t>::const_iterator it = 
+              lastStatesComputed_[stateId].contactSurfaces_.begin();
+              it != lastStatesComputed_[stateId].contactSurfaces_.end(); ++it) {
+          std::size_t found = std::string(limbname).find(it->first);
+          if (found!=std::string::npos) {
+             // std::cout << it->first << "\n";
+              affIt = it;
+              break;
+          }
       }
-
-     // TODO: find affordance object in contact with given limb -> no need to go through whole vector
+      if (affIt == lastStatesComputed_[stateId].contactSurfaces_.end ()) {
+      std::string err ("No affordance surface for Rom of name " + std::string(limbname) + " found!");
+          throw Error (err.c_str());
+      }
+      if (!(lastStatesComputed_[stateId].contacts_.find (affIt->first))->second) {
+      std::string err ("Limb " + std::string(limbname) + " is not in contact!");
+          throw Error (err.c_str());
+      }
      std::vector<fcl::Vec3f> intersect;
      for (model::ObjectVector_t::const_iterator objIt = reachability.begin ();
            objIt != reachability.end (); ++objIt) {
-       for (affMap_t::const_iterator affIt = affMap.begin (); affIt != affMap.end (); ++affIt) {
-           for (unsigned int j = 0; j < affIt->second.size (); ++j) {
-               // DEBUG!! change back to getIntersectionPoints
                intersect = intersect::getIntersectionPointsCustom (
-                       (*objIt)->fcl(), affIt->second[j]->fcl(), refine);
+                       (*objIt)->fcl(), affIt->second, refine);
+               std::cout << "found "<< intersect.size () << " intersection points" << std::endl;
                if (intersect.size() > 0) {
                    return intersect;
                }
-           }
-       }
-     }
+    }
      intersect.clear ();
      return intersect;
   }
 
   // function for debugging purposes
   hpp::floatSeqSeq* RbprmBuilder::getDebugContactPoints (const char* limbname,
-          unsigned short refine) throw (hpp::Error)
+          unsigned short stateId, unsigned short refine) throw (hpp::Error)
   {
     std::vector<fcl::Vec3f> intersect = getContactPoints (limbname,
-            romDevices_, problemSolver_, refine);
+            romDevices_, problemSolver_, stateId, refine);
     Eigen::Vector3d planeCentroid;
     Eigen::Vector3d normal_plane = intersect::projectToPlane (intersect, planeCentroid);
 
@@ -437,10 +444,11 @@ namespace hpp {
 
 // TODO: Find a suitable return type! 
   hpp::floatSeq* RbprmBuilder::getReachableContactArea (const char* limbname,
-          CORBA::Boolean ellipse, hpp::floatSeq_out pose, unsigned short refine) throw (hpp::Error)
+          CORBA::Boolean ellipse, hpp::floatSeq_out pose, unsigned short stateId,
+          unsigned short refine) throw (hpp::Error)
   {
       std::vector<fcl::Vec3f> intersect = getContactPoints (limbname,
-            romDevices_, problemSolver_, refine);
+            romDevices_, problemSolver_, stateId, refine);
      
       std::vector<double> radii;
       Eigen::Vector2d centroid2d;
