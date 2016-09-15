@@ -405,6 +405,24 @@ namespace hpp {
         return cit->second[sampleId];
     }
 
+
+    double RbprmBuilder::getEffectorDistance(unsigned short state1, unsigned short state2) throw (hpp::Error)
+    {
+        try
+        {
+            std::size_t s1((std::size_t)state1), s2((std::size_t)state2);
+            if(lastStatesComputed_.size () < s1 || lastStatesComputed_.size () < s2 )
+            {
+                throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
+            }
+            return rbprm::effectorDistance(lastStatesComputed_[s1], lastStatesComputed_[s2]);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
     std::vector<std::string> stringConversion(const hpp::Names_t& dofArray)
     {
         std::vector<std::string> res;
@@ -944,6 +962,10 @@ namespace hpp {
         try
         {
             T_Configuration positions = doubleDofArrayToConfig(3, rootPositions);
+            if(positions.size() <2)
+            {
+                throw std::runtime_error("generateComPath requires at least 2 configurations to generate path");
+            }
             return addRotations(positions,q1,q2,fullBody->device_->currentConfiguration(),
                                                  fullBody->device_,problemSolver->problem());
         }
@@ -1214,7 +1236,7 @@ assert(s2 == s1 +1);
             if(!(problemSolver_->problem()->configValidations()->validate(s1Ter.configuration_, rport)
                     && problemSolver_->problem()->configValidations()->validate(s2Bis.configuration_, rport)))
             {
-                //std::cout << "could not project without collision at state " << std::string(""+s1)  << std::endl;
+                std::cout << "could not project without collision at state " << std::string(""+s1)  << std::endl;
                 throw std::runtime_error ("could not project without collision at state " + std::string(""+s1));
                 // fallback to limbRRT instead
                 //return -1; //limbRRT(s1, s2, numOptimizations);

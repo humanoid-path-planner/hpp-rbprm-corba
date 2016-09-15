@@ -121,6 +121,7 @@ namespace hpp {
         virtual CORBA::UShort getNumSamples(const char* limb) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeNodeIds(const char* limb) throw (hpp::Error);
         virtual double getSampleValue(const char* limb, const char* valueName, unsigned short sampleId) throw (hpp::Error);
+        virtual double getEffectorDistance(unsigned short  state1, unsigned short  state2) throw (hpp::Error);
 
         virtual hpp::floatSeq* generateContacts(const hpp::floatSeq& configuration,
                                                 const hpp::floatSeq& direction) throw (hpp::Error);

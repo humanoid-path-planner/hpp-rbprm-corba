@@ -150,6 +150,13 @@ module hpp
     /// \return the value computed for the given sample and analytics
     double getSampleValue(in string limbName, in string valueName, in unsigned short sampleId) raises (Error);
 
+    /// compute the distance between all effectors replaced between two states
+    /// does not account for contact not present in both states
+    /// \param state1 from state
+    /// \param state2 destination state
+    /// \return the value computed for the given sample and analytics
+    double getEffectorDistance(in unsigned short state1, in unsigned short state2) raises (Error);
+
     /// Generate all possible contact in a given configuration
     /// \param dofArray initial configuration of the robot
     /// \param direction desired direction of motion for the robot

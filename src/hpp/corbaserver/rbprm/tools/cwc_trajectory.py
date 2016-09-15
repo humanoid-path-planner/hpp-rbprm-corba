@@ -2,6 +2,7 @@ from cwc import cone_optimization
 from obj_to_constraints import ineq_from_file, rotate_inequalities
 import numpy as np
 import math
+from numpy.linalg import norm
 
 import hpp.corbaserver.rbprm.data.com_inequalities as ine
 from hpp.corbaserver.rbprm.tools.path_to_trajectory import gen_trajectory_to_play
@@ -58,13 +59,21 @@ def __get_com_constraint(fullBody, state, config, limbsCOMConstraints, interm = 
 	return [np.vstack(As), np.hstack(bs)]
 		
 
-def gen_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, dt=0.2, reduce_ineq = True, verbose = False, limbsCOMConstraints = None):
+def gen_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, dt=0.2, phase_dt = [0.4, 1], reduce_ineq = True, verbose = False, limbsCOMConstraints = None):
 	init_com = __get_com(fullBody, states[state_id])
 	end_com = __get_com(fullBody, states[state_id+1])
 	p, N = fullBody.computeContactPoints(state_id)
 	mass = fullBody.getMass()
+	fly_time = phase_dt [1]
+	support_time = phase_dt [0]
 	t_end_phases = [0]
-	[t_end_phases.append(t_end_phases[-1]+1) for _ in range(len(p))]
+	[t_end_phases.append(t_end_phases[-1]+fly_time) for _ in range(len(p))]
+	if(len(t_end_phases) == 4):
+		t_end_phases[1] = support_time
+		t_end_phases[2] = t_end_phases[1] + fly_time
+		t_end_phases[3] = t_end_phases[2] + support_time
+		t_end_phases = [float((int)(math.ceil(el*10.))) / 10. for el in t_end_phases]
+		print "end_phases", t_end_phases
 	cones = None
 	if(computeCones):
 		cones = [fullBody.getContactCone(state_id, mu)[0]]
@@ -86,8 +95,8 @@ def gen_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, dt=
 		
 	return cone_optimization(p, N, [init_com + [0,0,0], end_com + [0,0,0]], t_end_phases[1:], dt, cones, COMConstraints, mu, mass, 9.81, reduce_ineq, verbose)
 
-def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  dt=0.2, reduce_ineq = True, verbose = False, limbsCOMConstraints = None):
-	var_final, params = gen_trajectory(fullBody, states, state_id, computeCones, mu , dt, reduce_ineq, verbose, limbsCOMConstraints)
+def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  dt=0.2, phase_dt = [0.4, 1], reduce_ineq = True, verbose = False, limbsCOMConstraints = None):
+	var_final, params = gen_trajectory(fullBody, states, state_id, computeCones, mu , dt, phase_dt, reduce_ineq, verbose, limbsCOMConstraints)
 	p, N = fullBody.computeContactPoints(state_id)
 	from mpl_toolkits.mplot3d import Axes3D
 	import matplotlib.pyplot as plt
@@ -114,25 +123,85 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 	ax.set_zlabel('Z Label')
 
 	plt.show()
+	
+	print "plotting speed "
+	print "end target ",  params['x_end']
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+	points = var_final['dc']
+	print "points", points
+	ys = [norm(el) for el in points]
+	xs = [i * params['dt'] for i in range(0,len(points))]
+	ax.scatter(xs, ys, c='b')
+
+
+	plt.show()
+	
+	print "plotting acceleration "
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+	points = var_final['ddc']
+	ys = [norm(el) for el in points]
+	xs = [i * params['dt'] for i in range(0,len(points))]
+	ax.scatter(xs, ys, c='b')
+
+
+	plt.show()
+	
+
+	plt.show()
 	return var_final, params
 	
-def solve_com_RRT(fullBody, states, state_id, computeCones = False, mu = 1, dt =0.1, reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None):
+def __optim__threading_ok(fullBody, states, state_id, computeCones = False, mu = 1, dt =0.1, phase_dt = [0.4, 1], reduce_ineq = True,
+ num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None, resultDic = {}):
 	print "callgin gen ",state_id
 	if(draw):
-		res = draw_trajectory(fullBody, states, state_id, computeCones, mu, dt, reduce_ineq, verbose, limbsCOMConstraints)		
+		res = draw_trajectory(fullBody, states, state_id, computeCones, mu, dt, phase_dt, reduce_ineq, verbose, limbsCOMConstraints)		
 	else:
-		res = gen_trajectory(fullBody, states, state_id, computeCones, mu, dt, reduce_ineq, verbose, limbsCOMConstraints)
+		res = gen_trajectory(fullBody, states, state_id, computeCones, mu, dt, phase_dt, reduce_ineq, verbose, limbsCOMConstraints)
 	t = res[1]["t_init_phases"];
 	dt = res[1]["dt"];
 	final_state = res[0]
 	c0 =  res[1]["x_init"][0:3]
 	comPos = [c0] + [c.tolist() for c in final_state['c']]
-	comPosPerPhase = [[comPos[(int)(t_id/dt)] for t_id in np.arange(t[index],t[index+1],dt)] for index, _ in enumerate(t[:-1]) ]
+	comPosPerPhase = [[comPos[(int)(t_id/dt)] for t_id in np.arange(t[index],t[index+1]-_EPS,dt)] for index, _ in enumerate(t[:-1]) ]
 	comPosPerPhase[-1].append(comPos[-1])
 	assert(len(comPos) == len(comPosPerPhase[0]) + len(comPosPerPhase[1]) + len(comPosPerPhase[2]))
-	#~ assert(comPos == [item for sublist in comPosPerPhase for item in sublist])
+	resultDic[str(state_id)] = comPosPerPhase
+	return comPosPerPhase
+
+def solve_com_RRT(fullBody, states, state_id, computeCones = False, mu = 1, dt =0.1, phase_dt = [0.4, 1], reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None):
+	comPosPerPhase = __optim__threading_ok(fullBody, states, state_id, computeCones, mu, dt, phase_dt, reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints)
 	print "done. generating state trajectory ",state_id	
+	print "comePhaseLength", len(comPosPerPhase[0]),  len(comPosPerPhase[1]),  len(comPosPerPhase[2])
 	paths_ids = [int(el) for el in fullBody.comRRTFromPos(state_id,comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims)]
 	print "done. computing final trajectory to display ",state_id
 	return paths_ids[-1], paths_ids[:-1]
 	
+#~ from multiprocessing import Process	
+
+#~ def solve_com_RRTs(fullBody, states, state_ids, computeCones = False, mu = 1, dt =0.1, phase_dt = 1, reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None):
+	#~ results = {}
+	#~ processes = {}
+	#~ allpathsids =[[],[]]
+	#~ errorid = []
+	#~ for sid in state_ids:
+		#~ pid = str(sid)
+		#~ p = Process(target=__optim__threading_ok, args=(fullBody, states, sid, computeCones, mu, dt, phase_dt, reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints, results))
+		#~ processes[str(sid)] = p
+		#~ p.start()
+	#~ for i,p in processes.iteritems():
+		#~ p.join()
+	#~ print results
+	#~ print "done. generating state trajectory "
+	#~ for sid in state_ids:
+		#~ comPosPerPhase = results[str(sid)]
+		#~ try:
+			#~ paths_ids = [int(el) for el in fullBody.comRRTFromPos(state_id,comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims)]
+			#~ print "done. computing final trajectory to display ",state_id
+			#~ allpathsids[0].append(paths_ids[-1])
+			#~ allpathsids[1].append(paths_ids[:-1])
+		#~ except:
+			#~ errorid += [i]
+	#~ print "errors at states: "; errorid
+	#~ return allpathsids[0], allpathsids[1]

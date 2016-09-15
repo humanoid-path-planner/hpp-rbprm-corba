@@ -158,6 +158,14 @@ class FullBody (object):
     # array of size 4, where each entry is the position of a corner of the contact surface
     def getEffectorPosition(self, limbName, configuration):
 		return self.client.rbprm.rbprm.getEffectorPosition(limbName,configuration)
+		
+	##compute the distance between all effectors replaced between two states
+    # does not account for contact not present in both states
+    # \param state1 from state
+    # \param state2 destination state
+    # \return the value computed for the given sample and analytics
+    def getEffectorDistance(self, state1, state2):
+		return self.client.rbprm.rbprm.getEffectorDistance(state1,state2)		
 
 	## Generates a balanced contact configuration, considering the
     #  given current configuration of the robot, and a direction of motion.
@@ -305,6 +313,7 @@ class FullBody (object):
     # \return H matrix and h column, such that H w <= h
     def getContactCone(self, stateId, friction = 0.5):
 		H_h =  array(self.client.rbprm.rbprm.getContactCone(stateId, friction))
+		#~ print "H_h", len(H_h) 
 		# now decompose cone 
 		return H_h[:,:-1], H_h[:, -1]
 		

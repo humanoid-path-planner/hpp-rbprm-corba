@@ -56,16 +56,18 @@ def follow_trajectory_path(robot, path_player, path_id, total_time, dt_framerate
 	dt_finals = [dt*i / length for i in range(int(num_frames_required))] + [1]
 	return[__find_q_t(robot, path_player, path_id, t) for t in dt_finals]
 	
-def gen_trajectory_to_play(robot, path_player, path_ids, total_time_per_path, dt_framerate=__24fps):
+def gen_trajectory_to_play(robot, path_player, path_ids, total_time_per_paths, dt_framerate=__24fps):
 	config_size = len(robot.getCurrentConfig())
 	res = []
 	pp = path_player
+	activeid = 0
 	for path_id in path_ids:
 		config_size_path = len(path_player.client.problem.configAtParam (path_id, 0))
 		if(config_size_path > config_size):
-			res+= follow_trajectory_path(robot, path_player, path_id, total_time_per_path, dt_framerate)
+			res+= follow_trajectory_path(robot, path_player, path_id, total_time_per_paths[1], dt_framerate)
 		else:
-			res+= linear_interpolate_path(robot, path_player, path_id, total_time_per_path, dt_framerate)
+			res+= linear_interpolate_path(robot, path_player, path_id, total_time_per_paths[0], dt_framerate)
+		activeid +=1
 	return res
 	
 import time
