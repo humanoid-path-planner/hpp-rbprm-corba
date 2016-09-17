@@ -112,7 +112,7 @@ namespace hpp {
 
         virtual void setFilter(const hpp::Names_t& roms) throw (hpp::Error);
 				virtual void setAffordanceFilter(const char* romName, const hpp::Names_t& affordances) throw (hpp::Error);
-        virtual std::vector<fcl::Vec3f> getContactPoints (const char* limbname, model::T_Rom& romDevices,
+        virtual std::vector<Eigen::Vector3d> getContactPoints (const char* limbname, model::T_Rom& romDevices,
                 const core::ProblemSolverPtr_t& problemSolver,const unsigned int stateId, const unsigned int refine);
         virtual hpp::floatSeqSeq * getDebugContactPoints (const char* limbname,
                 unsigned short stateId, unsigned short refine) throw (hpp::Error);

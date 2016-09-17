@@ -328,9 +328,10 @@ namespace hpp {
       return reachability;
   }
 
-  std::vector<fcl::Vec3f> RbprmBuilder::getContactPoints (const char* limbname, model::T_Rom& romDevices,
+  std::vector<Eigen::Vector3d> RbprmBuilder::getContactPoints (const char* limbname, model::T_Rom& romDevices,
           const core::ProblemSolverPtr_t& problemSolver, const unsigned int stateId, const unsigned int refine)
   {
+      std::vector<Eigen::Vector3d> res;
        model::T_Rom::const_iterator limbRomIt = romDevices.find (limbname);
       if (limbRomIt == romDevices.end ()) {
           std::string err ("No Rom of name " + std::string(limbname) + " found!");
@@ -363,17 +364,18 @@ namespace hpp {
       std::string err ("Limb " + std::string(limbname) + " is not in contact!");
           throw Error (err.c_str());
       }
-     std::vector<fcl::Vec3f> intersect;
+     std::vector<Eigen::Vector3d> intersect;
      for (model::ObjectVector_t::const_iterator objIt = reachability.begin ();
            objIt != reachability.end (); ++objIt) {
                intersect = intersect::getIntersectionPointsCustom (
                        (*objIt)->fcl(), affIt->second, refine);
                std::cout << "found "<< intersect.size () << " intersection points" << std::endl;
-               if (intersect.size() > 0) {
-                   return intersect;
-               }
-    }
-     intersect.clear ();
+               res.insert(res.end(), intersect.begin(), intersect.end());
+     }
+     if (res.size () < 3) {
+     std::string err ("rbprmbuilder::getContactPoints: no intersection found!");
+          throw Error (err.c_str());
+     }
      return intersect;
   }
 
@@ -381,7 +383,7 @@ namespace hpp {
   hpp::floatSeqSeq* RbprmBuilder::getDebugContactPoints (const char* limbname,
           unsigned short stateId, unsigned short refine) throw (hpp::Error)
   {
-    std::vector<fcl::Vec3f> intersect = getContactPoints (limbname,
+    std::vector<Eigen::Vector3d> intersect = getContactPoints (limbname,
             romDevices_, problemSolver_, stateId, refine);
     Eigen::Vector3d planeCentroid;
     Eigen::Vector3d normal_plane = intersect::projectToPlane (intersect, planeCentroid);
@@ -426,12 +428,12 @@ namespace hpp {
       }
       hpp::floatSeq pointOut;
       pointOut.length(3);
-      fcl::Vec3f point (0,0,0);
+      Eigen::Vector3d point (0,0,0);
       std::cout << "ellipse centre in world: " << w_T_CurveOrigin.getRotation () << std::endl
           << w_T_CurveOrigin.getTranslation () << std::endl;
       for (unsigned int deg = 0; deg < 360; deg +=5) {
           double theta = (((double) deg)/180.0)*M_PI;
-          fcl::Vec3f point =  fcl::Vec3f (radii[0]*sin(theta), radii[1]*cos(theta), 0.0);
+          Eigen::Vector3d point =  Eigen::Vector3d (radii[0]*sin(theta), radii[1]*cos(theta), 0.0);
           point = w_T_CurveOrigin.getRotation () * point + w_T_CurveOrigin.getTranslation();
           pointOut[0] = point[0];
           pointOut[1] = point[1];
@@ -447,7 +449,7 @@ namespace hpp {
           CORBA::Boolean ellipse, hpp::floatSeq_out pose, unsigned short stateId,
           unsigned short refine) throw (hpp::Error)
   {
-      std::vector<fcl::Vec3f> intersect = getContactPoints (limbname,
+      std::vector<Eigen::Vector3d> intersect = getContactPoints (limbname,
             romDevices_, problemSolver_, stateId, refine);
      
       std::vector<double> radii;
