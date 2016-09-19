@@ -38,6 +38,7 @@ q_init = rbprmBuilder.getCurrentConfig ();
 q_init [0:3] = [-2, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 q_goal = q_init [::]
 q_goal [0:3] = [3, 0, 0.63]; r (q_goal)
+#~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
 
 # Choosing a path optimizer
 ps.addPathOptimizer("RandomShortcut")
@@ -46,14 +47,14 @@ ps.addGoalConfig (q_goal)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
-afftool.loadObstacleModel (packageName, "darpa", "pling", r)
+afftool.loadObstacleModel (packageName, "darpa", "planning", r)
 afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 
 # Choosing RBPRM shooter and path validation methods.
 # Note that the standard RRT algorithm is used.
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
-r.loadObstacleModel (packageName, "darpa", "planning")
+#~ r.loadObstacleModel (packageName, "darpa", "planning")
 
 # Solve the problem
 t = ps.solve ()

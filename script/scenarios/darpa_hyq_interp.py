@@ -81,7 +81,7 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 
 r(q_init)
 # computing the contact sequence
-configs = fullBody.interpolate(0.09, 1, 10)
+configs = fullBody.interpolate(0.12, 1, 10)
 
 #~ r.loadObstacleModel ('hpp-rbprm-corba', "darpa", "contact")
 
@@ -112,15 +112,16 @@ def displayComPath(pathId,color=[0.,0.75,0.15,0.9]) :
 	pp.publisher.client.gui.refresh()
 	
 limbsCOMConstraints = { rLegId : {'file': "hyq/"+rLegId+"_com.ineq", 'effector' : rfoot},  
-					lLegId : {'file': "hyq/"+lLegId+"_com.ineq", 'effector' : lfoot},  
-					rarmId : {'file': "hyq/"+rarmId+"_com.ineq", 'effector' : rHand},  
-					larmId : {'file': "hyq/"+larmId+"_com.ineq", 'effector' : lHand} }
+						lLegId : {'file': "hyq/"+lLegId+"_com.ineq", 'effector' : lfoot},  
+						rarmId : {'file': "hyq/"+rarmId+"_com.ineq", 'effector' : rHand},  
+						larmId : {'file': "hyq/"+larmId+"_com.ineq", 'effector' : lHand} }
 
 
 	
 
 res = []
 trajec = []
+trajec_mil = []
 contacts = []
 pos = []
 normals = []
@@ -138,27 +139,30 @@ def getContactPerPhase(stateid):
 			contacts[2]+=[v['effector']]
 	return contacts
 
-def gencontactsPerFrame(stateid, path_ids, total_time_per_path, dt_framerate=1./24.):
+def gencontactsPerFrame(stateid, path_ids, times, dt_framerate=1./24.):
 	contactsPerPhase = getContactPerPhase(stateid)
 	config_size = len(fullBody.getCurrentConfig())
 	interpassed = False
 	res = []
 	for path_id in path_ids:		
 		length = pp.client.problem.pathLength (path_id)
-		num_frames_required = total_time_per_path / dt_framerate
-		dt = float(length) / num_frames_required
-		dt_finals = [dt*i for i in range(int(num_frames_required))] + [1]		
+		num_frames_required_fly = times[1] / dt_framerate
+		num_frames_required_support = times[0] / dt_framerate
+		dt_fly = float(length) / num_frames_required_fly
+		dt_support = float(length) / num_frames_required_support
+		dt_finals_fly  = [dt_fly*i for i in range(int(num_frames_required_fly))] + [1]		
+		dt_finals_support  = [dt_support*i for i in range(int(num_frames_required_support))] + [1]	
 		config_size_path = len(pp.client.problem.configAtParam (path_id, 0))
 		if(config_size_path > config_size):
 			interpassed = True
-			res+= [contactsPerPhase[1] for t in dt_finals]
+			res+= [contactsPerPhase[1] for t in dt_finals_fly]
 		elif interpassed:			
-			res+= [contactsPerPhase[2] for t in dt_finals]
+			res+= [contactsPerPhase[2] for t in dt_finals_support]
 		else:
-			res+= [contactsPerPhase[0] for t in dt_finals]
+			res+= [contactsPerPhase[0] for t in dt_finals_support]
 	return res
 
-def genPandNperFrame(stateid, path_ids, total_time_per_path, dt_framerate=1./24.):
+def genPandNperFrame(stateid, path_ids, times, dt_framerate=1./24.):
 	p, N= fullBody.computeContactPoints(stateid)
 	config_size = len(fullBody.getCurrentConfig())
 	interpassed = False
@@ -166,72 +170,144 @@ def genPandNperFrame(stateid, path_ids, total_time_per_path, dt_framerate=1./24.
 	nRes = []
 	for path_id in path_ids:		
 		length = pp.client.problem.pathLength (path_id)
-		num_frames_required = total_time_per_path / dt_framerate
-		dt = float(length) / num_frames_required
-		dt_finals = [dt*i for i in range(int(num_frames_required))] + [1]		
+		num_frames_required_fly = times[1] / dt_framerate
+		num_frames_required_support = times[0] / dt_framerate
+		dt_fly = float(length) / num_frames_required_fly
+		dt_support = float(length) / num_frames_required_support
+		dt_finals_fly  = [dt_fly*i for i in range(int(num_frames_required_fly))] + [1]		
+		dt_finals_support  = [dt_support*i for i in range(int(num_frames_required_support))] + [1]	
 		config_size_path = len(pp.client.problem.configAtParam (path_id, 0))
 		if(config_size_path > config_size):
 			interpassed = True
-			pRes+= [p[1] for t in dt_finals]
-			nRes+= [N[1] for t in dt_finals]
+			pRes+= [p[1] for t in dt_finals_fly]
+			nRes+= [N[1] for t in dt_finals_fly]
 		elif interpassed:			
-			pRes+= [p[2] for t in dt_finals]
-			nRes+= [N[2] for t in dt_finals]
+			pRes+= [p[2] for t in dt_finals_support]
+			nRes+= [N[2] for t in dt_finals_support]
 		else:
-			pRes+= [p[0] for t in dt_finals]
-			nRes+= [N[0] for t in dt_finals]
+			pRes+= [p[0] for t in dt_finals_support]
+			nRes+= [N[0] for t in dt_finals_support]
 	return pRes, nRes
 
 from hpp import Error as hpperr
 import sys
 numerror = 0
-def act(i, optim):
+def act(i, optim, time_scale = 20.):
 	global numerror
 	global errorid
 	fail = 0
 	try:
-		total_time_per_path = 1.2
-		pid, trajectory = solve_com_RRT(fullBody, configs, i, True, 0.4, 0.2, total_time_per_path, False, optim, False, False)
+		print "distance", fullBody.getEffectorDistance(i,i+1)
+		trunk_distance =  np.linalg.norm(np.array(configs[i+1][0:3]) - np.array(configs[i][0:3]))
+		distance = max(fullBody.getEffectorDistance(i,i+1), trunk_distance)
+		dist = int(distance * time_scale)#heuristic
+		while(dist %4 != 0):
+			dist +=1
+		total_time_flying_path = max(float(dist)/10., 0.3)
+		total_time_support_path = float((int)(math.ceil(min(total_time_flying_path /2., 0.2)*10.))) / 10.
+		times = [total_time_support_path, total_time_flying_path]
+		if(total_time_flying_path>= 1.):
+			dt = 0.1
+		elif total_time_flying_path<= 0.3:
+			dt = 0.05
+		else:
+			dt = 0.1
+		print 'time per path', times
+		print 'dt', dt
+		#~ total_time_per_path = 1.2
+		#~ pid, trajectory = solve_com_RRT(fullBody, configs, i, True, 1, 0.2, total_time_per_path, False, optim, False, False)
+		if(distance > 0.0001):
+			#~ pid, trajectory = solve_com_RRT(fullBody, configs, i, True, 0.4, dt, times, False, optim, False, False)
+			pid, trajectory = solve_effector_RRT(fullBody, configs, i, True, 0.4, dt, times, False, optim, False, False)
+			displayComPath(pid)
+			#~ pp(pid)
+			global res
+			res = res + [pid]
+			global trajec
+			global trajec_mil
+			trajec = trajec + gen_trajectory_to_play(fullBody, pp, trajectory, times)
+			trajec_mil = trajec_mil + gen_trajectory_to_play(fullBody, pp, trajectory, times, 1./1000.)
+			global contacts
+			contacts += gencontactsPerFrame(i, trajectory, times, 1./1000.)	
+			Ps, Ns = genPandNperFrame(i, trajectory, times, 1./1000.)	
+			global pos
+			pos += Ps
+			global normals
+			normals+= Ns
+			assert(len(contacts) == len(trajec_mil) and len(contacts) == len(pos) and len(normals) == len(pos))
+		else:
+			print "TODO, NO CONTACT VARIATION, LINEAR INTERPOLATION REQUIRED"
+	except hpperr as e:
+		print "hpperr failed at id " + str(i) , e.strerror
+		numerror+=1
+		errorid += [i]
+		fail+=1
+	#~ except ValueError as e:
+		#~ print "ValueError failed at id " + str(i) , e
+		#~ numerror+=1
+		#~ errorid += [i]
+		#~ fail+=1
+	#~ except IndexError as e:
+		#~ print "IndexError failed at id " + str(i) , e
+		#~ numerror+=1
+		#~ errorid += [i]
+		#~ fail+=1
+	#~ except Exception as e:
+		#~ print e
+		#~ numerror+=1
+		#~ errorid += [i]
+		#~ fail+=1
+	#~ except:
+		#~ numerror+=1
+		#~ errorid += [i]
+		#~ fail+=1
+	return fail
+	
+	
+def actu(i, optim):
+	global numerror
+	global errorid
+	fail = 0
+	print "distance", fullBody.getEffectorDistance(i,i+1)
+	trunk_distance =  np.linalg.norm(np.array(configs[i+1][0:3]) - np.array(configs[i][0:3]))
+	distance = max(fullBody.getEffectorDistance(i,i+1), trunk_distance)
+	dist = int(distance * 20.)#heuristic
+	while(dist %4 != 0):
+		dist +=1
+	total_time_flying_path = max(float(dist)/10., 0.3)
+	total_time_support_path = float((int)(math.ceil(min(total_time_flying_path /2., 0.4)*10.))) / 10.
+	times = [total_time_support_path, total_time_flying_path]
+	if(total_time_flying_path>= 1.):
+		dt = 0.2
+	elif total_time_flying_path<= 0.3:
+		dt = 0.05
+	else:
+		dt = 0.1
+	print 'time per path', times
+	print 'dt', dt
+	#~ total_time_per_path = 1.2
+	#~ pid, trajectory = solve_com_RRT(fullBody, configs, i, True, 1, 0.2, total_time_per_path, False, optim, False, False)
+	if(distance > 0.0001):
+		pid, trajectory = solve_com_RRT(fullBody, configs, i, True, 0.4, dt, times, False, optim, False, False)
 		displayComPath(pid)
 		#~ pp(pid)
 		global res
 		res = res + [pid]
 		global trajec
-		trajec = trajec + gen_trajectory_to_play(fullBody, pp, trajectory, total_time_per_path)
+		global trajec_mil
+		trajec = trajec + gen_trajectory_to_play(fullBody, pp, trajectory, times)
+		trajec_mil = trajec_mil + gen_trajectory_to_play(fullBody, pp, trajectory, times, 1./1000.)
 		global contacts
-		contacts += gencontactsPerFrame(i, trajectory, total_time_per_path)	
-		Ps, Ns = genPandNperFrame(i, trajectory, total_time_per_path)	
+		contacts += gencontactsPerFrame(i, trajectory, times, 1./1000.)	
+		Ps, Ns = genPandNperFrame(i, trajectory, times, 1./1000.)	
 		global pos
 		pos += Ps
 		global normals
 		normals+= Ns
-		assert(len(contacts) == len(trajec) and len(contacts) == len(pos) and len(normals) == len(pos))
-	except hpperr as e:
-		print "failed at id " + str(i) , e.strerror
-		numerror+=1
-		errorid += [i]
-		fail+=1
-	except ValueError as e:
-		print "failed at id " + str(i) , e
-		numerror+=1
-		errorid += [i]
-		fail+=1
-	except IndexError as e:
-		print "failed at id " + str(i) , e
-		numerror+=1
-		errorid += [i]
-		fail+=1
-	except Exception as e:
-		print e
-		numerror+=1
-		errorid += [i]
-		fail+=1
-	except:
-		numerror+=1
-		errorid += [i]
-		fail+=1
-	return fail
-	
+		assert(len(contacts) == len(trajec_mil) and len(contacts) == len(pos) and len(normals) == len(pos))
+	else:
+		print "TODO, NO CONTACT VARIATION, LINEAR INTERPOLATION REQUIRED"
+
 def displayInSave(pp, pathId, configs):
 	length = pp.end*pp.client.problem.pathLength (pathId)
 	t = pp.start*pp.client.problem.pathLength (pathId)
@@ -248,7 +324,7 @@ import time
 from pickle import dump
 def saveToPinocchio(filename):
 	res = []
-	for i, q_gep in enumerate(trajec):
+	for i, q_gep in enumerate(trajec_mil):
 		#invert to pinocchio config:
 		q = q_gep[:]
 		quat_end = q[4:7]
@@ -263,15 +339,18 @@ def saveToPinocchio(filename):
 def clean():
 	global res
 	global trajec
+	global trajec_mil
 	global contacts
 	global errorid
 	global pos
 	global normals
 	res = []
 	trajec = []
+	trajec_mil = []
 	contacts = []
 	errorid = []
 	pos = []
 	normals = []
 
-#~ saveToPinocchio('darpahyq_andrea')
+#~ fullBody.exportAll(r, trajec, 'darpa_hyq_t_var_04f_andrea');
+#~ saveToPinocchio('darpa_hyq_t_var_04f_andrea')

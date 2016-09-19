@@ -178,6 +178,14 @@ def solve_com_RRT(fullBody, states, state_id, computeCones = False, mu = 1, dt =
 	print "done. computing final trajectory to display ",state_id
 	return paths_ids[-1], paths_ids[:-1]
 	
+def solve_effector_RRT(fullBody, states, state_id, computeCones = False, mu = 1, dt =0.1, phase_dt = [0.4, 1], reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None):
+	comPosPerPhase = __optim__threading_ok(fullBody, states, state_id, computeCones, mu, dt, phase_dt, reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints)
+	print "done. generating state trajectory ",state_id	
+	print "comePhaseLength", len(comPosPerPhase[0]),  len(comPosPerPhase[1]),  len(comPosPerPhase[2])
+	paths_ids = [int(el) for el in fullBody.effectorRRT(state_id,comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims)]
+	print "done. computing final trajectory to display ",state_id
+	return paths_ids[-1], paths_ids[:-1]
+	
 #~ from multiprocessing import Process	
 
 #~ def solve_com_RRTs(fullBody, states, state_ids, computeCones = False, mu = 1, dt =0.1, phase_dt = 1, reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None):
