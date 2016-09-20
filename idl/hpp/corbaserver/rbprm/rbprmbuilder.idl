@@ -234,7 +234,9 @@ module hpp
     /// to this function. If these conditions are not met an error is raised.
     /// \param timestep normalized step for generation along the path (ie the path has a length of 1).
     /// \param path path computed.
-    floatSeqSeq interpolate(in double timestep, in double path, in double robustnessTreshold) raises (Error);
+    /// \param robustnessTreshold minimum value of the static equilibrium robustness criterion required to accept the configuration (0 by default).
+    /// \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
+    floatSeqSeq interpolate(in double timestep, in double path, in double robustnessTreshold, in unsigned short filterStates) raises (Error);
 
     /// Provided a path has already been computed, interpolates it and generates the statically stable
     /// constact configurations along it. setStartState and setEndState must have been called prior
@@ -242,7 +244,8 @@ module hpp
     /// \param timestep normalized step for generation along the path (ie the path has a length of 1).
     /// \param path path computed.
     /// \param robustnessTreshold minimum value of the static equilibrium robustness criterion required to accept the configuration (0 by default).
-    floatSeqSeq interpolateConfigs(in floatSeqSeq configs, in double robustnessTreshold) raises (Error);
+    /// \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
+    floatSeqSeq interpolateConfigs(in floatSeqSeq configs, in double robustnessTreshold, in unsigned short filterStates) raises (Error);
 
 
     /// returns the CWC of the robot at a given state

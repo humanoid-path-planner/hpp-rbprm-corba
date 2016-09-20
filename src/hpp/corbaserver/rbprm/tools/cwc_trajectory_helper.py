@@ -217,7 +217,8 @@ def saveAllData(fullBody, r, name):
 	saveToPinocchio(name)
 
 def play_traj(fullBody,pp,frame_rate):
-	return play_trajectory(fullBody,pp,frame_rate)
+	global trajec
+	return play_trajectory(fullBody,pp,trajec,frame_rate)
 
 #~ fullBody.exportAll(r, trajec, 'darpa_hyq_t_var_04f_andrea');
 #~ saveToPinocchio('darpa_hyq_t_var_04f_andrea')

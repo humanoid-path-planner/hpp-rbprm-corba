@@ -254,8 +254,13 @@ class FullBody (object):
     # \param stepSize discretization step
     # \param pathId Id of the path to compute from
     # \param robustnessTreshold minimum value of the static equilibrium robustness criterion required to accept the configuration (0 by default).
-    def interpolate(self, stepsize, pathId = 1, robustnessTreshold = 0):
-		return self.client.rbprm.rbprm.interpolate(stepsize, pathId, robustnessTreshold)
+    # \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
+    def interpolate(self, stepsize, pathId = 1, robustnessTreshold = 0, filterStates = False):
+		if(filterStates):
+			filt = 1
+		else:
+			filt = 0
+		return self.client.rbprm.rbprm.interpolate(stepsize, pathId, robustnessTreshold, filt)
 	
 	## Provided a discrete contact sequence has already been computed, computes
     # all the contact positions and normals for a given state, the next one, and the intermediate between them.
@@ -272,8 +277,14 @@ class FullBody (object):
 	#
     # \param stepSize discretization step
     # \param pathId Id of the path to compute from
-    def interpolateConfigs(self, configs):
-		return self.client.rbprm.rbprm.interpolateConfigs(configs)
+    # \param robustnessTreshold minimum value of the static equilibrium robustness criterion required to accept the configuration (0 by default).
+    # \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
+    def interpolateConfigs(self, configs, robustnessTreshold = 0, filterStates = False):
+		if(filterStates):
+			filt = 1
+		else:
+			filt = 0
+		return self.client.rbprm.rbprm.interpolateConfigs(configs, robustnessTreshold, filt)
 		
 	##
     # 

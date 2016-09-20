@@ -110,6 +110,7 @@ INSTALL(
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools//generateROMs.py
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/plot_analytics.py
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/cwc_trajectory.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/cwc_trajectory_helper.py
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/path_to_trajectory.py
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/obj_to_constraints.py
   DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm/tools

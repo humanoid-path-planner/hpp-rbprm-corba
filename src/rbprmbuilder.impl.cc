@@ -783,7 +783,7 @@ namespace hpp {
         return res;
     }
 
-    floatSeqSeq* RbprmBuilder::interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold) throw (hpp::Error)
+    floatSeqSeq* RbprmBuilder::interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold, unsigned short filterStates) throw (hpp::Error)
     {
         try
         {
@@ -803,7 +803,7 @@ namespace hpp {
                 throw hpp::Error ("No affordances found. Unable to interpolate.");
             }
             hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_);
-            lastStatesComputedTime_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,configurations,robustnessTreshold);
+            lastStatesComputedTime_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,configurations,robustnessTreshold, filterStates != 0);
             lastStatesComputed_ = TimeStatesToStates(lastStatesComputedTime_);
             hpp::floatSeqSeq *res;
             res = new hpp::floatSeqSeq ();
@@ -1047,7 +1047,7 @@ namespace hpp {
         return res;
     }
 
-    floatSeqSeq* RbprmBuilder::interpolate(double timestep, double path, double robustnessTreshold) throw (hpp::Error)
+    floatSeqSeq* RbprmBuilder::interpolate(double timestep, double path, double robustnessTreshold, unsigned short filterStates) throw (hpp::Error)
     {
         try
         {
@@ -1075,7 +1075,7 @@ namespace hpp {
         hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = 
 					rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver_->paths()[pathId]);
         lastStatesComputedTime_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
-					timestep,robustnessTreshold);
+                    timestep,robustnessTreshold, filterStates != 0);
 		lastStatesComputed_ = TimeStatesToStates(lastStatesComputedTime_);
 
         hpp::floatSeqSeq *res;
