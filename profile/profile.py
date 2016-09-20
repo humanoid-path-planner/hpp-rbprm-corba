@@ -9,7 +9,7 @@ scenarios = ['car_hrp2']
 #~ scenarios = ['stair_bauzil_hrp2']
 n_trials = 100
 
-stats = ['balance','collision','ik']
+stats = ['balance','collision','ik','cwc_optim','com_traj']
 
 python_script_extension = "_interp.py"
 analysis = {}
@@ -67,6 +67,13 @@ def parseData(scenario):
 	data['path_time'] = []
 	data['min_path_time'] = higher
 	data['max_path_time'] = lower
+	#cwc data
+	data["optim_error_optim_fail"] = 0
+	data[  "optim_error_com_proj"] = 0
+	data[   "optim_error_unknown"] = 0
+	data[     "optim_num_success"] = 0
+	data[      "optim_num_trials"] = 0
+	data[            "num_errors"] = 0
 	for stat in stats:
 		initdata(stat, data)	
 	file = open(filename,"r+");
@@ -97,6 +104,29 @@ def parseData(scenario):
 			data['path_time'].append(time);
 			data['min_path_time'] = min(data['min_path_time'],time)
 			data['max_path_time'] = max(data['max_path_time'],time)
+		#now, analyzing optimization
+		elif not (line.find('optim_error_optim_fail') == -1):
+			val = float(line.rstrip("\n").split()[2])
+			data['optim_error_optim_fail']+= val;
+		elif not (line.find('optim_error_com_proj') == -1):
+			val = float(line.rstrip("\n").split()[2])
+			data['optim_error_com_proj']+= val;
+		elif not (line.find('optim_error_unknown') == -1):
+			val = float(line.rstrip("\n").split()[2])
+			data['optim_error_unknown']+= val;
+		elif not (line.find('optim_num_success') == -1):
+			val = float(line.rstrip("\n").split()[2])
+			data['optim_num_success']+= val;
+		elif not (line.find('optim_num_trials') == -1):
+			val = float(line.rstrip("\n").split()[2])
+			data['optim_num_trials']+= val;
+		elif not (line.find('num_errors') == -1):
+			val = float(line.rstrip("\n").split()[2])
+			data['num_errors']+= val;
+		elif not (line.find('cwc_optim') == -1):
+			parseLine(1, 'cwc_optim', line, data)
+		elif not (line.find('com_traj') == -1):
+			parseLine(1, 'com_traj', line, data)
 
 
 def printOneStat(f, name, data, g_time, tTime):
@@ -141,6 +171,14 @@ def analyzeData():
 		tc = nc + c + uc 
 		f.write ("% of failed contact generation (no candidates found): " + str(nc / tc * 100)  + "%\n")
 		f.write ("% of unstable contact generation (no balanced candidates found): " + str(uc / tc * 100)  + "%\n")
+		f.write ("\n")
+		
+		f.write ("***********************%\n")
+		f.write (" optimization related data %\n")
+		f.write ("% succes rate of optimization: " + str(data["optim_num_success"] / data["optim_num_trials"] * 100)  + "%\n")
+		f.write ("% succes rate of optimization disregarding collision: " + str(data["optim_num_success"] / (data["optim_num_trials"] - data["optim_error_com_proj"]) * 100)  + "%\n")
+		f.write ("% errors due to problem infeasibility (% of errors, % over all trials): " + str(data["optim_error_optim_fail"] / data["num_errors"] * 100) + " " str(data["optim_error_optim_fail"] / data["optim_num_trials"] * 100)  + "%\n")
+		f.write ("% errors due to unknown reasons (% of errors, % over all trials): " + str(data["optim_error_unknown"] / data["num_errors"] * 100) + " " str(data["optim_error_unknown"] / data["optim_num_trials"] * 100)  + "%\n")
 		f.write ("\n \n \n")
 	f.close()
 	

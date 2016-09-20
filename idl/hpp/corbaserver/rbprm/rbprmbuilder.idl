@@ -418,6 +418,11 @@ module hpp
     /// \return min and max values obtained
     floatSeq runLimbSampleAnalysis(in string limbname, in string analysis, in double isstatic) raises (Error);
 
+    /// if the preprocessor variable PROFILE is active
+    /// dump the profiling data into a logFile
+    /// \param logFile name of the file where to dump the profiling data
+    void dumpProfile(in string logFile) raises (Error);
+
   }; // interface Robot
   }; // module rbprm
   }; // module corbaserver

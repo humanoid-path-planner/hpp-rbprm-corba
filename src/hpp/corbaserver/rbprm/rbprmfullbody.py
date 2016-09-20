@@ -89,6 +89,7 @@ class FullBody (object):
     # \param collisionObjects objects to be considered for collisions with the limb. TODO remove
     # \param nbSamples number of samples to generate for the limb
     # \param resolution, resolution of the octree voxels. The samples generated are stored in an octree data
+    # \param resolution, resolution of the octree voxels. The samples generated are stored in an octree data
     # structure to perform efficient proximity requests. The resulution of the octree, in meters, specifies the size
     # of the unit voxel of the octree. The larger they are, the more samples will be considered as candidates for contact.
     # This can be problematic in terms of performance. The default value is 3 cm.
@@ -124,6 +125,7 @@ class FullBody (object):
     # \param y height of the default support polygon of the effector
     # \param collisionObjects objects to be considered for collisions with the limb. TODO remove
     # \param nbSamples number of samples to generate for the limb
+    # \param heuristicName: name of the selected heuristic for configuration evaluation
     # \param resolution, resolution of the octree voxels. The samples generated are stored in an octree data
     # structure to perform efficient proximity requests. The resulution of the octree, in meters, specifies the size
     # of the unit voxel of the octree. The larger they are, the more samples will be considered as candidates for contact.
@@ -478,6 +480,12 @@ class FullBody (object):
 			isStatic = 1.
 		return self.client.rbprm.rbprm.runLimbSampleAnalysis(limbname, analysis,isStatic)
 		
+	## if the preprocessor variable PROFILE is active
+    # dump the profiling data into a logFile
+    # \param logFile name of the file where to dump the profiling data
+    def dumpProfile(self, logFile="log.txt"):
+		return self.client.rbprm.rbprm.dumpProfile(logFile)
+
 	## Create octree nodes representation for a given limb
 	#
     # \param gui gepetoo viewer instance discretization step

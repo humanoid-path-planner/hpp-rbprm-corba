@@ -37,6 +37,10 @@
 #include <hpp/core/collision-validation.hh>
 #include <fstream>
 
+#ifdef PROFILE
+    #include "hpp/rbprm/rbprm-profiler.hh"
+#endif
+
 
 
 namespace hpp {
@@ -1733,6 +1737,27 @@ assert(s2 == s1 +1);
         (*dofArray)[0] = bounds.first;
         (*dofArray)[1] = bounds.second;
         return dofArray;
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    void RbprmBuilder::dumpProfile(const char* logFile) throw (hpp::Error)
+    {
+        try
+        {
+            #ifdef PROFILE
+                RbPrmProfiler& watch = getRbPrmProfiler();
+                std::ofstream fout;
+                fout.open(logFile, std::fstream::out | std::fstream::app);
+                std::ostream* fp = &fout;
+                watch.report_all_and_count(2,*fp);
+                fout.close();
+            #else
+                throw(std::runtime_error("PROFILE PREPOC variable undefined, cannot dump profile"));
+            #endif
         }
         catch(std::runtime_error& e)
         {
