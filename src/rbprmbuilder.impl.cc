@@ -376,11 +376,22 @@ namespace hpp {
               + std::string(limbname) + " is not in contact!");
           throw Error (err.c_str());
       }
+      std::map<std::string, fcl::Vec3f>::const_iterator posIt =
+          lastStatesComputed_[stateId].contactPositions_.find(affIt->first);
+
+      if (posIt == lastStatesComputed_[stateId].contactPositions_.end ()) {
+          std::string err ("rbprmbuilder::getContactPoints: no intersection and no contact pose found.");
+          throw Error (err.c_str());
+          }
+
      std::vector<Eigen::Vector3d> intersect;
      for (model::ObjectVector_t::const_iterator objIt = reachability.begin ();
            objIt != reachability.end (); ++objIt) {
-               intersect = intersect::getIntersectionPoints ((*objIt)->fcl(), affIt->second);
-               res.insert(res.end(), intersect.begin(), intersect.end());
+               intersect::Inequality ineq = intersect::fcl2inequalities ((*objIt)->fcl());
+               if (intersect::is_inside (ineq, posIt->second)) {
+                  intersect = intersect::getIntersectionPoints ((*objIt)->fcl(), affIt->second);
+                  res.insert(res.end(), intersect.begin(), intersect.end());
+               }
      }
 
      // test whether all found points form a straight line. If this is the case, no ellipse can be formed
@@ -400,17 +411,14 @@ namespace hpp {
      if (res.size () < 3) {
          std::cout << "rbprmbuilder::getContactPoints: no intersection found!" <<
              " Returning current contact position." << std::endl;
-          std::map<std::string, fcl::Vec3f>::const_iterator posIt =
-              lastStatesComputed_[stateId].contactPositions_.find(affIt->first);
           std::map<std::string, fcl::Matrix3f>::const_iterator rotIt =
           lastStatesComputed_[stateId].contactRotation_.find(affIt->first);
 
-          if (posIt == lastStatesComputed_[stateId].contactPositions_.end () ||
-                  rotIt == lastStatesComputed_[stateId].contactRotation_.end ()) {
-              std::string err ("rbprmbuilder::getContactPoints: no intersection and no contact pose found.");
+          if (rotIt == lastStatesComputed_[stateId].contactRotation_.end ()) {
+              std::string err ("rbprmbuilder::getContactPoints: no intersection and no contact rotation found.");
               throw Error (err.c_str());
           }
-          contactPose.block(0,0, 3,1) = posIt->second;
+          contactPose.block(0,0, 3,1) = posIt->second; // posIt retrieved earlier
           Eigen::Quaternion<double> Q(rotIt->second);
           contactPose (3) = Q.w ();
           contactPose.block(4,0, 3,1) = Q.vec ();
