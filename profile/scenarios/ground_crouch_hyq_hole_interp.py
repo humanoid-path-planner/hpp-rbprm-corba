@@ -77,10 +77,10 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 
 r(q_init)
 
-configs = fullBody.interpolate(0.1,1,10) #hole 
+configs = fullBody.interpolate(0.08,1,3) #hole 
 #~ configs = fullBody.interpolate(0.08,1,5) # bridge
 
-r.loadObstacleModel ('hpp-rbprm-corba', "groundcrouch", "contact")
+#~ r.loadObstacleModel ('hpp-rbprm-corba', "groundcrouch", "contact")
 #~ fullBody.exportAll(r, configs, 'obstacle_hyq_robust_10');
 i = 0;
 r (configs[i]); i=i+1; i-1
@@ -111,7 +111,9 @@ def saveAll(name):
 #~ fullBody.exportAll(r, trajec, 'obstacle_hyq_t_var_04f_andrea');
 #~ saveToPinocchio('obstacle_hyq_t_var_04f_andrea')
 
-for i in range(4,25):
-    act(i,0)
+profile(fullBody, configs, 4, 10, limbsCOMConstraints)	
+fullBody.dumpProfile()
+    
+
 
 

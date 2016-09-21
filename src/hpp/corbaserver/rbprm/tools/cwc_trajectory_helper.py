@@ -217,7 +217,7 @@ def step_profile(fullBody, configs, i, optim, limbsCOMConstraints,  friction = 0
 			dt = 0.05
 		else:
 			dt = 0.1
-		if(distance > 0.0001):			
+		if(distance > 0.0001):				
 			stat_data["num_trials"] += 1
 			if(useCOMConstraints):
 				comC = limbsCOMConstraints
@@ -334,14 +334,14 @@ def write_stats(filename):
 	return sd
 
 def profile(fullBody, configs, i_start, i_end, limbsCOMConstraints,  friction = 0.5, optim_effectors = False, time_scale = 20., useCOMConstraints = False, filename ="log.txt"):	
-	global stat_data	
-	if(i_end < len(configs)-1):
+	global stat_data		
+	if(i_end > len(configs)-1):
+		print "ERROR: i_end < len_configs ", i_end, len(configs)-1
 		return # no point in trying optim, path was not fully computed
-	for i in range(i_start, i_end):
-		step(fullBody, configs, i, 0, limbsCOMConstraints,  friction, optim_effectors, time_scale, useCOMConstraints)
+	for i in range(i_start, i_end):		
+		step_profile(fullBody, configs, i, 0, limbsCOMConstraints,  friction, optim_effectors, time_scale, useCOMConstraints)
 	stat_data["time_cwc"]["avg"] = stat_data["time_cwc"]["totaltime"] / float(stat_data["time_cwc"]["numiter"])
 	write_stats(filename)
-}
 
 def saveAllData(fullBody, r, name):
 	fullBody.exportAll(r, trajec, name)

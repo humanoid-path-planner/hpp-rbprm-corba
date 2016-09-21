@@ -74,7 +74,8 @@ def gen_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, dt=
 		t_end_phases[2] = t_end_phases[1] + fly_time
 		t_end_phases[3] = t_end_phases[2] + support_time
 		t_end_phases = [float((int)(math.ceil(el*10.))) / 10. for el in t_end_phases]
-		print "end_phases", t_end_phases
+		if (not profile):
+			print "end_phases", t_end_phases
 	cones = None
 	if(computeCones):
 		cones = [fullBody.getContactCone(state_id, mu)[0]]
@@ -82,7 +83,8 @@ def gen_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, dt=
 			cones.append(fullBody.getContactIntermediateCone(state_id, mu)[0])
 		if(len(p) > len(cones)):
 			cones.append(fullBody.getContactCone(state_id+1, mu)[0])
-	print "num cones ", len(cones)
+	if (not profile):
+			print "num cones ", len(cones)
 	
 	COMConstraints = None
 	if(not (limbsCOMConstraints == None)):
@@ -177,7 +179,7 @@ def __optim__threading_ok(fullBody, states, state_id, computeCones = False, mu =
 	return comPosPerPhase, res[2] #res[2] is timeelapsed
 
 def solve_com_RRT(fullBody, states, state_id, computeCones = False, mu = 1, dt =0.1, phase_dt = [0.4, 1], reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None, profile = False):
-	comPosPerPhase, timeElapsed = __optim__threading_ok(fullBody, states, state_id, computeCones, mu, dt, phase_dt, reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints)
+	comPosPerPhase, timeElapsed = __optim__threading_ok(fullBody, states, state_id, computeCones, mu, dt, phase_dt, reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints, profile)
 	print "done. generating state trajectory ",state_id	
 	print "comePhaseLength", len(comPosPerPhase[0]),  len(comPosPerPhase[1]),  len(comPosPerPhase[2])
 	paths_ids = [int(el) for el in fullBody.comRRTFromPos(state_id,comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims)]
@@ -185,7 +187,7 @@ def solve_com_RRT(fullBody, states, state_id, computeCones = False, mu = 1, dt =
 	return paths_ids[-1], paths_ids[:-1], timeElapsed
 	
 def solve_effector_RRT(fullBody, states, state_id, computeCones = False, mu = 1, dt =0.1, phase_dt = [0.4, 1], reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None, profile = False):
-	comPosPerPhase, timeElapsed = __optim__threading_ok(fullBody, states, state_id, computeCones, mu, dt, phase_dt, reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints)
+	comPosPerPhase, timeElapsed = __optim__threading_ok(fullBody, states, state_id, computeCones, mu, dt, phase_dt, reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints, profile)
 	print "done. generating state trajectory ",state_id	
 	print "comePhaseLength", len(comPosPerPhase[0]),  len(comPosPerPhase[1]),  len(comPosPerPhase[2])
 	paths_ids = [int(el) for el in fullBody.effectorRRT(state_id,comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims)]
