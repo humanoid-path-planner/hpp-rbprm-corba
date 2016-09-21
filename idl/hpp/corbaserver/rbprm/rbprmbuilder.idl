@@ -105,12 +105,11 @@ module hpp
     void setAffordanceFilter(in string romName, in Names_t affordances) raises (Error);
 
     // TODO: Add documentation / edit parameters
-    floatSeqSeq getDebugContactPoints (in string libname,in unsigned short stateId,
-      in unsigned short refine) raises (Error);
+    floatSeqSeq getDebugContactPoints (in string libname,in unsigned short stateId) raises (Error);
     floatSeqSeq getPointsOnCurve (in floatSeq radiiIn,
             in floatSeq trafo) raises (Error);
     floatSeq getReachableContactArea (in string libname, in boolean ellipse, out floatSeq transform,
-      in unsigned short stateId, in unsigned short refine) raises (Error);
+      in unsigned short stateId) raises (Error);
 
 
     /// Get a 2D circular or elliptic approximation of the end effector contact area
