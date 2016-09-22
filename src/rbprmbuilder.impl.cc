@@ -27,6 +27,7 @@
 #include "hpp/rbprm/stability/stability.hh"
 #include "hpp/rbprm/sampling/sample-db.hh"
 #include "hpp/model/urdf/util.hh"
+#include "hpp/intersect/intersect.hh"
 #include <fstream>
 
 
@@ -307,6 +308,385 @@ namespace hpp {
         return res;
     }
 
+
+  const model::ObjectVector_t getReachability (const model::JointVector_t jointVector)
+  {
+      model::ObjectVector_t reachability;
+      std::vector<std::string> addedJoints;
+      for (unsigned int i = 0; i < jointVector.size (); ++i) {
+         const model::BodyPtr_t & body = jointVector[i]->linkedBody ();
+         if (body) {
+              if (std::find (addedJoints.begin (), addedJoints.end (), 
+                  body->name ()) == addedJoints.end () &&
+                  body->innerObjects (model::COLLISION).size () > 0) {
+                  // TODO: for now only saving the first collision object in vector:
+                reachability.push_back (body->innerObjects (model::COLLISION).front ());
+                addedJoints.push_back (body->name ());
+           }
+         }
+      }
+      return reachability;
+  }
+
+  // returns true if point p is on the line connecting p1 and p2
+  bool pointOnLine (const Eigen::Vector3d p1, const Eigen::Vector3d p2, const Eigen::Vector3d p)
+  {
+      Eigen::Vector3d cross = (p2 - p1).cross (p1 -p);
+    if (cross.isZero (1e-6)) {
+        return true;
+    }
+    return false;
+  }
+
+  std::vector<Eigen::Vector3d> RbprmBuilder::getContactPoints (const char* limbname, model::T_Rom& romDevices,
+          const core::ProblemSolverPtr_t& problemSolver, const unsigned int stateId, Eigen::VectorXd& contactPose)
+  {
+      std::vector<Eigen::Vector3d> res;
+       model::T_Rom::const_iterator limbRomIt = romDevices.find (limbname);
+      if (limbRomIt == romDevices.end ()) {
+          std::string err ("No Rom of name " + std::string(limbname) + " found!");
+          throw Error (err.c_str());
+      }
+      model::DevicePtr_t limbRom = limbRomIt->second;
+
+      const Configuration_t& configuration = problemSolver->robot ()->currentConfiguration ();
+      limbRom->currentConfiguration (configuration.block(0,0,7,1));
+      limbRom->computeForwardKinematics ();
+      const model::ObjectVector_t &reachability = getReachability (limbRom->getJointVector ());
+
+      std::map<std::string, fcl::CollisionObjectPtr_t>::const_iterator affIt = 
+          lastStatesComputed_[stateId].contactSurfaces_.end();
+      for(std::map<std::string,fcl::CollisionObjectPtr_t>::const_iterator it = 
+              lastStatesComputed_[stateId].contactSurfaces_.begin();
+              it != lastStatesComputed_[stateId].contactSurfaces_.end(); ++it) {
+          std::size_t found = std::string(limbname).find(it->first);
+          if (found!=std::string::npos) {
+             // std::cout << it->first << "\n";
+              affIt = it;
+              break;
+          }
+      }
+      if (affIt == lastStatesComputed_[stateId].contactSurfaces_.end ()) {
+      std::string err ("rbprmbuilder::getContactPoints: No affordance surface for Rom of name "
+              + std::string(limbname) + " found!");
+          throw Error (err.c_str());
+      }
+      if (!(lastStatesComputed_[stateId].contacts_.find (affIt->first))->second) {
+      std::string err ("rbprmbuilder::getContactPoints: Limb "
+              + std::string(limbname) + " is not in contact!");
+          throw Error (err.c_str());
+      }
+      std::map<std::string, fcl::Vec3f>::const_iterator posIt =
+          lastStatesComputed_[stateId].contactPositions_.find(affIt->first);
+      std::map<std::string, fcl::Matrix3f>::const_iterator rotIt =
+          lastStatesComputed_[stateId].contactRotation_.find(affIt->first);
+      if (posIt == lastStatesComputed_[stateId].contactPositions_.end () ||
+              rotIt == lastStatesComputed_[stateId].contactRotation_.end ()) {
+          std::string err ("rbprmbuilder::getContactPoints: no intersection and no contact pose found.");
+          throw Error (err.c_str());
+      }
+      contactPose.block(0,0, 3,1) = posIt->second; // posIt retrieved earlier
+      Eigen::Quaternion<double> Q(rotIt->second);
+      contactPose (3) = Q.w ();
+      contactPose.block(4,0, 3,1) = Q.vec ();
+
+     std::vector<Eigen::Vector3d> intersect;
+     for (model::ObjectVector_t::const_iterator objIt = reachability.begin ();
+           objIt != reachability.end (); ++objIt) {
+               intersect::Inequality ineq = intersect::fcl2inequalities ((*objIt)->fcl());
+               if (intersect::is_inside (ineq, contactPose.block(0,0, 3,1))) {
+                  intersect = intersect::getIntersectionPoints ((*objIt)->fcl(), affIt->second);
+                  res.insert(res.end(), intersect.begin(), intersect.end());
+               }
+     }
+
+     // test whether all found points form a straight line. If this is the case, no ellipse can be formed
+     unsigned int count = 0;
+     for (unsigned int k = 2; k < res.size (); ++k) { // do not enter loop if fewer than 3 points.
+         if (pointOnLine (res[0], res[1], res[k])) {
+             ++count;
+         }
+     }
+     if (count == res.size () -2) {
+       std::cout << "rbprmbuilder::getContactPoints: all intersection points on one line!" <<
+             " Returning current contact position." << std::endl;
+       res.clear(); // clear res so next if will catch it.
+     }
+
+
+     if (res.size () < 3) {
+         std::cout << "rbprmbuilder::getContactPoints: no intersection found!" <<
+             " Returning current contact position." << std::endl;
+          intersect.clear();
+     }
+     return intersect;
+  }
+
+  // function for debugging purposes
+  hpp::floatSeqSeq* RbprmBuilder::getDebugContactPoints (const char* limbname,
+          unsigned short stateId) throw (hpp::Error)
+  {
+    Eigen::VectorXd unusedContactPose (7);
+    hpp::floatSeqSeq *res;
+    res = new hpp::floatSeqSeq ();
+    std::vector<Eigen::Vector3d> intersect = getContactPoints (limbname,
+            romDevices_, problemSolver_, stateId, unusedContactPose);
+    if (intersect.size () < 3) {
+        res->length (0);
+        return res;
+    }
+    Eigen::Vector3d planeCentroid;
+    Eigen::Vector3d normal_plane = intersect::projectToPlane (intersect, planeCentroid);
+
+    std::cout << "plane normal: " << normal_plane.transpose () << std::endl;
+              
+
+       res->length ((_CORBA_ULong)intersect.size ());
+       for (unsigned int k = 0; k < intersect.size (); ++k) {
+           hpp::floatSeq point;
+           point.length(3);
+           point[0] = intersect[(_CORBA_ULong)k][0];
+           point[1] = intersect[(_CORBA_ULong)k][1];
+           point[2] = intersect[(_CORBA_ULong)k][2];
+           (*res)[k] = point;
+       }
+       return res;
+   }
+
+    void printEllipseFunction (const Eigen::VectorXd& ellipse)
+    {
+      std::cout << "Ellipse function: " << "(" << ellipse(0) << ")*x^2 + (" << ellipse(1) 
+                << ")*x*y + (" << ellipse(2) << ")*y^2 + (" << ellipse(3) << ")*x+ ("
+                << ellipse(4) << ")*y + (" << ellipse(5) << ")" << std::endl;
+    }
+
+    hpp::floatSeqSeq* RbprmBuilder::getPointsOnCurve (const hpp::floatSeq& radiiIn,
+            const hpp::floatSeq& trafo) throw (hpp::Error)
+    {
+      model::Transform3f w_T_CurveOrigin (fcl::Quaternion3f (trafo[3],trafo[4],trafo[5],trafo[6]),
+              fcl::Vec3f (trafo[0], trafo[1], trafo[2]));
+      hpp::floatSeqSeq* pointsOut = new hpp::floatSeqSeq();
+      pointsOut->length(0);
+      std::vector<double> radii;
+      if (radiiIn.length () > 1) {
+          radii.push_back(std::max (radiiIn[0], radiiIn[1]));
+          radii.push_back(std::min (radiiIn[0], radiiIn[1]));
+      } else {
+          radii.push_back(radiiIn[0]); 
+          radii.push_back(radiiIn[0]);
+      }
+      hpp::floatSeq pointOut;
+      pointOut.length(3);
+      Eigen::Vector3d point (0,0,0);
+      for (unsigned int deg = 0; deg < 360; deg +=5) {
+          double theta = (((double) deg)/180.0)*M_PI;
+          Eigen::Vector3d point =  Eigen::Vector3d (radii[0]*cos(theta), radii[1]*sin(theta), 0.0);
+          point = w_T_CurveOrigin.getRotation () * point + w_T_CurveOrigin.getTranslation();
+          pointOut[0] = point[0];
+          pointOut[1] = point[1];
+          pointOut[2] = point[2];
+          pointsOut->length(pointsOut->length()+1);
+          (*pointsOut)[pointsOut->length() -1] = pointOut;
+      }
+      return pointsOut;
+    }
+
+  hpp::floatSeq* RbprmBuilder::getReachableContactArea (const char* limbname,
+          CORBA::Boolean ellipse, hpp::floatSeq_out pose, unsigned short stateId)
+      throw (hpp::Error)
+  {
+      Eigen::VectorXd contactPose(7);
+      std::vector<Eigen::Vector3d> intersect = getContactPoints (limbname,
+            romDevices_, problemSolver_, stateId, contactPose);
+      
+      std::vector<double> radii;
+      hpp::floatSeq trafo;
+      trafo.length(7);
+      trafo[0] = contactPose(0);
+      trafo[1] = contactPose(1);
+      trafo[2] = contactPose(2);
+      trafo[3] = contactPose(3);
+      trafo[4] = contactPose(4);
+      trafo[5] = contactPose(5);
+      trafo[6] = contactPose(6);
+
+      // in case of no intersection or too few points for any approximation operations,
+      // return original position of limb and zero-radius.
+      if (intersect.size () < 3) {
+          radii.push_back(0.0);
+          std::cout << "getReachableContactArea: returning point instead of ellipse." << std::endl;
+      } else { // else go through with approximation
+         Eigen::Vector2d centroid2d;
+         Eigen::Vector3d centroid3d;
+         double tau(0.0);
+
+         // compute rotation of the plane the points approximately lie in; project all
+         // points to the found plane.
+         Eigen::Vector3d planeCentroid;
+         Eigen::Vector3d normal = intersect::projectToPlane(intersect, planeCentroid);
+         normal.normalize ();
+
+         // Create Quaternion only based on normal vector: TODO: Check whether this is right
+         Eigen::Vector3d Z_up (0.0, 0.0, 1.0);
+         Z_up.normalize ();
+         double angle = acos (Z_up.dot (normal));
+         Eigen::Vector3d axis = Z_up.cross (normal);
+              if (axis.isZero(0.0) && angle == 0.0) {
+             // if axis = [0,0,0] -> no rotation
+             axis << 0.0,0.0,1.0; // give any axis that is non-zero to avoid NaNs
+         }
+         axis.normalize ();
+         Eigen::Quaternion<double> Q (Eigen::AngleAxisd (angle, axis));
+         Q.normalize ();
+         // Rotate all points to plane frame
+         for (unsigned int i = 0; i < intersect.size (); ++i) {
+            intersect[i] = ((Q.inverse ()).toRotationMatrix ()) * (Eigen::Vector3d (intersect[i][0],
+                    intersect[i][1], intersect[i][2]) - planeCentroid);
+         }
+        
+         Eigen::VectorXd shape;
+         // express points' coordinates in plane frame
+         if (ellipse) {
+             shape = intersect::directEllipse (intersect);
+         } else {
+             shape = intersect::directCircle (intersect);
+         }
+
+         radii = intersect::getRadius (shape,
+                     centroid2d, tau);
+         // get radius of minimun contact area needed for end-effector:
+         std::vector<double> offsets = getApproximatedEffector (limbname, false);
+         double offset = 0.0;
+         if (offsets.size () == 2) {
+            offset = std::max(offsets[0], offsets[1]);
+         } else {
+             offset = offsets[0];
+         }
+         // subtract contact-area radius of end-effector from found rom surface to
+         // make sure full contact may be
+         bool positive = true;
+         for (unsigned int i = 0; i < radii.size (); ++i) {
+             radii[i] -= offset;
+             if (radii[i] < 0.0) {
+                positive = false;
+                radii.clear ();
+                radii.push_back (0.0);
+                std::cout << "getReachableContactArea: Ellipse too small for contact." <<
+                    " Returning point instead of ellipse." << std::endl;
+                break;
+             }
+         }
+         // if one of the radii is negative after reduction, there is not enough space for safe contact
+         // and a zero radius is returned along with the original contact position ( trafo set at the beginning of
+         // this function)
+         if (positive) {
+             printEllipseFunction(shape);  
+             // This is the 3d centroid of the ellipse in the plane frame 
+             // in the plane rotation, its normal is always (0,0,1)
+             centroid3d << centroid2d, 0.0;
+             // go back to world frame:
+             centroid3d = Q.toRotationMatrix () * centroid3d + planeCentroid;
+             // add rotation in plane frame to global quaternion (in plane frame rotation is always around z axis)
+             Q = Q.toRotationMatrix () * (Eigen::AngleAxisd (tau, Eigen::Vector3d (0,0,1))).toRotationMatrix ();
+
+             trafo[0] = centroid3d(0);
+             trafo[1] = centroid3d(1);
+             trafo[2] = centroid3d(2);
+             trafo[3] = Q.w();
+             trafo[4] = Q.x();
+             trafo[5] = Q.y();
+             trafo[6] = Q.z();
+          }
+      }
+      hpp::floatSeq* poseOut = new hpp::floatSeq(trafo);
+      pose = poseOut;
+      hpp::floatSeq *res = new hpp::floatSeq ();
+      res->length ((CORBA::ULong) radii.size ());
+      for (unsigned int k = 0; k < radii.size (); ++k) {
+          (*res)[(CORBA::ULong) k] = radii[k];
+      }
+      return res;
+  }
+
+  std::vector<double> RbprmBuilder::getApproximatedEffector (const char* limbname, bool ellipse)
+  {
+      if(!fullBodyLoaded_) {
+        throw Error ("rbprmbuilder::getApproximatedEffector: No full body robot was loaded");
+      }
+      T_Limb::const_iterator lit = fullBody_->GetLimbs().end ();
+      for (T_Limb::const_iterator it = fullBody_->GetLimbs().begin ();
+          it != fullBody_->GetLimbs().end (); ++it) {
+            std::size_t found = std::string(limbname).find(it->first);
+            if (found!=std::string::npos) {
+              lit = it;
+              break;
+            }
+      }
+      if(lit == fullBody_->GetLimbs().end()) {
+         std::string err("rbprmbuilder::getApproximatedEffector: No limb " 
+                 + std::string(limbname) + "was defined for robot" + fullBody_->device_->name());
+         throw Error (err.c_str());
+      }
+
+      std::vector<double> radii;
+      const RbPrmLimbPtr_t& limbPtr = lit->second;
+      const double x = limbPtr->x_;
+      const double y = limbPtr->y_;
+
+      if (ellipse) { // approximate end effector contact area as elliptical
+          radii.push_back (x/sqrt(2.0)); // x radius
+          radii.push_back (y/sqrt(2.0)); // y radius
+      } else { // approximate end effector contact area as circular
+          // simple approximation that fully encloses a rectangular area:
+          radii.push_back (sqrt (x*x + y*y));
+      }
+      return radii;
+  }
+
+  hpp::floatSeq* RbprmBuilder::getApproximatedEffectorDebug (const char* limbname,
+          unsigned short stateId, CORBA::Boolean ellipse, hpp::floatSeq_out pose) throw (hpp::Error)
+  {
+      std::map<std::string, fcl::Vec3f>::const_iterator posIt =
+          lastStatesComputed_[stateId].contactPositions_.find(limbname);
+      std::map<std::string, fcl::Matrix3f>::const_iterator rotIt =
+          lastStatesComputed_[stateId].contactRotation_.find(limbname);
+      if (rotIt == lastStatesComputed_[stateId].contactRotation_.end () || 
+              posIt == lastStatesComputed_[stateId].contactPositions_.end ()) {
+          std::string err ("rbprmbuilder::getApproximatedEffector: no contact pose found.");
+          throw Error (err.c_str());
+      }
+
+      std::vector<double> radii = getApproximatedEffector (limbname, ellipse);
+      hpp::floatSeq* res = new hpp::floatSeq();
+      res->length ((CORBA::ULong) radii.size());
+      for (unsigned int i = 0; i < radii.size (); ++i) {
+          (*res)[i] = radii[i];
+      }
+      Eigen::Vector3d pos = posIt->second;
+      Eigen::Matrix3d R = rotIt->second;
+      if (radii.size () == 2 && radii[0] < radii[2]) {
+          R = R* (Eigen::AngleAxisd (M_PI/2.0, Eigen::Vector3d (0,0,1))).toRotationMatrix ();
+      }
+      const model::Transform3f w_T_offset = Transform3f (R, pos);
+
+      model::vector_t poseVec; poseVec.resize(7);
+      poseVec [0] = w_T_offset.getTranslation () [0];
+      poseVec [1] = w_T_offset.getTranslation () [1];
+      poseVec [2] = w_T_offset.getTranslation () [2];
+
+      poseVec [3] = w_T_offset.getQuatRotation ().getW ();
+      poseVec [4] = w_T_offset.getQuatRotation ().getX ();
+      poseVec [5] = w_T_offset.getQuatRotation ().getY ();
+      poseVec [6] = w_T_offset.getQuatRotation ().getZ ();
+      
+      hpp::floatSeq* poseOut = new hpp::floatSeq();
+      poseOut->length ((CORBA::ULong) poseVec.size ());
+      for (std::size_t i=0; i<7; ++i) {
+        (*poseOut) [(CORBA::ULong) i] = poseVec [i];
+      }
+      pose = poseOut;
+      return res;
+  }
 
     void RbprmBuilder::setFilter(const hpp::Names_t& roms) throw (hpp::Error)
     {

@@ -29,7 +29,7 @@ SET(PROJECT_DESCRIPTION "Corba server for reachability based planning")
 SET(PROJECT_URL "")
 
 # Set to 1 for profiling
-#~ add_definitions(-DPROFILE)
+add_definitions(-DPROFILE)
 
 SET(CUSTOM_HEADER_DIR hpp/corbaserver/rbprm)
 
@@ -51,6 +51,7 @@ ADD_REQUIRED_DEPENDENCY("hpp-rbprm")
 ADD_REQUIRED_DEPENDENCY("omniORB4 >= 4.1.4")
 ADD_REQUIRED_DEPENDENCY("hpp-model-urdf >= 3")
 ADD_REQUIRED_DEPENDENCY("hpp-affordance-corba")
+ADD_REQUIRED_DEPENDENCY("hpp-intersect")
 
 PKG_CONFIG_APPEND_LIBS(${PROJECT_NAME})
 ADD_SUBDIRECTORY(src)

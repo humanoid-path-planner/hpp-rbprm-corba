@@ -53,10 +53,17 @@ afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 # Note that the standard RRT algorithm is used.
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
-r.loadObstacleModel (packageName, "darpa", "planning")
+
 
 # Solve the problem
 t = ps.solve ()
+
+print t;
+if isinstance(t, list):
+	t = t[0]* 3600000 + t[1] * 60000 + t[2] * 1000 + t[3]
+f = open('log.txt', 'a')
+f.write("path computation " + str(t) + "\n")
+f.close()
 
 # Playing the computed path
 from hpp.gepetto import PathPlayer

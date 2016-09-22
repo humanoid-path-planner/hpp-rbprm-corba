@@ -29,6 +29,11 @@
 *.out
 *.app
 
+# Autosave files
+*.swp
+*~
+.orig
+
 build/
 
 CMakeLists.txt.user
