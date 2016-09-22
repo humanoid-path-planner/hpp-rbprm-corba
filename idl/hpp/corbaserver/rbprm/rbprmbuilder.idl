@@ -97,24 +97,43 @@ module hpp
       raises (Error);
 
     /// Set Rom surface constraints for the configuration shooter
-    /// a Rom configuration will only be valid it collides with a surface
+    /// a Rom configuration will only be valid if it collides with a surface
     /// that forms a given affordance (support, lean, etc.)
+    /// \param romName name of the ROM object for which the filter is set.
     /// \param affordances a list of affordances accepted for 
 		/// validation of given Rom
-		///
     void setAffordanceFilter(in string romName, in Names_t affordances) raises (Error);
 
-    // TODO: Add documentation / edit parameters
+    /// Get contact points of collision between the ROM of a given limb and its contact surface.
+    /// Returns a list of points forming a convex hull around all found contact points.
+    /// \param limbname the name of the limb for which the contact points are found.
+    /// \param stateId  the index of the rbprm-state with the right configuration.
     floatSeqSeq getDebugContactPoints (in string libname,in unsigned short stateId) raises (Error);
+
+    /// Get points along a circle or ellipse shape. Returns a list of points that may be used for
+    /// visualisation.
+    /// \param radius or radii of shape along which points will be computed.
+    /// \param trafo the world pose of the shape centroid used to transform the computed points into
+    /// world frame.
     floatSeqSeq getPointsOnCurve (in floatSeq radiiIn,
             in floatSeq trafo) raises (Error);
+    /// Get elliptic or circular contact area corresponding to contact surface and reachability of 
+    /// a given limb. Returns radius or radii of approximated shape and the pose of its centroid. In
+    /// case of an elliptic shape, the rotation takes into account the angle of the ellipse in the contact
+    /// plane as well. The rotation in the contact plane is zero when the major axis of the ellipse lies along
+    /// the global x-axis.
+    /// \param limbname the name of the limb for which the approximation is done.
+    /// \param ellipse a boolean value specifying the shape of the approximation.
+    /// \param transform the world pose of the ellipse/circle centroid.
+    /// \param stateId the index of the rbprm-state with the right configuration.
     floatSeq getReachableContactArea (in string libname, in boolean ellipse, out floatSeq transform,
       in unsigned short stateId) raises (Error);
 
 
     /// Get a 2D circular or elliptic approximation of the end effector contact area
     /// of a given limb. Returns the radius or radii of the approximated shape.
-    /// \param limbname the name of the limb for which the approximation is done
+    /// \param limbname the name of the limb for which the approximation is done.
+    /// \param stateId the index of the rbprm-state with the right configuration.
     /// \param ellipse a boolean value specifying the shape of the approximation.
     /// If ellipse == false, the approximation will have a circular shape.
     floatSeq getApproximatedEffectorDebug (in string limbname, in unsigned short stateId, in boolean ellipse,
