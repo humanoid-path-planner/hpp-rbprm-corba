@@ -117,7 +117,7 @@ module hpp
     /// \param limbname the name of the limb for which the approximation is done
     /// \param ellipse a boolean value specifying the shape of the approximation.
     /// If ellipse == false, the approximation will have a circular shape.
-    floatSeq getApproximatedEffector (in string limbname, in boolean ellipse,
+    floatSeq getApproximatedEffectorDebug (in string limbname, in unsigned short stateId, in boolean ellipse,
             out floatSeq transform) raises (Error);
 
     /// Sets limits on robot orientation, described according to Euler's ZYX rotation order

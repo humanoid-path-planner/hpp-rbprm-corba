@@ -120,8 +120,9 @@ namespace hpp {
                 const hpp::floatSeq& trafo) throw (hpp::Error);
         virtual hpp::floatSeq * getReachableContactArea (const char* limbname,
                 CORBA::Boolean ellipse, hpp::floatSeq_out pose, unsigned short stateId) throw (hpp::Error);
-        virtual hpp::floatSeq* getApproximatedEffector (const char* limbname, 
-                CORBA::Boolean ellipse, floatSeq_out pose) throw (hpp::Error);
+        virtual std::vector<double> getApproximatedEffector (const char* limbname, bool ellipse);
+        virtual hpp::floatSeq* getApproximatedEffectorDebug (const char* limbname, 
+                unsigned short stateId, CORBA::Boolean ellipse, floatSeq_out pose) throw (hpp::Error);
         virtual void boundSO3(const hpp::floatSeq& limitszyx) throw (hpp::Error);
 
 

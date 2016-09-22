@@ -114,8 +114,8 @@ class Builder (object):
     # \param limbname the name of the limb for which the approximation is done
     # \param ellipsebool a boolean value specifying the shape of the approximation.
     # If ellipse == false, the approximation will have a circular shape.
-    def getApproximatedEffector (self, limbname, ellipsebool = False):
-        return self.client.rbprm.rbprm.getApproximatedEffector (limbname, ellipsebool)
+    def getApproximatedEffectorDebug (self, limbname, stateId, ellipsebool = False):
+        return self.client.rbprm.rbprm.getApproximatedEffector (limbname,stateId,ellipsebool)
 
 	## Export a computed path for blender
     #
