@@ -104,7 +104,7 @@ class FullBody (object):
     # \param heuristicName: name of the selected heuristic for configuration evaluation
     # \param loadValues: whether values computed, other than the static ones, should be loaded in memory
     # \param disableEffectorCollision: whether collision detection should be disabled for end effector bones
-    def addLimbDatabase(self, databasepath, limbId, heuristicName, loadValues = True, disableEffectorCollision = False):		
+    def addLimbDatabase(self, databasepath, limbId, heuristicName, loadValues = True, disableEffectorCollision = False):
 		boolVal = 0.
 		boolValEff = 0.
 		if(loadValues):

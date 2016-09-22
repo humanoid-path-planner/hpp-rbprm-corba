@@ -108,28 +108,39 @@ def __update_cwc_time(t):
 	stat_data["time_cwc"]["numiter"] += 1
 	
 
+def __getTimes(fullBody, configs, i, time_scale):
+	print "distance", fullBody.getEffectorDistance(i,i+1)
+	trunk_distance =  np.linalg.norm(np.array(configs[i+1][0:3]) - np.array(configs[i][0:3]))
+	distance = max(fullBody.getEffectorDistance(i,i+1), trunk_distance)
+	dist = int(distance * time_scale)#heuristic
+	while(dist %4 != 0):
+		dist +=1
+	total_time_flying_path = max(float(dist)/10., 0.3)
+	total_time_support_path = float((int)(math.ceil(min(total_time_flying_path /2., 0.2)*10.))) / 10.
+	times = [total_time_support_path, total_time_flying_path]
+	if(total_time_flying_path>= 1.):
+		dt = 0.1
+	elif total_time_flying_path<= 0.3:
+		dt = 0.05
+	else:
+		dt = 0.1
+	return times, dt, distance
+		
+
 from hpp import Error as hpperr
 import sys, time
-def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, optim_effectors = True, time_scale = 20., useCOMConstraints = False):
+def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, optim_effectors = True, time_scale = 20., useCOMConstraints = False, use_window = False, verbose = False, draw = False):
 	global errorid
 	global stat_data	
 	fail = 0
-	try:
-		print "distance", fullBody.getEffectorDistance(i,i+1)
-		trunk_distance =  np.linalg.norm(np.array(configs[i+1][0:3]) - np.array(configs[i][0:3]))
-		distance = max(fullBody.getEffectorDistance(i,i+1), trunk_distance)
-		dist = int(distance * time_scale)#heuristic
-		while(dist %4 != 0):
-			dist +=1
-		total_time_flying_path = max(float(dist)/10., 0.3)
-		total_time_support_path = float((int)(math.ceil(min(total_time_flying_path /2., 0.2)*10.))) / 10.
-		times = [total_time_support_path, total_time_flying_path]
-		if(total_time_flying_path>= 1.):
-			dt = 0.1
-		elif total_time_flying_path<= 0.3:
-			dt = 0.05
-		else:
-			dt = 0.1
+	#~ try:
+	if(True):
+		times, dt, distance = __getTimes(fullBody, configs, i, time_scale)
+		use_window = use_window and i + 2 < len(configs) - 1 # can't use preview if last state is reached	
+		if(use_window):
+			times2, dt2, dist2 = __getTimes(fullBody, configs, i+1, time_scale)
+			times += times2
+			dt = min(dt, dt2)
 		print 'time per path', times
 		print 'dt', dt
 		if(distance > 0.0001):		
@@ -139,20 +150,29 @@ def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, 
 			else:
 				comC = None
 			if(optim_effectors):
-				pid, trajectory, timeelapsed  =  solve_effector_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, False, False, comC)
+				pid, trajectory, timeelapsed  =  solve_effector_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window)
 			else :
-				pid, trajectory, timeelapsed  =       solve_com_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, False, False, comC)
+				pid, trajectory, timeelapsed  =       solve_com_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window)
 			displayComPath(pp, pid)
 			#~ pp(pid)
 			global res
 			res = res + [pid]
 			global trajec
 			global trajec_mil
-			trajec = trajec + gen_trajectory_to_play(fullBody, pp, trajectory, times)
-			trajec_mil = trajec_mil + gen_trajectory_to_play(fullBody, pp, trajectory, times, 1./1000.)
+			new_traj = gen_trajectory_to_play(fullBody, pp, trajectory, times)
+			new_traj_andrea = gen_trajectory_to_play(fullBody, pp, trajectory, times, 1./1000.)
+			new_contacts = gencontactsPerFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, times, 1./1000.)	
+			Ps, Ns = genPandNperFrame(fullBody, i, pp, trajectory, times, 1./1000.)
+			if(len(trajec) > 0):
+				new_traj = new_traj[1:]
+				new_traj_andrea = new_traj_andrea[1:]
+				new_contacts = new_contacts[1:]
+				Ps = Ps[1:]
+				Ns = Ns[1:]
+			trajec = trajec + new_traj
+			trajec_mil = new_traj_andrea
 			global contacts
-			contacts += gencontactsPerFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, times, 1./1000.)	
-			Ps, Ns = genPandNperFrame(fullBody, i, pp, trajectory, times, 1./1000.)	
+			contacts += new_contacts	
 			global pos
 			pos += Ps
 			global normals
@@ -329,6 +349,7 @@ def write_stats(filename):
 	f.write("optim_num_success " + str(sd["num_success"]) + "\n")
 	f.write("optim_num_trials " + str(sd["num_trials"]) + "\n")
 	f.write("num_errors " + str(sd["num_errors"]) + "\n")
+	f.write("error_id " + str(errorid) + "\n")
 	f.write("time_cwc " + str(sd["time_cwc"]["min"]) + " " + str(sd["time_cwc"]["avg"]) + " " + str(sd["time_cwc"]["max"]) + " " + str(sd["time_cwc"]["totaltime"])  + " " + str(sd["time_cwc"]["numiter"]) + " " + "\n")
 	f.close()
 	return sd
