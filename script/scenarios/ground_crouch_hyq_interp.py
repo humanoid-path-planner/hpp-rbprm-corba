@@ -7,8 +7,8 @@ from os import environ
 ins_dir = environ['DEVEL_DIR']
 db_dir = ins_dir+"/install/share/hyq-rbprm/database/hyq_"
 
-#~ import ground_crouch_hyq_path as tp
-import ground_crouch_hyq_path_bridge as tp
+import ground_crouch_hyq_path as tp
+#~ import ground_crouch_hyq_path_bridge as tp
 
 packageName = "hyq_description"
 meshPackageName = "hyq_description"
@@ -97,7 +97,7 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 
 r(q_init)
 
-configs = fullBody.interpolate(0.1,1,10, False) #hole 
+configs = fullBody.interpolate(0.1,1,10, True) #hole 
 #~ configs = fullBody.interpolate(0.08,1,5) # bridge
 
 r.loadObstacleModel ('hpp-rbprm-corba', "groundcrouch", "contact")
@@ -120,14 +120,16 @@ limbsCOMConstraints = { rLegId : {'file': "hyq/"+rLegId+"_com.ineq", 'effector' 
 
 
 
-def act(i, numOptim = 0):
-	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, 0.6, optim_effectors = True, time_scale = 20., useCOMConstraints = False)
+def act(i, numOptim = 0, use_window = False, verbose = False, draw = False):
+	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, 0.4, optim_effectors = True, time_scale = 20., useCOMConstraints = False, use_window = use_window,
+	verbose = verbose, draw = draw)
 
 def play(frame_rate = 1./24.):
 	play_traj(fullBody,pp,frame_rate)
 	
 def saveAll(name):
 	saveAllData(fullBody, r, name)
-#~ fullBody.exportAll(r, trajec, 'obstacle_hyq_t_var_04f_andrea');
+#~ fullBody.exportAll(r, trajec, 'hole_hyq_t_var_04f_andrea');
+#~ fullBody.exportAll(r, configs, 'obstacle_hyq_t_var_04f_contact_planning');
 #~ saveToPinocchio('obstacle_hyq_t_var_04f_andrea')
 

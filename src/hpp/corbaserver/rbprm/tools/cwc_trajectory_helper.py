@@ -129,16 +129,18 @@ def __getTimes(fullBody, configs, i, time_scale):
 
 from hpp import Error as hpperr
 import sys, time
-def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, optim_effectors = True, time_scale = 20., useCOMConstraints = False, use_window = False, verbose = False, draw = False):
+def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, optim_effectors = True, time_scale = 20., useCOMConstraints = False, use_window = 0, verbose = False, draw = False):
 	global errorid
 	global stat_data	
 	fail = 0
-	#~ try:
-	if(True):
-		times, dt, distance = __getTimes(fullBody, configs, i, time_scale)
-		use_window = use_window and i + 2 < len(configs) - 1 # can't use preview if last state is reached	
-		if(use_window):
-			times2, dt2, dist2 = __getTimes(fullBody, configs, i+1, time_scale)
+	try:
+	#~ if(True):
+		times = [];
+		dt = 1000;
+		distance = __getTimes(fullBody, configs, i, time_scale)
+		use_window = max(0, min(use_window,  (len(configs) - 1) - (i + 2))) # can't use preview if last state is reached
+		for w in range(use_window+1):
+			times2, dt2, dist2 = __getTimes(fullBody, configs, i+w, time_scale)
 			times += times2
 			dt = min(dt, dt2)
 		print 'time per path', times
@@ -158,11 +160,16 @@ def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, 
 			global res
 			res = res + [pid]
 			global trajec
-			global trajec_mil
-			new_traj = gen_trajectory_to_play(fullBody, pp, trajectory, times)
-			new_traj_andrea = gen_trajectory_to_play(fullBody, pp, trajectory, times, 1./1000.)
-			new_contacts = gencontactsPerFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, times, 1./1000.)	
-			Ps, Ns = genPandNperFrame(fullBody, i, pp, trajectory, times, 1./1000.)
+			global trajec_mil			
+			frame_rate = 1./24.
+			frame_rate_andrea = 1./1000.
+			if(len(trajec) > 0):
+				frame_rate = 1./25.
+				frame_rate_andrea = 1./1001.
+			new_traj = gen_trajectory_to_play(fullBody, pp, trajectory, times, frame_rate)
+			new_traj_andrea = gen_trajectory_to_play(fullBody, pp, trajectory, times,frame_rate_andrea)
+			new_contacts = gencontactsPerFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, times, frame_rate_andrea)	
+			Ps, Ns = genPandNperFrame(fullBody, i, pp, trajectory, times, frame_rate_andrea)
 			if(len(trajec) > 0):
 				new_traj = new_traj[1:]
 				new_traj_andrea = new_traj_andrea[1:]
