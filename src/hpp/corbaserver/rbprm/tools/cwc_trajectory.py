@@ -173,7 +173,7 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 	ax = fig.add_subplot(111)
 	points = var_final['dc']
 	#~ print "points", points
-	ys = [el for el in points]
+	ys = [norm(el) for el in points]
 	xs = [i * params['dt'] for i in range(0,len(points))]
 	ax.scatter(xs, ys, c='b')
 
@@ -184,7 +184,7 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 	fig = plt.figure()
 	ax = fig.add_subplot(111)
 	points = var_final['ddc']
-	ys = [el for el in points]
+	ys = [norm(el) for el in points]
 	xs = [i * params['dt'] for i in range(0,len(points))]
 	ax.scatter(xs, ys, c='b')
 

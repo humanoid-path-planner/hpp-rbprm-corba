@@ -133,8 +133,8 @@ def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, 
 	global errorid
 	global stat_data	
 	fail = 0
-	try:
-	#~ if(True):
+	#~ try:
+	if(True):
 		times = [];
 		dt = 1000;
 		distance = __getTimes(fullBody, configs, i, time_scale)
@@ -177,7 +177,7 @@ def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, 
 				Ps = Ps[1:]
 				Ns = Ns[1:]
 			trajec = trajec + new_traj
-			trajec_mil = new_traj_andrea
+			trajec_mil += new_traj_andrea
 			global contacts
 			contacts += new_contacts	
 			global pos
@@ -188,41 +188,41 @@ def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, 
 			stat_data["num_success"] += 1
 		else:
 			print "TODO, NO CONTACT VARIATION, LINEAR INTERPOLATION REQUIRED"
-	except hpperr as e:
-		print "hpperr failed at id " + str(i) , e.strerror
-		stat_data["error_com_proj"] += 1
-		stat_data["num_errors"] += 1
-		errorid += [i]
-		fail+=1
-	except OptimError as e:
-		print "OptimError failed at id " + str(i) , e.strerror
-		stat_data["error_optim_fail"] += 1
-		stat_data["num_errors"] += 1
-		errorid += [i]
-		fail+=1
-	except ValueError as e:
-		print "ValueError failed at id " + str(i) , e
-		stat_data["error_unknown"] += 1
-		stat_data["num_errors"] += 1
-		errorid += [i]
-		fail+=1
-	except IndexError as e:
-		print "IndexError failed at id " + str(i) , e
-		stat_data["error_unknown"] += 1
-		stat_data["num_errors"] += 1
-		errorid += [i]
-		fail+=1
-	except Exception as e:
-		stat_data["error_unknown"] += 1
-		stat_data["num_errors"] += 1
-		print e
-		errorid += [i]
-		fail+=1
-	except:
-		stat_data["error_unknown"] += 1
-		stat_data["num_errors"] += 1
-		errorid += [i]
-		fail+=1
+	#~ except hpperr as e:
+		#~ print "hpperr failed at id " + str(i) , e.strerror
+		#~ stat_data["error_com_proj"] += 1
+		#~ stat_data["num_errors"] += 1
+		#~ errorid += [i]
+		#~ fail+=1
+	#~ except OptimError as e:
+		#~ print "OptimError failed at id " + str(i) , e.strerror
+		#~ stat_data["error_optim_fail"] += 1
+		#~ stat_data["num_errors"] += 1
+		#~ errorid += [i]
+		#~ fail+=1
+	#~ except ValueError as e:
+		#~ print "ValueError failed at id " + str(i) , e
+		#~ stat_data["error_unknown"] += 1
+		#~ stat_data["num_errors"] += 1
+		#~ errorid += [i]
+		#~ fail+=1
+	#~ except IndexError as e:
+		#~ print "IndexError failed at id " + str(i) , e
+		#~ stat_data["error_unknown"] += 1
+		#~ stat_data["num_errors"] += 1
+		#~ errorid += [i]
+		#~ fail+=1
+	#~ except Exception as e:
+		#~ stat_data["error_unknown"] += 1
+		#~ stat_data["num_errors"] += 1
+		#~ print e
+		#~ errorid += [i]
+		#~ fail+=1
+	#~ except:
+		#~ stat_data["error_unknown"] += 1
+		#~ stat_data["num_errors"] += 1
+		#~ errorid += [i]
+		#~ fail+=1
 	return fail
 	
 def step_profile(fullBody, configs, i, optim, limbsCOMConstraints,  friction = 0.5, optim_effectors = True, time_scale = 20., useCOMConstraints = False):
