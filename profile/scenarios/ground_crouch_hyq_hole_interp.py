@@ -3,6 +3,10 @@ from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
 
+from os import environ
+ins_dir = environ['DEVEL_DIR']
+db_dir = ins_dir+"/install/share/hyq-rbprm/database/hyq_"
+
 import ground_crouch_hyq_path as tp
 
 packageName = "hyq_description"
@@ -44,22 +48,24 @@ normal = [0,1,0]
 # Specifying the rectangular contact surface length
 legx = 0.02; legy = 0.02
 # remaining parameters are the chosen heuristic (here, manipulability), and the resolution of the octree (here, 10 cm).
-fullBody.addLimb(rLegId,rLeg,rfoot,offset,normal, legx, legy, nbSamples, "forward", 0.1, cType)
+
+
+
+def addLimbDb(limbId, heuristicName, loadValues = True, disableEffectorCollision = False):
+	fullBody.addLimbDatabase(str(db_dir+limbId+'.db'), limbId, heuristicName,loadValues, disableEffectorCollision)
 
 lLegId = 'lhleg'
-lLeg = 'lh_haa_joint'
-lfoot = 'lh_foot_joint'
-fullBody.addLimb(lLegId,lLeg,lfoot,offset,normal, legx, legy, nbSamples, "backward", 0.05, cType)
-
 rarmId = 'rhleg'
-rarm = 'rh_haa_joint'
-rHand = 'rh_foot_joint'
-fullBody.addLimb(rarmId,rarm,rHand,offset,normal, legx, legy, nbSamples, "backward", 0.05, cType)
-
 larmId = 'lfleg'
-larm = 'lf_haa_joint'
+
+addLimbDb(rLegId, "static")
+addLimbDb(lLegId, "static")
+addLimbDb(rarmId, "static")
+addLimbDb(larmId, "static")
+
+lfoot = 'lh_foot_joint'
+rHand = 'rh_foot_joint'
 lHand = 'lf_foot_joint'
-fullBody.addLimb(larmId,larm,lHand,offset,normal, legx, legy, nbSamples, "forward", 0.05, cType)
 
 q_0 = fullBody.getCurrentConfig(); 
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.q_init[0:7]
@@ -112,6 +118,7 @@ def saveAll(name):
 #~ saveToPinocchio('obstacle_hyq_t_var_04f_andrea')
 
 profile(fullBody, configs, 4, 10, limbsCOMConstraints)	
+#~ profile(fullBody, configs, 4, len(configs)-4, limbsCOMConstraints)	
 fullBody.dumpProfile()
     
 

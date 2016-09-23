@@ -4,11 +4,12 @@ import subprocess as sp
 import os
 import shutil
 import datetime
+import time
 
 #~ scenarios = ['standing_hrp2']
-scenarios = ['ground_crouch_hyq_hole']
+scenarios = ['ground_crouch_hyq']
 #~ scenarios = ['stair_bauzil_hrp2']
-n_trials = 1
+n_trials = 200
 
 stats = ['balance','collision','ik']
 stats_optim = ['time_cwc','com_traj']
@@ -207,8 +208,9 @@ def analyzeData():
 	f.close()
 	
 for scenario in scenarios:
-	for i in range(0,n_trials):
-		var = scenario+python_script_extension;
-		sp.check_call(["./profile.sh", str(var)]);
+	#~ for i in range(0,n_trials):
+		#~ var = scenario+python_script_extension;
+		#~ sp.check_call(["./profile.sh", str(var)]);
+		#~ time.sleep(3)
 	parseData(scenario)
 analyzeData()
