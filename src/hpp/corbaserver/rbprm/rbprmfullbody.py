@@ -448,6 +448,21 @@ class FullBody (object):
     def projectToCom(self, state, targetCom):
 		return self.client.rbprm.rbprm.projectToCom(state, targetCom)	
 		
+	## Returns the configuration at a given state
+    # Will fail if the index of the state does not exist.
+    # \param state index of state.
+    # \return state configuration
+    def getConfigAtState(self, state):
+		return self.client.rbprm.rbprm.getConfigAtState(state)		
+		
+	## Project a given state into a given COM position
+    # and update the state configuration.
+    # \param state index of first state.
+    # \param targetCom 3D vector for the com position
+    # \return whether the projection was successful
+    def projectStateToCOM(self, state, targetCom):
+		return self.client.rbprm.rbprm.projectStateToCOM(state, targetCom)	> 0
+		
 	## Given start and goal states
 	#  generate a contact sequence over a list of configurations
 	#

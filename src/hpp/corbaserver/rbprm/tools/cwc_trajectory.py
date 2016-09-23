@@ -92,8 +92,10 @@ def compute_state_info(fullBody,states, state_id, phase_dt, mu, computeCones, li
 		#~ print "num com constraints", len(COMConstraints)
 	return p, N, init_com, end_com, t_end_phases, cones, COMConstraints
 
+
 def gen_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, dt=0.2, phase_dt = [0.4, 1],
-reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0):
+reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0):	
+	global lastspeed
 	use_window = max(0, min(use_window,  (len(states) - 1) - (state_id + 2))) # can't use preview if last state is reached	
 	assert( len(phase_dt) == 2 +  use_window * 2 ), "phase_dt does not describe all phases"
 	
@@ -104,11 +106,13 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 	p, N, init_com, end_com, t_end_phases, cones, COMConstraints = compute_state_info(fullBody,states, state_id, phase_dt[:2], mu, computeCones, limbsCOMConstraints)
 	if(use_window > 0):
 		init_waypoint_time = int(np.round(t_end_phases[-1]/ dt)) - 1
+		init_end_com = end_com[:]
 	for w in range(1,use_window+1):
 		waypoint = end_com[:]
 		waypoint_time = int(np.round(t_end_phases[-1]/ dt)) - 1
 		print "waypoint_time", waypoint_time
-		param_constraints += [("waypoint_reached_constraint",(waypoint_time, waypoint))]
+		# trying not to apply constraint
+		#~ param_constraints += [("waypoint_reached_constraint",(waypoint_time, waypoint))]
 		p1, N1, init_com1, end_com1, t_end_phases1, cones1, COMConstraints1 = compute_state_info(fullBody,states, state_id+w, phase_dt[2*w:], mu, computeCones, limbsCOMConstraints)
 		p+=p1;
 		N+=N1;
@@ -123,19 +127,30 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 			print "end_phases", t_end_phases
 	
 	timeelapsed = 0		
-	if (profile):
+	#~ if (profile):
+	if (True):
 		start = time.clock() 
 	print "init x", init_com + lastspeed.tolist()
 	var_final, params = cone_optimization(p, N, [init_com + lastspeed.tolist(), end_com + [0,0,0]], t_end_phases[1:], dt, cones, COMConstraints, mu, mass, 9.81, reduce_ineq, verbose,
 	constraints, param_constraints)	
-	if (profile):
+	#~ if (profile):
+	if (True):
 		end = time.clock() 
 		timeelapsed = (end - start) * 1000
+		print "solving time", timeelapsed
 	if(use_window > 0):
 		var_final['c'] = var_final['c'][:init_waypoint_time+1]
 		params["t_init_phases"] = params["t_init_phases"][:-3*use_window]
-		global lastspeed
-		lastspeed = var_final['dc'][init_waypoint_time]
+		lastspeed = var_final['dc'][init_waypoint_time]		
+		print "trying to project on com (from, to) ", init_end_com, var_final['c'][-1]
+		if (fullBody.projectStateToCOM(state_id+1, (var_final['c'][-1]).tolist())):
+			states[state_id+1] = fullBody.getConfigAtState(state_id+1) #updating config from python side)
+		else:
+			print "reached com is not good, restarting problem with 0 window"
+			return gen_trajectory(fullBody, states, state_id, computeCones, mu, dt, phase_dt[:2], reduce_ineq, verbose, limbsCOMConstraints, profile, use_window = 0)			
+	else:
+		lastspeed = np.array([0,0,0])
+		
 	return var_final, params, timeelapsed
 
 def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  dt=0.2, phase_dt = [0.4, 1], reduce_ineq = True, verbose = False, limbsCOMConstraints = None, use_window = 0):
@@ -173,7 +188,7 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 	ax = fig.add_subplot(111)
 	points = var_final['dc']
 	#~ print "points", points
-	ys = [norm(el) for el in points]
+	ys = [norm(el) * el[0] / abs(el[0]) for el in points]
 	xs = [i * params['dt'] for i in range(0,len(points))]
 	ax.scatter(xs, ys, c='b')
 
@@ -184,7 +199,7 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 	fig = plt.figure()
 	ax = fig.add_subplot(111)
 	points = var_final['ddc']
-	ys = [norm(el) for el in points]
+	ys = [norm(el) * el[0] / abs(el[0]) for el in points]
 	xs = [i * params['dt'] for i in range(0,len(points))]
 	ax.scatter(xs, ys, c='b')
 
@@ -210,9 +225,9 @@ def __optim__threading_ok(fullBody, states, state_id, computeCones = False, mu =
 	comPosPerPhase = [[comPos[(int)(t_id/dt) ] for t_id in np.arange(t[index],t[index+1]-_EPS,dt)] for index, _ in enumerate(t[:-1])  ]
 	comPosPerPhase[-1].append(comPos[-1])
 	print "(len(comPos)", len(comPos)
-	print "(len(0)", len(comPosPerPhase[0])
-	print "(len(1)", len(comPosPerPhase[1])
-	print "(len(2)", len(comPosPerPhase[2])
+	print "(len(0)", comPosPerPhase[0][0], comPosPerPhase[0][-1]
+	print "(len(1)", comPosPerPhase[1][0], comPosPerPhase[1][-1]
+	print "(len(2)", comPosPerPhase[2][0], comPosPerPhase[2][-1]
 	print "(len(sum)", len(comPosPerPhase[0]) + len(comPosPerPhase[1]) + len(comPosPerPhase[2])
 	assert(len(comPos) == len(comPosPerPhase[0]) + len(comPosPerPhase[1]) + len(comPosPerPhase[2]))
 	return comPosPerPhase, res[2] #res[2] is timeelapsed

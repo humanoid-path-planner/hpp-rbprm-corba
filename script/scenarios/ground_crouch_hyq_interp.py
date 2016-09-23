@@ -130,6 +130,6 @@ def play(frame_rate = 1./24.):
 def saveAll(name):
 	saveAllData(fullBody, r, name)
 #~ fullBody.exportAll(r, trajec, 'hole_hyq_t_var_04f_andrea');
-#~ fullBody.exportAll(r, configs, 'obstacle_hyq_t_var_04f_contact_planning');
+#~ fullBody.exportAll(r, configs, 'hole_hyq_t_var_04f_andrea_contact_planning');
 #~ saveToPinocchio('obstacle_hyq_t_var_04f_andrea')
 

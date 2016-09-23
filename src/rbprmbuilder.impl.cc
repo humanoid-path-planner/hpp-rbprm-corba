@@ -476,6 +476,34 @@ namespace hpp {
 
     }
 
+    double RbprmBuilder::projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com) throw (hpp::Error)
+    {
+        try
+        {
+            if(lastStatesComputed_.size() <= stateId)
+            {
+                throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
+            }
+            model::Configuration_t com_target = dofArrayToConfig (3, com);
+            State& s = lastStatesComputed_[stateId];
+            bool succes (false);
+            hpp::model::Configuration_t c = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s,com_target,succes);
+            if(succes)
+            {
+                std::cout << "updating config " << lastStatesComputed_[stateId].configuration_ << std::endl;
+                lastStatesComputed_[stateId].configuration_ = c;
+                std::cout << "updated config " << lastStatesComputed_[stateId].configuration_ << std::endl;
+                lastStatesComputedTime_[stateId].second.configuration_ = c;
+                return 1.;
+            }
+            return 0;
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
     hpp::floatSeq* RbprmBuilder::generateContacts(const hpp::floatSeq& configuration,
 			const hpp::floatSeq& direction) throw (hpp::Error)
     {
@@ -1190,6 +1218,17 @@ assert(s2 == s1 +1);
         }
     }
 
+    core::Configuration_t project_or_throw(rbprm::RbPrmFullBodyPtr_t fulllBody, ProblemPtr_t problem, const State& state, const fcl::Vec3f& targetCom)
+    {
+        bool success(false);
+        core::Configuration_t res = rbprm::interpolation::projectOnCom(fulllBody, problem,state,targetCom, success);
+        if(!success)
+        {
+            throw std::runtime_error("could not project state on COM constraint");
+        }
+        return res;
+    }
+
     hpp::floatSeq* RbprmBuilder::comRRTFromPos(double state1,
                                        const hpp::floatSeqSeq& rootPositions1,
                                        const hpp::floatSeqSeq& rootPositions2,
@@ -1214,19 +1253,19 @@ assert(s2 == s1 +1);
             std::vector<State> states;
             states.push_back(state1);
             State s1Bis(state1);
-            s1Bis.configuration_ = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s1Bis,paths[0]->end().head<3>());
+            s1Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Bis,paths[0]->end().head<3>());
             states.push_back(s1Bis);
 
             State s1Ter(s1Bis);
-            s1Ter.configuration_ = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s1Ter,paths[1]->initial().head<3>());
+            s1Ter.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Ter,paths[1]->initial().head<3>());
             states.push_back(s1Ter);
 
             State s2Bis(state2);
-            s2Bis.configuration_ = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s2Bis,paths[1]->end().head<3>());
+            s2Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Bis,paths[1]->end().head<3>());
             states.push_back(s2Bis);
 
             State s2Ter(s2Bis);
-            s2Ter.configuration_ = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s2Ter,paths[2]->initial().head<3>());
+            s2Ter.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Ter,paths[2]->initial().head<3>());
             states.push_back(s2Ter);
 
             states.push_back(state2);
@@ -1325,19 +1364,19 @@ assert(s2 == s1 +1);
             std::vector<State> states;
             states.push_back(state1);
             State s1Bis(state1);
-            s1Bis.configuration_ = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s1Bis,paths[0]->end().head<3>());
+            s1Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Bis,paths[0]->end().head<3>());
             states.push_back(s1Bis);
 
             State s1Ter(s1Bis);
-            s1Ter.configuration_ = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s1Ter,paths[1]->initial().head<3>());
+            s1Ter.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Ter,paths[1]->initial().head<3>());
             states.push_back(s1Ter);
 
             State s2Bis(state2);
-            s2Bis.configuration_ = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s2Bis,paths[1]->end().head<3>());
+            s2Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Bis,paths[1]->end().head<3>());
             states.push_back(s2Bis);
 
             State s2Ter(s2Bis);
-            s2Ter.configuration_ = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s2Ter,paths[2]->initial().head<3>());
+            s2Ter.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Ter,paths[2]->initial().head<3>());
             states.push_back(s2Ter);
 
             states.push_back(state2);
@@ -1404,7 +1443,30 @@ assert(s2 == s1 +1);
             }
             model::Configuration_t config = dofArrayToConfig (std::size_t(3), targetCom);
             fcl::Vec3f comTarget; for(int i =0; i<3; ++i) comTarget[i] = config[i];
-            model::Configuration_t  res = interpolation::projectOnCom(fullBody_,problemSolver_->problem(), lastStatesComputed_[state],comTarget);
+            model::Configuration_t  res = project_or_throw(fullBody_,problemSolver_->problem(), lastStatesComputed_[state],comTarget);
+            hpp::floatSeq* dofArray = new hpp::floatSeq();
+            dofArray->length(res.rows());
+            for(std::size_t i=0; i< res.rows(); ++i)
+            {
+              (*dofArray)[(_CORBA_ULong)i] = res[i];
+            }
+            return dofArray;
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    hpp::floatSeq* RbprmBuilder::getConfigAtState(unsigned short state) throw (hpp::Error)
+    {
+        try
+        {
+            if(lastStatesComputed_.size () < state)
+            {
+                throw std::runtime_error ("did not find a state at indicated index: " + std::string(""+(std::size_t)(state)));
+            }
+            model::Configuration_t res = lastStatesComputed_[state].configuration_;
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(res.rows());
             for(std::size_t i=0; i< res.rows(); ++i)

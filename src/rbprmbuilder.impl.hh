@@ -164,6 +164,8 @@ namespace hpp {
                                            const hpp::floatSeqSeq& rootPositions3,
                                            unsigned short numOptimizations) throw (hpp::Error);
         virtual hpp::floatSeq* projectToCom(double state, const hpp::floatSeq& targetCom) throw (hpp::Error);
+        virtual hpp::floatSeq* getConfigAtState(unsigned short stateId) throw (hpp::Error);
+        virtual double projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com) throw (hpp::Error);
         virtual void saveComputedStates(const char* filepath) throw (hpp::Error);
         virtual void saveLimbDatabase(const char* limbname,const char* filepath) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeBox(const char* limbName, double sampleId) throw (hpp::Error);
