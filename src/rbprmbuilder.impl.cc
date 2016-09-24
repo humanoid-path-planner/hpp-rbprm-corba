@@ -490,9 +490,7 @@ namespace hpp {
             hpp::model::Configuration_t c = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s,com_target,succes);
             if(succes)
             {
-                std::cout << "updating config " << lastStatesComputed_[stateId].configuration_ << std::endl;
                 lastStatesComputed_[stateId].configuration_ = c;
-                std::cout << "updated config " << lastStatesComputed_[stateId].configuration_ << std::endl;
                 lastStatesComputedTime_[stateId].second.configuration_ = c;
                 return 1.;
             }

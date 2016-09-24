@@ -110,7 +110,7 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 	for w in range(1,use_window+1):
 		waypoint = end_com[:]
 		waypoint_time = int(np.round(t_end_phases[-1]/ dt)) - 1
-		print "waypoint_time", waypoint_time
+		#~ print "waypoint_time", waypoint_time
 		# trying not to apply constraint
 		#~ param_constraints += [("waypoint_reached_constraint",(waypoint_time, waypoint))]
 		p1, N1, init_com1, end_com1, t_end_phases1, cones1, COMConstraints1 = compute_state_info(fullBody,states, state_id+w, phase_dt[2*w:], mu, computeCones, limbsCOMConstraints)
@@ -127,22 +127,21 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 			print "end_phases", t_end_phases
 	
 	timeelapsed = 0		
-	#~ if (profile):
-	if (True):
+	if (profile):
 		start = time.clock() 
-	print "init x", init_com + lastspeed.tolist()
+	#~ print "init x", init_com + lastspeed.tolist()
 	var_final, params = cone_optimization(p, N, [init_com + lastspeed.tolist(), end_com + [0,0,0]], t_end_phases[1:], dt, cones, COMConstraints, mu, mass, 9.81, reduce_ineq, verbose,
 	constraints, param_constraints)	
-	#~ if (profile):
-	if (True):
+	if (profile):
+	#~ if (True):
 		end = time.clock() 
 		timeelapsed = (end - start) * 1000
-		print "solving time", timeelapsed
+		#~ print "solving time", timeelapsed
 	if(use_window > 0):
 		var_final['c'] = var_final['c'][:init_waypoint_time+1]
 		params["t_init_phases"] = params["t_init_phases"][:-3*use_window]
 		lastspeed = var_final['dc'][init_waypoint_time]		
-		print "trying to project on com (from, to) ", init_end_com, var_final['c'][-1]
+		#~ print "trying to project on com (from, to) ", init_end_com, var_final['c'][-1]
 		if (fullBody.projectStateToCOM(state_id+1, (var_final['c'][-1]).tolist())):
 			states[state_id+1] = fullBody.getConfigAtState(state_id+1) #updating config from python side)
 		else:
@@ -224,11 +223,6 @@ def __optim__threading_ok(fullBody, states, state_id, computeCones = False, mu =
 	comPos = [c0] + [c.tolist() for c in final_state['c']]
 	comPosPerPhase = [[comPos[(int)(t_id/dt) ] for t_id in np.arange(t[index],t[index+1]-_EPS,dt)] for index, _ in enumerate(t[:-1])  ]
 	comPosPerPhase[-1].append(comPos[-1])
-	print "(len(comPos)", len(comPos)
-	print "(len(0)", comPosPerPhase[0][0], comPosPerPhase[0][-1]
-	print "(len(1)", comPosPerPhase[1][0], comPosPerPhase[1][-1]
-	print "(len(2)", comPosPerPhase[2][0], comPosPerPhase[2][-1]
-	print "(len(sum)", len(comPosPerPhase[0]) + len(comPosPerPhase[1]) + len(comPosPerPhase[2])
 	assert(len(comPos) == len(comPosPerPhase[0]) + len(comPosPerPhase[1]) + len(comPosPerPhase[2]))
 	return comPosPerPhase, res[2] #res[2] is timeelapsed
 
@@ -237,7 +231,6 @@ reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConst
 	comPosPerPhase, timeElapsed = __optim__threading_ok(fullBody, states, state_id, computeCones, mu, dt, phase_dt,
 	reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints, profile)
 	print "done. generating state trajectory ",state_id	
-	print "comePhaseLength", len(comPosPerPhase[0]),  len(comPosPerPhase[1]),  len(comPosPerPhase[2])
 	paths_ids = [int(el) for el in fullBody.comRRTFromPos(state_id,comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims)]
 	print "done. computing final trajectory to display ",state_id
 	return paths_ids[-1], paths_ids[:-1], timeElapsed
@@ -247,7 +240,6 @@ reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConst
 	comPosPerPhase, timeElapsed = __optim__threading_ok(fullBody, states, state_id, computeCones, mu, dt, phase_dt,
 	reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints, profile, use_window)
 	print "done. generating state trajectory ",state_id	
-	print "comePhaseLength", len(comPosPerPhase[0]),  len(comPosPerPhase[1]),  len(comPosPerPhase[2])
 	paths_ids = [int(el) for el in fullBody.effectorRRT(state_id,comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims)]
 	print "done. computing final trajectory to display ",state_id
 	return paths_ids[-1], paths_ids[:-1], timeElapsed
