@@ -200,29 +200,35 @@ def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, 
 		stat_data["num_errors"] += 1
 		errorid += [i]
 		fail+=1
-	except ValueError as e:
-		print "ValueError failed at id " + str(i) , e
-		stat_data["error_unknown"] += 1
-		stat_data["num_errors"] += 1
-		errorid += [i]
-		fail+=1
-	except IndexError as e:
-		print "IndexError failed at id " + str(i) , e
-		stat_data["error_unknown"] += 1
-		stat_data["num_errors"] += 1
-		errorid += [i]
-		fail+=1
+	#~ except ValueError as e:
+		#~ print "ValueError failed at id " + str(i) , e
+		#~ stat_data["error_unknown"] += 1
+		#~ stat_data["num_errors"] += 1
+		#~ errorid += [i]
+		#~ fail+=1
+	#~ except IndexError as e:
+		#~ print "IndexError failed at id " + str(i) , e
+		#~ stat_data["error_unknown"] += 1
+		#~ stat_data["num_errors"] += 1
+		#~ errorid += [i]
+		#~ fail+=1
 	except Exception as e:
 		stat_data["error_unknown"] += 1
 		stat_data["num_errors"] += 1
 		print e
 		errorid += [i]
 		fail+=1
+		if (use_window == 0 and (len(configs) - 1) - (i + 2) > 0):
+			print "could not project com, trying ti increase velocity "
+			return step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction, optim_effectors, time_scale, useCOMConstraints, 1, verbose, draw)
 	except:
 		stat_data["error_unknown"] += 1
 		stat_data["num_errors"] += 1
 		errorid += [i]
 		fail+=1
+		if (use_window == 0 and (len(configs) - 1) - (i + 2) > 0):
+			print "could not project com, trying ti increase velocity "
+			return step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction, optim_effectors, time_scale, useCOMConstraints, 1, verbose, draw)
 	return fail
 	
 def step_profile(fullBody, configs, i, optim, limbsCOMConstraints,  friction = 0.5, optim_effectors = True, time_scale = 20., useCOMConstraints = False):
@@ -343,6 +349,7 @@ import copy
 
 def stats():	
 	global stat_data	
+	stat_data["error_id"] = errorid
 	stat_data_copy = copy.deepcopy(stat_data)
 	return stat_data_copy
 	

@@ -485,8 +485,10 @@ namespace hpp {
                 throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
             }
             model::Configuration_t com_target = dofArrayToConfig (3, com);
-            State& s = lastStatesComputed_[stateId];
+            State s = lastStatesComputed_[stateId];
             bool succes (false);
+            std::cout << com_target << std::endl;
+            s.print();
             hpp::model::Configuration_t c = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s,com_target,succes);
             if(succes)
             {

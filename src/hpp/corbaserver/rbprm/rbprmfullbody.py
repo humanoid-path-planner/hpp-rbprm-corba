@@ -326,7 +326,7 @@ class FullBody (object):
     # \return H matrix and h column, such that H w <= h
     def getContactCone(self, stateId, friction = 0.5):
 		H_h =  array(self.client.rbprm.rbprm.getContactCone(stateId, friction))
-		#~ print "H_h", len(H_h) 
+		print "H_h", H_h.shape 
 		# now decompose cone 
 		return H_h[:,:-1], H_h[:, -1]
 		
@@ -336,6 +336,7 @@ class FullBody (object):
     # \return H matrix and h column, such that H w <= h
     def getContactIntermediateCone(self, stateId, friction = 0.5):
 		H_h =  array(self.client.rbprm.rbprm.getContactIntermediateCone(stateId, friction))
+		print "H_h", H_h.shape 
 		# now decompose cone 
 		return H_h[:,:-1], H_h[:, -1]
 		

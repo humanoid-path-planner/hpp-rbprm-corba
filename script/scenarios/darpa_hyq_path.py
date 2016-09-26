@@ -67,3 +67,6 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 q_far = q_init [::]
 q_far [0:3] = [-2, -3, 0.63]; 
 r(q_far)
+
+for i in range(1,10):
+	rbprmBuilder.client.basic.problem.optimizePath(i)

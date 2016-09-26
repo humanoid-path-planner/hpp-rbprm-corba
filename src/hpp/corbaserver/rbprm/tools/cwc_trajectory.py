@@ -97,7 +97,7 @@ def gen_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, dt=
 reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0):	
 	global lastspeed
 	use_window = max(0, min(use_window,  (len(states) - 1) - (state_id + 2))) # can't use preview if last state is reached	
-	assert( len(phase_dt) == 2 +  use_window * 2 ), "phase_dt does not describe all phases"
+	assert( len(phase_dt) >= 2 +  use_window * 2 ), "phase_dt does not describe all phases"
 	
 	constraints = ['cones_constraint', 'end_reached_constraint','end_speed_constraint']
 	param_constraints = []	
@@ -141,7 +141,7 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 		var_final['c'] = var_final['c'][:init_waypoint_time+1]
 		params["t_init_phases"] = params["t_init_phases"][:-3*use_window]
 		lastspeed = var_final['dc'][init_waypoint_time]		
-		#~ print "trying to project on com (from, to) ", init_end_com, var_final['c'][-1]
+		print "trying to project on com (from, to) ", init_end_com, var_final['c'][-1]
 		if (fullBody.projectStateToCOM(state_id+1, (var_final['c'][-1]).tolist())):
 			states[state_id+1] = fullBody.getConfigAtState(state_id+1) #updating config from python side)
 		else:
@@ -229,7 +229,7 @@ def __optim__threading_ok(fullBody, states, state_id, computeCones = False, mu =
 def solve_com_RRT(fullBody, states, state_id, computeCones = False, mu = 1, dt =0.1, phase_dt = [0.4, 1],
 reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0):
 	comPosPerPhase, timeElapsed = __optim__threading_ok(fullBody, states, state_id, computeCones, mu, dt, phase_dt,
-	reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints, profile)
+	reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints, profile, use_window)
 	print "done. generating state trajectory ",state_id	
 	paths_ids = [int(el) for el in fullBody.comRRTFromPos(state_id,comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims)]
 	print "done. computing final trajectory to display ",state_id
