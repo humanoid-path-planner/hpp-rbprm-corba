@@ -99,7 +99,8 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 	use_window = max(0, min(use_window,  (len(states) - 1) - (state_id + 2))) # can't use preview if last state is reached	
 	assert( len(phase_dt) >= 2 +  use_window * 2 ), "phase_dt does not describe all phases"
 	
-	constraints = ['cones_constraint', 'end_reached_constraint','end_speed_constraint']
+	#~ constraints = ['cones_constraint', 'end_reached_constraint','end_speed_constraint']
+	constraints = ['cones_constraint', 'end_reached_constraint','end_speed_constraint', 'com_kinematic_constraint']
 	param_constraints = []	
 	mass = fullBody.getMass()
 	
@@ -140,10 +141,10 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 	if(use_window > 0):
 		var_final['c'] = var_final['c'][:init_waypoint_time+1]
 		params["t_init_phases"] = params["t_init_phases"][:-3*use_window]
-		lastspeed = var_final['dc'][init_waypoint_time]		
 		print "trying to project on com (from, to) ", init_end_com, var_final['c'][-1]
 		if (fullBody.projectStateToCOM(state_id+1, (var_final['c'][-1]).tolist())):
 			states[state_id+1] = fullBody.getConfigAtState(state_id+1) #updating config from python side)
+			lastspeed = var_final['dc'][init_waypoint_time]		
 		else:
 			print "reached com is not good, restarting problem with 0 window"
 			return gen_trajectory(fullBody, states, state_id, computeCones, mu, dt, phase_dt[:2], reduce_ineq, verbose, limbsCOMConstraints, profile, use_window = 0)			
@@ -227,7 +228,7 @@ def __optim__threading_ok(fullBody, states, state_id, computeCones = False, mu =
 	return comPosPerPhase, res[2] #res[2] is timeelapsed
 
 def solve_com_RRT(fullBody, states, state_id, computeCones = False, mu = 1, dt =0.1, phase_dt = [0.4, 1],
-reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0):
+reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0, trackedEffectors = []):
 	comPosPerPhase, timeElapsed = __optim__threading_ok(fullBody, states, state_id, computeCones, mu, dt, phase_dt,
 	reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints, profile, use_window)
 	print "done. generating state trajectory ",state_id	
@@ -236,11 +237,16 @@ reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConst
 	return paths_ids[-1], paths_ids[:-1], timeElapsed
 	
 def solve_effector_RRT(fullBody, states, state_id, computeCones = False, mu = 1, dt =0.1, phase_dt = [0.4, 1],
-reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0):
+reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0, trackedEffectors = []):
 	comPosPerPhase, timeElapsed = __optim__threading_ok(fullBody, states, state_id, computeCones, mu, dt, phase_dt,
 	reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints, profile, use_window)
 	print "done. generating state trajectory ",state_id	
-	paths_ids = [int(el) for el in fullBody.effectorRRT(state_id,comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims)]
+	if(len(trackedEffectors) == 0):
+		paths_ids = [int(el) for el in fullBody.effectorRRT(state_id,comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims)]
+	else:
+		print "handling extra effector constraints"
+		refPathId = trackedEffectors[0]; path_start = trackedEffectors[1]; path_to  = trackedEffectors[2]; effectorstracked = trackedEffectors[3]
+		paths_ids = [int(el) for el in fullBody.effectorRRTFromPath(state_id, refPathId, path_start, path_to, comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims, effectorstracked)]
 	print "done. computing final trajectory to display ",state_id
 	return paths_ids[-1], paths_ids[:-1], timeElapsed
 	

@@ -163,6 +163,15 @@ namespace hpp {
                                            const hpp::floatSeqSeq& rootPositions2,
                                            const hpp::floatSeqSeq& rootPositions3,
                                            unsigned short numOptimizations) throw (hpp::Error);
+        virtual hpp::floatSeq* effectorRRTFromPath(double state1,
+                                           unsigned short path,
+                                           double path_from,
+                                           double path_to,
+                                           const hpp::floatSeqSeq& rootPositions1,
+                                           const hpp::floatSeqSeq& rootPositions2,
+                                           const hpp::floatSeqSeq& rootPositions3,
+                                           unsigned short numOptimizations,
+                                           const hpp::Names_t& trackedEffectors) throw (hpp::Error);
         virtual hpp::floatSeq* projectToCom(double state, const hpp::floatSeq& targetCom) throw (hpp::Error);
         virtual hpp::floatSeq* getConfigAtState(unsigned short stateId) throw (hpp::Error);
         virtual double projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com) throw (hpp::Error);

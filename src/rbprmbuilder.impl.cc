@@ -874,6 +874,8 @@ namespace hpp {
         std::pair<stability::MatrixXX, stability::VectorX> cone = stability::ComputeCentroidalCone(fullBody, state, friction);
         res->length ((_CORBA_ULong)cone.first.rows());
         _CORBA_ULong size = (_CORBA_ULong) cone.first.cols()+1;
+        std::cout << "H cols" <<  cone.first.cols() << std::endl;
+        std::cout << "H rows" <<  cone.first.rows() << std::endl;
         for(int i=0; i < cone.first.rows(); ++i)
         {
             double* dofArray = hpp::floatSeq::allocbuf(size);
@@ -901,6 +903,7 @@ namespace hpp {
         }
         catch(std::runtime_error& e)
         {
+            std::cout << "ERROR " << e.what() << std::endl;
             throw Error(e.what());
         }
     }
@@ -943,6 +946,7 @@ namespace hpp {
         }
         catch(std::runtime_error& e)
         {
+            std::cout << "ERROR " << e.what() << std::endl;
             throw Error(e.what());
         }
     }
@@ -1280,8 +1284,8 @@ assert(s2 == s1 +1);
             if(!(problemSolver_->problem()->configValidations()->validate(s1Ter.configuration_, rport)
                     && problemSolver_->problem()->configValidations()->validate(s2Bis.configuration_, rport)))
             {
-                std::cout << "could not project without collision at state " << std::string(""+s1)  << std::endl;
-                throw std::runtime_error ("could not project without collision at state " + std::string(""+s1));
+                std::cout << "could not project without collision at state " << s1  << std::endl;
+                throw std::runtime_error ("could not project without collision at state " + s1 );
                 // fallback to limbRRT instead
                 //return -1; //limbRRT(s1, s2, numOptimizations);
             }
@@ -1387,8 +1391,8 @@ assert(s2 == s1 +1);
             if(!(problemSolver_->problem()->configValidations()->validate(s1Ter.configuration_, rport)
                     && problemSolver_->problem()->configValidations()->validate(s2Bis.configuration_, rport)))
             {
-                std::cout << "could not project without collision at state " << std::string(""+s1)  << std::endl;
-                throw std::runtime_error ("could not project without collision at state " + std::string(""+s1));
+                std::cout << "could not project without collision at state " << s1  << std::endl;
+                throw std::runtime_error (std::string("could not project without collision at state " +  s1));
                 // fallback to limbRRT instead
                 //return -1; //limbRRT(s1, s2, numOptimizations);
             }
@@ -1403,6 +1407,102 @@ assert(s2 == s1 +1);
 
             core::PathPtr_t p2 =interpolation::effectorRRT(fullBody_,problemSolver_->problem(), paths[1],
                     s1Ter,s2Bis, numOptimizations,true);
+            pathsIds.push_back(AddPath(p2,problemSolver_));
+            // reduce path to remove extradof
+            core::SizeInterval_t interval(0, p2->initial().rows()-1);
+            core::SizeIntervals_t intervals;
+            intervals.push_back(interval);
+            PathPtr_t reducedPath = core::SubchainPath::create(p2,intervals);
+            resPath->appendPath(reducedPath);
+
+            if(s2Bis.configuration_ != state2.configuration_)
+            {
+                core::PathPtr_t p3= interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[1],
+                        s2Bis,state2, numOptimizations,false);
+                resPath->appendPath(p3);
+                pathsIds.push_back(AddPath(p3,problemSolver_));
+            }
+            pathsIds.push_back(AddPath(resPath,problemSolver_));
+            hpp::floatSeq* dofArray = new hpp::floatSeq();
+            dofArray->length(pathsIds.size());
+            for(std::size_t i=0; i< pathsIds.size(); ++i)
+            {
+              (*dofArray)[(_CORBA_ULong)i] = pathsIds[i];
+            }
+            return dofArray;
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    hpp::floatSeq* RbprmBuilder::effectorRRTFromPath(double state1,
+                                       unsigned short refpath, double path_from, double path_to,
+                                       const hpp::floatSeqSeq& rootPositions1,
+                                       const hpp::floatSeqSeq& rootPositions2,
+                                       const hpp::floatSeqSeq& rootPositions3,
+                                       unsigned short numOptimizations, const Names_t &trackedEffector) throw (hpp::Error)
+    {
+        try
+        {
+            std::vector<std::string> trackedEffectorNames = stringConversion(trackedEffector);
+            std::vector<CORBA::Short> pathsIds;
+            std::size_t s1((std::size_t)state1), s2((std::size_t)state1+1);
+            if(lastStatesComputed_.size () < s1 || lastStatesComputed_.size () < s2 )
+            {
+                throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
+            }
+            const State& state1=lastStatesComputed_[s1], state2=lastStatesComputed_[s2];
+            // first compute com paths.
+            std::vector<core::PathVectorPtr_t> paths;
+            paths.push_back(generateComPath(fullBody_,problemSolver_,rootPositions1,state1.configuration_.segment<4>(3), state2.configuration_.segment<4>(3)));
+            paths.push_back(generateComPath(fullBody_,problemSolver_,rootPositions2,state1.configuration_.segment<4>(3), state2.configuration_.segment<4>(3)));
+            paths.push_back(generateComPath(fullBody_,problemSolver_,rootPositions3,state1.configuration_.segment<4>(3), state2.configuration_.segment<4>(3)));
+
+            std::vector<State> states;
+            states.push_back(state1);
+            State s1Bis(state1);
+            s1Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Bis,paths[0]->end().head<3>());
+            states.push_back(s1Bis);
+
+            State s1Ter(s1Bis);
+            s1Ter.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Ter,paths[1]->initial().head<3>());
+            states.push_back(s1Ter);
+
+            State s2Bis(state2);
+            s2Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Bis,paths[1]->end().head<3>());
+            states.push_back(s2Bis);
+
+            State s2Ter(s2Bis);
+            s2Ter.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Ter,paths[2]->initial().head<3>());
+            states.push_back(s2Ter);
+
+            states.push_back(state2);
+            core::PathVectorPtr_t resPath = core::PathVector::create(fullBody_->device_->configSize(), fullBody_->device_->numberDof());
+
+            ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
+            fullBody_->device_->currentConfiguration(s1Ter.configuration_);
+            if(!(problemSolver_->problem()->configValidations()->validate(s1Ter.configuration_, rport)
+                    && problemSolver_->problem()->configValidations()->validate(s2Bis.configuration_, rport)))
+            {
+                std::cout << "could not project without collision at state " << s1  << std::endl;
+                throw std::runtime_error (std::string("could not project without collision at state " +  s1));
+                // fallback to limbRRT instead
+                //return -1; //limbRRT(s1, s2, numOptimizations);
+            }
+
+            if(state1.configuration_ != s1Ter.configuration_)
+            {
+                core::PathPtr_t p1 = interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[0],
+                        state1,s1Ter, numOptimizations,false);
+                resPath->appendPath(p1);
+                pathsIds.push_back(AddPath(p1,problemSolver_));
+            }
+
+            core::PathPtr_t refFullBody = problemSolver_->paths()[refpath]->extract(std::make_pair(path_from, path_to));
+            core::PathPtr_t p2 =interpolation::effectorRRTFromPath(fullBody_,problemSolver_->problem(), paths[1], refFullBody,
+                    s1Ter,s2Bis, numOptimizations,true, trackedEffectorNames);
             pathsIds.push_back(AddPath(p2,problemSolver_));
             // reduce path to remove extradof
             core::SizeInterval_t interval(0, p2->initial().rows()-1);

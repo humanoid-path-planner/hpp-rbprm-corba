@@ -129,10 +129,12 @@ def __getTimes(fullBody, configs, i, time_scale):
 
 from hpp import Error as hpperr
 import sys, time
-def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, optim_effectors = True, time_scale = 20., useCOMConstraints = False, use_window = 0, verbose = False, draw = False):
+def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, optim_effectors = True, time_scale = 20., useCOMConstraints = False, use_window = 0, verbose = False, draw = False,
+trackedEffectors = []):
 	global errorid
 	global stat_data	
 	fail = 0
+	print "ste"
 	try:
 	#~ if(True):
 		times = [];
@@ -152,9 +154,9 @@ def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, 
 			else:
 				comC = None
 			if(optim_effectors):
-				pid, trajectory, timeelapsed  =  solve_effector_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window)
+				pid, trajectory, timeelapsed  =  solve_effector_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window, trackedEffectors = trackedEffectors)
 			else :
-				pid, trajectory, timeelapsed  =       solve_com_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window)
+				pid, trajectory, timeelapsed  =       solve_com_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window, trackedEffectors = trackedEffectors)
 			displayComPath(pp, pid)
 			#~ pp(pid)
 			global res
@@ -188,12 +190,23 @@ def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, 
 			stat_data["num_success"] += 1
 		else:
 			print "TODO, NO CONTACT VARIATION, LINEAR INTERPOLATION REQUIRED"
-	except hpperr as e:
+	except hpperr as e:		
 		print "hpperr failed at id " + str(i) , e.strerror
-		stat_data["error_com_proj"] += 1
-		stat_data["num_errors"] += 1
-		errorid += [i]
-		fail+=1
+		if (use_window == 0 and (len(configs) - 1) - (i + 2) > 0):
+			print "could not project com, trying to increase velocity "
+			try:
+				return step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction, optim_effectors, time_scale, useCOMConstraints, 1, verbose, draw, trackedEffectors = trackedEffectors)
+			except: 
+				if ((len(configs) - 1) - (i + 3) > 0):
+					print "could not project com, trying to increase velocity more "
+					step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction, optim_effectors, time_scale, useCOMConstraints, 2, verbose, draw,  trackedEffectors = trackedEffectors)		
+		else:
+			print "In hpperr and window != 0"
+			print "hpperr failed at id " + str(i) , e.strerror
+			stat_data["error_com_proj"] += 1
+			stat_data["num_errors"] += 1
+			errorid += [i]
+			fail+=1
 	except OptimError as e:
 		print "OptimError failed at id " + str(i) , e.strerror
 		stat_data["error_optim_fail"] += 1
@@ -213,22 +226,39 @@ def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, 
 		#~ errorid += [i]
 		#~ fail+=1
 	except Exception as e:
-		stat_data["error_unknown"] += 1
-		stat_data["num_errors"] += 1
 		print e
-		errorid += [i]
-		fail+=1
 		if (use_window == 0 and (len(configs) - 1) - (i + 2) > 0):
-			print "could not project com, trying ti increase velocity "
-			return step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction, optim_effectors, time_scale, useCOMConstraints, 1, verbose, draw)
+			print "could not project com, trying to increase velocity "
+			try:
+				return step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction, optim_effectors, time_scale, useCOMConstraints, 1, verbose, draw,  trackedEffectors = trackedEffectors)
+			except: 
+				print "faile twice"
+				if ((len(configs) - 1) - (i + 3) > 0):
+					print "could not project com, trying to increase velocity more "
+					step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction, optim_effectors, time_scale, useCOMConstraints, 2, verbose, draw,  trackedEffectors = trackedEffectors)		
+		else:
+			print "In Exception and window != 0"
+			stat_data["error_unknown"] += 1
+			stat_data["num_errors"] += 1
+			print e
+			errorid += [i]
+			fail+=1
 	except:
-		stat_data["error_unknown"] += 1
-		stat_data["num_errors"] += 1
-		errorid += [i]
-		fail+=1
+		print "unknown"
 		if (use_window == 0 and (len(configs) - 1) - (i + 2) > 0):
-			print "could not project com, trying ti increase velocity "
-			return step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction, optim_effectors, time_scale, useCOMConstraints, 1, verbose, draw)
+			print "could not project com, trying to increase velocity "
+			try:
+				return step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction, optim_effectors, time_scale, useCOMConstraints, 1, verbose, draw,  trackedEffectors = trackedEffectors)
+			except: 
+				if ((len(configs) - 1) - (i + 3) > 0):
+					print "could not project com, trying to increase velocity more "
+					step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction, optim_effectors, time_scale, useCOMConstraints, 2, verbose, draw,  trackedEffectors = trackedEffectors)		
+		else:
+			print "In unknown and window != 0"
+			stat_data["error_unknown"] += 1
+			stat_data["num_errors"] += 1
+			errorid += [i]
+			fail+=1
 	return fail
 	
 def step_profile(fullBody, configs, i, optim, limbsCOMConstraints,  friction = 0.5, optim_effectors = True, time_scale = 20., useCOMConstraints = False):
