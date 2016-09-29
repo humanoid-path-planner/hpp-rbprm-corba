@@ -288,12 +288,12 @@ namespace hpp {
 
     std::vector<fcl::Vec3f> computeRectangleContact(const rbprm::RbPrmFullBodyPtr_t device,
                                                     const rbprm::State& state,
-                                                    const std::string& limbName, bool effectorFrame = false)
+                                                    const std::string& limbName)
     {
         std::vector<fcl::Vec3f> res;
         const rbprm::T_Limb& limbs = device->GetLimbs();
         rbprm::RbPrmLimbPtr_t limb;
-        Matrix43 p; Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
+        Matrix43 p; Eigen::Matrix3d R = Eigen::Matrix3d::Identity(); Eigen::Matrix3d cFrame = Eigen::Matrix3d::Identity();
         for(std::map<std::string, fcl::Vec3f>::const_iterator cit = state.contactPositions_.begin();
             cit != state.contactPositions_.end(); ++cit)
         {
@@ -325,11 +325,10 @@ namespace hpp {
                         x.normalize();
                         y = z.cross(x);
                     }
-                    R.block<3,1>(0,0) = x;
-                    R.block<3,1>(0,1) = y;
-                    R.block<3,1>(0,2) = z;
+                    cFrame.block<3,1>(0,0) = x;
+                    cFrame.block<3,1>(0,1) = y;
+                    cFrame.block<3,1>(0,2) = z;
                 }
-                else
                 {
                     const fcl::Matrix3f& fclRotation = state.contactRotation_.at(name);
                     for(int i =0; i< 3; ++i)
@@ -338,10 +337,11 @@ namespace hpp {
                 }
                 for(std::size_t i =0; i<4; ++i)
                 {
-                    if(!effectorFrame)
+                    if(limb->contactType_ == _3_DOF)
                     {
-                        res.push_back(position + (R*(p.row(i).transpose() + limb->offset_)));
-                        res.push_back(state.contactNormals_.at(name));
+                        fcl::Vec3f pworld = position + (cFrame*(p.row(i).transpose() + limb->offset_));
+                        res.push_back(R.transpose() * (pworld - limb->offset_ ));
+                        res.push_back(R.transpose() * state.contactNormals_.at(name));
                     }
                     else
                     {
@@ -1177,7 +1177,7 @@ namespace hpp {
         std::string limb(limbName);
         const State& firstState = lastStatesComputed_[cId], thirdState = lastStatesComputed_[cId+1];
         std::vector<std::vector<fcl::Vec3f> > allStates;
-        allStates.push_back(computeRectangleContact(fullBody_, firstState, limb, true));
+        allStates.push_back(computeRectangleContact(fullBody_, firstState, limb));
         std::vector<std::string> creations;
         bool success(false);
         State intermediaryState = intermediary(firstState, thirdState, cId, success);
