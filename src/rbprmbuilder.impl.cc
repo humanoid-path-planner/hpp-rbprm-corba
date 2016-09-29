@@ -329,24 +329,22 @@ namespace hpp {
                     cFrame.block<3,1>(0,1) = y;
                     cFrame.block<3,1>(0,2) = z;
                 }
-                {
-                    const fcl::Matrix3f& fclRotation = state.contactRotation_.at(name);
-                    for(int i =0; i< 3; ++i)
-                        for(int j =0; j<3;++j)
-                            R(i,j) = fclRotation(i,j);
-                }
+                fcl::Transform3f roWorld, roEffector;
+                roWorld.setRotation(state.contactRotation_.at(name));
+                roWorld.setTranslation(position);
+                roEffector = roWorld; roEffector.inverse();
                 for(std::size_t i =0; i<4; ++i)
                 {
                     if(limb->contactType_ == _3_DOF)
                     {
                         fcl::Vec3f pworld = position + (cFrame*(p.row(i).transpose() + limb->offset_));
-                        res.push_back(R.transpose() * (pworld - limb->offset_ ));
-                        res.push_back(R.transpose() * state.contactNormals_.at(name));
+                        res.push_back((roEffector * pworld).getTranslation());
+                        res.push_back(roEffector.getRotation() * state.contactNormals_.at(name));
                     }
                     else
                     {
                         res.push_back(p.row(i).transpose() + limb->offset_);
-                        res.push_back(R.transpose() * state.contactNormals_.at(name));
+                        res.push_back(roEffector.getRotation() * state.contactNormals_.at(name));
                     }
                 }
                 return res;
