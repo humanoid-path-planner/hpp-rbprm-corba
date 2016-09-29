@@ -149,6 +149,26 @@ namespace hpp {
         analysisFactory_ = new sampling::AnalysisFactory(fullBody_);
     }
 
+    void RbprmBuilder::loadFullBodyRobotFromExistingRobot() throw (hpp::Error)
+    {
+        try
+        {
+            fullBody_ = rbprm::RbPrmFullBody::create(problemSolver_->problem()->robot());
+            problemSolver_->pathValidationType ("Discretized",0.05); // reset to avoid conflict with rbprm path
+            problemSolver_->robot (fullBody_->device_);
+            problemSolver_->resetProblem();
+            problemSolver_->robot ()->controlComputation
+            (model::Device::JOINT_POSITION);
+        }
+        catch (const std::exception& exc)
+        {
+            hppDout (error, exc.what ());
+            throw hpp::Error (exc.what ());
+        }
+        fullBodyLoaded_ = true;
+        analysisFactory_ = new sampling::AnalysisFactory(fullBody_);
+    }
+
     hpp::floatSeq* RbprmBuilder::getSampleConfig(const char* limb, unsigned short sampleId) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
@@ -259,8 +279,77 @@ namespace hpp {
             }
             for(std::size_t i =0; i<4; ++i)
             {
-                res.push_back(position + (R*p.row(i).transpose()));
+                res.push_back(position + (R*(p.row(i).transpose() + limb->offset_)));
                 res.push_back(state.contactNormals_.at(name));
+            }
+        }
+        return res;
+    }
+
+    std::vector<fcl::Vec3f> computeRectangleContact(const rbprm::RbPrmFullBodyPtr_t device,
+                                                    const rbprm::State& state,
+                                                    const std::string& limbName, bool effectorFrame = false)
+    {
+        std::vector<fcl::Vec3f> res;
+        const rbprm::T_Limb& limbs = device->GetLimbs();
+        rbprm::RbPrmLimbPtr_t limb;
+        Matrix43 p; Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
+        for(std::map<std::string, fcl::Vec3f>::const_iterator cit = state.contactPositions_.begin();
+            cit != state.contactPositions_.end(); ++cit)
+        {
+            const std::string& name = cit->first;
+            if(limbName == name)
+            {
+                const fcl::Vec3f& position = cit->second;
+                limb = limbs.at(name);
+                const double& lx = limb->x_, ly = limb->y_;
+                p << lx,  ly, 0,
+                     lx, -ly, 0,
+                    -lx, -ly, 0,
+                    -lx,  ly, 0;
+                if(limb->contactType_ == _3_DOF)
+                {
+                    //create rotation matrix from normal
+                    fcl::Vec3f z_fcl = state.contactNormals_.at(name);
+                    Eigen::Vector3d z,x,y;
+                    for(int i =0; i<3; ++i) z[i] = z_fcl[i];
+                    x = z.cross(Eigen::Vector3d(0,-1,0));
+                    if(x.norm() < 10e-6)
+                    {
+                        y = z.cross(fcl::Vec3f(1,0,0));
+                        y.normalize();
+                        x = y.cross(z);
+                    }
+                    else
+                    {
+                        x.normalize();
+                        y = z.cross(x);
+                    }
+                    R.block<3,1>(0,0) = x;
+                    R.block<3,1>(0,1) = y;
+                    R.block<3,1>(0,2) = z;
+                }
+                else
+                {
+                    const fcl::Matrix3f& fclRotation = state.contactRotation_.at(name);
+                    for(int i =0; i< 3; ++i)
+                        for(int j =0; j<3;++j)
+                            R(i,j) = fclRotation(i,j);
+                }
+                for(std::size_t i =0; i<4; ++i)
+                {
+                    if(!effectorFrame)
+                    {
+                        res.push_back(position + (R*(p.row(i).transpose() + limb->offset_)));
+                        res.push_back(state.contactNormals_.at(name));
+                    }
+                    else
+                    {
+                        res.push_back(p.row(i).transpose() + limb->offset_);
+                        res.push_back(R.transpose() * state.contactNormals_.at(name));
+                    }
+                }
+                return res;
             }
         }
         return res;
@@ -320,12 +409,8 @@ namespace hpp {
             State state;
             state.configuration_ = config;
             state.contacts_[limbName] = true;
-            const fcl::Vec3f z = limb->effector_->currentTransformation().getRotation() * limb->normal_;
             const fcl::Vec3f position = limb->effector_->currentTransformation().getTranslation();
-            const fcl::Matrix3f alignRotation = tools::GetRotationMatrix(z,fcl::Vec3f(0,0,1));
-            fcl::Matrix3f rotation = alignRotation * limb->effector_->initialPosition ().getRotation();
-            fcl::Vec3f posOffset = position + rotation * limb->offset_;
-            state.contactPositions_[limbName] = posOffset;
+            state.contactPositions_[limbName] = position;
             state.contactNormals_[limbName] = fcl::Vec3f(0,0,1);
             state.contactRotation_[limbName] = limb->effector_->currentTransformation().getRotation();
             std::vector<fcl::Vec3f> poss = (computeRectangleContact(fullBody_, state));
@@ -957,7 +1042,7 @@ namespace hpp {
                              model::ConfigurationIn_t q2)
     {
         // TODO DT
-        return StraightPath::create(device, q1, q2, 0.1);
+        return problem->steeringMethod()->operator ()(q1,q2);
     }
 
     model::Configuration_t addRotation(CIT_Configuration& pit, const model::value_type& u,
@@ -1048,6 +1133,62 @@ namespace hpp {
         if(creations.size() == 1)
         {
             allStates.push_back(computeRectangleContact(fullBody_, thirdState));
+        }
+        if(creations.size() > 1)
+        {
+            throw std::runtime_error ("too many contact creations between states" + std::string(""+cId) +
+                                      "and " + std::string(""+(cId + 1)));
+        }
+
+        hpp::floatSeqSeq *res;
+        res = new hpp::floatSeqSeq ();
+
+        // compute array of contact positions
+
+        res->length ((_CORBA_ULong)allStates.size());
+        std::size_t i=0;
+        for(std::vector<std::vector<fcl::Vec3f> >::const_iterator cit = allStates.begin();
+                    cit != allStates.end(); ++cit, ++i)
+        {
+            const std::vector<fcl::Vec3f>& positions = *cit;
+            _CORBA_ULong size = (_CORBA_ULong) positions.size () * 3;
+            double* dofArray = hpp::floatSeq::allocbuf(size);
+            hpp::floatSeq floats (size, size, dofArray, true);
+            //convert the config in dofseq
+            for(std::size_t h = 0; h<positions.size(); ++h)
+            {
+                for(std::size_t k =0; k<3; ++k)
+                {
+                    model::size_type j (h*3 + k);
+                    dofArray[j] = positions[h][k];
+                }
+            }
+            (*res) [(_CORBA_ULong)i] = floats;
+        }
+        return res;
+    }
+
+    floatSeqSeq* RbprmBuilder::computeContactPointsForLimb(unsigned short cId, const char *limbName) throw (hpp::Error)
+    {
+        if(lastStatesComputed_.size() <= cId + 1)
+        {
+            throw std::runtime_error ("Unexisting state " + std::string(""+(cId+1)));
+        }
+        std::string limb(limbName);
+        const State& firstState = lastStatesComputed_[cId], thirdState = lastStatesComputed_[cId+1];
+        std::vector<std::vector<fcl::Vec3f> > allStates;
+        allStates.push_back(computeRectangleContact(fullBody_, firstState, limb, true));
+        std::vector<std::string> creations;
+        bool success(false);
+        State intermediaryState = intermediary(firstState, thirdState, cId, success);
+        if(success)
+        {
+            allStates.push_back(computeRectangleContact(fullBody_, intermediaryState, limb));
+        }
+        thirdState.contactCreations(firstState, creations);
+        if(creations.size() == 1)
+        {
+            allStates.push_back(computeRectangleContact(fullBody_, thirdState, limb));
         }
         if(creations.size() > 1)
         {
@@ -1196,6 +1337,18 @@ namespace hpp {
         }
     }
 
+    CORBA::Short RbprmBuilder::configToPath(const hpp::floatSeqSeq& configs) throw (hpp::Error)
+    {
+        T_Configuration positions =  doubleDofArrayToConfig(fullBody_->device_, configs);
+        core::PathVectorPtr_t res = core::PathVector::create(fullBody_->device_->configSize(),
+                                                             fullBody_->device_->numberDof());
+        for(CIT_Configuration pit = positions.begin();pit != positions.end()-1; ++pit)
+        {
+            res->appendPath(makePath(fullBody_->device_,problemSolver_->problem(), *pit,*(pit+1)));
+        }
+        return problemSolver_->addPath(res);
+    }
+
     CORBA::Short RbprmBuilder::comRRT(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error)
     {
         try
@@ -1285,7 +1438,7 @@ assert(s2 == s1 +1);
                     && problemSolver_->problem()->configValidations()->validate(s2Bis.configuration_, rport)))
             {
                 std::cout << "could not project without collision at state " << s1  << std::endl;
-                throw std::runtime_error ("could not project without collision at state " + s1 );
+//throw std::runtime_error ("could not project without collision at state " + s1 );
                 // fallback to limbRRT instead
                 //return -1; //limbRRT(s1, s2, numOptimizations);
             }
@@ -1392,7 +1545,7 @@ assert(s2 == s1 +1);
                     && problemSolver_->problem()->configValidations()->validate(s2Bis.configuration_, rport)))
             {
                 std::cout << "could not project without collision at state " << s1  << std::endl;
-                throw std::runtime_error (std::string("could not project without collision at state " +  s1));
+//throw std::runtime_error (std::string("could not project without collision at state " +  s1));
                 // fallback to limbRRT instead
                 //return -1; //limbRRT(s1, s2, numOptimizations);
             }
@@ -1414,7 +1567,6 @@ assert(s2 == s1 +1);
             intervals.push_back(interval);
             PathPtr_t reducedPath = core::SubchainPath::create(p2,intervals);
             resPath->appendPath(reducedPath);
-
             if(s2Bis.configuration_ != state2.configuration_)
             {
                 core::PathPtr_t p3= interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[1],
@@ -1460,64 +1612,23 @@ assert(s2 == s1 +1);
             paths.push_back(generateComPath(fullBody_,problemSolver_,rootPositions2,state1.configuration_.segment<4>(3), state2.configuration_.segment<4>(3)));
             paths.push_back(generateComPath(fullBody_,problemSolver_,rootPositions3,state1.configuration_.segment<4>(3), state2.configuration_.segment<4>(3)));
 
-            std::vector<State> states;
-            states.push_back(state1);
-            State s1Bis(state1);
-            s1Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Bis,paths[0]->end().head<3>());
-            states.push_back(s1Bis);
-
-            State s1Ter(s1Bis);
-            s1Ter.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Ter,paths[1]->initial().head<3>());
-            states.push_back(s1Ter);
-
-            State s2Bis(state2);
-            s2Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Bis,paths[1]->end().head<3>());
-            states.push_back(s2Bis);
-
-            State s2Ter(s2Bis);
-            s2Ter.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Ter,paths[2]->initial().head<3>());
-            states.push_back(s2Ter);
-
-            states.push_back(state2);
-            core::PathVectorPtr_t resPath = core::PathVector::create(fullBody_->device_->configSize(), fullBody_->device_->numberDof());
-
-            ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
-            fullBody_->device_->currentConfiguration(s1Ter.configuration_);
-            if(!(problemSolver_->problem()->configValidations()->validate(s1Ter.configuration_, rport)
-                    && problemSolver_->problem()->configValidations()->validate(s2Bis.configuration_, rport)))
-            {
-                std::cout << "could not project without collision at state " << s1  << std::endl;
-                throw std::runtime_error (std::string("could not project without collision at state " +  s1));
-                // fallback to limbRRT instead
-                //return -1; //limbRRT(s1, s2, numOptimizations);
-            }
-
-            if(state1.configuration_ != s1Ter.configuration_)
-            {
-                core::PathPtr_t p1 = interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[0],
-                        state1,s1Ter, numOptimizations,false);
-                resPath->appendPath(p1);
-                pathsIds.push_back(AddPath(p1,problemSolver_));
-            }
+            core::PathVectorPtr_t comPath = core::PathVector::create(fullBody_->device_->configSize(), fullBody_->device_->numberDof());
+            comPath->appendPath(paths[0]);
+            comPath->appendPath(paths[1]);
+            comPath->appendPath(paths[2]);
 
             core::PathPtr_t refFullBody = problemSolver_->paths()[refpath]->extract(std::make_pair(path_from, path_to));
-            core::PathPtr_t p2 =interpolation::effectorRRTFromPath(fullBody_,problemSolver_->problem(), paths[1], refFullBody,
-                    s1Ter,s2Bis, numOptimizations,true, trackedEffectorNames);
+            core::PathPtr_t p2 =interpolation::effectorRRTFromPath(fullBody_,problemSolver_->problem(), comPath, refFullBody,
+                    state1,state2, numOptimizations,true, trackedEffectorNames);
             pathsIds.push_back(AddPath(p2,problemSolver_));
             // reduce path to remove extradof
             core::SizeInterval_t interval(0, p2->initial().rows()-1);
             core::SizeIntervals_t intervals;
             intervals.push_back(interval);
             PathPtr_t reducedPath = core::SubchainPath::create(p2,intervals);
+            core::PathVectorPtr_t resPath = core::PathVector::create(fullBody_->device_->configSize(), fullBody_->device_->numberDof());
             resPath->appendPath(reducedPath);
 
-            if(s2Bis.configuration_ != state2.configuration_)
-            {
-                core::PathPtr_t p3= interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[1],
-                        s2Bis,state2, numOptimizations,false);
-                resPath->appendPath(p3);
-                pathsIds.push_back(AddPath(p3,problemSolver_));
-            }
             pathsIds.push_back(AddPath(resPath,problemSolver_));
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(pathsIds.size());

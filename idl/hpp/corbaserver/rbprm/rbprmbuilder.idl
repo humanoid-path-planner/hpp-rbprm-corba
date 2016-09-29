@@ -87,6 +87,12 @@ module hpp
              in string urdfSuffix, in string srdfSuffix)
       raises (Error);
 
+		/// Create a RbprmFullBody object
+		/// The device automatically has an anchor joint called "base_joint" as
+		/// root joint.
+		void loadFullBodyRobotFromExistingRobot ()
+			raises (Error);
+
     /// Set Rom constraints for the configuration shooter
     /// a configuration will only be valid if all roms indicated
     /// are colliding with the environment.
@@ -235,6 +241,12 @@ module hpp
     /// \return list of 2 or 3 lists of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
     floatSeqSeq computeContactPoints(in unsigned short stateId) raises (Error);
 
+		/// Provided a discrete contact sequence has already been computed, computes
+		/// all the contact positions and normals for a given state, the next one, and the intermediate between them.
+		/// \param stateId normalized step for generation along the path (ie the path has a length of 1).
+		/// \return list of 2 or 3 lists of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
+		floatSeqSeq computeContactPointsForLimb(in unsigned short stateId, in string limbname) raises (Error);
+
     /// Provided a path has already been computed, interpolates it and generates the statically stable
     /// constact configurations along it. setStartState and setEndState must have been called prior
     /// to this function. If these conditions are not met an error is raised.
@@ -305,6 +317,11 @@ module hpp
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
     /// \return id of the root path computed
     short limbRRTFromRootPath(in double state1, in double state2,  in  unsigned short path, in unsigned short numOptimizations) raises (Error);
+
+		/// Linear interpolation of many configurations into a path
+		/// \param configs list of configurations
+		/// \return id of the root path computed
+		short configToPath(in  floatSeqSeq configs) raises (Error);
 
     /// Provided a path has already been computed and interpolated, generate a continuous path
     /// between two indicated states. The states do not need to be consecutive, but increasing in Id.

@@ -75,6 +75,32 @@ class FullBody (object):
 			rankInConfiguration += self.client.basic.robot.getJointConfigSize (j)
 			self.rankInVelocity [j] = rankInVelocity
 			rankInVelocity += self.client.basic.robot.getJointNumberDof (j)
+	
+	# Virtual function to load the fullBody robot model.
+	#
+    def loadFullBodyModelFromActiveRobot (self, urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix):
+		self.client.rbprm.rbprm.loadFullBodyRobotFromExistingRobot()
+		self.name = urdfName
+		self.displayName = urdfName
+		self.tf_root = "base_link"
+		self.rootJointType = rootJointType
+		self.jointNames = self.client.basic.robot.getJointNames ()
+		self.allJointNames = self.client.basic.robot.getAllJointNames ()
+		self.client.basic.robot.meshPackageName = meshPackageName
+		self.meshPackageName = meshPackageName
+		self.rankInConfiguration = dict ()
+		self.rankInVelocity = dict ()
+		self.packageName = packageName
+		self.urdfName = urdfName
+		self.urdfSuffix = urdfSuffix
+		self.srdfSuffix = srdfSuffix
+		self.octrees={}
+		rankInConfiguration = rankInVelocity = 0
+		for j in self.jointNames:
+			self.rankInConfiguration [j] = rankInConfiguration
+			rankInConfiguration += self.client.basic.robot.getJointConfigSize (j)
+			self.rankInVelocity [j] = rankInVelocity
+			rankInVelocity += self.client.basic.robot.getJointNumberDof (j)
 
 	## Add a limb to the model
 	#
@@ -272,7 +298,33 @@ class FullBody (object):
     def computeContactPoints(self, stateId):
 		rawdata = self.client.rbprm.rbprm.computeContactPoints(stateId)
 		return [[b[i:i+3] for i in range(0, len(b), 6)] for b in rawdata], [[b[i+3:i+6] for i in range(0, len(b), 6)] for b in rawdata]
+	
+	## Provided a discrete contact sequence has already been computed, computes
+    # all the contact positions and normals for a given state, the next one, and the intermediate between them.
+    #
+    # \param stateId normalized step for generation along the path (ie the path has a length of 1).
+    # \return list of 2 or 3 lists of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
+    def computeContactPointsForLimb(self, stateId, limb):
+		rawdata = self.client.rbprm.rbprm.computeContactPointsForLimb(stateId, limb)
+		return [[b[i:i+3] for i in range(0, len(b), 6)] for b in rawdata], [[b[i+3:i+6] for i in range(0, len(b), 6)] for b in rawdata]
 
+	## Provided a discrete contact sequence has already been computed, computes
+    # all the contact positions and normals for a given state, the next one, and the intermediate between them.
+    #
+    # \param stateId normalized step for generation along the path (ie the path has a length of 1).
+    # \return list of 2 or 3 lists of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
+    def computeContactPointsPerLimb(self, stateId, limbs):
+		Ps = []; Ns = []
+		for limb in limbs:
+			P, N = self.computeContactPointsForLimb(stateId, limb)
+			for i in range(len(P)):
+				if i > len(Ps) - 1 :
+					Ps.append({})
+					Ns.append({})
+				if(len(P[i]) > 0):
+					Ps[i][limb] = P[i]
+					Ns[i][limb] = N[i]
+		return Ps, Ns
 		
 	## Given start and goal states
 	#  generate a contact sequence over a list of configurations

@@ -110,6 +110,9 @@ namespace hpp {
                  const char* urdfSuffix,
                  const char* srdfSuffix) throw (hpp::Error);
 
+        virtual void loadFullBodyRobotFromExistingRobot () throw (hpp::Error);
+
+
         virtual void setFilter(const hpp::Names_t& roms) throw (hpp::Error);
 				virtual void setAffordanceFilter(const char* romName, const hpp::Names_t& affordances) throw (hpp::Error);
         virtual void boundSO3(const hpp::floatSeq& limitszyx) throw (hpp::Error);
@@ -144,6 +147,7 @@ namespace hpp {
         virtual void setStartState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);
         virtual void setEndState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);
         virtual hpp::floatSeqSeq* computeContactPoints(unsigned short cId) throw (hpp::Error);
+        virtual hpp::floatSeqSeq* computeContactPointsForLimb(unsigned short cId, const char* limbName) throw (hpp::Error);
         virtual hpp::floatSeqSeq* interpolate(double timestep, double path, double robustnessTreshold, unsigned short filterStates) throw (hpp::Error);
         virtual hpp::floatSeqSeq* interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold, unsigned short filterStates) throw (hpp::Error);
         virtual hpp::floatSeqSeq* getContactCone(unsigned short stateId, double friction) throw (hpp::Error);
@@ -152,6 +156,7 @@ namespace hpp {
                                       const hpp::floatSeq& q1, const hpp::floatSeq& q2) throw (hpp::Error);
         virtual CORBA::Short limbRRT(double state1, double state2, unsigned short numOptimizations) throw (hpp::Error);
         virtual CORBA::Short limbRRTFromRootPath(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error);
+        virtual CORBA::Short configToPath(const hpp::floatSeqSeq& configs) throw (hpp::Error);
         virtual CORBA::Short comRRT(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error);
         virtual hpp::floatSeq* comRRTFromPos(double state1,
                                            const hpp::floatSeqSeq& rootPositions1,
