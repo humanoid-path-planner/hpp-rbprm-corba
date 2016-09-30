@@ -313,7 +313,7 @@ class FullBody (object):
     #
     # \param stateId normalized step for generation along the path (ie the path has a length of 1).
     # \return list of 2 or 3 lists of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
-    def computeContactPointsPerLimb(self, stateId, limbs):
+    def computeContactPointsPerLimb(self, stateId, limbs, dicEffector = {}):
 		Ps = []; Ns = []
 		for limb in limbs:
 			P, N = self.computeContactPointsForLimb(stateId, limb)
@@ -322,8 +322,11 @@ class FullBody (object):
 					Ps.append({})
 					Ns.append({})
 				if(len(P[i]) > 0):
-					Ps[i][limb] = P[i]
-					Ns[i][limb] = N[i]
+					targetName = limb
+					if(dicEffector.has_key(limb)):
+						targetName = dicEffector[limb]['effector']
+					Ps[i][targetName] = P[i]
+					Ns[i][targetName] = N[i]
 		return Ps, Ns
 		
 	## Given start and goal states

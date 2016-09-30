@@ -55,31 +55,36 @@ legx = 0.02; legy = 0.02
 def addLimbDb(limbId, heuristicName, loadValues = True, disableEffectorCollision = False):
 	fullBody.addLimbDatabase(str(db_dir+limbId+'.db'), limbId, heuristicName,loadValues, disableEffectorCollision)
 
-lLegId = 'lhleg'
-rarmId = 'rhleg'
-larmId = 'lfleg'
-
-addLimbDb(rLegId, "static")
-addLimbDb(lLegId, "static")
-addLimbDb(rarmId, "static")
-addLimbDb(larmId, "static")
-
-#~ fullBody.addLimb(rLegId,rLeg,rfoot,offset,normal, legx, legy, nbSamples, "forward", 0.1, cType)
-
 #~ lLegId = 'lhleg'
-#~ lLeg = 'lh_haa_joint'
-lfoot = 'lh_foot_joint'
-#~ fullBody.addLimb(lLegId,lLeg,lfoot,offset,normal, legx, legy, nbSamples, "backward", 0.05, cType)
-
 #~ rarmId = 'rhleg'
-#~ rarm = 'rh_haa_joint'
-rHand = 'rh_foot_joint'
-#~ fullBody.addLimb(rarmId,rarm,rHand,offset,normal, legx, legy, nbSamples, "backward", 0.05, cType)
-
 #~ larmId = 'lfleg'
-#~ larm = 'lf_haa_joint'
+#~ 
+#~ addLimbDb(rLegId, "static")
+#~ addLimbDb(lLegId, "static")
+#~ addLimbDb(rarmId, "static")
+#~ addLimbDb(larmId, "static")
+
+fullBody.addLimb(rLegId,rLeg,rfoot,offset,normal, legx, legy, nbSamples, "forward", 0.1, cType)
+
+lLegId = 'lhleg'
+lLeg = 'lh_haa_joint'
+lfoot = 'lh_foot_joint'
+fullBody.addLimb(lLegId,lLeg,lfoot,offset,normal, legx, legy, nbSamples, "backward", 0.05, cType)
+
+rarmId = 'rhleg'
+rarm = 'rh_haa_joint'
+rHand = 'rh_foot_joint'
+fullBody.addLimb(rarmId,rarm,rHand,offset,normal, legx, legy, nbSamples, "backward", 0.05, cType)
+#~ 
+larmId = 'lfleg'
+larm = 'lf_haa_joint'
 lHand = 'lf_foot_joint'
-#~ fullBody.addLimb(larmId,larm,lHand,offset,normal, legx, legy, nbSamples, "forward", 0.05, cType)
+fullBody.addLimb(larmId,larm,lHand,offset,normal, legx, legy, nbSamples, "forward", 0.05, cType)
+
+fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
+fullBody.runLimbSampleAnalysis(rarmId, "jointLimitsDistance", True)
+fullBody.runLimbSampleAnalysis(larmId, "jointLimitsDistance", True)
+fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 
 q_0 = fullBody.getCurrentConfig(); 
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.q_init[0:7]
@@ -120,16 +125,16 @@ limbsCOMConstraints = { rLegId : {'file': "hyq/"+rLegId+"_com.ineq", 'effector' 
 
 
 
-def act(i, numOptim = 0, use_window = False, verbose = False, draw = False):
-	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, 0.4, optim_effectors = True, time_scale = 20., useCOMConstraints = False, use_window = use_window,
-	verbose = verbose, draw = draw)
+def act(i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True, time_scale = 20,  verbose = False, draw = False, trackedEffectors = []):
+	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, friction, optim_effectors = optim_effectors, time_scale = time_scale, useCOMConstraints = True, use_window = use_window,
+	verbose = verbose, draw = draw, trackedEffectors = trackedEffectors)
 
 def play(frame_rate = 1./24.):
 	play_traj(fullBody,pp,frame_rate)
 	
 def saveAll(name):
 	saveAllData(fullBody, r, name)
-#~ fullBody.exportAll(r, trajec, 'hole_hyq_t_var_04f_andrea');
+#~ saveAll ('hole_hyq_t_var_04f_andrea');
 #~ fullBody.exportAll(r, configs, 'hole_hyq_t_var_04f_andrea_contact_planning');
 #~ saveToPinocchio('obstacle_hyq_t_var_04f_andrea')
 

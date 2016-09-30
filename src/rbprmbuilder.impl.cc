@@ -290,6 +290,8 @@ namespace hpp {
                                                     const rbprm::State& state,
                                                     const std::string& limbName)
     {
+        device->device_->currentConfiguration(state.configuration_);
+        device->device_->computeForwardKinematics();
         std::vector<fcl::Vec3f> res;
         const rbprm::T_Limb& limbs = device->GetLimbs();
         rbprm::RbPrmLimbPtr_t limb;
@@ -302,6 +304,11 @@ namespace hpp {
             {
                 const fcl::Vec3f& position = cit->second;
                 limb = limbs.at(name);
+                const fcl::Vec3f& normal = state.contactNormals_.at(name);
+                const fcl::Vec3f z = limb->effector_->currentTransformation().getRotation() * limb->normal_;
+                const fcl::Matrix3f alignRotation = tools::GetRotationMatrix(z,normal);
+                const fcl::Matrix3f rotation = alignRotation * limb->effector_->currentTransformation().getRotation();
+                const fcl::Vec3f offset = rotation * limb->offset_;
                 const double& lx = limb->x_, ly = limb->y_;
                 p << lx,  ly, 0,
                      lx, -ly, 0,
@@ -310,9 +317,8 @@ namespace hpp {
                 if(limb->contactType_ == _3_DOF)
                 {
                     //create rotation matrix from normal
-                    fcl::Vec3f z_fcl = state.contactNormals_.at(name);
                     Eigen::Vector3d z,x,y;
-                    for(int i =0; i<3; ++i) z[i] = z_fcl[i];
+                    for(int i =0; i<3; ++i) z[i] = normal[i];
                     x = z.cross(Eigen::Vector3d(0,-1,0));
                     if(x.norm() < 10e-6)
                     {
@@ -337,12 +343,14 @@ namespace hpp {
                 {
                     if(limb->contactType_ == _3_DOF)
                     {
-                        fcl::Vec3f pworld = position + (cFrame*(p.row(i).transpose() + limb->offset_));
+                        fcl::Vec3f pworld = position + (cFrame*(p.row(i).transpose())) + offset;
                         res.push_back((roEffector * pworld).getTranslation());
                         res.push_back(roEffector.getRotation() * state.contactNormals_.at(name));
                     }
                     else
                     {
+                        // TODO if limb is 6D and offset is not in the good direction
+                        // this probably won't work
                         res.push_back(p.row(i).transpose() + limb->offset_);
                         res.push_back(roEffector.getRotation() * state.contactNormals_.at(name));
                     }
@@ -570,8 +578,6 @@ namespace hpp {
             model::Configuration_t com_target = dofArrayToConfig (3, com);
             State s = lastStatesComputed_[stateId];
             bool succes (false);
-            std::cout << com_target << std::endl;
-            s.print();
             hpp::model::Configuration_t c = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s,com_target,succes);
             if(succes)
             {
@@ -1340,7 +1346,8 @@ namespace hpp {
         T_Configuration positions =  doubleDofArrayToConfig(fullBody_->device_, configs);
         core::PathVectorPtr_t res = core::PathVector::create(fullBody_->device_->configSize(),
                                                              fullBody_->device_->numberDof());
-        for(CIT_Configuration pit = positions.begin();pit != positions.end()-1; ++pit)
+        //for(CIT_Configuration pit = positions.begin();pit != positions.end()-1; ++pit)
+        for(CIT_Configuration pit = positions.begin();pit != positions.end()-200; ++pit)
         {
             res->appendPath(makePath(fullBody_->device_,problemSolver_->problem(), *pit,*(pit+1)));
         }

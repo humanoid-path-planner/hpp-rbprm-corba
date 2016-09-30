@@ -7,7 +7,7 @@ from cwc import OptimError, cone_optimization
 res = []
 trajec = []
 trajec_mil = []
-contacts = []
+#~ contacts = []
 pos = []
 normals = []
 errorid = []
@@ -27,43 +27,43 @@ def displayComPath(pp, pathId,color=[0.,0.75,0.15,0.9]) :
 	pp.publisher.client.gui.addToGroup(nameCurve,pp.publisher.sceneName)
 	pp.publisher.client.gui.refresh()
 
+#~ 
+#~ def getContactPerPhase(fullBody, stateid, limbsCOMConstraints):
+	#~ contacts = [[],[],[]]
+	#~ for k, v in limbsCOMConstraints.iteritems():
+		#~ if(fullBody.isLimbInContact(k, stateid)):
+			#~ contacts[0]+=[v['effector']]
+		#~ if(fullBody.isLimbInContactIntermediary(k, stateid)):
+			#~ contacts[1]+=[v['effector']]
+		#~ if(fullBody.isLimbInContact(k, stateid+1)):
+			#~ contacts[2]+=[v['effector']]
+	#~ return contacts
+#~ 
+#~ def gencontactsPerFrame(fullBody, stateid, limbsCOMConstraints, pp, path_ids, times, dt_framerate=1./24.):
+	#~ contactsPerPhase = getContactPerPhase(fullBody, stateid, limbsCOMConstraints)
+	#~ config_size = len(fullBody.getCurrentConfig())
+	#~ interpassed = False
+	#~ res = []
+	#~ for path_id in path_ids:		
+		#~ length = pp.client.problem.pathLength (path_id)
+		#~ num_frames_required_fly = times[1] / dt_framerate
+		#~ num_frames_required_support = times[0] / dt_framerate
+		#~ dt_fly = float(length) / num_frames_required_fly
+		#~ dt_support = float(length) / num_frames_required_support
+		#~ dt_finals_fly  = [dt_fly*i for i in range(int(num_frames_required_fly))] + [1]		
+		#~ dt_finals_support  = [dt_support*i for i in range(int(num_frames_required_support))] + [1]	
+		#~ config_size_path = len(pp.client.problem.configAtParam (path_id, 0))
+		#~ if(config_size_path > config_size):
+			#~ interpassed = True
+			#~ res+= [contactsPerPhase[1] for t in dt_finals_fly]
+		#~ elif interpassed:			
+			#~ res+= [contactsPerPhase[2] for t in dt_finals_support]
+		#~ else:
+			#~ res+= [contactsPerPhase[0] for t in dt_finals_support]
+	#~ return res
 
-def getContactPerPhase(fullBody, stateid, limbsCOMConstraints):
-	contacts = [[],[],[]]
-	for k, v in limbsCOMConstraints.iteritems():
-		if(fullBody.isLimbInContact(k, stateid)):
-			contacts[0]+=[v['effector']]
-		if(fullBody.isLimbInContactIntermediary(k, stateid)):
-			contacts[1]+=[v['effector']]
-		if(fullBody.isLimbInContact(k, stateid+1)):
-			contacts[2]+=[v['effector']]
-	return contacts
-
-def gencontactsPerFrame(fullBody, stateid, limbsCOMConstraints, pp, path_ids, times, dt_framerate=1./24.):
-	contactsPerPhase = getContactPerPhase(fullBody, stateid, limbsCOMConstraints)
-	config_size = len(fullBody.getCurrentConfig())
-	interpassed = False
-	res = []
-	for path_id in path_ids:		
-		length = pp.client.problem.pathLength (path_id)
-		num_frames_required_fly = times[1] / dt_framerate
-		num_frames_required_support = times[0] / dt_framerate
-		dt_fly = float(length) / num_frames_required_fly
-		dt_support = float(length) / num_frames_required_support
-		dt_finals_fly  = [dt_fly*i for i in range(int(num_frames_required_fly))] + [1]		
-		dt_finals_support  = [dt_support*i for i in range(int(num_frames_required_support))] + [1]	
-		config_size_path = len(pp.client.problem.configAtParam (path_id, 0))
-		if(config_size_path > config_size):
-			interpassed = True
-			res+= [contactsPerPhase[1] for t in dt_finals_fly]
-		elif interpassed:			
-			res+= [contactsPerPhase[2] for t in dt_finals_support]
-		else:
-			res+= [contactsPerPhase[0] for t in dt_finals_support]
-	return res
-
-def genPandNperFrame(fullBody, stateid, pp, path_ids, times, dt_framerate=1./24.):
-	p, N= fullBody.computeContactPoints(stateid)
+def genPandNperFrame(fullBody, stateid, limbsCOMConstraints, pp, path_ids, times, dt_framerate=1./24.):
+	p, N= fullBody.computeContactPointsPerLimb(stateid, limbsCOMConstraints.keys(), limbsCOMConstraints)
 	config_size = len(fullBody.getCurrentConfig())
 	interpassed = False
 	pRes = []
@@ -109,7 +109,6 @@ def __update_cwc_time(t):
 	
 
 def __getTimes(fullBody, configs, i, time_scale):
-	print "distance", fullBody.getEffectorDistance(i,i+1)
 	trunk_distance =  np.linalg.norm(np.array(configs[i+1][0:3]) - np.array(configs[i][0:3]))
 	distance = max(fullBody.getEffectorDistance(i,i+1), trunk_distance)
 	dist = int(distance * time_scale)#heuristic
@@ -134,7 +133,6 @@ trackedEffectors = []):
 	global errorid
 	global stat_data	
 	fail = 0
-	print "ste"
 	try:
 	#~ if(True):
 		times = [];
@@ -170,23 +168,23 @@ trackedEffectors = []):
 				#~ frame_rate_andrea = 1./1001.
 			new_traj = gen_trajectory_to_play(fullBody, pp, trajectory, times, frame_rate)
 			new_traj_andrea = gen_trajectory_to_play(fullBody, pp, trajectory, times,frame_rate_andrea)
-			new_contacts = gencontactsPerFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, times, frame_rate_andrea)	
-			Ps, Ns = genPandNperFrame(fullBody, i, pp, trajectory, times, frame_rate_andrea)
+			#~ new_contacts = gencontactsPerFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, times, frame_rate_andrea)	
+			Ps, Ns = genPandNperFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, times, frame_rate_andrea)
 			if(len(trajec) > 0):
 				new_traj = new_traj[1:]
 				new_traj_andrea = new_traj_andrea[1:]
-				new_contacts = new_contacts[1:]
+				#~ new_contacts = new_contacts[1:]
 				Ps = Ps[1:]
 				Ns = Ns[1:]
 			trajec = trajec + new_traj
 			trajec_mil += new_traj_andrea
-			global contacts
-			contacts += new_contacts	
+			#~ global contacts
+			#~ contacts += new_contacts	
 			global pos
 			pos += Ps
 			global normals
 			normals+= Ns
-			assert(len(contacts) == len(trajec_mil) and len(contacts) == len(pos) and len(normals) == len(pos))			
+			assert(len(trajec_mil) == len(pos) and len(normals) == len(pos))			
 			stat_data["num_success"] += 1
 		else:
 			print "TODO, NO CONTACT VARIATION, LINEAR INTERPOLATION REQUIRED"
@@ -208,7 +206,7 @@ trackedEffectors = []):
 			errorid += [i]
 			fail+=1
 	except OptimError as e:
-		print "OptimError failed at id " + str(i) , e.strerror
+		print "OptimError failed at id " + str(i) , e
 		stat_data["error_optim_fail"] += 1
 		stat_data["num_errors"] += 1
 		errorid += [i]
@@ -353,11 +351,12 @@ def saveToPinocchio(filename):
 		quat_end = q[4:7]
 		q[6] = q[3]
 		q[3:6] = quat_end
-		data = {'q':q, 'contacts': contacts[i], 'P' : pos[i], 'N' : normals[i]}
+		data = {'q':q, 'P' : pos[i], 'N' : normals[i]}
 		res += [data]
 	f1=open(filename, 'w+')
 	dump(res, f1)
 	f1.close()
+	return res
 		
 def clean():
 	global res

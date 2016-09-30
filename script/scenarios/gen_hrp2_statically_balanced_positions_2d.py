@@ -76,6 +76,7 @@ def draw_cp(cid, limb, config):
 	r.client.gui.createScene(scene)
 	for i in range(4):
 		pos = posetc[2*i]
+		print "pos", pos
 		r.client.gui.addBox(scene+"/b"+str(i),0.01,0.01,0.01, [1,0,0,1])
 		r.client.gui.applyConfiguration(scene+"/b"+str(i),pos+[1,0,0,0])
 		r.client.gui.refresh()	
@@ -101,7 +102,7 @@ q_0 = fullBody.getCurrentConfig();
 #~ fullBody.getSampleConfig()
 qs = []; qs_gepetto = []; states = []
 limbs = [lLegId,rLegId] 
-for _ in range(1000):
+for _ in range(10):
 	q = fullBody.generateGroundContact(limbs)
 	q_gep = q[:]
 	quat_end = q[4:7]

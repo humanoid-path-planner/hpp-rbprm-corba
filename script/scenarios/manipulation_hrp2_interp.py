@@ -6,7 +6,12 @@ from hpp.gepetto import ViewerFactory
 from hpp.gepetto import Viewer
 import sys
 
-import manipulation_hrp2_path as manipulation
+from hpp.corbaserver.manipulation.romeo import Robot
+from hpp.corbaserver.manipulation import ProblemSolver, Rule
+from hpp.gepetto.manipulation import Viewer, ViewerFactory
+from hpp.gepetto import PathPlayer, PathPlayerGui
+from math import sqrt
+
 
 from os import environ
 ins_dir = environ['DEVEL_DIR']
@@ -151,4 +156,9 @@ def playPaths(rs = None):
     #~ act(i,60, use_window = 0, optim_effectors = True, draw = False, verbose = True)
     
 trackedEffectors = [0, 0, 0.15, ['LARM_JOINT5']]
+
+#~ for i in range(0,1):
+	#~ trackedEffectors = [0, i * 0.15, (i+1) * 0.15, ['LARM_JOINT5']];
+	#~ act(i,60, use_window = 0, optim_effectors = True, draw = False, verbose = False, trackedEffectors = trackedEffectors)
+
 

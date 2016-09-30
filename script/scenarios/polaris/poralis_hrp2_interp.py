@@ -158,4 +158,5 @@ def saveAll(name):
 	saveAllData(fullBody, r, name)
 
 
-for i in range(10,30):  act(i,numOptim = 0, use_window = 0, friction = 1, optim_effectors = False, verbose = False, draw = False)
+for i in range(10,25):  act(i,numOptim = 60, use_window = 0, friction = 1, optim_effectors = True, verbose = False, draw = False);
+saveAll('polarisTestAndrea')
