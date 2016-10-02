@@ -24,6 +24,7 @@
 #include "hpp/rbprm/interpolation/rbprm-path-interpolation.hh"
 #include "hpp/rbprm/interpolation/limb-rrt.hh"
 #include "hpp/rbprm/interpolation/com-rrt.hh"
+#include "hpp/rbprm/interpolation/com-trajectory.hh"
 #include "hpp/rbprm/interpolation/spline/effector-rrt.hh"
 #include "hpp/rbprm/stability/stability.hh"
 #include "hpp/rbprm/sampling/sample-db.hh"
@@ -1082,7 +1083,7 @@ namespace hpp {
         return res;
     }
 
-   core::PathVectorPtr_t generateComPath(RbPrmFullBodyPtr_t& fullBody, core::ProblemSolverPtr_t problemSolver, const hpp::floatSeqSeq& rootPositions,
+   core::PathVectorPtr_t generateTrunkPath(RbPrmFullBodyPtr_t& fullBody, core::ProblemSolverPtr_t problemSolver, const hpp::floatSeqSeq& rootPositions,
                           const model::Configuration_t q1, const model::Configuration_t q2) throw (hpp::Error)
     {
         try
@@ -1090,7 +1091,7 @@ namespace hpp {
             T_Configuration positions = doubleDofArrayToConfig(3, rootPositions);
             if(positions.size() <2)
             {
-                throw std::runtime_error("generateComPath requires at least 2 configurations to generate path");
+                throw std::runtime_error("generateTrunkPath requires at least 2 configurations to generate path");
             }
             return addRotations(positions,q1,q2,fullBody->device_->currentConfiguration(),
                                                  fullBody->device_,problemSolver->problem());
@@ -1108,13 +1109,47 @@ namespace hpp {
         try
         {
             model::Configuration_t q1 = dofArrayToConfig(4, q1Seq), q2 = dofArrayToConfig(4, q2Seq);
-            return problemSolver_->addPath(generateComPath(fullBody_, problemSolver_, rootPositions, q1, q2));
+            return problemSolver_->addPath(generateTrunkPath(fullBody_, problemSolver_, rootPositions, q1, q2));
         }
         catch(std::runtime_error& e)
         {
             throw Error(e.what());
         }
     }
+
+    CORBA::Short RbprmBuilder::generateComTraj(const hpp::floatSeqSeq& positions, const hpp::floatSeqSeq& velocities,
+                                          const hpp::floatSeqSeq& accelerations,
+                                          const double dt) throw (hpp::Error)
+     {
+         try
+         {
+             T_Configuration c = doubleDofArrayToConfig(3, positions);
+             T_Configuration cd = doubleDofArrayToConfig(3, velocities);
+             T_Configuration cdd = doubleDofArrayToConfig(3, accelerations);
+             if(c.size() <2)
+             {
+                 throw std::runtime_error("generateComTraj requires at least 2 configurations to generate path");
+             }
+             core::PathVectorPtr_t res = core::PathVector::create(3, 3);
+             if(cdd.size() != c.size()-1 || cd.size() != c.size())
+             {
+                 std::cout << c.size() << " " << cd.size() << " " << cdd.size() << std::endl;
+                 throw std::runtime_error("in generateComTraj, positions and accelerations vector should have the same size");
+             }
+             CIT_Configuration cit = c.begin(); ++cit;
+             CIT_Configuration cdit = cd.begin();
+             CIT_Configuration cddit = cdd.begin();
+             for(;cit != c.end(); ++cit, ++cdit, ++cddit)
+             {
+                 res->appendPath(interpolation::ComTrajectory::create(*(cit-1),*cit,*cdit,*cddit,dt));
+             }
+             return problemSolver_->addPath(res);
+         }
+         catch(std::runtime_error& e)
+         {
+             throw Error(e.what());
+         }
+     }
 
 
     floatSeqSeq* RbprmBuilder::computeContactPoints(unsigned short cId) throw (hpp::Error)
@@ -1391,11 +1426,9 @@ assert(s2 == s1 +1);
         return res;
     }
 
-    hpp::floatSeq* RbprmBuilder::comRRTFromPos(double state1,
-                                       const hpp::floatSeqSeq& rootPositions1,
-                                       const hpp::floatSeqSeq& rootPositions2,
-                                       const hpp::floatSeqSeq& rootPositions3,
-                                       unsigned short numOptimizations) throw (hpp::Error)
+    hpp::floatSeq* RbprmBuilder::rrt(t_rrt functor,  double state1,
+                                    unsigned short cT1, unsigned short cT2, unsigned short cT3,
+                                    unsigned short numOptimizations)  throw (hpp::Error)
     {
         try
         {
@@ -1405,88 +1438,58 @@ assert(s2 == s1 +1);
             {
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
             }
+            const core::PathVectors_t& paths = problemSolver_->paths();
+            if(paths.size() -1 < std::max(cT1, std::max(cT2, cT3)))
+            {
+                throw std::runtime_error("in comRRTFromPos, at least one com trajectory is not present in problem solver");
+            }
             const State& state1=lastStatesComputed_[s1], state2=lastStatesComputed_[s2];
-            // first compute com paths.
-            std::vector<core::PathVectorPtr_t> paths;
-            paths.push_back(generateComPath(fullBody_,problemSolver_,rootPositions1,state1.configuration_.segment<4>(3), state2.configuration_.segment<4>(3)));
-            paths.push_back(generateComPath(fullBody_,problemSolver_,rootPositions2,state1.configuration_.segment<4>(3), state2.configuration_.segment<4>(3)));
-            paths.push_back(generateComPath(fullBody_,problemSolver_,rootPositions3,state1.configuration_.segment<4>(3), state2.configuration_.segment<4>(3)));
 
-            std::vector<State> states;
-            states.push_back(state1);
             State s1Bis(state1);
-            s1Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Bis,paths[0]->end().head<3>());
-            states.push_back(s1Bis);
-
-            State s1Ter(s1Bis);
-            s1Ter.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Ter,paths[1]->initial().head<3>());
-            states.push_back(s1Ter);
+            s1Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Bis,paths[cT1]->end().head<3>());
 
             State s2Bis(state2);
-            s2Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Bis,paths[1]->end().head<3>());
-            states.push_back(s2Bis);
+            s2Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Bis,paths[cT2]->end().head<3>());
 
-            State s2Ter(s2Bis);
-            s2Ter.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Ter,paths[2]->initial().head<3>());
-            states.push_back(s2Ter);
-
-            states.push_back(state2);
             core::PathVectorPtr_t resPath = core::PathVector::create(fullBody_->device_->configSize(), fullBody_->device_->numberDof());
-            /*for(std::vector<State>::const_iterator cit = states.begin(); cit != states.end();cit=cit+2, ++i)
-            {
-                resPath->appendPath(interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[i],
-                                                        *(cit),*(cit+1), numOptimizations));
-            }*/
+
             ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
-            fullBody_->device_->currentConfiguration(s1Ter.configuration_);
-            if(!(problemSolver_->problem()->configValidations()->validate(s1Ter.configuration_, rport)
+            fullBody_->device_->currentConfiguration(s1Bis.configuration_);
+            if(!(problemSolver_->problem()->configValidations()->validate(s1Bis.configuration_, rport)
                     && problemSolver_->problem()->configValidations()->validate(s2Bis.configuration_, rport)))
             {
                 std::cout << "could not project without collision at state " << s1  << std::endl;
 //throw std::runtime_error ("could not project without collision at state " + s1 );
-                // fallback to limbRRT instead
-                //return -1; //limbRRT(s1, s2, numOptimizations);
             }
 
-            /*resPath->appendPath(core::StraightPath::create(fullBody_->device_,state1.configuration_,s1Bis.configuration_,
-                                                           (*distance)(state1.configuration_,s1Bis.configuration_)));
-            resPath->appendPath(core::StraightPath::create(fullBody_->device_,s1Bis.configuration_,s1Ter.configuration_,
-                                                           (*distance)(s1Bis.configuration_,s1Ter.configuration_)));*/
-//resPath->appendPath(core::StraightPath::create(fullBody_->device_,state1.configuration_,s1Ter.configuration_, 0.5));
-            if(state1.configuration_ != s1Ter.configuration_)
+            if(state1.configuration_ != s1Bis.configuration_)
             {
-                core::PathPtr_t p1 = interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[0],
-                        state1,s1Ter, numOptimizations,false);
+                core::PathPtr_t p1 = interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[cT1],
+                        state1,s1Bis, numOptimizations,false);
                 resPath->appendPath(p1);
                 pathsIds.push_back(AddPath(p1,problemSolver_));
             }
 
-            core::PathPtr_t p2 =interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[1],
-                    s1Ter,s2Bis, numOptimizations,true);
-            pathsIds.push_back(AddPath(p2,problemSolver_));
-            // reduce path to remove extradof
-            core::SizeInterval_t interval(0, p2->initial().rows()-1);
-            core::SizeIntervals_t intervals;
-            intervals.push_back(interval);
-            PathPtr_t reducedPath = core::SubchainPath::create(p2,intervals);
-            resPath->appendPath(reducedPath);
-            /*resPath->appendPath(core::StraightPath::create(fullBody_->device_,s2Bis.configuration_,s2Ter.configuration_,
-                                                           (*distance)(s2Bis.configuration_,s2Ter.configuration_)));
-            resPath->appendPath(core::StraightPath::create(fullBody_->device_,s2Ter.configuration_,state2.configuration_,
-                                                           (*distance)(s2Ter.configuration_,state2.configuration_)));*/
-//resPath->appendPath(core::StraightPath::create(fullBody_->device_,s2Bis.configuration_,state2.configuration_, 0.5));;
+            {
+                core::PathPtr_t p2 =(*functor)(fullBody_,problemSolver_->problem(), paths[cT2],
+                    s1Bis,s2Bis, numOptimizations,true);
+                pathsIds.push_back(AddPath(p2,problemSolver_));
+                // reduce path to remove extradof
+                core::SizeInterval_t interval(0, p2->initial().rows()-1);
+                core::SizeIntervals_t intervals;
+                intervals.push_back(interval);
+                PathPtr_t reducedPath = core::SubchainPath::create(p2,intervals);
+                resPath->appendPath(reducedPath);
+            }
+
             if(s2Bis.configuration_ != state2.configuration_)
             {
-                core::PathPtr_t p3= interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[1],
+                core::PathPtr_t p3= interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[cT3],
                         s2Bis,state2, numOptimizations,false);
                 resPath->appendPath(p3);
                 pathsIds.push_back(AddPath(p3,problemSolver_));
             }
 
-            /*T_State tg; tg.push_back(s1Bis);
-            tg.push_back(s2Bis);
-            resPath->appendPath(interpolation::limbRRT(fullBody_,problemSolver_->problem(),
-                                                    tg.begin(),tg.begin()+1, numOptimizations));*/
             pathsIds.push_back(AddPath(resPath,problemSolver_));
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(pathsIds.size());
@@ -1500,132 +1503,60 @@ assert(s2 == s1 +1);
         {
             throw Error(e.what());
         }
+    }
+
+    hpp::floatSeq* RbprmBuilder::comRRTFromPos(double state1,
+                                               unsigned short cT1,
+                                               unsigned short cT2,
+                                               unsigned short cT3,
+                                               unsigned short numOptimizations) throw (hpp::Error)
+    {
+        return rrt(&interpolation::comRRT, state1, cT1, cT2, cT3, numOptimizations);
+
     }
 
     hpp::floatSeq* RbprmBuilder::effectorRRT(double state1,
-                                       const hpp::floatSeqSeq& rootPositions1,
-                                       const hpp::floatSeqSeq& rootPositions2,
-                                       const hpp::floatSeqSeq& rootPositions3,
-                                       unsigned short numOptimizations) throw (hpp::Error)
+                                             unsigned short cT1,
+                                             unsigned short cT2,
+                                             unsigned short cT3,
+                                             unsigned short numOptimizations) throw (hpp::Error)
     {
-        try
-        {
-            std::vector<CORBA::Short> pathsIds;
-            std::size_t s1((std::size_t)state1), s2((std::size_t)state1+1);
-            if(lastStatesComputed_.size () < s1 || lastStatesComputed_.size () < s2 )
-            {
-                throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
-            }
-            const State& state1=lastStatesComputed_[s1], state2=lastStatesComputed_[s2];
-            // first compute com paths.
-            std::vector<core::PathVectorPtr_t> paths;
-            paths.push_back(generateComPath(fullBody_,problemSolver_,rootPositions1,state1.configuration_.segment<4>(3), state2.configuration_.segment<4>(3)));
-            paths.push_back(generateComPath(fullBody_,problemSolver_,rootPositions2,state1.configuration_.segment<4>(3), state2.configuration_.segment<4>(3)));
-            paths.push_back(generateComPath(fullBody_,problemSolver_,rootPositions3,state1.configuration_.segment<4>(3), state2.configuration_.segment<4>(3)));
-
-            std::vector<State> states;
-            states.push_back(state1);
-            State s1Bis(state1);
-            s1Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Bis,paths[0]->end().head<3>());
-            states.push_back(s1Bis);
-
-            State s1Ter(s1Bis);
-            s1Ter.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Ter,paths[1]->initial().head<3>());
-            states.push_back(s1Ter);
-
-            State s2Bis(state2);
-            s2Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Bis,paths[1]->end().head<3>());
-            states.push_back(s2Bis);
-
-            State s2Ter(s2Bis);
-            s2Ter.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Ter,paths[2]->initial().head<3>());
-            states.push_back(s2Ter);
-
-            states.push_back(state2);
-            core::PathVectorPtr_t resPath = core::PathVector::create(fullBody_->device_->configSize(), fullBody_->device_->numberDof());
-
-            ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
-            fullBody_->device_->currentConfiguration(s1Ter.configuration_);
-            if(!(problemSolver_->problem()->configValidations()->validate(s1Ter.configuration_, rport)
-                    && problemSolver_->problem()->configValidations()->validate(s2Bis.configuration_, rport)))
-            {
-                std::cout << "could not project without collision at state " << s1  << std::endl;
-//throw std::runtime_error (std::string("could not project without collision at state " +  s1));
-                // fallback to limbRRT instead
-                //return -1; //limbRRT(s1, s2, numOptimizations);
-            }
-
-            if(state1.configuration_ != s1Ter.configuration_)
-            {
-                core::PathPtr_t p1 = interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[0],
-                        state1,s1Ter, numOptimizations,false);
-                resPath->appendPath(p1);
-                pathsIds.push_back(AddPath(p1,problemSolver_));
-            }
-
-            core::PathPtr_t p2 =interpolation::effectorRRT(fullBody_,problemSolver_->problem(), paths[1],
-                    s1Ter,s2Bis, numOptimizations,true);
-            pathsIds.push_back(AddPath(p2,problemSolver_));
-            // reduce path to remove extradof
-            core::SizeInterval_t interval(0, p2->initial().rows()-1);
-            core::SizeIntervals_t intervals;
-            intervals.push_back(interval);
-            PathPtr_t reducedPath = core::SubchainPath::create(p2,intervals);
-            resPath->appendPath(reducedPath);
-            if(s2Bis.configuration_ != state2.configuration_)
-            {
-                core::PathPtr_t p3= interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[1],
-                        s2Bis,state2, numOptimizations,false);
-                resPath->appendPath(p3);
-                pathsIds.push_back(AddPath(p3,problemSolver_));
-            }
-            pathsIds.push_back(AddPath(resPath,problemSolver_));
-            hpp::floatSeq* dofArray = new hpp::floatSeq();
-            dofArray->length(pathsIds.size());
-            for(std::size_t i=0; i< pathsIds.size(); ++i)
-            {
-              (*dofArray)[(_CORBA_ULong)i] = pathsIds[i];
-            }
-            return dofArray;
-        }
-        catch(std::runtime_error& e)
-        {
-            throw Error(e.what());
-        }
+        return rrt(&interpolation::effectorRRT, state1, cT1, cT2, cT3, numOptimizations);
     }
 
     hpp::floatSeq* RbprmBuilder::effectorRRTFromPath(double state1,
-                                       unsigned short refpath, double path_from, double path_to,
-                                       const hpp::floatSeqSeq& rootPositions1,
-                                       const hpp::floatSeqSeq& rootPositions2,
-                                       const hpp::floatSeqSeq& rootPositions3,
-                                       unsigned short numOptimizations, const Names_t &trackedEffector) throw (hpp::Error)
+                                                    unsigned short refpath, double path_from, double path_to,
+                                                    unsigned short cT1,
+                                                    unsigned short cT2,
+                                                    unsigned short cT3,
+                                                    unsigned short numOptimizations,
+                                                    const Names_t &trackedEffector) throw (hpp::Error)
     {
         try
         {
-            std::vector<std::string> trackedEffectorNames = stringConversion(trackedEffector);
             std::vector<CORBA::Short> pathsIds;
             std::size_t s1((std::size_t)state1), s2((std::size_t)state1+1);
             if(lastStatesComputed_.size () < s1 || lastStatesComputed_.size () < s2 )
             {
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
             }
+            const core::PathVectors_t& paths = problemSolver_->paths();
+            if(paths.size() -1 < std::max(cT1, std::max(cT2, cT3)))
+            {
+                throw std::runtime_error("in comRRTFromPos, at least one com trajectory is not present in problem solver");
+            }
             const State& state1=lastStatesComputed_[s1], state2=lastStatesComputed_[s2];
-            // first compute com paths.
-            std::vector<core::PathVectorPtr_t> paths;
-            paths.push_back(generateComPath(fullBody_,problemSolver_,rootPositions1,state1.configuration_.segment<4>(3), state2.configuration_.segment<4>(3)));
-            paths.push_back(generateComPath(fullBody_,problemSolver_,rootPositions2,state1.configuration_.segment<4>(3), state2.configuration_.segment<4>(3)));
-            paths.push_back(generateComPath(fullBody_,problemSolver_,rootPositions3,state1.configuration_.segment<4>(3), state2.configuration_.segment<4>(3)));
 
-            core::PathVectorPtr_t comPath = core::PathVector::create(fullBody_->device_->configSize(), fullBody_->device_->numberDof());
-            comPath->appendPath(paths[0]);
-            comPath->appendPath(paths[1]);
-            comPath->appendPath(paths[2]);
-
+            core::PathVectorPtr_t comPath = core::PathVector::create(3,3);
+            comPath->appendPath(paths[cT1]);
+            comPath->appendPath(paths[cT2]);
+            comPath->appendPath(paths[cT3]);
+            std::vector<std::string> trackedEffectorNames = stringConversion(trackedEffector);
             core::PathPtr_t refFullBody = problemSolver_->paths()[refpath]->extract(std::make_pair(path_from, path_to));
-            core::PathPtr_t p2 =interpolation::effectorRRTFromPath(fullBody_,problemSolver_->problem(), comPath, refFullBody,
-                    state1,state2, numOptimizations,true, trackedEffectorNames);
+            core::PathPtr_t p2 =interpolation::effectorRRTFromPath(fullBody_,problemSolver_->problem(), comPath,
+                    state1,state2, numOptimizations,true, refFullBody, trackedEffectorNames);
             pathsIds.push_back(AddPath(p2,problemSolver_));
+
             // reduce path to remove extradof
             core::SizeInterval_t interval(0, p2->initial().rows()-1);
             core::SizeIntervals_t intervals;

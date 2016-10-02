@@ -19,6 +19,7 @@
 # define HPP_RBPRM_CORBA_BUILDER_IMPL_HH
 
 # include <hpp/core/problem-solver.hh>
+# include <hpp/core/path.hh>
 # include "rbprmbuilder.hh"
 # include <hpp/rbprm/rbprm-device.hh>
 # include <hpp/rbprm/rbprm-fullbody.hh>
@@ -152,29 +153,40 @@ namespace hpp {
         virtual hpp::floatSeqSeq* interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold, unsigned short filterStates) throw (hpp::Error);
         virtual hpp::floatSeqSeq* getContactCone(unsigned short stateId, double friction) throw (hpp::Error);
         virtual hpp::floatSeqSeq* getContactIntermediateCone(unsigned short stateId, double friction) throw (hpp::Error);
+        virtual CORBA::Short generateComTraj(const hpp::floatSeqSeq& positions, const hpp::floatSeqSeq& velocities,
+                                             const hpp::floatSeqSeq& accelerations, const double dt) throw (hpp::Error);
         virtual CORBA::Short generateRootPath(const hpp::floatSeqSeq& rootPositions,
                                       const hpp::floatSeq& q1, const hpp::floatSeq& q2) throw (hpp::Error);
         virtual CORBA::Short limbRRT(double state1, double state2, unsigned short numOptimizations) throw (hpp::Error);
         virtual CORBA::Short limbRRTFromRootPath(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error);
         virtual CORBA::Short configToPath(const hpp::floatSeqSeq& configs) throw (hpp::Error);
         virtual CORBA::Short comRRT(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error);
+
+        typedef core::PathPtr_t (*t_rrt)
+            (RbPrmFullBodyPtr_t, core::ProblemPtr_t, const core::PathPtr_t,
+             const  State &, const State &, const  std::size_t, const bool);
+
+        hpp::floatSeq* rrt(t_rrt functor ,double state1,
+                           unsigned short comTraj1, unsigned short comTraj2, unsigned short comTraj3,
+                           unsigned short numOptimizations) throw (hpp::Error);
+
         virtual hpp::floatSeq* comRRTFromPos(double state1,
-                                           const hpp::floatSeqSeq& rootPositions1,
-                                           const hpp::floatSeqSeq& rootPositions2,
-                                           const hpp::floatSeqSeq& rootPositions3,
+                                           unsigned short comTraj1,
+                                           unsigned short comTraj2,
+                                           unsigned short comTraj3,
                                            unsigned short numOptimizations) throw (hpp::Error);
         virtual hpp::floatSeq* effectorRRT(double state1,
-                                           const hpp::floatSeqSeq& rootPositions1,
-                                           const hpp::floatSeqSeq& rootPositions2,
-                                           const hpp::floatSeqSeq& rootPositions3,
+                                           unsigned short comTraj1,
+                                           unsigned short comTraj2,
+                                           unsigned short comTraj3,
                                            unsigned short numOptimizations) throw (hpp::Error);
         virtual hpp::floatSeq* effectorRRTFromPath(double state1,
                                            unsigned short path,
                                            double path_from,
                                            double path_to,
-                                           const hpp::floatSeqSeq& rootPositions1,
-                                           const hpp::floatSeqSeq& rootPositions2,
-                                           const hpp::floatSeqSeq& rootPositions3,
+                                           unsigned short comTraj1,
+                                           unsigned short comTraj2,
+                                           unsigned short comTraj3,
                                            unsigned short numOptimizations,
                                            const hpp::Names_t& trackedEffectors) throw (hpp::Error);
         virtual hpp::floatSeq* projectToCom(double state, const hpp::floatSeq& targetCom) throw (hpp::Error);

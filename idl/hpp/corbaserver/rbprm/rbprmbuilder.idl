@@ -292,6 +292,19 @@ module hpp
     /// \return id of the root path computed
     short generateRootPath(in floatSeqSeq rootPositions, in floatSeq q1, in floatSeq q2) raises (Error);
 
+    /// Create a com trajectory given list of positions, velocities and accelerations
+    /// accelerations list contains one less element because it does not have an initial state.
+    /// a set of 3d key points
+    /// The path is composed of n+1 integrations
+    /// between the n positions.
+    /// The resulting path
+    /// is added to the problem solver
+    /// \param positions array of positions
+    /// \param velocities array of velocities
+    /// \param accelerations array of accelerations
+    /// \param dt time between two points
+    /// \return id of the root path computed
+    short generateComTraj(in floatSeqSeq positions, in floatSeqSeq velocities, in floatSeqSeq accelerations, in double dt) raises (Error);
 
     /// Provided a path has already been computed and interpolated, generate a continuous path
     /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
@@ -349,9 +362,9 @@ module hpp
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
     /// \return id of the root path computed
     floatSeq comRRTFromPos(in double state1,
-                        in  floatSeqSeq rootPositions1,
-                        in  floatSeqSeq rootPositions2,
-                        in  floatSeqSeq rootPositions3,
+                        in  unsigned short comTraj1,
+                        in  unsigned short comTraj2,
+                        in  unsigned short comTraj3,
                         in unsigned short numOptimizations) raises (Error);
 
     /// Provided a path has already been computed and interpolated, generate a continuous path
@@ -366,32 +379,32 @@ module hpp
     /// \param rootPositions1 com positions to track for 3rd phase
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
     /// \return id of the root path computed
-		floatSeq effectorRRT(in double state1,
-                        in  floatSeqSeq rootPositions1,
-                        in  floatSeqSeq rootPositions2,
-                        in  floatSeqSeq rootPositions3,
-												in unsigned short numOptimizations) raises (Error);
+    floatSeq effectorRRT(in double state1,
+                        in  unsigned short comTraj1,
+                        in  unsigned short comTraj2,
+                        in  unsigned short comTraj3,
+                        in unsigned short numOptimizations) raises (Error);
 
 
-		/// Provided a path has already been computed and interpolated, generate a continuous path
-		/// between two indicated states. The states do not need to be consecutive, but increasing in Id.
-		/// Will fail if the index of the states do not exist
-		/// The path of the COM of thr robot and limbs not considered by the contact transitions between
-		/// two states is assumed to be already computed, and registered in the solver under the id specified by the user.
-		/// It must be valid in the sense of the active PathValidation.
-		/// \param state1 index of first state.
-		/// \param rootPositions1 com positions to track for 1st phase
-		/// \param rootPositions1 com positions to track for 2nd phase
-		/// \param rootPositions1 com positions to track for 3rd phase
-		/// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
-		/// \return id of the root path computed
-		floatSeq effectorRRTFromPath(in double state1, in  unsigned short refPath,
-												in double path_from, in double path_to,
-												in floatSeqSeq rootPositions1,
-												in floatSeqSeq rootPositions2,
-												in floatSeqSeq rootPositions3,
-												in unsigned short numOptimizations,
-												in Names_t trackedEffectors) raises (Error);
+    /// Provided a path has already been computed and interpolated, generate a continuous path
+    /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
+    /// Will fail if the index of the states do not exist
+    /// The path of the COM of thr robot and limbs not considered by the contact transitions between
+    /// two states is assumed to be already computed, and registered in the solver under the id specified by the user.
+    /// It must be valid in the sense of the active PathValidation.
+    /// \param state1 index of first state.
+    /// \param rootPositions1 com positions to track for 1st phase
+    /// \param rootPositions1 com positions to track for 2nd phase
+    /// \param rootPositions1 com positions to track for 3rd phase
+    /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
+    /// \return id of the root path computed
+    floatSeq effectorRRTFromPath(in double state1, in  unsigned short refPath,
+                                    in double path_from, in double path_to,
+                                    in  unsigned short comTraj1,
+                                    in  unsigned short comTraj2,
+                                    in  unsigned short comTraj3,
+                                    in unsigned short numOptimizations,
+                                    in Names_t trackedEffectors) raises (Error);
 
     /// Project a given state into a given COM position
     /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
@@ -401,12 +414,12 @@ module hpp
     /// \return projected configuration
     floatSeq projectToCom(in double state, in floatSeq targetCom) raises (Error);
 
-		/// Retrieve the configuration at a given state
-		/// between two indicated states. The states do not need to be consecutive, but increasing in Id.
-		/// Will fail if the index of the state does not exist.
-		/// \param state index of first state.
-		/// \return projected configuration
-		floatSeq getConfigAtState(in unsigned short state) raises (Error);
+    /// Retrieve the configuration at a given state
+    /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
+    /// Will fail if the index of the state does not exist.
+    /// \param state index of first state.
+    /// \return projected configuration
+    floatSeq getConfigAtState(in unsigned short state) raises (Error);
 
     /// \param limb name of the limb for which the request aplies
     /// \param state1 current state considered

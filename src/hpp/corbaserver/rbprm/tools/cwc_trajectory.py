@@ -45,9 +45,6 @@ def __get_com_constraint(fullBody, state, config, limbsCOMConstraints, interm = 
 	for i, v in limbsCOMConstraints.iteritems():
 		if not constraintsComLoaded.has_key(i):
 			constraintsComLoaded[i] = ineq_from_file(ineqPath+v['file'])
-		#~ print "inter", interm
-		#~ print "intermed", fullBody.isLimbInContactIntermediary(i, state)
-		#~ print "inter", fullBody.isLimbInContact(i, state)
 		contact = (interm and fullBody.isLimbInContactIntermediary(i, state)) or (not interm and fullBody.isLimbInContact(i, state))
 		if contact:
 			ineq = constraintsComLoaded[i]
@@ -56,9 +53,7 @@ def __get_com_constraint(fullBody, state, config, limbsCOMConstraints, interm = 
 			tr[:3,3] = np.array(qEffector[0:3])
 			ineq_r = rotate_inequalities(ineq, tr)
 			As.append(ineq_r.A); bs.append(ineq_r.b);
-			#~ print 'contact', v['effector']
 			contacts.append(v['effector'])
-	#~ print 'contacts', contacts
 	return [np.vstack(As), np.hstack(bs)]
 		
 def compute_state_info(fullBody,states, state_id, phase_dt, mu, computeCones, limbsCOMConstraints):
@@ -83,13 +78,11 @@ def compute_state_info(fullBody,states, state_id, phase_dt, mu, computeCones, li
 			cones.append(fullBody.getContactCone(state_id+1, mu)[0])		
 	COMConstraints = None
 	if(not (limbsCOMConstraints == None)):
-		#~ print "retrieving COM constraints"
 		COMConstraints = [__get_com_constraint(fullBody, state_id, states[state_id], limbsCOMConstraints)]
 		if(len(p) > 2):
 			COMConstraints.append(__get_com_constraint(fullBody, state_id, states[state_id], limbsCOMConstraints, True))
 		if(len(p) > len(COMConstraints)):
 			COMConstraints.append(__get_com_constraint(fullBody, state_id + 1, states[state_id + 1], limbsCOMConstraints))
-		#~ print "num com constraints", len(COMConstraints)
 	return p, N, init_com, end_com, t_end_phases, cones, COMConstraints
 
 
@@ -101,7 +94,6 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 	
 	constraints = ['cones_constraint', 'end_reached_constraint','end_speed_constraint']
 	#~ constraints = ['cones_constraint', 'end_reached_constraint','end_speed_constraint', 'com_kinematic_constraint']
-	#~ constraints = ['end_reached_constraint']
 	param_constraints = []	
 	mass = fullBody.getMass()
 	
@@ -112,7 +104,6 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 	for w in range(1,use_window+1):
 		waypoint = end_com[:]
 		waypoint_time = int(np.round(t_end_phases[-1]/ dt)) - 1
-		print "waypoint_time", waypoint_time
 		# trying not to apply constraint
 		#~ param_constraints += [("waypoint_reached_constraint",(waypoint_time, waypoint))]
 		p1, N1, init_com1, end_com1, t_end_phases1, cones1, COMConstraints1 = compute_state_info(fullBody,states, state_id+w, phase_dt[2*w:], mu, computeCones, limbsCOMConstraints)
@@ -131,12 +122,10 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 	timeelapsed = 0		
 	if (profile):
 		start = time.clock() 
-	#~ print "init x", init_com + lastspeed.tolist()
 	var_final, params = cone_optimization(p, N, [init_com + lastspeed.tolist(), end_com + [0,0,0]], t_end_phases[1:], dt, cones, COMConstraints, mu, mass, 9.81, reduce_ineq, verbose,
 	constraints, param_constraints)	
 	print "end_com ", end_com , "computed end come", var_final['c'][-1], var_final['c_end']
 	if (profile):
-	#~ if (True):
 		end = time.clock() 
 		timeelapsed = (end - start) * 1000
 		#~ print "solving time", timeelapsed
@@ -151,8 +140,11 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 		else:
 			print "reached com is not good, restarting problem with 0 window"
 			return gen_trajectory(fullBody, states, state_id, computeCones, mu, dt, phase_dt[:2], reduce_ineq, verbose, limbsCOMConstraints, profile, use_window = 0)			
-	else:
+	else:		
+		if norm(np.array(var_final['c'][-1]) - np.array(__get_com(fullBody, states[state_id+1]))) > 0.00001:
+			print "error in com desired: obtained ", __get_com(fullBody, states[state_id+1]), var_final['c'][-1]
 		lastspeed = np.array([0,0,0])
+		
 	return var_final, params, timeelapsed
 
 def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  dt=0.2, phase_dt = [0.4, 1], reduce_ineq = True, verbose = False, limbsCOMConstraints = None, use_window = 0):
@@ -212,6 +204,20 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 	plt.show()
 	return var_final, params, elapsed
 	
+def __cVarPerPhase(var, dt, t, final_state, addValue, isAcceleration = False):
+	varVals = addValue + [v.tolist() for v in final_state[var]]
+	varPerPhase = [[varVals[(int)(t_id/dt) ] for t_id in np.arange(t[index],t[index+1]-_EPS,dt)] for index, _ in enumerate(t[:-1])  ]
+	varPerPhase[2].append(varVals[-1])
+	if(not isAcceleration):
+		assert len(varVals) == len(varPerPhase[0]) + len(varPerPhase[1]) + len(varPerPhase[2]), "incorrect num of c or dc"
+		
+	varPerPhase[0].append(varPerPhase[1][0]) # duplicate position
+	varPerPhase[1].append(varPerPhase[2][0])
+	if(isAcceleration): #acceleration: remove first
+		varPerPhase = [v[1:] for v in varPerPhase]
+		assert len(final_state[var]) == len(varPerPhase[0]) + len(varPerPhase[1]) + len(varPerPhase[2]), "incorrect num of ddc"
+	return varPerPhase
+	
 def __optim__threading_ok(fullBody, states, state_id, computeCones = False, mu = 1, dt =0.1, phase_dt = [0.4, 1], reduce_ineq = True,
  num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0):
 	print "callgin gen ",state_id
@@ -223,11 +229,14 @@ def __optim__threading_ok(fullBody, states, state_id, computeCones = False, mu =
 	dt = res[1]["dt"];
 	final_state = res[0]
 	c0 =  res[1]["x_init"][0:3]
-	comPos = [c0] + [c.tolist() for c in final_state['c']]
-	comPosPerPhase = [[comPos[(int)(t_id/dt) ] for t_id in np.arange(t[index],t[index+1]-_EPS,dt)] for index, _ in enumerate(t[:-1])  ]
-	comPosPerPhase[-1].append(comPos[-1])
-	assert(len(comPos) == len(comPosPerPhase[0]) + len(comPosPerPhase[1]) + len(comPosPerPhase[2]))
-	return comPosPerPhase, res[2] #res[2] is timeelapsed
+	dc0 = res[1]["x_init"][3:7]
+	comPosPerPhase = __cVarPerPhase('c'  , dt, t, final_state, [c0])
+	comVelPerPhase = __cVarPerPhase('dc' , dt, t, final_state, [dc0])
+	comAccPerPhase = __cVarPerPhase('ddc', dt, t, final_state, [[0,0,0]], isAcceleration = True)
+	
+	#now compute com trajectorirs
+	comTrajIds = [fullBody.generateComTraj(comPosPerPhase[i], comVelPerPhase[i], comAccPerPhase[i], dt) for i in range(0,3)]
+	return comTrajIds, res[2] #res[2] is timeelapsed
 
 def solve_com_RRT(fullBody, states, state_id, computeCones = False, mu = 1, dt =0.1, phase_dt = [0.4, 1],
 reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0, trackedEffectors = []):
@@ -243,8 +252,6 @@ reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConst
 	comPosPerPhase, timeElapsed = __optim__threading_ok(fullBody, states, state_id, computeCones, mu, dt, phase_dt,
 	reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints, profile, use_window)
 	print "done. generating state trajectory ",state_id		
-	if norm(np.array(comPosPerPhase[2][-1]) - np.array(__get_com(fullBody, states[state_id+1]))) > 0.00001:
-		print "error in com desired: obtained ", __get_com(fullBody, states[state_id+1]), comPosPerPhase[2][-1]
 	if(len(trackedEffectors) == 0):
 		paths_ids = [int(el) for el in fullBody.effectorRRT(state_id,comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims)]
 	else:
@@ -254,30 +261,3 @@ reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConst
 	print "done. computing final trajectory to display ",state_id
 	return paths_ids[-1], paths_ids[:-1], timeElapsed
 	
-#~ from multiprocessing import Process	
-
-#~ def solve_com_RRTs(fullBody, states, state_ids, computeCones = False, mu = 1, dt =0.1, phase_dt = 1, reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None):
-	#~ results = {}
-	#~ processes = {}
-	#~ allpathsids =[[],[]]
-	#~ errorid = []
-	#~ for sid in state_ids:
-		#~ pid = str(sid)
-		#~ p = Process(target=__optim__threading_ok, args=(fullBody, states, sid, computeCones, mu, dt, phase_dt, reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints, results))
-		#~ processes[str(sid)] = p
-		#~ p.start()
-	#~ for i,p in processes.iteritems():
-		#~ p.join()
-	#~ print results
-	#~ print "done. generating state trajectory "
-	#~ for sid in state_ids:
-		#~ comPosPerPhase = results[str(sid)]
-		#~ try:
-			#~ paths_ids = [int(el) for el in fullBody.comRRTFromPos(state_id,comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims)]
-			#~ print "done. computing final trajectory to display ",state_id
-			#~ allpathsids[0].append(paths_ids[-1])
-			#~ allpathsids[1].append(paths_ids[:-1])
-		#~ except:
-			#~ errorid += [i]
-	#~ print "errors at states: "; errorid
-	#~ return allpathsids[0], allpathsids[1]
