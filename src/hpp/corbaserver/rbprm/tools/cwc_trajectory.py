@@ -124,19 +124,22 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 		start = time.clock() 
 	var_final, params = cone_optimization(p, N, [init_com + lastspeed.tolist(), end_com + [0,0,0]], t_end_phases[1:], dt, cones, COMConstraints, mu, mass, 9.81, reduce_ineq, verbose,
 	constraints, param_constraints)	
-	print "end_com ", end_com , "computed end come", var_final['c'][-1], var_final['c_end']
+	#~ print "end_com ", end_com , "computed end come", var_final['c'][-1], var_final['c_end']
 	if (profile):
 		end = time.clock() 
 		timeelapsed = (end - start) * 1000
 		#~ print "solving time", timeelapsed
 	if(use_window > 0):
 		var_final['c'] = var_final['c'][:init_waypoint_time+1]
+		var_final['dc'] = var_final['dc'][:init_waypoint_time+1]
+		var_final['ddc'] = var_final['ddc'][:init_waypoint_time+1]
 		params["t_init_phases"] = params["t_init_phases"][:-3*use_window]
 		print "trying to project on com (from, to) ", init_end_com, var_final['c'][-1]
 		if (fullBody.projectStateToCOM(state_id+1, (var_final['c'][-1]).tolist())):
 			print "PROJECTED", init_end_com, var_final['c'][-1]
 			states[state_id+1] = fullBody.getConfigAtState(state_id+1) #updating config from python side)
 			lastspeed = var_final['dc'][init_waypoint_time]		
+			print "init speed", lastspeed
 		else:
 			print "reached com is not good, restarting problem with 0 window"
 			return gen_trajectory(fullBody, states, state_id, computeCones, mu, dt, phase_dt[:2], reduce_ineq, verbose, limbsCOMConstraints, profile, use_window = 0)			
@@ -204,18 +207,21 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 	plt.show()
 	return var_final, params, elapsed
 	
-def __cVarPerPhase(var, dt, t, final_state, addValue, isAcceleration = False):
+def __cVarPerPhase(var, dt, t, final_state, addValue):
 	varVals = addValue + [v.tolist() for v in final_state[var]]
-	varPerPhase = [[varVals[(int)(t_id/dt) ] for t_id in np.arange(t[index],t[index+1]-_EPS,dt)] for index, _ in enumerate(t[:-1])  ]
+	varPerPhase = [[varVals[(int)(round(t_id/dt)) ] for t_id in np.arange(t[index],t[index+1]-_EPS,dt)] for index, _ in enumerate(t[:-1])  ]
 	varPerPhase[2].append(varVals[-1])
-	if(not isAcceleration):
-		assert len(varVals) == len(varPerPhase[0]) + len(varPerPhase[1]) + len(varPerPhase[2]), "incorrect num of c or dc"
+	if(not var == "ddc"):
+		assert len(varVals) == len(varPerPhase[0]) + len(varPerPhase[1]) + len(varPerPhase[2]), mess
 		
-	varPerPhase[0].append(varPerPhase[1][0]) # duplicate position
-	varPerPhase[1].append(varPerPhase[2][0])
-	if(isAcceleration): #acceleration: remove first
+	if var == "dc":
+		varPerPhase[2] = varPerPhase[2][:-1] # not relevant for computation
+	else:
+		varPerPhase[0].append(varPerPhase[1][0]) # end pos of state is the same as the previous one
+		varPerPhase[1].append(varPerPhase[2][0])
+	if var == "ddc": #acceleration: remove first
 		varPerPhase = [v[1:] for v in varPerPhase]
-		assert len(final_state[var]) == len(varPerPhase[0]) + len(varPerPhase[1]) + len(varPerPhase[2]), "incorrect num of ddc"
+		assert len(final_state[var]) == len(varPerPhase[0]) + len(varPerPhase[1]) + len(varPerPhase[2]), "incorrect num of ddc"		
 	return varPerPhase
 	
 def __optim__threading_ok(fullBody, states, state_id, computeCones = False, mu = 1, dt =0.1, phase_dt = [0.4, 1], reduce_ineq = True,
@@ -232,8 +238,8 @@ def __optim__threading_ok(fullBody, states, state_id, computeCones = False, mu =
 	dc0 = res[1]["x_init"][3:7]
 	comPosPerPhase = __cVarPerPhase('c'  , dt, t, final_state, [c0])
 	comVelPerPhase = __cVarPerPhase('dc' , dt, t, final_state, [dc0])
-	comAccPerPhase = __cVarPerPhase('ddc', dt, t, final_state, [[0,0,0]], isAcceleration = True)
-	
+	comAccPerPhase = __cVarPerPhase('ddc', dt, t, final_state, [[0,0,0]])
+		
 	#now compute com trajectorirs
 	comTrajIds = [fullBody.generateComTraj(comPosPerPhase[i], comVelPerPhase[i], comAccPerPhase[i], dt) for i in range(0,3)]
 	return comTrajIds, res[2] #res[2] is timeelapsed

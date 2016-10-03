@@ -191,6 +191,7 @@ namespace hpp {
                                            const hpp::Names_t& trackedEffectors) throw (hpp::Error);
         virtual hpp::floatSeq* projectToCom(double state, const hpp::floatSeq& targetCom) throw (hpp::Error);
         virtual hpp::floatSeq* getConfigAtState(unsigned short stateId) throw (hpp::Error);
+        double projectStateToCOMEigen(unsigned short stateId, const model::Configuration_t& com_target)throw (hpp::Error);
         virtual double projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com) throw (hpp::Error);
         virtual void saveComputedStates(const char* filepath) throw (hpp::Error);
         virtual void saveLimbDatabase(const char* limbname,const char* filepath) throw (hpp::Error);

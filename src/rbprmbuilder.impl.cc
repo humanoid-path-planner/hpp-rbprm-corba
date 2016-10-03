@@ -568,7 +568,7 @@ namespace hpp {
 
     }
 
-    double RbprmBuilder::projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com) throw (hpp::Error)
+    double RbprmBuilder::projectStateToCOMEigen(unsigned short stateId, const model::Configuration_t& com_target) throw (hpp::Error)
     {
         try
         {
@@ -576,7 +576,6 @@ namespace hpp {
             {
                 throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
             }
-            model::Configuration_t com_target = dofArrayToConfig (3, com);
             State s = lastStatesComputed_[stateId];
             bool succes (false);
             hpp::model::Configuration_t c = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s,com_target,succes);
@@ -592,6 +591,12 @@ namespace hpp {
         {
             throw Error(e.what());
         }
+    }
+
+    double RbprmBuilder::projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com) throw (hpp::Error)
+    {        
+        model::Configuration_t com_target = dofArrayToConfig (3, com);
+        return projectStateToCOMEigen(stateId, com_target);
     }
 
     hpp::floatSeq* RbprmBuilder::generateContacts(const hpp::floatSeq& configuration,
@@ -1131,7 +1136,7 @@ namespace hpp {
                  throw std::runtime_error("generateComTraj requires at least 2 configurations to generate path");
              }
              core::PathVectorPtr_t res = core::PathVector::create(3, 3);
-             if(cdd.size() != c.size()-1 || cd.size() != c.size())
+             if(cdd.size() != c.size()-1 || cdd.size() != cd.size())
              {
                  std::cout << c.size() << " " << cd.size() << " " << cdd.size() << std::endl;
                  throw std::runtime_error("in generateComTraj, positions and accelerations vector should have the same size");
@@ -1141,6 +1146,7 @@ namespace hpp {
              CIT_Configuration cddit = cdd.begin();
              for(;cit != c.end(); ++cit, ++cdit, ++cddit)
              {
+                 std::cout << "is trajectory ok ?" << ((*cit) - (*(cit-1) +  dt * (*cdit) + dt * dt * (*cddit) * 0.5)).norm() <<std::endl;
                  res->appendPath(interpolation::ComTrajectory::create(*(cit-1),*cit,*cdit,*cddit,dt));
              }
              return problemSolver_->addPath(res);
@@ -1443,15 +1449,32 @@ assert(s2 == s1 +1);
             {
                 throw std::runtime_error("in comRRTFromPos, at least one com trajectory is not present in problem solver");
             }
-            const State& state1=lastStatesComputed_[s1], state2=lastStatesComputed_[s2];
+            State& state1=lastStatesComputed_[s1], state2=lastStatesComputed_[s2];
+
+model::Configuration_t oldConf = state1.configuration_;
+if (projectStateToCOMEigen(s1,paths[cT1]->initial().head<3>()) == 0)
+{
+    throw std::runtime_error("can not project com on initial state");
+}
+std::cout << "com projected ? " << (oldConf - state1.configuration_).norm() << std::endl;
+oldConf = state2.configuration_;
+if (projectStateToCOMEigen(s2,paths[cT3]->end().head<3>()) == 0)
+{
+    throw std::runtime_error("can not project com on initial state");
+}
+std::cout << "com2 projected ? " << (oldConf - state2.configuration_).norm() << std::endl;
 
             State s1Bis(state1);
+std::cout << "wtf" <<  (paths[cT1]->end() - paths[cT1]->end()).norm() << std::endl;
             s1Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Bis,paths[cT1]->end().head<3>());
 
             State s2Bis(state2);
             s2Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Bis,paths[cT2]->end().head<3>());
+std::cout << "wtf2 " <<  (paths[cT2]->end() - paths[cT3]->initial()).norm() << std::endl;
 
             core::PathVectorPtr_t resPath = core::PathVector::create(fullBody_->device_->configSize(), fullBody_->device_->numberDof());
+
+
 
             ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
             fullBody_->device_->currentConfiguration(s1Bis.configuration_);
