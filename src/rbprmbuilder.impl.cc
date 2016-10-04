@@ -969,8 +969,6 @@ namespace hpp {
         std::pair<stability::MatrixXX, stability::VectorX> cone = stability::ComputeCentroidalCone(fullBody, state, friction);
         res->length ((_CORBA_ULong)cone.first.rows());
         _CORBA_ULong size = (_CORBA_ULong) cone.first.cols()+1;
-        std::cout << "H cols" <<  cone.first.cols() << std::endl;
-        std::cout << "H rows" <<  cone.first.rows() << std::endl;
         for(int i=0; i < cone.first.rows(); ++i)
         {
             double* dofArray = hpp::floatSeq::allocbuf(size);
@@ -1010,8 +1008,7 @@ namespace hpp {
         thirdState.contactBreaks(firstState, breaks);
         if(breaks.size() > 1)
         {
-            throw std::runtime_error ("too many contact breaks between states" + std::string(""+cId) +
-                                      "and " + std::string(""+(cId + 1)));
+            throw std::runtime_error ("too many contact breaks between states" + std::string(""+cId) + "and " + std::string(""+(cId + 1)));
         }
         if(breaks.size() == 1)
         {
@@ -1144,9 +1141,9 @@ namespace hpp {
              CIT_Configuration cit = c.begin(); ++cit;
              CIT_Configuration cdit = cd.begin();
              CIT_Configuration cddit = cdd.begin();
-             for(;cit != c.end(); ++cit, ++cdit, ++cddit)
+             int i = 0;
+             for(;cit != c.end(); ++cit, ++cdit, ++cddit, ++i)
              {
-                 std::cout << "is trajectory ok ?" << ((*cit) - (*(cit-1) +  dt * (*cdit) + dt * dt * (*cddit) * 0.5)).norm() <<std::endl;
                  res->appendPath(interpolation::ComTrajectory::create(*(cit-1),*cit,*cdit,*cddit,dt));
              }
              return problemSolver_->addPath(res);
@@ -1181,8 +1178,7 @@ namespace hpp {
         }
         if(creations.size() > 1)
         {
-            throw std::runtime_error ("too many contact creations between states" + std::string(""+cId) +
-                                      "and " + std::string(""+(cId + 1)));
+            throw std::runtime_error ("too many contact creations between states" + std::string(""+cId) + "and " + std::string(""+(cId + 1)));
         }
 
         hpp::floatSeqSeq *res;
@@ -1237,8 +1233,7 @@ namespace hpp {
         }
         if(creations.size() > 1)
         {
-            throw std::runtime_error ("too many contact creations between states" + std::string(""+cId) +
-                                      "and " + std::string(""+(cId + 1)));
+            throw std::runtime_error ("too many contact creations between states" + std::string(""+cId) + "and " + std::string(""+(cId + 1)));
         }
 
         hpp::floatSeqSeq *res;
@@ -1451,26 +1446,11 @@ assert(s2 == s1 +1);
             }
             State& state1=lastStatesComputed_[s1], state2=lastStatesComputed_[s2];
 
-model::Configuration_t oldConf = state1.configuration_;
-if (projectStateToCOMEigen(s1,paths[cT1]->initial().head<3>()) == 0)
-{
-    throw std::runtime_error("can not project com on initial state");
-}
-std::cout << "com projected ? " << (oldConf - state1.configuration_).norm() << std::endl;
-oldConf = state2.configuration_;
-if (projectStateToCOMEigen(s2,paths[cT3]->end().head<3>()) == 0)
-{
-    throw std::runtime_error("can not project com on initial state");
-}
-std::cout << "com2 projected ? " << (oldConf - state2.configuration_).norm() << std::endl;
-
             State s1Bis(state1);
-std::cout << "wtf" <<  (paths[cT1]->end() - paths[cT1]->end()).norm() << std::endl;
             s1Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Bis,paths[cT1]->end().head<3>());
 
             State s2Bis(state2);
             s2Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Bis,paths[cT2]->end().head<3>());
-std::cout << "wtf2 " <<  (paths[cT2]->end() - paths[cT3]->initial()).norm() << std::endl;
 
             core::PathVectorPtr_t resPath = core::PathVector::create(fullBody_->device_->configSize(), fullBody_->device_->numberDof());
 
@@ -1485,13 +1465,18 @@ std::cout << "wtf2 " <<  (paths[cT2]->end() - paths[cT3]->initial()).norm() << s
 //throw std::runtime_error ("could not project without collision at state " + s1 );
             }
 
-            if(state1.configuration_ != s1Bis.configuration_)
             {
                 core::PathPtr_t p1 = interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[cT1],
-                        state1,s1Bis, numOptimizations,false);
-                resPath->appendPath(p1);
+                        state1,s1Bis, numOptimizations,true);
+                // reduce path to remove extradof
+                core::SizeInterval_t interval(0, p1->initial().rows()-1);
+                core::SizeIntervals_t intervals;
+                intervals.push_back(interval);
+                PathPtr_t reducedPath = core::SubchainPath::create(p1,intervals);
+                resPath->appendPath(reducedPath);
                 pathsIds.push_back(AddPath(p1,problemSolver_));
             }
+
 
             {
                 core::PathPtr_t p2 =(*functor)(fullBody_,problemSolver_->problem(), paths[cT2],
@@ -1505,15 +1490,20 @@ std::cout << "wtf2 " <<  (paths[cT2]->end() - paths[cT3]->initial()).norm() << s
                 resPath->appendPath(reducedPath);
             }
 
-            if(s2Bis.configuration_ != state2.configuration_)
+            //if(s2Bis.configuration_ != state2.configuration_)
             {
                 core::PathPtr_t p3= interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[cT3],
-                        s2Bis,state2, numOptimizations,false);
-                resPath->appendPath(p3);
+                        s2Bis,state2, numOptimizations,true);
+                // reduce path to remove extradof
+                core::SizeInterval_t interval(0, p3->initial().rows()-1);
+                core::SizeIntervals_t intervals;
+                intervals.push_back(interval);
+                PathPtr_t reducedPath = core::SubchainPath::create(p3,intervals);
+                resPath->appendPath(reducedPath);
                 pathsIds.push_back(AddPath(p3,problemSolver_));
             }
-
             pathsIds.push_back(AddPath(resPath,problemSolver_));
+
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(pathsIds.size());
             for(std::size_t i=0; i< pathsIds.size(); ++i)

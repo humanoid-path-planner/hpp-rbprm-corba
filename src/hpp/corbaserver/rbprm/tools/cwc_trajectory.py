@@ -6,7 +6,6 @@ from numpy.linalg import norm
 import time
 
 import hpp.corbaserver.rbprm.data.com_inequalities as ine
-from hpp.corbaserver.rbprm.tools.path_to_trajectory import gen_trajectory_to_play
 
 ineqPath = ine.__path__[0] +"/"
 
@@ -250,7 +249,7 @@ reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConst
 	reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints, profile, use_window)
 	print "done. generating state trajectory ",state_id	
 	paths_ids = [int(el) for el in fullBody.comRRTFromPos(state_id,comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims)]
-	print "done. computing final trajectory to display ",state_id
+	print "done. computing final trajectory to display ",state_id, "path ids ", paths_ids[-1], " ," , paths_ids[:-1]
 	return paths_ids[-1], paths_ids[:-1], timeElapsed
 	
 def solve_effector_RRT(fullBody, states, state_id, computeCones = False, mu = 1, dt =0.1, phase_dt = [0.4, 1],
@@ -264,6 +263,6 @@ reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConst
 		print "handling extra effector constraints"
 		refPathId = trackedEffectors[0]; path_start = trackedEffectors[1]; path_to  = trackedEffectors[2]; effectorstracked = trackedEffectors[3]
 		paths_ids = [int(el) for el in fullBody.effectorRRTFromPath(state_id, refPathId, path_start, path_to, comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims, effectorstracked)]
-	print "done. computing final trajectory to display ",state_id
+	print "done. computing final trajectory to display ",state_id, "path ids ", paths_ids[-1], " ," , paths_ids[:-1]
 	return paths_ids[-1], paths_ids[:-1], timeElapsed
 	

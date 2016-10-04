@@ -2,6 +2,8 @@
 from hpp.corbaserver.rbprm.tools.cwc_trajectory import *
 from hpp.corbaserver.rbprm.tools.path_to_trajectory import *
 from cwc import OptimError, cone_optimization
+from hpp.corbaserver.rbprm.tools.path_to_trajectory import gen_trajectory_to_play
+from numpy import append
 
 #global variables
 res = []
@@ -68,25 +70,24 @@ def genPandNperFrame(fullBody, stateid, limbsCOMConstraints, pp, path_ids, times
 	interpassed = False
 	pRes = []
 	nRes = []
-	for path_id in path_ids:		
+	for idx, path_id in enumerate(path_ids):		
 		length = pp.client.problem.pathLength (path_id)
-		num_frames_required_fly = times[1] / dt_framerate
-		num_frames_required_support = times[0] / dt_framerate
-		dt_fly = float(length) / num_frames_required_fly
-		dt_support = float(length) / num_frames_required_support
-		dt_finals_fly  = [dt_fly*i for i in range(int(num_frames_required_fly))] + [1]		
-		dt_finals_support  = [dt_support*i for i in range(int(num_frames_required_support))] + [1]	
-		config_size_path = len(pp.client.problem.configAtParam (path_id, 0))
-		if(config_size_path > config_size):
-			interpassed = True
-			pRes+= [p[1] for t in dt_finals_fly]
-			nRes+= [N[1] for t in dt_finals_fly]
-		elif interpassed:			
-			pRes+= [p[2] for t in dt_finals_support]
-			nRes+= [N[2] for t in dt_finals_support]
-		else:
-			pRes+= [p[0] for t in dt_finals_support]
-			nRes+= [N[0] for t in dt_finals_support]
+		num_frames_required = times[idx] / dt_framerate
+		print "dt_framerate", dt_framerate
+		print "num_frames_required", times[idx], " ", num_frames_required
+		dt = float(length) / num_frames_required
+		dt_finals  = [dt*i for i in range(int(num_frames_required))] + [1]		
+		#~ config_size_path = len(pp.client.problem.configAtParam (path_id, 0))
+		#~ if(config_size_path > config_size):
+			#~ interpassed = True
+		pRes+= [p[idx] for t in dt_finals]
+		nRes+= [N[idx] for t in dt_finals]
+		#~ elif interpassed:			
+			#~ pRes+= [p[2] for t in dt_finals_support]
+			#~ nRes+= [N[2] for t in dt_finals_support]
+		#~ else:
+			#~ pRes+= [p[0] for t in dt_finals_support]
+			#~ nRes+= [N[0] for t in dt_finals_support]
 	return pRes, nRes
 
 
@@ -133,8 +134,8 @@ trackedEffectors = []):
 	global errorid
 	global stat_data	
 	fail = 0
-	try:
-	#~ if(True):
+	#~ try:
+	if(True):
 		times = [];
 		dt = 1000;
 		distance = __getTimes(fullBody, configs, i, time_scale)
@@ -143,7 +144,8 @@ trackedEffectors = []):
 			times2, dt2, dist2 = __getTimes(fullBody, configs, i+w, time_scale)
 			times += times2
 			dt = min(dt, dt2)
-		print 'time per path', times
+		time_per_path = [times[0]] + [times[1]] + [times [0]]
+		print 'time per path', times, time_per_path
 		print 'dt', dt
 		if(distance > 0.0001):		
 			stat_data["num_trials"] += 1
@@ -166,10 +168,10 @@ trackedEffectors = []):
 			#~ if(len(trajec) > 0):
 				#~ frame_rate = 1./25.
 				#~ frame_rate_andrea = 1./1001.
-			new_traj = gen_trajectory_to_play(fullBody, pp, trajectory, times, frame_rate)
-			new_traj_andrea = gen_trajectory_to_play(fullBody, pp, trajectory, times,frame_rate_andrea)
+			new_traj = gen_trajectory_to_play(fullBody, pp, trajectory, time_per_path, frame_rate)
+			new_traj_andrea = gen_trajectory_to_play(fullBody, pp, trajectory, time_per_path,frame_rate_andrea)
 			#~ new_contacts = gencontactsPerFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, times, frame_rate_andrea)	
-			Ps, Ns = genPandNperFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, times, frame_rate_andrea)
+			Ps, Ns = genPandNperFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, time_per_path, frame_rate_andrea)
 			if(len(trajec) > 0):
 				new_traj = new_traj[1:]
 				new_traj_andrea = new_traj_andrea[1:]
@@ -181,14 +183,16 @@ trackedEffectors = []):
 			#~ global contacts
 			#~ contacts += new_contacts	
 			global pos
+			print "pos", len(pos), " ps, ", len(Ps)
 			pos += Ps
 			global normals
 			normals+= Ns
+			print len(trajec_mil), " ",  len(pos), " ", len(normals)
 			assert(len(trajec_mil) == len(pos) and len(normals) == len(pos))			
 			stat_data["num_success"] += 1
 		else:
 			print "TODO, NO CONTACT VARIATION, LINEAR INTERPOLATION REQUIRED"
-	except hpperr as e:		
+	#~ except hpperr as e:		
 		#~ print "hpperr failed at id " + str(i) , e.strerror
 		#~ if (use_window == 0 and (len(configs) - 1) - (i + 2) > 0):
 			#~ print "could not project com, trying to increase velocity "
@@ -199,18 +203,18 @@ trackedEffectors = []):
 					#~ print "could not project com, trying to increase velocity more "
 					#~ step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction, optim_effectors, time_scale, useCOMConstraints, 2, verbose, draw,  trackedEffectors = trackedEffectors)		
 		#~ else:
-		print "In hpperr and window != 0"
-		print "hpperr failed at id " + str(i) , e.strerror
-		stat_data["error_com_proj"] += 1
-		stat_data["num_errors"] += 1
-		errorid += [i]
-		fail+=1
-	except OptimError as e:
-		print "OptimError failed at id " + str(i) , e
-		stat_data["error_optim_fail"] += 1
-		stat_data["num_errors"] += 1
-		errorid += [i]
-		fail+=1
+		#~ print "In hpperr and window != 0"
+		#~ print "hpperr failed at id " + str(i) , e.strerror
+		#~ stat_data["error_com_proj"] += 1
+		#~ stat_data["num_errors"] += 1
+		#~ errorid += [i]
+		#~ fail+=1
+	#~ except OptimError as e:
+		#~ print "OptimError failed at id " + str(i) , e
+		#~ stat_data["error_optim_fail"] += 1
+		#~ stat_data["num_errors"] += 1
+		#~ errorid += [i]
+		#~ fail+=1
 	#~ except ValueError as e:
 		#~ print "ValueError failed at id " + str(i) , e
 		#~ stat_data["error_unknown"] += 1
@@ -241,8 +245,8 @@ trackedEffectors = []):
 			#~ print e
 			#~ errorid += [i]
 			#~ fail+=1
-	except:
-		print "unknown"
+	#~ except:
+		#~ print "unknown"
 		#~ if (use_window == 0 and (len(configs) - 1) - (i + 2) > 0):
 			#~ print "could not project com, trying to increase velocity "
 			#~ try:
@@ -252,11 +256,11 @@ trackedEffectors = []):
 					#~ print "could not project com, trying to increase velocity more "
 					#~ step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction, optim_effectors, time_scale, useCOMConstraints, 2, verbose, draw,  trackedEffectors = trackedEffectors)		
 		#~ else:
-		print "In unknown and window != 0"
-		stat_data["error_unknown"] += 1
-		stat_data["num_errors"] += 1
-		errorid += [i]
-		fail+=1
+		#~ print "In unknown and window != 0"
+		#~ stat_data["error_unknown"] += 1
+		#~ stat_data["num_errors"] += 1
+		#~ errorid += [i]
+		#~ fail+=1
 	return fail
 	
 def step_profile(fullBody, configs, i, optim, limbsCOMConstraints,  friction = 0.5, optim_effectors = True, time_scale = 20., useCOMConstraints = False):
