@@ -307,6 +307,16 @@ class FullBody (object):
     def computeContactPointsForLimb(self, stateId, limb):
 		rawdata = self.client.rbprm.rbprm.computeContactPointsForLimb(stateId, limb)
 		return [[b[i:i+3] for i in range(0, len(b), 6)] for b in rawdata], [[b[i+3:i+6] for i in range(0, len(b), 6)] for b in rawdata]
+	
+	## Compute effector contact points and normals for a given configuration
+    # in local coordinates
+    #
+    # \param q configuration of the robot
+    # \param limbName ids of the limb in contact
+    # \return list 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
+    def computeContactForConfig(q, limbName):
+		rawdata = self.computeContactPointsForLimb(stateId, limb)
+		return [[rawdata[i:i+3]] for i in range(0, len(rawdata), 6)], [[rawdata[i+3:i+6]] for i in range(0, len(rawdata), 6)]
 
 	## Provided a discrete contact sequence has already been computed, computes
     # all the contact positions and normals for a given state, the next one, and the intermediate between them.

@@ -3,7 +3,7 @@ from hpp.corbaserver.rbprm.tools.cwc_trajectory import *
 from hpp.corbaserver.rbprm.tools.path_to_trajectory import *
 from cwc import OptimError, cone_optimization
 from hpp.corbaserver.rbprm.tools.path_to_trajectory import gen_trajectory_to_play
-from numpy import append
+from numpy import append, array
 
 #global variables
 res = []
@@ -12,6 +12,8 @@ trajec_mil = []
 #~ contacts = []
 pos = []
 normals = []
+pEffs = []
+coms = []
 errorid = []
 
 def displayComPath(pp, pathId,color=[0.,0.75,0.15,0.9]) :
@@ -29,43 +31,10 @@ def displayComPath(pp, pathId,color=[0.,0.75,0.15,0.9]) :
 	pp.publisher.client.gui.addToGroup(nameCurve,pp.publisher.sceneName)
 	pp.publisher.client.gui.refresh()
 
-#~ 
-#~ def getContactPerPhase(fullBody, stateid, limbsCOMConstraints):
-	#~ contacts = [[],[],[]]
-	#~ for k, v in limbsCOMConstraints.iteritems():
-		#~ if(fullBody.isLimbInContact(k, stateid)):
-			#~ contacts[0]+=[v['effector']]
-		#~ if(fullBody.isLimbInContactIntermediary(k, stateid)):
-			#~ contacts[1]+=[v['effector']]
-		#~ if(fullBody.isLimbInContact(k, stateid+1)):
-			#~ contacts[2]+=[v['effector']]
-	#~ return contacts
-#~ 
-#~ def gencontactsPerFrame(fullBody, stateid, limbsCOMConstraints, pp, path_ids, times, dt_framerate=1./24.):
-	#~ contactsPerPhase = getContactPerPhase(fullBody, stateid, limbsCOMConstraints)
-	#~ config_size = len(fullBody.getCurrentConfig())
-	#~ interpassed = False
-	#~ res = []
-	#~ for path_id in path_ids:		
-		#~ length = pp.client.problem.pathLength (path_id)
-		#~ num_frames_required_fly = times[1] / dt_framerate
-		#~ num_frames_required_support = times[0] / dt_framerate
-		#~ dt_fly = float(length) / num_frames_required_fly
-		#~ dt_support = float(length) / num_frames_required_support
-		#~ dt_finals_fly  = [dt_fly*i for i in range(int(num_frames_required_fly))] + [1]		
-		#~ dt_finals_support  = [dt_support*i for i in range(int(num_frames_required_support))] + [1]	
-		#~ config_size_path = len(pp.client.problem.configAtParam (path_id, 0))
-		#~ if(config_size_path > config_size):
-			#~ interpassed = True
-			#~ res+= [contactsPerPhase[1] for t in dt_finals_fly]
-		#~ elif interpassed:			
-			#~ res+= [contactsPerPhase[2] for t in dt_finals_support]
-		#~ else:
-			#~ res+= [contactsPerPhase[0] for t in dt_finals_support]
-	#~ return res
 
 def genPandNperFrame(fullBody, stateid, limbsCOMConstraints, pp, path_ids, times, dt_framerate=1./24.):
 	p, N= fullBody.computeContactPointsPerLimb(stateid, limbsCOMConstraints.keys(), limbsCOMConstraints)
+	freeEffectors = [ [limbsCOMConstraints[limb]['effector'] for limb in limbsCOMConstraints.keys() if not p[i].has_key(limbsCOMConstraints[limb]['effector'])] for i in range(len(p))]
 	config_size = len(fullBody.getCurrentConfig())
 	interpassed = False
 	pRes = []
@@ -73,23 +42,44 @@ def genPandNperFrame(fullBody, stateid, limbsCOMConstraints, pp, path_ids, times
 	for idx, path_id in enumerate(path_ids):		
 		length = pp.client.problem.pathLength (path_id)
 		num_frames_required = times[idx] / dt_framerate
-		print "dt_framerate", dt_framerate
-		print "num_frames_required", times[idx], " ", num_frames_required
+		#~ print "dt_framerate", dt_framerate
+		#~ print "num_frames_required", times[idx], " ", num_frames_required
 		dt = float(length) / num_frames_required
-		dt_finals  = [dt*i for i in range(int(num_frames_required))] + [1]		
-		#~ config_size_path = len(pp.client.problem.configAtParam (path_id, 0))
-		#~ if(config_size_path > config_size):
-			#~ interpassed = True
+		dt_finals  = [dt*i for i in range(int(round(num_frames_required)))]	
 		pRes+= [p[idx] for t in dt_finals]
 		nRes+= [N[idx] for t in dt_finals]
-		#~ elif interpassed:			
-			#~ pRes+= [p[2] for t in dt_finals_support]
-			#~ nRes+= [N[2] for t in dt_finals_support]
-		#~ else:
-			#~ pRes+= [p[0] for t in dt_finals_support]
-			#~ nRes+= [N[0] for t in dt_finals_support]
-	return pRes, nRes
+	return pRes, nRes, freeEffectors
 
+
+def __getPos(effector, fullBody, config):
+	fullBody.setCurrentConfig (config)
+	q = fullBody.getJointPosition(effector)
+	quat_end = q[4:7]
+	q[6] = q[3]
+	q[3:6] = quat_end
+	return q
+
+def genPEffperFrame(fullBody, freeEffectorsPerPhase, qs, pp, times, dt_framerate):
+	res = []
+	for idx, phase in enumerate(freeEffectorsPerPhase):
+		num_frames_required = int(times[idx] / dt_framerate)
+		qid = len(res)
+		for q in qs[qid:num_frames_required+qid]:			
+			p = {}
+			for effector in phase:
+				p[effector] = __getPos(effector, fullBody, q)
+			res.append(p)
+	return res
+
+
+def genComPerFrame(final_state, dt, dt_framerate = 1./1000.):
+	num_frames_per_dt = int(round(dt / dt_framerate))
+	c =   [array(final_state['x_init'][:3])] + final_state['c']
+	dc =   [array(final_state['x_init'][3:])] + final_state['dc']
+	ddc = final_state['ddc']
+	cs = []
+	[cs.append(c[i] + ddt*dt *dc[i] + ddt*dt *ddt* dt * 0.5 * ddc[i]) for ddt in range(num_frames_per_dt) for i in range(0,len(ddc))]
+	return cs
 
 stat_data = { 
 "error_com_proj" : 0,
@@ -154,9 +144,9 @@ trackedEffectors = []):
 			else:
 				comC = None
 			if(optim_effectors):
-				pid, trajectory, timeelapsed  =  solve_effector_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window, trackedEffectors = trackedEffectors)
+				pid, trajectory, timeelapsed, final_state  =  solve_effector_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window, trackedEffectors = trackedEffectors)
 			else :
-				pid, trajectory, timeelapsed  =       solve_com_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window, trackedEffectors = trackedEffectors)
+				pid, trajectory, timeelapsed, final_state  =       solve_com_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window, trackedEffectors = trackedEffectors)
 			displayComPath(pp, pid)
 			#~ pp(pid)
 			global res
@@ -171,24 +161,31 @@ trackedEffectors = []):
 			new_traj = gen_trajectory_to_play(fullBody, pp, trajectory, time_per_path, frame_rate)
 			new_traj_andrea = gen_trajectory_to_play(fullBody, pp, trajectory, time_per_path,frame_rate_andrea)
 			#~ new_contacts = gencontactsPerFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, times, frame_rate_andrea)	
-			Ps, Ns = genPandNperFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, time_per_path, frame_rate_andrea)
+			Ps, Ns, freeEffectorsPerPhase = genPandNperFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, time_per_path, frame_rate_andrea)
+			NPeffs = genPEffperFrame(fullBody, freeEffectorsPerPhase, new_traj_andrea, pp, time_per_path, frame_rate_andrea)
+			com = genComPerFrame(final_state, dt, frame_rate_andrea)
 			if(len(trajec) > 0):
 				new_traj = new_traj[1:]
 				new_traj_andrea = new_traj_andrea[1:]
 				#~ new_contacts = new_contacts[1:]
 				Ps = Ps[1:]
 				Ns = Ns[1:]
+				com = com[1:]
+				pEffs = pEffs[1:]
 			trajec = trajec + new_traj
 			trajec_mil += new_traj_andrea
 			#~ global contacts
 			#~ contacts += new_contacts	
 			global pos
-			print "pos", len(pos), " ps, ", len(Ps)
 			pos += Ps
 			global normals
 			normals+= Ns
-			print len(trajec_mil), " ",  len(pos), " ", len(normals)
-			assert(len(trajec_mil) == len(pos) and len(normals) == len(pos))			
+			global pEffs
+			pEffs+= NPeffs
+			global coms
+			coms+= com
+			print len(trajec_mil), " ",  len(pos), " ", len(normals), " ", len(coms), " ", len(pEffs)
+			assert(len(trajec_mil) == len(pos) and len(normals) == len(pos) and len(normals) == len(coms) and len(coms) == len(pEffs))
 			stat_data["num_success"] += 1
 		else:
 			print "TODO, NO CONTACT VARIATION, LINEAR INTERPOLATION REQUIRED"
@@ -289,9 +286,9 @@ def step_profile(fullBody, configs, i, optim, limbsCOMConstraints,  friction = 0
 			else:
 				comC = None
 			if(optim_effectors):
-				pid, trajectory, timeelapsed =  solve_effector_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, False, False, comC, True)
+				pid, trajectory, timeelapsed, final_state =  solve_effector_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, False, False, comC, True)
 			else :
-				pid, trajectory, timeelapsed =       solve_com_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, False, False, comC, True)			
+				pid, trajectory, timeelapsed, final_state =       solve_com_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, False, False, comC, True)			
 			__update_cwc_time(timeelapsed)	
 			stat_data["num_success"] += 1
 		else:
@@ -346,7 +343,31 @@ def displayInSave(pp, pathId, configs):
 
 import time
 
+def __isDiff(P0, P1):
+	return len(set(P0.keys()) - set(P1.keys())) != 0 or len(set(P1.keys()) - set(P0.keys()))
+
 from pickle import dump
+def compressData(data_array, filename):
+	qs = [data['q'][:] for data in data_array]
+	C =  [data['C'][:] for data in data_array]
+	a = {}
+	frameswitches = []
+	for i in range(0,len(pos)):
+		if i == 0 or __isDiff(pos[i], pos[i-1]):
+			a = {}
+			for effector in pos[i].keys():
+				a[effector] = {'P' : pos[i][effector], 'N' : normals[i][effector]}
+			frameswitches.append([i,a])
+	res = {}
+	res['Q'] = [data['q'][:] for data in data_array]
+	res['C'] = [data['C'][:] for data in data_array]
+	res['fly'] = pEffs
+	res['frameswitches'] = frameswitches
+	f1=open(filename+"_compressed", 'w+')
+	dump(res, f1)
+	f1.close()
+	return res
+
 def saveToPinocchio(filename):
 	res = []
 	for i, q_gep in enumerate(trajec_mil):
@@ -355,12 +376,12 @@ def saveToPinocchio(filename):
 		quat_end = q[4:7]
 		q[6] = q[3]
 		q[3:6] = quat_end
-		data = {'q':q, 'P' : pos[i], 'N' : normals[i]}
+		data = {'q':q, 'P' : pos[i], 'N' : normals[i], 'C' : coms [i], 'pEffs' : pEffs[i]}
 		res += [data]
 	f1=open(filename, 'w+')
 	dump(res, f1)
 	f1.close()
-	return res
+	return compressData(res,filename)
 		
 def clean():
 	global res
@@ -370,6 +391,8 @@ def clean():
 	global errorid
 	global pos
 	global normals
+	global pEffs
+	global coms
 	res = []
 	trajec = []
 	trajec_mil = []
@@ -377,6 +400,8 @@ def clean():
 	errorid = []
 	pos = []
 	normals = []
+	pEffs = []
+	coms = []
 
 import copy
 
@@ -413,7 +438,7 @@ def profile(fullBody, configs, i_start, i_end, limbsCOMConstraints,  friction = 
 
 def saveAllData(fullBody, r, name):
 	fullBody.exportAll(r, trajec, name)
-	saveToPinocchio(name)
+	return saveToPinocchio(name)
 
 def play_traj(fullBody,pp,frame_rate):
 	global trajec

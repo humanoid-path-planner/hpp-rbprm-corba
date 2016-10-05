@@ -129,13 +129,16 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 		timeelapsed = (end - start) * 1000
 		#~ print "solving time", timeelapsed
 	if(use_window > 0):
+		var_final['c_old'] = var_final['c'][:]
+		var_final['dc_old'] = var_final['dc'][:]
+		var_final['ddc_old'] = var_final['ddc'][:]
 		var_final['c'] = var_final['c'][:init_waypoint_time+1]
 		var_final['dc'] = var_final['dc'][:init_waypoint_time+1]
 		var_final['ddc'] = var_final['ddc'][:init_waypoint_time+1]
 		params["t_init_phases"] = params["t_init_phases"][:-3*use_window]
 		print "trying to project on com (from, to) ", init_end_com, var_final['c'][-1]
 		if (fullBody.projectStateToCOM(state_id+1, (var_final['c'][-1]).tolist())):
-			print "PROJECTED", init_end_com, var_final['c'][-1]
+			#~ print "PROJECTED", init_end_com, var_final['c'][-1]
 			states[state_id+1] = fullBody.getConfigAtState(state_id+1) #updating config from python side)
 			lastspeed = var_final['dc'][init_waypoint_time]		
 			print "init speed", lastspeed
@@ -182,9 +185,13 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 	print "end target ",  params['x_end']
 	fig = plt.figure()
 	ax = fig.add_subplot(111)
-	points = var_final['dc']
+	if(use_window > 0):
+		points = var_final['dc_old']
+	else:
+		points = var_final['dc']
+		
 	#~ print "points", points
-	ys = [norm(el) * el[0] / abs(el[0]) for el in points]
+	ys = [norm(el) * el[0] / abs(el[0]+ _EPS) for el in points]
 	xs = [i * params['dt'] for i in range(0,len(points))]
 	ax.scatter(xs, ys, c='b')
 
@@ -194,14 +201,25 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 	print "plotting acceleration "
 	fig = plt.figure()
 	ax = fig.add_subplot(111)
-	points = var_final['ddc']
-	ys = [norm(el) * el[0] / abs(el[0]) for el in points]
+	if(use_window > 0):
+		points = var_final['ddc_old']
+	else:
+		points = var_final['ddc']
+	ys = [norm(el) * el[0] / abs(el[0]+ _EPS) for el in points]
 	xs = [i * params['dt'] for i in range(0,len(points))]
 	ax.scatter(xs, ys, c='b')
 
 
 	plt.show()
 	
+	print "plotting Dl "
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+	points = var_final['dL']
+	ys = [norm(el) * el[0] / abs(el[0]+ _EPS) for el in points]
+	xs = [i * params['dt'] for i in range(0,len(points))]
+	ax.scatter(xs, ys, c='b')
+
 
 	plt.show()
 	return var_final, params, elapsed
@@ -241,20 +259,20 @@ def __optim__threading_ok(fullBody, states, state_id, computeCones = False, mu =
 		
 	#now compute com trajectorirs
 	comTrajIds = [fullBody.generateComTraj(comPosPerPhase[i], comVelPerPhase[i], comAccPerPhase[i], dt) for i in range(0,3)]
-	return comTrajIds, res[2] #res[2] is timeelapsed
+	return comTrajIds, res[2], final_state #res[2] is timeelapsed
 
 def solve_com_RRT(fullBody, states, state_id, computeCones = False, mu = 1, dt =0.1, phase_dt = [0.4, 1],
 reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0, trackedEffectors = []):
-	comPosPerPhase, timeElapsed = __optim__threading_ok(fullBody, states, state_id, computeCones, mu, dt, phase_dt,
+	comPosPerPhase, timeElapsed, final_state = __optim__threading_ok(fullBody, states, state_id, computeCones, mu, dt, phase_dt,
 	reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints, profile, use_window)
 	print "done. generating state trajectory ",state_id	
 	paths_ids = [int(el) for el in fullBody.comRRTFromPos(state_id,comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims)]
 	print "done. computing final trajectory to display ",state_id, "path ids ", paths_ids[-1], " ," , paths_ids[:-1]
-	return paths_ids[-1], paths_ids[:-1], timeElapsed
+	return paths_ids[-1], paths_ids[:-1], timeElapsed, final_state
 	
 def solve_effector_RRT(fullBody, states, state_id, computeCones = False, mu = 1, dt =0.1, phase_dt = [0.4, 1],
 reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0, trackedEffectors = []):
-	comPosPerPhase, timeElapsed = __optim__threading_ok(fullBody, states, state_id, computeCones, mu, dt, phase_dt,
+	comPosPerPhase, timeElapsed, final_state = __optim__threading_ok(fullBody, states, state_id, computeCones, mu, dt, phase_dt,
 	reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints, profile, use_window)
 	print "done. generating state trajectory ",state_id		
 	if(len(trackedEffectors) == 0):
@@ -264,5 +282,5 @@ reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConst
 		refPathId = trackedEffectors[0]; path_start = trackedEffectors[1]; path_to  = trackedEffectors[2]; effectorstracked = trackedEffectors[3]
 		paths_ids = [int(el) for el in fullBody.effectorRRTFromPath(state_id, refPathId, path_start, path_to, comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims, effectorstracked)]
 	print "done. computing final trajectory to display ",state_id, "path ids ", paths_ids[-1], " ," , paths_ids[:-1]
-	return paths_ids[-1], paths_ids[:-1], timeElapsed
+	return paths_ids[-1], paths_ids[:-1], timeElapsed, final_state
 	

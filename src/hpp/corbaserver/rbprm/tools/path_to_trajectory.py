@@ -1,5 +1,5 @@
 __24fps = 1. / 24.
-__EPS = 0.0000001
+__EPS = 0.00001
 from numpy.linalg import norm
 
 def __linear_interpolation(p0,p1,dist_p0_p1, val):
@@ -9,7 +9,7 @@ def __gen_frame_positions(com_waypoints, dt, dt_framerate=__24fps):
 	total_time = (len(com_waypoints) - 1) * dt
 	dt_final = total_time * dt_framerate
 	num_frames_required = total_time / dt_framerate + 1
-	dt_finals = [dt_final*i for i in range(int(num_frames_required))]
+	dt_finals = [dt_final*i for i in range(int(round(num_frames_required)))]
 	ids_val = []
 	for i in range(len(com_waypoints) - 1):
 		ids_val += [(i,val-dt*i) for val in dt_finals if (val < (i+1) *dt) and (val > i*dt)]
@@ -44,7 +44,7 @@ def linear_interpolate_path(robot, path_player, path_id, total_time, dt_framerat
 	length = pp.client.problem.pathLength (path_id)
 	num_frames_required = total_time / dt_framerate
 	dt = float(length) / num_frames_required
-	dt_finals = [dt*i for i in range(int(num_frames_required))] + [length]
+	dt_finals = [dt*i for i in range(int(round(num_frames_required))-1)] + [length]
 	return[pp.client.problem.configAtParam (path_id, t) for t in dt_finals]
 	
 def follow_trajectory_path(robot, path_player, path_id, total_time, dt_framerate=__24fps):
@@ -53,8 +53,8 @@ def follow_trajectory_path(robot, path_player, path_id, total_time, dt_framerate
 	num_frames_required = total_time / dt_framerate
 	dt = float(length) / num_frames_required
 	#matches the extradof normalized
-	print "length ", length, "total tome ", total_time, "frame rate ", dt_framerate, "num_frames_required ", num_frames_required, "dt ", dt
-	dt_finals = [dt*i / length for i in range(int(num_frames_required))] + [1]
+	#~ print "length ", length, "total tome ", total_time, "frame rate ", dt_framerate, "num_frames_required ", num_frames_required, "dt ", dt
+	dt_finals = [dt*i / length for i in range(int(round(num_frames_required)))]
 	return[__find_q_t(robot, path_player, path_id, t) for t in dt_finals]
 	
 def gen_trajectory_to_play(robot, path_player, path_ids, total_time_per_paths, dt_framerate=__24fps):

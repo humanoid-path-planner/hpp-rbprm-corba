@@ -228,6 +228,11 @@ module hpp
     /// \param contactLimbs ids of the limb in contact for the state
     void setStartState(in floatSeq dofArray, in Names_t contactLimbs) raises (Error);
 
+    /// Compute effector contact points and normals for a given configuration
+    /// in local coordinates
+    /// \param dofArray configuration of the robot
+    /// \param limbName ids of the limb in contact
+    floatSeq computeContactForConfig(in floatSeq dofArray, in string limbName) raises (Error);
 
     /// Set the end state of a contact generation problem
     /// environment, ordered by their efficiency
@@ -241,11 +246,11 @@ module hpp
     /// \return list of 2 or 3 lists of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
     floatSeqSeq computeContactPoints(in unsigned short stateId) raises (Error);
 
-		/// Provided a discrete contact sequence has already been computed, computes
-		/// all the contact positions and normals for a given state, the next one, and the intermediate between them.
-		/// \param stateId normalized step for generation along the path (ie the path has a length of 1).
-		/// \return list of 2 or 3 lists of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
-		floatSeqSeq computeContactPointsForLimb(in unsigned short stateId, in string limbname) raises (Error);
+    /// Provided a discrete contact sequence has already been computed, computes
+    /// all the contact positions and normals for a given state, the next one, and the intermediate between them.
+    /// \param stateId normalized step for generation along the path (ie the path has a length of 1).
+    /// \return list of 2 or 3 lists of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
+    floatSeqSeq computeContactPointsForLimb(in unsigned short stateId, in string limbname) raises (Error);
 
     /// Provided a path has already been computed, interpolates it and generates the statically stable
     /// constact configurations along it. setStartState and setEndState must have been called prior

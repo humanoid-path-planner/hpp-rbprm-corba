@@ -845,13 +845,12 @@ namespace hpp {
 
     void SetPositionAndNormal(rbprm::State& state,
 			hpp::rbprm::RbPrmFullBodyPtr_t fullBody, const hpp::floatSeq& configuration,
-			const hpp::Names_t& contactLimbs)
+            std::vector<std::string>& names)
     {
         core::Configuration_t old = fullBody->device_->currentConfiguration();
         model::Configuration_t config = dofArrayToConfig (fullBody->device_, configuration);
         fullBody->device_->currentConfiguration(config);
         fullBody->device_->computeForwardKinematics();
-        std::vector<std::string> names = stringConversion(contactLimbs);
         for(std::vector<std::string>::const_iterator cit = names.begin(); cit != names.end();++cit)
         {
             rbprm::T_Limb::const_iterator lit = fullBody->GetLimbs().find(*cit);
@@ -865,7 +864,8 @@ namespace hpp {
             const fcl::Matrix3f& rot = transform.getRotation();
             state.contactPositions_[*cit] = transform.getTranslation();
             state.contactRotation_[*cit] = rot;
-            state.contactNormals_[*cit] = fcl::Vec3f(rot(0,2),rot(1,2), rot(2,2));
+            const fcl::Vec3f z = transform.getRotation() * lit->second->normal_;
+            state.contactNormals_[*cit] = z;
             state.contacts_[*cit] = true;
             state.contactOrder_.push(*cit);
         }        
@@ -880,7 +880,8 @@ namespace hpp {
     {
         try
         {
-            SetPositionAndNormal(startState_,fullBody_, configuration, contactLimbs);
+            std::vector<std::string> names = stringConversion(contactLimbs);
+            SetPositionAndNormal(startState_,fullBody_, configuration, names);
         }
         catch(std::runtime_error& e)
         {
@@ -888,11 +889,43 @@ namespace hpp {
         }
     }
 
+
+    hpp::floatSeq* RbprmBuilder::computeContactForConfig(const hpp::floatSeq& configuration, const char *limbNam) throw (hpp::Error)
+    {
+        State state;
+        std::string limb(limbNam);
+        try
+        {
+            std::vector<std::string> limbs; limbs.push_back(limbNam);
+            SetPositionAndNormal(state,fullBody_, configuration, limbs);
+
+            const std::vector<fcl::Vec3f>& positions = computeRectangleContact(fullBody_,state,limb);
+            _CORBA_ULong size = (_CORBA_ULong) positions.size () * 3;
+            hpp::floatSeq* dofArray = new hpp::floatSeq();
+            dofArray->length(size);
+            for(std::size_t h = 0; h<positions.size(); ++h)
+            {
+                for(std::size_t k =0; k<3; ++k)
+                {
+                    model::size_type j (h*3 + k);
+                    dofArray[j] = positions[h][k];
+                }
+            }
+            return dofArray;
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+
+    }
+
     void RbprmBuilder::setEndState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error)
     {
         try
         {
-            SetPositionAndNormal(endState_,fullBody_, configuration, contactLimbs);
+            std::vector<std::string> names = stringConversion(contactLimbs);
+            SetPositionAndNormal(endState_,fullBody_, configuration, names);
         }
         catch(std::runtime_error& e)
         {
