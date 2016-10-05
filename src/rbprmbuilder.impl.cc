@@ -340,6 +340,8 @@ namespace hpp {
                 roWorld.setRotation(state.contactRotation_.at(name));
                 roWorld.setTranslation(position);
                 roEffector = roWorld; roEffector.inverse();
+                fcl::Vec3f z_axis(0,0,1);
+                fcl::Matrix3f rotationLocal = tools::GetRotationMatrix(z_axis, limb->normal_);
                 for(std::size_t i =0; i<4; ++i)
                 {
                     if(limb->contactType_ == _3_DOF)
@@ -352,7 +354,7 @@ namespace hpp {
                     {
                         // TODO if limb is 6D and offset is not in the good direction
                         // this probably won't work
-                        res.push_back(p.row(i).transpose() + limb->offset_);
+                        res.push_back(rotationLocal*(p.row(i).transpose()) + limb->offset_);
                         res.push_back(roEffector.getRotation() * state.contactNormals_.at(name));
                     }
                 }
@@ -1881,6 +1883,8 @@ assert(s2 == s1 +1);
         model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
         model::Configuration_t save = fullBody_->device_->currentConfiguration();
         std::vector<std::string> names = stringConversion(contactLimbs);
+        fullBody_->device_->currentConfiguration(config);
+        fullBody_->device_->computeForwardKinematics();
         for(std::vector<std::string>::const_iterator cit = names.begin(); cit != names.end();++cit)
         {
             std::cout << "name " << * cit << std::endl;
