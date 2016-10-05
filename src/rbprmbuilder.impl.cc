@@ -640,8 +640,9 @@ namespace hpp {
             core::BasicConfigurationShooterPtr_t  shooter = core::BasicConfigurationShooter::create(fullBody_->device_);
             for(int i =0; i< 1000; ++i)
             {
+                core::DevicePtr_t device = fullBody_->device_->clone();
                 std::vector<std::string> names = stringConversion(contactLimbs);
-                core::ConfigProjectorPtr_t proj = core::ConfigProjector::create(fullBody_->device_,"proj", 1e-4, 1000);
+                core::ConfigProjectorPtr_t proj = core::ConfigProjector::create(device,"proj", 1e-4, 40);
                 //hpp::tools::LockJointRec(limb->limb_->name(), body->device_->rootJoint(), proj);
                 for(std::vector<std::string>::const_iterator cit = names.begin(); cit !=names.end(); ++cit)
                 {
@@ -900,7 +901,7 @@ namespace hpp {
             SetPositionAndNormal(state,fullBody_, configuration, limbs);
 
             const std::vector<fcl::Vec3f>& positions = computeRectangleContact(fullBody_,state,limb);
-            _CORBA_ULong size = (_CORBA_ULong) positions.size () * 3;
+            _CORBA_ULong size = (_CORBA_ULong) (positions.size () * 3);
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(size);
             for(std::size_t h = 0; h<positions.size(); ++h)
@@ -908,7 +909,7 @@ namespace hpp {
                 for(std::size_t k =0; k<3; ++k)
                 {
                     model::size_type j (h*3 + k);
-                    dofArray[j] = positions[h][k];
+                    (*dofArray)[(_CORBA_ULong)j] = positions[h][k];
                 }
             }
             return dofArray;
