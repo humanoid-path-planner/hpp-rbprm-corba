@@ -126,15 +126,125 @@ limbsCOMConstraints = { rLegId : {'file': "hyq/"+rLegId+"_com.ineq", 'effector' 
 
 
 def act(i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True, time_scale = 20,  verbose = False, draw = False, trackedEffectors = []):
-	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, friction, optim_effectors = optim_effectors, time_scale = time_scale, useCOMConstraints = True, use_window = use_window,
+	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, friction, optim_effectors = optim_effectors, time_scale = time_scale, useCOMConstraints = False, use_window = use_window,
 	verbose = verbose, draw = draw, trackedEffectors = trackedEffectors)
 
 def play(frame_rate = 1./24.):
 	play_traj(fullBody,pp,frame_rate)
 	
 def saveAll(name):
-	saveAllData(fullBody, r, name)
+	return saveAllData(fullBody, r, name)
 #~ saveAll ('hole_hyq_t_var_04f_andrea');
 #~ fullBody.exportAll(r, configs, 'hole_hyq_t_var_04f_andrea_contact_planning');
 #~ saveToPinocchio('obstacle_hyq_t_var_04f_andrea')
 
+
+
+from numpy import array, zeros
+from numpy import matrix
+from numpy import matlib
+
+#~ for i in range(6,25):
+	#~ act(i, 60, optim_effectors = True)
+
+#~ pid = act(8,0,optim_effectors = False)
+from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import res
+pid = res[0]-2 
+dt = 0.001
+
+#~ qs = [ pp.client.problem.configAtParam (pid, i*dt) for i in range(600,700)]
+#~ cs = []
+#~ res = zeros((3, 100))
+#~ for i in range(len(qs)):
+	#~ q = qs[i]
+	#~ fullBody.setCurrentConfig(q[:-1]) 
+	#~ c = fullBody.getCenterOfMass()
+	#~ cs += [c[0]]
+	#~ res[:,i] = c
+
+#~ for i in range(8,9): act(i,0,optim_effectors=False, draw=False)
+#~ ddc = [2 *(cs[i-1] - c[i])  for i in range(1, len(c))]
+#~ ddcx = [ddci[0] for ddci in ddc]
+
+
+#~ res = zeros((3, 100))
+
+#~ for i,ci in enumerate(c):
+	#~ res[:,i] = ci
+
+#~ m = matrix(res)
+
+
+from derivative_filters import *
+
+#~ res = computeSecondOrderPolynomialFitting(m, dt, 11)
+#~ (x, dx, ddx) = res
+
+import matplotlib.pyplot as plt
+import plot_utils 
+
+#~ plt.plot(ddx[0,:].A.squeeze())
+#~ plt.show()
+
+from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import trajec_mil
+from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import trajec
+
+#~ plt.plot(x[0,:].A.squeeze())
+#~ plt.plot(dx[0,:].A.squeeze())
+#~ plt.plot(ddx[2,:].A.squeeze())
+#~ plt.plot(dx[0,:].A.squeeze())
+#~ plt.plot(x[0,:].A.squeeze())
+
+#~ plt.show()
+
+#~ testc= []
+#~ trajec_mil = trajec
+sample = len(trajec_mil)
+
+dt_me = 1./24.
+dt = 1./1000.
+
+res = zeros((3, sample))
+
+for i,q in enumerate(trajec_mil[:sample]):
+	fullBody.setCurrentConfig(q) 
+	c = fullBody.getCenterOfMass()
+	res[:,i] = c
+	
+#~ for i,q in enumerate(trajec):
+	#~ fullBody.setCurrentConfig(q) 
+	#~ c = fullBody.getCenterOfMass()
+	#~ testc += [array(c)]
+	
+
+#~ testddc = [2 *(testc[i-1] - testc[i])  for i in range(1, len(testc))]
+#~ testddcx = [ddc[0] for ddc in testddc]
+#~ testcx = [c[0] for c in testc]
+
+#~ cs = res
+#~ res = zeros((3, 100))
+#~ for c in cs:
+	#~ res[:,i] = c	
+m = matrix(res)
+
+
+from derivative_filters import *
+
+res = computeSecondOrderPolynomialFitting(m, dt, 51)
+(x, dx, ddx) = res
+
+
+import matplotlib.pyplot as plt
+import plot_utils 
+
+#~ if(conf.SHOW_FIGURES and conf.PLOT_REF_COM_TRAJ):
+#~ plt.plot(x[0,:].A.squeeze())
+#~ plt.plot(dx[0,:].A.squeeze())
+plt.plot(ddx[0,:].A.squeeze())
+#~ plt.plot(x[0,:].A.squeeze())
+#~ plt.plot(testddcx)
+#~ plt.plot(testcx)
+#~ plt.show()
+
+
+	

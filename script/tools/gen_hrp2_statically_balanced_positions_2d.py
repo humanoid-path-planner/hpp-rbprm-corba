@@ -6,7 +6,7 @@ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.corbaserver.rbprm.tools.cwc_trajectory import *
 
 from hpp import Error as hpperr
-from numpy import array
+from numpy import array, matrix
 
 
 packageName = "hrp2_14_description"
@@ -91,7 +91,17 @@ def _getTransform(qEffector):
 		rm[m,3] = qEffector[m]
 	rm[3,3] = 1
 	return rm
-				
+			
+from numpy.linalg import norm
+def __loosely_z_aligned(limb, config):
+	fullBody.setCurrentConfig(config)
+	effectorName = limbsCOMConstraints[limb]['effector']
+	m = _getTransform(fullBody.getJointPosition(effectorName))
+	P, N = fullBody.computeContactForConfig(config, limb)
+	#~ N_world = m.dot(array(N[0]+[1]))[:3]
+	N_world = m[:3,:3].dot(array(N[0]))
+	N_world = N_world / np.linalg.norm(N_world)
+	return N_world.dot(array([0,0,1])) > 0.7
 
 def draw_cp(cid, limb, config):
 	global r
@@ -137,26 +147,75 @@ def fill_contact_points(limbs, config, config_pinocchio):
 		#~ res["N"] += [n for i, n in enumerate (posetc) if (i%2 == 1)]
 		res["N"] += N
 	return res
+	
+from numpy import cos, sin, pi
+def __eulerToQuat(pitch, roll, yaw):
+	t0 = cos(yaw * 0.5);
+	t1 = sin(yaw * 0.5);
+	t2 = cos(roll * 0.5);
+	t3 = sin(roll * 0.5);
+	t4 = cos(pitch * 0.5);
+	t5 = sin(pitch * 0.5);
+	w= t0 * t2 * t4 + t1 * t3 * t5;
+	x= t0 * t3 * t4 - t1 * t2 * t5;
+	y= t0 * t2 * t5 + t1 * t3 * t4;
+	z= t1 * t2 * t4 - t0 * t3 * t5;
+	return [w, x, y, z]
+	#~ 
+#~ void SampleRotation(model::DevicePtr_t so3, ConfigurationPtr_t config, JointVector_t& jv)
+#~ {
+	#~ std::size_t id = 1;
+	#~ if(so3->rootJoint())
+	#~ {
+		#~ Eigen::Matrix <value_type, 3, 1> confso3;
+		#~ id+=1;
+		#~ model::JointPtr_t joint = so3->rootJoint();
+		#~ for(int i =0; i <3; ++i)
+		#~ {
+			#~ joint->configuration()->uniformlySample (i, confso3);
+		#~ }
+		#~ Eigen::Quaterniond qt = Eigen::AngleAxisd(confso3(0), Eigen::Vector3d::UnitZ())
+		  #~ * Eigen::AngleAxisd(confso3(1), Eigen::Vector3d::UnitY())
+		  #~ * Eigen::AngleAxisd(confso3(2), Eigen::Vector3d::UnitX());
+		#~ std::size_t rank = 3;
+		#~ (*config)(rank+0) = qt.w();
+		#~ (*config)(rank+1) = qt.x();
+		#~ (*config)(rank+2) = qt.y();
+		#~ (*config)(rank+3) = qt.z();
+	#~ }
+	#~ if(id < jv.size())
+		#~ SampleRotationRec(config,jv,id);
+#~ }
+	
+from random import uniform
+def _boundSO3(q, num_limbs):
+	q[:3] = [0,0,0.5]
+	limb_weight = float(4 - num_limbs)
+	#generate random angle 
+	rot_y = uniform(-pi/(4+limb_weight), pi/(4+limb_weight))
+	rot_x = uniform(-pi/8, pi/(3+limb_weight))
+	
+	rot_z = 0;
+	q[3:7] = __eulerToQuat(rot_x, rot_y, rot_z)
+	return q
+	
 
 def _genbalance(limbs):
 	for i in range(10000):
 		q = fullBody.client.basic.robot.shootRandomConfig()
-		q[:2] = [0,0]
-		if fullBody.isConfigValid and fullBody.isConfigBalanced(q, limbs, 5):
-			#check normals
-			_, N = fullBody.computeContactForConfig(config, limbs[0])
-			_, N1 = fullBody.computeContactForConfig(config, limbs[1])
-			if (array(N[0]).dot(array([0,0,1])) > 0.5 and array(N1[0]).dot(array([0,0,1])) > 0.5):
-				return q
+		q = _boundSO3(q, len(limbs))
+		if fullBody.isConfigValid(q)[0] and fullBody.isConfigBalanced(q, limbs, 5) and __loosely_z_aligned(limbs[0], q) and __loosely_z_aligned(limbs[1], q):
+		#~ if fullBody.isConfigValid(q)[0] and  __loosely_z_aligned(limbs[0], q) and __loosely_z_aligned(limbs[1], q):
+			return q
 	print "can't generate equilibrium config"
 
 all_qs = []
-def gen(limbs):
+def gen(limbs, num_samples = 1000, coplanar = True):
 	q_0 = fullBody.getCurrentConfig(); 
 	#~ fullBody.getSampleConfig()
 	qs = []; qs_gepetto = []; states = []
-	for _ in range(10):
-		if(len(limbs) == 2):
+	for _ in range(num_samples):
+		if(coplanar):
 			q = fullBody.generateGroundContact(limbs)
 		else:
 			q = _genbalance(limbs)
@@ -173,6 +232,8 @@ def gen(limbs):
 	for lname in limbs:
 		fname += lname + "_"
 	fname += "configs"
+	if(coplanar):
+		fname += "_coplanar"
 	from pickle import dump
 	#~ f1=open("configs_feet_on_ground_static_eq", 'w+')
 	f1=open(fname, 'w+')
@@ -191,6 +252,12 @@ q_init =  [
         ]; r (q_init)
         
 limbs = [[lLegId,rLegId],[lLegId,rLegId, rarmId], [lLegId,rLegId, larmId], [lLegId,rLegId, rarmId, larmId] ]
+#~ limbs = [[lLegId,rLegId, rarmId]]
+#~ limbs = [[larmId, rarmId]]
 
+#~ gen(limbs[0], 10)
 for ls in limbs:
-	gen(ls)
+	gen(ls, 1000, False)
+gen(limbs[0], 1000)
+	
+i = 0

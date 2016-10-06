@@ -234,6 +234,8 @@ namespace hpp {
     std::vector<fcl::Vec3f> computeRectangleContact(const rbprm::RbPrmFullBodyPtr_t device,
                                                     const rbprm::State& state)
     {
+        device->device_->currentConfiguration(state.configuration_);
+        device->device_->computeForwardKinematics();
         std::vector<fcl::Vec3f> res;
         const rbprm::T_Limb& limbs = device->GetLimbs();
         rbprm::RbPrmLimbPtr_t limb;
@@ -244,6 +246,11 @@ namespace hpp {
             const std::string& name = cit->first;
             const fcl::Vec3f& position = cit->second;
             limb = limbs.at(name);
+            const fcl::Vec3f& normal = state.contactNormals_.at(name);
+            const fcl::Vec3f z = limb->effector_->currentTransformation().getRotation() * limb->normal_;
+            const fcl::Matrix3f alignRotation = tools::GetRotationMatrix(z,normal);
+            const fcl::Matrix3f rotation = alignRotation * limb->effector_->currentTransformation().getRotation();
+            const fcl::Vec3f offset = rotation * limb->offset_;
             const double& lx = limb->x_, ly = limb->y_;
             p << lx,  ly, 0,
                  lx, -ly, 0,
@@ -270,6 +277,11 @@ namespace hpp {
                 R.block<3,1>(0,0) = x;
                 R.block<3,1>(0,1) = y;
                 R.block<3,1>(0,2) = z;
+                for(std::size_t i =0; i<4; ++i)
+                {
+                    res.push_back(position + (R*(p.row(i).transpose())) + offset);
+                    res.push_back(state.contactNormals_.at(name));
+                }
             }
             else
             {
@@ -277,11 +289,13 @@ namespace hpp {
                 for(int i =0; i< 3; ++i)
                     for(int j =0; j<3;++j)
                         R(i,j) = fclRotation(i,j);
-            }
-            for(std::size_t i =0; i<4; ++i)
-            {
-                res.push_back(position + (R*(p.row(i).transpose() + limb->offset_)));
-                res.push_back(state.contactNormals_.at(name));
+                fcl::Vec3f z_axis(0,0,1);
+                fcl::Matrix3f rotationLocal = tools::GetRotationMatrix(z_axis, limb->normal_);
+                for(std::size_t i =0; i<4; ++i)
+                {
+                    res.push_back(position + (R*(rotationLocal*(p.row(i).transpose() + limb->offset_))));
+                    res.push_back(state.contactNormals_.at(name));
+                }
             }
         }
         return res;
@@ -352,8 +366,6 @@ namespace hpp {
                     }
                     else
                     {
-                        // TODO if limb is 6D and offset is not in the good direction
-                        // this probably won't work
                         res.push_back(rotationLocal*(p.row(i).transpose()) + limb->offset_);
                         res.push_back(roEffector.getRotation() * state.contactNormals_.at(name));
                     }
@@ -1887,7 +1899,6 @@ assert(s2 == s1 +1);
         fullBody_->device_->computeForwardKinematics();
         for(std::vector<std::string>::const_iterator cit = names.begin(); cit != names.end();++cit)
         {
-            std::cout << "name " << * cit << std::endl;
             const hpp::rbprm::RbPrmLimbPtr_t limb =fullBody_->GetLimbs().at(std::string(*cit));
             testedState.contacts_[*cit] = true;
             testedState.contactPositions_[*cit] = limb->effector_->currentTransformation().getTranslation();
