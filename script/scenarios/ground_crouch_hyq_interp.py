@@ -1,3 +1,6 @@
+import matplotlib
+#~ matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
@@ -147,32 +150,11 @@ from numpy import matlib
 #~ for i in range(6,25):
 	#~ act(i, 60, optim_effectors = True)
 
+
+for i in range(7,8):
+    act(i,0, use_window=0, verbose=True, optim_effectors=False, draw=False)
+
 #~ pid = act(8,0,optim_effectors = False)
-from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import res
-pid = res[0]-2 
-dt = 0.001
-
-#~ qs = [ pp.client.problem.configAtParam (pid, i*dt) for i in range(600,700)]
-#~ cs = []
-#~ res = zeros((3, 100))
-#~ for i in range(len(qs)):
-	#~ q = qs[i]
-	#~ fullBody.setCurrentConfig(q[:-1]) 
-	#~ c = fullBody.getCenterOfMass()
-	#~ cs += [c[0]]
-	#~ res[:,i] = c
-
-#~ for i in range(8,9): act(i,0,optim_effectors=False, draw=False)
-#~ ddc = [2 *(cs[i-1] - c[i])  for i in range(1, len(c))]
-#~ ddcx = [ddci[0] for ddci in ddc]
-
-
-#~ res = zeros((3, 100))
-
-#~ for i,ci in enumerate(c):
-	#~ res[:,i] = ci
-
-#~ m = matrix(res)
 
 
 from derivative_filters import *
@@ -188,6 +170,7 @@ import plot_utils
 
 from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import trajec_mil
 from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import trajec
+from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import coms
 
 #~ plt.plot(x[0,:].A.squeeze())
 #~ plt.plot(dx[0,:].A.squeeze())

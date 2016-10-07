@@ -74,11 +74,15 @@ def genPEffperFrame(fullBody, freeEffectorsPerPhase, qs, pp, times, dt_framerate
 
 def genComPerFrame(final_state, dt, dt_framerate = 1./1000.):
 	num_frames_per_dt = int(round(dt / dt_framerate))
+	inc = 1./((float)(num_frames_per_dt))
 	c =   [array(final_state['x_init'][:3])] + final_state['c']
 	dc =   [array(final_state['x_init'][3:])] + final_state['dc']
 	ddc = final_state['ddc']
 	cs = []
-	[cs.append(c[i] + ddt*dt *dc[i] + ddt*dt *ddt* dt * 0.5 * ddc[i]) for ddt in range(num_frames_per_dt) for i in range(0,len(ddc))]
+	for i in range(0,len(c)-1):
+		for j in range(num_frames_per_dt):
+			ddt = j * inc * dt
+			cs.append(c[i] + ddt *dc[i] + ddt *ddt * 0.5 * ddc[i])
 	return cs
 
 stat_data = { 
@@ -164,14 +168,13 @@ trackedEffectors = []):
 			Ps, Ns, freeEffectorsPerPhase = genPandNperFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, time_per_path, frame_rate_andrea)
 			NPeffs = genPEffperFrame(fullBody, freeEffectorsPerPhase, new_traj_andrea, pp, time_per_path, frame_rate_andrea)
 			com = genComPerFrame(final_state, dt, frame_rate_andrea)
-			if(len(trajec) > 0):
-				new_traj = new_traj[1:]
-				new_traj_andrea = new_traj_andrea[1:]
-				#~ new_contacts = new_contacts[1:]
-				Ps = Ps[1:]
-				Ns = Ns[1:]
-				com = com[1:]
-				pEffs = pEffs[1:]
+			#~ if(len(trajec) > 0):
+				#~ new_traj = new_traj[1:]
+				#~ new_traj_andrea = new_traj_andrea[1:]
+				#~ Ps = Ps[1:]
+				#~ Ns = Ns[1:]
+				#~ com = com[1:]
+				#~ NPeffs = NPeffs[1:]
 			trajec = trajec + new_traj
 			trajec_mil += new_traj_andrea
 			#~ global contacts
