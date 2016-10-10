@@ -118,8 +118,6 @@ def act(i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True,
 	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, friction, optim_effectors = optim_effectors, time_scale = time_scale, useCOMConstraints = False, use_window = use_window,
 	verbose = verbose, draw = draw, trackedEffectors = trackedEffectors)
 
-def play(frame_rate = 1./24.):
-	play_traj(fullBody,pp,frame_rate)
 
 #~ for i in range(6,25):
 	#~ act(i, 60, optim_effectors = True)
@@ -176,6 +174,18 @@ def contactPlan():
 		r(configs[i]);
 		time.sleep(0.5)		
 		
+def interpolate():
+	tp.cl.problem.selectProblem("default")
+	r.client.gui.setVisibility("hyq", "ON")
+	tp.r.client.gui.setVisibility("toto", "OFF")
+	tp.r.client.gui.setVisibility("hyq_trunk", "OFF")
+	for i in range(7,20):
+		act(i,1,optim_effectors=True)
+		
+def play(frame_rate = 1./24.):
+	play_traj(fullBody,pp,frame_rate)
+	
+
 		
 def a():
 	print "initial configuration"
@@ -196,6 +206,14 @@ def d():
 def e():
 	print "displaying contact plan"
 	contactPlan()
+	
+def f():
+	print "computing feasible com trajectory"
+	interpolate()
+
+def g():
+	print "playing feasible trajectory"
+	play()
 
 print "Root path generated in " + str(tp.t) + " ms."
 	
