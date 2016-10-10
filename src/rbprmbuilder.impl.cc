@@ -277,11 +277,13 @@ namespace hpp {
                 R.block<3,1>(0,0) = x;
                 R.block<3,1>(0,1) = y;
                 R.block<3,1>(0,2) = z;
-                for(std::size_t i =0; i<4; ++i)
+                /*for(std::size_t i =0; i<4; ++i)
                 {
                     res.push_back(position + (R*(p.row(i).transpose())) + offset);
                     res.push_back(state.contactNormals_.at(name));
-                }
+                }*/
+                res.push_back(position + (R*(offset)));
+                res.push_back(state.contactNormals_.at(name));
             }
             else
             {
@@ -356,18 +358,27 @@ namespace hpp {
                 roEffector = roWorld; roEffector.inverse();
                 fcl::Vec3f z_axis(0,0,1);
                 fcl::Matrix3f rotationLocal = tools::GetRotationMatrix(z_axis, limb->normal_);
-                for(std::size_t i =0; i<4; ++i)
+                if(limb->contactType_ == _3_DOF)
                 {
-                    if(limb->contactType_ == _3_DOF)
+                    fcl::Vec3f pworld = position +  offset;
+                    res.push_back((roEffector * pworld).getTranslation());
+                    res.push_back(roEffector.getRotation() * state.contactNormals_.at(name));
+                }
+                else
+                {
+                    for(std::size_t i =0; i<4; ++i)
                     {
-                        fcl::Vec3f pworld = position + (cFrame*(p.row(i).transpose())) + offset;
-                        res.push_back((roEffector * pworld).getTranslation());
-                        res.push_back(roEffector.getRotation() * state.contactNormals_.at(name));
-                    }
-                    else
-                    {
-                        res.push_back(rotationLocal*(p.row(i).transpose()) + limb->offset_);
-                        res.push_back(roEffector.getRotation() * state.contactNormals_.at(name));
+                        /*if(limb->contactType_ == _3_DOF)
+                        {
+                            fcl::Vec3f pworld = position + (cFrame*(p.row(i).transpose())) + offset;
+                            res.push_back((roEffector * pworld).getTranslation());
+                            res.push_back(roEffector.getRotation() * state.contactNormals_.at(name));
+                        }
+                        else*/
+                        {
+                            res.push_back(rotationLocal*(p.row(i).transpose()) + limb->offset_);
+                            res.push_back(roEffector.getRotation() * state.contactNormals_.at(name));
+                        }
                     }
                 }
                 return res;
@@ -1352,8 +1363,8 @@ namespace hpp {
         for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin();
 					cit != lastStatesComputed_.end(); ++cit, ++id)
         {
-            std::cout << "ID " << id;
-            cit->print();
+            /*std::cout << "ID " << id;
+            cit->print();*/
             const core::Configuration_t config = cit->configuration_;
             _CORBA_ULong size = (_CORBA_ULong) config.size ();
             double* dofArray = hpp::floatSeq::allocbuf(size);
