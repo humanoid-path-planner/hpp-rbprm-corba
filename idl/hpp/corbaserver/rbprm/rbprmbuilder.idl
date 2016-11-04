@@ -123,6 +123,13 @@ module hpp
 		/// \param com target com
 		double projectStateToCOM(in unsigned short stateId,  in floatSeq com) raises (Error);
 
+		/// Create a state and push it to the state array
+		///
+		/// \param q configuration
+		/// \param names list of effectors in contact
+		/// \return stateId
+		short createState(in floatSeq configuration, in Names_t contactLimbs) raises (Error);
+
     /// Get Sample configuration by its id
     /// \param sampleName name of the limb from which to retrieve a sample
     /// \param sampleId id of the desired samples

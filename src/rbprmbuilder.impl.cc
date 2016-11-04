@@ -618,6 +618,29 @@ namespace hpp {
         }
     }
 
+    CORBA::Short RbprmBuilder::createState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error)
+    {
+        model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
+        fullBody_->device_->currentConfiguration(config);
+        fullBody_->device_->computeForwardKinematics();
+        State state;
+        state.configuration_ = config;
+        std::vector<std::string> names = stringConversion(contactLimbs);
+        for(std::vector<std::string>::const_iterator cit = names.begin(); cit != names.end(); ++cit)
+        {
+            rbprm::RbPrmLimbPtr_t limb = fullBody_->GetLimbs().at(*cit);
+            const std::string& limbName = *cit;
+            state.contacts_[limbName] = true;
+            const fcl::Vec3f position = limb->effector_->currentTransformation().getTranslation();
+            state.contactPositions_[limbName] = position;
+            state.contactNormals_[limbName] = limb->effector_->currentTransformation().getRotation() * limb->normal_;
+            state.contactRotation_[limbName] = limb->effector_->currentTransformation().getRotation();
+
+        }
+        lastStatesComputed_.push_back(state);
+        return lastStatesComputed_.size()-1;
+    }
+
     double RbprmBuilder::projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com) throw (hpp::Error)
     {        
         model::Configuration_t com_target = dofArrayToConfig (3, com);
