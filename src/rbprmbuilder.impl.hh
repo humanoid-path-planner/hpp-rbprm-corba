@@ -63,13 +63,13 @@ namespace hpp {
         hpp::core::PathValidationPtr_t createPathValidation (const hpp::model::DevicePtr_t& robot, const hpp::model::value_type& val)
         {
             hpp::model::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::model::RbPrmDevice>(robot);
-						affMap_ = problemSolver_->map
-							<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
-		        if (affMap_.empty ()) {
-    	        throw hpp::Error ("No affordances found. Unable to create Path Validaton object.");
-      		  }
+            affMap_ = problemSolver_->map
+              <std::vector<boost::shared_ptr<model::CollisionObject> > > ();
+            if (affMap_.empty ()) {
+              throw hpp::Error ("No affordances found. Unable to create Path Validaton object.");
+            }
             hpp::rbprm::RbPrmValidationPtr_t validation
-							(hpp::rbprm::RbPrmValidation::create(robotcast, romFilter_, affFilter_, affMap_));
+              (hpp::rbprm::RbPrmValidation::create(robotcast, romFilter_, affFilter_, affMap_));
             hpp::rbprm::RbPrmPathValidationPtr_t collisionChecking = hpp::rbprm::RbPrmPathValidation::create(robot,val);
             collisionChecking->add (validation);
             problemSolver_->problem()->configValidation(core::ConfigValidations::create ());
