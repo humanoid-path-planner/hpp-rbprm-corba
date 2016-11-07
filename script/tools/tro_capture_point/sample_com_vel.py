@@ -133,7 +133,7 @@ def gen_com_vel(q0, contacts):
 								
 def comTranslationAfter07s(q_hpp, contacts):
 	(success, dc0)= gen_com_vel(q_pin(q_hpp), contacts)
-	return success, dc0 * 0.7
+	return success, dc0, dc0 * 0.7
 	
 
 np.set_printoptions(precision=2, suppress=True);

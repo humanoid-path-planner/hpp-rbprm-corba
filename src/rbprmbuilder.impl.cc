@@ -638,6 +638,7 @@ namespace hpp {
 
         }
         lastStatesComputed_.push_back(state);
+        lastStatesComputedTime_.push_back(std::make_pair(-1., state));
         return lastStatesComputed_.size()-1;
     }
 
