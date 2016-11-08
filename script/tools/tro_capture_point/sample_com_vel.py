@@ -110,7 +110,8 @@ def draw_q(q0):
 def q_pin(q_hpp):
     return np.matrix(q_hpp).T
 
-def gen_com_vel(q0, contacts):
+def gen_com_vel(q_hpp, contacts):
+    q0 =  q_pin(q_hpp)
     init(q0);
     v0 = mat_zeros(nv);
     invDynForm.setNewSensorData(0, q0, v0);
@@ -127,12 +128,12 @@ def gen_com_vel(q0, contacts):
                                                                   conf.MAX_INITIAL_COM_VEL, 100);
     if success:                     
         print "Initial velocities found"
-        return (success, v, invDynForm.J_com * v);
+        return (success, v[:], invDynForm.J_com * v);
     print "Could not find initial velocities"
-    return (success, v[:]);
+    return (success, v[:], invDynForm.J_com * v);
                         
                                 
-def comPosAfter07s(c, q_hpp, contacts):
+def comPosAfter07s(c, q_hpp, contacts, v = None):
     q0 =  q_pin(q_hpp)
     init(q0);
     v0 = mat_zeros(nv);
@@ -141,12 +142,15 @@ def comPosAfter07s(c, q_hpp, contacts):
     #~ draw_q(q0);
     print 'Gonna compute initial joint velocities that satisfy contact constraints';
     print 'conf.MAX_INITIAL_COM_VEL', conf.MAX_INITIAL_COM_VEL
-    (success, v) = compute_initial_joint_velocities_multi_contact(q0, invDynForm, conf.mu[0], 
-                                                conf.ZERO_INITIAL_ANGULAR_MOMENTUM, 
-                                                conf.ZERO_INITIAL_VERTICAL_COM_VEL,
-                                                False, #conf.ENSURE_STABILITY, 
-                                                True, #conf.ENSURE_UNSTABILITY, 
-                                                conf.MAX_INITIAL_COM_VEL, 100);
+    if(v == None):
+        (success, v) = compute_initial_joint_velocities_multi_contact(q0, invDynForm, conf.mu[0], 
+                                                    conf.ZERO_INITIAL_ANGULAR_MOMENTUM, 
+                                                    conf.ZERO_INITIAL_VERTICAL_COM_VEL,
+                                                    False, #conf.ENSURE_STABILITY, 
+                                                    True, #conf.ENSURE_UNSTABILITY, 
+                                                    conf.MAX_INITIAL_COM_VEL, 100);
+    else:
+        success = True
     if (not success):
         print "Could not find initial velocities"                       
         return (success, v[:], c, v0);
