@@ -198,7 +198,7 @@ def predict_com_for_limb_candidate(c, limb, limbs, res, data, config_gepetto):
     for k, v in res["contact_points"].iteritems():
         if k != effector:
             contact_points[k] = v
-    success, dc, c_final, v0 = scv.comPosAfter07s(c, res["q"], contact_points)
+    success, dc, c_final, v0 = scv.com_pos_after_t(c, res["q"], contact_points)
     effector_data = {}
     state_id = fullBody.createState(config_gepetto, maintained_limbs)
     if(success and fullBody.projectStateToCOM(state_id,c_final.tolist())): #all good, all contacts kinematically maintained):

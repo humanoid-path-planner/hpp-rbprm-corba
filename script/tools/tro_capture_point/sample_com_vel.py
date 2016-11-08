@@ -133,7 +133,7 @@ def gen_com_vel(q_hpp, contacts):
     return (success, v[:], invDynForm.J_com * v);
                         
                                 
-def comPosAfter07s(c, q_hpp, contacts, v = None):
+def com_pos_after_t(c, q_hpp, contacts, v = None, t = 0.7):
     q0 =  q_pin(q_hpp)
     init(q0);
     v0 = mat_zeros(nv);
@@ -160,10 +160,11 @@ def comPosAfter07s(c, q_hpp, contacts, v = None):
     P = np.matlib.copy(invDynForm.contact_points);
     N = np.matlib.copy(invDynForm.contact_normals);
     stab_criterion = StabilityCriterion("default", invDynForm.x_com, dx_com_des, P.T, N.T, conf.mu[0], np.array([0,0,-9.81]), invDynForm.M[0,0]) 
-    res = stab_criterion.predict_future_state(0.7, c_init, invDynForm.J_com * v)
+    res = stab_criterion.predict_future_state(t, c_init, invDynForm.J_com * v)
+    #TODO : res.t != 0.7
     print "c ", res.c
     print "dc ", res.dc
-    return success, res.dc, res.c, v0
+    return success and abs(res.t - t)< EPS , res.dc, res.c, v0
     
 
 np.set_printoptions(precision=2, suppress=True);
