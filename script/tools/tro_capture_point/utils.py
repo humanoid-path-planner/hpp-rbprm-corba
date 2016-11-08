@@ -12,9 +12,141 @@ from pinocchio.utils import zero as mat_zeros
 from pinocchio.utils import rand as mat_rand
 from pinocchio_inv_dyn.acc_bounds_util import computeVelLimits
 from pinocchio_inv_dyn.sot_utils import solveLeastSquare
-from pinocchio_inv_dyn.multi_contact.utils import can_I_stop
 from pinocchio_inv_dyn.multi_contact.stability_criterion import StabilityCriterion
 
+EPS = 1e-5
+
+class Bunch:
+    def __init__(self, **kwds):
+        self.__dict__.update(kwds);
+
+    def __str__(self):
+        res = "";
+        for (key,value) in self.__dict__.iteritems():
+            if (isinstance(value, np.ndarray) and len(value.shape)==2 and value.shape[0]>value.shape[1]):
+                res += " - " + key + ": " + str(value.T) + "\n";
+            else:
+                res += " - " + key + ": " + str(value) + "\n";
+        return res[:-1];
+
+def select_contact_to_make(x_com, dx_com, robot, name_contact_to_break, contacts, contact_candidates, mu, gravity, mass, viewer=None, verb=0):
+    ncp = np.sum([np.matrix(c['P']).shape[0] for c in contacts.itervalues()]);
+    p = mat_zeros((3,ncp));  # contact points in world frame
+    N = mat_zeros((3,ncp));  # contact normals in world frame
+    N[2,:] = 1.0;
+    stabilityCriterion = StabilityCriterion("Stab_crit", x_com, dx_com, p.T, N.T, mu, gravity, mass, verb=verb);
+    c_pred = mat_zeros((3,len(contact_candidates)));
+    dc_pred = mat_zeros((3,len(contact_candidates)));
+    v_pred = mat_zeros(len(contact_candidates));
+    t_pred = mat_zeros(len(contact_candidates));
+    
+    # compute contact points for all contacts except the one to move
+    i = 0;
+    for (contact_name, PN) in contacts.iteritems():
+        if(contact_name==name_contact_to_break):
+            continue;
+        oMi = robot.framePosition(robot.model.getFrameId(contact_name));
+        Pi = np.matrix(PN['P']).T;
+        Ni = np.matrix(PN['N']).T;
+        for j in range(Pi.shape[1]):
+            p[:,i] = oMi.act(Pi[:,j]);
+            N[:,i] = oMi.rotation * Ni[:,j];
+            i += 1;
+    c_id=0;
+    P_cand = np.matrix(contacts[name_contact_to_break]['P']).T;  # contact points of contact to break in local frame
+    N_cand = np.matrix(contacts[name_contact_to_break]['N']).T;  # contact normals of contact to break in local frame
+    for (c_id,oMi) in enumerate(contact_candidates):
+        # compute new position of contact points
+        for j in range(Pi.shape[1]):
+            p[:,i+j] = oMi.act(P_cand[:,j]);
+            N[:,i+j] = oMi.rotation * N_cand[:,j]; 
+
+        if(viewer is not None):
+            # update contact points in viewer
+            for j in range(p.shape[1]):
+                viewer.addSphere("contact_point"+str(j), 0.005, p[:,j], (0.,0.,0.), (1, 1, 1, 1));
+                viewer.updateObjectConfigRpy("contact_point"+str(j), p[:,j]);
+
+        # check whether the system can stop with this contacts
+        stabilityCriterion.set_contacts(p.T, N.T, mu);
+        try:
+            stab_res = stabilityCriterion.can_I_stop(x_com, dx_com);
+            c_pred[:,c_id] = np.asmatrix(stab_res.c).T;
+            dc_pred[:,c_id] = np.asmatrix(stab_res.dc).T;
+            v_pred[c_id] = norm(stab_res.dc);
+            t_pred[c_id] = stab_res.t;
+            if(verb>0):
+                print "[select_contact_to_make] Candidate %d, predicted com vel in %.3f s = %.3f"%(c_id, stab_res.t, norm(stab_res.dc));
+#                raw_input();
+        except Exception as e:
+            print "ERROR while computing stability criterion:", e;
+        
+    best_candidate_ids = np.where(abs(v_pred-np.min(v_pred))<EPS)[0];
+    if(best_candidate_ids.shape[0]>1):
+        # if multiple contacts result in the same final com velocity (typically that would be 0), 
+        # pick the one who does it faster
+        best_candidate_id = best_candidate_ids[np.argmin(t_pred[best_candidate_ids])];
+    else:
+        best_candidate_id = best_candidate_ids[0];
+
+    return Bunch(index=best_candidate_id, c=c_pred[:,best_candidate_id], 
+                 dc=dc_pred[:,best_candidate_id], t=t_pred[best_candidate_id,0]);
+
+
+def select_contact_to_break(x_com, dx_com, robot, mass, contacts, mu, gravity, step_time):
+    ''' Select which contact to break
+    '''
+    ncp = np.sum([np.matrix(c['P']).shape[0] for c in contacts.itervalues()]);
+    # assume all contacts have the same number of contact points
+    ncp -= np.matrix(contacts.itervalues().next()['P']).shape[0];
+    p   = mat_zeros((3,ncp));
+    N   = mat_zeros((3,ncp));
+    N[2,:] = 1.0;
+    stabilityCriterion = StabilityCriterion("Stab_crit", x_com, dx_com, p.T, N.T, mu, gravity, mass);
+    t_pred  = mat_zeros(len(contacts));
+    t_min  = mat_zeros(len(contacts));
+    v_pred  = mat_zeros(len(contacts));
+    c_pred  = mat_zeros((3,len(contacts)));
+    dc_pred = mat_zeros((3,len(contacts)));
+    dc_min = mat_zeros((3,len(contacts)));
+    for (contactId, name_of_contact_to_break) in enumerate(contacts):
+        # compute the contact points without name_of_contact_to_break
+        i = 0;
+        for (contact_name, PN) in contacts.iteritems():    
+            if(contact_name==name_of_contact_to_break):
+                continue;
+            fid = robot.model.getFrameId(contact_name);
+            oMi = robot.framePosition(fid);
+            Pi = np.matrix(PN['P']).T;
+            Ni = np.matrix(PN['N']).T;
+            for j in range(Pi.shape[1]):
+                p[:,i] = oMi.act(Pi[:,j]);
+                N[:,i] = oMi.rotation * Ni[:,j];
+                i += 1;
+        # predict future com state supposing to break name_of_contact_to_break
+        stabilityCriterion.set_contacts(p.T, N.T, mu);
+        try:
+            res = stabilityCriterion.predict_future_state(step_time);
+            t_pred[contactId] = res.t;
+            t_min[contactId] = res.t_min;
+            c_pred[:,contactId] = np.asmatrix(res.c).T;
+            dc_pred[:,contactId] = np.asmatrix(res.dc).T;
+            dc_min[:,contactId] = np.asmatrix(res.dc_min).T;
+            v_pred[contactId] = norm(res.dc);
+#            print "Without contact %s robot will be able to maintain the contact for %.3f s"%(name_of_contact_to_break,t);
+#            print "  Predicted com state = (", c_t.T, dc_t.T, "), norm(dc)=%.3f"%norm(dc_t);
+        except Exception as e:
+            print "ERROR while computing stability criterion:", e;
+    
+    t_pred_sorted = sorted(t_pred.A.squeeze());
+    if(t_pred_sorted[-1] > t_pred_sorted[-2]+EPS):
+        id_contact_to_break = np.argmax(t_pred);
+    else:
+        id_contact_to_break = np.argmin(v_pred);
+    name_of_contact_to_break = contacts.keys()[id_contact_to_break];
+    return Bunch(name=name_of_contact_to_break, c=c_pred[:,id_contact_to_break], 
+                 dc=dc_pred[:,id_contact_to_break], t=t_pred[id_contact_to_break,0],
+                 t_min=t_min[id_contact_to_break,0], dc_min=dc_min[:,id_contact_to_break]);
 
 ''' Solve a QP to compute initial joint velocities that satisfy contact constraints and optionally other
     specified constraints, such as having the capture point inside the convex hull of the contact points.

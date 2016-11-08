@@ -10,6 +10,7 @@ if cwd+'/data/config' not in sys.path:
 
 import conf_hpp as conf
 from utils import compute_initial_joint_velocities_multi_contact
+from pinocchio_inv_dyn.multi_contact.stability_criterion import StabilityCriterion
 
 import pinocchio as se3
 from pinocchio.utils import zero as mat_zeros
@@ -86,28 +87,28 @@ def createSimulator(q0, v0):
     simulator.verb=0;
     return simulator;
 
-def draw_q(q0):	
-	p = np.matrix.copy(invDynForm.contact_points);
-	simulator.viewer.updateRobotConfig(q0);
-	simulator.updateComPositionInViewer(np.matrix([invDynForm.x_com[0,0], invDynForm.x_com[1,0], 0.]).T);
-	q0[2] -= 0.005
-	simulator.viewer.updateRobotConfig(q0);
-	p[2,:] -= 0.005;
-	for j in range(p.shape[1]):
-		simulator.viewer.addSphere("contact_point"+str(j), 0.005, p[:,j], (0.,0.,0.), (1, 1, 1, 1));
-		simulator.viewer.updateObjectConfigRpy("contact_point"+str(j), p[:,j]);
-	
-	f = open(conf.INITIAL_CONFIG_FILENAME, 'rb');
-	res = pickle.load(f);
-	f.close();
-	p_steve = np.matrix(res[conf.INITIAL_CONFIG_ID]['P']);
-	p_steve[:,2] -= 0.005;
-	for j in range(p_steve.shape[0]):
-		simulator.viewer.addSphere("contact_point_steve"+str(j), 0.005, p_steve[j,:].T, color=(1, 0, 0, 1));
-		simulator.viewer.updateObjectConfigRpy("contact_point_steve"+str(j), p_steve[j,:].T);  
+def draw_q(q0): 
+    p = np.matrix.copy(invDynForm.contact_points);
+    simulator.viewer.updateRobotConfig(q0);
+    simulator.updateComPositionInViewer(np.matrix([invDynForm.x_com[0,0], invDynForm.x_com[1,0], 0.]).T);
+    q0[2] -= 0.005
+    simulator.viewer.updateRobotConfig(q0);
+    p[2,:] -= 0.005;
+    for j in range(p.shape[1]):
+        simulator.viewer.addSphere("contact_point"+str(j), 0.005, p[:,j], (0.,0.,0.), (1, 1, 1, 1));
+        simulator.viewer.updateObjectConfigRpy("contact_point"+str(j), p[:,j]);
+    
+    f = open(conf.INITIAL_CONFIG_FILENAME, 'rb');
+    res = pickle.load(f);
+    f.close();
+    p_steve = np.matrix(res[conf.INITIAL_CONFIG_ID]['P']);
+    p_steve[:,2] -= 0.005;
+    for j in range(p_steve.shape[0]):
+        simulator.viewer.addSphere("contact_point_steve"+str(j), 0.005, p_steve[j,:].T, color=(1, 0, 0, 1));
+        simulator.viewer.updateObjectConfigRpy("contact_point_steve"+str(j), p_steve[j,:].T);  
 
 def q_pin(q_hpp):
-	return np.matrix(q_hpp).T
+    return np.matrix(q_hpp).T
 
 def gen_com_vel(q0, contacts):
     init(q0);
@@ -119,29 +120,54 @@ def gen_com_vel(q0, contacts):
     print 'Gonna compute initial joint velocities that satisfy contact constraints';
     print 'conf.MAX_INITIAL_COM_VEL', conf.MAX_INITIAL_COM_VEL
     (success, v)= compute_initial_joint_velocities_multi_contact(q0, invDynForm, conf.mu[0], 
-												conf.ZERO_INITIAL_ANGULAR_MOMENTUM, 
-												conf.ZERO_INITIAL_VERTICAL_COM_VEL,
-												False, #conf.ENSURE_STABILITY, 
+                                                conf.ZERO_INITIAL_ANGULAR_MOMENTUM, 
+                                                conf.ZERO_INITIAL_VERTICAL_COM_VEL,
+                                                False, #conf.ENSURE_STABILITY, 
                                                                   True, #conf.ENSURE_UNSTABILITY, 
                                                                   conf.MAX_INITIAL_COM_VEL, 100);
-    if success:						
+    if success:                     
         print "Initial velocities found"
-        return (success, invDynForm.J_com * v);
+        return (success, v, invDynForm.J_com * v);
     print "Could not find initial velocities"
     return (success, v[:]);
-						
-								
-def comTranslationAfter07s(q_hpp, contacts):
-	(success, dc0)= gen_com_vel(q_pin(q_hpp), contacts)
-	return success, dc0, dc0 * 0.7
-	
+                        
+                                
+def comPosAfter07s(c, q_hpp, contacts):
+    q0 =  q_pin(q_hpp)
+    init(q0);
+    v0 = mat_zeros(nv);
+    invDynForm.setNewSensorData(0, q0, v0);
+    updateConstraints(0, q0, v0, invDynForm, contacts);
+    #~ draw_q(q0);
+    print 'Gonna compute initial joint velocities that satisfy contact constraints';
+    print 'conf.MAX_INITIAL_COM_VEL', conf.MAX_INITIAL_COM_VEL
+    (success, v) = compute_initial_joint_velocities_multi_contact(q0, invDynForm, conf.mu[0], 
+                                                conf.ZERO_INITIAL_ANGULAR_MOMENTUM, 
+                                                conf.ZERO_INITIAL_VERTICAL_COM_VEL,
+                                                False, #conf.ENSURE_STABILITY, 
+                                                True, #conf.ENSURE_UNSTABILITY, 
+                                                conf.MAX_INITIAL_COM_VEL, 100);
+    if (not success):
+        print "Could not find initial velocities"                       
+        return (success, v[:], c, v0);
+    
+    c_init = np.matrix(c)
+    dx_com_des = mat_zeros(3);
+    P = np.matlib.copy(invDynForm.contact_points);
+    N = np.matlib.copy(invDynForm.contact_normals);
+    stab_criterion = StabilityCriterion("default", invDynForm.x_com, dx_com_des, P.T, N.T, conf.mu[0], np.array([0,0,-9.81]), invDynForm.M[0,0]) 
+    res = stab_criterion.predict_future_state(0.7, c_init, invDynForm.J_com * v)
+    print "c ", res.c
+    print "dc ", res.dc
+    return success, res.dc, res.c, v0
+    
 
 np.set_printoptions(precision=2, suppress=True);
 
 if(conf.freeFlyer):
-	robot = RobotWrapper(conf.urdfFileName, conf.model_path, root_joint=se3.JointModelFreeFlyer());
+    robot = RobotWrapper(conf.urdfFileName, conf.model_path, root_joint=se3.JointModelFreeFlyer());
 else:
-	robot = RobotWrapper(conf.urdfFileName, conf.model_path, None);
+    robot = RobotWrapper(conf.urdfFileName, conf.model_path, None);
 nq = robot.nq;
 nv = robot.nv;
 v0 = mat_zeros(nv);
@@ -151,14 +177,14 @@ na = None;    # number of joints
 simulator =  None;
 
 def init(q0):
-	''' CREATE CONTROLLER AND SIMULATOR '''
-	global invDynForm
-	global robot
-	global na
-	global simulator
-	print "reset invdyn"
-	invDynForm = createInvDynFormUtil(q0, v0);
-	robot = invDynForm.r;
-	na = invDynForm.na;    # number of joints
-	simulator = createSimulator(q0, v0);
-	#~ gen_com_vel(q0, config_test['contact_points'])
+    ''' CREATE CONTROLLER AND SIMULATOR '''
+    global invDynForm
+    global robot
+    global na
+    global simulator
+    print "reset invdyn"
+    invDynForm = createInvDynFormUtil(q0, v0);
+    robot = invDynForm.r;
+    na = invDynForm.na;    # number of joints
+    simulator = createSimulator(q0, v0);
+    #~ gen_com_vel(q0, config_test['contact_points'])

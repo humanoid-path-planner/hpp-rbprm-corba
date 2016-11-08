@@ -162,33 +162,66 @@ def pos_quat_to_pinocchio(q):
 	q_res[3:6] = quat_end
 	return q_res
 
-def gen_contact_candidates_one_limb(limb, config_gepetto, res, num_candidates = 10):
+def gen_contact_candidates_one_limb(limb, res, num_candidates = 10):
 	effectorName = limbsCOMConstraints[limb]['effector']
 	candidates = []
+	print "res", res
 	for i in range(num_candidates):
-		fullBody.setCurrentConfig(fullBody.getSample(limb,randint(0,n_samples - 1)))
-		#~ m = _getTransform(fullBody.getJointPosition(effectorName))
-		candidates.append(pos_quat_to_pinocchio(fullBody.getJointPosition(effectorName)))
-	res["candidates"][effectorName] = candidates
+		q_contact = fullBody.getSample(limb,randint(0,n_samples - 1))
+		fullBody.setCurrentConfig(q_contact)
+		m = _getTransform(fullBody.getJointPosition(effectorName))
+		candidates.append(m)		
+		#DEBUG
+		res["config_candidates"].append(q_contact)
+		#~ candidates.append(pos_quat_to_pinocchio(fullBody.getJointPosition(effectorName)))
+	res[effectorName] = candidates
 		
-		
-def find_limbs_broken(target_c, config, limbs):
+
+def removeLimb(limb, limbs):
+	return [l for l in limbs if l != limb]
 	
+#~ 
+#~ def find_limbs_broken(target_c, config, limbs):
+	#~ res = []
+	#~ for limb in limbs:
+		#~ nLimbs = removeLimb(limb, limbs)
+		#~ state_id = fullBody.createState(config, nLimbs)
+		#~ if (fullBody.projectStateToCOM(state_id,target_c)):
+			#~ res.append(limb)
+	#~ return res
 	
 def gen_contact_candidates(limbs, config_gepetto, res):
 	#first generate a com translation current configuration
-	success, dc, delta_c = scv.comTranslationAfter07s(res["q"], res["contact_points"])
-	#set it as new com objective for projection
 	fullBody.setCurrentConfig(config_gepetto)
-	c = array(fullBody.getCenterOfMass())
-	target_c = c + delta_c
-	state_id = fullBody.createState(config, limbs)
-	res["candidates"] = {}
-	brokenContacts = []
-	candidateLimbs = []
-	if(fullBody.projectStateToCOM(state_id,target_c)): #all good, all contacts kinematically maintained
-		for limb in limbs:
-			gen_contact_candidates_one_limb(limb, config_gepetto, res, 10)
+	success, dc, c_final, v0 = scv.comPosAfter07s(matrix(fullBody.getCenterOfMass()), res["q"], res["contact_points"])	
+	if(success):
+		data = {}
+		#set it as new com objective for projection
+		target_c = c_final.tolist()
+		state_id = fullBody.createState(config_gepetto, limbs)
+		#~ res["candidates"].append({})
+		data["v0"] = v0
+		data["dc"] = dc
+		data["c_final"] = c_final
+		data["candidateEffector"] = {}
+		#DEBUG
+		data["candidateEffector"]["config_candidates"] = []
+		if (fullBody.projectStateToCOM(state_id,target_c)): #all good, all contacts kinematically maintained
+			#~ res["candidates"][-1]["brokenContacts"] = find_limbs_broken(target_c, config_gepetto, limbs)
+			#~ for limb in limbs:
+			proj_config = fullBody.getConfigAtState(state_id)
+			#DEBUG
+			data["init_config"] = config_gepetto	
+			#DEBUG
+			data["projected_config"] = proj_config	
+			fullBody.setCurrentConfig(proj_config)
+			for limb in limbsCOMConstraints.keys():
+				gen_contact_candidates_one_limb(limb, data["candidateEffector"], 1)			
+			if (not res.has_key("candidates")):
+				res["candidates"] = []
+			res["candidates"].append(data)
+			
+		
 	
 from numpy import cos, sin, pi
 def __eulerToQuat(pitch, roll, yaw):
@@ -268,7 +301,10 @@ def gen(limbs, num_samples = 1000, coplanar = True):
 		q[3:6] = quat_end
 		qs.append(q)
 		qs_gepetto.append(q_gep)
-		states.append(fill_contact_points(limbs,q_gep,q))
+		res = fill_contact_points(limbs,q_gep,q)
+		for _ in range(10):
+			gen_contact_candidates(limbs, q_gep, res)
+		states.append(res)
 	global all_qs
 	all_qs += [qs_gepetto]
 	fname = ""
