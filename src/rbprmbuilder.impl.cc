@@ -37,6 +37,9 @@
 #include <hpp/core/basic-configuration-shooter.hh>
 #include <hpp/core/collision-validation.hh>
 #include <fstream>
+#include <hpp/rbprm/planner/dynamic-planner.hh>
+#include <hpp/rbprm/planner/parabola-planner.hh>
+
 
 #ifdef PROFILE
     #include "hpp/rbprm/rbprm-profiler.hh"
@@ -2081,6 +2084,9 @@ assert(s2 == s1 +1);
                                                    boost::bind(&BindShooter::create, boost::ref(bindShooter_), _1));
         problemSolver->add<core::PathValidationBuilder_t>("RbprmPathValidation",
                                                    boost::bind(&BindShooter::createPathValidation, boost::ref(bindShooter_), _1, _2));
+        problemSolver->add<core::PathPlannerBuilder_t>("DynamicPlanner",DynamicPlanner::createWithRoadmap);
+        problemSolver->add<core::PathPlannerBuilder_t>("ParabolaPlanner",ParabolaPlanner::createWithRoadmap);
+
     }
 
     } // namespace impl
