@@ -303,3 +303,12 @@ class Builder (object):
     def getJacobianCenterOfMass (self):
         return self.client.basic.robot.getJacobianCenterOfMass ()
     ##\}
+
+    ## Get the dimension of the extra configuration space
+    def getDimensionExtraConfigSpace(self):
+        return self.client.basic.robot.getDimensionExtraConfigSpace()
+
+    ## Convert a direction vector to a quaternion (use Eigen::Quaterniond::FromTwoVectors with Z vector)
+    # \param u the vector director
+    def quaternionFromVector(self,vector):
+        return self.client.basic.robot.quaternionFromVector(vector)
