@@ -179,8 +179,8 @@ def interpolate():
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hyq_trunk", "OFF")
-	for i in range(7,20):
-		act(i,1,optim_effectors=True)
+	for i in range(7,23):
+		act(i,1,optim_effectors=False)
 		
 def play(frame_rate = 1./24.):
 	play_traj(fullBody,pp,frame_rate)
@@ -216,4 +216,16 @@ def g():
 	play()
 
 print "Root path generated in " + str(tp.t) + " ms."
+
+
+a()
+b()
+c()
+d()
+e()
+f()
+
+
+
+
 	

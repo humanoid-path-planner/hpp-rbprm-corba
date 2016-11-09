@@ -29,11 +29,6 @@ typedef hpp::affordanceCorba::Server AffordanceServer;
 int main (int argc, char* argv [])
 {
     hpp::core::ProblemSolverPtr_t problemSolver (hpp::core::ProblemSolver::create());
-    problemSolver->addSteeringMethodType("SteeringDynamic", boost::bind(                                                   static_cast<hpp::rbprm::SteeringDynamicPtr_t (*)(const hpp::core::ProblemPtr_t&)>                                                     (&hpp::rbprm::SteeringDynamic::create), _1 ));
-    problemSolver->addSteeringMethodType("SteeringParabola", boost::bind(                                                   static_cast<hpp::rbprm::SteeringMethodParabolaPtr_t (*)(const hpp::core::ProblemPtr_t&)>                                                     (&hpp::rbprm::SteeringMethodParabola::create), _1 ));
-
-
-    problemSolver->addPathPlannerType("RRTdynamic",hpp::rbprm::DynamicPlanner::createWithRoadmap);
 
 
     CorbaServer corbaServer (problemSolver, argc,

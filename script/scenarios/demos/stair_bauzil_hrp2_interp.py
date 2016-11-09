@@ -198,6 +198,18 @@ def contactPlan():
 		r(configs[i]);
 		time.sleep(0.5)		
 		
+def interpolate():
+	tp.cl.problem.selectProblem("default")
+	r.client.gui.setVisibility("hrp2_14", "ON")
+	tp.r.client.gui.setVisibility("toto", "OFF")
+	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
+	for i in range(7,20):
+		act(i,1,optim_effectors=True)
+		
+def play(frame_rate = 1./24.):
+	play_traj(fullBody,pp,frame_rate)
+	
+
 		
 def a():
 	print "initial configuration"
@@ -218,6 +230,14 @@ def d():
 def e():
 	print "displaying contact plan"
 	contactPlan()
+
+def f():
+	print "computing feasible com trajectory"
+	interpolate()
+
+def g():
+	print "playing feasible trajectory"
+	play()
 	
 print "Root path generated in " + str(tp.t) + " ms."
 	
