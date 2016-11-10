@@ -210,6 +210,13 @@ class FullBody (object):
     def generateGroundContact(self, contactLimbs):
 		return self.client.rbprm.rbprm.generateGroundContact(contactLimbs)
 		
+	## Create a state and push it to the state array
+	# \param q configuration
+	# \param names list of effectors in contact
+	# \return stateId
+    def createState(self, q, contactLimbs):
+		return self.client.rbprm.rbprm.createState(q, contactLimbs)
+		
 	## Retrieves the contact candidates configurations given a configuration and a limb
 	#
     # \param name id of the limb considered
