@@ -158,16 +158,16 @@ trackedEffectors = []):
 			global trajec
 			global trajec_mil			
 			frame_rate = 1./24.
-			frame_rate_andrea = 1./1000.
+			#~ frame_rate_andrea = 1./1000.
 			#~ if(len(trajec) > 0):
 				#~ frame_rate = 1./25.
 				#~ frame_rate_andrea = 1./1001.
 			new_traj = gen_trajectory_to_play(fullBody, pp, trajectory, time_per_path, frame_rate)
-			new_traj_andrea = gen_trajectory_to_play(fullBody, pp, trajectory, time_per_path,frame_rate_andrea)
+			#~ new_traj_andrea = gen_trajectory_to_play(fullBody, pp, trajectory, time_per_path,frame_rate_andrea)
 			#~ new_contacts = gencontactsPerFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, times, frame_rate_andrea)	
-			Ps, Ns, freeEffectorsPerPhase = genPandNperFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, time_per_path, frame_rate_andrea)
-			NPeffs = genPEffperFrame(fullBody, freeEffectorsPerPhase, new_traj_andrea, pp, time_per_path, frame_rate_andrea)
-			com = genComPerFrame(final_state, dt, frame_rate_andrea)
+			#~ Ps, Ns, freeEffectorsPerPhase = genPandNperFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, time_per_path, frame_rate_andrea)
+			#~ NPeffs = genPEffperFrame(fullBody, freeEffectorsPerPhase, new_traj_andrea, pp, time_per_path, frame_rate_andrea)
+			#~ com = genComPerFrame(final_state, dt, frame_rate_andrea)
 			#~ if(len(trajec) > 0):
 				#~ new_traj = new_traj[1:]
 				#~ new_traj_andrea = new_traj_andrea[1:]
@@ -176,19 +176,19 @@ trackedEffectors = []):
 				#~ com = com[1:]
 				#~ NPeffs = NPeffs[1:]
 			trajec = trajec + new_traj
-			trajec_mil += new_traj_andrea
+			#~ trajec_mil += new_traj_andrea
 			#~ global contacts
 			#~ contacts += new_contacts	
-			global pos
-			pos += Ps
-			global normals
-			normals+= Ns
-			global pEffs
-			pEffs+= NPeffs
-			global coms
-			coms+= com
-			print len(trajec_mil), " ",  len(pos), " ", len(normals), " ", len(coms), " ", len(pEffs)
-			assert(len(trajec_mil) == len(pos) and len(normals) == len(pos) and len(normals) == len(coms) and len(coms) == len(pEffs))
+			#~ global pos
+			#~ pos += Ps
+			#~ global normals
+			#~ normals+= Ns
+			#~ global pEffs
+			#~ pEffs+= NPeffs
+			#~ global coms
+			#~ coms+= com
+			#~ print len(trajec_mil), " ",  len(pos), " ", len(normals), " ", len(coms), " ", len(pEffs)
+			#~ assert(len(trajec_mil) == len(pos) and len(normals) == len(pos) and len(normals) == len(coms) and len(coms) == len(pEffs))
 			stat_data["num_success"] += 1
 		else:
 			print "TODO, NO CONTACT VARIATION, LINEAR INTERPOLATION REQUIRED"

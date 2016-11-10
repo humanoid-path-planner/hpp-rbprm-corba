@@ -812,6 +812,61 @@ namespace hpp {
         }
     }
 
+    hpp::floatSeq* RbprmBuilder::getContactSamplesIdsAndProject(const char* limbname,
+                                        const hpp::floatSeq& configuration,
+                                        const hpp::floatSeq& direction,
+                                        unsigned short numSamples) throw (hpp::Error)
+    {
+        if(!fullBodyLoaded_)
+            throw Error ("No full body robot was loaded");
+        try
+        {
+            fcl::Vec3f dir;
+            for(std::size_t i =0; i <3; ++i)
+            {
+                dir[i] = direction[(_CORBA_ULong)i];
+            }
+            model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
+            model::Configuration_t save = fullBody_->device_->currentConfiguration();
+            fullBody_->device_->currentConfiguration(config);
+
+            sampling::T_OctreeReport finalSet;
+            rbprm::T_Limb::const_iterator lit = fullBody_->GetLimbs().find(std::string(limbname));
+            if(lit == fullBody_->GetLimbs().end())
+            {
+                throw std::runtime_error ("Impossible to find limb for joint "
+                                          + std::string(limbname) + " to robot; limb not defined.");
+            }
+            const RbPrmLimbPtr_t& limb = lit->second;
+            fcl::Transform3f transform = limb->limb_->robot()->rootJoint()->childJoint(0)->currentTransformation (); // get root transform from configuration
+                        // TODO fix as in rbprm-fullbody.cc!!
+            std::vector<sampling::T_OctreeReport> reports(problemSolver_->collisionObstacles().size());
+            std::size_t i (0);
+            //#pragma omp parallel for
+            for(model::ObjectVector_t::const_iterator oit = problemSolver_->collisionObstacles().begin();
+                oit != problemSolver_->collisionObstacles().end(); ++oit, ++i)
+            {
+                sampling::GetCandidates(limb->sampleContainer_, transform, *oit, dir, reports[i]);
+            }
+            for(std::vector<sampling::T_OctreeReport>::const_iterator cit = reports.begin();
+                cit != reports.end(); ++cit)
+            {
+                finalSet.insert(cit->begin(), cit->end());
+            }
+            hpp::floatSeq* dofArray = new hpp::floatSeq();
+            dofArray->length((_CORBA_ULong)finalSet.size());
+            sampling::T_OctreeReport::const_iterator candCit = finalSet.begin();
+            for(std::size_t i=0; i< _CORBA_ULong(finalSet.size()); ++i, ++candCit)
+            {
+              (*dofArray)[(_CORBA_ULong)i] = (double)candCit->sample_->id_;
+            }
+            fullBody_->device_->currentConfiguration(save);
+            return dofArray;
+        } catch (const std::exception& exc) {
+        throw hpp::Error (exc.what ());
+        }
+    }
+
     hpp::floatSeq* RbprmBuilder::getSamplesIdsInOctreeNode(const char* limb,
                                                            double octreeNodeId) throw (hpp::Error)
     {

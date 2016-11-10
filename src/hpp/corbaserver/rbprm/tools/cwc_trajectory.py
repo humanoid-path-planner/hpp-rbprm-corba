@@ -159,6 +159,7 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  dt=0.2, phase_dt = [0.4, 1], reduce_ineq = True, verbose = False, limbsCOMConstraints = None, use_window = 0):
 	var_final, params, elapsed = gen_trajectory(fullBody, states, state_id, computeCones, mu , dt, phase_dt, reduce_ineq, verbose, limbsCOMConstraints, False, use_window = use_window)
 	p, N = fullBody.computeContactPoints(state_id)
+	print "p", p
 	fig = plt.figure()
 	ax = fig.add_subplot(111, projection='3d')
 	n = 100
@@ -180,8 +181,8 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 	ax.set_ylabel('Y Label')
 	ax.set_zlabel('Z Label')
 
-	#~ plt.show()
-	plt.savefig('/tmp/c'+ str(state_id)+ '.png')
+	plt.show()
+	#~ plt.savefig('/tmp/c'+ str(state_id)+ '.png')
 	
 	print "plotting speed "
 	print "end target ",  params['x_end']
@@ -199,8 +200,8 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 	ax.scatter(xs, ys, c='b')
 
 
-	#~ plt.show()
-	plt.savefig('/tmp/dc'+ str(state_id)+ '.png')
+	plt.show()
+	#~ plt.savefig('/tmp/dc'+ str(state_id)+ '.png')
 	
 	print "plotting acceleration "
 	fig = plt.figure()
@@ -215,7 +216,7 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 	ax.scatter(xs, ys, c='b')
 
 
-		#~ plt.show()
+	plt.show()
 	plt.savefig('/tmp/ddc'+ str(state_id)+ '.png')
 	
 	print "plotting Dl "
@@ -227,7 +228,7 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 	ax.scatter(xs, ys, c='b')
 
 
-	#~ plt.show()
+	plt.show()
 	plt.savefig('/tmp/dL'+ str(state_id)+ '.png')
 	return var_final, params, elapsed
 	

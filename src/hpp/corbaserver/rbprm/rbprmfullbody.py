@@ -253,6 +253,14 @@ class FullBody (object):
     # \param contacts the array of limbs in contact
     def setStartState(self, configuration, contacts):
 		return self.client.rbprm.rbprm.setStartState(configuration, contacts)
+		
+	## Create a state given a configuration and contacts
+	#
+    # \param configuration the desired start configuration
+    # \param contacts the array of limbs in contact
+    # \return id of created state
+    def createState(self, configuration, contacts):
+		return self.client.rbprm.rbprm.createState(configuration, contacts)
 			
 	## Initialize the last configuration of the path discretization 
 	# with a balanced configuration for the interpolation problem;
