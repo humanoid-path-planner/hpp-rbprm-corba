@@ -128,29 +128,36 @@ def draw_cp(cid, limb, config):
         r.client.gui.applyConfiguration(scene+"/b"+str(i),pos.tolist()+[1,0,0,0])
         r.client.gui.refresh()  
     r.client.gui.addSceneToWindow(scene,0)
+    
+def draw_com(config):
+    fullBody.setCurrentConfig(config)
+    effectorName = limbsCOMConstraints[limb]['effector']
+    limbId = limb
+    m = _getTransform(fullBody.getJointPosition(effectorName))
+    scene = "qds"+limb+str(cid)
+    r.client.gui.createScene(scene)
+    for i in range(4):
+        #~ pos = posetc[2*i]
+        print "P", array(P[i]+[1])
+        print "N", array(N[i]+[1])
+        print m.dot(array(P[i]+[1]))
+        pos = m.dot(array(P[i]+[1]))[:3]
+        print "pos", pos
+        r.client.gui.addBox(scene+"/b"+str(i),0.01,0.01,0.01, [1,0,0,1])
+        r.client.gui.applyConfiguration(scene+"/b"+str(i),pos.tolist()+[1,0,0,0])
+        r.client.gui.refresh()  
+    r.client.gui.addSceneToWindow(scene,0)
 
 
-def fill_contact_points(limbs, config, config_pinocchio):
-    res = {}
-    res["q"] = config_pinocchio[:]
-    res["contact_points"] = {}
-    res["P"] = []
-    res["N"] = []
+def fill_contact_points(limbs, fullbody, data):
+    data["contact_points"] = {}
     for limb in limbs:
         effector = limbsCOMConstraints[limb]['effector']
-        #~ posetc = fullBody.getEffectorPosition(limb, config)
-        P, N = fullBody.computeContactForConfig(config, limb)       
-        #~ posetc = fullBody.getEffectorPosition(limb, config)
-        res["contact_points"][effector] = {}
-        #~ res["contact_points"][effector]["P"] = [p for i, p in enumerate (posetc) if (i%2 == 0)]
-        res["contact_points"][effector]["P"] = P
-        #~ res["P"] += [p for i, p in enumerate (posetc) if (i%2 == 0)]
-        res["P"] += P
-        #~ res["contact_points"][effector]["N"] = [n for i, n in enumerate (posetc) if (i%2 == 1)]
-        res["contact_points"][effector]["N"] = N
-        #~ res["N"] += [n for i, n in enumerate (posetc) if (i%2 == 1)]
-        res["N"] += N
-    return res
+        P, N = fullBody.computeContactForConfig(fullbody.getCurrentConfig(), limb)   
+        data["contact_points"][effector] = {}
+        data["contact_points"][effector]["P"] = P
+        data["contact_points"][effector]["N"] = N
+    return data
     
     
 from random import randint
@@ -166,7 +173,6 @@ def gen_contact_candidates_one_limb(limb, data, num_candidates = 10):
     effectorName = limbsCOMConstraints[limb]['effector']
     candidates = []
     config_candidates = [] #DEBUG
-    print "data", data
     for i in range(num_candidates):
         q_contact = fullBody.getSample(limb,randint(0,n_samples - 1))
         fullBody.setCurrentConfig(q_contact)
@@ -191,15 +197,19 @@ def removeLimb(limb, limbs):
             #~ res.append(limb)
     #~ return res
     
-def predict_com_for_limb_candidate(c, limb, limbs, res, data, config_gepetto):
+def predict_com_for_limb_candidate(c, limb, limbs, res, data, config_gepetto, orig_contact_points):
     effector = limbsCOMConstraints[limb]['effector']
     contact_points = {}
     maintained_limbs = [l for l in limbs if limb != l]
-    for k, v in res["contact_points"].iteritems():
+    for k, v in orig_contact_points.iteritems():
         if k != effector:
             contact_points[k] = v
-    success, dc, c_final, v0 = scv.com_pos_after_t(c, res["q"], contact_points)
+    #~ success, dc, c_final, v0 = scv.com_pos_after_t(c, res["q"], contact_points, data["v0"])
+    success, dc, c_final, v0 = scv.com_pos_after_t(c, res["q"], contact_points, data["v0"])
+    print "c for limb ", c_final ,  ":", limb
+    print "success ",success
     effector_data = {}
+    print "maintained_limbs ", maintained_limbs 
     state_id = fullBody.createState(config_gepetto, maintained_limbs)
     if(success and fullBody.projectStateToCOM(state_id,c_final.tolist())): #all good, all contacts kinematically maintained):
         effector_data["dc"] = dc
@@ -209,14 +219,15 @@ def predict_com_for_limb_candidate(c, limb, limbs, res, data, config_gepetto):
         effector_data["projected_config"] = proj_config  #DEBUG
         data["candidates_per_effector"][effector] = effector_data
         return True
+    print "projection failed for limb ", limb
     return False
     
     
-def gen_contact_candidates(limbs, config_gepetto, res):
+def gen_contact_candidates(limbs, config_gepetto, res, contact_points):
     #first generate a com translation current configuration
     fullBody.setCurrentConfig(config_gepetto)
     c = matrix(fullBody.getCenterOfMass())
-    success, dc, v0 = scv.gen_com_vel(res["q"], res["contact_points"]) 
+    success, v0, dc = scv.gen_com_vel(res["q"], contact_points) 
     if(success):
         data = {}
         data["v0"] = v0
@@ -225,9 +236,12 @@ def gen_contact_candidates(limbs, config_gepetto, res):
         data["init_config"] = config_gepetto  #DEBUG    
         for limb in limbsCOMConstraints.keys(): 
             print "limb ", limb
-            if (predict_com_for_limb_candidate(c, limb, limbs, res, data, config_gepetto)):  #all good, all contacts kinematically maintained
-                configs_candidates.append(gen_contact_candidates_one_limb(limb, data["candidates_per_effector"], 1)) #DEBUG 
-        if(len(data["candidates_per_effector"].keys()) >0):             
+            if (predict_com_for_limb_candidate(c, limb, limbs, res, data, config_gepetto, contact_points)):  #all good, all contacts kinematically maintained
+                configs_candidates.append(gen_contact_candidates_one_limb(limb, data["candidates_per_effector"], 10)) #DEBUG 
+        if(len(data["candidates_per_effector"].keys()) >0):
+            #~ if((data["candidates_per_effector"].has_key('RARM_JOINT5') and not data["candidates_per_effector"].has_key('LARM_JOINT5')) or
+                #~ (data["candidates_per_effector"].has_key('LARM_JOINT5') and not data["candidates_per_effector"].has_key('RARM_JOINT5'))):
+                    #~ raise ValueError("RARM AND LARM candidates not coherent (if there is candidates for one there should be for the other)");
             data["candidates_per_effector"]["config_candidates"] = configs_candidates  #DEBUG     
             if (not res.has_key("candidates")):
                 res["candidates"] = []  
@@ -301,7 +315,9 @@ all_states = []
 def gen(limbs, num_samples = 1000, coplanar = True):
     q_0 = fullBody.getCurrentConfig(); 
     #~ fullBody.getSampleConfig()
-    qs = []; qs_gepetto = []; states = []
+    qs = []; qs_gepetto = []; states = []    
+    data = {}
+    fill_contact_points(limbs, fullBody, data)
     for _ in range(num_samples):
         if(coplanar):
             q = fullBody.generateGroundContact(limbs)
@@ -311,9 +327,10 @@ def gen(limbs, num_samples = 1000, coplanar = True):
         quat_end = q[4:7]
         q[6] = q[3]
         q[3:6] = quat_end
-        res = fill_contact_points(limbs,q_gep,q)
+        res = {}
+        res["q"] = q[:]
         for _ in range(1):
-            gen_contact_candidates(limbs, q_gep, res)
+            gen_contact_candidates(limbs, q_gep, res, data["contact_points"])
         if(res.has_key("candidates")): #contact candidates found
             states.append(res)
             qs.append(q)
@@ -326,10 +343,11 @@ def gen(limbs, num_samples = 1000, coplanar = True):
     fname += "configs"
     if(coplanar):
         fname += "_coplanar"
+	data["samples"] = states
     from pickle import dump
     #~ f1=open("configs_feet_on_ground_static_eq", 'w+')
     f1=open(fname, 'w+')
-    dump(states, f1)
+    dump(data, f1)
     f1.close()
     all_states.append(states)
 
@@ -348,10 +366,10 @@ limbs = [[lLegId,rLegId],[lLegId,rLegId, rarmId], [lLegId,rLegId, larmId], [lLeg
 #~ limbs = [[lLegId,rLegId, rarmId]]
 #~ limbs = [[larmId, rarmId]]
 
+gen(limbs[0], 10)
+for ls in limbs:
+    gen(ls, 10, False)
 #~ gen(limbs[0], 10)
-#~ for ls in limbs:
-    #~ gen(ls, 10, False)
-gen(limbs[0], 1)
     
 i = 0
 
@@ -385,4 +403,12 @@ def c3():
     
 def c4():
     r(b['config_candidates'][3][0])
+    
+def inc():
+    global i
+    global a
+    global b
+    i+=1
+    a = all_states[0][i]['candidates'][0]
+    b = a ['candidates_per_effector']
 
