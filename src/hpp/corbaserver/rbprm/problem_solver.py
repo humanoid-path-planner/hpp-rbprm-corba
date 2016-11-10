@@ -374,3 +374,17 @@ class ProblemSolver (object):
     def clearRoadmap (self):
         return self.client.problem.clearRoadmap ()
     ## \}
+
+    ##  Select steering method type
+    #   \param Name of the steering method type, either
+    #      "SteeringMethodStraight" or any type added by method
+    #      core::ProblemSolver::addSteeringMethodType
+    def selectSteeringMethod (self, steeringMethodType):
+        return self.client.problem.selectSteeringMethod (steeringMethodType)
+
+    ##  Select distance type
+    #   \param Name of the distance type, either
+    #      "WeighedDistance" or any type added by method
+    #      core::ProblemSolver::addDistanceType
+    def selectDistance (self, distanceType):
+        return self.client.problem.selectDistance (distanceType)
