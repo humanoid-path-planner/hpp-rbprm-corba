@@ -225,6 +225,14 @@ class FullBody (object):
     def getContactSamplesIds(self, name, configuration, direction):
 		return self.client.rbprm.rbprm.getContactSamplesIds(name, configuration, direction)
 		
+	## Retrieves the contact candidates configurations given a configuration and a limb
+	#
+    # \param name id of the limb considered
+    # \param configuration the considered robot configuration
+    # \param direction a 3d vector specifying the desired direction of motion
+    def getContactSamplesProjected(self, name, configuration, direction, numSamples = 10):
+		return self.client.rbprm.rbprm.getContactSamplesProjected(name, configuration, direction, numSamples)
+		
 	## Retrieves the samples IDs In a given octree cell
 	#
     # \param name id of the limb considered

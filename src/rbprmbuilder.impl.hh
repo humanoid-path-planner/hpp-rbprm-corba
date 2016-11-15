@@ -136,7 +136,7 @@ namespace hpp {
                                                    const hpp::floatSeq& configuration,
                                                    const hpp::floatSeq& direction) throw (hpp::Error);
 
-        virtual hpp::floatSeq* getContactSamplesIdsAndProject(const char* limb,
+        virtual hpp::floatSeqSeq* getContactSamplesProjected(const char* limb,
                                                    const hpp::floatSeq& configuration,
                                                    const hpp::floatSeq& direction,
                                                    unsigned short numSamples) throw (hpp::Error);

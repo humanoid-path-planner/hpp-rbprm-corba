@@ -7,6 +7,7 @@ from hpp.corbaserver.rbprm.tools.cwc_trajectory import *
 
 from hpp import Error as hpperr
 from numpy import array, matrix
+import random
 
 import sample_com_vel as scv
 
@@ -169,17 +170,31 @@ def pos_quat_to_pinocchio(q):
     q_res[3:6] = quat_end
     return q_res
 
-def gen_contact_candidates_one_limb(limb, data, num_candidates = 10):
+def gen_contact_candidates_one_limb(limb, data, num_candidates = 10, projectToObstacles = False):
     effectorName = limbsCOMConstraints[limb]['effector']
     candidates = []
     config_candidates = [] #DEBUG
-    for i in range(num_candidates):
-        q_contact = fullBody.getSample(limb,randint(0,n_samples - 1))
-        fullBody.setCurrentConfig(q_contact)
-        m = _getTransform(fullBody.getJointPosition(effectorName))
-        candidates.append(m)
-        config_candidates.append(q_contact) #DEBUG
-        #~ candidates.append(pos_quat_to_pinocchio(fullBody.getJointPosition(effectorName)))
+    if(projectToObstacles):
+        candidates = fullBody.getContactSamplesProjected(limb, fullBody.getCurrentConfig(),[0,0,1],10000)
+        random.shuffle(candidates)
+        print "num candidates", len(candidates)
+        print "num limlb", limb
+        if(len(candidates) > 0):
+            raw_input("enter somethin")
+        for i in range(len(candidates)):
+            q_contact = candidates[i]
+            fullBody.setCurrentConfig(q_contact)
+            m = _getTransform(fullBody.getJointPosition(effectorName))
+            candidates.append(m)
+            config_candidates.append(q_contact) #DEBUG
+    else:
+        for i in range(num_candidates):
+            q_contact = fullBody.getSample(limb,randint(0,n_samples - 1))
+            fullBody.setCurrentConfig(q_contact)
+            m = _getTransform(fullBody.getJointPosition(effectorName))
+            candidates.append(m)
+            config_candidates.append(q_contact) #DEBUG
+            #~ candidates.append(pos_quat_to_pinocchio(fullBody.getJointPosition(effectorName)))
     data[effectorName]["transforms"] = candidates
     return config_candidates #DEBUG
         
@@ -223,7 +238,7 @@ def predict_com_for_limb_candidate(c, limb, limbs, res, data, config_gepetto, or
     return False
     
     
-def gen_contact_candidates(limbs, config_gepetto, res, contact_points):
+def gen_contact_candidates(limbs, config_gepetto, res, contact_points, num_candidates = 10, projectToObstacles = False):
     #first generate a com translation current configuration
     fullBody.setCurrentConfig(config_gepetto)
     c = matrix(fullBody.getCenterOfMass())
@@ -232,12 +247,14 @@ def gen_contact_candidates(limbs, config_gepetto, res, contact_points):
         data = {}
         data["v0"] = v0
         data["candidates_per_effector"] = {}
-        configs_candidates = [] #DEBUG      
+        configs_candidates = {} #DEBUG      
         data["init_config"] = config_gepetto  #DEBUG    
         for limb in limbsCOMConstraints.keys(): 
-            print "limb ", limb
+            #~ print "limb ", limb
             if (predict_com_for_limb_candidate(c, limb, limbs, res, data, config_gepetto, contact_points)):  #all good, all contacts kinematically maintained
-                configs_candidates.append(gen_contact_candidates_one_limb(limb, data["candidates_per_effector"], 10)) #DEBUG 
+               val  = gen_contact_candidates_one_limb(limb, data["candidates_per_effector"], num_candidates, projectToObstacles) #DEBUG 
+               if len(val) > 0:
+                    configs_candidates[limb] = val
         if(len(data["candidates_per_effector"].keys()) >0):
             #~ if((data["candidates_per_effector"].has_key('RARM_JOINT5') and not data["candidates_per_effector"].has_key('LARM_JOINT5')) or
                 #~ (data["candidates_per_effector"].has_key('LARM_JOINT5') and not data["candidates_per_effector"].has_key('RARM_JOINT5'))):
@@ -312,25 +329,31 @@ def _genbalance(limbs):
 
 all_qs = []
 all_states = []
-def gen(limbs, num_samples = 1000, coplanar = True):
+def gen(limbs, num_samples = 1000, coplanar = True, num_candidates_per_config = 1, num_contact_candidates = 10, q_entries = None, projectToObstacles = False):
     q_0 = fullBody.getCurrentConfig(); 
     #~ fullBody.getSampleConfig()
     qs = []; qs_gepetto = []; states = []    
     data = {}
     fill_contact_points(limbs, fullBody, data)
-    for _ in range(num_samples):
-        if(coplanar):
-            q = fullBody.generateGroundContact(limbs)
+    if(q_entries != None):
+        num_samples = len(q_entries)
+        print "num_sample", num_samples, len(q_entries)
+    for i in range(num_samples):
+        if(q_entries == None):
+            if(coplanar):
+                q = fullBody.generateGroundContact(limbs)
+            else:
+                q = _genbalance(limbs)
         else:
-            q = _genbalance(limbs)
+            q = q_entries[i]
         q_gep = q[:]
         quat_end = q[4:7]
         q[6] = q[3]
         q[3:6] = quat_end
         res = {}
         res["q"] = q[:]
-        for _ in range(1):
-            gen_contact_candidates(limbs, q_gep, res, data["contact_points"])
+        for _ in range(num_candidates_per_config):
+            gen_contact_candidates(limbs, q_gep, res, data["contact_points"], num_contact_candidates, projectToObstacles)
         if(res.has_key("candidates")): #contact candidates found
             states.append(res)
             qs.append(q)
@@ -343,13 +366,14 @@ def gen(limbs, num_samples = 1000, coplanar = True):
     fname += "configs"
     if(coplanar):
         fname += "_coplanar"
-	data["samples"] = states
+    data["samples"] = states
     from pickle import dump
     #~ f1=open("configs_feet_on_ground_static_eq", 'w+')
     f1=open(fname, 'w+')
     dump(data, f1)
     f1.close()
     all_states.append(states)
+    return all_states
 
 j=0
 
@@ -366,19 +390,21 @@ limbs = [[lLegId,rLegId],[lLegId,rLegId, rarmId], [lLegId,rLegId, larmId], [lLeg
 #~ limbs = [[lLegId,rLegId, rarmId]]
 #~ limbs = [[larmId, rarmId]]
 
-gen(limbs[0], 10)
-for ls in limbs:
-    gen(ls, 10, False)
+#~ gen(limbs[0], 10)
+#~ for ls in limbs:
+    #~ gen(ls, 10, False)
 #~ gen(limbs[0], 10)
     
 i = 0
+a = None
+b = None
 
-a = all_states[0][0]['candidates'][0]
-b = a ['candidates_per_effector']
+#~ a = all_states[0][0]['candidates'][0]
+#~ b = a ['candidates_per_effector']
 def init():
     r(a['init_config'])
     
-b = a ['candidates_per_effector']
+#~ b = a ['candidates_per_effector']
 
 def rleg():
     r(b['RLEG_JOINT5']['projected_config'])
@@ -392,6 +418,20 @@ def larm():
 def rarm():
     r(b['RARM_JOINT5']['projected_config'])
     
+def rlegi(j):                 
+    r(b['config_candidates'][rLegId][j])
+                             
+def llegi(j):                 
+    r(b['config_candidates'][lLegId][j])
+                             
+def larmi(j):                 
+    r(b['config_candidates'][larmId][j])
+                             
+def rarmi(j):                 
+    r(b['config_candidates'][rarmId][j])
+    
+    
+    
 def c1():
     r(b['config_candidates'][0][0])
     
@@ -404,6 +444,10 @@ def c3():
 def c4():
     r(b['config_candidates'][3][0])
     
+    
+def cij(l,m):
+    r(b['config_candidates'][l][m])
+    
 def inc():
     global i
     global a
@@ -411,4 +455,10 @@ def inc():
     i+=1
     a = all_states[0][i]['candidates'][0]
     b = a ['candidates_per_effector']
+    
+def a():
+    return a
+    
+def b():
+    return b
 

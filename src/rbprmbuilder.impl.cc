@@ -37,6 +37,7 @@
 #include <hpp/core/basic-configuration-shooter.hh>
 #include <hpp/core/collision-validation.hh>
 #include <fstream>
+#include <algorithm>    // std::random_shuffle
 
 #ifdef PROFILE
     #include "hpp/rbprm/rbprm-profiler.hh"
@@ -812,7 +813,7 @@ namespace hpp {
         }
     }
 
-    hpp::floatSeq* RbprmBuilder::getContactSamplesIdsAndProject(const char* limbname,
+    hpp::floatSeqSeq* RbprmBuilder::getContactSamplesProjected(const char* limbname,
                                         const hpp::floatSeq& configuration,
                                         const hpp::floatSeq& direction,
                                         unsigned short numSamples) throw (hpp::Error)
@@ -827,7 +828,6 @@ namespace hpp {
                 dir[i] = direction[(_CORBA_ULong)i];
             }
             model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
-            model::Configuration_t save = fullBody_->device_->currentConfiguration();
             fullBody_->device_->currentConfiguration(config);
 
             sampling::T_OctreeReport finalSet;
@@ -853,15 +853,49 @@ namespace hpp {
             {
                 finalSet.insert(cit->begin(), cit->end());
             }
-            hpp::floatSeq* dofArray = new hpp::floatSeq();
-            dofArray->length((_CORBA_ULong)finalSet.size());
+            // randomize samples
+            std::random_shuffle(reports.begin(), reports.end());
+            unsigned short num_samples_ok (0);
+            bool success(false);
+            model::Configuration_t sampleConfig = config;
+            std::vector<model::Configuration_t> results;
             sampling::T_OctreeReport::const_iterator candCit = finalSet.begin();
-            for(std::size_t i=0; i< _CORBA_ULong(finalSet.size()); ++i, ++candCit)
+            for(std::size_t i=0; i< _CORBA_ULong(finalSet.size()) && num_samples_ok < numSamples; ++i, ++candCit)
             {
-              (*dofArray)[(_CORBA_ULong)i] = (double)candCit->sample_->id_;
+                const sampling::OctreeReport& report = *candCit;
+                success = false;
+                State state;
+                state.configuration_ = config;
+                hpp::rbprm::ProjectSampleToObstacle(fullBody_,std::string(limbname), limb, report, fullBody_->GetCollisionValidation(), sampleConfig, state, success);
+                if(success)
+                {
+                    results.push_back(sampleConfig);
+                    ++num_samples_ok;
+                }
             }
-            fullBody_->device_->currentConfiguration(save);
-            return dofArray;
+            hpp::floatSeqSeq *res;
+            res = new hpp::floatSeqSeq ();
+
+            res->length ((_CORBA_ULong)results.size ());
+            i=0;
+            std::size_t id = 0;
+            for(std::vector<model::Configuration_t>::const_iterator cit = results.begin();
+                        cit != results.end(); ++cit, ++id)
+            {
+                /*std::cout << "ID " << id;
+                cit->print();*/
+                const core::Configuration_t& config = *cit;
+                _CORBA_ULong size = (_CORBA_ULong) config.size ();
+                double* dofArray = hpp::floatSeq::allocbuf(size);
+                hpp::floatSeq floats (size, size, dofArray, true);
+                //convert the config in dofseq
+                for (model::size_type j=0 ; j < config.size() ; ++j) {
+                  dofArray[j] = config [j];
+                }
+                (*res) [(_CORBA_ULong)i] = floats;
+                ++i;
+            }
+            return res;
         } catch (const std::exception& exc) {
         throw hpp::Error (exc.what ());
         }

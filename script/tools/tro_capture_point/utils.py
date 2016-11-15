@@ -31,10 +31,7 @@ def compute_contact_points_from_contact_dictionary(robot, contacts):
     N   = mat_zeros((3,ncp));
     i = 0;
     for (contact_name, PN) in contacts.iteritems():
-        print "key ", contact_name,  robot.model.getFrameId(contact_name)
-        print "existe ", contact_name,  robot.model.existFrame(contact_name)
         oMi = robot.framePosition(robot.model.getFrameId(contact_name));
-        print "oMi ", oMi
         Pi = np.matrix(PN['P']).T;
         Ni = np.matrix(PN['N']).T;
         for j in range(Pi.shape[1]):
