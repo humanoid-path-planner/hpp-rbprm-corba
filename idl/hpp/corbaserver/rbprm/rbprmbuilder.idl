@@ -195,6 +195,15 @@ module hpp
     /// \return transformed configuration for which all possible contacts have been created
     floatSeq getContactSamplesIds(in string name, in floatSeq dofArray, in floatSeq direction) raises (Error);
 
+    /// Given a configuration and a limb, returns the id of all samples potentially in contact with the
+    /// environment, ordered by their efficiency
+    /// \param name name of the considered limb
+    /// \param dofArray considered configuration of the robot
+    /// \param direction desired direction of motion for the robot
+    /// \return transformed configuration for which all possible contacts have been created
+    floatSeqSeq getContactSamplesProjected(in string name, in floatSeq dofArray, in floatSeq direction,
+    in unsigned short numSamples) raises (Error);
+
     /// get Ids of limb in an octree cell
     /// \param name name of the considered limb
     /// \param octreeNodeId considered configuration of the robot

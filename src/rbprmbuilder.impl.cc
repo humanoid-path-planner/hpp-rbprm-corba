@@ -838,13 +838,22 @@ namespace hpp {
                                           + std::string(limbname) + " to robot; limb not defined.");
             }
             const RbPrmLimbPtr_t& limb = lit->second;
-            fcl::Transform3f transform = limb->limb_->robot()->rootJoint()->childJoint(0)->currentTransformation (); // get root transform from configuration
+            fcl::Transform3f transform = limb->octreeRoot(); // get root transform from configuration
                         // TODO fix as in rbprm-fullbody.cc!!
-            std::vector<sampling::T_OctreeReport> reports(problemSolver_->collisionObstacles().size());
+            const affMap_t &affMap = problemSolver_->map
+                        <std::vector<boost::shared_ptr<model::CollisionObject> > > ();
+            if (affMap.empty ())
+            {
+                throw hpp::Error ("No affordances found. Unable to interpolate.");
+            }
+            const model::ObjectVector_t objects = getAffObjectsForLimb(std::string(limbname), affMap,
+                                                                       bindShooter_.affFilter_);
+
+            std::vector<sampling::T_OctreeReport> reports(objects.size());
             std::size_t i (0);
             //#pragma omp parallel for
-            for(model::ObjectVector_t::const_iterator oit = problemSolver_->collisionObstacles().begin();
-                oit != problemSolver_->collisionObstacles().end(); ++oit, ++i)
+            for(model::ObjectVector_t::const_iterator oit = objects.begin();
+                oit != objects.end(); ++oit, ++i)
             {
                 sampling::GetCandidates(limb->sampleContainer_, transform, *oit, dir, reports[i]);
             }
