@@ -2,7 +2,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 
-import stair_bauzil_hrp2_path as tp
+import stair_bauzil_hrp2_path2 as tp
 import time
 
 
@@ -97,6 +97,8 @@ q_init =  [
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # LLEG       25-30
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # RLEG       31-36
         ]; r (q_init)
+        
+q_init[0:7] = tp.q_init[0:7]
 
 fullBody.setCurrentConfig (q_goal)
 #~ r(q_goal)
