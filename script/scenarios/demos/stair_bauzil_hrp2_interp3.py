@@ -2,7 +2,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 
-import stair_bauzil_hrp2_path as tp
+import stair_bauzil_hrp2_path3 as tp
 import time
 
 
@@ -47,7 +47,7 @@ rArmOffset = [0,0,-0.1]
 rArmNormal = [0,0,1]
 rArmx = 0.024; rArmy = 0.024
 #disabling collision for hook
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.05, "_6_DOF", True)
+#~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.05, "_6_DOF", True)
 
 
 #~ AFTER loading obstacles
@@ -57,7 +57,7 @@ lHand = 'LARM_JOINT5'
 lArmOffset = [-0.05,-0.050,-0.050]
 lArmNormal = [1,0,0]
 lArmx = 0.024; lArmy = 0.024
-#~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, 0.05)
+#~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.05, "_6_DOF", True)
 
 rKneeId = '0RKnee'
 rLeg = 'RLEG_JOINT0'
@@ -97,6 +97,8 @@ q_init =  [
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # LLEG       25-30
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # RLEG       31-36
         ]; r (q_init)
+
+q_init[0:7] = tp.q_init[0:7]
 
 fullBody.setCurrentConfig (q_goal)
 #~ r(q_goal)
