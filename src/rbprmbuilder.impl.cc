@@ -1198,6 +1198,7 @@ namespace hpp {
             success = true;
             return intermediary;
         }
+        std::cout << "no contact break during intermediary phase " << std::endl;
         return firstState;
     }
 
