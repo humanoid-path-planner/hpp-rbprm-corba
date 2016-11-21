@@ -106,6 +106,7 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 r(q_init)
 
 configs = fullBody.interpolate(0.1,1,10, True) #hole 
+#~ configs = fullBody.interpolate(0.01,1,10, True) #hole 
 #~ configs = fullBody.interpolate(0.08,1,5) # bridge
 
 r.loadObstacleModel ('hpp-rbprm-corba', "groundcrouch", "contact")
@@ -143,91 +144,39 @@ def saveAll(name):
 
 
 
-from numpy import array, zeros
-from numpy import matrix
-from numpy import matlib
+gui = r.client.gui
+scene = "oddct"
+r.client.gui.createScene(scene)
+resolution = 0.03
+i = 0
+boxname = scene+"/b"+str(i)
+gui.addBox(boxname,resolution,resolution,resolution, [1,1,1,1])
+gui.applyConfiguration(boxname,[0,0,0,1,0,0,0])
+gui.addSceneToWindow(scene,0)
+gui.refresh()
 
-#~ for i in range(6,25):
-	#~ act(i, 60, optim_effectors = True)
+import hpp.corbaserver.rbprm.tools.cwc_trajectory_helper as cwc_trajectory_helper
+import time
 
-
-for i in range(7,8):
-    act(i,0, use_window=0, verbose=True, optim_effectors=False, draw=False)
-
-#~ pid = act(8,0,optim_effectors = False)
-
-
-from derivative_filters import *
-
-#~ res = computeSecondOrderPolynomialFitting(m, dt, 11)
-#~ (x, dx, ddx) = res
-
-import matplotlib.pyplot as plt
-import plot_utils 
-
-#~ plt.plot(ddx[0,:].A.squeeze())
-#~ plt.show()
-
-from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import trajec_mil
-from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import trajec
-from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import coms
-
-#~ plt.plot(x[0,:].A.squeeze())
-#~ plt.plot(dx[0,:].A.squeeze())
-#~ plt.plot(ddx[2,:].A.squeeze())
-#~ plt.plot(dx[0,:].A.squeeze())
-#~ plt.plot(x[0,:].A.squeeze())
-
-#~ plt.show()
-
-#~ testc= []
-#~ trajec_mil = trajec
-sample = len(trajec_mil)
-
-dt_me = 1./24.
-dt = 1./1000.
-
-res = zeros((3, sample))
-
-for i,q in enumerate(trajec_mil[:sample]):
-	fullBody.setCurrentConfig(q) 
+def applycom():
+	global gui
+	global com
 	c = fullBody.getCenterOfMass()
-	res[:,i] = c
+	gui.applyConfiguration(boxname,[c[0],c[1],0,1,0,0,0])
+	gui.refresh()
+
+def go(dt_framerate=1./24.):
+	path_player = pp
+	configs = cwc_trajectory_helper.trajec
+	for q in configs:
+		start = time.time()
+		pp.publisher.robotConfig = q
+		pp.publisher.publishRobots ()
+		elapsed = time.time() - start  
+		applycom()
+		if elapsed < dt_framerate :
+			time.sleep(dt_framerate-elapsed)
+
+
 	
-#~ for i,q in enumerate(trajec):
-	#~ fullBody.setCurrentConfig(q) 
-	#~ c = fullBody.getCenterOfMass()
-	#~ testc += [array(c)]
-	
-
-#~ testddc = [2 *(testc[i-1] - testc[i])  for i in range(1, len(testc))]
-#~ testddcx = [ddc[0] for ddc in testddc]
-#~ testcx = [c[0] for c in testc]
-
-#~ cs = res
-#~ res = zeros((3, 100))
-#~ for c in cs:
-	#~ res[:,i] = c	
-m = matrix(res)
-
-
-from derivative_filters import *
-
-res = computeSecondOrderPolynomialFitting(m, dt, 51)
-(x, dx, ddx) = res
-
-
-import matplotlib.pyplot as plt
-import plot_utils 
-
-#~ if(conf.SHOW_FIGURES and conf.PLOT_REF_COM_TRAJ):
-#~ plt.plot(x[0,:].A.squeeze())
-#~ plt.plot(dx[0,:].A.squeeze())
-plt.plot(ddx[0,:].A.squeeze())
-#~ plt.plot(x[0,:].A.squeeze())
-#~ plt.plot(testddcx)
-#~ plt.plot(testcx)
-#~ plt.show()
-
-
 	
