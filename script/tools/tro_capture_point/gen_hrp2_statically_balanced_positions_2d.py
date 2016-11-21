@@ -329,7 +329,7 @@ def _genbalance(limbs):
 
 all_qs = []
 all_states = []
-def gen(limbs, num_samples = 1000, coplanar = True, num_candidates_per_config = 1, num_contact_candidates = 10, q_entries = None, projectToObstacles = False):
+def gen(limbs, num_samples = 1000, coplanar = True, num_candidates_per_config = 0, num_contact_candidates = 10, q_entries = None, projectToObstacles = False):
     q_0 = fullBody.getCurrentConfig(); 
     #~ fullBody.getSampleConfig()
     qs = []; qs_gepetto = []; states = []    
@@ -354,7 +354,7 @@ def gen(limbs, num_samples = 1000, coplanar = True, num_candidates_per_config = 
         res["q"] = q[:]
         for _ in range(num_candidates_per_config):
             gen_contact_candidates(limbs, q_gep, res, data["contact_points"], num_contact_candidates, projectToObstacles)
-        if(res.has_key("candidates")): #contact candidates found
+        if(num_candidates_per_config == 0 or res.has_key("candidates")): #contact candidates found
             states.append(res)
             qs.append(q)
             qs_gepetto.append(q_gep)
@@ -390,10 +390,10 @@ limbs = [[lLegId,rLegId],[lLegId,rLegId, rarmId], [lLegId,rLegId, larmId], [lLeg
 #~ limbs = [[lLegId,rLegId, rarmId]]
 #~ limbs = [[larmId, rarmId]]
 
-#~ gen(limbs[0], 10)
-#~ for ls in limbs:
-    #~ gen(ls, 10, False)
-#~ gen(limbs[0], 10)
+gen(limbs[0], 10)
+for ls in limbs:
+    gen(ls, 10, False)
+gen(limbs[0], 10)
     
 i = 0
 a = None
