@@ -415,6 +415,7 @@ class FullBody (object):
     def getContactCone(self, stateId, friction = 0.5):
 		H_h =  array(self.client.rbprm.rbprm.getContactCone(stateId, friction))
 		print "H_h", H_h.shape 
+		print "norm h", ( H_h[:, -1] != 0).any()
 		# now decompose cone 
 		return H_h[:,:-1], H_h[:, -1]
 		
@@ -425,6 +426,7 @@ class FullBody (object):
     def getContactIntermediateCone(self, stateId, friction = 0.5):
 		H_h =  array(self.client.rbprm.rbprm.getContactIntermediateCone(stateId, friction))
 		print "H_h", H_h.shape 
+		print "norm h", ( H_h[:, -1] != 0).any()
 		# now decompose cone 
 		return H_h[:,:-1], H_h[:, -1]
 		

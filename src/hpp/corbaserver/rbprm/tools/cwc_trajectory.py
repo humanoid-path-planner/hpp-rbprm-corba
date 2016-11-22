@@ -96,9 +96,10 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 	use_window = max(0, min(use_window,  (len(states) - 1) - (state_id + 2))) # can't use preview if last state is reached	
 	assert( len(phase_dt) >= 2 +  use_window * 2 ), "phase_dt does not describe all phases"
 	
-	#~ constraints = ['cones_constraint', 'end_reached_constraint','end_speed_constraint']
+	constraints = ['cones_constraint', 'end_reached_constraint','end_speed_constraint']
+	#~ constraints = ['end_reached_constraint']
 	#~ constraints = ['cones_constraint', 'end_reached_constraint']
-	constraints = ['end_reached_constraint']
+	#~ constraints = ['cones_constraint']
 	#~ constraints = ['cones_constraint', 'end_reached_constraint','end_speed_constraint', 'com_kinematic_constraint']
 	param_constraints = []	
 	mass = fullBody.getMass()
