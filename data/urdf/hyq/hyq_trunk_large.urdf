@@ -1,5 +1,8 @@
 <robot name="hyq_trunk_large">
   <link name="base_link">
+  <inertial>
+     <mass value="50.26"/>
+  </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
