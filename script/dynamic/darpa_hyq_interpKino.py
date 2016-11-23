@@ -5,7 +5,7 @@ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
 
 #calling script darpa_hyq_path to compute root path
-import darpa_hyq_path as tp
+import darpa_hyq_pathKino as tp
 
 from os import environ
 ins_dir = environ['DEVEL_DIR']
@@ -24,7 +24,7 @@ srdfSuffix = ""
 #  This time we load the full body model of HyQ
 fullBody = FullBody () 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz", [-2,5, -1, 1, 0.3, 4])
+fullBody.setJointBounds ("base_joint_xyz", [-5,5, -1.5, 1.5, 0.5, 0.8])
 
 #  Setting a number of sample configurations used
 nbSamples = 20000
@@ -34,26 +34,14 @@ r = tp.Viewer (ps)
 
 rootName = 'base_joint_xyz'
 
-#  Creating limbs
-# cType is "_3_DOF": positional constraint, but no rotation (contacts are punctual)
-cType = "_3_DOF"
-# string identifying the limb
-rLegId = 'rfleg'
-# First joint of the limb, as in urdf file
-rLeg = 'rf_haa_joint'
-# Last joint of the limb, as in urdf file
-rfoot = 'rf_foot_joint'
-# Specifying the distance between last joint and contact surface
-offset = [0.,-0.021,0.]
-# Specifying the contact surface direction when the limb is in rest pose
-normal = [0,1,0]
-# Specifying the rectangular contact surface length
-legx = 0.02; legy = 0.02
-# remaining parameters are the chosen heuristic (here, manipulability), and the resolution of the octree (here, 10 cm).
+
+
+
 
 def addLimbDb(limbId, heuristicName, loadValues = True, disableEffectorCollision = False):
 	fullBody.addLimbDatabase(str(db_dir+limbId+'.db'), limbId, heuristicName,loadValues, disableEffectorCollision)
 
+rLegId = 'rfleg'
 lLegId = 'lhleg'
 rarmId = 'rhleg'
 larmId = 'lfleg'
@@ -63,26 +51,9 @@ addLimbDb(lLegId, "static")
 addLimbDb(rarmId, "static")
 addLimbDb(larmId, "static")
 
-#~ fullBody.addLimb(rLegId,rLeg,rfoot,offset,normal, legx, legy, nbSamples, "jointlimits", 0.1, cType)
-
-lLegId = 'lhleg'
-lLeg = 'lh_haa_joint'
-lfoot = 'lh_foot_joint'
-#~ fullBody.addLimb(lLegId,lLeg,lfoot,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
-#~ 
-rarmId = 'rhleg'
-rarm = 'rh_haa_joint'
-rHand = 'rh_foot_joint'
-#~ fullBody.addLimb(rarmId,rarm,rHand,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
-
-larmId = 'lfleg'
-larm = 'lf_haa_joint'
-lHand = 'lf_foot_joint'
-#~ fullBody.addLimb(larmId,larm,lHand,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
-
 q_0 = fullBody.getCurrentConfig(); 
-q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.q_init[0:7]
-q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.q_goal[0:7]
+q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.ps.configAtParam(0,0.01)[0:7] # use this to get the correct orientation
+q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.ps.configAtParam(0,tp.ps.pathLength(1))[0:7]
 
 # Randomly generating a contact configuration at q_init
 fullBody.setCurrentConfig (q_init)
@@ -99,7 +70,8 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 
 r(q_init)
 # computing the contact sequence
-configs = fullBody.interpolate(0.12, 10, 10, True)
+# configs = fullBody.interpolate(0.12, 10, 10, True) #Was this (Pierre)
+configs = fullBody.interpolate(0.5,pathId=0)
 #~ configs = fullBody.interpolate(0.11, 7, 10, True)
 #~ configs = fullBody.interpolate(0.1, 1, 5, True)
 
@@ -107,7 +79,10 @@ configs = fullBody.interpolate(0.12, 10, 10, True)
 
 # calling draw with increasing i will display the sequence
 i = 0;
-fullBody.draw(configs[i],r); i=i+1; i-1
+import time
+for i in range(0,len(configs)):
+    fullBody.draw(configs[i],r)
+    time.sleep(0.5)
 
 
 from hpp.gepetto import PathPlayer

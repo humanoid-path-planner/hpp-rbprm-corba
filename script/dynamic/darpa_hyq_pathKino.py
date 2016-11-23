@@ -19,7 +19,7 @@ aMax = 1;
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-rbprmBuilder.setJointBounds ("base_joint_xyz", [-2,5, -1, 1, 0.5, 0.8])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [-5,5, -1.5, 1.5, 0.5, 0.8])
 # The following lines set constraint on the valid configurations:
 # a configuration is valid only if all limbs can create a contact ...
 rbprmBuilder.setFilter(['hyq_rhleg_rom', 'hyq_lfleg_rom', 'hyq_rfleg_rom','hyq_lhleg_rom'])
@@ -50,11 +50,14 @@ r.addLandmark(r.sceneName,1)
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init [0:3] = [-5, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 q_goal = q_init [::]
-q_goal [0:3] = [4, 0, 0.63]; r (q_goal)
+q_goal [0:3] = [4, 0, 0.63]
+#q_goal[0:3]=[3,-4,0.4]#position easy
+q_goal[7:10]=[0,0,0]#velocity
+r (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
 
 # Choosing a path optimizer
-ps.addPathOptimizer ("RandomShortcut")
+ps.addPathOptimizer ("RandomShortcutOriented")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 # Choosing RBPRM shooter and path validation methods.
@@ -63,10 +66,13 @@ ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 # Choosing kinodynamic methods : 
 ps.selectSteeringMethod("Kinodynamic")
 ps.selectDistance("KinodynamicDistance")
-ps.selectPathPlanner("dynamicPlanner")
+ps.selectPathPlanner("DynamicPlanner")
 
 #solve the problem :
 r(q_init)
+ps.client.problem.prepareSolveStepByStep()
+ps.client.problem.executeOneStep()
+
 ps.solve ()
 
 
@@ -77,17 +83,20 @@ pp.dt=0.03
 #r.client.gui.removeFromGroup("rm0",r.sceneName)
 pp.displayVelocityPath(0)
 #display path
-pp (0)
+#pp (0)
 #display path with post-optimisation
-r.client.gui.removeFromGroup("path_0_root",r.sceneName)
-pp.displayVelocityPath(1)
-pp (1)
+#r.client.gui.removeFromGroup("path_0_root",r.sceneName)
+#pp.displayVelocityPath(1)
+#pp (1)
 
-
+q_far = q_init[::]
+q_far[2] = -3
+r(q_far)
+"""
 for i in range(1,10):
     rbprmBuilder.client.basic.problem.optimizePath(i)
     r.client.gui.removeFromGroup("path_"+str(i)+"_root",r.sceneName)
     pp.displayVelocityPath(i+1)
-    time.sleep(2)
-
+    #time.sleep(2)
+"""
 
