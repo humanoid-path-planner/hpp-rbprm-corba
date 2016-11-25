@@ -318,18 +318,20 @@ def _boundSO3(q, num_limbs):
     return q
     
 
-def _genbalance(limbs):
+def _genbalance(limbs, unstable):
     for i in range(10000):
         q = fullBody.client.basic.robot.shootRandomConfig()
         q = _boundSO3(q, len(limbs))
-        if fullBody.isConfigValid(q)[0] and fullBody.isConfigBalanced(q, limbs, 5) and __loosely_z_aligned(limbs[0], q) and __loosely_z_aligned(limbs[1], q):
+        if fullBody.isConfigValid(q)[0] and __loosely_z_aligned(limbs[0], q) and __loosely_z_aligned(limbs[1], q):
+			if (unstable and not fullBody.isConfigBalanced(q, limbs, 5)) or  (not unstable and fullBody.isConfigBalanced(q, limbs, 5)): 
         #~ if fullBody.isConfigValid(q)[0] and  __loosely_z_aligned(limbs[0], q) and __loosely_z_aligned(limbs[1], q):
-            return q
+				return q
     print "can't generate equilibrium config"
 
 all_qs = []
 all_states = []
-def gen(limbs, num_samples = 1000, coplanar = True, num_candidates_per_config = 0, num_contact_candidates = 10, q_entries = None, projectToObstacles = False):
+all_data = []
+def gen(limbs, num_samples = 1000, coplanar = True, num_candidates_per_config = 0, num_contact_candidates = 10, q_entries = None, projectToObstacles = False, unstable = False):
     q_0 = fullBody.getCurrentConfig(); 
     #~ fullBody.getSampleConfig()
     qs = []; qs_gepetto = []; states = []    
@@ -343,7 +345,7 @@ def gen(limbs, num_samples = 1000, coplanar = True, num_candidates_per_config = 
             if(coplanar):
                 q = fullBody.generateGroundContact(limbs)
             else:
-                q = _genbalance(limbs)
+                q = _genbalance(limbs, unstable)
         else:
             q = q_entries[i]
         q_gep = q[:]
@@ -366,7 +368,10 @@ def gen(limbs, num_samples = 1000, coplanar = True, num_candidates_per_config = 
     fname += "configs"
     if(coplanar):
         fname += "_coplanar"
+    if(unstable):
+        fname += "_unstable"
     data["samples"] = states
+    all_data.append(data)
     from pickle import dump
     #~ f1=open("configs_feet_on_ground_static_eq", 'w+')
     f1=open(fname, 'w+')
@@ -386,14 +391,15 @@ q_init =  [
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # RLEG       31-36
         ]; r (q_init)
         
-limbs = [[lLegId,rLegId],[lLegId,rLegId, rarmId], [lLegId,rLegId, larmId], [lLegId,rLegId, rarmId, larmId] ]
-#~ limbs = [[lLegId,rLegId, rarmId]]
+#~ limbs = [[lLegId,rLegId],[lLegId,rLegId, rarmId], [lLegId,rLegId, larmId], [lLegId,rLegId, rarmId, larmId] ]
+#~ limbs = [[lLegId,rLegId] ]
+limbs = [[lLegId,rLegId, rarmId]]
 #~ limbs = [[larmId, rarmId]]
 
-gen(limbs[0], 10)
+#~ gen(limbs[0], 1000)
 for ls in limbs:
-    gen(ls, 10, False)
-gen(limbs[0], 10)
+    gen(ls, 1000, False, unstable=True)
+gen(limbs[0], 1000, unstable=True)
     
 i = 0
 a = None
