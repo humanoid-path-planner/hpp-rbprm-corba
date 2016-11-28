@@ -39,7 +39,7 @@
 #include <fstream>
 #include <hpp/rbprm/planner/dynamic-planner.hh>
 #include <hpp/rbprm/planner/parabola-planner.hh>
-
+#include <hpp/rbprm/planner/rbprm-steering-kinodynamic.hh>
 
 #ifdef PROFILE
     #include "hpp/rbprm/rbprm-profiler.hh"
@@ -2086,6 +2086,8 @@ assert(s2 == s1 +1);
                                                    boost::bind(&BindShooter::createPathValidation, boost::ref(bindShooter_), _1, _2));
         problemSolver->add<core::PathPlannerBuilder_t>("DynamicPlanner",DynamicPlanner::createWithRoadmap);
         problemSolver->add<core::PathPlannerBuilder_t>("ParabolaPlanner",ParabolaPlanner::createWithRoadmap);
+        problemSolver->add <core::SteeringMethodBuilder_t> ("RBPRMKinodynamic", SteeringMethodKinodynamic::create);
+
 
     }
 

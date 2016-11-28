@@ -65,7 +65,7 @@ if isinstance(t, list):
 f = open('log.txt', 'a')
 f.write("path computation " + str(t) + "\n")
 f.close()
->>>>>>> add script
+
 
 # Solve the problem
 t = ps.solve ()

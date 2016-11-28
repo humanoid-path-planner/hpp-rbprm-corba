@@ -64,7 +64,7 @@ ps.addGoalConfig (q_goal)
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 # Choosing kinodynamic methods : 
-ps.selectSteeringMethod("Kinodynamic")
+ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
 ps.selectPathPlanner("DynamicPlanner")
 
