@@ -6,6 +6,8 @@ from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
 
+from numpy import array
+
 from os import environ
 ins_dir = environ['DEVEL_DIR']
 db_dir = ins_dir+"/install/share/hyq-rbprm/database/hyq_"
@@ -105,7 +107,7 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 
 r(q_init)
 
-configs = fullBody.interpolate(0.1,1,10, True) #hole 
+configs = fullBody.interpolate(0.05,1,10, True) #hole 
 #~ configs = fullBody.interpolate(0.01,1,10, True) #hole 
 #~ configs = fullBody.interpolate(0.08,1,5) # bridge
 
@@ -129,7 +131,7 @@ limbsCOMConstraints = { rLegId : {'file': "hyq/"+rLegId+"_com.ineq", 'effector' 
 
 
 
-def act(i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True, time_scale = 20,  verbose = False, draw = False, trackedEffectors = []):
+def act(i, numOptim = 0, use_window = 0, friction = 0.3, optim_effectors = True, time_scale = 20,  verbose = False, draw = False, trackedEffectors = []):
 	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, friction, optim_effectors = optim_effectors, time_scale = time_scale, useCOMConstraints = False, use_window = use_window,
 	verbose = verbose, draw = draw, trackedEffectors = trackedEffectors)
 
@@ -137,7 +139,7 @@ def play(frame_rate = 1./24.):
 	play_traj(fullBody,pp,frame_rate)
 	
 def saveAll(name):
-	return saveAllData(fullBody, r, name)
+	a = saveAllData(fullBody, r, name)
 #~ saveAll ('hole_hyq_t_var_04f_andrea');
 #~ fullBody.exportAll(r, configs, 'hole_hyq_t_var_04f_andrea_contact_planning');
 #~ saveToPinocchio('obstacle_hyq_t_var_04f_andrea')
@@ -177,6 +179,36 @@ def go(dt_framerate=1./24.):
 		if elapsed < dt_framerate :
 			time.sleep(dt_framerate-elapsed)
 
+from numpy import min, max
+for i in range(11,13):
+	data, cones = act(i,verbose=True, use_window=1, numOptim=5, optim_effectors=True, draw=False);go()
+#~ for j in range(8,10):
+	#~ data, cones = act(j,verbose=True, use_window=0, numOptim=5, optim_effectors=True, draw=False)
+	w =  array(data['w'])
+	numphase = w.shape[0]/6
+	print "numphase",  numphase
+	for k in range(0,numphase-1):
+		print "cones 1 2 3", k, (cones[0].dot(w[6*k:6*k+6])<0.0001).all() , (cones[1].dot(w[6*k:6*k+6])<0.0001).all(), (cones[2].dot(w[6*k:6*k+6])<0.0001).all(), max(cones[1].dot(w[6*k:6*k+6]))
 
+for i in range(17,35):
+	data, cones = act(i,verbose=True, use_window=1, numOptim=5, optim_effectors=True, draw=False);go()
+#~ for j in range(8,10):
+	#~ data, cones = act(j,verbose=True, use_window=0, numOptim=5, optim_effectors=True, draw=False)
+	w =  array(data['w'])
+	numphase = w.shape[0]/6
+	print "numphase",  numphase
+	for k in range(0,numphase-1):
+		print "cones 1 2 3", k, (cones[0].dot(w[6*k:6*k+6])<0.0001).all() , (cones[1].dot(w[6*k:6*k+6])<0.0001).all(), (cones[2].dot(w[6*k:6*k+6])<0.0001).all(), max(cones[1].dot(w[6*k:6*k+6]))
+	saveAll("test"+str(i))
+	
+#~ for j in range(19,20):
+	#~ data, cones = act(j,verbose=True, use_window=0, friction = 0.3, numOptim=5, optim_effectors=True, draw=False)
+	#~ w =  array(data['w'])
+	#~ numphase = w.shape[0]/6
+	#~ print "numphase",  numphase
+	#~ for k in range(0,numphase-1):
+		#~ print "cones 1 2 3", k, (cones[0].dot(w[6*k:6*k+6])<0.0001).all() , (cones[1].dot(w[6*k:6*k+6])<0.0001).all(), (cones[2].dot(w[6*k:6*k+6])<0.0001).all(), max(cones[1].dot(w[6*k:6*k+6]))
+	
+saveAll("test")
 	
 	
