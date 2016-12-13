@@ -99,9 +99,11 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 
 r(q_init)
 # computing the contact sequence
-configs = fullBody.interpolate(0.12, 10, 10, True)
+#~ configs = fullBody.interpolate(0.12, 10, 5, True)
+#~ configs = fullBody.interpolate(0.08, 10, 10, True)
 #~ configs = fullBody.interpolate(0.11, 7, 10, True)
-#~ configs = fullBody.interpolate(0.1, 1, 5, True)
+#~ configs = fullBody.interpolate(0.1, 1, 10, True)
+configs = fullBody.interpolate(0.04, 1, 10, True)
 
 #~ r.loadObstacleModel ('hpp-rbprm-corba', "darpa", "contact")
 
@@ -139,3 +141,74 @@ def saveAll(name):
 
 #~ fullBody.exportAll(r, trajec, 'darpa_hyq_t_var_04f_andrea');
 #~ saveToPinocchio('darpa_hyq_t_var_04f_andrea')
+
+
+gui = r.client.gui
+scene = "oddct"
+r.client.gui.createScene(scene)
+resolution = 0.03
+i = 0
+boxname = scene+"/b"+str(i)
+gui.addBox(boxname,resolution,resolution,resolution, [1,1,1,1])
+gui.applyConfiguration(boxname,[0,0,0,1,0,0,0])
+gui.addSceneToWindow(scene,0)
+gui.refresh()
+
+import hpp.corbaserver.rbprm.tools.cwc_trajectory_helper as cwc_trajectory_helper
+import time
+
+def applycom():
+	global gui
+	global com
+	c = fullBody.getCenterOfMass()
+	gui.applyConfiguration(boxname,[c[0],c[1],0,1,0,0,0])
+	gui.refresh()
+
+def go(dt_framerate=1./24.):
+	path_player = pp
+	configs = cwc_trajectory_helper.trajec
+	for q in configs:
+		start = time.time()
+		pp.publisher.robotConfig = q
+		pp.publisher.publishRobots ()
+		elapsed = time.time() - start  
+		applycom()
+		if elapsed < dt_framerate :
+			time.sleep(dt_framerate-elapsed)
+
+
+#~ for i in range(9,14):
+	#~ act(i,verbose=True, use_window=0, numOptim=5, optim_effectors=False, draw=False);go()
+	#~ saveAll("test"+str(i));
+#~ for i in range(14,16):
+	#~ act(i,verbose=True, use_window=1, numOptim=5, optim_effectors=False, draw=False);go()
+	#~ saveAll("test"+str(i));
+#~ for i in range(16,17):
+	#~ act(i,verbose=True, use_window=2, numOptim=5, optim_effectors=False, draw=False);go()
+	#~ saveAll("test"+str(i));
+#~ for i in range(17,19):
+	#~ act(i,verbose=True, use_window=1, numOptim=5, optim_effectors=False, draw=False);go()
+	#~ saveAll("test"+str(i));
+#~ for i in range(19,22):
+	#~ act(i,verbose=True, use_window=1, numOptim=5, optim_effectors=False, draw=False);go()
+	#~ saveAll("test"+str(i));
+#~ for i in range(23,24):
+	#~ act(i,verbose=True, use_window=2, numOptim=5, optim_effectors=False, draw=False);go()
+	#~ saveAll("test"+str(i));
+#~ for i in range(24,26):
+	#~ act(i,verbose=True, use_window=1, numOptim=5, optim_effectors=False, draw=False);go()
+	#~ saveAll("test"+str(i));
+for i in range(16,28):
+	act(i,verbose=True, use_window=0, numOptim=5, optim_effectors=False, draw=False);go()
+	saveAll("test"+str(i));
+for i in range(28,30):
+	act(i,verbose=True, use_window=0, numOptim=5, optim_effectors=False, draw=False);go()
+	saveAll("test"+str(i));
+for i in range(30,42):
+	act(i,verbose=True, use_window=1, numOptim=5, optim_effectors=False, draw=False);go()
+	saveAll("test"+str(i));
+for i in range(32,83):
+	act(i,verbose=True, use_window=0, numOptim=5, optim_effectors=False, draw=False);go()
+	saveAll("test"+str(i));
+	
+	

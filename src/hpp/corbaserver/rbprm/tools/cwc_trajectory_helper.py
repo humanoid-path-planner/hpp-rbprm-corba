@@ -162,6 +162,7 @@ trackedEffectors = []):
 			global trajec_mil			
 			frame_rate = 1./24.
 			frame_rate_andrea = 1./1000.
+			#~ frame_rate_andrea = 1./10.
 			new_traj = gen_trajectory_to_play(fullBody, pp, trajectory, time_per_path, frame_rate)
 			new_traj_andrea = gen_trajectory_to_play(fullBody, pp, trajectory, time_per_path,frame_rate_andrea)
 			Ps, Ns, freeEffectorsPerPhase, Ks = genPandNandConesperFrame(fullBody, i, limbsCOMConstraints, cones, pp, trajectory, time_per_path, frame_rate_andrea)
