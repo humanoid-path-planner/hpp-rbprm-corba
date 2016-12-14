@@ -41,7 +41,7 @@ r = Viewer (ps)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
-afftool.loadObstacleModel (packageName, "darpa", "planning", r)
+afftool.loadObstacleModel (packageName, "ground", "planning", r)
 #r.loadObstacleModel (packageName, "ground", "planning")
 afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 r.addLandmark(r.sceneName,1)
@@ -50,9 +50,11 @@ r.addLandmark(r.sceneName,1)
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init [0:3] = [-2, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 q_goal = q_init [::]
-q_goal [0:3] = [3, 0, 0.63]
-#q_goal[0:3]=[3,-4,0.4]#position easy
-q_goal[7:10]=[0,0,0]#velocity
+
+q_goal[0:3]=[2,0,0.63]#position easy
+#q_goal [0:3] = [4, 0, 0.71]
+#q_goal[7:10]=[2,0,0.9]#velocity
+q_goal[7:10]=[1,0,0]#velocity
 r (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
 
@@ -82,10 +84,8 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp.dt=0.03
 #r.client.gui.removeFromGroup("rm0",r.sceneName)
 pp.displayVelocityPath(0)
-r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
 #display path
-pp.speed=0.3
-pp (0)
+#pp (0)
 
 #display path with post-optimisation
 """

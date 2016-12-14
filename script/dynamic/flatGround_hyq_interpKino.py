@@ -5,7 +5,7 @@ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
 
 #calling script darpa_hyq_path to compute root path
-import darpa_hyq_pathKino as tp
+import flatGround_hyq_pathKino as tp
 
 from os import environ
 ins_dir = environ['DEVEL_DIR']
@@ -54,14 +54,19 @@ addLimbDb(larmId, "static")
 q_0 = fullBody.getCurrentConfig(); 
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.ps.configAtParam(0,0.01)[0:7] # use this to get the correct orientation
 q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.ps.configAtParam(0,tp.ps.pathLength(1))[0:7]
+dir_init = tp.ps.configAtParam(0,0.01)[7:10]
+acc_init = tp.ps.configAtParam(0,0.01)[10:13]
+dir_goal = tp.ps.configAtParam(0,tp.ps.pathLength(1))[7:10]
+acc_goal = tp.ps.configAtParam(0,tp.ps.pathLength(1))[10:13]
+
 
 # Randomly generating a contact configuration at q_init
 fullBody.setCurrentConfig (q_init)
-q_init = fullBody.generateContacts(q_init, [0,0,1])
+q_init = fullBody.generateContacts(q_init,dir_init,acc_init)
 
 # Randomly generating a contact configuration at q_end
 fullBody.setCurrentConfig (q_goal)
-q_goal = fullBody.generateContacts(q_goal, [0,0,1])
+q_goal = fullBody.generateContacts(q_goal, dir_goal,acc_goal)
 
 # specifying the full body configurations as start and goal state of the problem
 fullBody.setStartState(q_init,[])
@@ -71,7 +76,7 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 r(q_init)
 # computing the contact sequence
 # configs = fullBody.interpolate(0.12, 10, 10, True) #Was this (Pierre)
-configs = fullBody.interpolate(0.5,pathId=0)
+configs = fullBody.interpolate(0.05,pathId=0)
 #~ configs = fullBody.interpolate(0.11, 7, 10, True)
 #~ configs = fullBody.interpolate(0.1, 1, 5, True)
 
