@@ -130,7 +130,7 @@ namespace hpp {
         virtual double getEffectorDistance(unsigned short  state1, unsigned short  state2) throw (hpp::Error);
 
         virtual hpp::floatSeq* generateContacts(const hpp::floatSeq& configuration,
-                                                const hpp::floatSeq& direction) throw (hpp::Error);
+                                                const hpp::floatSeq& direction, const hpp::floatSeq& acceleration) throw (hpp::Error);
 
         virtual hpp::floatSeq* generateGroundContact(const hpp::Names_t& contactLimbs) throw (hpp::Error);
 

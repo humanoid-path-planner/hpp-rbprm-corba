@@ -201,8 +201,8 @@ class FullBody (object):
 	#
     # \param configuration the initial robot configuration
     # \param direction a 3d vector specifying the desired direction of motion
-    def generateContacts(self, configuration, direction):
-		return self.client.rbprm.rbprm.generateContacts(configuration, direction)
+    def generateContacts(self, configuration, direction,acceleration = [0,0,0]):
+      return self.client.rbprm.rbprm.generateContacts(configuration, direction, acceleration)
 		
 	## Generate an autocollision free configuration with limbs in contact with the ground
     # \param contactLimbs name of the limbs to project in contact

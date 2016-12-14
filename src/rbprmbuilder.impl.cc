@@ -38,7 +38,6 @@
 #include <hpp/core/collision-validation.hh>
 #include <fstream>
 #include <hpp/rbprm/planner/dynamic-planner.hh>
-#include <hpp/rbprm/planner/parabola-planner.hh>
 #include <hpp/rbprm/planner/rbprm-steering-kinodynamic.hh>
 
 #ifdef PROFILE
@@ -651,16 +650,17 @@ namespace hpp {
     }
 
     hpp::floatSeq* RbprmBuilder::generateContacts(const hpp::floatSeq& configuration,
-			const hpp::floatSeq& direction) throw (hpp::Error)
+      const hpp::floatSeq& direction,const hpp::floatSeq& acceleration) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
         try
         {
-            fcl::Vec3f dir;
+            fcl::Vec3f dir,acc;
             for(std::size_t i =0; i <3; ++i)
             {
                 dir[i] = direction[(_CORBA_ULong)i];
+                acc[i] = acceleration[(_CORBA_ULong)i];
             }
 						const affMap_t &affMap = problemSolver_->map
 							<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
@@ -668,8 +668,9 @@ namespace hpp {
     	        throw hpp::Error ("No affordances found. Unable to generate Contacts.");
       		  }
             model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
+
             rbprm::State state = rbprm::ComputeContacts(fullBody_,config,
-							affMap, bindShooter_.affFilter_, dir);
+              affMap, bindShooter_.affFilter_, dir,0,acc);
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(_CORBA_ULong(state.configuration_.rows()));
             for(std::size_t i=0; i< _CORBA_ULong(config.rows()); i++)
@@ -2085,7 +2086,6 @@ assert(s2 == s1 +1);
         problemSolver->add<core::PathValidationBuilder_t>("RbprmPathValidation",
                                                    boost::bind(&BindShooter::createPathValidation, boost::ref(bindShooter_), _1, _2));
         problemSolver->add<core::PathPlannerBuilder_t>("DynamicPlanner",DynamicPlanner::createWithRoadmap);
-        problemSolver->add<core::PathPlannerBuilder_t>("ParabolaPlanner",ParabolaPlanner::createWithRoadmap);
         problemSolver->add <core::SteeringMethodBuilder_t> ("RBPRMKinodynamic", SteeringMethodKinodynamic::create);
 
 
