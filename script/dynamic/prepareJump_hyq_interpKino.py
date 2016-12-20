@@ -5,7 +5,7 @@ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
 
 #calling script darpa_hyq_path to compute root path
-import flatGround_hyq_pathKino as tp
+import prepareJump_hyq_pathKino as tp
 
 from os import environ
 ins_dir = environ['DEVEL_DIR']
@@ -53,13 +53,15 @@ addLimbDb(larmId, "static")
 
 q_0 = fullBody.getCurrentConfig(); 
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.ps.configAtParam(0,0.01)[0:7] # use this to get the correct orientation
-q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.ps.configAtParam(0,tp.ps.pathLength(1))[0:7]
+q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.ps.configAtParam(0,tp.ps.pathLength(0))[0:7]
 dir_init = tp.ps.configAtParam(0,0.01)[7:10]
 acc_init = tp.ps.configAtParam(0,0.01)[10:13]
 dir_goal = tp.ps.configAtParam(0,tp.ps.pathLength(1))[7:10]
 acc_goal = tp.ps.configAtParam(0,tp.ps.pathLength(1))[10:13]
 
-#fullBody.setStaticStability(False)
+
+
+
 # Randomly generating a contact configuration at q_init
 fullBody.setCurrentConfig (q_init)
 q_init = fullBody.generateContacts(q_init,dir_init,acc_init)
@@ -83,20 +85,23 @@ configs = fullBody.interpolate(0.05,pathId=0)
 #~ r.loadObstacleModel ('hpp-rbprm-corba', "darpa", "contact")
 
 # calling draw with increasing i will display the sequence
+"""
 i = 0;
 import time
 for i in range(0,len(configs)):
     fullBody.draw(configs[i],r)
     time.sleep(0.5)
-
+"""
 
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
+from fullBodyPlayer import Player
+player = Player(fullBody,pp,tp,configs)
 
-from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import step, clean,stats, saveAllData, play_traj
 
-	
+
+"""
 	
 limbsCOMConstraints = { rLegId : {'file': "hyq/"+rLegId+"_com.ineq", 'effector' : rfoot},  
 						lLegId : {'file': "hyq/"+lLegId+"_com.ineq", 'effector' : lfoot},  
@@ -119,3 +124,7 @@ def saveAll(name):
 
 #~ fullBody.exportAll(r, trajec, 'darpa_hyq_t_var_04f_andrea');
 #~ saveToPinocchio('darpa_hyq_t_var_04f_andrea')
+
+"""
+
+
