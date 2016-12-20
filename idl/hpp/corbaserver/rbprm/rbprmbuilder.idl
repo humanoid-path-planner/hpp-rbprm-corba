@@ -93,6 +93,11 @@ module hpp
 		void loadFullBodyRobotFromExistingRobot ()
 			raises (Error);
 
+    /// set a boolean in rbprmFullBody
+    /// if true, the acceleration doesn't account for the stability check
+    void setStaticStability(in boolean staticStability)
+      raises (Error);
+
     /// Set Rom constraints for the configuration shooter
     /// a configuration will only be valid if all roms indicated
     /// are colliding with the environment.

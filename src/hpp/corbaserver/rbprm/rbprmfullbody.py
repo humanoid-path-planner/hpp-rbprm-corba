@@ -262,6 +262,13 @@ class FullBody (object):
     def setEndState(self, configuration, contacts):
 		return self.client.rbprm.rbprm.setEndState(configuration, contacts)
 	
+  ## set a boolean in rbprmFullBody
+  # if true, the acceleration doesn't account for the stability check
+  #
+    # \param staticStability boolean
+    def setStaticStability(self,staticStability):
+        return self.client.rbprm.rbprm.setStaticStability(staticStability)
+
 	## Saves a computed contact sequence in a given filename
 	#
     # \param The file where the configuration must be saved

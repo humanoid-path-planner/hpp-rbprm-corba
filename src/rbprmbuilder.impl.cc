@@ -569,6 +569,10 @@ namespace hpp {
         return res;
     }
 
+    void RbprmBuilder::setStaticStability(const bool staticStability) throw (hpp::Error){
+      fullBody_->staticStability(staticStability);
+    }
+
 
     void RbprmBuilder::setFilter(const hpp::Names_t& roms) throw (hpp::Error)
     {

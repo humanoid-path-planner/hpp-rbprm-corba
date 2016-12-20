@@ -115,6 +115,7 @@ namespace hpp {
 
         virtual void loadFullBodyRobotFromExistingRobot () throw (hpp::Error);
 
+        void setStaticStability(const bool staticStability) throw (hpp::Error);
 
         virtual void setFilter(const hpp::Names_t& roms) throw (hpp::Error);
 				virtual void setAffordanceFilter(const char* romName, const hpp::Names_t& affordances) throw (hpp::Error);
