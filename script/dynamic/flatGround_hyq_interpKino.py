@@ -76,46 +76,21 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 r(q_init)
 # computing the contact sequence
 # configs = fullBody.interpolate(0.12, 10, 10, True) #Was this (Pierre)
-configs = fullBody.interpolate(0.05,pathId=0)
+configs = fullBody.interpolate(0.03,pathId=0,robustnessTreshold = 5, filterStates = True)
 #~ configs = fullBody.interpolate(0.11, 7, 10, True)
 #~ configs = fullBody.interpolate(0.1, 1, 5, True)
 
 #~ r.loadObstacleModel ('hpp-rbprm-corba', "darpa", "contact")
 
-# calling draw with increasing i will display the sequence
-i = 0;
-import time
-for i in range(0,len(configs)):
-    fullBody.draw(configs[i],r)
-    time.sleep(0.5)
-
-
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
+from fullBodyPlayer import Player
+player = Player(fullBody,pp,tp,configs)
 
-from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import step, clean,stats, saveAllData, play_traj
+#player.displayContactPlan()
 
-	
-	
-limbsCOMConstraints = { rLegId : {'file': "hyq/"+rLegId+"_com.ineq", 'effector' : rfoot},  
-						lLegId : {'file': "hyq/"+lLegId+"_com.ineq", 'effector' : lfoot},  
-						rarmId : {'file': "hyq/"+rarmId+"_com.ineq", 'effector' : rHand},  
-						larmId : {'file': "hyq/"+larmId+"_com.ineq", 'effector' : lHand} }
+player.interpolate(2,10)
 
 
-def act(i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True, verbose = False, draw = False):
-	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, 0.4, optim_effectors = optim_effectors, time_scale = 20., useCOMConstraints = True, use_window = use_window,
-	verbose = verbose, draw = draw)
 
-def play(frame_rate = 1./24.):
-	play_traj(fullBody,pp,frame_rate)
-	
-def saveAll(name):
-	saveAllData(fullBody, r, name)
-#~ fullBody.exportAll(r, trajec, 'hole_hyq_t_var_04f_andrea');
-#~ fullBody.exportAll(r, configs, 'hole_hyq_t_var_04f_andrea_contact_planning');
-#~ saveToPinocchio('obstacle_hyq_t_var_04f_andrea')
-
-#~ fullBody.exportAll(r, trajec, 'darpa_hyq_t_var_04f_andrea');
-#~ saveToPinocchio('darpa_hyq_t_var_04f_andrea')

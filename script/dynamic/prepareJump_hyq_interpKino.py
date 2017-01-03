@@ -99,6 +99,9 @@ pp = PathPlayer (fullBody.client.basic, r)
 from fullBodyPlayer import Player
 player = Player(fullBody,pp,tp,configs)
 
+player.interpolate()
+
+
 
 
 """
