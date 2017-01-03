@@ -3,7 +3,7 @@ from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import step, clean,stats,
 import time
 
 class Player (object):
-    def __init__ (self, fullBody,pathPlayer,tp,configs):
+    def __init__ (self, fullBody,pathPlayer,tp,configs=[]):
         self.viewer = pathPlayer.publisher
         self.tp = tp
         self.pp = pathPlayer
@@ -24,8 +24,8 @@ class Player (object):
 						    self.larmId : {'file': "hyq/"+self.larmId+"_com.ineq", 'effector' : self.lHand} }
 
 
-    def act(self,i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True, time_scale = 20,  verbose = False, draw = False, trackedEffectors = []):
-	    return step(fullBody, configs, i, numOptim, pp, self.limbsCOMConstraints, friction, optim_effectors = optim_effectors, time_scale = time_scale, useCOMConstraints = False, use_window = use_window,
+    def act(self,i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True, time_scale = 20,  verbose = True, draw = False, trackedEffectors = []):
+	    return step(self.fullBody, self.configs, i, numOptim, self.pp, self.limbsCOMConstraints, friction, optim_effectors = optim_effectors, time_scale = time_scale, useCOMConstraints = False, use_window = use_window,
 	    verbose = verbose, draw = draw, trackedEffectors = trackedEffectors)
 
     def initConfig(self):
@@ -80,51 +80,24 @@ class Player (object):
 	    end = time.clock() 
 	    print "Contact plan generated in " + str(end-start) + "seconds"
 	
-    def contactPlan(self):
+    def displayContactPlan(self):
 	    self.viewer.client.gui.setVisibility("hyq", "ON")
 	    self.tp.r.client.gui.setVisibility("toto", "OFF")
 	    self.tp.r.client.gui.setVisibility("hyq_trunk", "OFF")
-	    for i in range(1,len(self.configs)):
+	    for i in range(1,len(self.configs)-1):
 		    self.viewer(self.configs[i]);
 		    time.sleep(0.5)		
 		
-    def interpolate(self,begin,end):
-	    self.viewer.client.gui.setVisibility("hyq", "ON")
-	    self.tp.r.client.gui.setVisibility("toto", "OFF")
-	    self.tp.r.client.gui.setVisibility("hyq_trunk", "OFF")
-	    for i in range(begin,end):
-		    self.act(i,1,optim_effectors=False)
+    def interpolate(self,begin=1,end=0):
+        if end==0:
+            end = len(self.configs) - 1
+        self.viewer.client.gui.setVisibility("hyq", "ON")
+        self.tp.r.client.gui.setVisibility("toto", "OFF")
+        self.tp.r.client.gui.setVisibility("hyq_trunk", "OFF")
+        for i in range(begin,end):
+            self.act(i,1,optim_effectors=False)
 		
     def play(self,frame_rate = 1./24.):
 	    play_traj(self.fullBody,self.pp,frame_rate)
 	
-
-		
-    def a(self):
-	    print "initial configuration"
-	    self.initConfig()
-		
-    def b(self):
-	    print "end configuration"
-	    self.endConfig()
-		
-    def c(self):
-	    print "displaying root path"
-	    self.rootPath()
-	
-    def d(self):
-	    print "computing contact plan"
-	    self.genPlan()
-	
-    def e(self):
-	    print "displaying contact plan"
-	    self.contactPlan()
-	
-    def f(self):
-	    print "computing feasible com trajectory"
-	    self.interpolate()
-
-    def g(self):
-	    print "playing feasible trajectory"
-	    self.play()
 
