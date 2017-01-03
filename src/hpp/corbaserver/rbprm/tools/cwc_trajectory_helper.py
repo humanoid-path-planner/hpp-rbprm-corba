@@ -158,7 +158,8 @@ trackedEffectors = []):
 			global trajec
 			global trajec_mil			
 			frame_rate = 1./24.
-			frame_rate_andrea = 1./1000.
+			frame_rate_andrea = 1./10.
+#			frame_rate_andrea = 1./1000.
 			#~ if(len(trajec) > 0):
 				#~ frame_rate = 1./25.
 				#~ frame_rate_andrea = 1./1001.
@@ -187,8 +188,8 @@ trackedEffectors = []):
 			pEffs+= NPeffs
 			global coms
 			coms+= com
-			print len(trajec_mil), " ",  len(pos), " ", len(normals), " ", len(coms), " ", len(pEffs)
-			assert(len(trajec_mil) == len(pos) and len(normals) == len(pos) and len(normals) == len(coms) and len(coms) == len(pEffs))
+			#print len(trajec_mil), " ",  len(pos), " ", len(normals), " ", len(coms), " ", len(pEffs)
+			#assert(len(trajec_mil) == len(pos) and len(normals) == len(pos) and len(normals) == len(coms) and len(coms) == len(pEffs))
 			stat_data["num_success"] += 1
 		else:
 			print "TODO, NO CONTACT VARIATION, LINEAR INTERPOLATION REQUIRED"
