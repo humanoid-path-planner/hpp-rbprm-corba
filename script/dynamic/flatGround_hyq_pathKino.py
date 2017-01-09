@@ -16,6 +16,7 @@ urdfSuffix = ""
 srdfSuffix = ""
 vMax = 2;
 aMax = 1;
+extraDof = 6
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
@@ -29,7 +30,7 @@ rbprmBuilder.setAffordanceFilter('hyq_lhleg_rom', ['Support'])
 rbprmBuilder.setAffordanceFilter('hyq_lfleg_rom', ['Support',])
 # We also bound the rotations of the torso.
 rbprmBuilder.boundSO3([-0.4,0.4,-3,3,-3,3])
-rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(2*3)
+rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
 rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax,0,0,0,0,0,0,0,0])
 
 # Creating an instance of HPP problem solver and the viewer
