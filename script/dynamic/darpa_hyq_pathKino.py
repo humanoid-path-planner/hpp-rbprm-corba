@@ -57,7 +57,7 @@ r (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
 
 # Choosing a path optimizer
-ps.addPathOptimizer ("RandomShortcutOriented")
+#ps.addPathOptimizer ("RandomShortcutOriented")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 # Choosing RBPRM shooter and path validation methods.
@@ -70,8 +70,7 @@ ps.selectPathPlanner("DynamicPlanner")
 
 #solve the problem :
 r(q_init)
-#ps.client.problem.prepareSolveStepByStep()
-#ps.client.problem.executeOneStep()
+
 
 ps.solve ()
 
@@ -105,6 +104,16 @@ for i in range(1,10):
     #time.sleep(2)
 """
 
+"""
+i=0
+
+ps.clearRoadmap()
+ps.solve()
+r.client.gui.removeFromGroup("path_"+str(i)+"_root",r.sceneName)
+i = i+1
+pp.displayVelocityPath(i)
+
+pp(i)
 
 
 """
