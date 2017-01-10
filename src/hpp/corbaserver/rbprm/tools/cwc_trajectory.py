@@ -90,11 +90,11 @@ def compute_state_info(fullBody,states, state_id, phase_dt, mu, computeCones, li
 
 
 def gen_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, dt=0.2, phase_dt = [0.4, 1],
-reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0):	
+reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0,use_velocity=False):
 	global lastspeed
 	use_window = max(0, min(use_window,  (len(states) - 1) - (state_id + 2))) # can't use preview if last state is reached	
 	assert( len(phase_dt) >= 2 +  use_window * 2 ), "phase_dt does not describe all phases"
-	
+	configSize = len(states[state_id])
 	constraints = ['cones_constraint', 'end_reached_constraint','end_speed_constraint']
 	#~ constraints = ['cones_constraint', 'end_reached_constraint','end_speed_constraint', 'com_kinematic_constraint']
 	param_constraints = []	
@@ -125,7 +125,17 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 	timeelapsed = 0		
 	if (profile):
 		start = time.clock() 
-	var_final, params = cone_optimization(p, N, [init_com + lastspeed.tolist(), end_com + [0,0,0]], t_end_phases[1:], dt, cones, COMConstraints, mu, mass, 9.81, reduce_ineq, verbose,
+	if(use_velocity):
+		init_vel = states[state_id][configSize-6 : configSize-3]
+		end_vel = states[state_id+1][configSize-6 : configSize-3]
+	else:
+		init_vel=[0,0,0]
+		end_vel=[0,0,0]
+	print "init_vel ="
+	print init_vel
+	print "end_vel = "
+	print end_vel
+	var_final, params = cone_optimization(p, N, [init_com + [0,0,0], end_com + [0,0,0]], t_end_phases[1:], dt, cones, COMConstraints, mu, mass, 9.81, reduce_ineq, verbose,
 	constraints, param_constraints)	
 	#~ print "end_com ", end_com , "computed end come", var_final['c'][-1], var_final['c_end']
 	if (profile):
@@ -156,8 +166,8 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 		
 	return var_final, params, timeelapsed
 
-def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  dt=0.2, phase_dt = [0.4, 1], reduce_ineq = True, verbose = False, limbsCOMConstraints = None, use_window = 0):
-	var_final, params, elapsed = gen_trajectory(fullBody, states, state_id, computeCones, mu , dt, phase_dt, reduce_ineq, verbose, limbsCOMConstraints, False, use_window = use_window)
+def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  dt=0.2, phase_dt = [0.4, 1], reduce_ineq = True, verbose = False, limbsCOMConstraints = None, use_window = 0,use_velocity=False):
+	var_final, params, elapsed = gen_trajectory(fullBody, states, state_id, computeCones, mu , dt, phase_dt, reduce_ineq, verbose, limbsCOMConstraints, False, use_window = use_window,use_velocity=use_velocity)
 	p, N = fullBody.computeContactPoints(state_id)
 	fig = plt.figure()
 	ax = fig.add_subplot(111, projection='3d')
@@ -181,7 +191,7 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 	ax.set_zlabel('Z Label')
 
 	#~ plt.show()
-	plt.savefig('/tmp/c'+ str(state_id)+ '.png')
+	plt.savefig('/tmp/figCWC/c'+ str(state_id)+ '.png')
 	
 	print "plotting speed "
 	print "end target ",  params['x_end']
@@ -200,7 +210,7 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 
 
 	#~ plt.show()
-	plt.savefig('/tmp/dc'+ str(state_id)+ '.png')
+	plt.savefig('/tmp/figCWC/dc'+ str(state_id)+ '.png')
 	
 	print "plotting acceleration "
 	fig = plt.figure()
@@ -216,7 +226,7 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 
 
 		#~ plt.show()
-	plt.savefig('/tmp/ddc'+ str(state_id)+ '.png')
+	plt.savefig('/tmp/figCWC/ddc'+ str(state_id)+ '.png')
 	
 	print "plotting Dl "
 	fig = plt.figure()
@@ -228,7 +238,7 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 
 
 	#~ plt.show()
-	plt.savefig('/tmp/dL'+ str(state_id)+ '.png')
+	plt.savefig('/tmp/figCWC/dL'+ str(state_id)+ '.png')
 	return var_final, params, elapsed
 	
 def __cVarPerPhase(var, dt, t, final_state, addValue):
@@ -249,12 +259,12 @@ def __cVarPerPhase(var, dt, t, final_state, addValue):
 	return varPerPhase
 	
 def __optim__threading_ok(fullBody, states, state_id, computeCones = False, mu = 1, dt =0.1, phase_dt = [0.4, 1], reduce_ineq = True,
- num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0):
+ num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0,use_velocity=False):
 	print "callgin gen ",state_id
 	if(draw):
-		res = draw_trajectory(fullBody, states, state_id, computeCones, mu, dt, phase_dt, reduce_ineq, verbose, limbsCOMConstraints, use_window)		
+		res = draw_trajectory(fullBody, states, state_id, computeCones, mu, dt, phase_dt, reduce_ineq, verbose, limbsCOMConstraints, use_window,use_velocity)
 	else:
-		res = gen_trajectory(fullBody, states, state_id, computeCones, mu, dt, phase_dt, reduce_ineq, verbose, limbsCOMConstraints, profile, use_window)
+		res = gen_trajectory(fullBody, states, state_id, computeCones, mu, dt, phase_dt, reduce_ineq, verbose, limbsCOMConstraints, profile, use_window,use_velocity)
 	t = res[1]["t_init_phases"];
 	dt = res[1]["dt"];
 	final_state = res[0]
@@ -269,9 +279,9 @@ def __optim__threading_ok(fullBody, states, state_id, computeCones = False, mu =
 	return comTrajIds, res[2], final_state #res[2] is timeelapsed
 
 def solve_com_RRT(fullBody, states, state_id, computeCones = False, mu = 1, dt =0.1, phase_dt = [0.4, 1],
-reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0, trackedEffectors = []):
+reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0, trackedEffectors = [],use_velocity=False):
 	comPosPerPhase, timeElapsed, final_state = __optim__threading_ok(fullBody, states, state_id, computeCones, mu, dt, phase_dt,
-	reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints, profile, use_window)
+	reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints, profile, use_window,use_velocity)
 	print "done. generating state trajectory ",state_id	
 	paths_ids = [int(el) for el in fullBody.comRRTFromPos(state_id,comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims)]
 	print "done. computing final trajectory to display ",state_id, "path ids ", paths_ids[-1], " ," , paths_ids[:-1]

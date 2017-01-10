@@ -124,7 +124,7 @@ def __getTimes(fullBody, configs, i, time_scale):
 from hpp import Error as hpperr
 import sys, time
 def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, optim_effectors = True, time_scale = 20., useCOMConstraints = False, use_window = 0, verbose = False, draw = False,
-trackedEffectors = []):
+trackedEffectors = [],use_velocity=False):
 	global errorid
 	global stat_data	
 	fail = 0
@@ -150,7 +150,7 @@ trackedEffectors = []):
 			if(optim_effectors):
 				pid, trajectory, timeelapsed, final_state  =  solve_effector_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window, trackedEffectors = trackedEffectors)
 			else :
-				pid, trajectory, timeelapsed, final_state  =       solve_com_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window, trackedEffectors = trackedEffectors)
+				pid, trajectory, timeelapsed, final_state  =       solve_com_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window, trackedEffectors = trackedEffectors,use_velocity=use_velocity)
 			displayComPath(pp, pid)
 			#~ pp(pid)
 			global res
