@@ -14,7 +14,7 @@ urdfName = 'hyq_trunk_large'
 urdfNameRom = ['hyq_lhleg_rom','hyq_lfleg_rom','hyq_rfleg_rom','hyq_rhleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = 2;
+vMax = 4;
 aMax = 1;
 extraDof = 6
 # Creating an instance of the helper class, and loading the robot

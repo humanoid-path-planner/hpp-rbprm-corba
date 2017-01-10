@@ -29,6 +29,7 @@ fullBody.setJointBounds ("base_joint_xyz", [-5,5, -1.5, 1.5, 0.5, 0.8])
 
 #  Setting a number of sample configurations used
 nbSamples = 20000
+dynamic=False
 
 ps = tp.ProblemSolver(fullBody)
 r = tp.Viewer (ps)
@@ -60,7 +61,8 @@ acc_init = tp.ps.configAtParam(0,0.01)[10:13]
 dir_goal = tp.ps.configAtParam(0,tp.ps.pathLength(1))[7:10]
 acc_goal = tp.ps.configAtParam(0,tp.ps.pathLength(1))[10:13]
 configSize = fullBody.getConfigSize() -fullBody.client.basic.robot.getDimensionExtraConfigSpace()
-#fullBody.setStaticStability(False)
+
+fullBody.setStaticStability(not dynamic)
 # Randomly generating a contact configuration at q_init
 fullBody.setCurrentConfig (q_init)
 q_init = fullBody.generateContacts(q_init,dir_init,acc_init)
@@ -92,11 +94,11 @@ from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
 from fullBodyPlayer import Player
-player = Player(fullBody,pp,tp,configs)
+player = Player(fullBody,pp,tp,configs,draw=False,use_velocity=dynamic)
 
 #player.displayContactPlan()
 
-player.interpolate(20,75)
+player.interpolate(0,len(configs)-1)
 
 player.play()
 
