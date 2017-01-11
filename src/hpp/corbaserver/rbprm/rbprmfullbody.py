@@ -858,3 +858,8 @@ class FullBody (object):
     # \param u the vector director
     def quaternionFromVector(self,vector):
         return self.client.basic.robot.quaternionFromVector(vector)
+
+    ## return the time at the given state index (in the path computed during the first phase)
+    # \param stateId : index of the state
+    def getTimeAtState(self,stateId):
+        return self.client.rbprm.rbprm.getTimeAtState(stateId)

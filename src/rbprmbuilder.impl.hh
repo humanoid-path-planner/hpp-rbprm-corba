@@ -209,6 +209,7 @@ namespace hpp {
         virtual void runSampleAnalysis(const char* analysis, double isstatic) throw (hpp::Error);
         virtual hpp::floatSeq* runLimbSampleAnalysis(const char* limbname, const char* analysis, double isstatic) throw (hpp::Error);
         virtual void dumpProfile(const char* logFile) throw (hpp::Error);
+        virtual double getTimeAtState(unsigned short stateId)throw (hpp::Error);
 
         public:
         void SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver);

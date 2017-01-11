@@ -990,6 +990,25 @@ namespace hpp {
         }
     }
 
+    double RbprmBuilder::getTimeAtState(unsigned short stateId)throw (hpp::Error){
+      try
+      {
+          if(lastStatesComputed_.size() == 0)
+          {
+              throw std::runtime_error ("states not yet computed, call interpolate() first.");
+          }
+          if(lastStatesComputedTime_.size() <= stateId){
+            throw std::runtime_error ("invalid state id : "+std::string(""+stateId)+" number of state = "+std::string(""+lastStatesComputedTime_.size()));
+          }
+          return lastStatesComputedTime_[stateId].first;
+      }
+      catch(std::runtime_error& e)
+      {
+          throw Error(e.what());
+      }
+    }
+
+
     std::vector<State> TimeStatesToStates(const T_StateFrame& ref)
     {
         std::vector<State> res;

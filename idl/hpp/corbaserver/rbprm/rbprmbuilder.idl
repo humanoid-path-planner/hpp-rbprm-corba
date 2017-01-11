@@ -504,6 +504,10 @@ module hpp
     /// \param logFile name of the file where to dump the profiling data
     void dumpProfile(in string logFile) raises (Error);
 
+		/// return the time at the given state index
+		/// \param stateId index of the state
+		double getTimeAtState(in unsigned short stateId) raises (Error);
+
   }; // interface Robot
   }; // module rbprm
   }; // module corbaserver
