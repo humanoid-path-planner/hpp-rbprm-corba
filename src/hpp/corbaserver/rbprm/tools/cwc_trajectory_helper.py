@@ -101,8 +101,8 @@ def __update_cwc_time(t):
 	stat_data["time_cwc"]["max"] = max(stat_data["time_cwc"]["max"], t) 
 	stat_data["time_cwc"]["totaltime"] += t
 	stat_data["time_cwc"]["numiter"] += 1
-	
 
+"""
 def __getTimes(fullBody, configs, i, time_scale):
 	trunk_distance =  np.linalg.norm(np.array(configs[i+1][0:3]) - np.array(configs[i][0:3]))
 	distance = max(fullBody.getEffectorDistance(i,i+1), trunk_distance)
@@ -119,7 +119,26 @@ def __getTimes(fullBody, configs, i, time_scale):
 	else:
 		dt = 0.1
 	return times, dt, distance
-		
+
+"""
+
+def __getTimes(fullBody, configs, i, time_scale):
+		t = fullBody.getTimeAtState(i+1) - fullBody.getTimeAtState(i)
+		print "t = ",t
+		t = time_scale*t
+		print "after scale, t = ",t
+		# TODO : si t = 0
+		if t == 0:
+				print "WARNING : in getTime, t=0"
+		alpha = 0.1
+		times = [0.2 , 0]
+		times[1] = t - 2*times[0]
+		dt = 0.1
+		trunk_distance =  np.linalg.norm(np.array(configs[i+1][0:3]) - np.array(configs[i][0:3]))
+		distance = max(fullBody.getEffectorDistance(i,i+1), trunk_distance)
+		print "times : ",times
+		return times, dt, distance
+
 
 from hpp import Error as hpperr
 import sys, time

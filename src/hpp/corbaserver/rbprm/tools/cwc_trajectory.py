@@ -95,6 +95,7 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 	use_window = max(0, min(use_window,  (len(states) - 1) - (state_id + 2))) # can't use preview if last state is reached	
 	assert( len(phase_dt) >= 2 +  use_window * 2 ), "phase_dt does not describe all phases"
 	configSize = len(states[state_id])
+	#constraints = ['cones_constraint', 'end_reached_constraint','end_speed_constraint']
 	constraints = ['cones_constraint', 'end_reached_constraint','end_speed_constraint']
 	#~ constraints = ['cones_constraint', 'end_reached_constraint','end_speed_constraint', 'com_kinematic_constraint']
 	param_constraints = []	
@@ -135,7 +136,7 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 	print init_vel
 	print "end_vel = "
 	print end_vel
-	var_final, params = cone_optimization(p, N, [init_com + [0,0,0], end_com + [0,0,0]], t_end_phases[1:], dt, cones, COMConstraints, mu, mass, 9.81, reduce_ineq, verbose,
+	var_final, params = cone_optimization(p, N, [init_com + init_vel, end_com + end_vel], t_end_phases[1:], dt, cones, COMConstraints, mu, mass, 9.81, reduce_ineq, verbose,
 	constraints, param_constraints)	
 	#~ print "end_com ", end_com , "computed end come", var_final['c'][-1], var_final['c_end']
 	if (profile):
@@ -190,7 +191,7 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 	ax.set_ylabel('Y Label')
 	ax.set_zlabel('Z Label')
 
-	#~ plt.show()
+	#plt.show()
 	plt.savefig('/tmp/figCWC/c'+ str(state_id)+ '.png')
 	
 	print "plotting speed "
@@ -243,7 +244,11 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 	
 def __cVarPerPhase(var, dt, t, final_state, addValue):
 	varVals = addValue + [v.tolist() for v in final_state[var]]
+	print "t = "
+	print t
 	varPerPhase = [[varVals[(int)(round(t_id/dt)) ] for t_id in np.arange(t[index],t[index+1]-_EPS,dt)] for index, _ in enumerate(t[:-1])  ]
+	print "varperPhase ="
+	print varPerPhase
 	varPerPhase[2].append(varVals[-1])
 	if(not var == "ddc"):
 		assert len(varVals) == len(varPerPhase[0]) + len(varPerPhase[1]) + len(varPerPhase[2]), mess

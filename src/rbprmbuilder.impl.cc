@@ -687,6 +687,7 @@ namespace hpp {
 
     hpp::floatSeq* RbprmBuilder::generateGroundContact(const hpp::Names_t& contactLimbs) throw (hpp::Error)
     {
+        std::cout<<"generate ground contact"<<std::endl;
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
         try
@@ -904,6 +905,8 @@ namespace hpp {
 			hpp::rbprm::RbPrmFullBodyPtr_t fullBody, const hpp::floatSeq& configuration,
             std::vector<std::string>& names)
     {
+      std::cout<<"setPositonAndNormal"<<std::endl;
+
         core::Configuration_t old = fullBody->device_->currentConfiguration();
         model::Configuration_t config = dofArrayToConfig (fullBody->device_, configuration);
         fullBody->device_->currentConfiguration(config);
@@ -1752,6 +1755,8 @@ assert(s2 == s1 +1);
 
     void RbprmBuilder::saveComputedStates(const char* outfilename) throw (hpp::Error)
     {
+      std::cout<<"saveComputedStates"<<std::endl;
+
         std::stringstream ss;
         ss << lastStatesComputed_.size()-2 << "\n";
         std::vector<rbprm::State>::iterator cit = lastStatesComputed_.begin()+1;
@@ -1951,6 +1956,8 @@ assert(s2 == s1 +1);
 
     CORBA::Short RbprmBuilder::isConfigBalanced(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs, double robustnessTreshold) throw (hpp::Error)
     {
+      std::cout<<"isConfigBalanced"<<std::endl;
+
         try{
         rbprm::State testedState;
         model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);

@@ -14,7 +14,7 @@ urdfName = 'hyq_trunk_large'
 urdfNameRom = ['hyq_lhleg_rom','hyq_lfleg_rom','hyq_rfleg_rom','hyq_rhleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = 4;
+vMax = 2;
 aMax = 1;
 extraDof = 6
 # Creating an instance of the helper class, and loading the robot
@@ -52,6 +52,7 @@ q_init = rbprmBuilder.getCurrentConfig ();
 q_init [0:3] = [-2, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 q_goal = q_init [::]
 
+#q_goal[0:3]=[2,0,0.63]#position easy
 q_goal[0:3]=[2,0,0.63]#position easy
 #q_goal [0:3] = [4, 0, 0.71]
 #q_goal[7:10]=[2,0,0.9]#velocity

@@ -29,10 +29,10 @@ fullBody.setJointBounds ("base_joint_xyz", [-5,5, -1.5, 1.5, 0.5, 0.8])
 
 #  Setting a number of sample configurations used
 nbSamples = 20000
-dynamic=False
+dynamic=True
 
 ps = tp.ProblemSolver(fullBody)
-r = tp.Viewer (ps)
+r = tp.Viewer (ps,viewerClient=tp.r.client)
 
 rootName = 'base_joint_xyz'
 
@@ -62,7 +62,7 @@ dir_goal = tp.ps.configAtParam(0,tp.ps.pathLength(1))[7:10]
 acc_goal = tp.ps.configAtParam(0,tp.ps.pathLength(1))[10:13]
 configSize = fullBody.getConfigSize() -fullBody.client.basic.robot.getDimensionExtraConfigSpace()
 
-fullBody.setStaticStability(not dynamic)
+fullBody.setStaticStability(False)
 # Randomly generating a contact configuration at q_init
 fullBody.setCurrentConfig (q_init)
 q_init = fullBody.generateContacts(q_init,dir_init,acc_init)
@@ -84,7 +84,7 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 r(q_init)
 # computing the contact sequence
 # configs = fullBody.interpolate(0.12, 10, 10, True) #Was this (Pierre)
-configs = fullBody.interpolate(0.03,pathId=0,robustnessTreshold = 5, filterStates = True)
+configs = fullBody.interpolate(0.07,pathId=0,robustnessTreshold = 5, filterStates = True)
 #~ configs = fullBody.interpolate(0.11, 7, 10, True)
 #~ configs = fullBody.interpolate(0.1, 1, 5, True)
 
@@ -94,11 +94,31 @@ from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
 from fullBodyPlayer import Player
-player = Player(fullBody,pp,tp,configs,draw=False,use_velocity=dynamic)
+player = Player(fullBody,pp,tp,configs,draw=True,use_velocity=False)
 
 #player.displayContactPlan()
 
-player.interpolate(0,len(configs)-1)
+player.interpolate(11,13)
 
-player.play()
+#player.play()
+
+
+
+"""
+
+camera = [0.5681925415992737,
+ -6.707448482513428,
+ 2.5206544399261475,
+ 0.8217507600784302,
+ 0.5693002343177795,
+ 0.020600343123078346,
+ 0.01408931240439415]
+r.client.gui.setCameraTransform(0,camera)
+
+"""
+
+
+
+
+
 
