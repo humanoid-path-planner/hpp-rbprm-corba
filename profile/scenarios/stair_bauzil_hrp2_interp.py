@@ -131,6 +131,12 @@ def play(frame_rate = 1./24.):
 def saveAll(name):
 	saveAllData(fullBody, r, name)
 
+import time
+try:
+	time.sleep(2)
+	fullBody.dumpProfile()
+except Exception as e:
+	pass
 #~ for i in range(4,25):
     #~ act(i,0)
 
