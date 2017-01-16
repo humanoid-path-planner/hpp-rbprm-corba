@@ -3,7 +3,7 @@ from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import step, clean,stats,
 import time
 
 class Player (object):
-    def __init__ (self, fullBody,pathPlayer,tp,configs=[],draw=False,use_velocity=False):
+    def __init__ (self, fullBody,pathPlayer,tp,configs=[],draw=False,use_velocity=False,pathId = 0):
         self.viewer = pathPlayer.publisher
         self.tp = tp
         self.pp = pathPlayer
@@ -19,6 +19,7 @@ class Player (object):
         self.larmId = 'lfleg'
         self.lHand = 'lf_foot_joint'
         self.draw=draw
+        self.pathId = pathId
         self.use_velocity = use_velocity
         self.limbsCOMConstraints = { self.rLegId : {'file': "hyq/"+self.rLegId+"_com.ineq", 'effector' : self.rfoot},  
 						    self.lLegId : {'file': "hyq/"+self.lLegId+"_com.ineq", 'effector' : self.lfoot},  
@@ -26,9 +27,9 @@ class Player (object):
 						    self.larmId : {'file': "hyq/"+self.larmId+"_com.ineq", 'effector' : self.lHand} }
 
 
-    def act(self,i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True, time_scale = 10,  verbose = True, draw = False, trackedEffectors = []):
+    def act(self,i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True, time_scale = 1,  verbose = True, draw = False, trackedEffectors = []):
 	    return step(self.fullBody, self.configs, i, numOptim, self.pp, self.limbsCOMConstraints, friction, optim_effectors = optim_effectors, time_scale = time_scale, useCOMConstraints = False, use_window = use_window,
-	    verbose = verbose, draw = draw, trackedEffectors = trackedEffectors,use_velocity=self.use_velocity)
+	    verbose = verbose, draw = draw, trackedEffectors = trackedEffectors,use_velocity=self.use_velocity, pathId = self.pathId)
 
     def initConfig(self):
         self.viewer.client.gui.setVisibility("hyq", "ON")

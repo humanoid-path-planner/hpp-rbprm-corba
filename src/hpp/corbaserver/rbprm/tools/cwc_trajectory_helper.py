@@ -131,9 +131,9 @@ def __getTimes(fullBody, configs, i, time_scale):
 		if t == 0:
 				print "WARNING : in getTime, t=0"
 		alpha = 0.1
-		times = [0.2 , 0]
+		times = [0.02 , 0]
 		times[1] = t - 2*times[0]
-		dt = 0.1
+		dt = 0.01
 		trunk_distance =  np.linalg.norm(np.array(configs[i+1][0:3]) - np.array(configs[i][0:3]))
 		distance = max(fullBody.getEffectorDistance(i,i+1), trunk_distance)
 		print "times : ",times
@@ -143,7 +143,7 @@ def __getTimes(fullBody, configs, i, time_scale):
 from hpp import Error as hpperr
 import sys, time
 def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, optim_effectors = True, time_scale = 20., useCOMConstraints = False, use_window = 0, verbose = False, draw = False,
-trackedEffectors = [],use_velocity=False):
+trackedEffectors = [],use_velocity=False,pathId = 0):
 	global errorid
 	global stat_data	
 	fail = 0
@@ -169,15 +169,15 @@ trackedEffectors = [],use_velocity=False):
 			if(optim_effectors):
 				pid, trajectory, timeelapsed, final_state  =  solve_effector_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window, trackedEffectors = trackedEffectors)
 			else :
-				pid, trajectory, timeelapsed, final_state  =       solve_com_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window, trackedEffectors = trackedEffectors,use_velocity=use_velocity)
+				pid, trajectory, timeelapsed, final_state  =       solve_com_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window, trackedEffectors = trackedEffectors,use_velocity=use_velocity,pathId = pathId)
 			displayComPath(pp, pid)
 			#~ pp(pid)
 			global res
 			res = res + [pid]
 			global trajec
 			global trajec_mil			
-			frame_rate = 1./24.
-			frame_rate_andrea = 1./10.
+			frame_rate = 1./100
+			frame_rate_andrea = 1./100.
 #			frame_rate_andrea = 1./1000.
 			#~ if(len(trajec) > 0):
 				#~ frame_rate = 1./25.
