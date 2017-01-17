@@ -1559,12 +1559,23 @@ assert(s2 == s1 +1);
             }
             State& state1=lastStatesComputed_[s1], state2=lastStatesComputed_[s2];
 
+            hppDout(notice,"start comRRTFromPos");
             State s1Bis(state1);
+            hppDout(notice,"state1 = "<<model::displayConfig(state1.configuration_));
             s1Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Bis,paths[cT1]->end().head<3>());
-
+            hppDout(notice,"state1 after projection= "<<model::displayConfig(s1Bis.configuration_));
+            for(std::map<std::string,bool>::const_iterator cit = s1Bis.contacts_.begin();cit!=s1Bis.contacts_.end(); ++ cit)
+            {
+              hppDout(notice,"contact : "<<cit->first<<" = "<<cit->second);
+            }
             State s2Bis(state2);
+            hppDout(notice,"state2 = "<<model::displayConfig(state2.configuration_));
             s2Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Bis,paths[cT2]->end().head<3>());
-
+            hppDout(notice,"state2 after projection= "<<model::displayConfig(s2Bis.configuration_));
+            for(std::map<std::string,bool>::const_iterator cit = s2Bis.contacts_.begin();cit!=s2Bis.contacts_.end(); ++ cit)
+            {
+              hppDout(notice,"contact : "<<cit->first<<" = "<<cit->second);
+            }
             core::PathVectorPtr_t resPath = core::PathVector::create(fullBody_->device_->configSize(), fullBody_->device_->numberDof());
 
 
@@ -1579,8 +1590,10 @@ assert(s2 == s1 +1);
             }
 
             {
+                hppDout(notice,"begin comRRT states 1 and 1bis");
                 core::PathPtr_t p1 = interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[cT1],
                         state1,s1Bis, numOptimizations,true);
+                hppDout(notice,"end comRRT");
                 // reduce path to remove extradof
                 core::SizeInterval_t interval(0, p1->initial().rows()-1);
                 core::SizeIntervals_t intervals;
@@ -1592,8 +1605,10 @@ assert(s2 == s1 +1);
 
 
             {
+                hppDout(notice,"begin comRRT between statebis 1 and 2");
                 core::PathPtr_t p2 =(*functor)(fullBody_,problemSolver_->problem(), paths[cT2],
                     s1Bis,s2Bis, numOptimizations,true);
+                hppDout(notice,"end comRRT");
                 pathsIds.push_back(AddPath(p2,problemSolver_));
                 // reduce path to remove extradof
                 core::SizeInterval_t interval(0, p2->initial().rows()-1);
@@ -1605,8 +1620,10 @@ assert(s2 == s1 +1);
 
             //if(s2Bis.configuration_ != state2.configuration_)
             {
+                hppDout(notice,"begin comRRT states 2bis and 2");
                 core::PathPtr_t p3= interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[cT3],
                         s2Bis,state2, numOptimizations,true);
+                hppDout(notice,"end comRRT");
                 // reduce path to remove extradof
                 core::SizeInterval_t interval(0, p3->initial().rows()-1);
                 core::SizeIntervals_t intervals;
