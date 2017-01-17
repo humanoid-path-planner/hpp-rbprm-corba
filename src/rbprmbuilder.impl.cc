@@ -39,6 +39,7 @@
 #include <fstream>
 #include <hpp/rbprm/planner/dynamic-planner.hh>
 #include <hpp/rbprm/planner/rbprm-steering-kinodynamic.hh>
+#include <hpp/model/configuration.hh>
 
 #ifdef PROFILE
     #include "hpp/rbprm/rbprm-profiler.hh"

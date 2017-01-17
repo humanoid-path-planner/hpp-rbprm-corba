@@ -278,8 +278,10 @@ def __optim__threading_ok(fullBody, states, state_id, computeCones = False, mu =
 		res = draw_trajectory(fullBody, states, state_id, computeCones, mu, dt, phase_dt, reduce_ineq, verbose, limbsCOMConstraints, use_window,use_velocity, pathId)
 	else:
 		res = gen_trajectory(fullBody, states, state_id, computeCones, mu, dt, phase_dt, reduce_ineq, verbose, limbsCOMConstraints, profile, use_window,use_velocity, pathId)
-	t = res[1]["t_init_phases"];
-	dt = res[1]["dt"];
+	alpha = res[1]['alpha']
+	print "alpha in optim__trheading = ",alpha
+	t = [ti * alpha for ti in res[1]["t_init_phases"]]
+	dt = res[1]["dt"] * alpha
 	final_state = res[0]
 	c0 =  res[1]["x_init"][0:3]
 	dc0 = res[1]["x_init"][3:7]
