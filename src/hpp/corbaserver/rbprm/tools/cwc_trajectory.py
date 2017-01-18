@@ -110,6 +110,8 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 	mass = fullBody.getMass()
 	
 	p, N, init_com, end_com, t_end_phases, cones, COMConstraints, initial_guess = compute_state_info(fullBody,states, state_id, phase_dt[:2], mu, computeCones, limbsCOMConstraints,pathId)
+	if(not use_velocity):
+		initial_guess = []
 	if(use_window > 0):
 		init_waypoint_time = int(np.round(t_end_phases[-1]/ dt)) - 1
 		init_end_com = end_com[:]
@@ -255,8 +257,8 @@ def __cVarPerPhase(var, dt, t, final_state, addValue):
 	print "t = "
 	print t
 	varPerPhase = [[varVals[(int)(round(t_id/dt)) ] for t_id in np.arange(t[index],t[index+1]-_EPS,dt)] for index, _ in enumerate(t[:-1])  ]
-	print "varperPhase ="
-	print varPerPhase
+	#print "varperPhase ="
+	#print varPerPhase
 	varPerPhase[2].append(varVals[-1])
 	if(not var == "ddc"):
 		assert len(varVals) == len(varPerPhase[0]) + len(varPerPhase[1]) + len(varPerPhase[2]), mess
@@ -303,9 +305,9 @@ reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConst
 	return paths_ids[-1], paths_ids[:-1], timeElapsed, final_state
 	
 def solve_effector_RRT(fullBody, states, state_id, computeCones = False, mu = 1, dt =0.1, phase_dt = [0.4, 1],
-reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0, trackedEffectors = []):
+reduce_ineq = True, num_optims = 0, draw = False, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0, trackedEffectors = [],use_velocity=False,pathId = 0):
 	comPosPerPhase, timeElapsed, final_state = __optim__threading_ok(fullBody, states, state_id, computeCones, mu, dt, phase_dt,
-	reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints, profile, use_window)
+	reduce_ineq, num_optims, draw, verbose, limbsCOMConstraints, profile, use_window,use_velocity, pathId)
 	print "done. generating state trajectory ",state_id		
 	if(len(trackedEffectors) == 0):
 		paths_ids = [int(el) for el in fullBody.effectorRRT(state_id,comPosPerPhase[0],comPosPerPhase[1],comPosPerPhase[2],num_optims)]

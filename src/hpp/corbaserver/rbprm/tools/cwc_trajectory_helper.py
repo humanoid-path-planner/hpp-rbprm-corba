@@ -144,6 +144,7 @@ from hpp import Error as hpperr
 import sys, time
 def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, optim_effectors = True, time_scale = 20., useCOMConstraints = False, use_window = 0, verbose = False, draw = False,
 trackedEffectors = [],use_velocity=False,pathId = 0):
+	print "##########################################"
 	global errorid
 	global stat_data	
 	fail = 0
@@ -167,7 +168,7 @@ trackedEffectors = [],use_velocity=False,pathId = 0):
 			else:
 				comC = None
 			if(optim_effectors):
-				pid, trajectory, timeelapsed, final_state  =  solve_effector_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window, trackedEffectors = trackedEffectors)
+				pid, trajectory, timeelapsed, final_state  =  solve_effector_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window, trackedEffectors = trackedEffectors,use_velocity=use_velocity,pathId = pathId)
 			else :
 				pid, trajectory, timeelapsed, final_state  =       solve_com_RRT(fullBody, configs, i, True, friction, dt, times, False, optim, draw, verbose, comC, False, use_window=use_window, trackedEffectors = trackedEffectors,use_velocity=use_velocity,pathId = pathId)
 			displayComPath(pp, pid)
