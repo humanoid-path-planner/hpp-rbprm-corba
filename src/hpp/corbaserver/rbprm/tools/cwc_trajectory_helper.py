@@ -122,22 +122,23 @@ def __getTimes(fullBody, configs, i, time_scale):
 
 """
 
-def __getTimes(fullBody, configs, i, time_scale):
+def __getTimes(fullBody, configs, i, time_scale,use_window=0):
 		t = fullBody.getTimeAtState(i+1) - fullBody.getTimeAtState(i)
+		dt = 0.01
 		print "t = ",t
 		t = time_scale*t
 		print "after scale, t = ",t
-		# TODO : si t = 0
-		if t == 0:
-				print "WARNING : in getTime, t=0"
-		alpha = 0.1
-		times = [0.02 , 0]
-		times[1] = t - 2*times[0]
-		dt = 0.01
 		trunk_distance =  np.linalg.norm(np.array(configs[i+1][0:3]) - np.array(configs[i][0:3]))
 		distance = max(fullBody.getEffectorDistance(i,i+1), trunk_distance)
+		# TODO : si t = 0, hardcoded ...
+		if t <= dt:
+				print "WARNING : in getTime, t=0"
+				t = 0.15
+				use_window = use_window+1
+		times = [0.05 , 0] #FIXME : hardcoded value depend on interpolation step choosen (not available here)
+		times[1] = t - 2*times[0]
 		print "times : ",times
-		return times, dt, distance
+		return times, dt, distance,use_window
 
 
 from hpp import Error as hpperr
@@ -152,10 +153,12 @@ trackedEffectors = [],use_velocity=False,pathId = 0):
 	if(True):
 		times = [];
 		dt = 1000;
-		distance = __getTimes(fullBody, configs, i, time_scale)
+		times, dt, distance,use_window = __getTimes(fullBody, configs, i, time_scale,use_window)
+		if distance == 0:
+				use_window = use_window+1
 		use_window = max(0, min(use_window,  (len(configs) - 1) - (i + 2))) # can't use preview if last state is reached
 		for w in range(use_window+1):
-			times2, dt2, dist2 = __getTimes(fullBody, configs, i+w, time_scale)
+			times2, dt2, dist2,unused = __getTimes(fullBody, configs, i+w, time_scale)
 			times += times2
 			dt = min(dt, dt2)
 		time_per_path = [times[0]] + [times[1]] + [times [0]]
@@ -177,7 +180,7 @@ trackedEffectors = [],use_velocity=False,pathId = 0):
 			res = res + [pid]
 			global trajec
 			global trajec_mil			
-			frame_rate = 1./100
+			frame_rate = 1./60
 			frame_rate_andrea = 1./100.
 #			frame_rate_andrea = 1./1000.
 			#~ if(len(trajec) > 0):

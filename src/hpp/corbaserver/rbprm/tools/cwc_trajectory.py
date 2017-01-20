@@ -86,16 +86,17 @@ def compute_state_info(fullBody,states, state_id, phase_dt, mu, computeCones, li
 			COMConstraints.append(__get_com_constraint(fullBody, state_id, states[state_id], limbsCOMConstraints, True))
 		if(len(p) > len(COMConstraints)):
 			COMConstraints.append(__get_com_constraint(fullBody, state_id + 1, states[state_id + 1], limbsCOMConstraints))
-	dt = 0.01
-	nbSteps = int(t_end_phases[3] / dt) # FIXME : prendre dt en parametre
-	initial_guess = np.zeros(nbSteps*6).tolist()
-	t_init = fullBody.getTimeAtState(state_id)
-	for i in range(0,nbSteps):
-		initial_guess[i*3:3+i*3] = fullBody.client.basic.problem.configAtParam(pathId,t_init+i*dt)[-3:] # acceleration
-		initial_guess[(nbSteps*3) + i*3: (nbSteps*3) + 3+ i*3] = [0,0,0] # angular momentum
-	print "initial guess velocity = ",initial_guess
-	return p, N, init_com, end_com, t_end_phases, cones, COMConstraints, initial_guess
+	return p, N, init_com, end_com, t_end_phases, cones, COMConstraints
 
+def compute_initial_guess(fullBody,t_end_phases,pathId,state_id,dt=0.01):
+		nbSteps = int(t_end_phases[-1] / dt) # FIXME : prendre dt en parametre
+		initial_guess = np.zeros(nbSteps*6).tolist()
+		t_init = fullBody.getTimeAtState(state_id)
+		for i in range(0,nbSteps):
+			initial_guess[i*3:3+i*3] = fullBody.client.basic.problem.configAtParam(pathId,t_init+i*dt)[-3:] # acceleration
+			initial_guess[(nbSteps*3) + i*3: (nbSteps*3) + 3+ i*3] = [0,0,0] # angular momentum
+		print "initial guess velocity = ",initial_guess
+		return initial_guess
 
 def gen_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, dt=0.2, phase_dt = [0.4, 1],
 reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0,use_velocity=False, pathId = 0):
@@ -109,7 +110,7 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 	param_constraints = []	
 	mass = fullBody.getMass()
 	
-	p, N, init_com, end_com, t_end_phases, cones, COMConstraints, initial_guess = compute_state_info(fullBody,states, state_id, phase_dt[:2], mu, computeCones, limbsCOMConstraints,pathId)
+	p, N, init_com, end_com, t_end_phases, cones, COMConstraints = compute_state_info(fullBody,states, state_id, phase_dt[:2], mu, computeCones, limbsCOMConstraints,pathId)
 	if(not use_velocity):
 		initial_guess = []
 	if(use_window > 0):
@@ -120,7 +121,7 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 		waypoint_time = int(np.round(t_end_phases[-1]/ dt)) - 1
 		# trying not to apply constraint
 		#~ param_constraints += [("waypoint_reached_constraint",(waypoint_time, waypoint))]
-		p1, N1, init_com1, end_com1, t_end_phases1, cones1, COMConstraints1, initial_guess = compute_state_info(fullBody,states, state_id+w, phase_dt[2*w:], mu, computeCones, limbsCOMConstraints, pathId)
+		p1, N1, init_com1, end_com1, t_end_phases1, cones1, COMConstraints1 = compute_state_info(fullBody,states, state_id+w, phase_dt[2*w:], mu, computeCones, limbsCOMConstraints, pathId)
 		p+=p1;
 		N+=N1;
 		end_com = end_com1;
@@ -128,7 +129,7 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 		if(COMConstraints != None and COMConstraints1 != None):
 			COMConstraints += COMConstraints1;
 		t_end_phases += [t_end_phases[-1] + t for t in t_end_phases1[1:]]
-	
+	initial_guess = compute_initial_guess(fullBody,t_end_phases,pathId,state_id)
 	if (not profile):
 			print "num cones ", len(cones)
 			print "end_phases", t_end_phases
