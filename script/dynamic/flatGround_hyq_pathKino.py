@@ -14,7 +14,7 @@ urdfName = 'hyq_trunk_large'
 urdfNameRom = ['hyq_lhleg_rom','hyq_lfleg_rom','hyq_rfleg_rom','hyq_rhleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = 2;
+vMax = 1;
 aMax = 1;
 extraDof = 6
 # Creating an instance of the helper class, and loading the robot
@@ -61,7 +61,6 @@ r (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
 
 # Choosing a path optimizer
-ps.addPathOptimizer ("RandomShortcutOriented")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 # Choosing RBPRM shooter and path validation methods.

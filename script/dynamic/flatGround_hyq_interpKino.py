@@ -48,18 +48,18 @@ lLegId = 'lhleg'
 rarmId = 'rhleg'
 larmId = 'lfleg'
 
-addLimbDb(rLegId, "static")
-addLimbDb(lLegId, "static")
-addLimbDb(rarmId, "static")
-addLimbDb(larmId, "static")
+addLimbDb(rLegId, "forward")
+addLimbDb(lLegId, "forward")
+addLimbDb(rarmId, "forward")
+addLimbDb(larmId, "forward")
 
 q_0 = fullBody.getCurrentConfig(); 
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.ps.configAtParam(0,0.01)[0:7] # use this to get the correct orientation
-q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.ps.configAtParam(0,tp.ps.pathLength(1))[0:7]
+q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.ps.configAtParam(0,tp.ps.pathLength(0))[0:7]
 dir_init = tp.ps.configAtParam(0,0.01)[7:10]
 acc_init = tp.ps.configAtParam(0,0.01)[10:13]
-dir_goal = tp.ps.configAtParam(0,tp.ps.pathLength(1))[7:10]
-acc_goal = tp.ps.configAtParam(0,tp.ps.pathLength(1))[10:13]
+dir_goal = tp.ps.configAtParam(0,tp.ps.pathLength(0))[7:10]
+acc_goal = tp.ps.configAtParam(0,tp.ps.pathLength(0))[10:13]
 configSize = fullBody.getConfigSize() -fullBody.client.basic.robot.getDimensionExtraConfigSpace()
 
 fullBody.setStaticStability(False)
@@ -77,14 +77,14 @@ q_init[configSize+3:configSize+6] = acc_init[::]
 q_goal[configSize:configSize+3] = dir_goal[::]
 q_goal[configSize+3:configSize+6] = acc_goal[::]
 # specifying the full body configurations as start and goal state of the problem
-fullBody.setStartState(q_init,[rLegId,lLegId,rarmId,larmId])
-fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
+fullBody.setStartState(q_init,[larmId,rLegId,rarmId,lLegId])
+fullBody.setEndState(q_goal,[larmId,rLegId,rarmId,lLegId])
 
 
 r(q_init)
 # computing the contact sequence
 # configs = fullBody.interpolate(0.12, 10, 10, True) #Was this (Pierre)
-configs = fullBody.interpolate(0.07,pathId=0,robustnessTreshold = 5, filterStates = True)
+configs = fullBody.interpolate(0.1,pathId=0,robustnessTreshold = 5, filterStates = True)
 #~ configs = fullBody.interpolate(0.11, 7, 10, True)
 #~ configs = fullBody.interpolate(0.1, 1, 5, True)
 
@@ -94,11 +94,11 @@ from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
 from fullBodyPlayer import Player
-player = Player(fullBody,pp,tp,configs,draw=True,use_velocity=False)
+player = Player(fullBody,pp,tp,configs,draw=True,optim_effector=False,use_velocity=dynamic,pathId = 0)
 
 #player.displayContactPlan()
 
-player.interpolate(11,13)
+player.interpolate(5,len(configs)-2)
 
 #player.play()
 

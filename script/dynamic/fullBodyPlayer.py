@@ -3,7 +3,7 @@ from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import step, clean,stats,
 import time
 
 class Player (object):
-    def __init__ (self, fullBody,pathPlayer,tp,configs=[],draw=False,use_velocity=False,pathId = 0):
+    def __init__ (self, fullBody,pathPlayer,tp,configs=[],draw=False,optim_effector=False,use_velocity=False,pathId = 0):
         self.viewer = pathPlayer.publisher
         self.tp = tp
         self.pp = pathPlayer
@@ -21,6 +21,7 @@ class Player (object):
         self.draw=draw
         self.pathId = pathId
         self.use_velocity = use_velocity
+        self.optim_effector = optim_effector
         self.limbsCOMConstraints = { self.rLegId : {'file': "hyq/"+self.rLegId+"_com.ineq", 'effector' : self.rfoot},  
 						    self.lLegId : {'file': "hyq/"+self.lLegId+"_com.ineq", 'effector' : self.lfoot},  
 						    self.rarmId : {'file': "hyq/"+self.rarmId+"_com.ineq", 'effector' : self.rHand},  
@@ -98,9 +99,9 @@ class Player (object):
         self.tp.r.client.gui.setVisibility("toto", "OFF")
         self.tp.r.client.gui.setVisibility("hyq_trunk", "OFF")
         for i in range(begin,end):
-            self.act(i,1,optim_effectors=False,draw=self.draw)
+            self.act(i,1,optim_effectors=self.optim_effector,draw=self.draw)
 		
-    def play(self,frame_rate = 1./24.):
+    def play(self,frame_rate = 1./60.):
 	    play_traj(self.fullBody,self.pp,frame_rate)
 	
 

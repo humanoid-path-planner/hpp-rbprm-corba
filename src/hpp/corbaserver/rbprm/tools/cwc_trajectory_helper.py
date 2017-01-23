@@ -135,7 +135,7 @@ def __getTimes(fullBody, configs, i, time_scale,use_window=0):
 				print "WARNING : in getTime, t=0"
 				t = 0.15
 				use_window = use_window+1
-		times = [0.05 , 0] #FIXME : hardcoded value depend on interpolation step choosen (not available here)
+		times = [0.03 , 0] #FIXME : hardcoded value depend on interpolation step choosen (not available here)
 		times[1] = t - 2*times[0]
 		print "times : ",times
 		return times, dt, distance,use_window

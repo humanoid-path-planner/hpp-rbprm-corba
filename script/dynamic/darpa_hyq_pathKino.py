@@ -14,8 +14,9 @@ urdfName = 'hyq_trunk_large'
 urdfNameRom = ['hyq_lhleg_rom','hyq_lfleg_rom','hyq_rfleg_rom','hyq_rhleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = 2;
+vMax = 1;
 aMax = 1;
+extraDof = 6
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
@@ -29,7 +30,7 @@ rbprmBuilder.setAffordanceFilter('hyq_lhleg_rom', ['Support'])
 rbprmBuilder.setAffordanceFilter('hyq_lfleg_rom', ['Support',])
 # We also bound the rotations of the torso.
 rbprmBuilder.boundSO3([-0.4,0.4,-3,3,-3,3])
-rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(2*3)
+rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
 rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax,0,0,0,0,0,0,0,0])
 
 # Creating an instance of HPP problem solver and the viewer
@@ -84,7 +85,7 @@ pp.displayVelocityPath(0)
 r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
 #display path
 pp.speed=0.3
-pp (0)
+#pp (0)
 
 #display path with post-optimisation
 """
@@ -118,6 +119,7 @@ pp(i)
 
 """
 
+"""
 r.client.gui.addCurve("c1",qlist,r.color.red)
 r.client.gui.setVisibility("c1","ALWAYS_ON_TOP")
 r.client.gui.addToGroup("c1",r.sceneName)
@@ -129,8 +131,7 @@ r.client.gui.addToGroup("c2",r.sceneName)
 
 
 
-
-
-
 """
+
+
 
