@@ -150,17 +150,22 @@ trackedEffectors = [],use_velocity=False,pathId = 0):
 	global stat_data	
 	fail = 0
 	#~ try:
+	print "Use window = ",use_window
 	if(True):
 		times = [];
 		dt = 1000;
 		times, dt, distance,use_window = __getTimes(fullBody, configs, i, time_scale,use_window)
+		print "Use window = ",use_window
 		if distance == 0:
 				use_window = use_window+1
 		use_window = max(0, min(use_window,  (len(configs) - 1) - (i + 2))) # can't use preview if last state is reached
-		for w in range(use_window+1):
-			times2, dt2, dist2,unused = __getTimes(fullBody, configs, i+w, time_scale)
+		w = 0
+		while w < (use_window+1):
+			times2, dt2, dist2,use_window = __getTimes(fullBody, configs, i+w, time_scale,use_window)
+			print "Use window = ",use_window
 			times += times2
 			dt = min(dt, dt2)
+			w = w+1
 		time_per_path = [times[0]] + [times[1]] + [times [0]]
 		print 'time per path', times, time_per_path
 		print 'dt', dt

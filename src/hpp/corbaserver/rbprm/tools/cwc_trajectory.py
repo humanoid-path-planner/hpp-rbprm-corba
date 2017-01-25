@@ -121,7 +121,7 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 		waypoint_time = int(np.round(t_end_phases[-1]/ dt)) - 1
 		# trying not to apply constraint
 		#~ param_constraints += [("waypoint_reached_constraint",(waypoint_time, waypoint))]
-		p1, N1, init_com1, end_com1, t_end_phases1, cones1, COMConstraints1 = compute_state_info(fullBody,states, state_id+w, phase_dt[2*w:], mu, computeCones, limbsCOMConstraints, pathId)
+		p1, N1, init_com1, end_com1, t_end_phases1, cones1, COMConstraints1 = compute_state_info(fullBody,states, state_id+w, phase_dt[:2], mu, computeCones, limbsCOMConstraints, pathId)
 		p+=p1;
 		N+=N1;
 		end_com = end_com1;
@@ -169,12 +169,15 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 			lastspeed = var_final['dc'][init_waypoint_time]		
 			print "init speed", lastspeed
 		else:
-			print "reached com is not good, restarting problem with 0 window"
-			return gen_trajectory(fullBody, states, state_id, computeCones, mu, dt, phase_dt[:2], reduce_ineq, verbose, limbsCOMConstraints, profile, use_window = 0, pathId = pathId)
+			use_window = 0
+			print "reached com is not good, restarting problem with window = ",use_window
+			return gen_trajectory(fullBody, states, state_id, computeCones, mu, dt, phase_dt, reduce_ineq, verbose, limbsCOMConstraints, profile, use_window = use_window, pathId = pathId)
 	else:		
 		if norm(np.array(var_final['c'][-1]) - np.array(__get_com(fullBody, states[state_id+1]))) > 0.00001:
 			print "error in com desired: obtained ", __get_com(fullBody, states[state_id+1]), var_final['c'][-1]
-		lastspeed = np.array([0,0,0])
+			print "restarting problem with windows = ",use_window+1
+			return gen_trajectory(fullBody, states, state_id, computeCones, mu, dt, phase_dt ,reduce_ineq, verbose, limbsCOMConstraints, profile , use_window + 1,use_velocity, pathId)
+	lastspeed = np.array([0,0,0])
 		
 	return var_final, params, timeelapsed
 
