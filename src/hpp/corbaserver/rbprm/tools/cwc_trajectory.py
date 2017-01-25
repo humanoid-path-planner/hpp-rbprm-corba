@@ -95,14 +95,15 @@ def compute_initial_guess(fullBody,t_end_phases,pathId,state_id,dt=0.01):
 		for i in range(0,nbSteps):
 			initial_guess[i*3:3+i*3] = fullBody.client.basic.problem.configAtParam(pathId,t_init+i*dt)[-3:] # acceleration
 			initial_guess[(nbSteps*3) + i*3: (nbSteps*3) + 3+ i*3] = [0,0,0] # angular momentum
-		print "initial guess velocity = ",initial_guess
+		#print "initial guess velocity = ",initial_guess
 		return initial_guess
 
-def gen_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, dt=0.2, phase_dt = [0.4, 1],
+def gen_trajectory(fullBody, states, state_id, computeCones = False, mu = 1, dt=0.01, phase_dt = [0.4, 1],
 reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False, use_window = 0,use_velocity=False, pathId = 0):
 	global lastspeed
 	use_window = max(0, min(use_window,  (len(states) - 1) - (state_id + 2))) # can't use preview if last state is reached	
-	assert( len(phase_dt) >= 2 +  use_window * 2 ), "phase_dt does not describe all phases"
+	#print "phase dt : ", phase_dt
+	#assert( len(phase_dt) >= 2 +  use_window * 2 ), "phase_dt does not describe all phases"
 	configSize = len(states[state_id])
 	#constraints = ['cones_constraint', 'end_reached_constraint','end_speed_constraint']
 	constraints = ['cones_constraint', 'end_reached_constraint','end_speed_constraint']
