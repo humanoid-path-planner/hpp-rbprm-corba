@@ -16,6 +16,7 @@ urdfSuffix = ""
 srdfSuffix = ""
 vMax = 2;
 aMax = 1;
+extraDof = 6
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
@@ -29,7 +30,7 @@ rbprmBuilder.setAffordanceFilter('hyq_lhleg_rom', ['Support'])
 rbprmBuilder.setAffordanceFilter('hyq_lfleg_rom', ['Support',])
 # We also bound the rotations of the torso.
 rbprmBuilder.boundSO3([-0.4,0.4,-3,3,-3,3])
-rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(2*3)
+rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
 rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax,0,0,0,0,0,0,0,0])
 
 # Creating an instance of HPP problem solver and the viewer
@@ -48,17 +49,19 @@ r.addLandmark(r.sceneName,1)
 
 # Setting initial and goal configurations
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init [0:3] = [2, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+q_init [0:3] = [3, 1, 0.63]
+q_init[7:10]=[0,0,0]#velocity
+rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 q_goal = q_init [::]
 
-q_goal [0:3] = [4, 0, 0.71]
-q_goal[7:10]=[2,0,0.9]#velocity
+q_goal [0:3] = [4, 1, 0.76]
+q_goal[7:10]=[2,0,0.7]#velocity
 
 r (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
 
 # Choosing a path optimizer
-ps.addPathOptimizer ("RandomShortcutOriented")
+#ps.addPathOptimizer ("RandomShortcutOriented")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 # Choosing RBPRM shooter and path validation methods.

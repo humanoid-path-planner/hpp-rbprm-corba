@@ -1,14 +1,5 @@
 from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.gepetto import Viewer
-white=[1.0,1.0,1.0,1.0]
-green=[0.23,0.75,0.2,0.5]
-yellow=[0.85,0.75,0.15,1]
-pink=[1,0.6,1,1]
-orange=[1,0.42,0,1]
-brown=[0.85,0.75,0.15,0.5]
-blue = [0.0, 0.0, 0.8, 1.0]
-grey = [0.7,0.7,0.7,1.0]
-red = [0.8,0.0,0.0,1.0]
 
 
 rootJointType = 'freeflyer'
@@ -18,7 +9,9 @@ urdfName = 'robot_test_trunk'
 urdfNameRom = ['robot_test_lleg_rom','robot_test_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-
+vMax = 4;
+aMax = 1;
+extraDof = 6
 rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 rbprmBuilder.setJointBounds ("base_joint_xyz", [-6,6, -3, 3, 0, 2.5])
@@ -26,21 +19,22 @@ rbprmBuilder.boundSO3([-0.1,0.1,-1,1,-1,1])
 rbprmBuilder.setFilter(['robot_test_lleg_rom', 'robot_test_rleg_rom'])
 rbprmBuilder.setAffordanceFilter('robot_test_lleg_rom', ['Support'])
 rbprmBuilder.setAffordanceFilter('robot_test_rleg_rom', ['Support'])
-rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(3)
-rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([0,0,0,0,0,0])
+rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
+rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax,0,0,0,0,0,0,0,0])
 
 
 #~ from hpp.corbaserver.rbprm. import ProblemSolver
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 
 ps = ProblemSolver( rbprmBuilder )
-
+ps.client.problem.setParameter("aMax",aMax)
+ps.client.problem.setParameter("vMax",vMax)
 r = Viewer (ps)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.loadObstacleModel (packageName, "ground_jump_easy", "planning", r)
-afftool.visualiseAffordances('Support', r, brown)
+afftool.visualiseAffordances('Support', r, r.color.brown)
 
 q_init = rbprmBuilder.getCurrentConfig ();
 #q_init[(len(q_init)-3):]=[0,0,1] # set normal for init / goal config
@@ -49,20 +43,20 @@ q_init [0:3] = [-4, 1, 0.9]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 
 q_goal = q_init [::]
 #q_goal [0:3] = [-2, 0, 0.9]; r (q_goal) # premiere passerelle
-q_goal [0:3] = [3, 1, 0.9]; r (q_goal) # pont
+q_goal [0:3] = [1, 1, 0.9]; r (q_goal) # pont
 
 
-
-
-#~ ps.addPathOptimizer("GradientBased")
-ps.addPathOptimizer("RandomShortcut")
-#ps.client.problem.selectSteeringMethod("SteeringDynamic")
-ps.selectPathPlanner("ParabolaPlanner")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
-
+# Choosing RBPRM shooter and path validation methods.
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
+# Choosing kinodynamic methods : 
+ps.selectSteeringMethod("RBPRMKinodynamic")
+ps.selectDistance("KinodynamicDistance")
+ps.selectPathPlanner("DynamicPlanner")
+
+
 
 r(q_init)
 

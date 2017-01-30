@@ -100,6 +100,7 @@ install(FILES
   data/urdf/robot_test/robot_test_trunk.urdf
 	data/urdf/ground_bigStep.urdf
 	data/urdf/ground_jump_easy.urdf
+	data/urdf/ground_jump_low.urdf
 	data/urdf/ground_jump_bar.urdf
 	data/urdf/ground_jump_med.urdf
 	data/urdf/ground_with_bridge.urdf
@@ -140,6 +141,7 @@ install(FILES
   data/srdf/robot_test/robot_test_trunk.srdf
 	data/srdf/ground_bigStep.srdf
 	data/srdf/ground_jump_easy.srdf
+	data/srdf/ground_jump_low.srdf
 	data/srdf/ground_jump_bar.srdf
 	data/srdf/ground_jump_med.srdf
 	data/srdf/ground_with_bridge.srdf
@@ -184,6 +186,7 @@ install(FILES
 	data/meshes/ground_jump_easyStart.stl
 	data/meshes/ground_jump_easyStart2.stl
 	data/meshes/ground_jump_easyGoal.stl
+	data/meshes/ground_jump_lowGoal.stl
 	data/meshes/ground_jump_bar.stl
 	data/meshes/ground_jump_med.stl
 	data/meshes/ground_with_bridge.stl
@@ -194,6 +197,7 @@ install(FILES
 	data/meshes/hyq/hyq_all_realist.stl
 	data/meshes/hyq/hyq_trunk.stl
 	data/meshes/hyq/hyq_trunk_large.stl
+	data/meshes/hyq/hyq_trunk_large2.stl
 	data/meshes/hyq/hyq_rom.stl
 	data/meshes/hyq/hyq_rhleg_rom.stl
 	data/meshes/hyq/hyq_rfleg_rom.stl

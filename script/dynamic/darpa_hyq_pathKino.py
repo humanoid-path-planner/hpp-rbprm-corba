@@ -76,12 +76,21 @@ r(q_init)
 ps.solve ()
 
 
+camera = [0.6293167471885681,
+ -9.560577392578125,
+ 10.504343032836914,
+ 0.9323806762695312,
+ 0.36073973774909973,
+ 0.008668755181133747,
+ 0.02139890193939209]
+r.client.gui.setCameraTransform(0,camera)
+
 # Playing the computed path
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp.dt=0.03
 #r.client.gui.removeFromGroup("rm0",r.sceneName)
-pp.displayVelocityPath(0)
+pp.displayVelocityPath(1)
 r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
 #display path
 pp.speed=0.3

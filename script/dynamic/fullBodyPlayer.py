@@ -88,7 +88,7 @@ class Player (object):
 	    self.viewer.client.gui.setVisibility("hyq", "ON")
 	    self.tp.r.client.gui.setVisibility("toto", "OFF")
 	    self.tp.r.client.gui.setVisibility("hyq_trunk", "OFF")
-	    for i in range(1,len(self.configs)-1):
+	    for i in range(0,len(self.configs)):
 		    self.viewer(self.configs[i]);
 		    time.sleep(0.5)		
 		
