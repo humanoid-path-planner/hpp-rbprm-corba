@@ -9,8 +9,8 @@ urdfName = 'robot_test_trunk'
 urdfNameRom = ['robot_test_lleg_rom','robot_test_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = 4;
-aMax = 1;
+vMax = 1;
+aMax = 5;
 extraDof = 6
 rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
@@ -29,6 +29,8 @@ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 ps = ProblemSolver( rbprmBuilder )
 ps.client.problem.setParameter("aMax",aMax)
 ps.client.problem.setParameter("vMax",vMax)
+ps.client.problem.setParameter("sizeFootX",0.24)
+ps.client.problem.setParameter("sizeFootY",0.14)
 r = Viewer (ps)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
@@ -38,7 +40,9 @@ afftool.visualiseAffordances('Support', r, r.color.brown)
 
 q_init = rbprmBuilder.getCurrentConfig ();
 #q_init[(len(q_init)-3):]=[0,0,1] # set normal for init / goal config
-q_init [0:3] = [-4, 1, 0.9]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+q_init [0:3] = [-4, 1, 0.9]; rbprmBuilder.setCurrentConfig
+q_init[3:7] = [0.7071,0,0,0.7071] 
+(q_init); r (q_init)
 
 
 q_goal = q_init [::]
@@ -60,7 +64,9 @@ ps.selectPathPlanner("DynamicPlanner")
 
 r(q_init)
 
-#ps.client.problem.prepareSolveStepByStep()
+ps.client.problem.prepareSolveStepByStep()
+
+
 #i = 0
 #r.displayRoadmap("rm"+str(i),0.02)
 #ps.client.problem.executeOneStep() ;i = i+1; r.displayRoadmap("rm"+str(i),0.02) ; r.client.gui.removeFromGroup("rm"+str(i-1),r.sceneName) ;

@@ -104,6 +104,7 @@ install(FILES
 	data/urdf/ground_jump_bar.urdf
 	data/urdf/ground_jump_med.urdf
 	data/urdf/ground_with_bridge.urdf
+	data/urdf/roomWall.urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
   )
 install(FILES
@@ -145,6 +146,7 @@ install(FILES
 	data/srdf/ground_jump_bar.srdf
 	data/srdf/ground_jump_med.srdf
 	data/srdf/ground_with_bridge.srdf
+	data/srdf/roomWall.srdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
   )
 install(FILES
@@ -190,6 +192,7 @@ install(FILES
 	data/meshes/ground_jump_bar.stl
 	data/meshes/ground_jump_med.stl
 	data/meshes/ground_with_bridge.stl
+	data/meshes/roomWall.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
   )
 install(FILES
