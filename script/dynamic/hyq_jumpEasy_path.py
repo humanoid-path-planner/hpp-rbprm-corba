@@ -33,6 +33,7 @@ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 ps = ProblemSolver( rbprmBuilder )
 ps.client.problem.setParameter("aMax",aMax)
 ps.client.problem.setParameter("vMax",vMax)
+ps.client.problem.setParameter("tryJump",1)
 r = Viewer (ps)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
@@ -82,7 +83,7 @@ ps.client.problem.finishSolveStepByStep()
 # Playing the computed path
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
-pp.dt=0.005
+pp.dt=1./30.
 #r.client.gui.removeFromGroup("rm0",r.sceneName)
 pp.displayVelocityPath(0)
 pp.speed=0.2
