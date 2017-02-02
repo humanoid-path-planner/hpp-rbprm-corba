@@ -87,6 +87,7 @@ PKG_CONFIG_USE_DEPENDENCY(${LIBRARY_NAME} hpp-rbprm)
 PKG_CONFIG_USE_DEPENDENCY(${LIBRARY_NAME} hpp-model-urdf)
 PKG_CONFIG_USE_DEPENDENCY(${LIBRARY_NAME} hpp-corbaserver)
 PKG_CONFIG_USE_DEPENDENCY(${LIBRARY_NAME} omniORB4)
+PKG_CONFIG_USE_DEPENDENCY(${LIBRARY_NAME} hpp-affordance-corba)
 
 INSTALL(TARGETS ${LIBRARY_NAME} DESTINATION lib)
 
@@ -108,6 +109,11 @@ INSTALL(
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/__init__.py
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools//generateROMs.py
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/plot_analytics.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/cwc_trajectory.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/cwc_trajectory_helper.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/path_to_trajectory.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/obj_to_constraints.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/time_out.py
   DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm/tools
   )
 # Stand alone corba server

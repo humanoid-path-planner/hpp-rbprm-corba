@@ -87,6 +87,12 @@ module hpp
              in string urdfSuffix, in string srdfSuffix)
       raises (Error);
 
+		/// Create a RbprmFullBody object
+		/// The device automatically has an anchor joint called "base_joint" as
+		/// root joint.
+		void loadFullBodyRobotFromExistingRobot ()
+			raises (Error);
+
     /// Set Rom constraints for the configuration shooter
     /// a configuration will only be valid if all roms indicated
     /// are colliding with the environment.
@@ -98,13 +104,11 @@ module hpp
 
     /// Set Rom surface constraints for the configuration shooter
     /// a Rom configuration will only be valid it collides with a surface
-    /// the normal of which is colinear to the indicated normal,
-    /// modulated by a range value.
-    /// \param normal prefered contact surface normal direction
-    /// \param range tolerance between surface normal and desired surface normal. If the dot
-    /// product of the normal is greater than range then the surface will be accepted.
-    ///
-    void setNormalFilter(in string romName, in floatSeq normal, in double range) raises (Error);
+    /// that forms a given affordance (support, lean, etc.)
+    /// \param affordances a list of affordances accepted for 
+		/// validation of given Rom
+		///
+    void setAffordanceFilter(in string romName, in Names_t affordances) raises (Error);
 
     /// Sets limits on robot orientation, described according to Euler's ZYX rotation order
     ///
@@ -112,6 +116,19 @@ module hpp
     /// expressed in gradients
     /// [z_inf, z_sup, y_inf, y_sup, x_inf, x_sup]
     void boundSO3(in floatSeq limitszyx) raises (Error);
+
+		/// Project a state into a COM
+		///
+		/// \param stateId target state
+		/// \param com target com
+		double projectStateToCOM(in unsigned short stateId,  in floatSeq com) raises (Error);
+
+		/// Create a state and push it to the state array
+		///
+		/// \param q configuration
+		/// \param names list of effectors in contact
+		/// \return stateId
+		short createState(in floatSeq configuration, in Names_t contactLimbs) raises (Error);
 
     /// Get Sample configuration by its id
     /// \param sampleName name of the limb from which to retrieve a sample
@@ -127,6 +144,13 @@ module hpp
     /// \return world position of the limb end effector given the current robot configuration and the
     /// and the selected sample
     floatSeq getSamplePosition(in string sampleName, in unsigned short sampleId) raises (Error);
+
+    /// Get the end effector position for a given configuration, assuming z normal
+    /// \param limbName name of the limb from which to retrieve a sample
+    /// \param dofArray configuration of the robot
+    /// \return world position of the limb end effector given the current robot configuration.
+    /// array of size 4, where each entry is the position of a corner of the contact surface
+    floatSeqSeq getEffectorPosition(in string limbName, in floatSeq dofArray) raises (Error);
 
     /// Get the end effector position of a given limb configuration
     /// \param limbName name of the limb from which to retrieve a sample
@@ -145,11 +169,23 @@ module hpp
     /// \return the value computed for the given sample and analytics
     double getSampleValue(in string limbName, in string valueName, in unsigned short sampleId) raises (Error);
 
+    /// compute the distance between all effectors replaced between two states
+    /// does not account for contact not present in both states
+    /// \param state1 from state
+    /// \param state2 destination state
+    /// \return the value computed for the given sample and analytics
+    double getEffectorDistance(in unsigned short state1, in unsigned short state2) raises (Error);
+
     /// Generate all possible contact in a given configuration
     /// \param dofArray initial configuration of the robot
     /// \param direction desired direction of motion for the robot
     /// \return transformed configuration for which all possible contacts have been created
     floatSeq generateContacts(in floatSeq dofArray, in floatSeq direction) raises (Error);
+
+    /// Generate an autocollision free configuration with limbs in contact with the ground
+    /// \param contactLimbs name of the limbs to project in contact
+    /// \return a sampled contact configuration
+    floatSeq generateGroundContact(in Names_t contactLimbs) raises (Error);
 
     /// Given a configuration and a limb, returns the id of all samples potentially in contact with the
     /// environment, ordered by their efficiency
@@ -158,6 +194,15 @@ module hpp
     /// \param direction desired direction of motion for the robot
     /// \return transformed configuration for which all possible contacts have been created
     floatSeq getContactSamplesIds(in string name, in floatSeq dofArray, in floatSeq direction) raises (Error);
+
+    /// Given a configuration and a limb, returns the id of all samples potentially in contact with the
+    /// environment, ordered by their efficiency
+    /// \param name name of the considered limb
+    /// \param dofArray considered configuration of the robot
+    /// \param direction desired direction of motion for the robot
+    /// \return transformed configuration for which all possible contacts have been created
+    floatSeqSeq getContactSamplesProjected(in string name, in floatSeq dofArray, in floatSeq direction,
+    in unsigned short numSamples) raises (Error);
 
     /// get Ids of limb in an octree cell
     /// \param name name of the considered limb
@@ -199,6 +244,11 @@ module hpp
     /// \param contactLimbs ids of the limb in contact for the state
     void setStartState(in floatSeq dofArray, in Names_t contactLimbs) raises (Error);
 
+    /// Compute effector contact points and normals for a given configuration
+    /// in local coordinates
+    /// \param dofArray configuration of the robot
+    /// \param limbName ids of the limb in contact
+    floatSeq computeContactForConfig(in floatSeq dofArray, in string limbName) raises (Error);
 
     /// Set the end state of a contact generation problem
     /// environment, ordered by their efficiency
@@ -206,12 +256,17 @@ module hpp
     /// \param contactLimbs ids of the limb in contact for the state
     void setEndState(in floatSeq dofArray, in Names_t contactLimbs) raises (Error);
 
-    /// Provided a path has already been computed, interpolates it and generates the statically stable
-    /// constact configurations along it. setStartState and setEndState must have been called prior
-    /// to this function. If these conditions are not met an error is raised.
-    /// \param timestep normalized step for generation along the path (ie the path has a length of 1).
-    /// \param path path computed.
-    floatSeqSeq interpolate(in double timestep, in double path, in double robustnessTreshold) raises (Error);
+    /// Provided a discrete contact sequence has already been computed, computes
+    /// all the contact positions and normals for a given state, the next one, and the intermediate between them.
+    /// \param stateId normalized step for generation along the path (ie the path has a length of 1).
+    /// \return list of 2 or 3 lists of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
+    floatSeqSeq computeContactPoints(in unsigned short stateId) raises (Error);
+
+    /// Provided a discrete contact sequence has already been computed, computes
+    /// all the contact positions and normals for a given state, the next one, and the intermediate between them.
+    /// \param stateId normalized step for generation along the path (ie the path has a length of 1).
+    /// \return list of 2 or 3 lists of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
+    floatSeqSeq computeContactPointsForLimb(in unsigned short stateId, in string limbname) raises (Error);
 
     /// Provided a path has already been computed, interpolates it and generates the statically stable
     /// constact configurations along it. setStartState and setEndState must have been called prior
@@ -219,7 +274,58 @@ module hpp
     /// \param timestep normalized step for generation along the path (ie the path has a length of 1).
     /// \param path path computed.
     /// \param robustnessTreshold minimum value of the static equilibrium robustness criterion required to accept the configuration (0 by default).
-    floatSeqSeq interpolateConfigs(in floatSeqSeq configs, in double robustnessTreshold) raises (Error);
+    /// \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
+    floatSeqSeq interpolate(in double timestep, in double path, in double robustnessTreshold, in unsigned short filterStates) raises (Error);
+
+    /// Provided a path has already been computed, interpolates it and generates the statically stable
+    /// constact configurations along it. setStartState and setEndState must have been called prior
+    /// to this function. If these conditions are not met an error is raised.
+    /// \param timestep normalized step for generation along the path (ie the path has a length of 1).
+    /// \param path path computed.
+    /// \param robustnessTreshold minimum value of the static equilibrium robustness criterion required to accept the configuration (0 by default).
+    /// \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
+    floatSeqSeq interpolateConfigs(in floatSeqSeq configs, in double robustnessTreshold, in unsigned short filterStates) raises (Error);
+
+
+    /// returns the CWC of the robot at a given state
+    ///
+    /// \param stateId The considered state
+    /// \param friction The friction coefficient
+    /// \return H matrix, such that H w <= h. h is added as the last column
+    floatSeqSeq getContactCone(in unsigned short stateId, in double friction) raises (Error);
+
+    /// returns the CWC of the robot between two states
+    ///
+    /// \param stateId The considered state
+    /// \return H matrix, such that H w <= h. h is added as the last column
+    floatSeqSeq getContactIntermediateCone(in unsigned short stateId, in double friction) raises (Error);
+
+    /// Create a path for the root given
+    /// a set of 3d key points
+    /// The path is composed of n+1 linear interpolations
+    /// between the n positions.
+    /// The rotation is linearly interpolated as well,
+    /// between a start and a goal rotation. The resulting path
+    /// is added to the problem solver
+    /// \param positions array of positions
+    /// \param q1 quaternion of 1st rotation
+    /// \param q2 quaternion of 2nd rotation
+    /// \return id of the root path computed
+    short generateRootPath(in floatSeqSeq rootPositions, in floatSeq q1, in floatSeq q2) raises (Error);
+
+    /// Create a com trajectory given list of positions, velocities and accelerations
+    /// accelerations list contains one less element because it does not have an initial state.
+    /// a set of 3d key points
+    /// The path is composed of n+1 integrations
+    /// between the n positions.
+    /// The resulting path
+    /// is added to the problem solver
+    /// \param positions array of positions
+    /// \param velocities array of velocities
+    /// \param accelerations array of accelerations
+    /// \param dt time between two points
+    /// \return id of the root path computed
+    short generateComTraj(in floatSeqSeq positions, in floatSeqSeq velocities, in floatSeqSeq accelerations, in double dt) raises (Error);
 
     /// Provided a path has already been computed and interpolated, generate a continuous path
     /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
@@ -230,7 +336,8 @@ module hpp
     /// \param state1 index of first state.
     /// \param state2 index of second state.
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
-    void interpolateBetweenStates(in double state1, in double state2, in unsigned short numOptimizations) raises (Error);
+    /// \return id of the root path computed
+    short limbRRT(in double state1, in double state2, in unsigned short numOptimizations) raises (Error);
 
     /// Provided a path has already been computed and interpolated, generate a continuous path
     /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
@@ -242,7 +349,109 @@ module hpp
     /// \param state2 index of second state.
     /// \param path index of the path considered for the generation
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
-    void interpolateBetweenStatesFromPath(in double state1, in double state2,  in  unsigned short path, in unsigned short numOptimizations) raises (Error);
+    /// \return id of the root path computed
+    short limbRRTFromRootPath(in double state1, in double state2,  in  unsigned short path, in unsigned short numOptimizations) raises (Error);
+
+		/// Linear interpolation of many configurations into a path
+		/// \param configs list of configurations
+		/// \return id of the root path computed
+		short configToPath(in  floatSeqSeq configs) raises (Error);
+
+    /// Provided a path has already been computed and interpolated, generate a continuous path
+    /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
+    /// Will fail if the index of the states do not exist
+    /// The path of the COM of thr robot and limbs not considered by the contact transitions between
+    /// two states is assumed to be already computed, and registered in the solver under the id specified by the user.
+    /// It must be valid in the sense of the active PathValidation.
+    /// \param state1 index of first state.
+    /// \param state2 index of second state.
+    /// \param comPath index of the path considered of the com path
+    /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
+    /// \return id of the root path computed
+    short comRRT(in double state1, in double state2,  in  unsigned short comPath, in unsigned short numOptimizations) raises (Error);
+
+    /// Provided a path has already been computed and interpolated, generate a continuous path
+    /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
+    /// Will fail if the index of the states do not exist
+    /// The path of the COM of thr robot and limbs not considered by the contact transitions between
+    /// two states is assumed to be already computed, and registered in the solver under the id specified by the user.
+    /// It must be valid in the sense of the active PathValidation.
+    /// \param state1 index of first state.
+    /// \param rootPositions1 com positions to track for 1st phase
+    /// \param rootPositions1 com positions to track for 2nd phase
+    /// \param rootPositions1 com positions to track for 3rd phase
+    /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
+    /// \return id of the root path computed
+    floatSeq comRRTFromPos(in double state1,
+                        in  unsigned short comTraj1,
+                        in  unsigned short comTraj2,
+                        in  unsigned short comTraj3,
+                        in unsigned short numOptimizations) raises (Error);
+
+    /// Provided a path has already been computed and interpolated, generate a continuous path
+    /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
+    /// Will fail if the index of the states do not exist
+    /// The path of the COM of thr robot and limbs not considered by the contact transitions between
+    /// two states is assumed to be already computed, and registered in the solver under the id specified by the user.
+    /// It must be valid in the sense of the active PathValidation.
+    /// \param state1 index of first state.
+    /// \param rootPositions1 com positions to track for 1st phase
+    /// \param rootPositions1 com positions to track for 2nd phase
+    /// \param rootPositions1 com positions to track for 3rd phase
+    /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
+    /// \return id of the root path computed
+    floatSeq effectorRRT(in double state1,
+                        in  unsigned short comTraj1,
+                        in  unsigned short comTraj2,
+                        in  unsigned short comTraj3,
+                        in unsigned short numOptimizations) raises (Error);
+
+
+    /// Provided a path has already been computed and interpolated, generate a continuous path
+    /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
+    /// Will fail if the index of the states do not exist
+    /// The path of the COM of thr robot and limbs not considered by the contact transitions between
+    /// two states is assumed to be already computed, and registered in the solver under the id specified by the user.
+    /// It must be valid in the sense of the active PathValidation.
+    /// \param state1 index of first state.
+    /// \param rootPositions1 com positions to track for 1st phase
+    /// \param rootPositions1 com positions to track for 2nd phase
+    /// \param rootPositions1 com positions to track for 3rd phase
+    /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
+    /// \return id of the root path computed
+    floatSeq effectorRRTFromPath(in double state1, in  unsigned short refPath,
+                                    in double path_from, in double path_to,
+                                    in  unsigned short comTraj1,
+                                    in  unsigned short comTraj2,
+                                    in  unsigned short comTraj3,
+                                    in unsigned short numOptimizations,
+                                    in Names_t trackedEffectors) raises (Error);
+
+    /// Project a given state into a given COM position
+    /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
+    /// Will fail if the index of the state does not exist.
+    /// \param state index of first state.
+    /// \param targetCom 3D vector for the com position
+    /// \return projected configuration
+    floatSeq projectToCom(in double state, in floatSeq targetCom) raises (Error);
+
+    /// Retrieve the configuration at a given state
+    /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
+    /// Will fail if the index of the state does not exist.
+    /// \param state index of first state.
+    /// \return projected configuration
+    floatSeq getConfigAtState(in unsigned short state) raises (Error);
+
+    /// \param limb name of the limb for which the request aplies
+    /// \param state1 current state considered
+    /// \return whether the limb is in contact at this state
+    short isLimbInContact(in string limbname, in double state1) raises (Error);
+
+    /// Is limb in contact during the motion from the current state to the next one
+    /// \param limb name of the limb for which the request aplies
+    /// \param state1 current state considered
+    /// \return whether the limb is in contact at this state
+    short isLimbInContactIntermediary(in string limbname, in double state1) raises (Error);
 
     /// Saves the last computed states by the function interpolate in a filename.
     /// Raises an error if interpolate has not been called, or the file could not be opened.
@@ -293,6 +502,11 @@ module hpp
     /// \param isstatic 1 is becomes new static value of database, 0 otherwise
     /// \return min and max values obtained
     floatSeq runLimbSampleAnalysis(in string limbname, in string analysis, in double isstatic) raises (Error);
+
+    /// if the preprocessor variable PROFILE is active
+    /// dump the profiling data into a logFile
+    /// \param logFile name of the file where to dump the profiling data
+    void dumpProfile(in string logFile) raises (Error);
 
   }; // interface Robot
   }; // module rbprm

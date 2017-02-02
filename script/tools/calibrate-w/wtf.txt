@@ -1,0 +1,130 @@
+
+Scenario: scene_wall
+	 size _1
+	 false positive 0.245712006382
+	 false negative 0.0
+	 size _11
+	 false positive 0.107299561229
+	 false negative 0.232548863183
+	 size _115
+	 false positive 0.0438771439968
+	 false negative 0.309134423614
+	 size _12
+	 false positive 0.0283207020343
+	 false negative 0.337455125648
+	 size _125
+	 false positive 0.0151575588353
+	 false negative 0.352612684483
+	 size _15
+	 false positive 0.00159553250897
+	 false negative 0.382528919027
+	 size _175
+	 false positive 0.0
+	 false negative 0.387315516554
+Scenario: stair_bauzil
+	 size _1
+	 false positive 0.145824429438
+	 false negative 0.161466792034
+	 size _11
+	 false positive 0.110094879904
+	 false negative 0.204120010257
+	 size _115
+	 false positive 0.104795281648
+	 false negative 0.212838704163
+	 size _12
+	 false positive 0.0982135225233
+	 false negative 0.222583126763
+	 size _125
+	 false positive 0.0930848790495
+	 false negative 0.231045388495
+	 size _15
+	 false positive 0.0687238225489
+	 false negative 0.271903581503
+	 size _175
+	 false positive 0.0451320625695
+	 false negative 0.307718608428
+Scenario: scene_wall
+size 1 
+ 	 false positive 0.228103992099
+	 size _1
+	 false positive 0.228100009558
+	 false negative 1.19476216268e-05
+	 size _11
+	 false positive 0.105541306911
+	 false negative 0.235985439832
+	 size _115
+	 false positive 0.0429078918023
+	 false negative 0.311725395865
+Scenario: scene_wall
+size 1 
+ 	 false positive 0.246963562753
+	 size _1
+	 false positive 0.246963562753
+	 false negative 0.0
+	 size _11
+	 false positive 0.113360323887
+	 false negative 0.222672064777
+	 size _115
+	 false positive 0.0485829959514
+	 false negative 0.315789473684
+Scenario: scene_wall
+Scenario: scene_wall
+size 1 
+ 	 false positive 0.224264705882
+	 size _1
+	 false positive 0.224264705882
+	 false negative 0.0
+	 size _11
+	 false positive 0.117647058824
+	 false negative 0.224264705882
+	 size _115
+	 false positive 0.0514705882353
+	 false negative 0.301470588235
+Scenario: scene_wall
+	 size _1
+	 false positive 0.224264705882
+	 false negative 0.0
+	 size _11
+	 false positive 0.117647058824
+	 false negative 0.224264705882
+	 size _115
+	 false positive 0.0514705882353
+	 false negative 0.301470588235
+Scenario: scene_wall
+	 size _1
+	 false positive 0.224264705882
+	 false negative 0.0
+	 size _11
+	 false positive 0.117647058824
+	 false negative 0.224264705882
+	 size _115
+	 false positive 0.0514705882353
+	 false negative 0.301470588235
+Scenario: scene_wall
+	 size _1
+	 false positive 0.224264705882
+	 false negative 0.0
+	 size _11
+	 false positive 0.117647058824
+	 false negative 0.224264705882
+	 size _115
+	 false positive 0.0514705882353
+	 false negative 0.301470588235
+Scenario: scene_wall
+	 size _1
+	 false positive 0.224264705882
+	 false negative 0.0
+	 size _11
+	 false positive 0.117647058824
+	 false negative 0.224264705882
+size 1 
+ 	 true false negative 0.983606557377
+size 1 
+ 	 false false negative 0.016393442623
+	 size _115
+	 false positive 0.0514705882353
+	 false negative 0.301470588235
+size 1 
+ 	 true false negative 0.939024390244
+size 1 
+ 	 false false negative 0.0609756097561
