@@ -97,10 +97,10 @@ ps.solve()
 # Playing the computed path
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
-pp.dt=0.005
+pp.dt=1/30.
 #r.client.gui.removeFromGroup("rm0",r.sceneName)
 pp.displayVelocityPath(0)
-pp.speed=0.2
+pp.speed=1
 pp(0)
 
 
