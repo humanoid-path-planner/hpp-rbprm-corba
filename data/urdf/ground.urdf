@@ -3,7 +3,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package:///../hpp-rbprm-corba/meshes/ground.stl"/>
+        <mesh filename="package://hpp-rbprm-corba/meshes/ground.stl"/>
       </geometry>
       <material name="white">
         <color rgba="1 1 1 1"/>

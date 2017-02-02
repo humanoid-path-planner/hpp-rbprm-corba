@@ -29,7 +29,7 @@ SET(PROJECT_DESCRIPTION "Corba server for reachability based planning")
 SET(PROJECT_URL "")
 
 # Set to 1 for profiling
-#~ add_definitions(-DPROFILE)
+#add_definitions(-DPROFILE)
 
 SET(CUSTOM_HEADER_DIR hpp/corbaserver/rbprm)
 
@@ -50,6 +50,7 @@ ADD_REQUIRED_DEPENDENCY("hpp-corbaserver >= 3")
 ADD_REQUIRED_DEPENDENCY("hpp-rbprm")
 ADD_REQUIRED_DEPENDENCY("omniORB4 >= 4.1.4")
 ADD_REQUIRED_DEPENDENCY("hpp-model-urdf >= 3")
+ADD_REQUIRED_DEPENDENCY("hpp-affordance-corba")
 
 PKG_CONFIG_APPEND_LIBS(${PROJECT_NAME})
 ADD_SUBDIRECTORY(src)
@@ -90,6 +91,7 @@ install(FILES
   data/urdf/groundcrouch.urdf
   data/urdf/darpa.urdf
   data/urdf/car.urdf
+  data/urdf/polaris.urdf
   #~ data/urdf/scene2.urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
   )
@@ -120,6 +122,7 @@ install(FILES
   data/srdf/groundcrouch.srdf
   data/srdf/darpa.srdf
   data/srdf/car.srdf
+  data/srdf/polaris.srdf
   #~ data/srdf/scene2.srdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
   )
@@ -128,11 +131,13 @@ install(FILES
 	data/meshes/darpareduced.stl
 	data/meshes/car.stl
 	data/meshes/car_simple.stl
+	data/meshes/ground.stl
+	data/meshes/ground_table.stl
 	data/meshes/hrp2_trunk.stl
 	data/meshes/hrp2_trunk_body.stl
 	data/meshes/hrp2_trunk_torso.stl
-        data/meshes/hrp2_trunk_body_view.dae
-        data/meshes/hrp2_trunk_torso_view.dae
+	data/meshes/hrp2_trunk_body_view.dae
+	data/meshes/hrp2_trunk_torso_view.dae
 	data/meshes/hrp2_rom.stl
 	data/meshes/hrp2_larm_rom.stl
 	data/meshes/hrp2_rarm_rom.stl
@@ -148,11 +153,13 @@ install(FILES
 	data/meshes/truck.stl
 	data/meshes/truck_vision.stl
 	data/meshes/stair_bauzil.stl
-        data/meshes/stair_bauzil_reduced.stl
+	data/meshes/stair_bauzil_reduced.stl
 	data/meshes/climb.stl
 	data/meshes/stepladder.stl
 	data/meshes/chair.stl
 	data/meshes/car.stl
+        data/meshes/polaris.stl
+        data/meshes/polaris_reduced.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
   )
 install(FILES
@@ -167,6 +174,5 @@ install(FILES
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes/hyq
   )
 
-PKG_CONFIG_APPEND_LIBS(${PROJECT_NAME})
 SETUP_PROJECT_FINALIZE()
 
