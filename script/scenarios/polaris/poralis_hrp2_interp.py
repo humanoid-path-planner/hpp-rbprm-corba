@@ -43,7 +43,7 @@ fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "man
 rarmId = 'hrp2_rarm_rom'
 rarm = 'RARM_JOINT0'
 rHand = 'RARM_JOINT5'
-rArmOffset = [-0.05,-0.050,-0.050]
+rArmOffset = [-0.040,-0.01,-0.085]
 rArmNormal = [1,0,0]
 rArmx = 0.024; rArmy = 0.024
 fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 20000, "EFORT", 0.05, "_6_DOF", True)
@@ -51,7 +51,7 @@ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 20000, "
 larmId = 'hrp2_larm_rom'
 larm = 'LARM_JOINT0'
 lHand = 'LARM_JOINT5'
-lArmOffset = [-0.05,-0.050,-0.050]
+lArmOffset = [-0.040,0.01,-0.085]
 lArmNormal = [1,0,0]
 lArmx = 0.024; lArmy = 0.024
 fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 20000, "EFORT", 0.05, "_6_DOF", True)
@@ -158,5 +158,5 @@ def saveAll(name):
 	saveAllData(fullBody, r, name)
 
 
-for i in range(10,25):  act(i,numOptim = 60, use_window = 0, friction = 1, optim_effectors = True, verbose = False, draw = False);
-saveAll('polarisTestAndrea')
+#~ for i in range(10,25):  act(i,numOptim = 60, use_window = 0, friction = 1, optim_effectors = True, verbose = False, draw = False);
+#~ saveAll('polarisTestAndrea')

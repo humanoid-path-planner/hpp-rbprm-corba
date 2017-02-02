@@ -58,27 +58,27 @@ lLegId = 'lhleg'
 rarmId = 'rhleg'
 larmId = 'lfleg'
 
-addLimbDb(rLegId, "static")
-addLimbDb(lLegId, "static")
-addLimbDb(rarmId, "static")
-addLimbDb(larmId, "static")
+#~ addLimbDb(rLegId, "static")
+#~ addLimbDb(lLegId, "static")
+#~ addLimbDb(rarmId, "static")
+#~ addLimbDb(larmId, "static")
 
-#~ fullBody.addLimb(rLegId,rLeg,rfoot,offset,normal, legx, legy, nbSamples, "jointlimits", 0.1, cType)
+fullBody.addLimb(rLegId,rLeg,rfoot,offset,normal, legx, legy, nbSamples, "jointlimits", 0.1, cType)
 
 lLegId = 'lhleg'
 lLeg = 'lh_haa_joint'
 lfoot = 'lh_foot_joint'
-#~ fullBody.addLimb(lLegId,lLeg,lfoot,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
+fullBody.addLimb(lLegId,lLeg,lfoot,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
 #~ 
 rarmId = 'rhleg'
 rarm = 'rh_haa_joint'
 rHand = 'rh_foot_joint'
-#~ fullBody.addLimb(rarmId,rarm,rHand,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
-
+fullBody.addLimb(rarmId,rarm,rHand,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
+#~ 
 larmId = 'lfleg'
 larm = 'lf_haa_joint'
 lHand = 'lf_foot_joint'
-#~ fullBody.addLimb(larmId,larm,lHand,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
+fullBody.addLimb(larmId,larm,lHand,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
 
 q_0 = fullBody.getCurrentConfig(); 
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.q_init[0:7]
@@ -198,17 +198,23 @@ def go(dt_framerate=1./24.):
 #~ for i in range(24,26):
 	#~ act(i,verbose=True, use_window=1, numOptim=5, optim_effectors=False, draw=False);go()
 	#~ saveAll("test"+str(i));
-for i in range(16,28):
-	act(i,verbose=True, use_window=0, numOptim=5, optim_effectors=False, draw=False);go()
+for i in range(14,19):
+	act(i,verbose=True, use_window=0, numOptim=5, optim_effectors=True, draw=False);go()
+	saveAll("test"+str(i));
+for i in range(19,22):
+	act(i,verbose=True, use_window=1, numOptim=5, optim_effectors=True, draw=False);go()
+	saveAll("test"+str(i));
+for i in range(22,28):
+	act(i,verbose=True, use_window=0, numOptim=5, optim_effectors=True, draw=False);go()
 	saveAll("test"+str(i));
 for i in range(28,30):
-	act(i,verbose=True, use_window=0, numOptim=5, optim_effectors=False, draw=False);go()
+	act(i,verbose=True, use_window=0, numOptim=5, optim_effectors=True, draw=False);go()
 	saveAll("test"+str(i));
 for i in range(30,42):
-	act(i,verbose=True, use_window=1, numOptim=5, optim_effectors=False, draw=False);go()
+	act(i,verbose=True, use_window=1, numOptim=5, optim_effectors=True, draw=False);go()
 	saveAll("test"+str(i));
 for i in range(32,83):
-	act(i,verbose=True, use_window=0, numOptim=5, optim_effectors=False, draw=False);go()
+	act(i,verbose=True, use_window=0, numOptim=5, optim_effectors=True, draw=False);go()
 	saveAll("test"+str(i));
 	
 	

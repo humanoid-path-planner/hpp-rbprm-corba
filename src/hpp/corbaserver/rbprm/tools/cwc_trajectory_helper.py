@@ -126,8 +126,8 @@ def __getTimes(fullBody, configs, i, time_scale):
 
 from hpp import Error as hpperr
 import sys, time
-def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, optim_effectors = True, time_scale = 20., useCOMConstraints = False, use_window = 0, verbose = False, draw = False,
-trackedEffectors = []):
+def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, optim_effectors = True, time_scale = 20., 
+useCOMConstraints = False, use_window = 0, verbose = False, draw = False,trackedEffectors = [], saveForSim=False,):
 	global errorid
 	global stat_data	
 	fail = 0
@@ -161,29 +161,29 @@ trackedEffectors = []):
 			global trajec
 			global trajec_mil			
 			frame_rate = 1./24.
-			frame_rate_andrea = 1./1000.
-			#~ frame_rate_andrea = 1./10.
 			new_traj = gen_trajectory_to_play(fullBody, pp, trajectory, time_per_path, frame_rate)
-			new_traj_andrea = gen_trajectory_to_play(fullBody, pp, trajectory, time_per_path,frame_rate_andrea)
-			Ps, Ns, freeEffectorsPerPhase, Ks = genPandNandConesperFrame(fullBody, i, limbsCOMConstraints, cones, pp, trajectory, time_per_path, frame_rate_andrea)
-			NPeffs = genPEffperFrame(fullBody, freeEffectorsPerPhase, new_traj_andrea, pp, time_per_path, frame_rate_andrea)
-			com = genComPerFrame(final_state, dt, frame_rate_andrea)
 			trajec = trajec + new_traj
-			trajec_mil += new_traj_andrea
-			#~ global contacts
-			#~ contacts += new_contacts	
-			global cones_saved
-			cones_saved += Ks
-			global pos
-			pos += Ps
-			global normals
-			normals+= Ns
-			global pEffs
-			pEffs+= NPeffs
-			global coms
-			coms+= com
-			print len(trajec_mil), " ",  len(pos), " ", len(normals), " ", len(coms), " ", len(pEffs), " ", len(cones_saved)
-			assert(len(trajec_mil) == len(pos) and len(normals) == len(pos) and len(normals) == len(coms) and len(cones_saved) == len(coms) and len(coms) == len(pEffs))
+			if(saveForSim):
+				frame_rate_sim = 1./1000.
+				new_traj_andrea = gen_trajectory_to_play(fullBody, pp, trajectory, time_per_path,frame_rate_sim)
+				Ps, Ns, freeEffectorsPerPhase, Ks = genPandNandConesperFrame(fullBody, i, limbsCOMConstraints, cones, pp, trajectory, time_per_path, frame_rate_andrea)
+				NPeffs = genPEffperFrame(fullBody, freeEffectorsPerPhase, new_traj_andrea, pp, time_per_path, frame_rate_andrea)
+				com = genComPerFrame(final_state, dt, frame_rate_andrea)
+				trajec_mil += new_traj_andrea
+				#~ global contacts
+				#~ contacts += new_contacts	
+				global cones_saved
+				cones_saved += Ks
+				global pos
+				pos += Ps
+				global normals
+				normals+= Ns
+				global pEffs
+				pEffs+= NPeffs
+				global coms
+				coms+= com
+				print len(trajec_mil), " ",  len(pos), " ", len(normals), " ", len(coms), " ", len(pEffs), " ", len(cones_saved)
+				assert(len(trajec_mil) == len(pos) and len(normals) == len(pos) and len(normals) == len(coms) and len(cones_saved) == len(coms) and len(coms) == len(pEffs))
 			stat_data["num_success"] += 1
 		else:
 			print "TODO, NO CONTACT VARIATION, LINEAR INTERPOLATION REQUIRED"

@@ -172,19 +172,7 @@ def contactPlan():
 	tp.r.client.gui.setVisibility("hyq_trunk", "OFF")
 	for i in range(1,len(configs)):
 		r(configs[i]);
-		time.sleep(0.5)		
-		
-def interpolate():
-	tp.cl.problem.selectProblem("default")
-	r.client.gui.setVisibility("hyq", "ON")
-	tp.r.client.gui.setVisibility("toto", "OFF")
-	tp.r.client.gui.setVisibility("hyq_trunk", "OFF")
-	for i in range(7,20):
-		act(i,1,optim_effectors=True)
-		
-def play(frame_rate = 1./24.):
-	play_traj(fullBody,pp,frame_rate)
-	
+		time.sleep(0.5)			
 
 		
 def a():
@@ -207,13 +195,5 @@ def e():
 	print "displaying contact plan"
 	contactPlan()
 	
-def f():
-	print "computing feasible com trajectory"
-	interpolate()
-
-def g():
-	print "playing feasible trajectory"
-	play()
-
 print "Root path generated in " + str(tp.t) + " ms."
 	
