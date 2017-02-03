@@ -19,7 +19,7 @@ srdfSuffix = ""
 fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz", [-0.135,2, -1, 1, 0, 2.2])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [0,3, -2, 0, 0.3, 1])
 
 
 ps = tp.ProblemSolver( fullBody )
@@ -31,14 +31,14 @@ rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,-0.105,0,]
 rLegNormal = [0,1,0]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 10000, "manipulability", 0.1)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "manipulability", 0.1)
 
 lLegId = '1lLeg'
 lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,-0.105,0]
 lLegNormal = [0,1,0]
 lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.1)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "manipulability", 0.1)
 
 rarmId = '3Rarm'
 rarm = 'RARM_JOINT0'
@@ -47,7 +47,7 @@ rArmOffset = [0,0,-0.1]
 rArmNormal = [0,0,1]
 rArmx = 0.024; rArmy = 0.024
 #disabling collision for hook
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.05, "_6_DOF", True)
+fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 50000, "manipulability", 0.05, "_3_DOF", True)
 
 
 #~ AFTER loading obstacles

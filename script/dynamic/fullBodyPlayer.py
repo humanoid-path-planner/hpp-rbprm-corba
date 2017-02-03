@@ -84,13 +84,13 @@ class Player (object):
 	    end = time.clock() 
 	    print "Contact plan generated in " + str(end-start) + "seconds"
 	
-    def displayContactPlan(self):
+    def displayContactPlan(self,pause = 0.5):
 	    self.viewer.client.gui.setVisibility("hyq", "ON")
 	    self.tp.r.client.gui.setVisibility("toto", "OFF")
 	    self.tp.r.client.gui.setVisibility("hyq_trunk", "OFF")
 	    for i in range(0,len(self.configs)):
 		    self.viewer(self.configs[i]);
-		    time.sleep(0.5)		
+		    time.sleep(pause)		
 		
     def interpolate(self,begin=1,end=0):
         if end==0:

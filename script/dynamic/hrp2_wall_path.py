@@ -31,7 +31,7 @@ srdfSuffix = ""
 rbprmBuilder = Builder ()
 
 rbprmBuilder.loadModel(urdfName, urdfNameRoms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-rbprmBuilder.setJointBounds ("base_joint_xyz", [0,2, -1, 1, 0, 2.2])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [0,3, -2, 0, 0.3, 1])
 rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
 rbprmBuilder.setAffordanceFilter('hrp2_rarm_rom', ['Lean'])
 rbprmBuilder.setAffordanceFilter('hrp2_lleg_rom', ['Support',])
@@ -66,15 +66,16 @@ afftool.visualiseAffordances('Lean', r, r.color.blue)
 
 
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init[0:3] = [2.1, -1, 0.45];
+#q_init[0:3] = [2.1, -1, 0.58];
+q_init[0:3] = [2, -1, 0.58];
 q_init[3:7] = [0.7071,0,0,0.7071]
 q_init[indexECS:indexECS+3] = [2,0,0]
 rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 
 
 q_goal = q_init [::]
-q_goal [0:3] = [1, -1, 0.45]; 
-q_goal[indexECS:indexECS+3] = [0,0,0]
+q_goal [0:3] = [1.2, -1, 0.58]; 
+q_goal[indexECS:indexECS+3] = [-1,0,0]
 
 
 #r(q_goal)
@@ -90,23 +91,26 @@ ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
 ps.selectPathPlanner("DynamicPlanner")
 
+#t = ps.solve ()
+
+
 ps.client.problem.prepareSolveStepByStep()
 
 
 ps.client.problem.finishSolveStepByStep()
 
 
-#t = ps.solve ()
+
 
 
 # Playing the computed path
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
-pp.dt=1/30.
+pp.dt=1./30.
 #r.client.gui.removeFromGroup("rm0",r.sceneName)
 pp.displayVelocityPath(0)
-pp.speed=0.2
-pp(0)
+pp.speed=0.5
+#pp(0)
 
 
 
