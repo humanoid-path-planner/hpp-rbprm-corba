@@ -31,7 +31,7 @@ srdfSuffix = ""
 rbprmBuilder = Builder ()
 
 rbprmBuilder.loadModel(urdfName, urdfNameRoms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-rbprmBuilder.setJointBounds ("base_joint_xyz", [0,1.55, -0.8, -0.5, 0.50, 1.3])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [0,1.55, -0.7, -0.5, 0.50, 1.3])
 #rbprmBuilder.setJointBounds ("base_joint_xyz", [0,2, -1, 1, 0, 2.2])
 rbprmBuilder.setJointBounds('CHEST_JOINT0',[0,0])
 rbprmBuilder.setJointBounds('CHEST_JOINT1',[0,0.45])
@@ -47,7 +47,7 @@ vMax = 1;
 aMax = 10;
 extraDof = 6
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
-rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax,0,0,0,0,0,0,0,0])
+rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-vMax,vMax,-0.2,0.2,-vMax,vMax,0,0,0,0,0,0])
 indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.basic.robot.getDimensionExtraConfigSpace()
 
 #~ from hpp.corbaserver.rbprm. import ProblemSolver
@@ -67,6 +67,8 @@ q_init = rbprmBuilder.getCurrentConfig ();
 
 q_init [0:3] = [0, -0.65, 0.55];
 q_init[8] = 0.4
+#q_init [0:3] = [0, -0.65, 0.58];
+#q_init[8] = 0.43
 rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 
 q_goal = q_init [::]
@@ -97,9 +99,12 @@ ps.selectPathPlanner("DynamicPlanner")
 
 #ps.client.problem.finishSolveStepByStep()
 
-r.solveAndDisplay("rm",1,0.01)
+#r.solveAndDisplay("rm",1,0.01)
 
 ps.solve()
+
+# was 5.5
+ps.client.problem.extractPath(0,5.7,ps.client.problem.pathLength(0))
 
 
 
@@ -107,12 +112,10 @@ ps.solve()
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp.dt=1/30.
-r.client.gui.removeFromGroup("rm",r.sceneName)
-pp.displayVelocityPath(0)
-pp.speed=1
-pp(0)
-
-
+#r.client.gui.removeFromGroup("rm",r.sceneName)
+pp.displayVelocityPath(1)
+pp.speed=0.25
+#pp(0)
 
 
 

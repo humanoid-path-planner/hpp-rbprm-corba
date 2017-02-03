@@ -1,3 +1,4 @@
+
 <robot name="hrp2_trunk_flexible">
   <link name="base_link"/>
   <joint name="WAIST" type="fixed">

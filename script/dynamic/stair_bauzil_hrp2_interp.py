@@ -28,15 +28,15 @@ r = tp.Viewer (ps,viewerClient=tp.r.client)
 #~ AFTER loading obstacles
 rLegId = '0rLeg'
 rLeg = 'RLEG_JOINT0'
-rLegOffset = [0,-0.105,0,]
-rLegNormal = [0,1,0]
+rLegOffset = [0,0,-0.105]
+rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 20000, "manipulability", 0.1)
 
 lLegId = '1lLeg'
 lLeg = 'LLEG_JOINT0'
-lLegOffset = [0,-0.105,0]
-lLegNormal = [0,1,0]
+lLegOffset = [0,0,-0.105]
+lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
 fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 20000, "manipulability", 0.1)
 
@@ -131,7 +131,7 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId])
 
 
 
-configs = fullBody.interpolate(0.08,pathId=0,robustnessTreshold = 1, filterStates = True)
+configs = fullBody.interpolate(0.1,pathId=1,robustnessTreshold = 3, filterStates = True)
 print "number of configs :", len(configs)
 
 
