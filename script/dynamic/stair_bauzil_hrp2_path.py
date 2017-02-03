@@ -31,9 +31,14 @@ srdfSuffix = ""
 rbprmBuilder = Builder ()
 
 rbprmBuilder.loadModel(urdfName, urdfNameRoms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-#rbprmBuilder.setJointBounds ("base_joint_xyz", [0,1.5, -1, 0, 0.6, 1.3])
-rbprmBuilder.setJointBounds ("base_joint_xyz", [0,2, -1, 1, 0, 2.2])
-rbprmBuilder.setFilter(['hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom'])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [0,1.55, -0.8, -0.5, 0.50, 1.3])
+#rbprmBuilder.setJointBounds ("base_joint_xyz", [0,2, -1, 1, 0, 2.2])
+rbprmBuilder.setJointBounds('CHEST_JOINT0',[0,0])
+rbprmBuilder.setJointBounds('CHEST_JOINT1',[0,0.45])
+rbprmBuilder.setJointBounds('HEAD_JOINT0',[0,0])
+rbprmBuilder.setJointBounds('HEAD_JOINT1',[0,0])
+
+rbprmBuilder.setFilter(['hrp2_rarm_rom'])
 rbprmBuilder.setAffordanceFilter('hrp2_rarm_rom', ['Support'])
 rbprmBuilder.setAffordanceFilter('hrp2_lleg_rom', ['Support',])
 rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
@@ -60,10 +65,13 @@ r = Viewer (ps)
 
 q_init = rbprmBuilder.getCurrentConfig ();
 
-q_init [0:3] = [0.15, -0.82, 0.648702]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+q_init [0:3] = [0, -0.65, 0.55];
+q_init[8] = 0.4
+rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 
 q_goal = q_init [::]
 q_goal [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
+q_goal[8] = 0
 q_goal [0:3] = [1.49, -0.65, 1.15]; r (q_goal)
 #~ q_goal [0:3] = [1.2, -0.65, 1.1]; r (q_goal)
 
@@ -89,6 +97,7 @@ ps.selectPathPlanner("DynamicPlanner")
 
 #ps.client.problem.finishSolveStepByStep()
 
+r.solveAndDisplay("rm",1,0.01)
 
 ps.solve()
 
@@ -98,7 +107,7 @@ ps.solve()
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp.dt=1/30.
-#r.client.gui.removeFromGroup("rm0",r.sceneName)
+r.client.gui.removeFromGroup("rm",r.sceneName)
 pp.displayVelocityPath(0)
 pp.speed=1
 pp(0)
