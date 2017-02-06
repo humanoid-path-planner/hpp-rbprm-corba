@@ -106,7 +106,7 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 	#assert( len(phase_dt) >= 2 +  use_window * 2 ), "phase_dt does not describe all phases"
 	configSize = len(states[state_id])
 	#constraints = ['cones_constraint', 'end_reached_constraint','end_speed_constraint']
-	constraints = ['end_reached_constraint']
+	constraints = ['end_reached_constraint','cones_constraint']
 	#~ constraints = ['cones_constraint', 'end_reached_constraint','end_speed_constraint', 'com_kinematic_constraint']
 	param_constraints = []	
 	mass = fullBody.getMass()

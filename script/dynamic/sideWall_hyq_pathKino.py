@@ -20,7 +20,7 @@ extraDof = 6
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-rbprmBuilder.setJointBounds ("base_joint_xyz", [0,6, -0.5, 0.5, 0.4, 1.2])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [0.8,5.6, -0.5, 0.5, 0.4, 1.2])
 # The following lines set constraint on the valid configurations:
 # a configuration is valid only if all limbs can create a contact ...
 rbprmBuilder.setFilter(['hyq_rhleg_rom', 'hyq_lfleg_rom', 'hyq_rfleg_rom','hyq_lhleg_rom'])
@@ -29,7 +29,7 @@ rbprmBuilder.setAffordanceFilter('hyq_rfleg_rom', ['Support',])
 rbprmBuilder.setAffordanceFilter('hyq_lhleg_rom', ['Support'])
 rbprmBuilder.setAffordanceFilter('hyq_lfleg_rom', ['Support',])
 # We also bound the rotations of the torso.
-rbprmBuilder.boundSO3([-0.4,0.4,-3,3,-3,3])
+rbprmBuilder.boundSO3([-0.2,0.2,-0.3,0.3,-0.3,0.3])
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
 rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax,0,0,0,0,0,0,0,0])
 
@@ -74,10 +74,14 @@ r(q_init)
 
 #ps.client.problem.prepareSolveStepByStep()
 
-r.solveAndDisplay("rm",1,0.01)
+q_far = q_init[::]
+q_far[2] = -3
+r(q_far)
+
+#r.solveAndDisplay("rm",1,0.01)
 
 
-#ps.solve ()
+ps.solve ()
 
 """
 camera = [0.6293167471885681,
@@ -90,14 +94,16 @@ camera = [0.6293167471885681,
 r.client.gui.setCameraTransform(0,camera)
 """
 
+ps.client.problem.extractPath(0,0,5.5)
+
 
 # Playing the computed path
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp.dt=0.03
-#r.client.gui.removeFromGroup("rm0",r.sceneName)
+r.client.gui.removeFromGroup("rm",r.sceneName)
 pp.displayVelocityPath(1)
-r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
+r.client.gui.setVisibility("path_1_root","ALWAYS_ON_TOP")
 #display path
 pp.speed=0.3
 #pp (0)
@@ -109,9 +115,14 @@ pp.displayVelocityPath(1)
 pp (1)
 
 """
+
+"""
 q_far = q_init[::]
 q_far[2] = -3
 r(q_far)
+"""
+
+
 """
 for i in range(1,10):
     rbprmBuilder.client.basic.problem.optimizePath(i)
