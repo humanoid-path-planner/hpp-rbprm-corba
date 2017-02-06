@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+<robot name="ground_jump_easy">
+  <link name="ground"> </link>
+  <joint name="ground_start_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="ground"/>
+    <child link="groundStart"/>
+  </joint>
+  <link name="groundStart">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://hpp-rbprm-corba/meshes/ground_jump_easyStart.stl"/>
+      </geometry>
+      <material name="white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://hpp-rbprm-corba/meshes/ground_jump_easyStart.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="ground_goal_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="ground"/>
+    <child link="groundGoal"/>
+  </joint>
+  <link name="groundGoal">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://hpp-rbprm-corba/meshes/ground_jump_lowGoal.stl"/>
+      </geometry>
+      <material name="white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://hpp-rbprm-corba/meshes/ground_jump_lowGoal.stl"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>
