@@ -94,7 +94,7 @@ camera = [0.6293167471885681,
 r.client.gui.setCameraTransform(0,camera)
 """
 
-ps.client.problem.extractPath(0,0,5.5)
+ps.client.problem.extractPath(0,0,3.4)
 
 
 # Playing the computed path
