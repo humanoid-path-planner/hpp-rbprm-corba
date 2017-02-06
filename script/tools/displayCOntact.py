@@ -1,12 +1,17 @@
 
+# sideWall : 
+q2 = [[1.41929 , 0.56273 , 0.3167],[0.633238 , 0.498175 , 0.252145],[1.41049 , -0.498295 , 0.243064],[0.519045 , -0.527337 , 0.272106],]
 
 
+
+"""
 color = r.color.black
 
 for i in range(0,len(q)):
   r.client.gui.addSphere("s"+str(i),0.03,color)
   r.client.gui.applyConfiguration("s"+str(i),q[i]+[1,0,0,0])
   r.client.gui.addToGroup("s"+str(i),r.sceneName)
+"""
 
 
 
@@ -16,7 +21,7 @@ for i in range(0,len(q2)):
   r.client.gui.addSphere("sc"+str(i),0.01,color)
   r.client.gui.applyConfiguration("sc"+str(i),q2[i]+[1,0,0,0])
   r.client.gui.addToGroup("sc"+str(i),r.sceneName)
-
+  r.client.gui.setVisibility("sc"+str(i),"ALWAYS_ON_TOP")
 
 r.client.gui.refresh()
 
@@ -31,6 +36,9 @@ q2 = [[0.325947 , -0.417313 , 0.15],[0.325947 , -0.557313 , 0.15],[0.565947 , -0
 
 
 """"""""""""""""""""""""""""""""""""""""""""
+
+
+
 
 """"""""""""""""""""""""""""""""""""""""""""
 # wall
