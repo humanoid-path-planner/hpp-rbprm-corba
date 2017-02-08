@@ -1,13 +1,9 @@
-<robot name="hyq_trunk">
+<robot name="stair_bauzil">
   <link name="base_link">
-  <inertial>
-     <mass value="50.26"/>
-     <inertia ixx="1." ixy="0.0" ixz="0.0" iyy="1." iyz="0.0" izz="1."/>
-  </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://hpp-rbprm-corba/meshes/hyq/hyq_all.stl"/>
+        <mesh filename="package://hpp-rbprm-corba/meshes/downSlope2.stl"/>
       </geometry>
       <material name="white">
         <color rgba="1 1 1 1"/>
@@ -16,7 +12,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://hpp-rbprm-corba/meshes/hyq/hyq_trunk.stl"/>
+        <mesh filename="package://hpp-rbprm-corba/meshes/downSlope2.stl"/>
       </geometry>
     </collision>
   </link>

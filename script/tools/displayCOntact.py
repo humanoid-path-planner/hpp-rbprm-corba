@@ -4,19 +4,18 @@ q2 = [[1.41929 , 0.56273 , 0.3167],[0.633238 , 0.498175 , 0.252145],[1.41049 , -
 
 
 
-"""
-color = r.color.black
 
+color = r.color.black
 for i in range(0,len(q)):
   r.client.gui.addSphere("s"+str(i),0.03,color)
   r.client.gui.applyConfiguration("s"+str(i),q[i]+[1,0,0,0])
+  r.client.gui.setVisibility("s"+str(i),"ALWAYS_ON_TOP")
   r.client.gui.addToGroup("s"+str(i),r.sceneName)
-"""
 
+r.client.gui.refresh()
 
 
 color = r.color.red
-
 for i in range(0,len(q2)):
   r.client.gui.addSphere("sc"+str(i),0.01,color)
   r.client.gui.applyConfiguration("sc"+str(i),q2[i]+[1,0,0,0])
@@ -25,6 +24,17 @@ for i in range(0,len(q2)):
 
 r.client.gui.refresh()
 
+
+color = r.color.blue
+name = "vec2"
+
+quat = rbprmBuilder.quaternionFromVector(v[3:6])
+v[3:7] = quat[::]
+r.client.gui.addArrow(name,0.02,1,color)
+r.client.gui.addToGroup(name,r.sceneName)
+r.client.gui.setVisibility(name,"ALWAYS_ON_TOP")
+r.client.gui.applyConfiguration(name,v)
+r.client.gui.refresh()
 
 
 
