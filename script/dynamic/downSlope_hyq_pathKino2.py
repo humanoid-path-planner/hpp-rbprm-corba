@@ -51,20 +51,19 @@ r.addLandmark(r.sceneName,1)
 
 # Setting initial and goal configurations
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init[3:7] = [0.9659,0,0.2588,0]
-q_init [0:3] = [-1.25, 1, 1.7]; r (q_init)
+q_init[3:7] = [0.95371695,0,0.30070580,0]
+q_init [0:3] = [-1.25, 1, 1.65]; r (q_init)
 #q_init[3:7] = [0.7071,0,0,0.7071]
 #q_init [0:3] = [1, 1, 0.65]
 
 rbprmBuilder.setCurrentConfig (q_init)
 q_goal = q_init [::]
-#q_goal[3:7] = [0.7071,0,0,0.7071]
-#q_goal [0:3] = [1, 5, 0.65]; r(q_goal)
-q_goal[3:7] = [1,0,0,0]
-q_goal [0:3] = [2, 1, 0.60]; r(q_goal)
-#q_goal[3:7] = [0.9659,0,0.2588,0]
-#q_goal[7:10] = [vMax,0,-2]
-#q_goal [0:3] = [0, 1, 0.8]; r(q_goal)
+
+#q_goal[3:7] = [1,0,0,0]
+#q_goal [0:3] = [2, 1, 0.60]; r(q_goal)
+q_goal[3:7] = [0.95371695,0,0.30070580,0]
+q_goal[7:10] = [3,0,-2]
+q_goal [0:3] = [0, 1, 0.8]; r(q_goal)
 
 r (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
@@ -83,18 +82,17 @@ ps.selectPathPlanner("DynamicPlanner")
 #solve the problem :
 r(q_init)
 
-#ps.client.problem.prepareSolveStepByStep()
+ps.client.problem.prepareSolveStepByStep()
+
+ps.client.problem.finishSolveStepByStep()
 
 q_far = q_init[::]
 q_far[2] = -3
 r(q_far)
 
-#r.solveAndDisplay("rm",1,0.01)
 
 
-ps.solve ()
 
-# seed = 1486546394 (hyq_trunk, 2m)
 
 """
 camera = [0.6293167471885681,
@@ -129,11 +127,6 @@ pp.speed=0.3
 
 #display path with post-optimisation
 
-
-ps.client.problem.extractPath(0,0,1.95)
-r.client.gui.removeFromGroup("path_0_root",r.sceneName)
-pp.displayVelocityPath(1)
-#pp (1)
 
 
 
