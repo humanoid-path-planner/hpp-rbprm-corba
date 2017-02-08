@@ -655,7 +655,7 @@ namespace hpp {
     }
 
     hpp::floatSeq* RbprmBuilder::generateContacts(const hpp::floatSeq& configuration,
-      const hpp::floatSeq& direction,const hpp::floatSeq& acceleration) throw (hpp::Error)
+      const hpp::floatSeq& direction,const hpp::floatSeq& acceleration, const double robustnessThreshold ) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
@@ -675,7 +675,7 @@ namespace hpp {
             model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
 
             rbprm::State state = rbprm::ComputeContacts(fullBody_,config,
-              affMap, bindShooter_.affFilter_, dir,0,acc);
+              affMap, bindShooter_.affFilter_, dir,robustnessThreshold,acc);
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(_CORBA_ULong(state.configuration_.rows()));
             for(std::size_t i=0; i< _CORBA_ULong(config.rows()); i++)

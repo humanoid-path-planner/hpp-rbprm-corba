@@ -198,11 +198,11 @@ class FullBody (object):
 	## Generates a balanced contact configuration, considering the
     #  given current configuration of the robot, and a direction of motion.
     #  Typically used to generate a start and / or goal configuration automatically for a planning problem.
-	#
+    #
     # \param configuration the initial robot configuration
     # \param direction a 3d vector specifying the desired direction of motion
-    def generateContacts(self, configuration, direction,acceleration = [0,0,0]):
-      return self.client.rbprm.rbprm.generateContacts(configuration, direction, acceleration)
+    def generateContacts(self, configuration, direction,acceleration = [0,0,0], robustnessThreshold = 0):
+      return self.client.rbprm.rbprm.generateContacts(configuration, direction, acceleration, robustnessThreshold)
 		
 	## Generate an autocollision free configuration with limbs in contact with the ground
     # \param contactLimbs name of the limbs to project in contact
