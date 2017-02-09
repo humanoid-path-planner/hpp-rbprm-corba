@@ -32,7 +32,7 @@ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 nbSamples = 20000
 
 ps = tp.ProblemSolver( fullBody )
-r = tp.Viewer (ps)
+r = tp.Viewer (ps, viewerClient=tp.r.client)
 
 rootName = 'base_joint_xyz'
 

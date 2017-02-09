@@ -95,6 +95,6 @@ rbprmBuilder2 = Robot ("toto")
 ps2 = ProblemSolver( rbprmBuilder2 )
 cl.problem.selectProblem("default")
 cl.problem.movePathToProblem(3,"rbprm_path",rbprmBuilder.getAllJointNames())
-r2 = Viewer (ps2)
+r2 = Viewer (ps2, viewerClient=r.client)
 r2(q_far)
 
