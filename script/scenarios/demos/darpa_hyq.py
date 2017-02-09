@@ -33,7 +33,7 @@ fullBody.setJointBounds ("base_joint_xyz", [-2,5, -1, 1, 0.3, 4])
 nbSamples = 20000
 
 ps = tp.ProblemSolver(fullBody)
-r = tp.Viewer (ps)
+r = tp.Viewer (ps, viewerClient=tp.r.client)
 
 rootName = 'base_joint_xyz'
 
