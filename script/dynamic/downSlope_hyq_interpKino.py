@@ -62,6 +62,13 @@ dir_goal = tp.ps.configAtParam(pathId,tp.ps.pathLength(pathId))[7:10]
 acc_goal = tp.ps.configAtParam(pathId,tp.ps.pathLength(pathId))[10:13]
 configSize = fullBody.getConfigSize() -fullBody.client.basic.robot.getDimensionExtraConfigSpace()
 
+# copy extraconfig for start and init configurations
+q_init[configSize:configSize+3] = dir_init[::]
+q_init[configSize+3:configSize+6] = acc_init[::]
+q_goal[configSize:configSize+3] = dir_goal[::]
+q_goal[configSize+3:configSize+6] = acc_goal[::]
+
+
 fullBody.setStaticStability(False)
 # Randomly generating a contact configuration at q_init
 fullBody.setCurrentConfig (q_init)
@@ -71,11 +78,7 @@ q_init = fullBody.generateContacts(q_init,dir_init,acc_init)
 fullBody.setCurrentConfig (q_goal)
 q_goal = fullBody.generateContacts(q_goal, dir_goal,acc_goal)
 
-# copy extraconfig for start and init configurations
-q_init[configSize:configSize+3] = dir_init[::]
-q_init[configSize+3:configSize+6] = acc_init[::]
-q_goal[configSize:configSize+3] = dir_goal[::]
-q_goal[configSize+3:configSize+6] = acc_goal[::]
+
 # specifying the full body configurations as start and goal state of the problem
 fullBody.setStartState(q_init,[larmId,rLegId,rarmId,lLegId])
 fullBody.setEndState(q_goal,[larmId,rLegId,rarmId,lLegId])
