@@ -108,6 +108,7 @@ install(FILES
     data/urdf/sideWall.urdf
     data/urdf/sideWall_long.urdf
 	data/urdf/downSlope.urdf
+	data/urdf/downSlope.urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
   )
 install(FILES
@@ -153,6 +154,7 @@ install(FILES
 	data/srdf/sideWall.srdf
 	data/srdf/sideWall_long.srdf
 	data/srdf/downSlope.srdf
+	data/srdf/slalom.srdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
   )
 install(FILES
@@ -203,6 +205,7 @@ install(FILES
 	data/meshes/sideWall_long.stl
 	data/meshes/downSlope.stl
 	data/meshes/downSlope2.stl
+	data/meshes/slalom.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
   )
 install(FILES
