@@ -72,11 +72,11 @@ q_goal[configSize+3:configSize+6] = acc_goal[::]
 fullBody.setStaticStability(False)
 # Randomly generating a contact configuration at q_init
 fullBody.setCurrentConfig (q_init)
-q_init = fullBody.generateContacts(q_init,dir_init,acc_init)
+q_init = fullBody.generateContacts(q_init,dir_init,acc_init,2)
 
 # Randomly generating a contact configuration at q_end
 fullBody.setCurrentConfig (q_goal)
-q_goal = fullBody.generateContacts(q_goal, dir_goal,acc_goal)
+q_goal = fullBody.generateContacts(q_goal, dir_goal,acc_goal,2)
 
 
 # specifying the full body configurations as start and goal state of the problem
@@ -87,7 +87,7 @@ fullBody.setEndState(q_goal,[larmId,rLegId,rarmId,lLegId])
 r(q_init)
 # computing the contact sequence
 
-configs = fullBody.interpolate(0.08,pathId=pathId,robustnessTreshold = 2, filterStates = True)
+configs = fullBody.interpolate(0.08,pathId=pathId,robustnessTreshold = 1, filterStates = True)
 
 
 print "number of configs =", len(configs)

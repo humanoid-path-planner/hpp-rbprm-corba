@@ -61,12 +61,17 @@ acc_init = tp.ps.configAtParam(pId,0.01)[tp.indexECS+3:tp.indexECS+6]
 dir_goal = tp.ps.configAtParam(pId,tp.ps.pathLength(pId)-0.01)[tp.indexECS:tp.indexECS+3]
 acc_goal = tp.ps.configAtParam(pId,tp.ps.pathLength(pId)-0.01)[tp.indexECS+3:tp.indexECS+6]
 
-robTreshold = 1
+robTreshold = 3
 # copy extraconfig for start and init configurations
 q_init[configSize:configSize+3] = dir_init[::]
 q_init[configSize+3:configSize+6] = acc_init[::]
 q_goal[configSize:configSize+3] = dir_goal[::]
 q_goal[configSize+3:configSize+6] = acc_goal[::]
+
+
+# FIXME : test
+q_init[2] = q_init[2]+0.15
+q_goal[2] = q_goal[2]+0.15
 
 fullBody.setStaticStability(False)
 # Randomly generating a contact configuration at q_init
@@ -90,7 +95,7 @@ fullBody.setEndState(q_goal,[rLegId,lLegId])
 
 
 
-configs = fullBody.interpolate(0.08,pathId=pId,robustnessTreshold = 1, filterStates = True)
+configs = fullBody.interpolate(0.06,pathId=pId,robustnessTreshold = 1, filterStates = True)
 print "number of configs :", len(configs)
 
 
