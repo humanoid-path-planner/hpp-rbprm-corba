@@ -1586,10 +1586,11 @@ assert(s2 == s1 +1);
                     && problemSolver_->problem()->configValidations()->validate(s2Bis.configuration_, rport)))
             {
                 std::cout << "could not project without collision at state " << s1  << std::endl;
-//throw std::runtime_error ("could not project without collision at state " + s1 );
+                rport->print(std::cout);
+                //throw std::runtime_error ("could not project without collision at state " + s1 );
             }
 
-            {
+            try{
                 hppDout(notice,"begin comRRT states 1 and 1bis");
                 core::PathPtr_t p1 = interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[cT1],
                         state1,s1Bis, numOptimizations,true);
@@ -1602,9 +1603,13 @@ assert(s2 == s1 +1);
                 resPath->appendPath(reducedPath);
                 pathsIds.push_back(AddPath(p1,problemSolver_));
             }
-
-
+            catch(std::runtime_error& e)
             {
+                throw Error(e.what());
+            }
+
+
+            try{
                 hppDout(notice,"begin comRRT between statebis 1 and 2");
                 core::PathPtr_t p2 =(*functor)(fullBody_,problemSolver_->problem(), paths[cT2],
                     s1Bis,s2Bis, numOptimizations,true);
@@ -1617,9 +1622,13 @@ assert(s2 == s1 +1);
                 PathPtr_t reducedPath = core::SubchainPath::create(p2,intervals);
                 resPath->appendPath(reducedPath);
             }
+            catch(std::runtime_error& e)
+            {
+                throw Error(e.what());
+            }
 
             //if(s2Bis.configuration_ != state2.configuration_)
-            {
+            try{
                 hppDout(notice,"begin comRRT states 2bis and 2");
                 core::PathPtr_t p3= interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[cT3],
                         s2Bis,state2, numOptimizations,true);
@@ -1631,6 +1640,10 @@ assert(s2 == s1 +1);
                 PathPtr_t reducedPath = core::SubchainPath::create(p3,intervals);
                 resPath->appendPath(reducedPath);
                 pathsIds.push_back(AddPath(p3,problemSolver_));
+            }
+            catch(std::runtime_error& e)
+            {
+                throw Error(e.what());
             }
             pathsIds.push_back(AddPath(resPath,problemSolver_));
 

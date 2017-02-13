@@ -259,8 +259,7 @@ def draw_trajectory(fullBody, states, state_id, computeCones = False, mu = 1,  d
 	
 def __cVarPerPhase(var, dt, t, final_state, addValue):
 	varVals = addValue + [v.tolist() for v in final_state[var]]
-	print "t = "
-	print t
+	print "cVarPerPhase : t = ", t
 	varPerPhase = [[varVals[(int)(round(t_id/dt)) ] for t_id in np.arange(t[index],t[index+1]-_EPS,dt)] for index, _ in enumerate(t[:-1])  ]
 	#print "varperPhase ="
 	#print varPerPhase
@@ -286,7 +285,6 @@ def __optim__threading_ok(fullBody, states, state_id, computeCones = False, mu =
 	else:
 		res = gen_trajectory(fullBody, states, state_id, computeCones, mu, dt, phase_dt, reduce_ineq, verbose, limbsCOMConstraints, profile, use_window,use_velocity, pathId)
 	alpha = res[1]['alpha']
-	print "alpha in optim__trheading = ",alpha
 	t = [ti * alpha for ti in res[1]["t_init_phases"]]
 	dt = res[1]["dt"] * alpha
 	final_state = res[0]
