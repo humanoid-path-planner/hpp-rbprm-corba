@@ -26,21 +26,21 @@ ps = tp.ProblemSolver( fullBody )
 r = tp.Viewer (ps,viewerClient=tp.r.client)
 
 #~ AFTER loading obstacles
-rLegId = '0rLeg'
+rLegId = 'hrp2_rleg_rom'
 rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,0,-0.105]
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 20000, "manipulability", 0.1)
 
-lLegId = '1lLeg'
+lLegId = 'hrp2_lleg_rom'
 lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,0,-0.105]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
 fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 20000, "manipulability", 0.1)
 
-rarmId = '3Rarm'
+rarmId = 'hrp2_rarm_rom'
 rarm = 'RARM_JOINT0'
 rHand = 'RARM_JOINT5'
 rArmOffset = [0,0,-0.1]
@@ -139,7 +139,7 @@ print "number of configs :", len(configs)
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
-from fullBodyPlayer import Player
+from fullBodyPlayerHrp2 import Player
 player = Player(fullBody,pp,tp,configs,draw=False,optim_effector=False,use_velocity=True,pathId = 0)
 
 player.displayContactPlan()

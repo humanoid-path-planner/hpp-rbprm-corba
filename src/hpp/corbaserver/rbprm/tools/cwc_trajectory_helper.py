@@ -185,7 +185,7 @@ trackedEffectors = [],use_velocity=False,pathId = 0):
 			res = res + [pid]
 			global trajec
 			global trajec_mil			
-			frame_rate = 1./60
+			frame_rate = 1./24.
 			frame_rate_andrea = 1./100.
 #			frame_rate_andrea = 1./1000.
 			#~ if(len(trajec) > 0):

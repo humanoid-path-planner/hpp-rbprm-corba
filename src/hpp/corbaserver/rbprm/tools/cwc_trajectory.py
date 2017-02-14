@@ -60,6 +60,7 @@ def __get_com_constraint(fullBody, state, config, limbsCOMConstraints, interm = 
 	return [np.vstack(As), np.hstack(bs)]
 		
 def compute_state_info(fullBody,states, state_id, phase_dt, mu, computeCones, limbsCOMConstraints, pathId = 0):
+	print "phase dt in compute_state_info:",phase_dt
 	init_com = __get_com(fullBody, states[state_id])
 	end_com = __get_com(fullBody, states[state_id+1])
 	p, N = fullBody.computeContactPoints(state_id)
@@ -285,7 +286,9 @@ def __optim__threading_ok(fullBody, states, state_id, computeCones = False, mu =
 	else:
 		res = gen_trajectory(fullBody, states, state_id, computeCones, mu, dt, phase_dt, reduce_ineq, verbose, limbsCOMConstraints, profile, use_window,use_velocity, pathId)
 	alpha = res[1]['alpha']
+	print "t in optim_threading :",res[1]["t_init_phases"]
 	t = [ti * alpha for ti in res[1]["t_init_phases"]]
+	print "t after alpha in optim_threading :",t
 	dt = res[1]["dt"] * alpha
 	final_state = res[0]
 	c0 =  res[1]["x_init"][0:3]

@@ -98,7 +98,7 @@ print "number of configs :", len(configs)
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
-from fullBodyPlayer import Player
+from fullBodyPlayerHrp2 import Player
 player = Player(fullBody,pp,tp,configs,draw=False,optim_effector=False,use_velocity=True,pathId = 0)
 
 player.displayContactPlan()

@@ -33,14 +33,14 @@ rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,0,-0.105]
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "EFORT_Normal", 0.1)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "manipulability", 0.1)
 
 lLegId = 'hrp2_lleg_rom'
 lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,0,-0.105]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "EFORT_Normal", 0.1)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "manipulability", 0.1)
 
 
 
@@ -95,18 +95,29 @@ fullBody.setEndState(q_goal,[rLegId,lLegId])
 
 
 
-configs = fullBody.interpolate(0.06,pathId=pId,robustnessTreshold = 1, filterStates = True)
+configs = fullBody.interpolate(0.07,pathId=pId,robustnessTreshold = 3, filterStates = True)
 print "number of configs :", len(configs)
-
+r(configs[-1])
 
 
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
-from fullBodyPlayer import Player
-player = Player(fullBody,pp,tp,configs,draw=False,optim_effector=False,use_velocity=True,pathId = pId)
+import fullBodyPlayerHrp2
 
-player.displayContactPlan()
+player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=1,optim_effector=False,use_velocity=True,pathId = pId)
+
+#player.displayContactPlan()
+
+player.interpolate(3,20)
 
 
 
+"""
+
+reload(hpp.corbaserver.rbprm.tools.cwc_trajectory)
+reload(hpp.corbaserver.rbprm.tools.cwc_trajectory_helper)
+reload(fullBodyPlayerHrp2)
+
+
+"""
