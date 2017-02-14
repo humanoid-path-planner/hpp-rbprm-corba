@@ -26,6 +26,8 @@
 #include "hpp/rbprm/interpolation/com-rrt.hh"
 #include "hpp/rbprm/interpolation/com-trajectory.hh"
 #include "hpp/rbprm/interpolation/spline/effector-rrt.hh"
+#include "hpp/rbprm/projection/projection.hh"
+#include "hpp/rbprm/contact_generation/contact_generation.hh"
 #include "hpp/rbprm/stability/stability.hh"
 #include "hpp/rbprm/sampling/sample-db.hh"
 #include "hpp/model/urdf/util.hh"
@@ -846,7 +848,7 @@ namespace hpp {
             {
                 throw hpp::Error ("No affordances found. Unable to interpolate.");
             }
-            const model::ObjectVector_t objects = getAffObjectsForLimb(std::string(limbname), affMap,
+            const model::ObjectVector_t objects = contact::getAffObjectsForLimb(std::string(limbname), affMap,
                                                                        bindShooter_.affFilter_);
 
             std::vector<sampling::T_OctreeReport> reports(objects.size());
@@ -875,7 +877,7 @@ namespace hpp {
                 success = false;
                 State state;
                 state.configuration_ = config;
-                hpp::rbprm::ProjectSampleToObstacle(fullBody_,std::string(limbname), limb, report, fullBody_->GetCollisionValidation(), sampleConfig, state, success);
+                hpp::rbprm::projection::ProjectSampleToObstacle(fullBody_,std::string(limbname), limb, report, fullBody_->GetCollisionValidation(), sampleConfig, state, success);
                 if(success)
                 {
                     results.push_back(sampleConfig);
