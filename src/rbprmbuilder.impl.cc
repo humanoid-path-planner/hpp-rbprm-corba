@@ -877,8 +877,9 @@ namespace hpp {
                 success = false;
                 State state;
                 state.configuration_ = config;
-                hpp::rbprm::projection::ProjectSampleToObstacle(fullBody_,std::string(limbname), limb, report, fullBody_->GetCollisionValidation(), sampleConfig, state, success);
-                if(success)
+                hpp::rbprm::projection::ProjectionReport rep =
+                hpp::rbprm::projection::projectSampleToObstacle(fullBody_,std::string(limbname), limb, report, fullBody_->GetCollisionValidation(), sampleConfig, state);
+                if(rep.success_)
                 {
                     results.push_back(sampleConfig);
                     ++num_samples_ok;
