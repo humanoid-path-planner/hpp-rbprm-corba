@@ -76,8 +76,8 @@ lLegx = 0.05; lLegy = 0.05
 #~ fullBody.addLimb(lKneeId,lLeg,lKnee,lLegOffset,lLegNormal, lLegx, lLegy, 10000, 0.01)
  #~ 
 
-#~ fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
-#~ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
+fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
+fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 
 #~ fullBody.client.basic.robot.setJointConfig('LARM_JOINT0',[1])
 #~ fullBody.client.basic.robot.setJointConfig('RARM_JOINT0',[-1])
@@ -103,14 +103,14 @@ fullBody.setCurrentConfig (q_goal)
 q_goal = fullBody.generateContacts(q_goal, [0,0,1])
 #~ r(q_goal)
 
-fullBody.setStartState(q_init,[rLegId,lLegId]) #,rarmId,larmId])
+fullBody.setStartState(q_init,[rLegId,lLegId,rarmId]) #,rarmId,larmId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
 #~ 
 #~ configs = fullBody.interpolate(0.1)
-configs = fullBody.interpolate(0.1)
 #~ configs = fullBody.interpolate(0.15)
 i = 0;
-fullBody.draw(configs[i],r); i=i+1; i-1
+configs = []
+#~ fullBody.draw(configs[i],r); i=i+1; i-1
 
 r.loadObstacleModel ('hpp-rbprm-corba', "stair_bauzil", "contact")
 #~ fullBody.exportAll(r, configs, 'stair_bauzil_hrp2_robust_2');
@@ -178,14 +178,14 @@ def rootPath():
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
 	
-def genPlan():
+def genPlan(stepsize=0.1):
 	r.client.gui.setVisibility("hrp2_14", "ON")
 	tp.cl.problem.selectProblem("default")
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
 	global configs
 	start = time.clock() 
-	configs = configs = fullBody.interpolate(0.1, True)
+	configs = fullBody.interpolate(stepsize, 1, 2, False)
 	end = time.clock() 
 	print "Contact plan generated in " + str(end-start) + "seconds"
 	
@@ -211,9 +211,9 @@ def c():
 	print "displaying root path"
 	rootPath()
 	
-def d():
+def d(step=0.1):
 	print "computing contact plan"
-	genPlan()
+	genPlan(step)
 	
 def e():
 	print "displaying contact plan"
@@ -221,5 +221,5 @@ def e():
 	
 print "Root path generated in " + str(tp.t) + " ms."
 	
-
+d(0.01); e()
 

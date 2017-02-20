@@ -1015,7 +1015,8 @@ namespace hpp {
             const fcl::Matrix3f& rot = transform.getRotation();
             state.contactPositions_[*cit] = transform.getTranslation();
             state.contactRotation_[*cit] = rot;
-            const fcl::Vec3f z = transform.getRotation() * lit->second->normal_;
+            //const fcl::Vec3f z = transform.getRotation() * lit->second->normal_;
+            const fcl::Vec3f z = fcl::Vec3f(0,0,1);
             state.contactNormals_[*cit] = z;
             state.contacts_[*cit] = true;
             state.contactOrder_.push(*cit);
@@ -1023,6 +1024,7 @@ namespace hpp {
         state.nbContacts = state.contactNormals_.size() ;
         state.configuration_ = config;
         state.robustness =  stability::IsStable(fullBody,state);
+        std::cout  << "is stable " << state.robustness << std::endl;
         state.stable = state.robustness >= 0;
         fullBody->device_->currentConfiguration(old);
     }
