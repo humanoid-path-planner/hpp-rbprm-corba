@@ -108,7 +108,7 @@ install(FILES
     data/urdf/sideWall.urdf
     data/urdf/sideWall_long.urdf
 	data/urdf/downSlope.urdf
-	data/urdf/downSlope.urdf
+	data/urdf/slalom.urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
   )
 install(FILES

@@ -26,7 +26,7 @@ urdfName = 'hrp2_trunk_flexible'
 urdfNameRom =  ['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = 4;
+vMax = 2;
 aMax = 6;
 extraDof = 6
 
@@ -48,7 +48,7 @@ rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
 # We also bound the rotations of the torso. (z, y, x)
 rbprmBuilder.boundSO3([-0.1,0.1,-0.65,0.65,-0.2,0.2])
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
-rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-4,4,-1,1,-2,2,0,0,0,0,0,0])
+rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-2,2,-0.5,0.5,-2,2,0,0,0,0,0,0])
 indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.basic.robot.getDimensionExtraConfigSpace()
 
 # Creating an instance of HPP problem solver and the viewer

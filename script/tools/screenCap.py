@@ -28,6 +28,13 @@ time.sleep(2)
 player.displayContactPlan(1)
 tp.r.stopCapture ()
 
+import time
+r(configs[6])
+tp.r.startCapture ("capture/capture","png")
+time.sleep(2)
+player.play(1/2.)
+tp.r.stopCapture ()
+
 
 
 
@@ -38,7 +45,7 @@ tp.r.stopCapture ()
 """
 
 ## avconv (bash) commands
-avconv -i capture_0_%d.png -r 30 -vcodec mpeg4 -qscale 1 -mbd rd -flags +mv4+aic -trellis 2 -cmp 2 -subcmp 2 -g 300 -y downSlope_hrp2_contactPlan2.mp4
+avconv -i capture_0_%d.png -r 30 -vcodec mpeg4 -qscale 1 -mbd rd -flags +mv4+aic -trellis 2 -cmp 2 -subcmp 2 -g 300 -y downSlope_hrp2_interpolation2.mp4
 
 avconv -i capture_0_%d.png -r 30 -vcodec mpeg4 -qscale 1 -mbd rd -flags +mv4+aic -trellis 2 -cmp 2 -subcmp 2 -g 300 -pass 2  hyq_darpa.mp4
 
