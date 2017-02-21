@@ -185,13 +185,15 @@ trackedEffectors = [],use_velocity=False,pathId = 0):
 			res = res + [pid]
 			global trajec
 			global trajec_mil			
-			frame_rate = 1./24.
+			frame_rate = 0.01
 			frame_rate_andrea = 1./100.
 #			frame_rate_andrea = 1./1000.
 			#~ if(len(trajec) > 0):
 				#~ frame_rate = 1./25.
 				#~ frame_rate_andrea = 1./1001.
+			print "first traj :"
 			new_traj = gen_trajectory_to_play(fullBody, pp, trajectory, time_per_path, frame_rate)
+			print "traj Andrea : "
 			new_traj_andrea = gen_trajectory_to_play(fullBody, pp, trajectory, time_per_path,frame_rate_andrea)
 			#~ new_contacts = gencontactsPerFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, times, frame_rate_andrea)	
 			Ps, Ns, freeEffectorsPerPhase = genPandNperFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, time_per_path, frame_rate_andrea)
