@@ -103,7 +103,8 @@ fullBody.setCurrentConfig (q_goal)
 q_goal = fullBody.generateContacts(q_goal, [0,0,1])
 #~ r(q_goal)
 
-fullBody.setStartState(q_init,[rLegId,lLegId,rarmId]) #,rarmId,larmId])
+#~ fullBody.setStartState(q_init,[rLegId,lLegId,rarmId]) #,rarmId,larmId])
+fullBody.setStartState(q_init,[rLegId,lLegId]) #,rarmId,larmId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
 #~ 
 #~ configs = fullBody.interpolate(0.1)
