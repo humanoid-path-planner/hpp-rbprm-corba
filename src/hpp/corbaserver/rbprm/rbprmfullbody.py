@@ -210,6 +210,13 @@ class FullBody (object):
     def generateGroundContact(self, contactLimbs):
 		return self.client.rbprm.rbprm.generateGroundContact(contactLimbs)
 		
+	## Create a state and push it to the state array
+	# \param q configuration
+	# \param names list of effectors in contact
+	# \return stateId
+    def createState(self, q, contactLimbs):
+		return self.client.rbprm.rbprm.createState(q, contactLimbs)
+		
 	## Retrieves the contact candidates configurations given a configuration and a limb
 	#
     # \param name id of the limb considered
@@ -217,6 +224,14 @@ class FullBody (object):
     # \param direction a 3d vector specifying the desired direction of motion
     def getContactSamplesIds(self, name, configuration, direction):
 		return self.client.rbprm.rbprm.getContactSamplesIds(name, configuration, direction)
+		
+	## Retrieves the contact candidates configurations given a configuration and a limb
+	#
+    # \param name id of the limb considered
+    # \param configuration the considered robot configuration
+    # \param direction a 3d vector specifying the desired direction of motion
+    def getContactSamplesProjected(self, name, configuration, direction, numSamples = 10):
+		return self.client.rbprm.rbprm.getContactSamplesProjected(name, configuration, direction, numSamples)
 		
 	## Retrieves the samples IDs In a given octree cell
 	#
@@ -253,6 +268,14 @@ class FullBody (object):
     # \param contacts the array of limbs in contact
     def setStartState(self, configuration, contacts):
 		return self.client.rbprm.rbprm.setStartState(configuration, contacts)
+		
+	## Create a state given a configuration and contacts
+	#
+    # \param configuration the desired start configuration
+    # \param contacts the array of limbs in contact
+    # \return id of created state
+    def createState(self, configuration, contacts):
+		return self.client.rbprm.rbprm.createState(configuration, contacts)
 			
 	## Initialize the last configuration of the path discretization 
 	# with a balanced configuration for the interpolation problem;
@@ -399,6 +422,7 @@ class FullBody (object):
     def getContactCone(self, stateId, friction = 0.5):
 		H_h =  array(self.client.rbprm.rbprm.getContactCone(stateId, friction))
 		print "H_h", H_h.shape 
+		print "norm h", ( H_h[:, -1] != 0).any()
 		# now decompose cone 
 		return H_h[:,:-1], H_h[:, -1]
 		
@@ -409,6 +433,7 @@ class FullBody (object):
     def getContactIntermediateCone(self, stateId, friction = 0.5):
 		H_h =  array(self.client.rbprm.rbprm.getContactIntermediateCone(stateId, friction))
 		print "H_h", H_h.shape 
+		print "norm h", ( H_h[:, -1] != 0).any()
 		# now decompose cone 
 		return H_h[:,:-1], H_h[:, -1]
 		

@@ -1,5 +1,22 @@
 from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.gepetto import Viewer
+from hpp.corbaserver import Client
+from hpp.corbaserver.robot import Robot as Parent
+
+class Robot (Parent):
+	rootJointType = 'freeflyer'
+	packageName = 'hpp-rbprm-corba'
+	meshPackageName = 'hpp-rbprm-corba'
+	# URDF file describing the trunk of the robot HyQ
+	urdfName = 'hrp2_trunk_flexible'
+	urdfSuffix = ""
+	srdfSuffix = ""
+	def __init__ (self, robotName, load = True):
+		Parent.__init__ (self, robotName, self.rootJointType, load)
+		self.tf_root = "base_footprint"
+		self.client.basic = Client ()
+		self.load = load
+		
 
 rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
@@ -52,7 +69,7 @@ afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
 afftool.loadObstacleModel (packageName, "stair_bauzil", "planning", r)
 #~ afftool.analyseAll()
-afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
+#~ afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 #~ afftool.visualiseAffordances('Lean', r, [0, 0, 0.9])
 
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
@@ -62,7 +79,7 @@ t = ps.solve ()
 
 print t;
 if isinstance(t, list):
-  t = t[0]* 3600000 + t[1] * 60000 + t[2] * 1000 + t[3]
+	t = t[0]* 3600000 + t[1] * 60000 + t[2] * 1000 + t[3]
 f = open('log.txt', 'a')
 f.write("path computation " + str(t) + "\n")
 f.close()
@@ -78,4 +95,14 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 #~ pp (1)
 #~ pp.toFile(1, "/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
 #~ rbprmBuilder.exportPath (r, ps.client.problem, 1, 0.01, "stair_bauzil_hrp2_path.txt")
-r (q_init)
+
+cl = Client()
+cl.problem.selectProblem("rbprm_path")
+rbprmBuilder2 = Robot ("toto")
+ps2 = ProblemSolver( rbprmBuilder2 )
+cl.problem.selectProblem("default")
+cl.problem.movePathToProblem(1,"rbprm_path",rbprmBuilder.getAllJointNames())
+r2 = Viewer (ps2, viewerClient=r.client)
+r.client.gui.setVisibility("toto", "OFF")
+r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
+#~ r2(q_far)

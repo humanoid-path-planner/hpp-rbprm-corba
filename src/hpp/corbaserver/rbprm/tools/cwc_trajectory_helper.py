@@ -15,6 +15,7 @@ normals = []
 pEffs = []
 coms = []
 errorid = []
+cones_saved = []
 
 def displayComPath(pp, pathId,color=[0.,0.75,0.15,0.9]) :
 	pathPos=[]
@@ -101,6 +102,7 @@ def __update_cwc_time(t):
 	stat_data["time_cwc"]["max"] = max(stat_data["time_cwc"]["max"], t) 
 	stat_data["time_cwc"]["totaltime"] += t
 	stat_data["time_cwc"]["numiter"] += 1
+	
 
 """
 def __getTimes(fullBody, configs, i, time_scale):
@@ -471,6 +473,7 @@ def profile(fullBody, configs, i_start, i_end, limbsCOMConstraints,  friction = 
 	write_stats(filename)
 
 def saveAllData(fullBody, r, name):
+	global trajec
 	fullBody.exportAll(r, trajec, name)
 	return saveToPinocchio(name)
 

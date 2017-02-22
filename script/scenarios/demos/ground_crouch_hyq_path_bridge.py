@@ -1,5 +1,21 @@
 from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.gepetto import Viewer
+from hpp.corbaserver import Client
+from hpp.corbaserver.robot import Robot as Parent
+
+class Robot (Parent):
+	rootJointType = 'freeflyer'
+	packageName = 'hpp-rbprm-corba'
+	meshPackageName = 'hpp-rbprm-corba'
+	# URDF file describing the trunk of the robot HyQ
+	urdfName = 'hyq_trunk_large'
+	urdfSuffix = ""
+	srdfSuffix = ""
+	def __init__ (self, robotName, load = True):
+		Parent.__init__ (self, robotName, self.rootJointType, load)
+		self.tf_root = "base_footprint"
+		self.client.basic = Client ()
+		self.load = load
 
 rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
@@ -29,12 +45,11 @@ r = Viewer (ps)
 
 
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init [0:3] = [-5, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
-#~ q_init [0:3] = [-2,  0.47, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+#~ q_init [0:3] = [-5, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+q_init [0:3] = [-2,  0.47, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 q_goal = q_init [::]
-q_goal [0:3] = [-4, 0, 0.63]; r (q_goal)
 #~ q_goal [0:3] = [5, 0, 0.63]; r (q_goal)
-#~ q_goal [0:3] = [-2, 0, 0.63]; r (q_goal)
+q_goal [0:3] = [3, 0.47, 0.63]; r (q_goal)
 
 ps.addPathOptimizer("RandomShortcut")
 ps.setInitialConfig (q_init)
@@ -72,3 +87,15 @@ r (q_init)
 q_far = q_init [::]
 q_far [0:3] = [-2, -3, 0.63]; 
 r(q_far)
+
+for i in range(1,10):
+	rbprmBuilder.client.basic.problem.optimizePath(i)
+        
+cl = Client()
+cl.problem.selectProblem("rbprm_path")
+rbprmBuilder2 = Robot ("toto")
+ps2 = ProblemSolver( rbprmBuilder2)
+cl.problem.selectProblem("default")
+cl.problem.movePathToProblem(3,"rbprm_path",rbprmBuilder.getAllJointNames())
+r2 = Viewer (ps2, viewerClient=r.client )
+r2(q_far)

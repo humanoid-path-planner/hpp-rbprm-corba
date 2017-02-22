@@ -32,7 +32,7 @@ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 nbSamples = 20000
 
 ps = tp.ProblemSolver( fullBody )
-r = tp.Viewer (ps)
+r = tp.Viewer (ps, viewerClient=tp.r.client)
 
 rootName = 'base_joint_xyz'
 
@@ -172,19 +172,7 @@ def contactPlan():
 	tp.r.client.gui.setVisibility("hyq_trunk", "OFF")
 	for i in range(1,len(configs)):
 		r(configs[i]);
-		time.sleep(0.5)		
-		
-def interpolate():
-	tp.cl.problem.selectProblem("default")
-	r.client.gui.setVisibility("hyq", "ON")
-	tp.r.client.gui.setVisibility("toto", "OFF")
-	tp.r.client.gui.setVisibility("hyq_trunk", "OFF")
-	for i in range(7,23):
-		act(i,1,optim_effectors=False)
-		
-def play(frame_rate = 1./24.):
-	play_traj(fullBody,pp,frame_rate)
-	
+		time.sleep(0.5)			
 
 		
 def a():
@@ -206,26 +194,6 @@ def d():
 def e():
 	print "displaying contact plan"
 	contactPlan()
-	
-def f():
-	print "computing feasible com trajectory"
-	interpolate()
-
-def g():
-	print "playing feasible trajectory"
-	play()
 
 print "Root path generated in " + str(tp.t) + " ms."
-
-
-a()
-b()
-c()
-d()
-e()
-f()
-
-
-
-
 	

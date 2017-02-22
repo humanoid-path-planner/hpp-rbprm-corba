@@ -35,9 +35,21 @@ r = Viewer (ps)
 
 # Setting initial and goal configurations
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init [0:3] = [-2, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+#~ q_init [0:3] = [-2, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+q_init [0:3] = [-1.8, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+
 q_goal = q_init [::]
 q_goal [0:3] = [3, 0, 0.63]; r (q_goal)
+
+config_i = 0
+
+#~ from pickle import load
+#~ f = open("config_"+str(config_i), 'r')
+#~ q_init [0:7] =  load(f)[0:7] 
+#~ f.close()
+
+
+
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
 
 # Choosing a path optimizer
@@ -58,13 +70,11 @@ ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 
 # Solve the problem
 t = ps.solve ()
-print t;
 if isinstance(t, list):
 	t = t[0]* 3600000 + t[1] * 60000 + t[2] * 1000 + t[3]
 f = open('log.txt', 'a')
 f.write("path computation " + str(t) + "\n")
 f.close()
-
 
 # Playing the computed path
 from hpp.gepetto import PathPlayer
@@ -74,3 +84,6 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 q_far = q_init [::]
 q_far [0:3] = [-2, -3, 0.63]; 
 r(q_far)
+
+for i in range(1,10):
+	rbprmBuilder.client.basic.problem.optimizePath(i)

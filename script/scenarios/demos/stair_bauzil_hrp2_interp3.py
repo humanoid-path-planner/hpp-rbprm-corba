@@ -2,7 +2,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 
-import stair_bauzil_hrp2_path as tp
+import stair_bauzil_hrp2_path3 as tp
 import time
 
 
@@ -19,11 +19,11 @@ srdfSuffix = ""
 fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-rbprmBuilder.setJointBounds ("base_joint_xyz", [0,3, -2, 0, 0.3, 1])
+fullBody.setJointBounds ("base_joint_xyz", [-0.135,2, -1, 1, 0, 2.2])
 
 
 ps = tp.ProblemSolver( fullBody )
-r = tp.Viewer (ps, viewerClient=tp.r.client)
+r = tp.Viewer (ps)
 
 #~ AFTER loading obstacles
 rLegId = '0rLeg'
@@ -31,14 +31,14 @@ rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,-0.105,0,]
 rLegNormal = [0,1,0]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "manipulability", 0.1)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 10000, "manipulability", 0.1)
 
 lLegId = '1lLeg'
 lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,-0.105,0]
 lLegNormal = [0,1,0]
 lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "manipulability", 0.1)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.1)
 
 rarmId = '3Rarm'
 rarm = 'RARM_JOINT0'
@@ -47,7 +47,7 @@ rArmOffset = [0,0,-0.1]
 rArmNormal = [0,0,1]
 rArmx = 0.024; rArmy = 0.024
 #disabling collision for hook
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 50000, "manipulability", 0.05, "_3_DOF", True)
+#~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.05, "_6_DOF", True)
 
 
 #~ AFTER loading obstacles
@@ -57,7 +57,7 @@ lHand = 'LARM_JOINT5'
 lArmOffset = [-0.05,-0.050,-0.050]
 lArmNormal = [1,0,0]
 lArmx = 0.024; lArmy = 0.024
-#~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, 0.05)
+#~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.05, "_6_DOF", True)
 
 rKneeId = '0RKnee'
 rLeg = 'RLEG_JOINT0'
@@ -76,8 +76,8 @@ lLegx = 0.05; lLegy = 0.05
 #~ fullBody.addLimb(lKneeId,lLeg,lKnee,lLegOffset,lLegNormal, lLegx, lLegy, 10000, 0.01)
  #~ 
 
-fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
-fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
+#~ fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
+#~ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 
 #~ fullBody.client.basic.robot.setJointConfig('LARM_JOINT0',[1])
 #~ fullBody.client.basic.robot.setJointConfig('RARM_JOINT0',[-1])
@@ -98,20 +98,21 @@ q_init =  [
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # RLEG       31-36
         ]; r (q_init)
 
+q_init[0:7] = tp.q_init[0:7]
+
 fullBody.setCurrentConfig (q_goal)
 #~ r(q_goal)
 q_goal = fullBody.generateContacts(q_goal, [0,0,1])
 #~ r(q_goal)
 
-#~ fullBody.setStartState(q_init,[rLegId,lLegId,rarmId]) #,rarmId,larmId])
 fullBody.setStartState(q_init,[rLegId,lLegId]) #,rarmId,larmId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
 #~ 
 #~ configs = fullBody.interpolate(0.1)
+configs = fullBody.interpolate(0.1)
 #~ configs = fullBody.interpolate(0.15)
 i = 0;
-configs = []
-#~ fullBody.draw(configs[i],r); i=i+1; i-1
+fullBody.draw(configs[i],r); i=i+1; i-1
 
 r.loadObstacleModel ('hpp-rbprm-corba', "stair_bauzil", "contact")
 #~ fullBody.exportAll(r, configs, 'stair_bauzil_hrp2_robust_2');
@@ -179,14 +180,14 @@ def rootPath():
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
 	
-def genPlan(stepsize=0.1):
+def genPlan():
 	r.client.gui.setVisibility("hrp2_14", "ON")
 	tp.cl.problem.selectProblem("default")
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
 	global configs
 	start = time.clock() 
-	configs = fullBody.interpolate(stepsize, 1, 2, False)
+	configs = configs = fullBody.interpolate(0.1, True)
 	end = time.clock() 
 	print "Contact plan generated in " + str(end-start) + "seconds"
 	
@@ -199,18 +200,6 @@ def contactPlan():
 		r(configs[i]);
 		time.sleep(0.5)		
 		
-def interpolate():
-	tp.cl.problem.selectProblem("default")
-	r.client.gui.setVisibility("hrp2_14", "ON")
-	tp.r.client.gui.setVisibility("toto", "OFF")
-	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
-	for i in range(7,20):
-		act(i,1,optim_effectors=True)
-		
-def play(frame_rate = 1./24.):
-	play_traj(fullBody,pp,frame_rate)
-	
-
 		
 def a():
 	print "initial configuration"
@@ -224,23 +213,15 @@ def c():
 	print "displaying root path"
 	rootPath()
 	
-def d(step=0.1):
+def d():
 	print "computing contact plan"
-	genPlan(step)
+	genPlan()
 	
 def e():
 	print "displaying contact plan"
 	contactPlan()
-
-def f():
-	print "computing feasible com trajectory"
-	interpolate()
-
-def g():
-	print "playing feasible trajectory"
-	play()
 	
 print "Root path generated in " + str(tp.t) + " ms."
 	
-d(0.01); e()
+
 

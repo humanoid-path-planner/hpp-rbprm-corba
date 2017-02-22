@@ -25,21 +25,21 @@ ps = tp.ProblemSolver( fullBody )
 r = tp.Viewer (ps)
 
 #~ AFTER loading obstacles
-rLegId = '0rLeg'
+rLegId = 'hrp2_rleg_rom'
 rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,-0.105,0,]
 rLegNormal = [0,1,0]
 rLegx = 0.09; rLegy = 0.05
 fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 10000, "manipulability", 0.1)
 
-lLegId = '1lLeg'
+lLegId = 'hrp2_lleg_rom'
 lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,-0.105,0]
 lLegNormal = [0,1,0]
 lLegx = 0.09; lLegy = 0.05
 fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.1)
 
-rarmId = '3Rarm'
+rarmId = 'hrp2_rarm_rom'
 rarm = 'RARM_JOINT0'
 rHand = 'RARM_JOINT5'
 rArmOffset = [0,0,-0.1]
@@ -75,6 +75,9 @@ lLegx = 0.05; lLegy = 0.05
 #~ fullBody.addLimb(lKneeId,lLeg,lKnee,lLegOffset,lLegNormal, lLegx, lLegy, 10000, 0.01)
  #~ 
 
+fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
+fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
+
 #~ fullBody.client.basic.robot.setJointConfig('LARM_JOINT0',[1])
 #~ fullBody.client.basic.robot.setJointConfig('RARM_JOINT0',[-1])
 
@@ -108,35 +111,28 @@ configs = fullBody.interpolate(0.1)
 i = 0;
 fullBody.draw(configs[i],r); i=i+1; i-1
 
-#~ r.loadObstacleModel ('hpp-rbprm-corba', "stair_bauzil", "contact")
+r.loadObstacleModel ('hpp-rbprm-corba', "stair_bauzil", "contact")
+#~ fullBody.exportAll(r, configs, 'stair_bauzil_hrp2_robust_2');
+#~ fullBody.client.basic.robot.setJointConfig('LLEG_JOINT0',[-1])
+#~ q_0 = fullBody.getCurrentConfig(); 
+#~ fullBody.draw(q_0,r);
+#~ print(fullBody.client.rbprm.rbprm.getOctreeTransform(rarmId, q_0))
+#~ 
+#~ 
+#~ fullBody.client.basic.robot.setJointConfig('LLEG_JOINT0',[1])
+#~ q_0 = fullBody.getCurrentConfig(); 
+#~ fullBody.draw(q_0,r);
+#~ print(fullBody.client.rbprm.rbprm.getOctreeTransform(rarmId, q_0))
+#~ q_init = fullBody.generateContacts(q_init, [0,0,-1]); r (q_init)
+
+#~ f1 = open("secondchoice","w+")
+#~ f1 = open("hrp2_stair_not_robust_configs","w+")
+#~ f1.write(str(configs))
+#~ f1.close()
 
 limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},  
-						lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}, 
-						rarmId : {'file': "hrp2/RA_com.ineq", 'effector' : rHand},
-						larmId : {'file': "hrp2/LA_com.ineq", 'effector' : lHand} }
+						lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'},
+						rarmId : {'file': "hrp2/RA_com.ineq", 'effector' : rHand} }
+						#~ larmId : {'file': "hrp2/LA_com.ineq", 'effector' : lHand} }
 
-from hpp.gepetto import PathPlayer
-#~ pp = PathPlayer (ps.robot.client.basic, r, 0.001, 0.1)
-pp = PathPlayer (ps.robot.client.basic, r)
-#~ (self, client, publisher, dt=0.01, speed=1)
-
-from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import step, clean,stats, saveAllData, play_traj
-
-def act(i, numOptim = 0):
-	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, 0.5, optim_effectors = False, time_scale = 20., useCOMConstraints = False)
-
-def play(frame_rate = 1./24.):
-	play_traj(fullBody,pp,frame_rate)
-	
-def saveAll(name):
-	saveAllData(fullBody, r, name)
-
-import time
-try:
-	time.sleep(2)
-	fullBody.dumpProfile()
-except Exception as e:
-	pass
-#~ for i in range(4,25):
-    #~ act(i,0)
 

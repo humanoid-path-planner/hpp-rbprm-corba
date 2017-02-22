@@ -3,6 +3,8 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
+#reference pose for hyq
+from hyq_ref_pose import hyq_ref
 
 #calling script darpa_hyq_path to compute root path
 import darpa_hyq_path as tp
@@ -33,7 +35,7 @@ fullBody.setJointBounds ("base_joint_xyz", [-2,5, -1, 1, 0.3, 4])
 nbSamples = 20000
 
 ps = tp.ProblemSolver(fullBody)
-r = tp.Viewer (ps)
+r = tp.Viewer (ps, viewerClient=tp.r.client)
 
 rootName = 'base_joint_xyz'
 
@@ -70,31 +72,26 @@ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 fullBody.runLimbSampleAnalysis(rarmId, "jointLimitsDistance", True)
 fullBody.runLimbSampleAnalysis(larmId, "jointLimitsDistance", True)
 
-q_0 = fullBody.getCurrentConfig(); 
-q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.q_init[0:7]
-q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.q_goal[0:7]
+#~ q_init = hyq_ref[:]; q_init[0:7] = tp.q_init[0:7]; 
+#~ q_goal = hyq_ref[:]; q_goal[0:7] = tp.q_goal[0:7]; 
+q_init = hyq_ref[:]; q_init[0:7] = tp.q_init[0:7]; q_init[2]=hyq_ref[2]+0.02
+q_goal = hyq_ref[:]; q_goal[0:7] = tp.q_goal[0:7]; q_init[2]=hyq_ref[2]+0.02
 
 # Randomly generating a contact configuration at q_init
-fullBody.setCurrentConfig (q_init)
-q_init = fullBody.generateContacts(q_init, [0,0,1])
+#~ fullBody.setCurrentConfig (q_init)
+#~ q_init = fullBody.generateContacts(q_init, [0,0,1])
 
 # Randomly generating a contact configuration at q_end
-fullBody.setCurrentConfig (q_goal)
-q_goal = fullBody.generateContacts(q_goal, [0,0,1])
+#~ fullBody.setCurrentConfig (q_goal)
+#~ q_goal = fullBody.generateContacts(q_goal, [0,0,1])
 
 # specifying the full body configurations as start and goal state of the problem
-fullBody.setStartState(q_init,[])
+fullBody.setStartState(q_init,[rLegId,lLegId,rarmId,larmId])
 fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 
 
 r(q_init)
-#~ configs = fullBody.interpolate(0.12, 10, 10, True)
 configs = []
-#~ r.loadObstacleModel ('hpp-rbprm-corba', "darpa", "contact")
-
-# calling draw with increasing i will display the sequence
-i = 0;
-#~ fullBody.draw(configs[i],r); i=i+1; i-1
 
 
 from hpp.gepetto import PathPlayer
@@ -112,7 +109,7 @@ limbsCOMConstraints = { rLegId : {'file': "hyq/"+rLegId+"_com.ineq", 'effector' 
 
 
 def act(i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True, verbose = False, draw = False):
-	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, 0.4, optim_effectors = optim_effectors, time_scale = 20., useCOMConstraints = True, use_window = use_window,
+	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, 0.4, optim_effectors = optim_effectors, time_scale = 20., useCOMConstraints = False, use_window = use_window,
 	verbose = verbose, draw = draw)
 
 def play(frame_rate = 1./24.):
@@ -149,25 +146,25 @@ def rootPath():
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
 	
-def genPlan():
+def genPlan(stepsize=0.06):
 	tp.cl.problem.selectProblem("default")
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	global configs
 	start = time.clock() 
-	configs = fullBody.interpolate(0.12, 10, 10, True)
+	configs = fullBody.interpolate(stepsize, 5, 5, True)
 	end = time.clock() 
 	print "Contact plan generated in " + str(end-start) + "seconds"
 	
-def contactPlan():
+def contactPlan(step = 0.5):
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
-	for i in range(1,len(configs)):
+	for i in range(0,len(configs)):
 		r(configs[i]);
-		time.sleep(0.5)		
+		time.sleep(step)		
 		
 		
 def a():
@@ -182,12 +179,15 @@ def c():
 	print "displaying root path"
 	rootPath()
 	
-def d():
+def d(step=0.06):
 	print "computing contact plan"
-	genPlan()
+	genPlan(step)
 	
 def e():
 	print "displaying contact plan"
 	contactPlan()
 	
 print "Root path generated in " + str(tp.t) + " ms."
+
+#~ d();e()
+d(0.0005)

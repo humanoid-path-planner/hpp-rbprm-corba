@@ -58,27 +58,27 @@ lLegId = 'lhleg'
 rarmId = 'rhleg'
 larmId = 'lfleg'
 
-addLimbDb(rLegId, "static")
-addLimbDb(lLegId, "static")
-addLimbDb(rarmId, "static")
-addLimbDb(larmId, "static")
+#~ addLimbDb(rLegId, "static")
+#~ addLimbDb(lLegId, "static")
+#~ addLimbDb(rarmId, "static")
+#~ addLimbDb(larmId, "static")
 
-#~ fullBody.addLimb(rLegId,rLeg,rfoot,offset,normal, legx, legy, nbSamples, "jointlimits", 0.1, cType)
+fullBody.addLimb(rLegId,rLeg,rfoot,offset,normal, legx, legy, nbSamples, "jointlimits", 0.1, cType)
 
 lLegId = 'lhleg'
 lLeg = 'lh_haa_joint'
 lfoot = 'lh_foot_joint'
-#~ fullBody.addLimb(lLegId,lLeg,lfoot,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
+fullBody.addLimb(lLegId,lLeg,lfoot,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
 #~ 
 rarmId = 'rhleg'
 rarm = 'rh_haa_joint'
 rHand = 'rh_foot_joint'
-#~ fullBody.addLimb(rarmId,rarm,rHand,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
+fullBody.addLimb(rarmId,rarm,rHand,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
 
 larmId = 'lfleg'
 larm = 'lf_haa_joint'
 lHand = 'lf_foot_joint'
-#~ fullBody.addLimb(larmId,larm,lHand,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
+fullBody.addLimb(larmId,larm,lHand,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
 
 q_0 = fullBody.getCurrentConfig(); 
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.q_init[0:7]
@@ -88,54 +88,35 @@ q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.q_goal[0:7]
 fullBody.setCurrentConfig (q_init)
 q_init = fullBody.generateContacts(q_init, [0,0,1])
 
+#~ from pickle import load
+#~ f = open("config_"+str(tp.config_i), 'r')
+#~ q_init =  load(f)
+#~ f.close()
+
 # Randomly generating a contact configuration at q_end
 fullBody.setCurrentConfig (q_goal)
 q_goal = fullBody.generateContacts(q_goal, [0,0,1])
 
 # specifying the full body configurations as start and goal state of the problem
 fullBody.setStartState(q_init,[])
+#~ fullBody.setStartState(q_init,[rLegId,lLegId,rarmId,larmId])
 fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 
 
 r(q_init)
 # computing the contact sequence
-configs = fullBody.interpolate(0.12, 10, 10, True)
+#~ configs = fullBody.interpolate(0.05, 10, 1, True)
+configs = fullBody.interpolate(0.08, 10, 10, True)
 #~ configs = fullBody.interpolate(0.11, 7, 10, True)
-#~ configs = fullBody.interpolate(0.1, 1, 5, True)
+#~ configs = fullBody.interpolate(0.1, 1, 10, True)
+#~ configs = fullBody.interpolate(0.02, 10, 10, True)
 
-#~ r.loadObstacleModel ('hpp-rbprm-corba', "darpa", "contact")
-
-# calling draw with increasing i will display the sequence
-i = 0;
-fullBody.draw(configs[i],r); i=i+1; i-1
-
-
-from hpp.gepetto import PathPlayer
-pp = PathPlayer (fullBody.client.basic, r)
-
-
-from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import step, clean,stats, saveAllData, play_traj
+import time
+try:
+	time.sleep(2)
+	fullBody.dumpProfile()
+except Exception as e:
+	pass
 
 	
 	
-limbsCOMConstraints = { rLegId : {'file': "hyq/"+rLegId+"_com.ineq", 'effector' : rfoot},  
-						lLegId : {'file': "hyq/"+lLegId+"_com.ineq", 'effector' : lfoot},  
-						rarmId : {'file': "hyq/"+rarmId+"_com.ineq", 'effector' : rHand},  
-						larmId : {'file': "hyq/"+larmId+"_com.ineq", 'effector' : lHand} }
-
-
-def act(i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True, verbose = False, draw = False):
-	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, 0.4, optim_effectors = optim_effectors, time_scale = 20., useCOMConstraints = True, use_window = use_window,
-	verbose = verbose, draw = draw)
-
-def play(frame_rate = 1./24.):
-	play_traj(fullBody,pp,frame_rate)
-	
-def saveAll(name):
-	saveAllData(fullBody, r, name)
-#~ fullBody.exportAll(r, trajec, 'hole_hyq_t_var_04f_andrea');
-#~ fullBody.exportAll(r, configs, 'hole_hyq_t_var_04f_andrea_contact_planning');
-#~ saveToPinocchio('obstacle_hyq_t_var_04f_andrea')
-
-#~ fullBody.exportAll(r, trajec, 'darpa_hyq_t_var_04f_andrea');
-#~ saveToPinocchio('darpa_hyq_t_var_04f_andrea')

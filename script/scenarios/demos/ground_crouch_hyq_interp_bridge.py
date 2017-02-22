@@ -10,7 +10,7 @@ from os import environ
 ins_dir = environ['DEVEL_DIR']
 db_dir = ins_dir+"/install/share/hyq-rbprm/database/hyq_"
 
-import ground_crouch_hyq_path as tp
+import ground_crouch_hyq_path_bridge as tp
 #~ import ground_crouch_hyq_path_bridge as tp
 
 packageName = "hyq_description"
@@ -32,7 +32,7 @@ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 nbSamples = 20000
 
 ps = tp.ProblemSolver( fullBody )
-r = tp.Viewer (ps)
+r = tp.Viewer (ps,viewerClient=tp.r.client)
 
 rootName = 'base_joint_xyz'
 
@@ -57,15 +57,6 @@ legx = 0.02; legy = 0.02
 
 def addLimbDb(limbId, heuristicName, loadValues = True, disableEffectorCollision = False):
 	fullBody.addLimbDatabase(str(db_dir+limbId+'.db'), limbId, heuristicName,loadValues, disableEffectorCollision)
-
-#~ lLegId = 'lhleg'
-#~ rarmId = 'rhleg'
-#~ larmId = 'lfleg'
-#~ 
-#~ addLimbDb(rLegId, "static")
-#~ addLimbDb(lLegId, "static")
-#~ addLimbDb(rarmId, "static")
-#~ addLimbDb(larmId, "static")
 
 fullBody.addLimb(rLegId,rLeg,rfoot,offset,normal, legx, legy, nbSamples, "forward", 0.1, cType)
 
@@ -105,13 +96,8 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 
 r(q_init)
 
-configs = fullBody.interpolate(0.1,1,10, True) #hole 
+configs = []
 #~ configs = fullBody.interpolate(0.08,1,5) # bridge
-
-r.loadObstacleModel ('hpp-rbprm-corba', "groundcrouch", "contact")
-#~ fullBody.exportAll(r, configs, 'obstacle_hyq_robust_10');
-i = 0;
-r (configs[i]); i=i+1; i-1
 
 
 from hpp.gepetto import PathPlayer
@@ -132,102 +118,102 @@ def act(i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True,
 	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, friction, optim_effectors = optim_effectors, time_scale = time_scale, useCOMConstraints = False, use_window = use_window,
 	verbose = verbose, draw = draw, trackedEffectors = trackedEffectors)
 
-def play(frame_rate = 1./24.):
-	play_traj(fullBody,pp,frame_rate)
-	
-def saveAll(name):
-	return saveAllData(fullBody, r, name)
-#~ saveAll ('hole_hyq_t_var_04f_andrea');
-#~ fullBody.exportAll(r, configs, 'hole_hyq_t_var_04f_andrea_contact_planning');
-#~ saveToPinocchio('obstacle_hyq_t_var_04f_andrea')
-
-
-
-from numpy import array, zeros
-from numpy import matrix
-from numpy import matlib
 
 #~ for i in range(6,25):
 	#~ act(i, 60, optim_effectors = True)
 
 
-for i in range(7,8):
-    act(i,0, use_window=0, verbose=True, optim_effectors=False, draw=False)
+import time
 
-#~ pid = act(8,0,optim_effectors = False)
+#DEMO METHODS
 
 
-from derivative_filters import *
-
-#~ res = computeSecondOrderPolynomialFitting(m, dt, 11)
-#~ (x, dx, ddx) = res
-
-import matplotlib.pyplot as plt
-import plot_utils 
-
-#~ plt.plot(ddx[0,:].A.squeeze())
-#~ plt.show()
-
-from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import trajec_mil
-from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import trajec
-from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import coms
-
-#~ plt.plot(x[0,:].A.squeeze())
-#~ plt.plot(dx[0,:].A.squeeze())
-#~ plt.plot(ddx[2,:].A.squeeze())
-#~ plt.plot(dx[0,:].A.squeeze())
-#~ plt.plot(x[0,:].A.squeeze())
-
-#~ plt.show()
-
-#~ testc= []
-#~ trajec_mil = trajec
-sample = len(trajec_mil)
-
-dt_me = 1./24.
-dt = 1./1000.
-
-res = zeros((3, sample))
-
-for i,q in enumerate(trajec_mil[:sample]):
-	fullBody.setCurrentConfig(q) 
-	c = fullBody.getCenterOfMass()
-	res[:,i] = c
+def initConfig():
+	r.client.gui.setVisibility("hyq", "ON")
+	tp.cl.problem.selectProblem("default")
+	tp.r.client.gui.setVisibility("toto", "OFF")
+	tp.r.client.gui.setVisibility("hyq_trunk", "OFF")
+	r(q_init)
 	
-#~ for i,q in enumerate(trajec):
-	#~ fullBody.setCurrentConfig(q) 
-	#~ c = fullBody.getCenterOfMass()
-	#~ testc += [array(c)]
+def endConfig():
+	r.client.gui.setVisibility("hyq", "ON")
+	tp.cl.problem.selectProblem("default")
+	tp.r.client.gui.setVisibility("toto", "OFF")
+	tp.r.client.gui.setVisibility("hyq_trunk", "OFF")
+	r(q_goal)
 	
 
-#~ testddc = [2 *(testc[i-1] - testc[i])  for i in range(1, len(testc))]
-#~ testddcx = [ddc[0] for ddc in testddc]
-#~ testcx = [c[0] for c in testc]
+def rootPath():
+	r.client.gui.setVisibility("hyq", "OFF")
+	tp.cl.problem.selectProblem("rbprm_path")
+	tp.r.client.gui.setVisibility("toto", "OFF")
+	r.client.gui.setVisibility("hyq", "OFF")
+	r.client.gui.setVisibility("hyq_trunk", "ON")
+	tp.pp(0)
+	r.client.gui.setVisibility("hyq_trunk", "OFF")
+	r.client.gui.setVisibility("hyq", "ON")
+	tp.cl.problem.selectProblem("default")
+	
+def genPlan():
+	r.client.gui.setVisibility("hyq", "ON")
+	tp.cl.problem.selectProblem("default")
+	tp.r.client.gui.setVisibility("toto", "OFF")
+	tp.r.client.gui.setVisibility("hyq_trunk", "OFF")
+	global configs
+	start = time.clock() 
+	configs = fullBody.interpolate(0.12, 10, 10, True)
+	end = time.clock() 
+	print "Contact plan generated in " + str(end-start) + "seconds"
+	
+def contactPlan():
+	tp.cl.problem.selectProblem("default")
+	r.client.gui.setVisibility("hyq", "ON")
+	tp.r.client.gui.setVisibility("toto", "OFF")
+	tp.r.client.gui.setVisibility("hyq_trunk", "OFF")
+	for i in range(1,len(configs)):
+		r(configs[i]);
+		time.sleep(0.5)		
+		
+def interpolate():
+	tp.cl.problem.selectProblem("default")
+	r.client.gui.setVisibility("hyq", "ON")
+	tp.r.client.gui.setVisibility("toto", "OFF")
+	tp.r.client.gui.setVisibility("hyq_trunk", "OFF")
+	for i in range(7,20):
+		act(i,1,optim_effectors=True)
+		
+def play(frame_rate = 1./24.):
+	play_traj(fullBody,pp,frame_rate)
+	
 
-#~ cs = res
-#~ res = zeros((3, 100))
-#~ for c in cs:
-	#~ res[:,i] = c	
-m = matrix(res)
+		
+def a():
+	print "initial configuration"
+	initConfig()
+		
+def b():
+	print "end configuration"
+	endConfig()
+		
+def c():
+	print "displaying root path"
+	rootPath()
+	
+def d():
+	print "computing contact plan"
+	genPlan()
+	
+def e():
+	print "displaying contact plan"
+	contactPlan()
+	
+def f():
+	print "computing feasible com trajectory"
+	interpolate()
 
+def g():
+	print "playing feasible trajectory"
+	play()
 
-from derivative_filters import *
-
-res = computeSecondOrderPolynomialFitting(m, dt, 51)
-(x, dx, ddx) = res
-
-
-import matplotlib.pyplot as plt
-import plot_utils 
-
-#~ if(conf.SHOW_FIGURES and conf.PLOT_REF_COM_TRAJ):
-#~ plt.plot(x[0,:].A.squeeze())
-#~ plt.plot(dx[0,:].A.squeeze())
-plt.plot(ddx[0,:].A.squeeze())
-#~ plt.plot(x[0,:].A.squeeze())
-#~ plt.plot(testddcx)
-#~ plt.plot(testcx)
-#~ plt.show()
-
-
+print "Root path generated in " + str(tp.t) + " ms."
 	

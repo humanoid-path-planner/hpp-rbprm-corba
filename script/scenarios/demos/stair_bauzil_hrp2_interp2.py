@@ -2,7 +2,8 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 
-import stair_bauzil_hrp2_path as tp
+import stair_bauzil_hrp2_path2 as tp
+import time
 
 
 
@@ -75,8 +76,8 @@ lLegx = 0.05; lLegy = 0.05
 #~ fullBody.addLimb(lKneeId,lLeg,lKnee,lLegOffset,lLegNormal, lLegx, lLegy, 10000, 0.01)
  #~ 
 
-fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
-fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
+#~ fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
+#~ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 
 #~ fullBody.client.basic.robot.setJointConfig('LARM_JOINT0',[1])
 #~ fullBody.client.basic.robot.setJointConfig('RARM_JOINT0',[-1])
@@ -96,6 +97,8 @@ q_init =  [
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # LLEG       25-30
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # RLEG       31-36
         ]; r (q_init)
+        
+q_init[0:7] = tp.q_init[0:7]
 
 fullBody.setCurrentConfig (q_goal)
 #~ r(q_goal)
@@ -140,13 +143,85 @@ from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import step, clean,stats,
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
-def act(i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True, verbose = False, draw = False, trackedEffectors = []):
+def act(i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True, verbose = False, draw = False):
 	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, 0.4, optim_effectors = optim_effectors, time_scale = 20., useCOMConstraints = True, use_window = use_window,
-	verbose = verbose, draw = draw, trackedEffectors = trackedEffectors)
+	verbose = verbose, draw = draw)
 
 def play(frame_rate = 1./24.):
 	play_traj(fullBody,pp,frame_rate)
 	
 def saveAll(name):
 	saveAllData(fullBody, r, name)
+	
+
+def initConfig():
+	r.client.gui.setVisibility("hrp2_14", "ON")
+	tp.cl.problem.selectProblem("default")
+	tp.r.client.gui.setVisibility("toto", "OFF")
+	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
+	r(q_init)
+	
+def endConfig():
+	r.client.gui.setVisibility("hrp2_14", "ON")
+	tp.cl.problem.selectProblem("default")
+	tp.r.client.gui.setVisibility("toto", "OFF")
+	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
+	r(q_goal)
+	
+
+def rootPath():
+	tp.cl.problem.selectProblem("rbprm_path")
+	r.client.gui.setVisibility("hrp2_14", "OFF")
+	tp.r.client.gui.setVisibility("toto", "OFF")
+	r.client.gui.setVisibility("hyq", "OFF")
+	r.client.gui.setVisibility("hrp2_trunk_flexible", "ON")
+	tp.pp(0)
+	r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
+	r.client.gui.setVisibility("hyq", "ON")
+	tp.cl.problem.selectProblem("default")
+	
+def genPlan():
+	r.client.gui.setVisibility("hrp2_14", "ON")
+	tp.cl.problem.selectProblem("default")
+	tp.r.client.gui.setVisibility("toto", "OFF")
+	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
+	global configs
+	start = time.clock() 
+	configs = configs = fullBody.interpolate(0.1, True)
+	end = time.clock() 
+	print "Contact plan generated in " + str(end-start) + "seconds"
+	
+def contactPlan():
+	tp.cl.problem.selectProblem("default")
+	r.client.gui.setVisibility("hrp2_14", "ON")
+	tp.r.client.gui.setVisibility("toto", "OFF")
+	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
+	for i in range(0,len(configs)-1):
+		r(configs[i]);
+		time.sleep(0.5)		
+		
+		
+def a():
+	print "initial configuration"
+	initConfig()
+		
+def b():
+	print "end configuration"
+	endConfig()
+		
+def c():
+	print "displaying root path"
+	rootPath()
+	
+def d():
+	print "computing contact plan"
+	genPlan()
+	
+def e():
+	print "displaying contact plan"
+	contactPlan()
+	
+print "Root path generated in " + str(tp.t) + " ms."
+	
+
 

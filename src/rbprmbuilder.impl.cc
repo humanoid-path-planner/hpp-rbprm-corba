@@ -26,6 +26,8 @@
 #include "hpp/rbprm/interpolation/com-rrt.hh"
 #include "hpp/rbprm/interpolation/com-trajectory.hh"
 #include "hpp/rbprm/interpolation/spline/effector-rrt.hh"
+#include "hpp/rbprm/projection/projection.hh"
+#include "hpp/rbprm/contact_generation/contact_generation.hh"
 #include "hpp/rbprm/stability/stability.hh"
 #include "hpp/rbprm/sampling/sample-db.hh"
 #include "hpp/model/urdf/util.hh"
@@ -40,6 +42,7 @@
 #include <hpp/rbprm/planner/dynamic-planner.hh>
 #include <hpp/rbprm/planner/rbprm-steering-kinodynamic.hh>
 #include <hpp/model/configuration.hh>
+#include <algorithm>    // std::random_shuffle
 
 #ifdef PROFILE
     #include "hpp/rbprm/rbprm-profiler.hh"
@@ -645,6 +648,7 @@ namespace hpp {
 
         }
         lastStatesComputed_.push_back(state);
+        lastStatesComputedTime_.push_back(std::make_pair(-1., state));
         return lastStatesComputed_.size()-1;
     }
 
@@ -821,6 +825,104 @@ namespace hpp {
         }
     }
 
+    hpp::floatSeqSeq* RbprmBuilder::getContactSamplesProjected(const char* limbname,
+                                        const hpp::floatSeq& configuration,
+                                        const hpp::floatSeq& direction,
+                                        unsigned short numSamples) throw (hpp::Error)
+    {
+        if(!fullBodyLoaded_)
+            throw Error ("No full body robot was loaded");
+        try
+        {
+            fcl::Vec3f dir;
+            for(std::size_t i =0; i <3; ++i)
+            {
+                dir[i] = direction[(_CORBA_ULong)i];
+            }
+            model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
+            fullBody_->device_->currentConfiguration(config);
+
+            sampling::T_OctreeReport finalSet;
+            rbprm::T_Limb::const_iterator lit = fullBody_->GetLimbs().find(std::string(limbname));
+            if(lit == fullBody_->GetLimbs().end())
+            {
+                throw std::runtime_error ("Impossible to find limb for joint "
+                                          + std::string(limbname) + " to robot; limb not defined.");
+            }
+            const RbPrmLimbPtr_t& limb = lit->second;
+            fcl::Transform3f transform = limb->octreeRoot(); // get root transform from configuration
+                        // TODO fix as in rbprm-fullbody.cc!!
+            const affMap_t &affMap = problemSolver_->map
+                        <std::vector<boost::shared_ptr<model::CollisionObject> > > ();
+            if (affMap.empty ())
+            {
+                throw hpp::Error ("No affordances found. Unable to interpolate.");
+            }
+            const model::ObjectVector_t objects = contact::getAffObjectsForLimb(std::string(limbname), affMap,
+                                                                       bindShooter_.affFilter_);
+
+            std::vector<sampling::T_OctreeReport> reports(objects.size());
+            std::size_t i (0);
+            //#pragma omp parallel for
+            for(model::ObjectVector_t::const_iterator oit = objects.begin();
+                oit != objects.end(); ++oit, ++i)
+            {
+                sampling::GetCandidates(limb->sampleContainer_, transform, *oit, dir, reports[i]);
+            }
+            for(std::vector<sampling::T_OctreeReport>::const_iterator cit = reports.begin();
+                cit != reports.end(); ++cit)
+            {
+                finalSet.insert(cit->begin(), cit->end());
+            }
+            // randomize samples
+            std::random_shuffle(reports.begin(), reports.end());
+            unsigned short num_samples_ok (0);
+            bool success(false);
+            model::Configuration_t sampleConfig = config;
+            std::vector<model::Configuration_t> results;
+            sampling::T_OctreeReport::const_iterator candCit = finalSet.begin();
+            for(std::size_t i=0; i< _CORBA_ULong(finalSet.size()) && num_samples_ok < numSamples; ++i, ++candCit)
+            {
+                const sampling::OctreeReport& report = *candCit;
+                success = false;
+                State state;
+                state.configuration_ = config;
+                hpp::rbprm::projection::ProjectionReport rep =
+                hpp::rbprm::projection::projectSampleToObstacle(fullBody_,std::string(limbname), limb, report, fullBody_->GetCollisionValidation(), sampleConfig, state);
+                if(rep.success_)
+                {
+                    results.push_back(sampleConfig);
+                    ++num_samples_ok;
+                }
+            }
+            hpp::floatSeqSeq *res;
+            res = new hpp::floatSeqSeq ();
+
+            res->length ((_CORBA_ULong)results.size ());
+            i=0;
+            std::size_t id = 0;
+            for(std::vector<model::Configuration_t>::const_iterator cit = results.begin();
+                        cit != results.end(); ++cit, ++id)
+            {
+                /*std::cout << "ID " << id;
+                cit->print();*/
+                const core::Configuration_t& config = *cit;
+                _CORBA_ULong size = (_CORBA_ULong) config.size ();
+                double* dofArray = hpp::floatSeq::allocbuf(size);
+                hpp::floatSeq floats (size, size, dofArray, true);
+                //convert the config in dofseq
+                for (model::size_type j=0 ; j < config.size() ; ++j) {
+                  dofArray[j] = config [j];
+                }
+                (*res) [(_CORBA_ULong)i] = floats;
+                ++i;
+            }
+            return res;
+        } catch (const std::exception& exc) {
+        throw hpp::Error (exc.what ());
+        }
+    }
+
     hpp::floatSeq* RbprmBuilder::getSamplesIdsInOctreeNode(const char* limb,
                                                            double octreeNodeId) throw (hpp::Error)
     {
@@ -906,8 +1008,6 @@ namespace hpp {
 			hpp::rbprm::RbPrmFullBodyPtr_t fullBody, const hpp::floatSeq& configuration,
             std::vector<std::string>& names)
     {
-      std::cout<<"setPositonAndNormal"<<std::endl;
-
         core::Configuration_t old = fullBody->device_->currentConfiguration();
         model::Configuration_t config = dofArrayToConfig (fullBody->device_, configuration);
         fullBody->device_->currentConfiguration(config);
@@ -933,6 +1033,7 @@ namespace hpp {
         state.nbContacts = state.contactNormals_.size() ;
         state.configuration_ = config;
         state.robustness =  stability::IsStable(fullBody,state);
+        std::cout  << "is stable " << state.robustness << std::endl;
         state.stable = state.robustness >= 0;
         fullBody->device_->currentConfiguration(old);
     }
@@ -1130,6 +1231,7 @@ namespace hpp {
             success = true;
             return intermediary;
         }
+        std::cout << "no contact break during intermediary phase " << std::endl;
         return firstState;
     }
 
@@ -1987,8 +2089,6 @@ assert(s2 == s1 +1);
 
     CORBA::Short RbprmBuilder::isConfigBalanced(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs, double robustnessTreshold) throw (hpp::Error)
     {
-      std::cout<<"isConfigBalanced"<<std::endl;
-
         try{
         rbprm::State testedState;
         model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);

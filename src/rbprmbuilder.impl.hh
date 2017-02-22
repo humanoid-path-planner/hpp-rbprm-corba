@@ -139,6 +139,11 @@ namespace hpp {
                                                    const hpp::floatSeq& configuration,
                                                    const hpp::floatSeq& direction) throw (hpp::Error);
 
+        virtual hpp::floatSeqSeq* getContactSamplesProjected(const char* limb,
+                                                   const hpp::floatSeq& configuration,
+                                                   const hpp::floatSeq& direction,
+                                                   unsigned short numSamples) throw (hpp::Error);
+
         virtual hpp::floatSeq* getSamplesIdsInOctreeNode(const char* limb,
                                                    double octreeNodeId) throw (hpp::Error);
 

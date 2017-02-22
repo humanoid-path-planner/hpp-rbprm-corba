@@ -31,7 +31,9 @@ rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRoms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 rbprmBuilder.setJointBounds ("base_joint_xyz", [0,2, -1, 1, 0, 2.2])
 #~ rbprmBuilder.setFilter(['hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom'])
+
 rbprmBuilder.setAffordanceFilter('3Rarm', ['Support'])
+rbprmBuilder.setAffordanceFilter('4Larm', ['Support'])
 rbprmBuilder.setAffordanceFilter('0rLeg', ['Support',])
 rbprmBuilder.setAffordanceFilter('1lLeg', ['Support'])
 #~ rbprmBuilder.setNormalFilter('hrp2_rarm_rom', [0,0,1], 0.5)
@@ -49,14 +51,15 @@ r = Viewer (ps)
 
 
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init [0:3] = [0, -0.82, 0.648702]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
-q_init [0:3] = [0.1, -0.82, 0.648702]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+q_init [0:3] =  [1.49, -0.65, 1.25]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+#~ q_init [0:3] = [0, 0, 0.648702]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+q_init [3:7] = [0, 0, 0, 1 ]
 #~ q_init [0:3] = [0, -0.63, 0.6]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 #~ q_init [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
 
 q_goal = q_init [::]
-q_goal [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
-q_goal [0:3] = [1.49, -0.65, 1.25]; r (q_goal)
+#~ q_goal [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
+q_goal [0:3] = [0, 0, 0.648702]; r (q_goal)
 #~ q_goal [0:3] = [1.2, -0.65, 1.1]; r (q_goal)
 
 #~ ps.addPathOptimizer("GradientBased")
@@ -102,7 +105,7 @@ rbprmBuilder2 = Robot ("toto")
 ps2 = ProblemSolver( rbprmBuilder2 )
 cl.problem.selectProblem("default")
 cl.problem.movePathToProblem(1,"rbprm_path",rbprmBuilder.getAllJointNames())
-r2 = Viewer (ps2, viewerClient=r.client)
+r2 = Viewer (ps2)
 r.client.gui.setVisibility("toto", "OFF")
-r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
+r.client.gui.setVisibility("hrp2_trunk_flexible", "ON")
 #~ r2(q_far)
