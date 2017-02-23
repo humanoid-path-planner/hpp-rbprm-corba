@@ -26,7 +26,7 @@ urdfName = 'hrp2_trunk_flexible'
 urdfNameRom =  ['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = 2;
+vMax = 4;
 aMax = 6;
 extraDof = 6
 
@@ -48,7 +48,7 @@ rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
 # We also bound the rotations of the torso. (z, y, x)
 rbprmBuilder.boundSO3([-0.1,0.1,-0.65,0.65,-0.2,0.2])
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
-rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-2,2,-0.5,0.5,-2,2,0,0,0,0,0,0])
+rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-4,4,-1,1,-2,2,0,0,0,0,0,0])
 indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.basic.robot.getDimensionExtraConfigSpace()
 
 # Creating an instance of HPP problem solver and the viewer
@@ -105,8 +105,29 @@ r(q_init)
 
 #r.solveAndDisplay("rm",1,0.01)
 
+"""
+t = ps.solve()
 
-ps.solve()
+if isinstance(t, list):
+	ts = t[0]* 3600. + t[1] * 60. + t[2] + t[3]/1000.	
+
+f= open("/local/dev_hpp/logs/benchHrp2_slope_LP.txt","a")
+f.write("t = "+str(ts))
+f.close()
+"""
+
+
+for i in range(0,50):
+  t = ps.solve()
+  if isinstance(t, list):
+    ts = t[0]* 3600. + t[1] * 60. + t[2] + t[3]/1000.	
+  f= open("/local/dev_hpp/logs/benchHrp2_slope_LP.txt","a")
+  f.write("t = "+str(ts) + "\n")
+  f.write("path_length = "+str(ps.client.problem.pathLength(i)) + "\n")
+  f.close()
+  print "problem "+str(i)+"solved \n"
+  ps.clearRoadmap()
+
 
 #ps.client.problem.prepareSolveStepByStep()
 
