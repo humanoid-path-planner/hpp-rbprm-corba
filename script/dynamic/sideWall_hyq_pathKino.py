@@ -9,6 +9,7 @@ rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
 meshPackageName = 'hpp-rbprm-corba'
 # URDF file describing the trunk of the robot HyQ
+#~ urdfName = 'hyq_trunk_large'
 urdfName = 'hyq_trunk_large'
 # URDF files describing the reachable workspace of each limb of HyQ
 urdfNameRom = ['hyq_lhleg_rom','hyq_lfleg_rom','hyq_rfleg_rom','hyq_rhleg_rom']
@@ -52,7 +53,7 @@ r.addLandmark(r.sceneName,1)
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init [0:3] = [1, 0, 0.8]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 q_goal = q_init [::]
-q_goal [0:3] = [5.5, 0, 0.8]
+q_goal [0:3] = [5.5, 0, 0.9]
 #q_goal[0:3]=[3,-4,0.4]#position easy
 #q_goal[7:10]=[0,0,0]#velocity
 r (q_goal)

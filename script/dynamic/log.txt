@@ -1,0 +1,2400 @@
+CORBA: POA child already exists.
+CORBA: Create POA: name = rbprmChild
+BODY
+CHEST_LINK0
+HEAD_LINK0
+HEAD_LINK1
+base_link
+torso
+Scaling image '/home/stonneau/dev/hpp/install/share/hrp2_14_description/meshes/emblem.gif' from (500,500) to (512,512)
+base_link
+Creating face
+Creating face
+Creating face
+Creating face
+List of Nodes in group :0_scene_hpp_
+	hrp2_trunk_flexible
+	Vec_Velocity
+	Vec_Acceleration
+	planning
+Creating face
+Creating face
+Creating face
+Creating face
+Creating face
+Creating face
+Creating face
+Creating face
+Creating face
+Creating face
+Creating face
+Creating face
+Creating face
+Creating face
+Creating face
+Creating face
+List of Nodes in group :0_scene_hpp_
+	Support
+	hrp2_trunk_flexible
+	Vec_Velocity
+	Vec_Acceleration
+	planning
+No Node named "hrp2_trunk_flexible/"
+seed = 1487774757
+Error : you need at least 11 extra DOF
+Error : you need at least 22 extra DOF
+here
+No Node named "hrp2_trunk_flexible/"
+[33m[ WARN] [1487774757.333337501]: Group 'r_arm' is empty.[0m
+[33m[ WARN] [1487774757.333378240]: Group 'l_arm' is empty.[0m
+[33m[ WARN] [1487774757.333401940]: Group 'r_leg' is empty.[0m
+[33m[ WARN] [1487774757.333424183]: Group 'l_leg' is empty.[0m
+[33m[ WARN] [1487774757.333848631]: Link 'Accelerometer' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.333857147]: Link 'Gyro' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.333869391]: Link 'camera_bottom_left' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.333877262]: Link 'camera_bottom_left' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.333884984]: Link 'camera_bottom_right' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.333892361]: Link 'camera_bottom_right' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.333899673]: Link 'camera_top_left' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.333906996]: Link 'camera_top_left' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.333914284]: Link 'camera_top_right' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.333921344]: Link 'camera_top_right' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.333928658]: Link 'gaze' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.333952246]: Link 'LHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.333959426]: Link 'LHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.333976277]: Link 'l_gripper' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.333993914]: Link 'LHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334003592]: Link 'LHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334020098]: Link 'LHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334035616]: Link 'LeftHandForceSensor' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334047001]: Link 'RHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334054035]: Link 'RHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334069824]: Link 'r_gripper' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334078213]: Link 'RHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334085307]: Link 'RHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334092273]: Link 'RHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334099763]: Link 'RightHandForceSensor' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334113490]: Link 'LeftFootForceSensor' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334121173]: Link 'l_sole' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334136514]: Link 'RightFootForceSensor' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334144165]: Link 'r_sole' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334155274]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334162518]: Link 'RHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334169708]: Link 'LHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334176741]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334183578]: Link 'LHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334190383]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334197187]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334227033]: Link 'RHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334234728]: Link 'LHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334241681]: Link 'LHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334248575]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334255435]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334351413]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334359409]: Link 'RHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334366794]: Link 'RHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334389397]: Link 'RHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334396548]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334403729]: Link 'RHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334410766]: Link 'RHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334417811]: Link 'RHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334431560]: Link 'LHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334438720]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334445777]: Link 'LHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334452738]: Link 'LHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334459689]: Link 'LHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334476489]: Link 'LHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334483457]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334490377]: Link 'LHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334497338]: Link 'LHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334504190]: Link 'LHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334518947]: Link 'LHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334526082]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334533051]: Link 'LHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334539969]: Link 'LHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334546824]: Link 'LHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334557908]: Link 'LHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334567707]: Link 'LHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334579078]: Link 'LHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334586006]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334592959]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334599848]: Link 'LHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334606652]: Link 'LHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334613577]: Link 'LHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334620544]: Link 'LHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334635808]: Link 'LHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334643217]: Link 'LHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334694459]: Link 'RHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334702496]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334709883]: Link 'RHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334717010]: Link 'RHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334724085]: Link 'RHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334734849]: Link 'RHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334742013]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334749037]: Link 'RHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334756133]: Link 'RHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334763126]: Link 'RHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334772023]: Link 'RHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334779142]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334786136]: Link 'RHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334793335]: Link 'RHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334800449]: Link 'RHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334807709]: Link 'RHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334814898]: Link 'RHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334848178]: Link 'LHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334855654]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334862846]: Link 'LHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334870021]: Link 'LHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334877058]: Link 'LHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334893551]: Link 'RHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334900980]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334908036]: Link 'RHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334914966]: Link 'RHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334922026]: Link 'RHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334934844]: Link 'RHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334941869]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334948787]: Link 'RHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334955761]: Link 'RHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334962835]: Link 'RHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334977230]: Link 'LHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334984424]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334991495]: Link 'LHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.334998567]: Link 'LHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335013466]: Link 'LHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335025667]: Link 'LHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335033022]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335040162]: Link 'LHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335047347]: Link 'LHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335054493]: Link 'LHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335065398]: Link 'RHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335072619]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335079880]: Link 'RHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335087028]: Link 'RHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335094262]: Link 'RHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335106787]: Link 'RHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335114005]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335121039]: Link 'RHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335128066]: Link 'RHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335135161]: Link 'RHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335148908]: Link 'LHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335156428]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335163785]: Link 'LHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335170953]: Link 'LHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335178189]: Link 'LHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335191565]: Link 'LHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335198840]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335205942]: Link 'LHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335212972]: Link 'LHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335219970]: Link 'LHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335226964]: Link 'LHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335236809]: Link 'RHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335243921]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335250975]: Link 'RHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335257968]: Link 'RHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335264910]: Link 'RHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335273867]: Link 'LHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335281007]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335288075]: Link 'LHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335295078]: Link 'LHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335302106]: Link 'LHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335312838]: Link 'RHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335327089]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335334397]: Link 'RHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335341562]: Link 'RHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335348714]: Link 'RHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335357757]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335364856]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335371865]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335378795]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335385838]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335392725]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335399645]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335406666]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335413682]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335420673]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335427667]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335434571]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335441460]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335448472]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335455447]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335462347]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335469225]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335476113]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335483034]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335490095]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335497288]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335504446]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335511478]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335518394]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335525225]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335532047]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335538944]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335545777]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335552744]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335559691]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335566553]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335573473]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335580312]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335587128]: Link 'RHAND_LINK1' is not known to URDFBODY
+CHEST_LINK0
+HEAD_LINK0
+HEAD_LINK1
+LARM_LINK0
+LARM_LINK1
+LARM_LINK2
+LARM_LINK3
+LARM_LINK4
+LARM_LINK6
+LLEG_LINK0
+LLEG_LINK1
+LLEG_LINK2
+LLEG_LINK3
+LLEG_LINK4
+RARM_LINK0
+RARM_LINK1
+RARM_LINK2
+RARM_LINK3
+RARM_LINK4
+RARM_LINK6
+RLEG_LINK0
+RLEG_LINK1
+RLEG_LINK2
+RLEG_LINK3
+RLEG_LINK4
+base_link
+l_ankle
+l_wrist
+r_ankle
+r_wrist
+torso
+Scaling image '/home/stonneau/dev/hpp/install/share/hrp2_14_description/meshes/emblem.gif' from (500,500) to (512,512)
+No Node named "hrp2_14/"
+No Node named "hrp2_14/"
+No Node named "hrp2_14/"
+No Node named "hrp2_14/"
+. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335600863]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335608013]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335615025]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335622001]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335628934]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335635958]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335642875]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335649767]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335656617]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335663477]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335670714]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335677905]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335685124]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335692300]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335699371]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335706346]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335716217]: Link 'LHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335723227]: Link 'LHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335732191]: Link 'RHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335741775]: Link 'RHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335748943]: Link 'RHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335759518]: Link 'RHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335766543]: Link 'RHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335775453]: Link 'LHAND_LINK1' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335782543]: Link 'LHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335789554]: Link 'LHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335814533]: Link 'RHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335821669]: Link 'RHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335828747]: Link 'RHAND_LINK4' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335835936]: Link 'LHAND_LINK2' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335842993]: Link 'LHAND_LINK3' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335849914]: Link 'LHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335856851]: Link 'LHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335863668]: Link 'RHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335870525]: Link 'RHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+[33m[ WARN] [1487774757.335877413]: Link 'RHAND_LINK0' is not known to URDF. Cannot disable collisons.[0m
+is stable 6.64489
+is stable -58.0026
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_rarm_rom
+try to add contact hrp2_rarm_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+GE OUT
+contact candidates 
+candiddates 
+candidate hrp2_rleg_rom
+try to add contact hrp2_rleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+Contact repositionning occured 1
+(successes) 124
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+empty LIST, NOT STABLE
+contact candidates 
+candiddates 
+candidate hrp2_lleg_rom
+try to add contact hrp2_lleg_rom0
+success 
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+set col free other limb 
+success ?  1
+MAINTAIN SUCCESS 
+
+contact candidates 
+candiddates 
+state VALID no new contacts
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_lleg_rom
+candidate hrp2_rleg_rom
+trying to maintain 
+candiddates 
+candidate hrp2_rarm_rom
+candidate hrp2_rleg_rom
+Contact repositionning occured 2
+(successes) 148
+Node "toto" doesn't exist.
+No Node named "hrp2_14/"
+No Node named "hrp2_14/"
+No Node named "hrp2_14/"
+No Node named "hrp2_14/"
+No Node named "hrp2_14/"
+Python 2.7.6 (default, Oct 26 2016, 20:30:19) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 1.2.1 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+No values found for velocity and acceleration bounds, use 1 by default
+number of configs : 6

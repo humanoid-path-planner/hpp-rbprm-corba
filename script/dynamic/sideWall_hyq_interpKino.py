@@ -45,10 +45,10 @@ lLegId = 'lhleg'
 rarmId = 'rhleg'
 larmId = 'lfleg'
 
-addLimbDb(rLegId, "EFORT_Normal")
-addLimbDb(lLegId, "EFORT_Normal")
-addLimbDb(rarmId, "EFORT_Normal")
-addLimbDb(larmId, "EFORT_Normal")
+addLimbDb(rLegId, "manipulability")
+addLimbDb(lLegId, "manipulability")
+addLimbDb(rarmId, "manipulability")
+addLimbDb(larmId, "manipulability")
 
 q_0 = fullBody.getCurrentConfig(); 
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.ps.configAtParam(0,0.01)[0:7] # use this to get the correct orientation
@@ -81,7 +81,8 @@ fullBody.setEndState(q_goal,[larmId,rLegId,rarmId,lLegId])
 r(q_init)
 # computing the contact sequence
 
-configs = fullBody.interpolate(0.08,pathId=1,robustnessTreshold = 2, filterStates = True)
+#~ configs = fullBody.interpolate(0.08,pathId=1,robustnessTreshold = 2, filterStates = True)
+configs = fullBody.interpolate(0.001,pathId=1,robustnessTreshold = 2, filterStates = True)
 
 
 print "number of configs =", len(configs)
@@ -93,10 +94,10 @@ pp = PathPlayer (fullBody.client.basic, r)
 from fullBodyPlayer import Player
 player = Player(fullBody,pp,tp,configs,draw=True,optim_effector=False,use_velocity=dynamic,pathId = 1)
 
-#player.displayContactPlan()
+player.displayContactPlan()
 
-r(configs[15])
-player.interpolate(10,100)
+#~ r(configs[15])
+#~ player.interpolate(10,100)
 
 #player.play()
 
