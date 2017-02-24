@@ -117,7 +117,7 @@ f.close()
 """
 
 
-for i in range(0,50):
+for i in range(0,9):
   t = ps.solve()
   if isinstance(t, list):
     ts = t[0]* 3600. + t[1] * 60. + t[2] + t[3]/1000.	
@@ -125,9 +125,9 @@ for i in range(0,50):
   f.write("t = "+str(ts) + "\n")
   f.write("path_length = "+str(ps.client.problem.pathLength(i)) + "\n")
   f.close()
-  print "problem "+str(i)+"solved \n"
-  ps.clearRoadmap()
+  print "problem "+str(i)+" solved \n"
 
+  ps.clearRoadmap()
 
 #ps.client.problem.prepareSolveStepByStep()
 
