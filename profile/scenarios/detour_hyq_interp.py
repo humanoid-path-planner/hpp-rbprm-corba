@@ -5,7 +5,7 @@ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
 
 #calling script darpa_hyq_path to compute root path
-import slalom_hyq_pathKino as tp
+import detour_hyq_path as tp
 
 from os import environ
 ins_dir = environ['DEVEL_DIR']
@@ -26,7 +26,7 @@ srdfSuffix = ""
 fullBody = FullBody () 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 fullBody.client.basic.robot.setDimensionExtraConfigSpace(tp.extraDof)
-fullBody.setJointBounds ("base_joint_xyz", [-6,6, -2.5, 2.5, 0.0, 1.])
+fullBody.setJointBounds  ("base_joint_xyz", [-2.5,2.5, -6, 6, 0.6, 0.65])
 
 #  Setting a number of sample configurations used
 nbSamples = 20000
@@ -89,12 +89,10 @@ r(q_init)
 
 configs = fullBody.interpolate(0.001,pathId=pathId,robustnessTreshold = 0, filterStates = True)
 
-
+"""
 print "number of configs =", len(configs)
 r(configs[-1])
 
-
-"""
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 

@@ -7,9 +7,9 @@ import datetime
 import time
 
 #~ scenarios = ['standing_hrp2']
-scenarios = ['ground_crouch_hyq']
+scenarios = ['slalom_hyq']
 #~ scenarios = ['stair_bauzil_hrp2']
-n_trials = 200
+n_trials = 20
 
 stats = ['balance','collision','ik']
 stats_optim = ['time_cwc','com_traj']
@@ -206,11 +206,10 @@ def analyzeData():
 				printOneStatOptim(f, stat, d)
 		f.write ("\n \n \n")
 	f.close()
-	
 for scenario in scenarios:
-	#~ for i in range(0,n_trials):
-		#~ var = scenario+python_script_extension;
-		#~ sp.check_call(["./profile.sh", str(var)]);
-		#~ time.sleep(3)
-	parseData(scenario)
+  for i in range(0,n_trials):
+    var = scenario+python_script_extension;
+    sp.check_call(["./profile.sh", str(var)]);
+    time.sleep(3)
+  parseData(scenario)
 analyzeData()

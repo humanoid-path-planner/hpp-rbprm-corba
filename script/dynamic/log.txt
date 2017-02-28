@@ -2398,3 +2398,21 @@ help      -> Python's own help system.
 object?   -> Details about 'object', use 'object??' for extra details.
 No values found for velocity and acceleration bounds, use 1 by default
 number of configs : 6
+
+*** PROFILING RESULTS [ms] (min - avg - max - total time - nSamples) ***
+collision                               0.14	0.17	0.23	14.09	82
+complete generation                     11917.31	11917.31	11917.31	11917.31	1
+ik                                      0.07	0.07	0.12	6.10	82
+test balance                            0.08	0.13	0.19	10.90	82
+contact: 86
+planner succeeded: 1
+unstable contact: 4
+
+*** PROFILING RESULTS [ms] (min - avg - max - total time - nSamples) ***
+collision                               0.14	0.17	0.23	24.22	144
+complete generation                     17669.82	17669.82	17669.82	17669.82	1
+ik                                      0.07	0.08	0.12	10.86	144
+test balance                            0.08	0.13	0.20	19.30	144
+contact: 150
+planner succeeded: 1
+unstable contact: 2
