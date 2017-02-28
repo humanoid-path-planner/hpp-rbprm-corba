@@ -2433,3 +2433,24 @@ test balance                            0.15	0.20	0.27	3.33	17
 contact: 19
 no contact: 11
 planner succeeded: 1
+contact: 49
+planner failed: 1
+unstable contact: 5
+contact: 73
+planner failed: 2
+unstable contact: 5
+contact: 30
+planner failed: 1
+unstable contact: 5
+contact: 48
+planner failed: 1
+unstable contact: 5
+
+*** PROFILING RESULTS [ms] (min - avg - max - total time - nSamples) ***
+collision                               0.14	0.30	0.68	61.75	204
+complete generation                     2547.60	2547.60	2547.60	2547.60	1
+ik                                      0.04	0.08	0.18	16.71	215
+test balance                            0.08	0.12	0.26	24.76	204
+contact: 207
+planner succeeded: 1
+unstable contact: 5
