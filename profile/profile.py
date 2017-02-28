@@ -9,7 +9,7 @@ import time
 #~ scenarios = ['standing_hrp2']
 scenarios = ['darpa_hyq']
 #~ scenarios = ['stair_bauzil_hrp2']
-n_trials = 20
+n_trials = 10
 
 stats = ['balance','collision','ik']
 stats_optim = ['time_cwc','com_traj']

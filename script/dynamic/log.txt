@@ -2487,3 +2487,75 @@ test balance                            0.08	0.16	0.30	20.33	127
 contact: 133
 planner succeeded: 1
 unstable contact: 2
+contact: 10
+no contact: 3
+planner failed: 1
+unstable contact: 1
+contact: 15
+no contact: 6
+planner failed: 2
+unstable contact: 1
+contact: 9
+no contact: 4
+planner failed: 1
+unstable contact: 1
+contact: 8
+no contact: 3
+planner failed: 1
+unstable contact: 1
+contact: 136
+planner failed: 1
+unstable contact: 1
+contact: 508
+planner failed: 1
+unstable contact: 1
+contact: 9
+no contact: 2
+planner failed: 1
+unstable contact: 1
+contact: 296
+planner failed: 1
+unstable contact: 1
+contact: 269
+planner failed: 1
+contact: 400
+planner failed: 1
+contact: 90
+planner failed: 1
+unstable contact: 1
+contact: 256
+planner failed: 1
+unstable contact: 1
+contact: 254
+planner failed: 1
+unstable contact: 1
+contact: 535
+planner failed: 1
+unstable contact: 1
+contact: 100
+planner failed: 1
+unstable contact: 1
+contact: 72
+planner failed: 1
+unstable contact: 1
+contact: 361
+planner failed: 1
+unstable contact: 1
+contact: 420
+planner failed: 1
+unstable contact: 1
+contact: 9
+no contact: 3
+planner failed: 1
+contact: 264
+planner failed: 1
+unstable contact: 1
+
+*** PROFILING RESULTS [ms] (min - avg - max - total time - nSamples) ***
+collision                               0.04	0.12	0.44	38.60	324
+complete generation                     40886.81	40886.81	40886.81	40886.81	1
+ik                                      0.04	0.09	0.20	37.89	423
+test balance                            0.10	0.15	0.25	21.70	146
+contact: 150
+planner succeeded: 1
+unstable contact: 4

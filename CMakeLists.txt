@@ -215,6 +215,7 @@ install(FILES
 	data/meshes/hyq/hyq_trunk_large.stl
 	data/meshes/hyq/hyq_trunk_large2.stl
 	data/meshes/hyq/hyq_trunk_large3.stl
+	data/meshes/hyq/hyq_trunk_large4.stl
 	data/meshes/hyq/hyq_rom.stl
 	data/meshes/hyq/hyq_rhleg_rom.stl
 	data/meshes/hyq/hyq_rfleg_rom.stl
