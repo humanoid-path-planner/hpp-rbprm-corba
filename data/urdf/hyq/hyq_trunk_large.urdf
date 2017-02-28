@@ -16,7 +16,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" scale="5 5 5"/>
       <geometry>
-        <mesh filename="package://hpp-rbprm-corba/meshes/hyq/hyq_trunk_large2.stl" scale="1 1 1"/>
+        <mesh filename="package://hpp-rbprm-corba/meshes/hyq/hyq_trunk_large.stl" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>

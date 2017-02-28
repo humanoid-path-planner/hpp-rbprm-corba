@@ -7,9 +7,9 @@ import datetime
 import time
 
 #~ scenarios = ['standing_hrp2']
-scenarios = ['wall_hrp2']
+scenarios = ['darpa_hyq']
 #~ scenarios = ['stair_bauzil_hrp2']
-n_trials = 50
+n_trials = 20
 
 stats = ['balance','collision','ik']
 stats_optim = ['time_cwc','com_traj']
