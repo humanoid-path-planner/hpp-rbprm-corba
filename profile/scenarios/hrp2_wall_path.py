@@ -93,16 +93,13 @@ ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
 ps.selectPathPlanner("DynamicPlanner")
 
-#t = ps.solve ()
 
-
-ps.client.problem.prepareSolveStepByStep()
-
-
-ps.client.problem.finishSolveStepByStep()
-
-
-
+t = ps.solve ()
+if isinstance(t, list):
+	t = t[0]* 3600000 + t[1] * 60000 + t[2] * 1000 + t[3]
+f = open('log.txt', 'a')
+f.write("path computation " + str(t) + "\n")
+f.close()
 
 
 # Playing the computed path

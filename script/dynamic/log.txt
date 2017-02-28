@@ -2418,3 +2418,18 @@ planner succeeded: 1
 unstable contact: 2
 path computation 887965
 path computation 2632519
+contact: 5
+no contact: 3
+planner failed: 1
+contact: 8
+no contact: 5
+planner failed: 2
+
+*** PROFILING RESULTS [ms] (min - avg - max - total time - nSamples) ***
+collision                               0.07	0.19	0.66	348.35	1855
+complete generation                     13143.06	13143.06	13143.06	13143.06	1
+ik                                      0.09	0.31	1.17	1448.63	4741
+test balance                            0.15	0.20	0.27	3.33	17
+contact: 19
+no contact: 11
+planner succeeded: 1
