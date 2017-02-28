@@ -104,17 +104,14 @@ ps.selectPathPlanner("DynamicPlanner")
 ps.solve()
 
 # was 5.5
-ps.client.problem.extractPath(0,5.7,ps.client.problem.pathLength(0))
-
 
 
 # Playing the computed path
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
-pp.dt=1/30.
 #r.client.gui.removeFromGroup("rm",r.sceneName)
-pp.displayVelocityPath(1)
-pp.speed=0.25
+pp.displayVelocityPath(0)
+pp.speed=0.3
 #pp(0)
 
 
