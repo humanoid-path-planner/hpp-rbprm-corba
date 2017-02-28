@@ -34,7 +34,7 @@ extraDof = 6
 rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 #rbprmBuilder.setJointBounds ("base_joint_xyz", [-1.25,2, -0.5, 5.5, 0.6, 1.8])
-rbprmBuilder.setJointBounds ("base_joint_xyz", [-2,4, 0, 2, 0.2, 1.8])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [-2,4, 0.5, 1.5, 0.2, 1.8])
 rbprmBuilder.setJointBounds('CHEST_JOINT0',[0,0])
 rbprmBuilder.setJointBounds('CHEST_JOINT1',[-0.35,0.1])
 rbprmBuilder.setJointBounds('HEAD_JOINT0',[0,0])
@@ -83,7 +83,7 @@ q_goal = q_init [::]
 
 q_goal[3:7] = [1,0,0,0]
 q_goal[8] = 0
-q_goal [0:3] = [3, 1, 0.55]; r (q_goal)
+q_goal [0:3] = [3.3, 1, 0.55]; r (q_goal)
 
 r (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
@@ -105,18 +105,15 @@ r(q_init)
 
 #r.solveAndDisplay("rm",1,0.01)
 
-"""
-t = ps.solve()
-
+t = ps.solve ()
 if isinstance(t, list):
-	ts = t[0]* 3600. + t[1] * 60. + t[2] + t[3]/1000.	
-
-f= open("/local/dev_hpp/logs/benchHrp2_slope_LP.txt","a")
-f.write("t = "+str(ts))
+	t = t[0]* 3600000 + t[1] * 60000 + t[2] * 1000 + t[3]
+f = open('log.txt', 'a')
+f.write("path computation " + str(t) + "\n")
 f.close()
+
+
 """
-
-
 for i in range(0,9):
   t = ps.solve()
   if isinstance(t, list):
@@ -126,9 +123,8 @@ for i in range(0,9):
   f.write("path_length = "+str(ps.client.problem.pathLength(i)) + "\n")
   f.close()
   print "problem "+str(i)+" solved \n"
-
   ps.clearRoadmap()
-
+"""
 #ps.client.problem.prepareSolveStepByStep()
 
 #ps.client.problem.finishSolveStepByStep()
@@ -160,7 +156,14 @@ for i in range(0,ps.numberNodes()):
   r.client.gui.removeFromGroup("vecRM"+str(i),r.sceneName)
 
 """
+from hpp.gepetto import PathPlayer
+pp = PathPlayer (rbprmBuilder.client.basic, r)
+pp.dt=0.03
+pp.displayVelocityPath(0)
+r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
 
+
+"""
 # for seed 1486657707
 ps.client.problem.extractPath(0,0,2.15) 
 
@@ -173,7 +176,7 @@ r.client.gui.setVisibility("path_1_root","ALWAYS_ON_TOP")
 #display path
 pp.speed=0.3
 #pp (0)
-
+"""
 #display path with post-optimisation
 
 

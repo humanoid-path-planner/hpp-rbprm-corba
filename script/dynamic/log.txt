@@ -2416,3 +2416,5 @@ test balance                            0.08	0.13	0.20	19.30	144
 contact: 150
 planner succeeded: 1
 unstable contact: 2
+path computation 887965
+path computation 2632519

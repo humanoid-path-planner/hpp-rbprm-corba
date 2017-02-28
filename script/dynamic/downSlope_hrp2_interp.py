@@ -95,11 +95,11 @@ fullBody.setEndState(q_goal,[rLegId,lLegId])
 
 
 
-configs = fullBody.interpolate(0.07,pathId=pId,robustnessTreshold = 3, filterStates = True)
+configs = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = 3, filterStates = True)
 print "number of configs :", len(configs)
 r(configs[-1])
 
-
+"""
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
@@ -111,7 +111,7 @@ player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=
 
 player.interpolate(4,5)
 
-
+"""
 
 """
 import hpp.corbaserver.rbprm.tools.cwc_trajectory
