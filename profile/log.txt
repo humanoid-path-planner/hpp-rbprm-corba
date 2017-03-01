@@ -1,5 +1,0 @@
-path computation 190045
-contact: 114
-no contact: 2
-planner failed: 1
-unstable contact: 4
