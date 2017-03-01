@@ -7,9 +7,9 @@ import datetime
 import time
 
 #~ scenarios = ['standing_hrp2']
-scenarios = ['downSlope_hrp2']
+scenarios = ['downSlope_easy_hrp2']
 #~ scenarios = ['stair_bauzil_hrp2']
-n_trials = 4
+n_trials = 20
 
 stats = ['balance','collision','ik']
 stats_optim = ['time_cwc','com_traj']
