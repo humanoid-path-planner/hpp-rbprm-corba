@@ -95,9 +95,10 @@ fullBody.setEndState(q_goal,[rLegId,lLegId])
 
 
 
-configs = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = 3, filterStates = True)
+configs = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = 0, filterStates = True)
 print "number of configs :", len(configs)
 r(configs[-1])
+time.sleep(5)
 
 """
 from hpp.gepetto import PathPlayer
