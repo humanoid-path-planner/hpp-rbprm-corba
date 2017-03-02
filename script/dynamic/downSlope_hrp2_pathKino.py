@@ -106,12 +106,21 @@ r(q_init)
 #r.solveAndDisplay("rm",1,0.01)
 
 t = ps.solve ()
+
+from hpp.gepetto import PathPlayer
+pp = PathPlayer (rbprmBuilder.client.basic, r)
+pp.dt=0.03
+pp.displayVelocityPath(0)
+r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
+
+
+"""
 if isinstance(t, list):
 	t = t[0]* 3600000 + t[1] * 60000 + t[2] * 1000 + t[3]
 f = open('log.txt', 'a')
 f.write("path computation " + str(t) + "\n")
 f.close()
-
+"""
 
 """
 for i in range(0,9):
@@ -156,11 +165,6 @@ for i in range(0,ps.numberNodes()):
   r.client.gui.removeFromGroup("vecRM"+str(i),r.sceneName)
 
 """
-from hpp.gepetto import PathPlayer
-pp = PathPlayer (rbprmBuilder.client.basic, r)
-pp.dt=0.03
-pp.displayVelocityPath(0)
-r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
 
 
 """

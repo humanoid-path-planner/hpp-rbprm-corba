@@ -19,7 +19,7 @@ pId = tp.ps.numberPaths() -1
 fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz",  [-2,5, 0, 2, 0.45, 1.8])
+fullBody.setJointBounds ("base_joint_xyz",  [-2,5, 0.5, 1.5, 0.3, 1.8])
 fullBody.client.basic.robot.setDimensionExtraConfigSpace(tp.extraDof)
 
 ps = tp.ProblemSolver( fullBody )

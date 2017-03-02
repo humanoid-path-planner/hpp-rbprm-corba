@@ -133,12 +133,15 @@ def __getTimes(fullBody, configs, i, time_scale,use_window=0):
 		trunk_distance =  np.linalg.norm(np.array(configs[i+1][0:3]) - np.array(configs[i][0:3]))
 		distance = max(fullBody.getEffectorDistance(i,i+1), trunk_distance)
 		# TODO : si t = 0, hardcoded ...
-		if t <= dt:
+		if t <= dt*6.:
 				print "WARNING : in getTime, t=0"
-				t = 0.1
+				t = dt*6.
 				use_window = use_window+1
-		times = [0.02 , 0] #FIXME : hardcoded value depend on interpolation step choosen (not available here)
+		times = [dt*2. , 0] #FIXME : hardcoded value depend on interpolation step choosen (not available here)
+		if t > dt*14.:
+			times = [dt*4. , 0]
 		times[1] = t - 2*times[0]
+		times[1] = float((int)(math.floor(times[1]*100.))) / 100.
 		print "times : ",times
 		return times, dt, distance,use_window
 

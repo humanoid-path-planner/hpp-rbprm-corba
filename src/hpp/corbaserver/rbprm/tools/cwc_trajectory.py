@@ -131,7 +131,7 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 		if(COMConstraints != None and COMConstraints1 != None):
 			COMConstraints += COMConstraints1;
 		t_end_phases += [t_end_phases[-1] + t for t in t_end_phases1[1:]]
-	initial_guess = compute_initial_guess(fullBody,t_end_phases,pathId,state_id)
+	initial_guess = compute_initial_guess(fullBody,t_end_phases,pathId,state_id,dt)
 	if (not profile):
 			print "num cones ", len(cones)
 			print "end_phases", t_end_phases
@@ -163,7 +163,7 @@ reduce_ineq = True, verbose = False, limbsCOMConstraints = None, profile = False
 		var_final['c'] = var_final['c'][:init_waypoint_time+1]
 		var_final['dc'] = var_final['dc'][:init_waypoint_time+1]
 		var_final['ddc'] = var_final['ddc'][:init_waypoint_time+1]
-		params["t_init_phases"] = params["t_init_phases"][:-3*use_window]
+		params["t_init_phases"] = params["t_init_phases"][:4]
 		print "trying to project on com (from, to) ", init_end_com, var_final['c'][-1]
 		if (fullBody.projectStateToCOM(state_id+1, (var_final['c'][-1]).tolist())):
 			#~ print "PROJECTED", init_end_com, var_final['c'][-1]
