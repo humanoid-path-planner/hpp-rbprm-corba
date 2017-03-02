@@ -136,7 +136,7 @@ def __getTimes(fullBody, configs, i, time_scale,use_window=0):
 		if t <= dt*6.:
 				print "WARNING : in getTime, t=0"
 				t = dt*6.
-				use_window = use_window+1
+				use_window = 2
 		times = [dt*2. , 0] #FIXME : hardcoded value depend on interpolation step choosen (not available here)
 		if t > dt*14.:
 			times = [dt*4. , 0]

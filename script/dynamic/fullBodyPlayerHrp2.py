@@ -11,15 +11,15 @@ class Player(object):
         self.configs=configs
         self.rLegId = 'hrp2_rleg_rom'
         self.lLegId = 'hrp2_lleg_rom'
-        self.rarmId = 'hrp2_rarm_rom'
+        #self.rarmId = 'hrp2_rarm_rom'
         self.draw=draw
         self.pathId = pathId
         self.use_velocity = use_velocity
         self.optim_effector = optim_effector
         self.use_window = use_window
         self.limbsCOMConstraints = { self.rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},  
-				self.lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'},
-				self.rarmId : {'file': "hrp2/RA_com.ineq", 'effector' : 'RARM_JOINT5'} }
+				self.lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}}
+				#self.rarmId : {'file': "hrp2/RA_com.ineq", 'effector' : 'RARM_JOINT5'} }
 
 
     def act(self,i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True, time_scale = 1,  verbose = True, draw = False, trackedEffectors = []):
@@ -93,7 +93,7 @@ class Player(object):
       for i in range(begin,end):
           self.act(i,1,use_window=self.use_window,optim_effectors=self.optim_effector,draw=self.draw)
 		
-    def play(self,frame_rate = 1./24.):
+    def play(self,frame_rate = 1./30.):
 	    play_traj(self.fullBody,self.pp,frame_rate)
 	
 

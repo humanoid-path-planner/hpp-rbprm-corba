@@ -27,7 +27,7 @@ urdfNameRom =  ['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
 vMax = 4;
-aMax = 6;
+aMax = 5;
 extraDof = 6
 
 # Creating an instance of the helper class, and loading the robot
@@ -84,7 +84,7 @@ q_goal = q_init [::]
 
 q_goal[3:7] = [1,0,0,0]
 q_goal[8] = 0
-q_goal [0:3] = [2.5, 1, 0.5]; r (q_goal)
+q_goal [0:3] = [3, 1, 0.55]; r (q_goal)
 
 r (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
@@ -106,13 +106,24 @@ r(q_init)
 
 #r.solveAndDisplay("rm",1,0.01)
 
-t = ps.solve ()
+
+
+ps.client.problem.prepareSolveStepByStep()
+pbCl = rbprmBuilder.client.basic.problem
+q1= [0.2, 1, 0.5, 1, 0, 0, 0, 0.0, 0, 0.0, 0.0, 4, 0.0, -1.5, 0.0, 0.0, 0.0]
+pbCl.addConfigToRoadmap (q1)
+pbCl.directPath(q1,q_goal,True)
+pbCl.directPath(q_init,q1,False)
+pbCl.addEdgeToRoadmap (q_init, q1, 1, False)
+pbCl.addEdgeToRoadmap (q1, q_goal, 0, False)
+ps.client.problem.finishSolveStepByStep()
 
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp.dt=0.03
-pp.displayVelocityPath(0)
-r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
+pp.speed=0.1
+pp.displayVelocityPath(2)
+r.client.gui.setVisibility("path_2_root","ALWAYS_ON_TOP")
 
 
 """
@@ -198,6 +209,12 @@ r(q_far)
 
  # Manually add waypoints to roadmap:
 """
+
+r.client.gui.removeFromGroup("path_"+str(ps.numberPaths()-2)+"_root",r.sceneName)
+pp.displayVelocityPath(ps.numberPaths()-1)
+
+
+
 ps.client.problem.prepareSolveStepByStep()
 pbCl = rbprmBuilder.client.basic.problem
 q1= [0.6, 1, 0.5, 1, 0, 0, 0, 0.0, 0, 0.0, 0.0, 3, 0.0, -1.5, 0.0, 0.0, 0.0]
@@ -208,8 +225,7 @@ pbCl.addConfigToRoadmap (q1)
 pbCl.directPath(q1,q_goal,True)
 
 pbCl.directPath(q_init,q1,False)
-r.client.gui.removeFromGroup("path_"+str(ps.numberPaths()-2)+"_root",r.sceneName)
-pp.displayVelocityPath(ps.numberPaths()-1)
+
 
 pbCl.addEdgeToRoadmap (q_init, q1, 1, False)
 pbCl.addEdgeToRoadmap (q1, q_goal, 0, False)

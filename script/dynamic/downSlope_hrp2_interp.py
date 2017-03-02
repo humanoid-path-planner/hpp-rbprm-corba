@@ -2,7 +2,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 
-import downSlope_hrp2_pathKino as tp
+import downSlope_hrp2_waypoint as tp
 import time
 
 
@@ -70,8 +70,8 @@ q_goal[configSize+3:configSize+6] = acc_goal[::]
 
 
 # FIXME : test
-q_init[2] = q_init[2]+0.15
-q_goal[2] = q_goal[2]+0.15
+q_init[2] = q_init[2]+0.1
+q_goal[2] = q_goal[2]+0.1
 
 fullBody.setStaticStability(False)
 # Randomly generating a contact configuration at q_init
@@ -94,21 +94,20 @@ fullBody.setStartState(q_init,[rLegId,lLegId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])
 
 
-"""
+
 
 
 fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
 fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 
 
-"""
 
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
 import fullBodyPlayerHrp2
 
-configs = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = 0, filterStates = True)
+configs = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = 1, filterStates = True)
 print "number of configs :", len(configs)
 r(configs[-1])
 
