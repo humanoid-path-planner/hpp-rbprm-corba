@@ -83,7 +83,7 @@ q_goal = q_init [::]
 
 q_goal[3:7] = [1,0,0,0]
 q_goal[8] = 0
-q_goal [0:3] = [3.3, 1, 0.55]; r (q_goal)
+q_goal [0:3] = [2, 1, 0.55]; r (q_goal)
 
 r (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)

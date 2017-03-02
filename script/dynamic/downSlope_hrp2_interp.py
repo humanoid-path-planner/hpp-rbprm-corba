@@ -19,7 +19,7 @@ pId = tp.ps.numberPaths() -1
 fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz",  [-2,5, 0.5, 1.5, 0.3, 1.8])
+fullBody.setJointBounds ("base_joint_xyz",  [-2,4, 0.5, 1.5, 0.3, 1.8])
 fullBody.client.basic.robot.setDimensionExtraConfigSpace(tp.extraDof)
 
 ps = tp.ProblemSolver( fullBody )
@@ -61,7 +61,7 @@ acc_init = tp.ps.configAtParam(pId,0.01)[tp.indexECS+3:tp.indexECS+6]
 dir_goal = tp.ps.configAtParam(pId,tp.ps.pathLength(pId)-0.01)[tp.indexECS:tp.indexECS+3]
 acc_goal = tp.ps.configAtParam(pId,tp.ps.pathLength(pId)-0.01)[tp.indexECS+3:tp.indexECS+6]
 
-robTreshold = 3
+robTreshold = 1
 # copy extraconfig for start and init configurations
 q_init[configSize:configSize+3] = dir_init[::]
 q_init[configSize+3:configSize+6] = acc_init[::]
@@ -94,24 +94,33 @@ fullBody.setStartState(q_init,[rLegId,lLegId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])
 
 
+"""
 
-configs = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = 3, filterStates = True)
-print "number of configs :", len(configs)
-r(configs[-1])
+
+fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
+fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
+
 
 """
+
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
 import fullBodyPlayerHrp2
 
+configs = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = 0, filterStates = True)
+print "number of configs :", len(configs)
+r(configs[-1])
+
+
+
 player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=1,optim_effector=False,use_velocity=True,pathId = pId)
 
-#player.displayContactPlan()
+player.displayContactPlan()
 
-player.interpolate(4,5)
+player.interpolate(4,20)
 
-"""
+
 
 """
 import hpp.corbaserver.rbprm.tools.cwc_trajectory
