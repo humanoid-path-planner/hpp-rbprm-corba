@@ -6,7 +6,7 @@ rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
 meshPackageName = 'hpp-rbprm-corba'
 # URDF file describing the trunk of the robot HyQ
-urdfName = 'hyq_trunk_large'
+urdfName = 'hyq_trunk'
 # URDF files describing the reachable workspace of each limb of HyQ
 urdfNameRom = ['hyq_lhleg_rom','hyq_lfleg_rom','hyq_rfleg_rom','hyq_rhleg_rom']
 urdfSuffix = ""
