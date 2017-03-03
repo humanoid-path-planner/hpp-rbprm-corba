@@ -27,7 +27,7 @@ urdfNameRom =  ['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
 vMax = 4;
-aMax = 5;
+aMax = 4.5;
 extraDof = 6
 
 # Creating an instance of the helper class, and loading the robot
@@ -84,7 +84,7 @@ q_goal = q_init [::]
 
 q_goal[3:7] = [1,0,0,0]
 q_goal[8] = 0
-q_goal [0:3] = [3, 1, 0.55]; r (q_goal)
+q_goal [0:3] = [2.5, 1, 0.55]; r (q_goal)
 
 r (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
@@ -111,11 +111,16 @@ r(q_init)
 ps.client.problem.prepareSolveStepByStep()
 pbCl = rbprmBuilder.client.basic.problem
 q1= [0.2, 1, 0.5, 1, 0, 0, 0, 0.0, 0, 0.0, 0.0, 4, 0.0, -1.5, 0.0, 0.0, 0.0]
+q2= q_goal[::]
+
 pbCl.addConfigToRoadmap (q1)
-pbCl.directPath(q1,q_goal,True)
+
 pbCl.directPath(q_init,q1,False)
-pbCl.addEdgeToRoadmap (q_init, q1, 1, False)
-pbCl.addEdgeToRoadmap (q1, q_goal, 0, False)
+pbCl.directPath(q1,q_goal,True)
+
+pbCl.addEdgeToRoadmap (q_init, q1, 0, False)
+pbCl.addEdgeToRoadmap (q1, q_goal, 1, False)
+
 ps.client.problem.finishSolveStepByStep()
 
 from hpp.gepetto import PathPlayer

@@ -33,14 +33,14 @@ rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,0,-0.105]
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "manipulability", 0.1)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "forward", 0.1)
 
 lLegId = 'hrp2_lleg_rom'
 lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,0,-0.105]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "manipulability", 0.1)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "forward", 0.1)
 
 
 
@@ -59,14 +59,14 @@ q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.ps.configAtParam(pId,tp.p
 dir_init = tp.ps.configAtParam(pId,0.01)[tp.indexECS:tp.indexECS+3]
 acc_init = tp.ps.configAtParam(pId,0.01)[tp.indexECS+3:tp.indexECS+6]
 dir_goal = tp.ps.configAtParam(pId,tp.ps.pathLength(pId)-0.01)[tp.indexECS:tp.indexECS+3]
-acc_goal = tp.ps.configAtParam(pId,tp.ps.pathLength(pId)-0.01)[tp.indexECS+3:tp.indexECS+6]
+acc_goal = [0,0,0]
 
-robTreshold = 1
+robTreshold = 3
 # copy extraconfig for start and init configurations
 q_init[configSize:configSize+3] = dir_init[::]
 q_init[configSize+3:configSize+6] = acc_init[::]
 q_goal[configSize:configSize+3] = dir_goal[::]
-q_goal[configSize+3:configSize+6] = acc_goal[::]
+q_goal[configSize+3:configSize+6] = [0,0,0]
 
 
 # FIXME : test
@@ -113,11 +113,11 @@ r(configs[-1])
 
 
 
-player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=1,optim_effector=False,use_velocity=True,pathId = pId)
+player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=1,optim_effector=True,use_velocity=True,pathId = pId)
 
 player.displayContactPlan()
 
-player.interpolate(4,20)
+player.interpolate(0,len(configs)-1)
 
 
 

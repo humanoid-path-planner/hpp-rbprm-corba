@@ -91,7 +91,9 @@ class Player(object):
       self.tp.r.client.gui.setVisibility("toto", "OFF")
       self.tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
       for i in range(begin,end):
-          self.act(i,1,use_window=self.use_window,optim_effectors=self.optim_effector,draw=self.draw)
+          self.viewer(self.configs[i])
+          self.act(i,20,use_window=self.use_window,optim_effectors=self.optim_effector,draw=self.draw)
+
 		
     def play(self,frame_rate = 1./30.):
 	    play_traj(self.fullBody,self.pp,frame_rate)
