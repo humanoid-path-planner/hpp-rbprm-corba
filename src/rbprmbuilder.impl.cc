@@ -1646,6 +1646,8 @@ assert(s2 == s1 +1);
                                     unsigned short cT1, unsigned short cT2, unsigned short cT3,
                                     unsigned short numOptimizations)  throw (hpp::Error)
     {
+        hppDout(notice,"########## begin rrt for state "<<state1<<" ###########");
+
         try
         {
             std::vector<CORBA::Short> pathsIds;
@@ -1689,7 +1691,7 @@ assert(s2 == s1 +1);
             {
                 std::cout << "could not project without collision at state " << s1  << std::endl;
                 rport->print(std::cout);
-                //throw std::runtime_error ("could not project without collision at state " + s1 );
+                throw std::runtime_error ("could not project without collision at state " + s1 );
             }
 
             try{
