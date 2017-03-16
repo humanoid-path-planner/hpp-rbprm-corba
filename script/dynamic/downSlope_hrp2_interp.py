@@ -115,9 +115,11 @@ r(configs[-1])
 
 player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=1,optim_effector=True,use_velocity=True,pathId = pId)
 
-player.displayContactPlan()
 
-player.interpolate(0,len(configs)-1)
+
+player.displayContactPlan(10.)
+
+player.interpolate(2,len(configs)-1)
 
 
 

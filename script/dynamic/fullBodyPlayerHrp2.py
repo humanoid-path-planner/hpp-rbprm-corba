@@ -76,13 +76,17 @@ class Player(object):
       end = time.clock() 
       print "Contact plan generated in " + str(end-start) + "seconds"
 	
-    def displayContactPlan(self,pause = 0.5):
+    def displayContactPlan(self,timeScale = 1.):
       self.viewer.client.gui.setVisibility("hrp2_14", "ON")
       self.tp.r.client.gui.setVisibility("toto", "OFF")
       self.tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
+      previousTime = self.fullBody.getTimeAtState(0)
       for i in range(0,len(self.configs)-1):
         self.viewer(self.configs[i]);
-        time.sleep(pause)		
+        time.sleep(timeScale)
+        #nextTime = self.fullBody.getTimeAtState(i+1)
+        #time.sleep((nextTime-previousTime)*timeScale)
+        #previousTime=nextTime		
 		
     def interpolate(self,begin=1,end=0):
       if end==0:

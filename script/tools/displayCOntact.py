@@ -32,10 +32,22 @@ quat = rbprmBuilder.quaternionFromVector(v[3:6])
 v[3:7] = quat[::]
 r.client.gui.addArrow(name,0.02,1,color)
 r.client.gui.addToGroup(name,r.sceneName)
-r.client.gui.setVisibility(name,"ALWAYS_ON_TOP")
+r.client.gui.setVisibility(name,"ON")
 r.client.gui.applyConfiguration(name,v)
 r.client.gui.refresh()
 
+
+
+
+#COM : 
+
+r.client.gui.addSphere("scom",0.01,r.color.red)
+r.client.gui.setVisibility("scom","ALWAYS_ON_TOP")
+r.client.gui.addToGroup("scom",r.sceneName)
+r.addLandmark("scom",2)
+
+r.client.gui.applyConfiguration("scom",q+[0,0,-1,0])
+r.client.gui.refresh()
 
 
 """"""""""""""""""""""""""""""""""""""""""""
