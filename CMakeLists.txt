@@ -111,6 +111,7 @@ install(FILES
 	data/urdf/downSlope_easy.urdf
 	data/urdf/downSlope_easy20.urdf
 	data/urdf/slalom.urdf
+	data/urdf/flat_step.urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
   )
 install(FILES
@@ -159,6 +160,7 @@ install(FILES
 	data/srdf/downSlope_easy.srdf
 	data/srdf/downSlope_easy20.srdf
 	data/srdf/slalom.srdf
+	data/srdf/flat_step.srdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
   )
 install(FILES
@@ -212,6 +214,7 @@ install(FILES
 	data/meshes/downSlope_easy20.stl
 	data/meshes/downSlope2.stl
 	data/meshes/slalom.stl
+	data/meshes/flat_step.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
   )
 install(FILES
