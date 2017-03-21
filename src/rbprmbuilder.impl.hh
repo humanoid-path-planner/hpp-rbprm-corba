@@ -33,6 +33,7 @@
 # include <hpp/rbprm/rbprm-path-validation.hh>
 # include <hpp/fcl/BVH/BVH_model.h>
 # include <hpp/core/config-validations.hh>
+#include <hpp/rbprm/dynamic/dynamic-path-validation.hh>
 namespace hpp {
   namespace rbprm {
     namespace impl {
@@ -75,6 +76,41 @@ namespace hpp {
             problemSolver_->problem()->configValidation(core::ConfigValidations::create ());
             problemSolver_->problem()->configValidations()->add(validation);
             return collisionChecking;
+        }
+
+        hpp::core::PathValidationPtr_t createDynamicPathValidation (const hpp::model::DevicePtr_t& robot, const hpp::model::value_type& val)
+        {
+          hpp::model::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::model::RbPrmDevice>(robot);
+          affMap_ = problemSolver_->map
+            <std::vector<boost::shared_ptr<model::CollisionObject> > > ();
+          if (affMap_.empty ()) {
+            throw hpp::Error ("No affordances found. Unable to create Path Validaton object.");
+          }
+          hpp::rbprm::RbPrmValidationPtr_t validation
+            (hpp::rbprm::RbPrmValidation::create(robotcast, romFilter_, affFilter_, affMap_));
+          hpp::rbprm::DynamicPathValidationPtr_t collisionChecking = hpp::rbprm::DynamicPathValidation::create(robot,val);
+          collisionChecking->add (validation);
+          problemSolver_->problem()->configValidation(core::ConfigValidations::create ());
+          problemSolver_->problem()->configValidations()->add(validation);
+          // build the dynamicValidation :
+          double sizeFootX,sizeFootY,mass,mu;
+          bool rectangularContact;
+          try {
+            sizeFootX = problemSolver_->problem()->get<double> (std::string("sizeFootX"))/2.;
+            sizeFootY = problemSolver_->problem()->get<double> (std::string("sizeFootY"))/2.;
+            rectangularContact = 1;
+          } catch (const std::exception& e) {
+            hppDout(warning,"Warning : size of foot not definied, use 0 (contact point)");
+            sizeFootX =0;
+            sizeFootY =0;
+            rectangularContact = 0;
+          }
+          mass = robot->mass();
+          mu = 0.5; // FIXME : store it in problem ?
+          DynamicValidationPtr_t dynamicVal = DynamicValidation::create(rectangularContact,sizeFootX,sizeFootY,mass,mu);
+          collisionChecking->addDynamicValidator(dynamicVal);
+
+          return collisionChecking;
         }
 
         hpp::core::ProblemSolverPtr_t problemSolver_;

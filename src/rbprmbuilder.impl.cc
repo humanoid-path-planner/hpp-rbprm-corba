@@ -2248,6 +2248,8 @@ assert(s2 == s1 +1);
                                                    boost::bind(&BindShooter::create, boost::ref(bindShooter_), _1));
         problemSolver->add<core::PathValidationBuilder_t>("RbprmPathValidation",
                                                    boost::bind(&BindShooter::createPathValidation, boost::ref(bindShooter_), _1, _2));
+        problemSolver->add<core::PathValidationBuilder_t>("RbprmDynamicPathValidation",
+                                                   boost::bind(&BindShooter::createDynamicPathValidation, boost::ref(bindShooter_), _1, _2));
         problemSolver->add<core::PathPlannerBuilder_t>("DynamicPlanner",DynamicPlanner::createWithRoadmap);
         problemSolver->add <core::SteeringMethodBuilder_t> ("RBPRMKinodynamic", SteeringMethodKinodynamic::create);
 
