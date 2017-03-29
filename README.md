@@ -47,10 +47,10 @@ To install hpp-rbprm-corba:
 
   - Make sure to install hyq.urdf in $HPP_DEVEL_DIR/install/share/hpp-rbprm-corba/
 
-  - The planning is decomposed in two phases / scripts. First, a root path is computed (\*_path.py files). Then, the contacts are generated along the computed path (\*_interp.py files). The scripts are located in the folder /scripts/scenarios/demos.
+  - The planning is decomposed in two phases / scripts. First, a root path is computed (\*_path.py files). Then, the contacts are generated along the computed path (\*_interp.py files). The scripts are located in the folder /scripts/demos.
 
   - To see the different steps of the process run
 
-    ```$ ./run.sh darpa_hyq_path.py```
+    ```$ ./run.sh darpa_hyq.py```
 
   The script include comments explaining the different calls to the library. You can call the different methods a() ... d() to see the different steps of the planning.
