@@ -48,10 +48,10 @@ lLegId = 'lhleg'
 rarmId = 'rhleg'
 larmId = 'lfleg'
 
-addLimbDb(rLegId, "forward")
-addLimbDb(lLegId, "forward")
-addLimbDb(rarmId, "forward")
-addLimbDb(larmId, "forward")
+addLimbDb(rLegId, "manipulability")
+addLimbDb(lLegId, "manipulability")
+addLimbDb(rarmId, "manipulability")
+addLimbDb(larmId, "manipulability")
 
 q_0 = fullBody.getCurrentConfig(); 
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.ps.configAtParam(0,0.01)[0:7] # use this to get the correct orientation
@@ -83,10 +83,9 @@ fullBody.setEndState(q_goal,[larmId,rLegId,rarmId,lLegId])
 
 r(q_init)
 # computing the contact sequence
-# configs = fullBody.interpolate(0.12, 10, 10, True) #Was this (Pierre)
-configs = fullBody.interpolate(0.1,pathId=0,robustnessTreshold = 5, filterStates = True)
-#~ configs = fullBody.interpolate(0.11, 7, 10, True)
-#~ configs = fullBody.interpolate(0.1, 1, 5, True)
+
+configs = fullBody.interpolate(0.001,pathId=0,robustnessTreshold = 0, filterStates = True)
+r(configs[-1])
 
 #~ r.loadObstacleModel ('hpp-rbprm-corba', "darpa", "contact")
 

@@ -83,10 +83,10 @@ class Player(object):
       previousTime = self.fullBody.getTimeAtState(0)
       for i in range(0,len(self.configs)-1):
         self.viewer(self.configs[i]);
-        time.sleep(timeScale)
-        #nextTime = self.fullBody.getTimeAtState(i+1)
-        #time.sleep((nextTime-previousTime)*timeScale)
-        #previousTime=nextTime		
+        #time.sleep(timeScale)
+        nextTime = self.fullBody.getTimeAtState(i+1)
+        time.sleep((nextTime-previousTime)*timeScale)
+        previousTime=nextTime		
 		
     def interpolate(self,begin=1,end=0):
       if end==0:
