@@ -513,9 +513,14 @@ module hpp
     /// \param logFile name of the file where to dump the profiling data
     void dumpProfile(in string logFile) raises (Error);
 
-		/// return the time at the given state index
-		/// \param stateId index of the state
-		double getTimeAtState(in unsigned short stateId) raises (Error);
+	/// return the time at the given state index
+	/// \param stateId index of the state
+	double getTimeAtState(in unsigned short stateId) raises (Error);
+
+	/// return the contacts variation between two states
+	/// \param stateIdFrom : index of the first state
+	/// \param stateIdTo : index of the second state
+    Names_t getContactsVariations(in unsigned short stateIdFrom,in unsigned short stateIdTo) raises (Error);
 
   }; // interface Robot
   }; // module rbprm

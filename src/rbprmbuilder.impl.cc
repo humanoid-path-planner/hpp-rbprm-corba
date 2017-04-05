@@ -43,7 +43,7 @@
 #include <hpp/rbprm/planner/rbprm-steering-kinodynamic.hh>
 #include <hpp/model/configuration.hh>
 #include <algorithm>    // std::random_shuffle
-
+#include <hpp/rbprm/interpolation/time-constraint-helper.hh>
 #ifdef PROFILE
     #include "hpp/rbprm/rbprm-profiler.hh"
 #endif
@@ -1113,6 +1113,36 @@ namespace hpp {
       }
     }
 
+    Names_t* RbprmBuilder::getContactsVariations(unsigned short stateIdFrom,unsigned short stateIdTo )throw (hpp::Error){
+      try
+      {
+          if(lastStatesComputed_.size() == 0)
+          {
+              throw std::runtime_error ("states not yet computed, call interpolate() first.");
+          }
+          if(lastStatesComputedTime_.size() <= stateIdFrom){
+            throw std::runtime_error ("invalid state id : "+std::string(""+stateIdFrom)+" number of state = "+std::string(""+lastStatesComputedTime_.size()));
+          }
+          if(lastStatesComputedTime_.size() <= stateIdTo){
+            throw std::runtime_error ("invalid state id : "+std::string(""+stateIdTo)+" number of state = "+std::string(""+lastStatesComputedTime_.size()));
+          }
+          State stateFrom = lastStatesComputed_[stateIdFrom];
+          State stateTo = lastStatesComputed_[stateIdTo];
+          std::vector<std::string> variations_s = stateTo.allVariations(stateFrom,rbprm::interpolation::extractEffectorsName(fullBody_->GetLimbs()));
+          CORBA::ULong size = (CORBA::ULong) variations_s.size ();
+          char** nameList = Names_t::allocbuf(size);
+          Names_t *variations = new Names_t (size,size,nameList);
+          for (std::size_t i = 0 ; i < variations_s.size() ; ++i){
+            nameList[i] = (char*) malloc (sizeof(char)*(variations_s[i].length ()+1));
+            strcpy (nameList [i], variations_s[i].c_str ());
+          }
+          return variations;
+      }
+      catch(std::runtime_error& e)
+      {
+          throw Error(e.what());
+      }
+    }
 
     std::vector<State> TimeStatesToStates(const T_StateFrame& ref)
     {

@@ -109,7 +109,7 @@ import fullBodyPlayerHrp2
 
 configs = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = 1, filterStates = True)
 print "number of configs :", len(configs)
-r(configs[-1])
+
 
 
 

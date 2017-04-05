@@ -34,6 +34,8 @@
 # include <hpp/fcl/BVH/BVH_model.h>
 # include <hpp/core/config-validations.hh>
 #include <hpp/rbprm/dynamic/dynamic-path-validation.hh>
+# include "hpp/corbaserver/fwd.hh"
+
 namespace hpp {
   namespace rbprm {
     namespace impl {
@@ -251,6 +253,7 @@ namespace hpp {
         virtual hpp::floatSeq* runLimbSampleAnalysis(const char* limbname, const char* analysis, double isstatic) throw (hpp::Error);
         virtual void dumpProfile(const char* logFile) throw (hpp::Error);
         virtual double getTimeAtState(unsigned short stateId)throw (hpp::Error);
+        virtual Names_t* getContactsVariations(unsigned short stateIdFrom,unsigned short stateIdTo )throw (hpp::Error);
 
         public:
         void SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver);

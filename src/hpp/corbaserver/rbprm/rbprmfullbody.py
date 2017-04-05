@@ -888,3 +888,9 @@ class FullBody (object):
     # \param stateId : index of the state
     def getTimeAtState(self,stateId):
         return self.client.rbprm.rbprm.getTimeAtState(stateId)
+
+    ## return the contacts variation between two states
+    # \param stateIdFrom : index of the first state
+    # \param stateIdTo : index of the second state
+    def getContactsVariations(self,stateIdFrom,stateIdTo):
+        return self.client.rbprm.rbprm.getContactsVariations(stateIdFrom,stateIdTo)
