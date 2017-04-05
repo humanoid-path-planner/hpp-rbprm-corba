@@ -73,7 +73,7 @@ q_goal[configSize+3:configSize+6] = [0,0,0]
 q_init[2] = q_init[2]+0.1
 q_goal[2] = q_goal[2]+0.1
 
-fullBody.setStaticStability(False)
+fullBody.setStaticStability(True)
 # Randomly generating a contact configuration at q_init
 fullBody.setCurrentConfig (q_init)
 r(q_init)
@@ -113,13 +113,13 @@ r(configs[-1])
 
 
 
-player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=1,optim_effector=True,use_velocity=True,pathId = pId)
+player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=1,optim_effector=True,use_velocity=False,pathId = pId)
 
 
 
-player.displayContactPlan(10.)
+player.displayContactPlan(1.)
 
-player.interpolate(2,len(configs)-1)
+#player.interpolate(2,len(configs)-1)
 
 
 
