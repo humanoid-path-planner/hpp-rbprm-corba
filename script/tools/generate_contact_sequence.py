@@ -101,6 +101,7 @@ def generateContactSequence(fb,configs,viewer=None):
         # retrieve the COM position for init and final state (equal for double support phases)
         init_state = phase_d.init_state
         init_state[0:3] = np.matrix(configs[k][0:3]).transpose()
+        init_state[3:9] = np.matrix(configs[k][-6:]).transpose()
         phase_d.init_state=init_state
         phase_d.final_state=init_state
         phase_d.reference_configurations.append(np.matrix(pinnochioQuaternion(configs[k][:-6])))
@@ -124,6 +125,7 @@ def generateContactSequence(fb,configs,viewer=None):
         phase_s.init_state=init_state
         final_state = phase_d.final_state
         final_state[0:3] = np.matrix(configs[k+1][0:3]).transpose()
+        final_state[3:9] = np.matrix(configs[k+1][-6:]).transpose()        
         phase_s.final_state=final_state
         phase_s.reference_configurations.append(np.matrix(pinnochioQuaternion(configs[k][:-6])))
         
@@ -163,6 +165,8 @@ def generateContactSequence(fb,configs,viewer=None):
     # retrieve the COM position for init and final state (equal for double support phases)
     init_state = phase_d.init_state
     init_state[0:3] = np.matrix(configs[-1][0:3]).transpose()
+    init_state[3:9] = np.matrix(configs[-1][-6:]).transpose()        
+    
     phase_d.init_state=init_state
     phase_d.final_state=init_state
     phase_d.reference_configurations.append(np.matrix(pinnochioQuaternion(configs[-1][:-6])))    

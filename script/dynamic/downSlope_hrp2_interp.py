@@ -117,21 +117,16 @@ player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=
 
 
 
-player.displayContactPlan(10.)
-
-player.interpolate(2,len(configs)-1)
+#player.displayContactPlan(2.)
 
 
 
-"""
-import hpp.corbaserver.rbprm.tools.cwc_trajectory
-import hpp.corbaserver.rbprm.tools.path_to_trajectory
-import hpp.corbaserver.rbprm.tools.cwc_trajectory_helper
-
-reload(hpp.corbaserver.rbprm.tools.cwc_trajectory)
-reload(hpp.corbaserver.rbprm.tools.path_to_trajectory)
-reload(hpp.corbaserver.rbprm.tools.cwc_trajectory_helper)
-reload(fullBodyPlayerHrp2)
+from planning.slope_config import *
+from generate_contact_sequence import *
+cs = generateContactSequence(fullBody,configs[:-1],r)
+filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
+cs.saveAsXML(filename, "ContactSequence")
+print "save contact sequence : ",filename
 
 
-"""
+
