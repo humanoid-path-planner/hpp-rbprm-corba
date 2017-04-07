@@ -33,14 +33,14 @@ rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,0,-0.105]
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "manipulability", 0.1)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "forward", 0.1)
 
 lLegId = 'hrp2_lleg_rom'
 lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,0,-0.105]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "manipulability", 0.1)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "forward", 0.1)
 
 
 
@@ -107,7 +107,7 @@ pp = PathPlayer (fullBody.client.basic, r)
 
 import fullBodyPlayerHrp2
 
-configs = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = 1, filterStates = True)
+configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 1, filterStates = True)
 print "number of configs :", len(configs)
 
 
@@ -115,23 +115,22 @@ print "number of configs :", len(configs)
 
 player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=1,optim_effector=True,use_velocity=False,pathId = pId)
 
+# remove the last config (= user defined q_goal, not consitent with the previous state)
+configs = configs[:-1]
 
-
-player.displayContactPlan(1.)
+#player.displayContactPlan(1.)
 
 #player.interpolate(2,len(configs)-1)
 
 
 
-"""
-import hpp.corbaserver.rbprm.tools.cwc_trajectory
-import hpp.corbaserver.rbprm.tools.path_to_trajectory
-import hpp.corbaserver.rbprm.tools.cwc_trajectory_helper
 
-reload(hpp.corbaserver.rbprm.tools.cwc_trajectory)
-reload(hpp.corbaserver.rbprm.tools.path_to_trajectory)
-reload(hpp.corbaserver.rbprm.tools.cwc_trajectory_helper)
-reload(fullBodyPlayerHrp2)
+from planning.straight_walk_config_planning import *
+from generate_contact_sequence import *
+cs = generateContactSequence(fullBody,configs,r)
+filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
+cs.saveAsXML(filename, "ContactSequence")
+print "save contact sequence : ",filename
 
 
-"""
+
