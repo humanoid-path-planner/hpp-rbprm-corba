@@ -104,14 +104,14 @@ def generateContactSequence(fb,configs,viewer=None):
         #FIXME : retrieve list of active contact in planning
         phase_d.LH_patch=unusedPatch.copy()
         phase_d.RH_patch=unusedPatch.copy()
-        
         # retrieve the COM position for init and final state (equal for double support phases)
         init_state = phase_d.init_state
-        init_state[0:3] = np.matrix(configs[k][0:3]).transpose()
+        init_state[0:3] = np.matrix(fb.getCenterOfMass()).transpose()
         init_state[3:9] = np.matrix(configs[k][-6:]).transpose()
         phase_d.init_state=init_state
         phase_d.final_state=init_state
         phase_d.reference_configurations.append(np.matrix(pinnochioQuaternion(configs[k][:-6])))
+        phase_d.time_trajectory.append(0.)
         
         # simple support : 
         phase_s = cs.contact_phases[k*2 + 1]
@@ -119,7 +119,7 @@ def generateContactSequence(fb,configs,viewer=None):
         phase_s.RF_patch = phase_d.RF_patch
         phase_s.LF_patch = phase_d.LF_patch
         phase_s.LH_patch=unusedPatch.copy()
-        phase_s.RH_patch=unusedPatch.copy()        
+        phase_s.RH_patch=unusedPatch.copy()  
         # find the contact to break : 
         variations = fb.getContactsVariations(k,k+1)
         for var in variations:
@@ -132,10 +132,11 @@ def generateContactSequence(fb,configs,viewer=None):
         # retrieve the COM position for init and final state 
         phase_s.init_state=init_state
         final_state = phase_d.final_state
-        final_state[0:3] = np.matrix(configs[k+1][0:3]).transpose()
+        final_state[0:3] = np.matrix(fb.getCenterOfMass()).transpose()
         final_state[3:9] = np.matrix(configs[k+1][-6:]).transpose()        
         phase_s.final_state=final_state
         phase_s.reference_configurations.append(np.matrix(pinnochioQuaternion(configs[k][:-6])))
+        phase_s.time_trajectory.append(fb.getTimeAtState(k+1) - fb.getTimeAtState(k))
         
         
     # add the final double support stance : 
@@ -173,11 +174,13 @@ def generateContactSequence(fb,configs,viewer=None):
     phase_d.RH_patch=unusedPatch.copy()            
     # retrieve the COM position for init and final state (equal for double support phases)
     init_state = phase_d.init_state
-    init_state[0:3] = np.matrix(configs[-1][0:3]).transpose()
+    init_state[0:3] = np.matrix(fb.getCenterOfMass()).transpose()
     init_state[3:9] = np.matrix(configs[-1][-6:]).transpose()        
     phase_d.init_state=init_state
     phase_d.final_state=init_state
-    phase_d.reference_configurations.append(np.matrix(pinnochioQuaternion(configs[-1][:-6])))    
+    phase_d.reference_configurations.append(np.matrix(pinnochioQuaternion(configs[-1][:-6])))  
+    phase_d.time_trajectory.append(0.)
+    
     return cs
 
 

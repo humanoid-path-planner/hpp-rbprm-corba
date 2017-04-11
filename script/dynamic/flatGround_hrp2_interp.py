@@ -118,7 +118,7 @@ player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=
 # remove the last config (= user defined q_goal, not consitent with the previous state)
 configs = configs[:-1]
 
-player.displayContactPlan(1.)
+#player.displayContactPlan(1.)
 
 #player.interpolate(2,len(configs)-1)
 
