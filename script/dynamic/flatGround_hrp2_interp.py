@@ -73,7 +73,7 @@ q_goal[configSize+3:configSize+6] = [0,0,0]
 q_init[2] = q_init[2]+0.1
 q_goal[2] = q_goal[2]+0.1
 
-fullBody.setStaticStability(True)
+fullBody.setStaticStability(False)
 # Randomly generating a contact configuration at q_init
 fullBody.setCurrentConfig (q_init)
 r(q_init)
@@ -118,18 +118,18 @@ player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=
 # remove the last config (= user defined q_goal, not consitent with the previous state)
 configs = configs[:-1]
 
-#player.displayContactPlan(1.)
+player.displayContactPlan(1.)
 
 #player.interpolate(2,len(configs)-1)
 
 
 
 
-from planning.straight_walk_config_planning import *
+from planning.straight_walk_dynamic_config import *
 from generate_contact_sequence import *
 cs = generateContactSequence(fullBody,configs,r)
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
-cs.saveAsXML(filename, "ContactSequence")
+cs.saveAsXML(filename, CONTACT_SEQUENCE_XML_TAG)
 print "save contact sequence : ",filename
 
 

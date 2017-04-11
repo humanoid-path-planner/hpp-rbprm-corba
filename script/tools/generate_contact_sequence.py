@@ -32,6 +32,9 @@ def generateContactSequence(fb,configs,viewer=None):
     n_steps = n_double_support*2 -1 
     
     cs = ContactSequenceHumanoid(n_steps)
+    unusedPatch = cs.contact_phases[0].LF_patch.copy()
+    unusedPatch.placement = SE3.Identity()
+    unusedPatch.active= False
     
     # for each double support phase we must create 2 contact_stance (exept for the final one)
     for k in range(0,n_double_support-1):
@@ -97,7 +100,11 @@ def generateContactSequence(fb,configs,viewer=None):
                 if var == 'hrp2_rleg_rom':
                     phase_d.LF_patch = phase_s.LF_patch                    
                     phase_d.RF_patch.placement = MRF
-                    phase_d.RF_patch.active = True            
+                    phase_d.RF_patch.active = True
+        #FIXME : retrieve list of active contact in planning
+        phase_d.LH_patch=unusedPatch.copy()
+        phase_d.RH_patch=unusedPatch.copy()
+        
         # retrieve the COM position for init and final state (equal for double support phases)
         init_state = phase_d.init_state
         init_state[0:3] = np.matrix(configs[k][0:3]).transpose()
@@ -111,7 +118,8 @@ def generateContactSequence(fb,configs,viewer=None):
         # copy previous placement :
         phase_s.RF_patch = phase_d.RF_patch
         phase_s.LF_patch = phase_d.LF_patch
-        
+        phase_s.LH_patch=unusedPatch.copy()
+        phase_s.RH_patch=unusedPatch.copy()        
         # find the contact to break : 
         variations = fb.getContactsVariations(k,k+1)
         for var in variations:
@@ -161,12 +169,12 @@ def generateContactSequence(fb,configs,viewer=None):
             phase_d.LF_patch = phase_s.LF_patch                    
             phase_d.RF_patch.placement = MRF
             phase_d.RF_patch.active = True
-            
+    phase_d.LH_patch=unusedPatch.copy()
+    phase_d.RH_patch=unusedPatch.copy()            
     # retrieve the COM position for init and final state (equal for double support phases)
     init_state = phase_d.init_state
     init_state[0:3] = np.matrix(configs[-1][0:3]).transpose()
     init_state[3:9] = np.matrix(configs[-1][-6:]).transpose()        
-    
     phase_d.init_state=init_state
     phase_d.final_state=init_state
     phase_d.reference_configurations.append(np.matrix(pinnochioQuaternion(configs[-1][:-6])))    

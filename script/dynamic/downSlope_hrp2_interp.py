@@ -107,7 +107,7 @@ pp = PathPlayer (fullBody.client.basic, r)
 
 import fullBodyPlayerHrp2
 
-configs = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = 1, filterStates = True)
+configs = fullBody.interpolate(0.05,pathId=pId,robustnessTreshold = 1, filterStates = True)
 print "number of configs :", len(configs)
 r(configs[-1])
 
@@ -117,7 +117,7 @@ player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=
 
 
 
-#player.displayContactPlan(2.)
+player.displayContactPlan(2.)
 
 
 

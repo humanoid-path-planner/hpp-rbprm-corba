@@ -26,7 +26,7 @@ urdfName = 'hrp2_trunk_flexible'
 urdfNameRom =  ['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = 1;
+vMax = 0.5;
 aMax = 0.5;
 extraDof = 6
 

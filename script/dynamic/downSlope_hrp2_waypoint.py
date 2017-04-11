@@ -56,7 +56,7 @@ indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.basic.robot.getDim
 ps = ProblemSolver( rbprmBuilder )
 ps.client.problem.setParameter("aMax",aMax)
 ps.client.problem.setParameter("vMax",vMax)
-ps.client.problem.setParameter("tryJump",vMax)
+ps.client.problem.setParameter("tryJump",1)
 ps.client.problem.setParameter("sizeFootX",0.24)
 ps.client.problem.setParameter("sizeFootY",0.14)
 r = Viewer (ps)
