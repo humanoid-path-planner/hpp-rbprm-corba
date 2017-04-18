@@ -141,6 +141,13 @@ namespace hpp {
                     std::string (urdfSuffix),
                     std::string (srdfSuffix));
             fullBody_ = rbprm::RbPrmFullBody::create(device);
+            try {
+              boost::any value = problemSolver_->problem()->get<boost::any> (std::string("friction"));
+              fullBody_->setFriction(boost::any_cast<double>(value));
+              hppDout(notice,"fullbody : mu define in python : "<<fullBody_->getFriction());
+            } catch (const std::exception& e) {
+              hppDout(notice,"fullbody : mu not defined, take : "<<fullBody_->getFriction()<<" as default.");
+            }
             problemSolver_->pathValidationType ("Discretized",0.05); // reset to avoid conflict with rbprm path
             problemSolver_->robot (fullBody_->device_);
             problemSolver_->resetProblem();

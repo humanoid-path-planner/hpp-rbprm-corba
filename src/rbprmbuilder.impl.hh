@@ -98,8 +98,10 @@ namespace hpp {
           double sizeFootX,sizeFootY,mass,mu;
           bool rectangularContact;
           try {
-            sizeFootX = problemSolver_->problem()->get<double> (std::string("sizeFootX"))/2.;
-            sizeFootY = problemSolver_->problem()->get<double> (std::string("sizeFootY"))/2.;
+            boost::any value_x = problemSolver_->problem()->get<boost::any> (std::string("sizeFootX"));
+            boost::any value_y = problemSolver_->problem()->get<boost::any> (std::string("sizeFootY"));
+            sizeFootX = boost::any_cast<double>(value_x)/2.;
+            sizeFootY = boost::any_cast<double>(value_y)/2.;
             rectangularContact = 1;
           } catch (const std::exception& e) {
             hppDout(warning,"Warning : size of foot not definied, use 0 (contact point)");
@@ -108,7 +110,14 @@ namespace hpp {
             rectangularContact = 0;
           }
           mass = robot->mass();
-          mu = 0.5; // FIXME : store it in problem ?
+          try {
+            boost::any value = problemSolver_->problem()->get<boost::any> (std::string("friction"));
+            mu = boost::any_cast<double>(value);
+            hppDout(notice,"dynamic val : mu define in python : "<<mu);
+          } catch (const std::exception& e) {
+            mu= 0.5;
+            hppDout(notice,"dynamic val : mu not defined, take : "<<mu<<" as default.");
+          }
           DynamicValidationPtr_t dynamicVal = DynamicValidation::create(rectangularContact,sizeFootX,sizeFootY,mass,mu);
           collisionChecking->addDynamicValidator(dynamicVal);
 

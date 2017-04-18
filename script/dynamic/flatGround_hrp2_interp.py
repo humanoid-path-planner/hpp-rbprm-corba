@@ -61,7 +61,7 @@ acc_init = tp.ps.configAtParam(pId,0.01)[tp.indexECS+3:tp.indexECS+6]
 dir_goal = tp.ps.configAtParam(pId,tp.ps.pathLength(pId)-0.01)[tp.indexECS:tp.indexECS+3]
 acc_goal = [0,0,0]
 
-robTreshold = 1
+robTreshold = 2
 # copy extraconfig for start and init configurations
 q_init[configSize:configSize+3] = dir_init[::]
 q_init[configSize+3:configSize+6] = acc_init[::]
@@ -95,19 +95,18 @@ fullBody.setEndState(q_goal,[rLegId,lLegId])
 
 
 
-"""
+
 
 fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
 fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 
-"""
 
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
 import fullBodyPlayerHrp2
 
-configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 1, filterStates = True)
+configs = fullBody.interpolate(0.005,pathId=pId,robustnessTreshold = 1, filterStates = True)
 print "number of configs :", len(configs)
 
 
@@ -118,7 +117,7 @@ player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=
 # remove the last config (= user defined q_goal, not consitent with the previous state)
 configs = configs[:-1]
 
-#player.displayContactPlan(1.)
+player.displayContactPlan(1.)
 
 #player.interpolate(2,len(configs)-1)
 
