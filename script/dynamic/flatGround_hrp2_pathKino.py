@@ -3,6 +3,9 @@ from hpp.gepetto import Viewer
 from hpp.corbaserver import Client
 from hpp.corbaserver.robot import Robot as Parent
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
+import omniORB.any
+from planning.straight_walk_dynamic_config import *
+
 
 class Robot (Parent):
 	rootJointType = 'freeflyer'
@@ -26,10 +29,10 @@ urdfName = 'hrp2_trunk_flexible'
 urdfNameRom =  ['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = 0.3;
-aMax = 0.5;
+vMax = omniORB.any.to_any(0.3);
+aMax = omniORB.any.to_any(0.5);
 extraDof = 6
-
+mu=omniORB.any.to_any(MU)
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
@@ -56,14 +59,15 @@ indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.basic.robot.getDim
 ps = ProblemSolver( rbprmBuilder )
 ps.client.problem.setParameter("aMax",aMax)
 ps.client.problem.setParameter("vMax",vMax)
-ps.client.problem.setParameter("sizeFootX",0.24)
-ps.client.problem.setParameter("sizeFootY",0.14)
+ps.client.problem.setParameter("sizeFootX",omniORB.any.to_any(0.24))
+ps.client.problem.setParameter("sizeFootY",omniORB.any.to_any(0.14))
+ps.client.problem.setParameter("friction",mu)
 r = Viewer (ps)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
-afftool.loadObstacleModel (packageName, "ground", "planning", r)
+afftool.loadObstacleModel (ENV_PACKAGE_NAME, ENV_NAME, ENV_PREFIX, r)
 #r.loadObstacleModel (packageName, "ground", "planning")
 afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 r.addLandmark(r.sceneName,1)

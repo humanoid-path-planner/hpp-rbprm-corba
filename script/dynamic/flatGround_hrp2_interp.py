@@ -25,6 +25,7 @@ fullBody.client.basic.robot.setDimensionExtraConfigSpace(tp.extraDof)
 ps = tp.ProblemSolver( fullBody )
 ps.client.problem.setParameter("aMax",tp.aMax)
 ps.client.problem.setParameter("vMax",tp.vMax)
+ps.client.problem.setParameter("friction",tp.mu)
 r = tp.Viewer (ps,viewerClient=tp.r.client)
 
 #~ AFTER loading obstacles
