@@ -3,3 +3,5 @@ cmd = "ssh -X iwaki 'cd /local/pfernbac/muscod/walk_dynamic/uc-dual/build ; sour
 import subprocess
 subprocess.check_output(cmd,shell=True)
 
+
+
