@@ -3,7 +3,8 @@ from hpp.gepetto import Viewer
 from hpp.corbaserver import Client
 from hpp.corbaserver.robot import Robot as Parent
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
-
+from planning.stairs_config import *
+import omniORB.any
 
 class Robot (Parent):
 	rootJointType = 'freeflyer'
@@ -31,7 +32,7 @@ srdfSuffix = ""
 rbprmBuilder = Builder ()
 
 rbprmBuilder.loadModel(urdfName, urdfNameRoms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-rbprmBuilder.setJointBounds ("base_joint_xyz", [0,1.55, -0.7, -0.5, 0.50, 1.3])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [0,1.55, -0.9, -0.55, 0.50, 1.3])
 #rbprmBuilder.setJointBounds ("base_joint_xyz", [0,2, -1, 1, 0, 2.2])
 rbprmBuilder.setJointBounds('CHEST_JOINT0',[0,0])
 rbprmBuilder.setJointBounds('CHEST_JOINT1',[0,0.45])
@@ -43,9 +44,10 @@ rbprmBuilder.setAffordanceFilter('hrp2_rarm_rom', ['Support'])
 rbprmBuilder.setAffordanceFilter('hrp2_lleg_rom', ['Support',])
 rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
 rbprmBuilder.boundSO3([-0.,0,-1,1,-1,1])
-vMax = 1;
-aMax = 10;
+vMax = 0.3;
+aMax = 10.;
 extraDof = 6
+mu=omniORB.any.to_any(MU)
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
 rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-vMax,vMax,-0.2,0.2,-vMax,vMax,0,0,0,0,0,0])
 indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.basic.robot.getDimensionExtraConfigSpace()
@@ -54,28 +56,14 @@ indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.basic.robot.getDim
 
 
 ps = ProblemSolver( rbprmBuilder )
-ps.client.problem.setParameter("aMax",aMax)
-ps.client.problem.setParameter("vMax",vMax)
-ps.client.problem.setParameter("sizeFootX",0.24)
-ps.client.problem.setParameter("sizeFootY",0.14)
+ps.client.problem.setParameter("aMax",omniORB.any.to_any(aMax))
+ps.client.problem.setParameter("vMax",omniORB.any.to_any(vMax))
+ps.client.problem.setParameter("sizeFootX",omniORB.any.to_any(0.24))
+ps.client.problem.setParameter("sizeFootY",omniORB.any.to_any(0.14))
 r = Viewer (ps)
+r.addLandmark(r.sceneName,1)
 
 
-
-
-q_init = rbprmBuilder.getCurrentConfig ();
-
-q_init [0:3] = [0, -0.65, 0.55];
-q_init[8] = 0.4
-#q_init [0:3] = [0, -0.65, 0.58];
-#q_init[8] = 0.43
-rbprmBuilder.setCurrentConfig (q_init); r (q_init)
-
-q_goal = q_init [::]
-q_goal [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
-q_goal[8] = 0
-q_goal [0:3] = [1.49, -0.65, 1.15]; r (q_goal)
-#~ q_goal [0:3] = [1.2, -0.65, 1.1]; r (q_goal)
 
 
 
@@ -83,6 +71,27 @@ from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
 afftool.loadObstacleModel (packageName, "stair_bauzil", "planning", r)
+
+
+
+
+q_init = rbprmBuilder.getCurrentConfig ();
+
+q_init [0:3] = [0, -0.82, 0.55];
+q_init[8] = 0
+#q_init [0:3] = [0, -0.65, 0.58];
+#q_init[8] = 0.43
+rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+
+q_goal = q_init [::]
+q_goal [3:7] =  [ 0.98877108,  0.        ,  0.14943813,  0.        ]
+q_goal[8] = 0
+q_goal [0:3] = [1.49, -0.82, 1.25]; r (q_goal)
+#~ q_goal [0:3] = [1.2, -0.65, 1.1]; r (q_goal)
+
+
+
+
 
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)

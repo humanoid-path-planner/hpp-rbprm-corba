@@ -1,7 +1,7 @@
 from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
-
+import omniORB.any
 import stair_bauzil_hrp2_path as tp
 import time
 
@@ -23,6 +23,12 @@ fullBody.setJointBounds ("base_joint_xyz",  [0,2, -1, 1, 0, 2.2])
 fullBody.client.basic.robot.setDimensionExtraConfigSpace(tp.extraDof)
 
 ps = tp.ProblemSolver( fullBody )
+
+
+ps.client.problem.setParameter("aMax",omniORB.any.to_any(tp.aMax))
+ps.client.problem.setParameter("vMax",omniORB.any.to_any(tp.vMax))
+ps.client.problem.setParameter("friction",tp.mu)
+
 r = tp.Viewer (ps,viewerClient=tp.r.client)
 
 #~ AFTER loading obstacles
@@ -31,14 +37,14 @@ rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,0,-0.105]
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "forward", 0.1)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "manipulability", 0.1)
 
 lLegId = 'hrp2_lleg_rom'
 lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,0,-0.105]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "forward", 0.1)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "manipulability", 0.1)
 
 rarmId = 'hrp2_rarm_rom'
 rarm = 'RARM_JOINT0'
@@ -47,7 +53,7 @@ rArmOffset = [0,0,-0.1]
 rArmNormal = [0,0,1]
 rArmx = 0.024; rArmy = 0.024
 #disabling collision for hook
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 50000, "forward", 0.05, "_6_DOF", True)
+fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 50000, "manipulability", 0.05, "_6_DOF", True)
 
 """
 
@@ -105,6 +111,10 @@ acc_goal = tp.ps.configAtParam(0,tp.ps.pathLength(0))[tp.indexECS+3:tp.indexECS+
 
 
 
+fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
+fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
+
+
 fullBody.setStaticStability(True)
 # Randomly generating a contact configuration at q_init
 fullBody.setCurrentConfig (q_init)
@@ -131,7 +141,7 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId])
 
 
 
-configs = fullBody.interpolate(0.001,pathId=0,robustnessTreshold = 0, filterStates = True)
+configs = fullBody.interpolate(0.01,pathId=0,robustnessTreshold = 2, filterStates = True)
 print "number of configs :", len(configs)
 r(configs[-1])
 
@@ -141,6 +151,8 @@ pp = PathPlayer (fullBody.client.basic, r)
 
 from fullBodyPlayerHrp2 import Player
 player = Player(fullBody,pp,tp,configs,draw=False,optim_effector=False,use_velocity=True,pathId = 0)
+
+raw_input("press enter to display contact sequence ...")
 
 player.displayContactPlan()
 

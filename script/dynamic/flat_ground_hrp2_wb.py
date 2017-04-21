@@ -13,7 +13,7 @@ print "####################################"
 print "#         Calling MUSCOD :         #"
 print "####################################"
 
-cmd = "ssh -X iwaki 'cd /local/pfernbac/muscod/walk_dynamic/uc-dual/build ; source /local/pfernbac/config.sh ; muscod_release straight_walk_dynamic '"
+cmd = "ssh -X iwaki 'cd /local/pfernbac/muscod/walk_dynamic/uc-dual/build ; source /local/pfernbac/config.sh ; muscod_release straight_walk_dynamic ; killall pgxwin_server'"
 
 import subprocess
 try :

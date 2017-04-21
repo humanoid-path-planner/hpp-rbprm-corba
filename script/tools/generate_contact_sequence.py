@@ -5,8 +5,17 @@ from pinocchio.utils import *
 import locomote
 from locomote import WrenchCone,SOC6,ControlType,IntegratorType,ContactPatch, ContactPhaseHumanoid, ContactSequenceHumanoid
 
+global i_sphere 
 DISPLAY_CONTACTS = True
-
+rleg_id = "RLEG_JOINT5"
+lleg_id = "LLEG_JOINT5"
+rhand_id = "RARM_JOINT5"
+lhand_id = "LARM_JOINT5"
+rleg_rom = 'hrp2_rleg_rom'
+lleg_rom = 'hrp2_lleg_rom'
+rhand_rom = 'hrp2_rarm_rom'
+lhand_rom = 'hrp2_larm_rom'
+limbs_names = [rleg_rom,lleg_rom,rhand_rom,lhand_rom]
 
 # FIXME : retrive value from somewhere ? (it's actually in generate_straight_walk_muscod)
 MRsole_offset = se3.SE3.Identity()
@@ -22,11 +31,41 @@ def pinnochioQuaternion(q):
     q[6] = w
     return q
 
+def displayContactsFromPhase(phase):
+    global i_sphere
+    if DISPLAY_CONTACTS and viewer:
+        gui = viewer.client.gui
+        name = 's'+str(i_sphere)
+        i_sphere += 1
+        gui.addSphere(name,0.01,[1,0,0,1])
+        gui.setVisibility(name,"ALWAYS_ON_TOP")
+        gui.addToGroup(name,viewer.sceneName)
+        p = MRF.translation.transpose().tolist()[0]
+        rot = Quaternion(MRF.rotation)
+        p +=  [rot.w]
+        p += rot.coeffs().transpose().tolist()[0][0:3]
+        gui.applyConfiguration(name,p)
+        gui.addLandmark(name,0.1)
+        name = 's'+str(i_sphere)
+        i_sphere += 1
+        gui.addSphere(name,0.01,[1,0,0,1])
+        gui.setVisibility(name,"ALWAYS_ON_TOP")
+        gui.addToGroup(name,viewer.sceneName)
+        p = MLF.translation.transpose().tolist()[0]
+        rot = Quaternion(MLF.rotation)
+        p +=  [rot.w]
+        p += rot.coeffs().transpose().tolist()[0][0:3]           
+        gui.applyConfiguration(name,p)  
+        gui.addLandmark(name,0.1)            
+        gui.refresh()                    
+        
+
 def generateContactSequence(fb,configs,viewer=None):
     print "generate contact sequence from planning : "
+    global i_sphere
+    i_sphere = 0
     #print "MR offset",MRsole_offset
-    #print "ML offset",MLsole_offset
-    i_sphere = 0    
+    #print "ML offset",MLsole_offset  
     n_double_support = len(configs)
     # config only contains the double support stance
     n_steps = n_double_support*2 -1 
@@ -38,72 +77,87 @@ def generateContactSequence(fb,configs,viewer=None):
     
     # for each double support phase we must create 2 contact_stance (exept for the final one)
     for k in range(0,n_double_support-1):
-        # double support : 
+        # %%%%%%%%%  double support : %%%%%%%%%%%%%
         phase_d = cs.contact_phases[k*2]
         fb.setCurrentConfig(configs[k])
         # compute MRF and MLF : the position of the contacts
-        q_r = fb.getJointPosition('RLEG_JOINT5')
-        q_l = fb.getJointPosition('LLEG_JOINT5')
+        q_rl = fb.getJointPosition(rleg_id)
+        q_ll = fb.getJointPosition(lleg_id)
+        q_rh = fb.getJointPosition(rhand_id)
+        q_lh = fb.getJointPosition(lhand_id)
+        
+        # feets
         MRF = SE3()
         MLF = SE3()
-        MRF.translation = np.matrix(q_r[0:3])
-        MLF.translation = np.matrix(q_l[0:3])
-        rot_r = Quaternion(q_r[3],q_r[4],q_r[5],q_r[6])
-        rot_l = Quaternion(q_l[3],q_l[4],q_l[5],q_l[6])
-        MRF.rotation = rot_r.matrix()
-        MLF.rotation = rot_l.matrix()
+        MRF.translation = np.matrix(q_rl[0:3])
+        MLF.translation = np.matrix(q_ll[0:3])
+        rot_rl = Quaternion(q_rl[3],q_rl[4],q_rl[5],q_rl[6])
+        rot_ll = Quaternion(q_ll[3],q_ll[4],q_ll[5],q_ll[6])
+        MRF.rotation = rot_rl.matrix()
+        MLF.rotation = rot_ll.matrix()
         
         # apply the transform ankle -> center of contact
         MRF *= MRsole_offset
         MLF *= MLsole_offset
         
-        if DISPLAY_CONTACTS and viewer:
-            gui = viewer.client.gui
-            name = 's'+str(i_sphere)
-            i_sphere += 1
-            gui.addSphere(name,0.01,[1,0,0,1])
-            gui.setVisibility(name,"ALWAYS_ON_TOP")
-            gui.addToGroup(name,viewer.sceneName)
-            p = MRF.translation.transpose().tolist()[0]
-            rot = Quaternion(MRF.rotation)
-            p +=  [rot.w]
-            p += rot.coeffs().transpose().tolist()[0][0:3]
-            gui.applyConfiguration(name,p)
-            gui.addLandmark(name,0.1)
-            name = 's'+str(i_sphere)
-            i_sphere += 1
-            gui.addSphere(name,0.01,[1,0,0,1])
-            gui.setVisibility(name,"ALWAYS_ON_TOP")
-            gui.addToGroup(name,viewer.sceneName)
-            p = MLF.translation.transpose().tolist()[0]
-            rot = Quaternion(MLF.rotation)
-            p +=  [rot.w]
-            p += rot.coeffs().transpose().tolist()[0][0:3]           
-            gui.applyConfiguration(name,p)  
-            gui.addLandmark(name,0.1)            
-            gui.refresh()            
+        # hands
+        MRH = SE3()
+        MLH = SE3()
+        MRH.translation = np.matrix(q_rh[0:3])
+        MLH.translation = np.matrix(q_lh[0:3])
+        rot_rh = Quaternion(q_rh[3],q_rh[4],q_rh[5],q_rh[6])
+        rot_lh = Quaternion(q_lh[3],q_lh[4],q_lh[5],q_lh[6])
+        MRH.rotation = rot_rh.matrix()
+        MLH.rotation = rot_lh.matrix()        
         
-        if k==0: #init stance
-            phase_d.RF_patch.placement = MRF
-            phase_d.RF_patch.active = True
-        
-            phase_d.LF_patch.placement = MLF
-            phase_d.LF_patch.active = True   
-        else: # we need to copy the unchanged patch from the last simple support phase (and not create a new one with the same placement)
+        # initial state : Set all new contacts patch (either with placement computed below or unused)
+        if k==0:
+            # FIXME : for loop ? how ?
+            if fb.isLimbInContact(rleg_rom,k):
+                phase_d.RF_patch.placement = MRF
+                phase_d.RF_patch.active = True
+            else:
+                phase_d.RF_patch = unusedPatch.copy()
+            if fb.isLimbInContact(lleg_rom,k):
+                phase_d.LF_patch.placement = MLF
+                phase_d.LF_patch.active = True
+            else:
+                phase_d.LF_patch = unusedPatch.copy()
+            if fb.isLimbInContact(rhand_rom,k):
+                phase_d.RH_patch.placement = MRH
+                phase_d.RH_patch.active = True
+            else:
+                phase_d.RH_patch = unusedPatch.copy()
+            if fb.isLimbInContact(lhand_rom,k):
+                phase_d.LH_patch.placement = MLH
+                phase_d.LH_patch.active = True
+            else:
+                phase_d.LH_patch = unusedPatch.copy()
+        else:   
+            # we need to copy the unchanged patch from the last simple support phase (and not create a new one with the same placement)
+            phase_d.RF_patch = phase_s.RF_patch
+            phase_d.RF_patch.active = fb.isLimbInContact(rleg_rom,k)
+            phase_d.LF_patch = phase_s.LF_patch
+            phase_d.LF_patch.active = fb.isLimbInContact(lleg_rom,k)
+            phase_d.RH_patch = phase_s.RH_patch
+            phase_d.RH_patch.active = fb.isLimbInContact(rhand_rom,k)
+            phase_d.LH_patch = phase_s.LH_patch
+            phase_d.LH_patch.active = fb.isLimbInContact(lhand_rom,k)
+            
+            # now we change the contacts that have moved : 
             variations = fb.getContactsVariations(k-1,k)
-            assert len(variations)==1, "Several changes of contacts in adjacent states, not implemented yet !"
-            for var in variations:            
-                if var == 'hrp2_lleg_rom':
-                    phase_d.RF_patch = phase_s.RF_patch
+            #assert len(variations)==1, "Several changes of contacts in adjacent states, not implemented yet !"
+            for var in variations:     
+                # FIXME : for loop in variation ? how ?
+                if var == lleg_rom:
                     phase_d.LF_patch.placement = MLF
-                    phase_d.LF_patch.active = True                       
-                if var == 'hrp2_rleg_rom':
-                    phase_d.LF_patch = phase_s.LF_patch                    
+                if var == rleg_rom:
                     phase_d.RF_patch.placement = MRF
-                    phase_d.RF_patch.active = True
-        #FIXME : retrieve list of active contact in planning
-        phase_d.LH_patch=unusedPatch.copy()
-        phase_d.RH_patch=unusedPatch.copy()
+                if var == lhand_rom:
+                    phase_d.LH_patch.placement = MLH
+                if var == rhand_rom:
+                    phase_d.RH_patch.placement = MRH
+                    
         # retrieve the COM position for init and final state (equal for double support phases)
         init_state = phase_d.init_state
         init_state[0:3] = np.matrix(fb.getCenterOfMass()).transpose()
@@ -113,22 +167,25 @@ def generateContactSequence(fb,configs,viewer=None):
         phase_d.reference_configurations.append(np.matrix(pinnochioQuaternion(configs[k][:-6])))
         phase_d.time_trajectory.append(0.)
         
-        # simple support : 
+        
+        # %%%%%% simple support : %%%%%%%% 
         phase_s = cs.contact_phases[k*2 + 1]
         # copy previous placement :
         phase_s.RF_patch = phase_d.RF_patch
         phase_s.LF_patch = phase_d.LF_patch
-        phase_s.LH_patch=unusedPatch.copy()
-        phase_s.RH_patch=unusedPatch.copy()  
+        phase_s.RH_patch = phase_d.RH_patch
+        phase_s.LH_patch = phase_d.LH_patch 
         # find the contact to break : 
         variations = fb.getContactsVariations(k,k+1)
         for var in variations:
-            if var == 'hrp2_lleg_rom': # FIXME : retrieve the names from somewhere
-                phase_s.LF_patch.active=False
-                phase_s.RF_patch.active=True
-            if var == 'hrp2_rleg_rom':
-                phase_s.RF_patch.active=False 
-                phase_s.LF_patch.active=True
+            if var == lleg_rom:
+                phase_d.LF_patch.active = False
+            if var == rleg_rom:
+                phase_d.RF_patch.active = False
+            if var == lhand_rom:
+                phase_d.LH_patch.active = False
+            if var == rhand_rom:
+                phase_d.RH_patch.active = False
         # retrieve the COM position for init and final state 
         phase_s.init_state=init_state
         final_state = phase_d.final_state
@@ -143,35 +200,59 @@ def generateContactSequence(fb,configs,viewer=None):
     phase_d = cs.contact_phases[n_steps-1]
     fb.setCurrentConfig(configs[n_double_support - 1])
     # compute MRF and MLF : the position of the contacts
-    q_r = fb.getJointPosition('RLEG_JOINT5')
-    q_l = fb.getJointPosition('LLEG_JOINT5')
+    q_rl = fb.getJointPosition(rleg_id)
+    q_ll = fb.getJointPosition(lleg_id)
+    q_rh = fb.getJointPosition(rhand_id)
+    q_lh = fb.getJointPosition(lhand_id)
+
+    # feets
     MRF = SE3()
     MLF = SE3()
-    MRF.translation = np.matrix(q_r[0:3])
-    MLF.translation = np.matrix(q_l[0:3])
-    rot_r = Quaternion(q_r[3],q_r[4],q_r[5],q_r[6])
-    rot_l = Quaternion(q_l[3],q_l[4],q_l[5],q_l[6])
-    MRF.rotation = rot_r.matrix()
-    MLF.rotation = rot_l.matrix()
+    MRF.translation = np.matrix(q_rl[0:3])
+    MLF.translation = np.matrix(q_ll[0:3])
+    rot_rl = Quaternion(q_rl[3],q_rl[4],q_rl[5],q_rl[6])
+    rot_ll = Quaternion(q_ll[3],q_ll[4],q_ll[5],q_ll[6])
+    MRF.rotation = rot_rl.matrix()
+    MLF.rotation = rot_ll.matrix()
 
     # apply the transform ankle -> center of contact
     MRF *= MRsole_offset
-    MLF *= MLsole_offset   
+    MLF *= MLsole_offset
+
+    # hands
+    MRH = SE3()
+    MLH = SE3()
+    MRH.translation = np.matrix(q_rh[0:3])
+    MLH.translation = np.matrix(q_lh[0:3])
+    rot_rh = Quaternion(q_rh[3],q_rh[4],q_rh[5],q_rh[6])
+    rot_lh = Quaternion(q_lh[3],q_lh[4],q_lh[5],q_lh[6])
+    MRH.rotation = rot_rh.matrix()
+    MLH.rotation = rot_lh.matrix()    
     
     # we need to copy the unchanged patch from the last simple support phase (and not create a new one with the same placement)
-    variations = fb.getContactsVariations(n_double_support - 2,n_double_support - 1)
-    assert len(variations)==1, "Several changes of contacts in adjacent states, not implemented yet !"
-    for var in variations:            
-        if var == 'hrp2_lleg_rom':
-            phase_d.RF_patch = phase_s.RF_patch
+    k = n_double_support-1
+    phase_d.RF_patch = phase_s.RF_patch
+    phase_d.RF_patch.active = fb.isLimbInContact(rleg_rom,k)
+    phase_d.LF_patch = phase_s.LF_patch
+    phase_d.LF_patch.active = fb.isLimbInContact(lleg_rom,k)
+    phase_d.RH_patch = phase_s.RH_patch
+    phase_d.RH_patch.active = fb.isLimbInContact(rhand_rom,k)
+    phase_d.LH_patch = phase_s.LH_patch
+    phase_d.LH_patch.active = fb.isLimbInContact(lhand_rom,k)
+    
+    # now we change the contacts that have moved : 
+    variations = fb.getContactsVariations(k-1,k)
+    #assert len(variations)==1, "Several changes of contacts in adjacent states, not implemented yet !"
+    for var in variations:     
+        # FIXME : for loop in variation ? how ?
+        if var == lleg_rom:
             phase_d.LF_patch.placement = MLF
-            phase_d.LF_patch.active = True                       
-        if var == 'hrp2_rleg_rom':
-            phase_d.LF_patch = phase_s.LF_patch                    
+        if var == rleg_rom:
             phase_d.RF_patch.placement = MRF
-            phase_d.RF_patch.active = True
-    phase_d.LH_patch=unusedPatch.copy()
-    phase_d.RH_patch=unusedPatch.copy()            
+        if var == lhand_rom:
+            phase_d.LH_patch.placement = MLH
+        if var == rhand_rom:
+            phase_d.RH_patch.placement = MRH
     # retrieve the COM position for init and final state (equal for double support phases)
     init_state = phase_d.init_state
     init_state[0:3] = np.matrix(fb.getCenterOfMass()).transpose()
