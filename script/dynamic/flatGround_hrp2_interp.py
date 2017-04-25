@@ -77,8 +77,8 @@ q_goal[configSize+3:configSize+6] = [0,0,0]
 
 
 # FIXME : test
-q_init[2] = q_init[2]+0.1
-q_goal[2] = q_goal[2]+0.1
+q_init[2] = q_init[2]+0.05
+q_goal[2] = q_goal[2]+0.05
 
 fullBody.setStaticStability(False)
 # Randomly generating a contact configuration at q_init
@@ -134,7 +134,7 @@ print "####################################"
 print "# Writing contact sequence file :  #"
 print "####################################"
 
-from planning.straight_walk_dynamic_config import *
+from planning.configs.straight_walk_dynamic_config import *
 from generate_contact_sequence import *
 cs = generateContactSequence(fullBody,configs,r)
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE

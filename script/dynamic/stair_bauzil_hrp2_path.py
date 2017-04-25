@@ -3,7 +3,7 @@ from hpp.gepetto import Viewer
 from hpp.corbaserver import Client
 from hpp.corbaserver.robot import Robot as Parent
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
-from planning.stairs_config import *
+from planning.configs.stairs_config import *
 import omniORB.any
 
 class Robot (Parent):

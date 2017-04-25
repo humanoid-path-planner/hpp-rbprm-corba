@@ -22,6 +22,10 @@ MRsole_offset = se3.SE3.Identity()
 MRsole_offset.translation = np.matrix([0.0146,  -0.01, -0.105])
 MLsole_offset = se3.SE3.Identity()
 MLsole_offset.translation = np.matrix([0.0146,  0.01, -0.105])
+MRhand_offset = se3.SE3.Identity()
+MRhand_offset.translation = np.matrix([0,  0., 0.11])
+MLhand_offset = se3.SE3.Identity()
+MLhand_offset.translation = np.matrix([0,  0., 0.11])
 
 
 def pinnochioQuaternion(q):
@@ -31,33 +35,32 @@ def pinnochioQuaternion(q):
     q[6] = w
     return q
 
-def displayContactsFromPhase(phase):
+def addContactLandmark(M,color,viewer):
     global i_sphere
-    if DISPLAY_CONTACTS and viewer:
-        gui = viewer.client.gui
-        name = 's'+str(i_sphere)
-        i_sphere += 1
-        gui.addSphere(name,0.01,[1,0,0,1])
-        gui.setVisibility(name,"ALWAYS_ON_TOP")
-        gui.addToGroup(name,viewer.sceneName)
-        p = MRF.translation.transpose().tolist()[0]
-        rot = Quaternion(MRF.rotation)
-        p +=  [rot.w]
-        p += rot.coeffs().transpose().tolist()[0][0:3]
-        gui.applyConfiguration(name,p)
-        gui.addLandmark(name,0.1)
-        name = 's'+str(i_sphere)
-        i_sphere += 1
-        gui.addSphere(name,0.01,[1,0,0,1])
-        gui.setVisibility(name,"ALWAYS_ON_TOP")
-        gui.addToGroup(name,viewer.sceneName)
-        p = MLF.translation.transpose().tolist()[0]
-        rot = Quaternion(MLF.rotation)
-        p +=  [rot.w]
-        p += rot.coeffs().transpose().tolist()[0][0:3]           
-        gui.applyConfiguration(name,p)  
-        gui.addLandmark(name,0.1)            
-        gui.refresh()                    
+    gui = viewer.client.gui
+    name = 's'+str(i_sphere)
+    i_sphere += 1    
+    gui.addSphere(name,0.02,color)
+    gui.setVisibility(name,"ALWAYS_ON_TOP")
+    gui.addToGroup(name,viewer.sceneName)
+    p = M.translation.transpose().tolist()[0]
+    rot = Quaternion(M.rotation)
+    p +=  [rot.w]
+    p += rot.coeffs().transpose().tolist()[0][0:3]
+    gui.applyConfiguration(name,p)
+    gui.addLandmark(name,0.1)    
+    
+    
+def displayContactsFromPhase(phase,viewer):
+    if phase.LF_patch.active:
+        addContactLandmark(phase.LF_patch.placement,viewer.color.red ,viewer)
+    if phase.RF_patch.active:
+        addContactLandmark(phase.RF_patch.placement,viewer.color.green ,viewer)  
+    if phase.LH_patch.active:
+        addContactLandmark(phase.LH_patch.placement*MLhand_offset,viewer.color.yellow ,viewer)
+    if phase.RH_patch.active:
+        addContactLandmark(phase.RH_patch.placement*MRhand_offset,viewer.color.blue ,viewer)                 
+    viewer.client.gui.refresh()                    
         
 
 def generateContactSequence(fb,configs,viewer=None):
@@ -108,7 +111,9 @@ def generateContactSequence(fb,configs,viewer=None):
         rot_rh = Quaternion(q_rh[3],q_rh[4],q_rh[5],q_rh[6])
         rot_lh = Quaternion(q_lh[3],q_lh[4],q_lh[5],q_lh[6])
         MRH.rotation = rot_rh.matrix()
-        MLH.rotation = rot_lh.matrix()        
+        MLH.rotation = rot_lh.matrix()   
+        
+      
         
         # initial state : Set all new contacts patch (either with placement computed below or unused)
         if k==0:
@@ -168,6 +173,10 @@ def generateContactSequence(fb,configs,viewer=None):
         phase_d.time_trajectory.append(0.)
         
         
+        if DISPLAY_CONTACTS and viewer:
+            displayContactsFromPhase(phase_d,viewer)
+        
+        
         # %%%%%% simple support : %%%%%%%% 
         phase_s = cs.contact_phases[k*2 + 1]
         # copy previous placement :
@@ -179,13 +188,13 @@ def generateContactSequence(fb,configs,viewer=None):
         variations = fb.getContactsVariations(k,k+1)
         for var in variations:
             if var == lleg_rom:
-                phase_d.LF_patch.active = False
+                phase_s.LF_patch.active = False
             if var == rleg_rom:
-                phase_d.RF_patch.active = False
+                phase_s.RF_patch.active = False
             if var == lhand_rom:
-                phase_d.LH_patch.active = False
+                phase_s.LH_patch.active = False
             if var == rhand_rom:
-                phase_d.RH_patch.active = False
+                phase_s.RH_patch.active = False
         # retrieve the COM position for init and final state 
         phase_s.init_state=init_state
         final_state = phase_d.final_state
@@ -195,6 +204,8 @@ def generateContactSequence(fb,configs,viewer=None):
         phase_s.reference_configurations.append(np.matrix(pinnochioQuaternion(configs[k][:-6])))
         phase_s.time_trajectory.append(fb.getTimeAtState(k+1) - fb.getTimeAtState(k))
         
+        if DISPLAY_CONTACTS and viewer:
+            displayContactsFromPhase(phase_s,viewer)        
         
     # add the final double support stance : 
     phase_d = cs.contact_phases[n_steps-1]
@@ -262,6 +273,10 @@ def generateContactSequence(fb,configs,viewer=None):
     phase_d.reference_configurations.append(np.matrix(pinnochioQuaternion(configs[-1][:-6])))  
     phase_d.time_trajectory.append(0.)
     
+    if DISPLAY_CONTACTS and viewer:
+        displayContactsFromPhase(phase_d,viewer)
+        
+        
     return cs
 
 
