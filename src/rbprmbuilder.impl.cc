@@ -1306,6 +1306,32 @@ namespace hpp {
         }
     }
 
+    CORBA::Short RbprmBuilder::straightPath(const hpp::floatSeqSeq& positions) throw (hpp::Error)
+     {
+         try
+         {
+             T_Configuration c = doubleDofArrayToConfig(3, positions);
+             if(c.size() <2)
+             {
+                 throw std::runtime_error("straightPath requires at least 2 configurations to generate path");
+             }
+             core::PathVectorPtr_t res = core::PathVector::create(3, 3);
+             CIT_Configuration cit = c.begin(); ++cit;
+             int i = 0;
+             model::vector3_t zero (0.,0.,0.);
+             for(;cit != c.end(); ++cit, ++i)
+             {
+                 model::vector3_t speed = (*cit) -  *(cit-1);
+                 res->appendPath(interpolation::ComTrajectory::create(*(cit-1),*cit,speed,zero,1.));
+             }
+             return problemSolver_->addPath(res);
+         }
+         catch(std::runtime_error& e)
+         {
+             throw Error(e.what());
+         }
+     }
+
     CORBA::Short RbprmBuilder::generateComTraj(const hpp::floatSeqSeq& positions, const hpp::floatSeqSeq& velocities,
                                           const hpp::floatSeqSeq& accelerations,
                                           const double dt) throw (hpp::Error)

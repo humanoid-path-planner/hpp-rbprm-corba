@@ -7,6 +7,7 @@ from obj_to_constraints import ineq_from_file, rotate_inequalities
 import numpy as np
 import math
 from numpy.linalg import norm
+from com_constraints import get_com_constraint
 import time
 
 import hpp.corbaserver.rbprm.data.com_inequalities as ine
@@ -40,24 +41,6 @@ constraintsComLoaded = {}
 
 lastspeed = np.array([0,0,0])
 
-def __get_com_constraint(fullBody, state, config, limbsCOMConstraints, interm = False):
-	global constraintsLoaded
-	As = [];	bs = []
-	fullBody.setCurrentConfig(config)
-	contacts = []
-	for i, v in limbsCOMConstraints.iteritems():
-		if not constraintsComLoaded.has_key(i):
-			constraintsComLoaded[i] = ineq_from_file(ineqPath+v['file'])
-		contact = (interm and fullBody.isLimbInContactIntermediary(i, state)) or (not interm and fullBody.isLimbInContact(i, state))
-		if contact:
-			ineq = constraintsComLoaded[i]
-			qEffector = fullBody.getJointPosition(v['effector'])
-			tr = quaternion_matrix(qEffector[3:7])			
-			tr[:3,3] = np.array(qEffector[0:3])
-			ineq_r = rotate_inequalities(ineq, tr)
-			As.append(ineq_r.A); bs.append(ineq_r.b);
-			contacts.append(v['effector'])
-	return [np.vstack(As), np.hstack(bs)]
 		
 def compute_state_info(fullBody,states, state_id, phase_dt, mu, computeCones, limbsCOMConstraints):
 	init_com = __get_com(fullBody, states[state_id])
@@ -81,11 +64,11 @@ def compute_state_info(fullBody,states, state_id, phase_dt, mu, computeCones, li
 			cones.append(fullBody.getContactCone(state_id+1, mu)[0])		
 	COMConstraints = None
 	if(not (limbsCOMConstraints == None)):
-		COMConstraints = [__get_com_constraint(fullBody, state_id, states[state_id], limbsCOMConstraints)]
+		COMConstraints = [get_com_constraint(fullBody, state_id, states[state_id], limbsCOMConstraints)]
 		if(len(p) > 2):
-			COMConstraints.append(__get_com_constraint(fullBody, state_id, states[state_id], limbsCOMConstraints, True))
+			COMConstraints.append(get_com_constraint(fullBody, state_id, states[state_id], limbsCOMConstraints, True))
 		if(len(p) > len(COMConstraints)):
-			COMConstraints.append(__get_com_constraint(fullBody, state_id + 1, states[state_id + 1], limbsCOMConstraints))
+			COMConstraints.append(get_com_constraint(fullBody, state_id + 1, states[state_id + 1], limbsCOMConstraints))
 	print 'num cones ', len(cones)
 	return p, N, init_com, end_com, t_end_phases, cones, COMConstraints
 

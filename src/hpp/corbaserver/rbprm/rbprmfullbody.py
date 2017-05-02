@@ -451,13 +451,25 @@ class FullBody (object):
     # The resulting path
     # is added to the problem solver
     # \param positions array of positions
+    # \return id of the root path computed
+    def straightPath(self, positions):
+		return self.client.rbprm.rbprm.straightPath(positions)
+			
+	## Create a com trajectory given list of positions, velocities and accelerations
+    # accelerations list contains one less element because it does not have an initial state.
+    # a set of 3d key points
+    # The path is composed of n+1 integrations
+    # between the n positions.
+    # The resulting path
+    # is added to the problem solver
+    # \param positions array of positions
     # \param velocities array of velocities
     # \param accelerations array of accelerations
     # \param dt time between two points
     # \return id of the root path computed
     def generateComTraj(self, positions, velocities, accelerations, dt):
 		return self.client.rbprm.rbprm.generateComTraj(positions, velocities, accelerations, dt)
-		
+        
 	## Create a path for the root given
     #  a set of 3d key points
     #  The path is composed of n+1 linear interpolations

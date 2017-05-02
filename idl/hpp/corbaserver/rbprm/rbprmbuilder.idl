@@ -327,6 +327,15 @@ module hpp
     /// \return id of the root path computed
     short generateComTraj(in floatSeqSeq positions, in floatSeqSeq velocities, in floatSeqSeq accelerations, in double dt) raises (Error);
 
+		/// Create a linear path given list of positions
+		/// The path is composed of n+1 integrations
+		/// between the n positions.
+		/// The resulting path
+		/// is added to the problem solver
+		/// \param positions array of positions
+		/// \return id of the root path computed
+		short straightPath(in floatSeqSeq positions) raises (Error);
+
     /// Provided a path has already been computed and interpolated, generate a continuous path
     /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
     /// Will fail if the index of the states do not exist
