@@ -190,14 +190,14 @@ def genPlan(stepsize=0.1):
 	end = time.clock() 
 	print "Contact plan generated in " + str(end-start) + "seconds"
 	
-def contactPlan():
+def contactPlan(step = 0.5):
+	r.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
-	r.client.gui.setVisibility("hrp2_14", "ON")
 	tp.r.client.gui.setVisibility("toto", "OFF")
-	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
-	for i in range(0,len(configs)-1):
+	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
+	for i in range(0,len(configs)):
 		r(configs[i]);
-		time.sleep(0.5)		
+		time.sleep(step)	
 		
 		
 def a():
@@ -216,11 +216,23 @@ def d(step=0.1):
 	print "computing contact plan"
 	genPlan(step)
 	
-def e():
+def e(step = 0.5):
 	print "displaying contact plan"
-	contactPlan()
+	contactPlan(step)
 	
 print "Root path generated in " + str(tp.t) + " ms."
 	
-d(0.01); e()
+d(0.05); e(0.01)
+
+print "Root path generated in " + str(tp.t) + " ms."
+	
+#~ from gen_data_from_rbprm import *
+#~ 
+#~ for config in configs:
+	#~ r(config)
+	#~ print(fullBody.client.basic.robot.getComPosition())
+#~ 
+
+#~ gen_and_save(fullBody,configs, "stair_bauzil_contacts_data")
+#~ main()
 

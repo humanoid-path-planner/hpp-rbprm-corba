@@ -482,6 +482,10 @@ module hpp
     /// \return size 7 position + quaternion of the octree root
     floatSeq getOctreeTransform(in string limbname, in floatSeq dofArray) raises (Error);
 
+    /// returns whether a state is in static equilibrium
+    /// \param state id of the state
+    double isStateBalanced(in unsigned short state) raises (Error);
+
     /// returns octree transform for a given robot configuration
     /// \param config configuration tested on the robot
     /// \param contacts name of the limbs in contact

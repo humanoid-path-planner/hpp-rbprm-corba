@@ -2065,6 +2065,23 @@ assert(s2 == s1 +1);
         }
     }
 
+    double RbprmBuilder::isStateBalanced(unsigned short stateId) throw (hpp::Error)
+    {
+        try
+        {
+            if(lastStatesComputed_.size() <= stateId)
+            {
+                throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
+            }
+            return stability::IsStable(fullBody_,lastStatesComputed_[stateId]);
+        }
+        catch(std::runtime_error& e)
+        {
+            std::cout << "ERROR " << e.what() << std::endl;
+            throw Error(e.what());
+        }
+    }
+
 
     void RbprmBuilder::runSampleAnalysis(const char* analysis, double isstatic) throw (hpp::Error)
     {

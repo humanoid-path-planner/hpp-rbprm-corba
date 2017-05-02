@@ -596,6 +596,14 @@ class FullBody (object):
 		else:
 			return False
 		
+	## Given start and goal states
+	#  generate a contact sequence over a list of configurations
+	#
+    # \param stepSize discretization step
+    # \param pathId Id of the path to compute from
+    def isStateBalanced(self, stateId, robustness = 0):
+		return self.client.rbprm.rbprm.isStateBalanced(stateId) > robustness
+					
 	## Updates limb databases with a user chosen computation
 	#
     # \param analysis name of computation
