@@ -31,14 +31,14 @@ rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,-0.105,0,]
 rLegNormal = [0,1,0]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 10000, "manipulability", 0.4)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 10000, "manipulability", 0.1)
                                                                                                 
 lLegId = '1lLeg'                                                                                
 lLeg = 'LLEG_JOINT0'                                                                            
 lLegOffset = [0,-0.105,0]                                                                       
 lLegNormal = [0,1,0]                                                                            
 lLegx = 0.09; lLegy = 0.05                                                                      
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.4)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.1)
 
 rarmId = '3Rarm'
 rarm = 'RARM_JOINT0'
@@ -265,16 +265,18 @@ def __Bezier(wps, init_acc = [0.,0.,0.], end_acc = [0.,0.,0.]):
     c.init_acc = matrix(init_acc);
     c.end_acc  = matrix(end_acc);
     matrix_bezier = matrix(wps).transpose()
-    return __curveToWps(bezier(matrix_bezier, c))
+    #~ return __curveToWps(bezier(matrix_bezier, c))
+    return __curveToWps(bezier(matrix_bezier))
 
-def test(stateid = 1, path = False) :
+def test(stateid = 1, path = False, use_rand = False) :
     com_1 = __get_com(fullBody, configs[stateid])
     com_2 = __get_com(fullBody, configs[stateid+1])
     data = gen_sequence_data_from_state(fullBody,stateid,configs)
     c_bounds_1 = get_com_constraint(fullBody, stateid, configs[stateid], limbsCOMConstraints, interm = False)
+    c_bounds_mid = get_com_constraint(fullBody, stateid, configs[stateid], limbsCOMConstraints, interm = True)
     c_bounds_2 = get_com_constraint(fullBody, stateid, configs[stateid+1], limbsCOMConstraints, interm = False)
-    #~ success, c_mid_1, c_mid_2 = solve_quasi_static(data, c_bounds = [c_bounds_1, c_bounds_2])
-    success, c_mid_1, c_mid_2 = solve_dyn(data, c_bounds = [c_bounds_1, c_bounds_2])
+    success, c_mid_1, c_mid_2 = solve_quasi_static(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand)
+    #~ success, c_mid_1, c_mid_2 = solve_dyn(data, c_bounds = [c_bounds_1, c_bounds_2])
     
     if path and success:
         #~ fullBody.straightPath([c_mid_1[0].tolist(),c_mid_2[0].tolist()])
@@ -285,14 +287,17 @@ def test(stateid = 1, path = False) :
         bezier_2 = __Bezier([c_mid_2[0].tolist(),com_2]              , init_acc = c_mid_2[1].tolist())
         
         p0 = fullBody.generateCurveTraj(bezier_0)
+        print "p0", p0
         fullBody.generateCurveTraj(bezier_1)
         fullBody.generateCurveTraj(bezier_2)
         pp.displayPath(p0)
         pp.displayPath(p0+1)
         pp.displayPath(p0+2)
-        #~ paths_ids = [int(el) for el in fullBody.comRRTFromPos(stateid,p0,p0+1,p0+2)]
-        paths_ids = []
-        #~ pp(paths_ids[-1])
+        paths_ids = [int(el) for el in fullBody.comRRTFromPos(stateid,p0,p0+1,p0+2)]
+        #~ paths_ids = []
+        pp(paths_ids[-1])
     
-        return sucess, paths_ids
+        return success, paths_ids
     return success
+data = gen_sequence_data_from_state(fullBody,3,configs)
+test(1, True)
