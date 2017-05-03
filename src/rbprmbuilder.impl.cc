@@ -40,6 +40,8 @@
 #include <hpp/core/collision-validation.hh>
 #include <fstream>
 #include <algorithm>    // std::random_shuffle
+#include "spline/bezier_curve.h"
+#include "hpp/rbprm/interpolation/polynom-trajectory.hh"
 
 #ifdef PROFILE
     #include "hpp/rbprm/rbprm-profiler.hh"
@@ -49,6 +51,8 @@
 
 namespace hpp {
   namespace rbprm {
+
+  typedef spline::bezier_curve<> bezier;
     namespace impl {
 
     RbprmBuilder::RbprmBuilder ()
@@ -1324,6 +1328,25 @@ namespace hpp {
                  model::vector3_t speed = (*cit) -  *(cit-1);
                  res->appendPath(interpolation::ComTrajectory::create(*(cit-1),*cit,speed,zero,1.));
              }
+             return problemSolver_->addPath(res);
+         }
+         catch(std::runtime_error& e)
+         {
+             throw Error(e.what());
+         }
+     }
+
+
+    CORBA::Short RbprmBuilder::generateCurveTraj(const hpp::floatSeqSeq& positions) throw (hpp::Error)
+     {
+         try
+         {
+             T_Configuration c = doubleDofArrayToConfig(3, positions);
+             bezier* curve = new bezier(c.begin(), c.end());
+             hpp::rbprm::interpolation::PolynomPtr_t curvePtr (curve);
+             hpp::rbprm::interpolation::PolynomTrajectoryPtr_t path = hpp::rbprm::interpolation::PolynomTrajectory::create(curvePtr);
+             core::PathVectorPtr_t res = core::PathVector::create(3, 3);
+             res->appendPath(path);
              return problemSolver_->addPath(res);
          }
          catch(std::runtime_error& e)

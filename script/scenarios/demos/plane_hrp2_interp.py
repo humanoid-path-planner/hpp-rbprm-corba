@@ -76,8 +76,8 @@ lLegx = 0.05; lLegy = 0.05
 #~ fullBody.addLimb(lKneeId,lLeg,lKnee,lLegOffset,lLegNormal, lLegx, lLegy, 10000, 0.01)
  #~ 
 
-#~ fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
-#~ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
+fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
+fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 
 #~ fullBody.client.basic.robot.setJointConfig('LARM_JOINT0',[1])
 #~ fullBody.client.basic.robot.setJointConfig('RARM_JOINT0',[-1])
@@ -187,7 +187,7 @@ def genPlan(stepsize=0.1):
 	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
 	global configs
 	start = time.clock() 
-	configs = fullBody.interpolate(stepsize, 1, 5, True)
+	configs = fullBody.interpolate(stepsize, 1, 2, True)
 	end = time.clock() 
 	print "Contact plan generated in " + str(end-start) + "seconds"
 	
@@ -249,6 +249,18 @@ def __get_com(robot, config):
 	robot.setCurrentConfig(save)
 	return com
 
+from numpy import matrix, asarray
+from numpy.linalg import norm
+from spline import bezier
+
+def __Bezier(wps):
+    matrix_bezier = matrix(wps).transpose()
+    return bezier(matrix_bezier)
+
+def __curveToWps(curve):
+    return asarray(curve.waypoints().transpose()).tolist()
+
+
 
 def test(stateid = 1, path = False) :
     com_1 = __get_com(fullBody, configs[stateid])
@@ -259,12 +271,14 @@ def test(stateid = 1, path = False) :
     success, c_mid_1, c_mid_2 = solve_quasi_static(data, c_bounds = [c_bounds_1, c_bounds_2])
     
     if path:
-        p0 = fullBody.straightPath([com_1,c_mid_1[0].tolist()])
-        fullBody.straightPath([c_mid_1[0].tolist(),c_mid_2[0].tolist()])
-        fullBody.straightPath([c_mid_2[0].tolist(),com_2])
-        pp.displayPath(p0)
+        #~ fullBody.straightPath([c_mid_1[0].tolist(),c_mid_2[0].tolist()])
+        #~ fullBody.straightPath([c_mid_2[0].tolist(),com_2])
+        p0 = fullBody.generateCurveTraj([com_1,c_mid_1[0].tolist()])
+        fullBody.generateCurveTraj([com_1, c_mid_1[0].tolist(),c_mid_2[0].tolist(), com_2])
+        fullBody.generateCurveTraj([c_mid_2[0].tolist(),com_2])
+        #~ pp.displayPath(p0)
         pp.displayPath(p0+1)
-        pp.displayPath(p0+2)
+        #~ pp.displayPath(p0+2)
         paths_ids = [int(el) for el in fullBody.comRRTFromPos(stateid,p0,p0+1,p0+2)]
         pp(paths_ids[-1])
     

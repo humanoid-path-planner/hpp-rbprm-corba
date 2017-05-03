@@ -163,6 +163,7 @@ namespace hpp {
                                              const hpp::floatSeqSeq& accelerations, const double dt) throw (hpp::Error);
 
         virtual CORBA::Short straightPath(const hpp::floatSeqSeq& positions) throw (hpp::Error);
+        virtual CORBA::Short generateCurveTraj(const hpp::floatSeqSeq& positions) throw (hpp::Error);
         virtual CORBA::Short generateRootPath(const hpp::floatSeqSeq& rootPositions,
                                       const hpp::floatSeq& q1, const hpp::floatSeq& q2) throw (hpp::Error);
         virtual CORBA::Short limbRRT(double state1, double state2, unsigned short numOptimizations) throw (hpp::Error);
