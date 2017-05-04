@@ -464,6 +464,17 @@ class FullBody (object):
     # \return id of the root path computed
     def generateCurveTraj(self, positions):
 		return self.client.rbprm.rbprm.generateCurveTraj(positions)
+        
+    ## Create a com trajectory given a polynomial trajectory.
+    # The path is composed of n+1 integrations
+    # between the n waypoints. Then splits the curve into several sub curves
+    # The resulting paths
+    # are added to the problem solver
+    # \param positions array of positions
+    # \param partition array of times [0,1.] that describe the beginning or end of each phase
+    # \return id of the complete path computed
+    def generateCurveTrajParts(self, positions, partition):
+		return self.client.rbprm.rbprm.generateCurveTrajParts(positions, partition)
 			
 	## Create a com trajectory given list of positions, velocities and accelerations
     # accelerations list contains one less element because it does not have an initial state.

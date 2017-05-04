@@ -342,6 +342,13 @@ module hpp
 		/// \return id of the path computed
 		short generateCurveTraj(in floatSeqSeq coefficients) raises (Error);
 
+		/// Create a trajectory corresponding to a bezier curve.
+		/// The coefficients give the order of the spline
+		/// \param coefficients array of positions
+		/// \param partitions array of positions
+		/// \return id of the path computed
+		short generateCurveTrajParts(in floatSeqSeq coefficients, in floatSeq partitions) raises (Error);
+
     /// Provided a path has already been computed and interpolated, generate a continuous path
     /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
     /// Will fail if the index of the states do not exist

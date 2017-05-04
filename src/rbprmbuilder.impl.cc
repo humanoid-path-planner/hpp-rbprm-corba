@@ -1355,6 +1355,34 @@ namespace hpp {
          }
      }
 
+    CORBA::Short RbprmBuilder::generateCurveTrajParts(const hpp::floatSeqSeq& positions, const hpp::floatSeq& partitions) throw (hpp::Error)
+     {
+         try
+         {
+             model::Configuration_t config = dofArrayToConfig ((std::size_t)partitions.length(), partitions);
+             T_Configuration c = doubleDofArrayToConfig(3, positions);
+             bezier* curve = new bezier(c.begin(), c.end());
+             hpp::rbprm::interpolation::PolynomPtr_t curvePtr (curve);
+             hpp::rbprm::interpolation::PolynomTrajectoryPtr_t path = hpp::rbprm::interpolation::PolynomTrajectory::create(curvePtr);
+             core::PathVectorPtr_t res = core::PathVector::create(3, 3);
+             res->appendPath(path);
+             std::size_t returned_pathId =problemSolver_->addPath(res);
+             for (int i = 1; i < config.rows(); ++i)
+             {
+                 std::cout << "j ajoute " << config(i-1) << " " << config(i) << std::endl;
+                core::PathPtr_t cutPath = path->extract(interval_t (config(i-1), config(i)));
+                res = core::PathVector::create(3, 3);
+                res->appendPath(cutPath);
+                problemSolver_->addPath(res);
+             }
+             return returned_pathId;
+         }
+         catch(std::runtime_error& e)
+         {
+             throw Error(e.what());
+         }
+     }
+
     CORBA::Short RbprmBuilder::generateComTraj(const hpp::floatSeqSeq& positions, const hpp::floatSeqSeq& velocities,
                                           const hpp::floatSeqSeq& accelerations,
                                           const double dt) throw (hpp::Error)
@@ -1681,10 +1709,10 @@ assert(s2 == s1 +1);
                 throw std::runtime_error("in comRRTFromPos, at least one com trajectory is not present in problem solver");
             }
             State& state1=lastStatesComputed_[s1], state2=lastStatesComputed_[s2];
-
+std::cout << "state 1" << paths[cT1]->end().head<3>() << std::endl;
             State s1Bis(state1);
             s1Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Bis,paths[cT1]->end().head<3>());
-
+std::cout << "ok. state 2" << paths[cT2]->end().head<3>() << std::endl;
             State s2Bis(state2);
             s2Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Bis,paths[cT2]->end().head<3>());
 
