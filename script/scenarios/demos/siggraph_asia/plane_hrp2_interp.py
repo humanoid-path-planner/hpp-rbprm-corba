@@ -329,13 +329,13 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False) :
     return success
 data = gen_sequence_data_from_state(fullBody,3,configs)
 
-test(0, True, True, False)
-test(0, True, True, True)
-test(1, True, True, False)
-test(1, True, True, True)
-test(2, True, True, False)
-test(2, True, True, True)
-test(3, True, True, False)
-test(3, True, True, True)
+#~ test(0, True, True, False)
+#~ test(0, True, True, True)
+#~ test(1, True, True, False)
+#~ test(1, True, True, True)
+#~ test(2, True, True, False)
+#~ test(2, True, True, True)
+#~ test(3, True, True, False)
+#~ test(3, True, True, True)
 
 #~ pp(29),pp(9),pp(17)
