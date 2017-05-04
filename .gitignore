@@ -30,6 +30,7 @@
 *.app
 
 build/
+build-rel/
 profile/logs
 
 CMakeLists.txt.user
