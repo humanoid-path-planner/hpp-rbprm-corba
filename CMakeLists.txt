@@ -93,6 +93,7 @@ install(FILES
   data/urdf/car.urdf
   data/urdf/polaris.urdf
 	data/urdf/siggraph_asia/down.urdf
+	data/urdf/siggraph_asia/scale.urdf
   #~ data/urdf/scene2.urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
   )
@@ -125,6 +126,7 @@ install(FILES
   data/srdf/car.srdf
   data/srdf/polaris.srdf
 	data/srdf/siggraph_asia/down.srdf
+	data/srdf/siggraph_asia/scale.srdf
   #~ data/srdf/scene2.srdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
   )
@@ -163,6 +165,7 @@ install(FILES
 	data/meshes/polaris.stl
 	data/meshes/polaris_reduced.stl
 	data/meshes/siggraph_asia/down.stl
+	data/meshes/siggraph_asia/scale.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
   )
 install(FILES

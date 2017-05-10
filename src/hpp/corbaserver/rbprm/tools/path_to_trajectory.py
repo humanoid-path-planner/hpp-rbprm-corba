@@ -66,6 +66,7 @@ def gen_trajectory_to_play(robot, path_player, path_ids, total_time_per_paths, d
 		config_size_path = len(path_player.client.problem.configAtParam (path_id, 0))
 		if(config_size_path > config_size):
 		#~ if(i == 1 ):
+			print "follow"
 			res+= follow_trajectory_path(robot, path_player, path_id, total_time_per_paths[i], dt_framerate)
 		else:
 			res+= linear_interpolate_path(robot, path_player, path_id, total_time_per_paths[i], dt_framerate)
