@@ -295,6 +295,7 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False) :
     #~ success, c_mid_1, c_mid_2 = solve_dyn(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand)
     #~ success, c_mid_1, c_mid_2 = solve_dyn(data, c_bounds = [c_bounds_1, c_bounds_2])
     
+    paths_ids = []
     if path and success:
         #~ fullBody.straightPath([c_mid_1[0].tolist(),c_mid_2[0].tolist()])
         #~ fullBody.straightPath([c_mid_2[0].tolist(),com_2])
@@ -306,7 +307,8 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False) :
             #~ pp.displayPath(p0+1)
             #~ pp.displayPath(p0+2)
             pp.displayPath(p0)
-            paths_ids = [int(el) for el in fullBody.comRRTFromPos(stateid,p0+1,p0+2,p0+3)]
+            #~ paths_ids = [int(el) for el in fullBody.comRRTFromPos(stateid,p0+1,p0+2,p0+3)]
+            paths_ids = [int(el) for el in fullBody.effectorRRT(stateid,p0+1,p0+2,p0+3)]
         else:
             bezier_0 = __Bezier([com_1,c_mid_1[0].tolist()]              , end_acc = c_mid_1[1].tolist() , end_vel = [0.,0.,0.])
             bezier_1 = __Bezier([c_mid_1[0].tolist(),c_mid_2[0].tolist()], end_acc = c_mid_2[1].tolist(), init_acc = c_mid_1[1].tolist(), init_vel = [0.,0.,0.], end_vel = [0.,0.,0.])
@@ -322,20 +324,59 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False) :
             paths_ids = [int(el) for el in fullBody.comRRTFromPos(stateid,p0,p0+1,p0+2)]
         #~ paths_ids = []
         global allpaths
-        allpaths += [paths_ids[-1]]
-        pp(paths_ids[-1])
+        allpaths += paths_ids[:-1]
+        #~ pp(paths_ids[-1])
     
-        return success, paths_ids
-    return success
+        #~ return success, paths_ids, c_mid_1, c_mid_2
+    return success, c_mid_1, c_mid_2, paths_ids
 data = gen_sequence_data_from_state(fullBody,3,configs)
 
-#~ test(0, True, True, False)
-#~ test(0, True, True, True)
+
+
+def prepare_whole_interp(stateid, stateid_end):
+	all_points = []
+	allSuc = True
+	for i in range(stateid, stateid_end):
+		com_1 = __get_com(fullBody, configs[stateid])
+		success, c_mid_1, c_mid_2, paths_ids = test(i, False, True, False)
+		allSuc = success and allSuc
+		if not success:
+			break
+		all_points = all_points + [com_1, c_mid_1[0].tolist(), c_mid_2[0].tolist()]
+	all_points = all_points + [__get_com(fullBody, configs[stateid_end])]
+	if allSuc:
+		bezier_0 = __Bezier(all_points)
+		p0 = fullBody.generateCurveTraj(bezier_0)
+		pp.displayPath(p0)
+		num_paths = stateid_end - stateid
+		num_sub_paths = num_paths * 3
+		increment = 1. / float(num_paths)
+		partitions = [0.]
+		for i in range(0, num_paths):
+			dec = increment * float(i)
+			partitions += [dec + 0.01 * increment, dec + 0.99 * increment,dec + 1. * increment]
+		print "partitions", partitions, len(partitions)
+		p0 = fullBody.generateCurveTrajParts(bezier_0,partitions) +1
+		paths_ids = []
+		for i in range(0, num_paths):
+			print "***************************3i", p0+3*i
+			paths_ids += [int(el) for el in fullBody.comRRTFromPos(stateid + i,p0+3*i,p0+3*i+1,p0+3*i+2)]
+        #~ paths_ids = []
+			global allpaths
+			allpaths += paths_ids[:-1]
+			#~ pp(paths_ids[-1])
+#~ success, paths_ids, c_mid_1, c_mid_2 = test(0, True, True, False)
+#~ prepare_whole_interp(1, 2)
+test(0, True, True, True)
 #~ test(1, True, True, False)
-#~ test(1, True, True, True)
+test(1, True, True, True)
 #~ test(2, True, True, False)
-#~ test(2, True, True, True)
+test(2, True, True, True)
 #~ test(3, True, True, False)
-#~ test(3, True, True, True)
+test(3, True, True, True)
 
 #~ pp(29),pp(9),pp(17)
+
+from hpp.corbaserver.rbprm.tools.path_to_trajectory import *
+a = gen_trajectory_to_play(fullBody, pp, allpaths, flatten([[0.1, 0.9, 0.1] for _ in range(len(allpaths) / 3)]))
+play_trajectory(fullBody,pp,a)

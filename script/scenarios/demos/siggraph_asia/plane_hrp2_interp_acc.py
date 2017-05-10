@@ -2,7 +2,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 
-import down_hrp2_path as tp
+import plane_hrp2_path as tp
 import time
 
 
@@ -19,7 +19,7 @@ srdfSuffix = ""
 fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz", [0,3, -0.5, 0.5, -0.4, 0.6])
+fullBody.setJointBounds ("base_joint_xyz", [-0.135,2, -1, 1, 0, 2.2])
 
 
 ps = tp.ProblemSolver( fullBody )
@@ -47,7 +47,7 @@ rArmOffset = [0,0,-0.1]
 rArmNormal = [0,0,1]
 rArmx = 0.024; rArmy = 0.024
 #disabling collision for hook
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.05, "_6_DOF", True)
+#~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.05, "_6_DOF", True)
 
 
 #~ AFTER loading obstacles
@@ -76,8 +76,8 @@ lLegx = 0.05; lLegy = 0.05
 #~ fullBody.addLimb(lKneeId,lLeg,lKnee,lLegOffset,lLegNormal, lLegx, lLegy, 10000, 0.01)
  #~ 
 
-#~ fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
-#~ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
+fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
+fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 
 #~ fullBody.client.basic.robot.setJointConfig('LARM_JOINT0',[1])
 #~ fullBody.client.basic.robot.setJointConfig('RARM_JOINT0',[-1])
@@ -90,7 +90,7 @@ q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.q_goal[0:7]
 
 fullBody.setCurrentConfig (q_init)
 q_init =  [
-        0.2,0, 0.48, 1.0, 0.0 , 0.0, 0.0,                         	 # Free flyer 0-6
+        0, -0.82, 0.58, 1.0, 0.0 , 0.0, 0.0,                         	 # Free flyer 0-6
         0.0, 0.0, 0.0, 0.0,                                                  # CHEST HEAD 7-10
         0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # LARM       11-17
         0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # RARM       18-24
@@ -105,14 +105,33 @@ q_init = fullBody.generateContacts(q_init, [0,0,1])
 #~ r(q_goal)
 
 #~ fullBody.setStartState(q_init,[rLegId,lLegId,rarmId]) #,rarmId,larmId])
-fullBody.setStartState(q_init,[rLegId,lLegId]) #,rarmId,larmId])
+fullBody.setStartState(q_init,[lLegId,rLegId]) #,rarmId,larmId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
 #~ 
 #~ configs = fullBody.interpolate(0.1)
 #~ configs = fullBody.interpolate(0.15)
 i = 0;
 configs = []
+#~ fullBody.draw(configs[i],r); i=i+1; i-1
 
+#~ r.loadObstacleModel ('hpp-rbprm-corba', "stair_bauzil", "contact")
+#~ fullBody.exportAll(r, configs, 'stair_bauzil_hrp2_robust_2');
+#~ fullBody.client.basic.robot.setJointConfig('LLEG_JOINT0',[-1])
+#~ q_0 = fullBody.getCurrentConfig(); 
+#~ fullBody.draw(q_0,r);
+#~ print(fullBody.client.rbprm.rbprm.getOctreeTransform(rarmId, q_0))
+#~ 
+#~ 
+#~ fullBody.client.basic.robot.setJointConfig('LLEG_JOINT0',[1])
+#~ q_0 = fullBody.getCurrentConfig(); 
+#~ fullBody.draw(q_0,r);
+#~ print(fullBody.client.rbprm.rbprm.getOctreeTransform(rarmId, q_0))
+#~ q_init = fullBody.generateContacts(q_init, [0,0,-1]); r (q_init)
+
+#~ f1 = open("secondchoice","w+")
+#~ f1 = open("hrp2_stair_not_robust_configs","w+")
+#~ f1.write(str(configs))
+#~ f1.close()
 
 limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},  
 						lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'},
@@ -168,17 +187,15 @@ def genPlan(stepsize=0.1):
 	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
 	global configs
 	start = time.clock() 
-	print "BEFORE"
-	configs = fullBody.interpolate(stepsize, 0, 2, True)
-	print "AFTER"
+	configs = fullBody.interpolate(stepsize, 1, 2, True)
 	end = time.clock() 
 	print "Contact plan generated in " + str(end-start) + "seconds"
 	
 def contactPlan(step = 0.5):
-	r.client.gui.setVisibility("hrp2_14", "ON")
+	r.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
 	tp.r.client.gui.setVisibility("toto", "OFF")
-	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
+	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	for i in range(0,len(configs)):
 		r(configs[i]);
 		time.sleep(step)	
@@ -204,11 +221,11 @@ def e(step = 0.5):
 	print "displaying contact plan"
 	contactPlan(step)
 	
-print "Root path WXXSD in " + str(tp.t) + " ms."
+print "Root path generated in " + str(tp.t) + " ms."
 	
-d(0.005); e()
+d(0.05); e(0.01)
 
-print "Root path SDDSD in " + str(tp.t) + " ms."
+print "Root path generated in " + str(tp.t) + " ms."
 	
 #~ from gen_data_from_rbprm import *
 #~ 
@@ -283,7 +300,7 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False) :
         #~ fullBody.straightPath([c_mid_1[0].tolist(),c_mid_2[0].tolist()])
         #~ fullBody.straightPath([c_mid_2[0].tolist(),com_2])
         if just_one_curve:
-            bezier_0 = __Bezier([com_1,c_mid_1[0].tolist(),c_mid_2[0].tolist(),com_2])
+            bezier_0 = __Bezier([com_1,c_mid_1[0].tolist(),c_mid_2[0].tolist(),com_2], init_acc = [0.0,-20.,0.], end_acc = [0.0,0.,0.], init_vel = [1.,0.,0.], end_vel = [1.,0.,0.])
         
             p0 = fullBody.generateCurveTrajParts(bezier_0,[0.,0.1,0.9,1.])
             print "p0", p0
@@ -291,6 +308,7 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False) :
             #~ pp.displayPath(p0+2)
             pp.displayPath(p0)
             paths_ids = [int(el) for el in fullBody.comRRTFromPos(stateid,p0+1,p0+2,p0+3)]
+            #~ paths_ids = [int(el) for el in fullBody.effectorRRT(stateid,p0+1,p0+2,p0+3)]
         else:
             bezier_0 = __Bezier([com_1,c_mid_1[0].tolist()]              , end_acc = c_mid_1[1].tolist() , end_vel = [0.,0.,0.])
             bezier_1 = __Bezier([c_mid_1[0].tolist(),c_mid_2[0].tolist()], end_acc = c_mid_2[1].tolist(), init_acc = c_mid_1[1].tolist(), init_vel = [0.,0.,0.], end_vel = [0.,0.,0.])
@@ -307,11 +325,11 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False) :
         #~ paths_ids = []
         global allpaths
         allpaths += paths_ids[:-1]
-        pp(paths_ids[-1])
+        #~ pp(paths_ids[-1])
     
         #~ return success, paths_ids, c_mid_1, c_mid_2
     return success, c_mid_1, c_mid_2, paths_ids
-#~ data = gen_sequence_data_from_state(fullBody,3,configs)
+data = gen_sequence_data_from_state(fullBody,3,configs)
 
 
 
@@ -349,22 +367,16 @@ def prepare_whole_interp(stateid, stateid_end):
 			#~ pp(paths_ids[-1])
 #~ success, paths_ids, c_mid_1, c_mid_2 = test(0, True, True, False)
 #~ prepare_whole_interp(1, 2)
+test(0, True, True, True)
+#~ test(1, True, True, False)
+test(1, True, True, True)
+#~ test(2, True, True, False)
+test(2, True, True, True)
+#~ test(3, True, True, False)
+test(3, True, True, True)
 
 #~ pp(29),pp(9),pp(17)
+
 from hpp.corbaserver.rbprm.tools.path_to_trajectory import *
-
-def gen(ine_curve =False):
-	#~ test(0, True, True, ine_curve)
-	#~ test(0, True, True, True)
-	#~ test(1, True, True, ine_curve)
-	#~ test(1, True, True, True)
-	test(2, True, True, ine_curve)
-	#~ test(2, True, True, True)
-	test(3, True, True, ine_curve)
-	#~ test(3, True, True, True)
-	test(4, True, True, ine_curve)
-	test(5, True, True, ine_curve)
-	a = gen_trajectory_to_play(fullBody, pp, allpaths, flatten([[0.1, 0.9, 0.1] for _ in range(len(allpaths) / 3)]))
-
-#~ pp(29),pp(9),pp(17)
-#~ gen(True)
+a = gen_trajectory_to_play(fullBody, pp, allpaths, flatten([[0.1, 0.9, 0.1] for _ in range(len(allpaths) / 3)]))
+#~ play_trajectory(fullBody,pp,a)
