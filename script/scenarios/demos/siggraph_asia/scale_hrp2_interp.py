@@ -281,7 +281,7 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
     c_bounds_1 = get_com_constraint(fullBody, stateid, configs[stateid], limbsCOMConstraints, interm = False)
     c_bounds_mid = get_com_constraint(fullBody, stateid, configs[stateid], limbsCOMConstraints, interm = True)
     c_bounds_2 = get_com_constraint(fullBody, stateid, configs[stateid+1], limbsCOMConstraints, interm = False)
-    success, c_mid_1, c_mid_2 = solve_quasi_static(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand, mu = 0.8, fullBody = fullBody)
+    success, c_mid_1, c_mid_2 = solve_quasi_static(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand, mu = 0.8)
     #~ success, c_mid_1, c_mid_2 = solve_dyn(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand)
     #~ success, c_mid_1, c_mid_2 = solve_dyn(data, c_bounds = [c_bounds_1, c_bounds_2])
     
@@ -292,7 +292,23 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
         if just_one_curve:
             bezier_0 = __Bezier([com_1,c_mid_1[0].tolist(),c_mid_2[0].tolist(),com_2])
         
-            p0 = fullBody.generateCurveTrajParts(bezier_0,[0.,0.3,0.9,1.])
+            partions = [0.,0.3,0.9,1.]
+            p0 = fullBody.generateCurveTrajParts(bezier_0,partions)
+            #testing intermediary configurations 
+            print 'wtf', partions[1], " "
+            com_interm1 = bezier_0[1]
+            com_interm2 = bezier_0[2]
+            success_proj1 = project_com_colfree(fullBody, stateid  , com_interm1)
+            success_proj2 = project_com_colfree(fullBody, stateid+1, com_interm2)
+            
+            if not success_proj1:
+				print "proj 1 failed"
+				return False, c_mid_1, c_mid_2, paths_ids
+				
+            if not success_proj2:
+				print "proj 2 failed"
+				return False, c_mid_1, c_mid_2, paths_ids
+            
             print "p0", p0
             #~ pp.displayPath(p0+1)
             #~ pp.displayPath(p0+2)
