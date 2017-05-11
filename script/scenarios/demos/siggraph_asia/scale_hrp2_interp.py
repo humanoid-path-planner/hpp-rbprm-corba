@@ -111,8 +111,8 @@ q_goal = fullBody.generateContacts(q_goal, [0,0,1])
 q_init = fullBody.generateContacts(q_init, [0,0,1])
 #~ r(q_goal)
 
-#~ fullBody.setStartState(q_init,[rLegId,lLegId,rarmId]) #,rarmId,larmId])
-fullBody.setStartState(q_init,[rLegId,lLegId]) #,rarmId,larmId])
+fullBody.setStartState(q_init,[rLegId,lLegId,rarmId]) #,rarmId,larmId])
+#~ fullBody.setStartState(q_init,[rLegId,lLegId]) #,rarmId,larmId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
 #~ 
 #~ configs = fullBody.interpolate(0.1)
@@ -274,14 +274,14 @@ def play_all_paths_qs():
         if i % 2 == 0 :
             pp(pid)
 
-def test(stateid = 1, path = False, use_rand = False, just_one_curve = False) :
+def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, num_optim = 0) :
     com_1 = __get_com(fullBody, configs[stateid])
     com_2 = __get_com(fullBody, configs[stateid+1])
     data = gen_sequence_data_from_state(fullBody,stateid,configs, mu = 1.)
     c_bounds_1 = get_com_constraint(fullBody, stateid, configs[stateid], limbsCOMConstraints, interm = False)
     c_bounds_mid = get_com_constraint(fullBody, stateid, configs[stateid], limbsCOMConstraints, interm = True)
     c_bounds_2 = get_com_constraint(fullBody, stateid, configs[stateid+1], limbsCOMConstraints, interm = False)
-    success, c_mid_1, c_mid_2 = solve_quasi_static(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand)
+    success, c_mid_1, c_mid_2 = solve_quasi_static(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand, mu = 0.8, fullBody = fullBody)
     #~ success, c_mid_1, c_mid_2 = solve_dyn(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand)
     #~ success, c_mid_1, c_mid_2 = solve_dyn(data, c_bounds = [c_bounds_1, c_bounds_2])
     
@@ -292,12 +292,12 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False) :
         if just_one_curve:
             bezier_0 = __Bezier([com_1,c_mid_1[0].tolist(),c_mid_2[0].tolist(),com_2])
         
-            p0 = fullBody.generateCurveTrajParts(bezier_0,[0.,0.1,0.9,1.])
+            p0 = fullBody.generateCurveTrajParts(bezier_0,[0.,0.3,0.9,1.])
             print "p0", p0
             #~ pp.displayPath(p0+1)
             #~ pp.displayPath(p0+2)
             pp.displayPath(p0)
-            paths_ids = [int(el) for el in fullBody.comRRTFromPos(stateid,p0+1,p0+2,p0+3)]
+            paths_ids = [int(el) for el in fullBody.comRRTFromPos(stateid,p0+1,p0+2,p0+3,num_optim)]
         else:
             bezier_0 = __Bezier([com_1,c_mid_1[0].tolist()]              , end_acc = c_mid_1[1].tolist() , end_vel = [0.,0.,0.])
             bezier_1 = __Bezier([c_mid_1[0].tolist(),c_mid_2[0].tolist()], end_acc = c_mid_2[1].tolist(), init_acc = c_mid_1[1].tolist(), init_vel = [0.,0.,0.], end_vel = [0.,0.,0.])
@@ -310,12 +310,12 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False) :
             pp.displayPath(p0)
             pp.displayPath(p0+1)
             pp.displayPath(p0+2)
-            paths_ids = [int(el) for el in fullBody.comRRTFromPos(stateid,p0,p0+1,p0+2)]
+            paths_ids = [int(el) for el in fullBody.comRRTFromPos(stateid,p0,p0+1,p0+2,num_optim)]
         #~ paths_ids = []
         global allpaths
         allpaths += paths_ids[:-1]
         #~ allpaths += [paths_ids[-1]]
-        pp(paths_ids[-1])
+        #~ pp(paths_ids[-1])
     
         #~ return success, paths_ids, c_mid_1, c_mid_2
     return success, c_mid_1, c_mid_2, paths_ids
@@ -372,7 +372,7 @@ def gen(ine_curve =False):
 	#~ test(3, True, True, True)
 	test(4, True, True, ine_curve)
 	test(5, True, True, ine_curve)
-	a = gen_trajectory_to_play(fullBody, pp, allpaths, flatten([[0.1, 0.9, 0.1] for _ in range(len(allpaths) / 3)]))
+	a = gen_trajectory_to_play(fullBody, pp, allpaths, flatten([[0.3, 0.6, 0.1] for _ in range(len(allpaths) / 3)]))
 
 #~ pp(29),pp(9),pp(17)
 #~ gen(True)
