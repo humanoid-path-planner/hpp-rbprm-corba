@@ -255,7 +255,8 @@ def __Bezier(wps, init_acc = [0.,0.,0.], end_acc = [0.,0.,0.], init_vel = [0.,0.
     c.init_acc = matrix(init_acc);
     c.end_acc  = matrix(end_acc);
     matrix_bezier = matrix(wps).transpose()
-    return __curveToWps(bezier(matrix_bezier, c))
+    curve =  bezier(matrix_bezier, c)
+    return __curveToWps(curve), curve
     #~ return __curveToWps(bezier(matrix_bezier))
 
 allpaths = []
@@ -277,7 +278,7 @@ def play_all_paths_qs():
 def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, num_optim = 0) :
     com_1 = __get_com(fullBody, configs[stateid])
     com_2 = __get_com(fullBody, configs[stateid+1])
-    data = gen_sequence_data_from_state(fullBody,stateid,configs, mu = 1.)
+    data = gen_sequence_data_from_state(fullBody,stateid,configs, mu = 0.8)
     c_bounds_1 = get_com_constraint(fullBody, stateid, configs[stateid], limbsCOMConstraints, interm = False)
     c_bounds_mid = get_com_constraint(fullBody, stateid, configs[stateid], limbsCOMConstraints, interm = True)
     c_bounds_2 = get_com_constraint(fullBody, stateid, configs[stateid+1], limbsCOMConstraints, interm = False)
@@ -290,16 +291,18 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
         #~ fullBody.straightPath([c_mid_1[0].tolist(),c_mid_2[0].tolist()])
         #~ fullBody.straightPath([c_mid_2[0].tolist(),com_2])
         if just_one_curve:
-            bezier_0 = __Bezier([com_1,c_mid_1[0].tolist(),c_mid_2[0].tolist(),com_2])
+            print "just one curve"
+            bezier_0, curve = __Bezier([com_1,c_mid_1[0].tolist(),c_mid_2[0].tolist(),com_2])
         
-            partions = [0.,0.3,0.9,1.]
+            partions = [0.,0.1,0.9,1.]
             p0 = fullBody.generateCurveTrajParts(bezier_0,partions)
             #testing intermediary configurations 
             print 'wtf', partions[1], " "
-            com_interm1 = bezier_0[1]
-            com_interm2 = bezier_0[2]
-            success_proj1 = project_com_colfree(fullBody, stateid  , com_interm1)
-            success_proj2 = project_com_colfree(fullBody, stateid+1, com_interm2)
+            com_interm1 = curve(partions[1])
+            com_interm2 = curve(partions[2])
+            print "com_1", com_1
+            success_proj1 = project_com_colfree(fullBody, stateid  , asarray((com_interm1).transpose()).tolist()[0])
+            success_proj2 = project_com_colfree(fullBody, stateid+1, asarray((com_interm2).transpose()).tolist()[0])
             
             if not success_proj1:
 				print "proj 1 failed"
@@ -315,9 +318,10 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
             pp.displayPath(p0)
             paths_ids = [int(el) for el in fullBody.comRRTFromPos(stateid,p0+1,p0+2,p0+3,num_optim)]
         else:
-            bezier_0 = __Bezier([com_1,c_mid_1[0].tolist()]              , end_acc = c_mid_1[1].tolist() , end_vel = [0.,0.,0.])
-            bezier_1 = __Bezier([c_mid_1[0].tolist(),c_mid_2[0].tolist()], end_acc = c_mid_2[1].tolist(), init_acc = c_mid_1[1].tolist(), init_vel = [0.,0.,0.], end_vel = [0.,0.,0.])
-            bezier_2 = __Bezier([c_mid_2[0].tolist(),com_2]              , init_acc = c_mid_2[1].tolist(), init_vel = [0.,0.,0.])
+            print "just all curve"
+            bezier_0, curve = __Bezier([com_1,c_mid_1[0].tolist()]              , end_acc = c_mid_1[1].tolist() , end_vel = [0.,0.,0.])
+            bezier_1, curve = __Bezier([c_mid_1[0].tolist(),c_mid_2[0].tolist()], end_acc = c_mid_2[1].tolist(), init_acc = c_mid_1[1].tolist(), init_vel = [0.,0.,0.], end_vel = [0.,0.,0.])
+            bezier_2, curve = __Bezier([c_mid_2[0].tolist(),com_2]              , init_acc = c_mid_2[1].tolist(), init_vel = [0.,0.,0.])
         
             p0 = fullBody.generateCurveTraj(bezier_0)
             print "p0", p0
@@ -377,18 +381,15 @@ def prepare_whole_interp(stateid, stateid_end):
 #~ pp(29),pp(9),pp(17)
 from hpp.corbaserver.rbprm.tools.path_to_trajectory import *
 
-def gen(ine_curve =False):
-	#~ test(0, True, True, ine_curve)
-	#~ test(0, True, True, True)
-	#~ test(1, True, True, ine_curve)
-	#~ test(1, True, True, True)
-	test(2, True, True, ine_curve)
-	#~ test(2, True, True, True)
-	test(3, True, True, ine_curve)
-	#~ test(3, True, True, True)
-	test(4, True, True, ine_curve)
-	test(5, True, True, ine_curve)
-	a = gen_trajectory_to_play(fullBody, pp, allpaths, flatten([[0.3, 0.6, 0.1] for _ in range(len(allpaths) / 3)]))
+def gen(len_con = 10, num_optim = 0, ine_curve =True):
+    for i in range (len_con):
+        if not test(i, True, False, ine_curve,num_optim):
+            for j in range(10):
+                found = test(i, True, True, ine_curve, num_optim)
+                if found:
+                    break
+    a = gen_trajectory_to_play(fullBody, pp, allpaths, flatten([[0.3, 0.6, 0.1] for _ in range(len(allpaths) / 3)]))
+    return a
 
 #~ pp(29),pp(9),pp(17)
 #~ gen(True)
