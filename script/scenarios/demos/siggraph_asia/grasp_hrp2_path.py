@@ -29,15 +29,15 @@ srdfSuffix = ""
 rbprmBuilder = Builder ()
 
 rbprmBuilder.loadModel(urdfName, urdfNameRoms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-rbprmBuilder.setJointBounds ("base_joint_xyz", [-1,3, -1, 1, 0, 2.2])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [-3,3, -2, 2, 0, 1])
 #~ rbprmBuilder.setFilter(['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom'])
 #~ rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
 #~ rbprmBuilder.setAffordanceFilter('hrp2_rarm_rom', ['Support','Lean'])
 #~ rbprmBuilder.setAffordanceFilter('hrp2_larm_rom', ['Support','Lean'])
-rbprmBuilder.setAffordanceFilter('hrp2_rarm_rom', ['Support'])
-rbprmBuilder.setAffordanceFilter('hrp2_larm_rom', ['Support'])
-#~ rbprmBuilder.setAffordanceFilter('hrp2_rarm_rom', ['Lean'])
-#~ rbprmBuilder.setAffordanceFilter('hrp2_larm_rom', ['Lean'])
+#~ rbprmBuilder.setAffordanceFilter('hrp2_rarm_rom', ['Support'])
+#~ rbprmBuilder.setAffordanceFilter('hrp2_larm_rom', ['Support'])
+rbprmBuilder.setAffordanceFilter('hrp2_rarm_rom', ['Lean'])
+rbprmBuilder.setAffordanceFilter('hrp2_larm_rom', ['Lean'])
 rbprmBuilder.setAffordanceFilter('hrp2_lleg_rom', ['Support',])
 rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
 #~ rbprmBuilder.setNormalFilter('hrp2_rarm_rom', [0,0,1], 0.5)
@@ -55,15 +55,15 @@ r = Viewer (ps)
 
 
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
-q_init [0:3] = [-0.05, -0.82, 0.50]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+#~ q_init [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
+q_init [0:3] = [-0.05, -1.12, 0.5]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 #~ q_init [0:3] = [0.1, -0.82, 0.648702]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 #~ q_init [0:3] = [0, -0.63, 0.6]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 #~ q_init [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
 
 q_goal = q_init [::]
-q_goal [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
-q_goal [0:3] = [0.6 	, -0.82, 1.5]; r (q_goal)
+#~ q_goal [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
+q_goal [0:3] = [-0.05, -0.12, 0.5]; r (q_goal)
 #~ q_goal [0:3] = [1.2, -0.65, 1.1]; r (q_goal)
 
 #~ ps.addPathOptimizer("GradientBased")
@@ -73,9 +73,9 @@ ps.addGoalConfig (q_goal)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
-afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
-afftool.setAffordanceConfig('Lean', [0.5, 0.03, 0.00005])
-afftool.loadObstacleModel (packageName, "scale", "planning", r)
+afftool.setAffordanceConfig('Support', [0.000005, 0.000005, 0.00005])
+afftool.setAffordanceConfig('Lean', [0.00005, 0.000005, 0.00005])
+afftool.loadObstacleModel (packageName, "grasp", "planning", r)
 #~ afftool.analyseAll()
 afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 afftool.visualiseAffordances('Lean', r, [0, 0, 0.9])
@@ -112,5 +112,5 @@ cl.problem.selectProblem("default")
 cl.problem.movePathToProblem(1,"rbprm_path",rbprmBuilder.getAllJointNames())
 r2 = Viewer (ps2, viewerClient=r.client)
 r.client.gui.setVisibility("toto", "OFF")
-#~ r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
+r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
 #~ r2(q_far)

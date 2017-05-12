@@ -30,13 +30,15 @@ rLegId = '0rLeg'
 rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,-0.105,0,]
 rLegNormal = [0,1,0]
+#~ rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 10000, "manipulability", 0.1)
                                                                                                 
 lLegId = '1lLeg'                                                                                
 lLeg = 'LLEG_JOINT0'                                                                            
 lLegOffset = [0,-0.105,0]                                                                       
-lLegNormal = [0,1,0]                                                                            
+lLegNormal = [0,1,0]      
+#~ lLegNormal = [0,0,1]                                                                      
 lLegx = 0.09; lLegy = 0.05                                                                      
 fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.1)
 

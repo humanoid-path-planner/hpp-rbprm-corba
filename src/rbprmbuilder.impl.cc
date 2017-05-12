@@ -955,7 +955,7 @@ namespace hpp {
     }
 
     void RbprmBuilder::addLimb(const char* id, const char* limb, const char* effector, const hpp::floatSeq& offset, const hpp::floatSeq& normal, double x, double y,
-                               unsigned short samples, const char* heuristicName, double resolution, const char *contactType, double disableEffectorCollision) throw (hpp::Error)
+                               unsigned short samples, const char* heuristicName, double resolution, const char *contactType, double disableEffectorCollision, double grasp) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
@@ -973,7 +973,7 @@ namespace hpp {
                 cType = hpp::rbprm::_3_DOF;
             }
             fullBody_->AddLimb(std::string(id), std::string(limb), std::string(effector), off, norm, x, y,
-                               problemSolver_->collisionObstacles(), samples,heuristicName,resolution,cType,disableEffectorCollision > 0.5);
+                               problemSolver_->collisionObstacles(), samples,heuristicName,resolution,cType,disableEffectorCollision > 0.5, grasp > 0.5);
         }
         catch(std::runtime_error& e)
         {
@@ -982,7 +982,7 @@ namespace hpp {
     }
 
 
-    void RbprmBuilder::addLimbDatabase(const char* databasePath, const char* id, const char* heuristicName, double loadValues, double disableEffectorCollision) throw (hpp::Error)
+    void RbprmBuilder::addLimbDatabase(const char* databasePath, const char* id, const char* heuristicName, double loadValues, double disableEffectorCollision, double grasp) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
@@ -990,7 +990,7 @@ namespace hpp {
         {
             std::string fileName(databasePath);
             fullBody_->AddLimb(fileName, std::string(id), problemSolver_->collisionObstacles(), heuristicName, loadValues > 0.5,
-                               disableEffectorCollision > 0.5);
+                               disableEffectorCollision > 0.5, grasp > 0.5);
         }
         catch(std::runtime_error& e)
         {
@@ -1684,6 +1684,7 @@ assert(s2 == s1 +1);
     {
         bool success(false);
         core::Configuration_t res = rbprm::interpolation::projectOnCom(fulllBody, problem,state,targetCom, success);
+        std::cout << "no com " << targetCom << std::endl;
         if(!success)
         {
             throw std::runtime_error("could not project state on COM constraint");

@@ -2,7 +2,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 
-import scale_hrp2_path as tp
+import grasp_hrp2_path as tp
 import time
 
 
@@ -19,7 +19,7 @@ srdfSuffix = ""
 fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz", [-1,3, -1, 1, 0, 2.2])
+fullBody.setJointBounds ("base_joint_xyz", [-3,3, -2, 2, 0, 1])
 
 
 ps = tp.ProblemSolver( fullBody )
@@ -99,7 +99,7 @@ q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.q_goal[0:7]
 
 fullBody.setCurrentConfig (q_init)
 q_init =  [
-        -0.05, -0.82, 0.55, 1.0, 0.0 , 0.0, 0.0,                         	 # Free flyer 0-6
+        -0.05, -1.12, 0.5, 1.0, 0.0 , 0.0, 0.0,                         	 # Free flyer 0-6
         0.0, 0.0, 0.0, 0.0,                                                  # CHEST HEAD 7-10
         0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # LARM       11-17
         0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # RARM       18-24
@@ -113,7 +113,7 @@ q_goal = fullBody.generateContacts(q_goal, [0,0,1])
 q_init = fullBody.generateContacts(q_init, [0,0,1])
 #~ r(q_goal)
 
-fullBody.setStartState(q_init,[rLegId,lLegId,rarmId]) #,rarmId,larmId])
+fullBody.setStartState(q_init,[rLegId,lLegId,larmId]) #,rarmId,larmId])
 #~ fullBody.setStartState(q_init,[rLegId,lLegId]) #,rarmId,larmId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
 #~ 

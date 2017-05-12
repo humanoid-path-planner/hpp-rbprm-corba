@@ -130,14 +130,17 @@ class FullBody (object):
     # \param heuristicName: name of the selected heuristic for configuration evaluation
     # \param loadValues: whether values computed, other than the static ones, should be loaded in memory
     # \param disableEffectorCollision: whether collision detection should be disabled for end effector bones
-    def addLimbDatabase(self, databasepath, limbId, heuristicName, loadValues = True, disableEffectorCollision = False):
+    def addLimbDatabase(self, databasepath, limbId, heuristicName, loadValues = True, disableEffectorCollision = False, grasp =False):
 		boolVal = 0.
 		boolValEff = 0.
+		graspv = 0.
 		if(loadValues):
 			boolVal = 1.
 		if(disableEffectorCollision):
 			boolValEff = 1.
-		self.client.rbprm.rbprm.addLimbDatabase(databasepath, limbId, heuristicName, boolVal,boolValEff)		
+		if(grasp):
+			graspv = 1.
+		self.client.rbprm.rbprm.addLimbDatabase(databasepath, limbId, heuristicName, boolVal,boolValEff,graspv)		
 
 	## Add a limb to the model
 	#
@@ -158,11 +161,14 @@ class FullBody (object):
     # This can be problematic in terms of performance. The default value is 3 cm.
     # \param contactType whether the contact is punctual ("_3_DOF") or surfacic ("_6_DOF")
     # \param disableEffectorCollision: whether collision detection should be disabled for end effector bones
-    def addLimb(self, limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution, contactType="_6_DOF",disableEffectorCollision = False):
+    def addLimb(self, limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution, contactType="_6_DOF",disableEffectorCollision = False, grasp =False):
 		boolValEff = 0.
 		if(disableEffectorCollision):
 			boolValEff = 1.
-		self.client.rbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution,contactType, boolValEff)
+		graspv = 0.
+		if(grasp):
+			graspv = 1.
+		self.client.rbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution,contactType, boolValEff,graspv)
 
 	## Returns the configuration of a limb described by a sample
 	#
