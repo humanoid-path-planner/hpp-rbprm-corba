@@ -56,14 +56,14 @@ r = Viewer (ps)
 
 q_init = rbprmBuilder.getCurrentConfig ();
 #~ q_init [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
-q_init [0:3] = [-0.05, -1.12, 0.5]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+q_init [0:3] = [-0.05, -1., 0.5]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 #~ q_init [0:3] = [0.1, -0.82, 0.648702]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 #~ q_init [0:3] = [0, -0.63, 0.6]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 #~ q_init [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
 
 q_goal = q_init [::]
 #~ q_goal [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
-q_goal [0:3] = [-0.05, -0.12, 0.5]; r (q_goal)
+q_goal [0:3] = [-0.05, -0.02, 0.5]; r (q_goal)
 #~ q_goal [0:3] = [1.2, -0.65, 1.1]; r (q_goal)
 
 #~ ps.addPathOptimizer("GradientBased")

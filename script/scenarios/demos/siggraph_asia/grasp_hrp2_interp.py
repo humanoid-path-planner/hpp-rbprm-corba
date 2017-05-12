@@ -51,7 +51,7 @@ lArmNormal = [1,0,0]
 lArmOffset = [0,0,-0.105]
 lArmNormal = [0,0,1]
 lArmx = 0.024; lArmy = 0.024
-fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.1, "_6_DOF", True,grasp = True)
+fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "EFORT", 0.1, "_6_DOF", True,grasp = True)
 #~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.1, "_6_DOF", True)
 #~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, 0.05)
 
@@ -63,7 +63,7 @@ rArmOffset = [0,0,-0.105]
 rArmNormal = [0,0,1]
 rArmx = 0.024; rArmy = 0.024
 #disabling collision for hook
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF", True,grasp = True)
+fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "EFORT", 0.1, "_6_DOF", True,grasp = True)
 #~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF", True)
 
 rKneeId = '0RKnee'
@@ -86,7 +86,7 @@ lLegx = 0.05; lLegy = 0.05
 fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
 fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 #~ fullBody.runLimbSampleAnalysis(larmId, "jointLimitsDistance", True)
-#~ fullBody.runLimbSampleAnalysis(rarmId, "jointLimitsDistance", True)
+fullBody.runLimbSampleAnalysis(rarmId, "jointLimitsDistance", True)
 
 #~ fullBody.client.basic.robot.setJointConfig('LARM_JOINT0',[1])
 #~ fullBody.client.basic.robot.setJointConfig('RARM_JOINT0',[-1])
@@ -113,8 +113,9 @@ q_goal = fullBody.generateContacts(q_goal, [0,0,1])
 q_init = fullBody.generateContacts(q_init, [0,0,1])
 #~ r(q_goal)
 
-fullBody.setStartState(q_init,[rLegId,lLegId,larmId]) #,rarmId,larmId])
-#~ fullBody.setStartState(q_init,[rLegId,lLegId]) #,rarmId,larmId])
+#~ fullBody.setStartState(q_init,[rLegId,lLegId,rarmId]) #,rarmId,larmId])
+#~ fullBody.setStartState(q_init,[rLegId,lLegId,larmId, rarmId]) #,rarmId,larmId])
+fullBody.setStartState(q_init,[rLegId,lLegId]) #,rarmId,larmId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
 #~ 
 #~ configs = fullBody.interpolate(0.1)
@@ -215,7 +216,7 @@ def e(step = 0.5):
 	
 print "Root path WXXSD in " + str(tp.t) + " ms."
 	
-d(0.005); e()
+d(0.01); 
 
 print "Root path SDDSD in " + str(tp.t) + " ms."
 	
@@ -383,14 +384,14 @@ def prepare_whole_interp(stateid, stateid_end):
 #~ pp(29),pp(9),pp(17)
 from hpp.corbaserver.rbprm.tools.path_to_trajectory import *
 
-def gen(len_con = 10, num_optim = 0, ine_curve =True):
-    for i in range (len_con):
+def gen(start = 0, len_con = 10, num_optim = 0, ine_curve =True, s = 1.):
+    for i in range (start, start+len_con):
         if not test(i, True, False, ine_curve,num_optim):
             for j in range(10):
                 found = test(i, True, True, ine_curve, num_optim)
                 if found:
                     break
-    a = gen_trajectory_to_play(fullBody, pp, allpaths, flatten([[0.3, 0.6, 0.1] for _ in range(len(allpaths) / 3)]))
+    a = gen_trajectory_to_play(fullBody, pp, allpaths, flatten([[s*0.3, s* 0.6, s* 0.1] for _ in range(len(allpaths) / 3)]))
     return a
 
 #~ pp(29),pp(9),pp(17)
