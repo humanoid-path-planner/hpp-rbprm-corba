@@ -31,32 +31,32 @@ rootName = 'base_joint_xyz'
 rLegId = 'RL'
 rLeg = 'RLEG_JOINT0'
 rfoot = 'RLEG_JOINT5'
-rLegOffset = [0,-0.105,0,]
-rLegNormal = [0,1,0]
+rLegOffset = [0,0,-0.105]
+rLegNormal = [0,0,1]       
 rLegx = 0.09; rLegy = 0.05
 fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, nbSamples, "manipulability", 0.1)
 
 lLegId = 'LL'
 lLeg = 'LLEG_JOINT0'
-lfoot = 'LLEG_JOINT5'
-lLegOffset = [0,-0.105,0]
-lLegNormal = [0,1,0]
-lLegx = 0.09; lLegy = 0.05
+lfoot = 'LLEG_JOINT5'                                                              
+lLegx = 0.09; lLegy = 0.05      
+lLegOffset = [0,0,-0.105]
+lLegNormal = [0,0,1]          
 fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, nbSamples, "manipulability", 0.1)
 
 rarmId = 'RA'
 rarm = 'RARM_JOINT0'
 rHand = 'RARM_JOINT5'
-rArmOffset = [-0.05,-0.050,-0.050]
-rArmNormal = [1,0,0]
+rArmOffset = [0,0,-0.1075]
+rArmNormal = [0,0,1]
 rArmx = 0.024; rArmy = 0.024
 fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, nbSamples, "manipulability", 0.05)
 
 larmId = 'LA'
 larm = 'LARM_JOINT0'
 lHand = 'LARM_JOINT5'
-lArmOffset = [-0.05,-0.050,-0.050]
-lArmNormal = [1,0,0]
+lArmOffset = [0,0,-0.1075]
+lArmNormal = [0,0,1]
 lArmx = 0.024; lArmy = 0.024
 fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, nbSamples, "manipulability", 0.05)
 

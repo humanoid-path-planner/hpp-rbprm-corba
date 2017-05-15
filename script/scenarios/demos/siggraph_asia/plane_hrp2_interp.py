@@ -41,43 +41,29 @@ lLegOffset = [0,0,-0.105]
 lLegNormal = [0,0,1]                                                                  
 fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.1)
 
-rarmId = '3Rarm'
+#~ AFTER loading obstacles
+larmId = 'hrp2_larm_rom'
+larm = 'LARM_JOINT0'
+lHand = 'LARM_JOINT5'
+lArmOffset = [0,0,-0.1075]
+lArmNormal = [0,0,1]
+lArmx = 0.024; lArmy = 0.024
+#~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.1, "_6_DOF", False,grasp = True)
+#~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.1, "_6_DOF", True)
+fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.1, "_6_DOF")
+#~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, 0.05)
+
+
+rarmId = 'hrp2_rarm_rom'
 rarm = 'RARM_JOINT0'
 rHand = 'RARM_JOINT5'
-rArmOffset = [0,0,-0.1]
+rArmOffset = [0,0,-0.1075]
 rArmNormal = [0,0,1]
 rArmx = 0.024; rArmy = 0.024
 #disabling collision for hook
-#~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.05, "_6_DOF", True)
-
-
-#~ AFTER loading obstacles
-larmId = '4Larm'
-larm = 'LARM_JOINT0'
-lHand = 'LARM_JOINT5'
-lArmOffset = [-0.05,-0.050,-0.050]
-lArmNormal = [1,0,0]
-lArmOffset = [0,0,-0.1]
-lArmNormal = [0,0,1]
-lArmx = 0.024; lArmy = 0.024
-#~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, 0.05)
-
-rKneeId = '0RKnee'
-rLeg = 'RLEG_JOINT0'
-rKnee = 'RLEG_JOINT3'
-rLegOffset = [0.105,0.055,0.017]
-rLegNormal = [-1,0,0]
-rLegx = 0.05; rLegy = 0.05
-#~ fullBody.addLimb(rKneeId, rLeg,rKnee,rLegOffset,rLegNormal, rLegx, rLegy, 10000, 0.01)
-#~ 
-lKneeId = '1LKnee'
-lLeg = 'LLEG_JOINT0'
-lKnee = 'LLEG_JOINT3'
-lLegOffset = [0.105,0.055,0.017]
-lLegNormal = [-1,0,0]
-lLegx = 0.05; lLegy = 0.05
-#~ fullBody.addLimb(lKneeId,lLeg,lKnee,lLegOffset,lLegNormal, lLegx, lLegy, 10000, 0.01)
- #~ 
+#~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF", False,grasp = True)
+#~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF", True)
+fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF")
 
 fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
 fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
@@ -288,14 +274,14 @@ def play_all_paths_qs():
         if i % 2 == 0 :
             pp(pid)
 
-def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, num_optim = 0) :
+def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, num_optim = 0, effector = False) :
     com_1 = __get_com(fullBody, configs[stateid])
     com_2 = __get_com(fullBody, configs[stateid+1])
-    data = gen_sequence_data_from_state(fullBody,stateid,configs, mu = 0.8)
+    data = gen_sequence_data_from_state(fullBody,stateid,configs, mu = 0.3)
     c_bounds_1 = get_com_constraint(fullBody, stateid, configs[stateid], limbsCOMConstraints, interm = False)
     c_bounds_mid = get_com_constraint(fullBody, stateid, configs[stateid], limbsCOMConstraints, interm = True)
     c_bounds_2 = get_com_constraint(fullBody, stateid, configs[stateid+1], limbsCOMConstraints, interm = False)
-    success, c_mid_1, c_mid_2 = solve_quasi_static(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand, mu = 0.8)
+    success, c_mid_1, c_mid_2 = solve_quasi_static(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand, mu = 0.3)
     #~ success, c_mid_1, c_mid_2 = solve_dyn(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand)
     #~ success, c_mid_1, c_mid_2 = solve_dyn(data, c_bounds = [c_bounds_1, c_bounds_2])
     
@@ -317,13 +303,13 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
             success_proj1 = project_com_colfree(fullBody, stateid  , asarray((com_interm1).transpose()).tolist()[0])
             success_proj2 = project_com_colfree(fullBody, stateid+1, asarray((com_interm2).transpose()).tolist()[0])
             
-            if not success_proj1:
-				print "proj 1 failed"
-				return False, c_mid_1, c_mid_2, paths_ids
-				
-            if not success_proj2:
-				print "proj 2 failed"
-				return False, c_mid_1, c_mid_2, paths_ids
+            #~ if not success_proj1:
+				#~ print "proj 1 failed"
+				#~ return False, c_mid_1, c_mid_2, paths_ids
+				#~ 
+            #~ if not success_proj2:
+				#~ print "proj 2 failed"
+				#~ return False, c_mid_1, c_mid_2, paths_ids
             
             print "p0", p0
             #~ pp.displayPath(p0+1)
@@ -332,7 +318,11 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
             pp.displayPath(p0+1)
             #~ pp.displayPath(p0+2)
             pp.displayPath(p0+3)
-            paths_ids = [int(el) for el in fullBody.comRRTFromPos(stateid,p0+1,p0+2,p0+3,num_optim)]
+            if(effector):
+				paths_ids = [int(el) for el in fullBody.effectorRRT(stateid,p0+1,p0+2,p0+3,num_optim)]
+            else:
+				paths_ids = [int(el) for el in fullBody.comRRTFromPos(stateid,p0+1,p0+2,p0+3,num_optim)]
+			
         else:
             print "just all curve"
             bezier_0, curve = __Bezier([com_1,c_mid_1[0].tolist()]              , end_acc = c_mid_1[1].tolist() , end_vel = [0.,0.,0.])
@@ -360,13 +350,13 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
 #~ pp(29),pp(9),pp(17)
 from hpp.corbaserver.rbprm.tools.path_to_trajectory import *
 
-def gen(start = 0, len_con = 10, num_optim = 0, ine_curve =True, s = 1.):
+def gen(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s = 1., effector = False):
     n_fail = 0;
     for i in range (start, start+len_con):
-        if not test(i, True, False, ine_curve,num_optim):
+        if not test(i, True, False, ine_curve,num_optim)[0]:
             found = False
             for j in range(10):
-                found = test(i, True, True, ine_curve, num_optim)
+                found = test(i, True, True, ine_curve, num_optim)[0]
                 if found:
                     break
             if not found:

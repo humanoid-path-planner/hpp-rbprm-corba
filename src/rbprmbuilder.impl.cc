@@ -1684,7 +1684,6 @@ assert(s2 == s1 +1);
     {
         bool success(false);
         core::Configuration_t res = rbprm::interpolation::projectOnCom(fulllBody, problem,state,targetCom, success);
-        std::cout << "no com " << targetCom << std::endl;
         if(!success)
         {
             throw std::runtime_error("could not project state on COM constraint");
