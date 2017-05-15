@@ -47,7 +47,8 @@ rArmOffset = [0,0,-0.1075]
 rArmNormal = [0,0,1]
 rArmx = 0.024; rArmy = 0.024
 #disabling collision for hook
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.05, "_6_DOF", True)
+#~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.05, "_6_DOF", True)
+fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.05)
 
 
 #~ value [(2.22045e-16 1 -3.92523e-17)(1 2.22045e-16 3.92523e-17)(3.92523e-17 -3.92523e-17 -1)]
