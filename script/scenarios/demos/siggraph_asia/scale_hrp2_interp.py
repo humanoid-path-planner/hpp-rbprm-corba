@@ -28,16 +28,16 @@ r = tp.Viewer (ps, viewerClient=tp.r.client)
 #~ AFTER loading obstacles
 rLegId = 'hrp2_rleg_rom'
 rLeg = 'RLEG_JOINT0'
-rLegOffset = [0,-0.105,0,]
-rLegNormal = [0,1,0]
+rLegOffset = [0,0,-0.105]
+rLegNormal = [0,0,1]       
 rLegx = 0.09; rLegy = 0.05
 fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 10000, "manipulability", 0.1)
                                                                                                 
 lLegId = 'hrp2_lleg_rom'                                                                                
-lLeg = 'LLEG_JOINT0'                                                                            
-lLegOffset = [0,-0.105,0]                                                                       
-lLegNormal = [0,1,0]                                                                            
-lLegx = 0.09; lLegy = 0.05                                                                      
+lLeg = 'LLEG_JOINT0'                                                                     
+lLegx = 0.09; lLegy = 0.05      
+lLegOffset = [0,0,-0.105]
+lLegNormal = [0,0,1]                                                                  
 fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.1)
 
 
@@ -46,42 +46,26 @@ fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "man
 larmId = 'hrp2_larm_rom'
 larm = 'LARM_JOINT0'
 lHand = 'LARM_JOINT5'
-lArmOffset = [-0.05,-0.050,-0.050]
-lArmNormal = [1,0,0]
-lArmOffset = [0,0,-0.105]
+lArmOffset = [0,0,-0.1075]
 lArmNormal = [0,0,1]
 lArmx = 0.024; lArmy = 0.024
-fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.1, "_6_DOF", True,grasp = True)
+#~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.1, "_6_DOF", True,grasp = True)
 #~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.1, "_6_DOF", True)
+fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.1, "_6_DOF")
 #~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, 0.05)
 
 
 rarmId = 'hrp2_rarm_rom'
 rarm = 'RARM_JOINT0'
 rHand = 'RARM_JOINT5'
-rArmOffset = [0,0,-0.105]
+rArmOffset = [0,0,-0.1075]
 rArmNormal = [0,0,1]
 rArmx = 0.024; rArmy = 0.024
 #disabling collision for hook
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF", True,grasp = True)
+#~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF", True,grasp = True)
 #~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF", True)
+fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF")
 
-rKneeId = '0RKnee'
-rLeg = 'RLEG_JOINT0'
-rKnee = 'RLEG_JOINT3'
-rLegOffset = [0.105,0.055,0.017]
-rLegNormal = [-1,0,0]
-rLegx = 0.05; rLegy = 0.05
-#~ fullBody.addLimb(rKneeId, rLeg,rKnee,rLegOffset,rLegNormal, rLegx, rLegy, 10000, 0.01)
-#~ 
-lKneeId = '1LKnee'
-lLeg = 'LLEG_JOINT0'
-lKnee = 'LLEG_JOINT3'
-lLegOffset = [0.105,0.055,0.017]
-lLegNormal = [-1,0,0]
-lLegx = 0.05; lLegy = 0.05
-#~ fullBody.addLimb(lKneeId,lLeg,lKnee,lLegOffset,lLegNormal, lLegx, lLegy, 10000, 0.01)
- #~ 
 #~ 
 fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
 fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
@@ -383,15 +367,30 @@ def prepare_whole_interp(stateid, stateid_end):
 #~ pp(29),pp(9),pp(17)
 from hpp.corbaserver.rbprm.tools.path_to_trajectory import *
 
-def gen(len_con = 10, num_optim = 0, ine_curve =True):
-    for i in range (len_con):
-        if not test(i, True, False, ine_curve,num_optim):
-            for j in range(10):
-                found = test(i, True, True, ine_curve, num_optim)
+def gen(start, len_con = 10, num_optim = 0, ine_curve =True):
+    for i in range (start, start+len_con):
+        r(configs[i])
+        if not test(i, True, False, ine_curve,num_optim)[0]:
+            for j in range(1):
+                found = test(i, True, True, ine_curve, num_optim)[0]
                 if found:
                     break
     a = gen_trajectory_to_play(fullBody, pp, allpaths, flatten([[0.3, 0.6, 0.1] for _ in range(len(allpaths) / 3)]))
     return a
+
+def gen(start, len_con = 10, num_optim = 0, ine_curve =True):
+    for i in range (start, start+len_con):
+        r(configs[i])
+        if not test(i, True, False, ine_curve,num_optim)[0]:
+            for j in range(1):
+                found = test(i, True, True, ine_curve, num_optim)[0]
+                if found:
+                    break
+    a = gen_trajectory_to_play(fullBody, pp, allpaths, flatten([[0.3, 0.6, 0.1] for _ in range(len(allpaths) / 3)]))
+    return a
+
+def gen_l_rrt(start, len_con = 10, num_optim = 0, ine_curve =True):
+    fullBody.limbRRT(start, start+len_con, num_optim)
 
 #~ pp(29),pp(9),pp(17)
 #~ gen(True)
