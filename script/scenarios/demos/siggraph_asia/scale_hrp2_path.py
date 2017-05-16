@@ -29,7 +29,7 @@ srdfSuffix = ""
 rbprmBuilder = Builder ()
 
 rbprmBuilder.loadModel(urdfName, urdfNameRoms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-rbprmBuilder.setJointBounds ("base_joint_xyz", [-1,3, -1, 1, 0, 2.2])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [-1,3, -1, 1, 0, 6])
 #~ rbprmBuilder.setFilter(['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom'])
 #~ rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
 #~ rbprmBuilder.setAffordanceFilter('hrp2_rarm_rom', ['Support','Lean'])
@@ -64,6 +64,7 @@ q_init [0:3] = [-0.05, -0.82, 0.50]; rbprmBuilder.setCurrentConfig (q_init); r (
 q_goal = q_init [::]
 q_goal [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
 q_goal [0:3] = [0.6 	, -0.82, 1.5]; r (q_goal)
+#~ q_goal [0:3] = [3, -0.82, 6]; r(q_goal)
 #~ q_goal [0:3] = [1.2, -0.65, 1.1]; r (q_goal)
 
 #~ ps.addPathOptimizer("GradientBased")

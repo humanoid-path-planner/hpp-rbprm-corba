@@ -71,7 +71,7 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
             createPtBox(viewer.client.gui, 0, c_mid_1[0].tolist(), 0.01, [0,1,0,1.])
             createPtBox(viewer.client.gui, 0, c_mid_2[0].tolist(), 0.01, [0,1,0,1.])
         
-            partions = [0.,0.3,0.7,1.]
+            partions = [0.,0.2,0.8,1.]
             p0 = fullBody.generateCurveTrajParts(bezier_0,partions)
             #testing intermediary configurations 
             print 'wtf', partions[1], " "
@@ -177,13 +177,14 @@ def test_ineq(stateid, constraints, n_samples = 10, color=[1,1,1,1.]):
 def gen(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s = 1., effector = False):
     n_fail = 0;
     for i in range (start, start+len_con):
+		viewer(configs[i])
 		res =  test(i, True, False, ine_curve,num_optim, effector)
 		if(not res[0]):       
 			print "lp failed"
 			createPtBox(viewer.client.gui, 0, res[1][0], 0.01, [1,0,0,1.])
 			createPtBox(viewer.client.gui, 0, res[2][0], 0.01, [1,0,0,1.])
 			found = False
-			for j in range(1):
+			for j in range(10):
 				res = test(i, True, True, ine_curve, num_optim, effector)               
 				createPtBox(viewer.client.gui, 0, res[1][0], 0.01, [0,1,0,1.])
 				createPtBox(viewer.client.gui, 0, res[2][0], 0.01, [0,1,0,1.])
@@ -193,7 +194,7 @@ def gen(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s = 1., effector
 				n_fail += 1
     print "n_fail ", n_fail
         
-    a = gen_trajectory_to_play(fullBody, ppl, allpaths, flatten([[s*0.3, s* 0.6, s* 0.1] for _ in range(len(allpaths) / 3)]))
+    a = gen_trajectory_to_play(fullBody, ppl, allpaths, flatten([[s*0.2, s* 0.6, s* 0.2] for _ in range(len(allpaths) / 3)]))
     return a
     
 viewer = None

@@ -12,6 +12,7 @@ import time
 ps = path_planner.ProblemSolver( model.fullBody )
 r = path_planner.Viewer (ps, viewerClient=path_planner.r.client)
 fullBody = model.fullBody
+fullBody.setJointBounds ("base_joint_xyz", [-0.135,2, -1, 1, 0, 2.2])
 pp = PathPlayer (fullBody.client.basic, r)
 
 from plan_execute import a, b, c, d, e, init_plan_execute
