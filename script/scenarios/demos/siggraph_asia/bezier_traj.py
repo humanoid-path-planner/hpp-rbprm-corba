@@ -52,11 +52,11 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
     com_2 = __get_com(fullBody, configs[stateid+1])
     createPtBox(viewer.client.gui, 0, com_1, 0.01, [0,1,1,1.])
     createPtBox(viewer.client.gui, 0, com_2, 0.01, [0,1,1,1.])
-    data = gen_sequence_data_from_state(fullBody,stateid,configs, mu = 0.3)
+    data = gen_sequence_data_from_state(fullBody,stateid,configs, mu = 0.5)
     c_bounds_1 = get_com_constraint(fullBody, stateid, configs[stateid], limbsCOMConstraints, interm = False)
     c_bounds_mid = get_com_constraint(fullBody, stateid, configs[stateid], limbsCOMConstraints, interm = True)
     c_bounds_2 = get_com_constraint(fullBody, stateid, configs[stateid+1], limbsCOMConstraints, interm = False)
-    success, c_mid_1, c_mid_2 = solve_quasi_static(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand, mu = 0.3)
+    success, c_mid_1, c_mid_2 = solve_quasi_static(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand, mu = 0.5)
     #~ success, c_mid_1, c_mid_2 = solve_dyn(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand)
     #~ success, c_mid_1, c_mid_2 = solve_dyn(data, c_bounds = [c_bounds_1, c_bounds_2])
     
