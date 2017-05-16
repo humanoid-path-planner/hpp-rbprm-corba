@@ -50,7 +50,7 @@ lArmNormal = [0,0,1]
 lArmx = 0.024; lArmy = 0.024
 #~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.1, "_6_DOF", False,grasp = True)
 #~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.1, "_6_DOF", True)
-fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.1, "_6_DOF")
+#~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.1, "_6_DOF")
 #~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, 0.05)
 
 
@@ -63,7 +63,7 @@ rArmx = 0.024; rArmy = 0.024
 #disabling collision for hook
 #~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF", False,grasp = True)
 #~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF", True)
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF")
+#~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF")
 
 fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
 fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
@@ -123,8 +123,8 @@ configs = []
 #~ f1.close()
 
 limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},  
-						lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'},
-						rarmId : {'file': "hrp2/RA_com.ineq", 'effector' : rHand} }
+						lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}, }
+						#~ rarmId : {'file': "hrp2/RA_com.ineq", 'effector' : rHand} }
 						#~ larmId : {'file': "hrp2/LA_com.ineq", 'effector' : lHand} }
 
 #~ fullBody.limbRRTFromRootPath(0,len(configs)-1,0,2)
@@ -277,6 +277,8 @@ def play_all_paths_qs():
 def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, num_optim = 0, effector = False) :
     com_1 = __get_com(fullBody, configs[stateid])
     com_2 = __get_com(fullBody, configs[stateid+1])
+    createPtBox(r.client.gui, 0, com_1, 0.01, [0,1,1,1.])
+    createPtBox(r.client.gui, 0, com_2, 0.01, [0,1,1,1.])
     data = gen_sequence_data_from_state(fullBody,stateid,configs, mu = 0.3)
     c_bounds_1 = get_com_constraint(fullBody, stateid, configs[stateid], limbsCOMConstraints, interm = False)
     c_bounds_mid = get_com_constraint(fullBody, stateid, configs[stateid], limbsCOMConstraints, interm = True)
@@ -292,6 +294,8 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
         if just_one_curve:
             print "just one curve"
             bezier_0, curve = __Bezier([com_1,c_mid_1[0].tolist(),c_mid_2[0].tolist(),com_2])
+            createPtBox(r.client.gui, 0, c_mid_1[0].tolist(), 0.01, [0,1,1,1.])
+            createPtBox(r.client.gui, 0, c_mid_2[0].tolist(), 0.01, [0,1,1,1.])
         
             partions = [0.,0.3,0.7,1.]
             p0 = fullBody.generateCurveTrajParts(bezier_0,partions)
@@ -350,19 +354,61 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
 #~ pp(29),pp(9),pp(17)
 from hpp.corbaserver.rbprm.tools.path_to_trajectory import *
 
+
+b_id = 0
+
+scene = "bos"
+r.client.gui.createScene(scene)
+def createPtBox(gui, winId, config, res = 0.01, color = [1,1,1,0.3]):
+	resolution = res
+	global scene
+	global b_id
+	boxname = scene+"/"+str(b_id)
+	b_id += 1
+	gui.addBox(boxname,resolution,resolution,resolution, color)
+	gui.applyConfiguration(boxname,[config[0],config[1],config[2],1,0,0,0])
+	gui.addSceneToWindow(scene,winId)
+	gui.refresh()
+
+def test_ineq(stateid, constraints, n_samples = 10, color=[1,1,1,1.]):
+	Kin = get_com_constraint(fullBody, stateid, configs[stateid], constraints, interm = False)
+	#~ print "kin ", Kin
+	#create box around current com
+	fullBody.setCurrentConfig(configs[stateid])
+	com = fullBody.getCenterOfMass()
+	createPtBox(r.client.gui, 0, com, 0.1, color)
+	bounds_c = flatten([[com[i]-1., com[i]+1.] for i in range(3)]) # arbitrary
+	for i in range(n_samples):
+		c = array([uniform(bounds_c[2*i], bounds_c[2*i+1]) for i in range(3)])
+		print "c: ", c
+		if(Kin[0].dot(c)<=Kin[1]).all():
+			print "boundaries satisfied"
+			createPtBox(r.client.gui, 0, c, 0.01, color)
+		
+#~ test_ineq(0,{ rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'}}, 1000, [1,0,0,1])
+#~ test_ineq(0,{ lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}}, 1000, [0,1,0,1])
+#~ test_ineq(0,{ rLegId : {'file': "hrp2/RA_com.ineq", 'effector' : rHand}}, 1000, [0,0,1,1])
+#~ test_ineq(0,{ rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'}}, 1000, [0,1,1,1])
+#~ test_ineq(0, limbsCOMConstraints, 1000, [0,1,1,1])
+
+
 def gen(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s = 1., effector = False):
     n_fail = 0;
     for i in range (start, start+len_con):
-        if not test(i, True, False, ine_curve,num_optim)[0]:
-            found = False
-            for j in range(10):
-                found = test(i, True, True, ine_curve, num_optim)[0]
-                if found:
-                    break
-            if not found:
-                n_fail += 1
+		res =  test(i, True, False, ine_curve,num_optim)
+		if(not res[0]):       
+			createPtBox(r.client.gui, 0, res[1][0], 0.01, [1,0,0,1.])
+			createPtBox(r.client.gui, 0, res[2][0], 0.01, [1,0,0,1.])
+			found = False
+			for j in range(1):
+				res = test(i, True, True, ine_curve, num_optim)               
+				createPtBox(r.client.gui, 0, res[1][0], 0.01, [0,1,0,1.])
+				createPtBox(r.client.gui, 0, res[2][0], 0.01, [0,1,0,1.])
+				if res[0]:
+					break
+			if not res[0]:
+				n_fail += 1
     print "n_fail ", n_fail
         
     a = gen_trajectory_to_play(fullBody, pp, allpaths, flatten([[s*0.3, s* 0.6, s* 0.1] for _ in range(len(allpaths) / 3)]))
     return a
-
