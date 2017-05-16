@@ -294,8 +294,8 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
         if just_one_curve:
             print "just one curve"
             bezier_0, curve = __Bezier([com_1,c_mid_1[0].tolist(),c_mid_2[0].tolist(),com_2])
-            createPtBox(r.client.gui, 0, c_mid_1[0].tolist(), 0.01, [0,1,1,1.])
-            createPtBox(r.client.gui, 0, c_mid_2[0].tolist(), 0.01, [0,1,1,1.])
+            createPtBox(r.client.gui, 0, c_mid_1[0].tolist(), 0.01, [0,1,0,1.])
+            createPtBox(r.client.gui, 0, c_mid_2[0].tolist(), 0.01, [0,1,0,1.])
         
             partions = [0.,0.3,0.7,1.]
             p0 = fullBody.generateCurveTrajParts(bezier_0,partions)
@@ -307,21 +307,21 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
             success_proj1 = project_com_colfree(fullBody, stateid  , asarray((com_interm1).transpose()).tolist()[0])
             success_proj2 = project_com_colfree(fullBody, stateid+1, asarray((com_interm2).transpose()).tolist()[0])
             
-            #~ if not success_proj1:
-				#~ print "proj 1 failed"
-				#~ return False, c_mid_1, c_mid_2, paths_ids
-				#~ 
-            #~ if not success_proj2:
-				#~ print "proj 2 failed"
-				#~ return False, c_mid_1, c_mid_2, paths_ids
+            if not success_proj1:
+				print "proj 1 failed"
+				return False, c_mid_1, c_mid_2, paths_ids
+				
+            if not success_proj2:
+				print "proj 2 failed"
+				return False, c_mid_1, c_mid_2, paths_ids
             
             print "p0", p0
             #~ pp.displayPath(p0+1)
             #~ pp.displayPath(p0+2)
-            #~ pp.displayPath(p0)
-            pp.displayPath(p0+1)
+            pp.displayPath(p0)
+            #~ pp.displayPath(p0+1)
             #~ pp.displayPath(p0+2)
-            pp.displayPath(p0+3)
+            #~ pp.displayPath(p0+3)
             if(effector):
 				paths_ids = [int(el) for el in fullBody.effectorRRT(stateid,p0+1,p0+2,p0+3,num_optim)]
             else:
@@ -376,7 +376,6 @@ def test_ineq(stateid, constraints, n_samples = 10, color=[1,1,1,1.]):
 	#create box around current com
 	fullBody.setCurrentConfig(configs[stateid])
 	com = fullBody.getCenterOfMass()
-	createPtBox(r.client.gui, 0, com, 0.1, color)
 	bounds_c = flatten([[com[i]-1., com[i]+1.] for i in range(3)]) # arbitrary
 	for i in range(n_samples):
 		c = array([uniform(bounds_c[2*i], bounds_c[2*i+1]) for i in range(3)])
@@ -397,6 +396,7 @@ def gen(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s = 1., effector
     for i in range (start, start+len_con):
 		res =  test(i, True, False, ine_curve,num_optim)
 		if(not res[0]):       
+			print "lp failed"
 			createPtBox(r.client.gui, 0, res[1][0], 0.01, [1,0,0,1.])
 			createPtBox(r.client.gui, 0, res[2][0], 0.01, [1,0,0,1.])
 			found = False
@@ -412,3 +412,8 @@ def gen(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s = 1., effector
         
     a = gen_trajectory_to_play(fullBody, pp, allpaths, flatten([[s*0.3, s* 0.6, s* 0.1] for _ in range(len(allpaths) / 3)]))
     return a
+
+
+#~ test_ineq(0,{ rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'}}, 1000, [1,0,0,1])
+#~ test_ineq(0,{ lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}}, 1000, [0,0,1,1])
+#~ gen(0,1)
