@@ -44,18 +44,18 @@ def rootPath():
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
 	
-def genPlan(stepsize=0.1, rob = 2):
+def genPlan(stepsize=0.1):
 	r.client.gui.setVisibility("hrp2_14", "ON")
 	tp.cl.problem.selectProblem("default")
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
 	global configs
 	start = time.clock() 
-	configs = fullBody.interpolate(stepsize, 1, rob, True)
+	configs = fullBody.interpolate(stepsize, 1, 2, True)
 	end = time.clock() 
 	print "Contact plan generated in " + str(end-start) + "seconds"
 	
-def contactPlan(step = 0.5, rob = 2):
+def contactPlan(step = 0.5):
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
 	tp.r.client.gui.setVisibility("toto", "OFF")
@@ -82,12 +82,9 @@ def d(step=0.1):
 	genPlan(step)
 	return configs
 	
-def e(step = 0.5, rob = 2, qs=None):
-	if(qs != None):
-		global configs
-		configs = qs[:]
+def e(step = 0.5):
 	print "displaying contact plan"
-	contactPlan(step, rob)
+	contactPlan(step)
     
 r = None
 tp = None
