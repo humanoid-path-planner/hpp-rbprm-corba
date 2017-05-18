@@ -44,8 +44,8 @@ rbprmBuilder.setAffordanceFilter('hrp2_rarm_rom', ['Support'])
 rbprmBuilder.setAffordanceFilter('hrp2_lleg_rom', ['Support',])
 rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
 rbprmBuilder.boundSO3([-0.,0,-1,1,-1,1])
-vMax = 0.3;
-aMax = 10.;
+vMax = 0.1;
+aMax = 5.;
 extraDof = 6
 mu=omniORB.any.to_any(MU)
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)

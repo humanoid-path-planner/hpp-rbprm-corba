@@ -77,8 +77,8 @@ q_goal[configSize+3:configSize+6] = [0,0,0]
 
 
 # FIXME : test
-q_init[2] = q_init[2]+0.05
-q_goal[2] = q_goal[2]+0.05
+q_init[2] = q_init[2]+0.1
+q_goal[2] = q_goal[2]+0.1
 
 fullBody.setStaticStability(False)
 # Randomly generating a contact configuration at q_init

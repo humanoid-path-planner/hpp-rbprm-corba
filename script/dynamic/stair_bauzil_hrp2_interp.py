@@ -115,6 +115,11 @@ fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
 fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 
 
+# FIXME : test
+q_init[2] = q_init[2]+0.02
+q_goal[2] = q_goal[2]+0.02
+
+
 fullBody.setStaticStability(True)
 # Randomly generating a contact configuration at q_init
 fullBody.setCurrentConfig (q_init)
@@ -141,7 +146,7 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId])
 
 
 
-configs = fullBody.interpolate(0.01,pathId=0,robustnessTreshold = 2, filterStates = True)
+configs = fullBody.interpolate(0.03,pathId=0,robustnessTreshold = 2, filterStates = True)
 print "number of configs :", len(configs)
 r(configs[-1])
 
@@ -150,15 +155,15 @@ from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
 from fullBodyPlayerHrp2 import Player
-player = Player(fullBody,pp,tp,configs,draw=False,optim_effector=False,use_velocity=True,pathId = 0)
+player = Player(fullBody,pp,tp,configs,draw=False,optim_effector=False,use_velocity=False,pathId = 0)
 
 
 
-#player.displayContactPlan()
+player.displayContactPlan()
 
 
 
-#player.interpolate(2,len(configs)-1)
+
 print "####################################"
 print "#            SOLVING P2 :          #"
 print "#               DONE               #"
@@ -168,7 +173,7 @@ print "####################################"
 
 from planning.configs.stairs_config import *
 from generate_contact_sequence import *
-cs = generateContactSequence(fullBody,configs[:-1],r)
+cs = generateContactSequence(fullBody,configs[:-2],r)
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, CONTACT_SEQUENCE_XML_TAG)
 print "save contact sequence : ",filename

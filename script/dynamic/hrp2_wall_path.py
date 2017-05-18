@@ -3,7 +3,7 @@ from hpp.gepetto import Viewer
 from hpp.corbaserver import Client
 from hpp.corbaserver.robot import Robot as Parent
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
-
+import omniORB.any
 
 class Robot (Parent):
 	rootJointType = 'freeflyer'
@@ -48,10 +48,10 @@ indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.basic.robot.getDim
 
 
 ps = ProblemSolver( rbprmBuilder )
-ps.client.problem.setParameter("aMax",aMax)
-ps.client.problem.setParameter("vMax",vMax)
-ps.client.problem.setParameter("sizeFootX",0.24)
-ps.client.problem.setParameter("sizeFootY",0.14)
+ps.client.problem.setParameter("aMax",omniORB.any.to_any(aMax))
+ps.client.problem.setParameter("vMax",omniORB.any.to_any(vMax))
+ps.client.problem.setParameter("sizeFootX",omniORB.any.to_any(0.24))
+ps.client.problem.setParameter("sizeFootY",omniORB.any.to_any(0.14))
 r = Viewer (ps)
 
 
@@ -66,9 +66,9 @@ afftool.visualiseAffordances('Lean', r, r.color.blue)
 
 
 q_init = rbprmBuilder.getCurrentConfig ();
-#q_init[0:3] = [2.1, -1, 0.58];
+q_init[0:3] = [2, -1, 0.58];
 #q_init[0:3] = [2, -1, 0.58];
-q_init[0:3] = [1.85, -1, 0.58];
+#q_init[0:3] = [1.85, -1, 0.58];
 q_init[3:7] = [0.7071,0,0,0.7071]
 #q_init[indexECS:indexECS+3] = [2,0,0]
 q_init[indexECS:indexECS+3] = [1,0,0]

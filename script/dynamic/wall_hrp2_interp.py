@@ -1,6 +1,7 @@
 from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
+import omniORB.any
 
 import hrp2_wall_path as tp
 import time
@@ -23,8 +24,8 @@ fullBody.setJointBounds ("base_joint_xyz", [0,3, -2, 0, 0.3, 1])
 fullBody.client.basic.robot.setDimensionExtraConfigSpace(tp.extraDof)
 
 ps = tp.ProblemSolver( fullBody )
-ps.client.problem.setParameter("aMax",tp.aMax)
-ps.client.problem.setParameter("vMax",tp.vMax)
+ps.client.problem.setParameter("aMax",omniORB.any.to_any(tp.aMax))
+ps.client.problem.setParameter("vMax",omniORB.any.to_any(tp.vMax))
 r = tp.Viewer (ps,viewerClient=tp.r.client)
 
 
@@ -118,7 +119,8 @@ fullBody.setStaticStability(False)
 # Randomly generating a contact configuration at q_init
 fullBody.setCurrentConfig (q_init)
 r(q_init)
-#~ q_init = fullBody.generateContacts(q_init,dir_init,acc_init)
+q_init_noArm = q_init[::]
+q_init = fullBody.generateContacts(q_init,dir_init,acc_init)
 r(q_init)
 
 # Randomly generating a contact configuration at q_end
