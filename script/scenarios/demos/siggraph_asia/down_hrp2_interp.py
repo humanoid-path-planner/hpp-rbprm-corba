@@ -25,7 +25,7 @@ q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = path_planner.q_goal[0:7]
 
 fullBody.setCurrentConfig (q_init)
 q_init =  [
-        0.2,0, 0.6, 1.0, 0.0 , 0.0, 0.0,                         	 # Free flyer 0-6
+        -0.,0, 0.6, 1.0, 0.0 , 0.0, 0.0,                         	 # Free flyer 0-6
         0.0, 0.0, 0.0, 0.0,                                                  # CHEST HEAD 7-10
         0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # LARM       11-17
         0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # RARM       18-24
@@ -41,6 +41,7 @@ q_init = fullBody.generateContacts(q_init, [0,0,1])
 #~ fullBody.setStartState(q_init,[rLegId,lLegId,rarmId]) #,rarmId,larmId])
 #~ fullBody.setStartState(q_init,[rLegId,lLegId,larmId, rarmId]) #,rarmId,larmId])
 fullBody.setStartState(q_init,[rLegId,lLegId]) #,rarmId,larmId])
+#~ fullBody.setStartState(q_init,[lLegId,rLegId]) #,rarmId,larmId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
 
 configs = d(0.005); e()

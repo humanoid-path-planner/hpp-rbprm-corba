@@ -123,6 +123,9 @@ import numpy as np
 
 points = [[],[],[],[]]
 
+success = 0
+fails = 0
+
 def printComPosition(nbConfigs):
 	for i in range(0,nbConfigs):
 		q = fullBody.shootRandomConfig()
@@ -135,6 +138,8 @@ def printComPosition(nbConfigs):
 		#~ print ("final com" + str(com))
 		#~ print ("final com" + str(fullBody.getCenterOfMass()))
 		if(fullBody.isConfigValid(q)[0]):
+			global success
+			success +=1
 			for j in range(0,len(effectors)):
 				effectorName = effectors[j]
 				limbId = limbIds[j]
@@ -153,7 +158,9 @@ def printComPosition(nbConfigs):
 				p = invrm.dot([0,0,0,1])
 				points[j].append(p)
 				#~ print (points[j])
-		#~ else:
+		else:			
+			global fails
+			fails +=1
 			#~ print fullBody.isConfigValid(q)[1]
 	for j in range(0,len(limbIds)):
 		f1=open('./'+str(limbIds[j])+'_com.erom', 'w+')
@@ -166,3 +173,5 @@ def printComPosition(nbConfigs):
 #~ printRootPosition(rarmId, rHand, nbSamples)
 #~ printRootPosition(larmId, lHand, nbSamples) 
 printComPosition(100000)
+print "successes ", success
+print "fails  ", fails

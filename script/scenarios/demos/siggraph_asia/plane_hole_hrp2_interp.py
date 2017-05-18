@@ -13,7 +13,7 @@ import time
 ps = path_planner.ProblemSolver( model.fullBody )
 r = path_planner.Viewer (ps, viewerClient=path_planner.r.client)
 fullBody = model.fullBody
-fullBody.setJointBounds ("base_joint_xyz", [-0.135,5, -1, 1, 0, 2.2])
+fullBody.setJointBounds ("base_joint_xyz", [-0.135,20, -1, 1, 0, 2.2])
 pp = PathPlayer (fullBody.client.basic, r)
 
 from plan_execute import a, b, c, d, e, init_plan_execute
@@ -45,7 +45,7 @@ q_init = model.fullBody.generateContacts(q_init, [0,0,1])
 model.fullBody.setStartState(q_init,[model.lLegId,rLegId]) #,rarmId,larmId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
 
-configs = d(0.005); e(0.01)
+configs = d(0.01); e(0.01)
 
 from bezier_traj import *
 init_bezier_traj(model.fullBody, r, pp, configs, model.limbsCOMConstraints)

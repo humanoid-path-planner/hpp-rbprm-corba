@@ -36,8 +36,8 @@ affordanceType = ['Support']
 affordanceTypeHand = ['Support','Lean']
 rbprmBuilder.setAffordanceFilter('SpidermanLFootSphere', affordanceType)
 rbprmBuilder.setAffordanceFilter('SpidermanRFootSphere', affordanceType)
-rbprmBuilder.setAffordanceFilter('SpidermanLHandSphere', affordanceType)
-rbprmBuilder.setAffordanceFilter('SpidermanRHandSphere', affordanceType)
+rbprmBuilder.setAffordanceFilter('SpidermanLHandSphere', affordanceTypeHand)
+rbprmBuilder.setAffordanceFilter('SpidermanRHandSphere', affordanceTypeHand)
 #~ rbprmBuilder.setContactSize (0.03,0.08)
 #~ rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(ecsSize)
 #~ rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([0,0,0,0,0,0,-3.14,3.14])

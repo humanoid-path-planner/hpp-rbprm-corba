@@ -49,9 +49,9 @@ fullBody.addLimb(rLegId,'RThigh_rx','SpidermanRFootSphere',[0,0,0],[0,0,1], x, y
 fullBody.addLimb(lLegId,'LThigh_rx','SpidermanLFootSphere',[0,0,0],[0,0,1], x, y, nbSamples, "EFORT_Normal", 0.01,"_6_DOF")
 fullBody.addLimb(rarmId,'RHumerus_rx','SpidermanRHandSphere',[0,0,0],[0,-1,0], x, y, nbSamples, "EFORT_Normal", 0.01,"_6_DOF")
 fullBody.addLimb(larmId,'LHumerus_rx','SpidermanLHandSphere',[0,0,0],[0,1,0], x, y, nbSamples, "EFORT_Normal", 0.01,"_6_DOF")
-
-fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
-fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
+#~ 
+#~ fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
+#~ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 
 
 
