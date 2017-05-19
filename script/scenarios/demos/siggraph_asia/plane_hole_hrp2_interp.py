@@ -25,7 +25,7 @@ q_goal = model.fullBody.getCurrentConfig(); q_goal[0:7] = path_planner.q_goal[0:
 
 
 q_init =  [
-        0, 0, 0.58, 1.0, 0.0 , 0.0, 0.0,                         	 # Free flyer 0-6
+        0.8, 0, 0.58, 1.0, 0.0 , 0.0, 0.0,                         	 # Free flyer 0-6
         0.0, 0.0, 0.0, 0.0,                                                  # CHEST HEAD 7-10
         0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # LARM       11-17
         0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # RARM       18-24
@@ -51,7 +51,62 @@ from bezier_traj import *
 init_bezier_traj(model.fullBody, r, pp, configs, model.limbsCOMConstraints)
 #~ AFTER loading obstacles
 
+com_vel = [0.,0.,0.]
+com_acc = [0.,0.,0.]
+
+vels = []
+accs = []
 
 #~ test_ineq(0,{ rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'}}, 1000, [1,0,0,1])
 #~ test_ineq(0,{ lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}}, 1000, [0,0,1,1])
 #~ gen(0,1)
+
+path = []
+
+def go(sid, rg = 2, num_optim = 0, mu = 0.5):
+    global com_vel
+    global com_acc
+    global vels
+    global accs
+    for l in range(sid,sid+rg):
+        print "STATE ", l
+        a,com_vel,com_acc = gen_several_states_partial(l,2,mu=mu,num_optim=num_optim, s=2,init_vel=com_vel, init_acc=com_acc, path=True)
+        vels += [com_vel[:]]
+        accs += [com_acc[:]]
+    global path
+    print "STATE ", sid+rg
+    path,com_vel,com_acc = gen_several_states(sid+rg,1,mu=mu,num_optim=num_optim, s=2,init_vel=com_vel, init_acc=com_acc)
+    vels += [com_vel[:]]
+    accs += [com_acc[:]]
+    return a
+    
+def go2(sid, num_optim = 0, mu = 0.5, s =None):
+    global com_vel
+    global com_acc
+    global vels
+    global accs
+    global path
+    if s == None:
+        s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 0.5
+        print "$$$$$$$$$$$$$$$ S $$$$$$$$ ", s
+    path,com_vel,com_acc = gen_several_states(sid,sid+2,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
+    vels += [com_vel[:]]
+    accs += [com_acc[:]]
+    return a
+    
+#~ a = go2(0, s = 1)
+#~ a = go2(0, num_optim=0, s = 1.2, mu=0.6)
+#~ a = go2(2, num_optim=0, s = 1.2, mu=0.6)
+a = go2(4, num_optim=3, mu=0.6)
+
+def reset():
+    global com_vel
+    global com_acc
+    global vels
+    global accs
+    com_vel = [0.,0.,0.]
+    com_acc = [0.,0.,0.]
+    clean_path();
+    vels = []
+    accs = []
+    

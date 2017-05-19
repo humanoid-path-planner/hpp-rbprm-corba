@@ -4,8 +4,8 @@ from hpp.gepetto import Viewer
 from hpp.gepetto import PathPlayer
 
 import scale_hrp2_path as path_planner
-import hrp2_model as model
-#~ import hrp2_model_grasp as model
+#~ import hrp2_model as model
+import hrp2_model_grasp as model
 from hrp2_model import *
 import time
 
@@ -54,75 +54,3 @@ init_bezier_traj(model.fullBody, r, pp, configs, model.limbsCOMConstraints)
 #~ test_ineq(0,{ rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'}}, 1000, [1,0,0,1])
 #~ test_ineq(0,{ lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}}, 1000, [0,0,1,1])
 #~ gen(0,1)
-
-com_vel = [0.,0.,0.]
-com_acc = [0.,0.,0.]
-
-vels = []
-accs = []
-
-#~ test_ineq(0,{ rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'}}, 1000, [1,0,0,1])
-#~ test_ineq(0,{ lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}}, 1000, [0,0,1,1])
-#~ gen(0,1)
-
-path = []
-
-def go(sid, rg = 2, num_optim = 0, mu = 0.5):
-    global com_vel
-    global com_acc
-    global vels
-    global accs
-    for l in range(sid,sid+rg):
-        print "STATE ", l
-        a,com_vel,com_acc = gen_several_states_partial(l,2,mu=mu,num_optim=num_optim, s=2,init_vel=com_vel, init_acc=com_acc, path=True)
-        vels += [com_vel[:]]
-        accs += [com_acc[:]]
-    global path
-    print "STATE ", sid+rg
-    path,com_vel,com_acc = gen_several_states(sid+rg,1,mu=mu,num_optim=num_optim, s=2,init_vel=com_vel, init_acc=com_acc)
-    vels += [com_vel[:]]
-    accs += [com_acc[:]]
-    return a
-    
-def go0(sid, rg, num_optim = 0, mu = 0.5, s =None):
-    global com_vel
-    global com_acc
-    global vels
-    global accs
-    global path
-    if s == None:
-        s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1.2
-        print "$$$$$$$$$$$$$$$ S $$$$$$$$ *********************444444444444444444444444444 ", s
-    for i in range(rg):
-        path = gen(sid+i,sid+i+1,mu=mu,num_optim=num_optim, s=s)
-    return path
-
-def go2(sid, num_optim = 0, mu = 0.5, s =None):
-    global com_vel
-    global com_acc
-    global vels
-    global accs
-    global path
-    if s == None:
-        s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1.5
-        print "$$$$$$$$$$$$$$$ S $$$$$$$$ ", s
-    path,com_vel,com_acc = gen_several_states(sid,sid+2,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
-    vels += [com_vel[:]]
-    accs += [com_acc[:]]
-    return a
-    
-#~ a = go2(0, s = 1)
-#~ a = go2(0, num_optim=0, s = 1.2, mu=0.6)
-#~ a = go2(2, num_optim=0, s = 1.2, mu=0.6)
-#~ a = go2(4, num_optim=3, mu=0.6)
-
-def reset():
-    global com_vel
-    global com_acc
-    global vels
-    global accs
-    com_vel = [0.,0.,0.]
-    com_acc = [0.,0.,0.]
-    clean_path();
-    vels = []
-    accs = []

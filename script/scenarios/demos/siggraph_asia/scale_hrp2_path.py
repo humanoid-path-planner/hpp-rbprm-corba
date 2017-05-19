@@ -64,7 +64,7 @@ q_init [0:3] = [-0.05, -0.82, 0.50]; rbprmBuilder.setCurrentConfig (q_init); r (
 q_goal = q_init [::]
 q_goal [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
 q_goal [0:3] = [0.6 	, -0.82, 1.5]; r (q_goal)
-#~ q_goal [0:3] = [3, -0.82, 6]; r(q_goal)
+q_goal [0:3] = [3, -0.82, 6]; r(q_goal)
 #~ q_goal [0:3] = [1.2, -0.65, 1.1]; r (q_goal)
 
 #~ ps.addPathOptimizer("GradientBased")
