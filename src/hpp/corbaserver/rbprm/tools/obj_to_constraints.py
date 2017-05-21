@@ -152,7 +152,7 @@ def load_obj_and_save_ineq(in_name, out_name):
 	ineq = as_inequalities(obj)
 	ineq_to_file (ineq, out_name)	
 	
-#~ load_obj_and_save_ineq('./hrp2/LA_com_reduced.obj','./hrp2/LA_com.ineq')
-#~ load_obj_and_save_ineq('./hrp2/RA_com_reduced.obj','./hrp2/RA_com.ineq')
-#~ load_obj_and_save_ineq('./hrp2/LL_com_reduced.obj','./hrp2/LL_com.ineq')
-#~ load_obj_and_save_ineq('./hrp2/RL_com_reduced.obj','./hrp2/RL_com.ineq')
+#~ load_obj_and_save_ineq('./spiderman/LA_com_reduced.obj','./spiderman/LA_com.ineq')
+#~ load_obj_and_save_ineq('./spiderman/RA_com_reduced.obj','./spiderman/RA_com.ineq')
+#~ load_obj_and_save_ineq('./spiderman/LL_com_reduced.obj','./spiderman/LL_com.ineq')
+#~ load_obj_and_save_ineq('./spiderman/RL_com_reduced.obj','./spiderman/RL_com.ineq')

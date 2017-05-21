@@ -19,70 +19,47 @@ srdfSuffix = ""
 fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz", [-0.135,2, -1, 1, 0, 2.2])
+fullBody.setJointBounds ("base_joint_xyz", [-0.135,2.5, -1, 1, 0, 2.2])
 
 
 ps = tp.ProblemSolver( fullBody )
 r = tp.Viewer (ps, viewerClient=tp.r.client)
 
-#~ AFTER loading obstacles
-rLegId = '0rLeg'
+rLegId = 'hrp2_rleg_rom'
 rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,0,-0.105]
-rLegNormal = [0,0,1]
+rLegNormal = [0,0,1]       
 rLegx = 0.09; rLegy = 0.05
 fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 10000, "manipulability", 0.1)
-
-lLegId = '1lLeg'
-lLeg = 'LLEG_JOINT0'
+                                                                                                
+lLegId = 'hrp2_lleg_rom'                                                                                
+lLeg = 'LLEG_JOINT0'                                                                     
+lLegx = 0.09; lLegy = 0.05      
 lLegOffset = [0,0,-0.105]
-lLegNormal = [0,0,1]
-lLegx = 0.09; lLegy = 0.05
+lLegNormal = [0,0,1]                                                                  
 fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.1)
 
-rarmId = '3Rarm'
+#~ AFTER loading obstacles
+larmId = 'hrp2_larm_rom'
+larm = 'LARM_JOINT0'
+lHand = 'LARM_JOINT5'
+lArmOffset = [0,0,-0.1075]
+lArmNormal = [0,0,1]
+lArmx = 0.024; lArmy = 0.024
+#~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.1, "_6_DOF", False,grasp = True)
+#~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.1, "_6_DOF", True)
+
+
+rarmId = 'hrp2_rarm_rom'
 rarm = 'RARM_JOINT0'
 rHand = 'RARM_JOINT5'
 rArmOffset = [0,0,-0.1075]
 rArmNormal = [0,0,1]
 rArmx = 0.024; rArmy = 0.024
 #disabling collision for hook
-#~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.05, "_6_DOF", True)
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.05)
+#~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF", False,grasp = True)
+fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF", True)
 
-
-#~ value [(2.22045e-16 1 -3.92523e-17)(1 2.22045e-16 3.92523e-17)(3.92523e-17 -3.92523e-17 -1)]
-#~ invvalue [(2.22045e-16 1 3.92523e-17)(1 2.22045e-16 -3.92523e-17)(-3.92523e-17 3.92523e-17 -1)]
-
-#~ value [0 1 0)(1 0 0)(0 0 -1)]
-#~ invvalue [(4.44089e-16 1 -1.17757e-16)(1 7.77156e-16 -1.96262e-16)(-1.96262e-16 -1.17757e-16 -1)]
-
-
-
-#~ AFTER loading obstacles
-larmId = '4Larm'
-larm = 'LARM_JOINT0'
-lHand = 'LARM_JOINT5'
-lArmOffset = [-0.05,-0.050,-0.050]
-lArmNormal = [1,0,0]
-lArmx = 0.024; lArmy = 0.024
-#~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, 0.05)
-
-rKneeId = '0RKnee'
-rLeg = 'RLEG_JOINT0'
-rKnee = 'RLEG_JOINT3'
-rLegOffset = [0.105,0.055,0.017]
-rLegNormal = [-1,0,0]
-rLegx = 0.05; rLegy = 0.05
-#~ fullBody.addLimb(rKneeId, rLeg,rKnee,rLegOffset,rLegNormal, rLegx, rLegy, 10000, 0.01)
-#~ 
-lKneeId = '1LKnee'
-lLeg = 'LLEG_JOINT0'
-lKnee = 'LLEG_JOINT3'
-lLegOffset = [0.105,0.055,0.017]
-lLegNormal = [-1,0,0]
-lLegx = 0.05; lLegy = 0.05
-#~ fullBody.addLimb(lKneeId,lLeg,lKnee,lLegOffset,lLegNormal, lLegx, lLegy, 10000, 0.01)
  #~ 
 
 fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
@@ -113,16 +90,14 @@ q_goal = fullBody.generateContacts(q_goal, [0,0,1])
 #~ r(q_goal)
 
 #~ fullBody.setStartState(q_init,[rLegId,lLegId,rarmId]) #,rarmId,larmId])
-fullBody.setStartState(q_init,[rLegId,lLegId]) #,rarmId,larmId])
+#~ fullBody.setStartState(q_init,[rLegId,lLegId]) #,rarmId,larmId])
+fullBody.setStartState(q_init,[rLegId,lLegId])#,larmId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
-#~ 
-#~ configs = fullBody.interpolate(0.1)
-#~ configs = fullBody.interpolate(0.15)
 i = 0;
 configs = []
 #~ fullBody.draw(configs[i],r); i=i+1; i-1
 
-r.loadObstacleModel ('hpp-rbprm-corba', "stair_bauzil", "contact")
+#~ r.loadObstacleModel ('hpp-rbprm-corba', "stair_bauzil", "contact")
 #~ fullBody.exportAll(r, configs, 'stair_bauzil_hrp2_robust_2');
 #~ fullBody.client.basic.robot.setJointConfig('LLEG_JOINT0',[-1])
 #~ q_0 = fullBody.getCurrentConfig(); 
@@ -195,7 +170,7 @@ def genPlan(stepsize=0.1):
 	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
 	global configs
 	start = time.clock() 
-	configs = fullBody.interpolate(stepsize, 1, 2, False)
+	configs = fullBody.interpolate(stepsize, 1, 2, True)
 	end = time.clock() 
 	print "Contact plan generated in " + str(end-start) + "seconds"
 	
@@ -230,8 +205,8 @@ def e(step = 0.5):
 	contactPlan(step)
 	
 print "Root path generated in " + str(tp.t) + " ms."
+d(0.1); e(0.01)
 	
-d(0.05); e(0.01)
 
 print "Root path generated in " + str(tp.t) + " ms."
 	
@@ -244,6 +219,140 @@ print "Root path generated in " + str(tp.t) + " ms."
 
 #~ gen_and_save(fullBody,configs, "stair_bauzil_contacts_data")
 #~ main()
+
+#~ configs = d(0.005); e()
+qs = configs
+fb = fullBody
+ttp = tp
+from bezier_traj import *
+init_bezier_traj(fb, r, pp, qs, limbsCOMConstraints)
+#~ AFTER loading obstacles
+configs = qs
+fullBody = fb
+tp = ttp
+
+#~ test_ineq(0,{ rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'}}, 1000, [1,0,0,1])
+#~ test_ineq(0,{ lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}}, 1000, [0,0,1,1])
+#~ gen(0,1)
+
+com_vel = [0.,0.,0.]
+com_acc = [0.,0.,0.]
+
+vels = []
+accs = []
+
+#~ test_ineq(0,{ rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'}}, 1000, [1,0,0,1])
+#~ test_ineq(0,{ lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}}, 1000, [0,0,1,1])
+#~ gen(0,1)
+
+path = []
+a_s = []
+def go(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
+    global com_vel
+    global com_acc
+    global vels
+    global accs
+    global path
+    global a_s
+    a = []
+    for l in range(sid,sid+rg):
+        print "STATE ", l
+        if s == None:
+			s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 0.8
+        a,com_vel,com_acc = gen_several_states_partial(l,window,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc, path=True)
+        a_s+=[a]
+        vels += [com_vel[:]]
+        accs += [com_acc[:]]
+    print "STATE ", sid+rg
+    #~ path,com_vel,com_acc = gen_several_states(sid+rg,1,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
+    vels += [com_vel[:]]
+    accs += [com_acc[:]]
+    return a
+    
+def go_stop(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
+	global com_vel
+	global com_acc
+	global vels
+	global accs
+	global path
+	global a_s
+	a = []
+	for l in range(sid,sid+rg):
+		print "STATE ", l		
+		if s == None:
+			s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 0.8
+		a,com_vel,com_acc = gen_several_states_partial(l,window,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc, path=True)
+		a_s+=[a]
+		vels += [com_vel[:]]
+		accs += [com_acc[:]]
+	print "STATE ", sid+rg
+	a,com_vel,com_acc = gen_several_states(sid+rg,1,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
+	a_s+=[a]
+	vels += [com_vel[:]]
+	accs += [com_acc[:]]
+	return a
+    
+def go0(sid, rg, num_optim = 0, mu = 0.6, s =None):
+    global com_vel
+    global com_acc
+    global vels
+    global accs
+    global path
+    if s == None:
+        s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1.5
+        print "$$$$$$$$$$$$$$$ S $$$$$$$$ *********************444444444444444444444444444 ", s
+    for i in range(rg):
+        path = gen(sid+i,1,mu=mu,num_optim=num_optim, s=s)
+    return path
+
+def go2(sid, rg = 1, num_optim = 0, mu = 0.5, t =2, s =None):
+    global com_vel
+    global com_acc
+    global vels
+    global accs
+    global path
+    for i in range(rg):
+		if s == None:
+			s = max(norm(array(configs[sid+i+1]) - array(configs[sid+i])), 1.) * 0.6
+			print "$$$$$$$$$$$$$$$ S $$$$$$$$ ", s
+		path,com_vel,com_acc = gen_several_states(sid+i,sid+i+t,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
+		vels += [com_vel[:]]
+		accs += [com_acc[:]]
+    return path
+    
+#~ a = go2(0, s = 1)
+#~ a = go2(0, num_optim=0, s = 1.2, mu=0.6)
+#~ a = go2(2, num_optim=0, s = 1.2, mu=0.6)
+#~ a = go2(4, num_optim=3, mu=0.6)
+
+def reset():
+    global com_vel
+    global com_acc
+    global vels
+    global accs
+    global a_s
+    global path
+    com_vel = [0.,0.,0.]
+    com_acc = [0.,0.,0.]
+    clean_path();
+    vels = []
+    accs = []
+    path = []
+    a_s = []
+    for i, config in enumerate(configs):
+		fullBody.setConfigAtState(i,config)
+
+#~ a = go(0,6,0,mu =2)
+#~ a = go0(0,7,10,mu =2)
+#~ a = go0(0,7,10,mu =2)
+
+#~ a = go_stop(1,2)
+#~ a = go_stop(1,2); a = go_stop(4,1);  a = go_stop(6,1)
+#~ a = go_stop(0,2); a = go_stop(3,1);  a = go_stop(5,1)
+#~ a = go_stop(0,1,3);
+#~ a = go_stop(2,1,3);
+#~ a = go_stop(4,1,3);
+#~ a = go_stop(6,1,3);
 
 
 

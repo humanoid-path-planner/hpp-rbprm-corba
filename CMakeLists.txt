@@ -97,6 +97,7 @@ install(FILES
   data/urdf/siggraph_asia/scale_spidey.urdf
   data/urdf/siggraph_asia/grasp.urdf
   data/urdf/siggraph_asia/plane_hole.urdf
+  data/urdf/siggraph_asia/stairs_lower.urdf
   data/urdf/siggraph_asia/wall.urdf
   data/spiderman/urdf/SpidermanLFootSphere.urdf
   data/spiderman/urdf/SpidermanLHandSphere.urdf
@@ -142,6 +143,7 @@ install(FILES
   data/srdf/siggraph_asia/grasp.srdf
   data/srdf/siggraph_asia/wall.srdf
   data/srdf/siggraph_asia/plane_hole.srdf
+  data/srdf/siggraph_asia/stairs_lower.srdf
   data/spiderman/srdf/SpidermanLFootSphere.srdf
   data/spiderman/srdf/SpidermanLHandSphere.srdf
   data/spiderman/srdf/SpidermanRFootSphere.srdf
@@ -192,6 +194,7 @@ install(FILES
     data/meshes/siggraph_asia/grasp.stl
     data/meshes/siggraph_asia/plane_hole.stl
     data/meshes/siggraph_asia/wall.stl
+    data/meshes/siggraph_asia/stairs_lower.stl
 	
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
   )

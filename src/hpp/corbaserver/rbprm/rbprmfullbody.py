@@ -420,8 +420,8 @@ class FullBody (object):
     # \return H matrix and h column, such that H w <= h
     def getContactCone(self, stateId, friction = 0.5):
 		H_h =  array(self.client.rbprm.rbprm.getContactCone(stateId, friction))
-		print "H_h", H_h.shape 
-		print "norm h", ( H_h[:, -1] != 0).any()
+		#~ print "H_h", H_h.shape 
+		#~ print "norm h", ( H_h[:, -1] != 0).any()
 		# now decompose cone 
 		return H_h[:,:-1], H_h[:, -1]
 		
@@ -431,8 +431,8 @@ class FullBody (object):
     # \return H matrix and h column, such that H w <= h
     def getContactIntermediateCone(self, stateId, friction = 0.5):
 		H_h =  array(self.client.rbprm.rbprm.getContactIntermediateCone(stateId, friction))
-		print "H_h", H_h.shape 
-		print "norm h", ( H_h[:, -1] != 0).any()
+		#~ print "H_h", H_h.shape 
+		#~ print "norm h", ( H_h[:, -1] != 0).any()
 		# now decompose cone 
 		return H_h[:,:-1], H_h[:, -1]
 		
@@ -623,6 +623,14 @@ class FullBody (object):
     # \return whether the projection was successful
     def projectStateToCOM(self, state, targetCom):
 		return self.client.rbprm.rbprm.projectStateToCOM(state, targetCom)	> 0
+		
+	## Project a given state into a given COM position
+    # and update the state configuration.
+    # \param state index of first state.
+    # \param targetCom 3D vector for the com position
+    # \return whether the projection was successful
+    def setConfigAtState(self, state, targetCom):
+		return self.client.rbprm.rbprm.setConfigAtState(state, targetCom)	> 0
 		
 	## Given start and goal states
 	#  generate a contact sequence over a list of configurations

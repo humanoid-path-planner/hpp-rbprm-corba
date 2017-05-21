@@ -307,7 +307,7 @@ def gen_several_states_partial(start = 0, len_con = 1, num_optim = 0, ine_curve 
     com_vel = init_vel[:]
     com_acc = init_acc[:]
     print "going from, to ", com_1, "->", com_2
-    print "going from, to ", start, "->", start + len_con
+    #~ print "going from, to ", start, "->", start + len_con
     allpoints = [com_1]  
     all_partitions = [] 
     n_fail = 0;
@@ -336,7 +336,7 @@ def gen_several_states_partial(start = 0, len_con = 1, num_optim = 0, ine_curve 
             step = (1./ len_con)
             idx = step * (i - start)
             all_partitions +=  [idx +0.2*step,idx+0.8*step,idx+step]
-    print all_partitions
+    print "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[", all_partitions
     allpoints+=[com_2] 
     bezier_0, curve = __Bezier(allpoints, init_acc = com_acc, init_vel = com_vel)
     all_partitions =  [0.] + all_partitions[:-3]
@@ -344,12 +344,7 @@ def gen_several_states_partial(start = 0, len_con = 1, num_optim = 0, ine_curve 
     com_acc = curve.derivate(all_partitions[-1],2)
     com_vel = flatten(asarray(com_vel).transpose().tolist())
     com_acc = flatten(asarray(com_acc).transpose().tolist())
-    print "at", all_partitions[-1]
-    print "com_vel", com_vel
-    print "com_acc", com_acc
     p0 = fullBody.generateCurveTrajParts(bezier_0,all_partitions) + 1
-    print "n_fail ", n_fail
-    print "generating super curve"
     print all_partitions
     #~ ppl.displayPath(p0-1)
     ppl.displayPath(p0)
@@ -357,24 +352,23 @@ def gen_several_states_partial(start = 0, len_con = 1, num_optim = 0, ine_curve 
     ppl.displayPath(p0+2)
     #~ ppl.displayPath(p0)
     # now we need to project all states to the new com positions
-    print "WTF ", len(all_partitions)
     for k in range(3, len(all_partitions),3):
         print "k ", k
         print all_partitions[k]
         new_com = flatten(asarray(curve(all_partitions[k]).transpose()).tolist())
-        print "curve end ", curve(1.)
         ok = False
         #~ try:
         sid = start+k/3
         print "for state", sid
         print "before project to new com ", new_com
         print "before previous com", __get_com(fullBody, fullBody.getConfigAtState(sid))
+        #~ new_com[0]+=0.02
         ok = fullBody.projectStateToCOM(sid, new_com)
-        print "projection", ok
+        #~ print "projection", ok
         if ok:
             q1 = fullBody.getConfigAtState(sid)
             ok = fullBody.isConfigValid(q1)[0]
-            print "is config valud", ok
+            #~ print "is config valud", ok
         #~ except:
             #~ print "hpperr"
             #~ break
@@ -382,10 +376,16 @@ def gen_several_states_partial(start = 0, len_con = 1, num_optim = 0, ine_curve 
             print "faield to project"
             return [], com_vel, com_acc
     j = 0;
-    print "WTF2"
+    #~ print "WTF2"
     if path:
         for i in range(p0,p0+len_con*3-3,3):
-            paths_ids = [int(el) for el in fullBody.comRRTFromPos(start+j,i,i+1,i+2,num_optim)]    
+            try:
+                #~ print "FOR STATE ", start+j 
+                #~ print "USING PATHS", i 
+                paths_ids = [int(el) for el in fullBody.comRRTFromPos(start+j,i,i+1,i+2,num_optim)]    
+            except:
+                print "COULD NOT SOLVE COMRRT"
+                return [], com_vel, com_acc
             j += 1
             global allpaths
             allpaths += paths_ids[:-1]

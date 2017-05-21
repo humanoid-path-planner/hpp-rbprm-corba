@@ -1882,6 +1882,34 @@ std::cout << "ok. state 2" << paths[cT2]->end().head<3>() << std::endl;
         }
     }
 
+
+    double RbprmBuilder::setConfigAtState(unsigned short state, const hpp::floatSeq& q) throw (hpp::Error)
+    {
+        try
+        {
+            if(lastStatesComputed_.size () < state)
+            {
+                throw std::runtime_error ("did not find a states at indicated index: " + std::string(""+(std::size_t)(state)));
+            }
+            model::Configuration_t res = dofArrayToConfig (fullBody_->device_, q);
+            if(lastStatesComputed_.size() <= state)
+            {
+                throw std::runtime_error ("Unexisting state in setConfigAtstate");
+            }
+            else
+            {
+                lastStatesComputed_[state].configuration_ = res;
+                lastStatesComputedTime_[state].second.configuration_ = res;
+                return 1.;
+            }
+            return 0.;
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
     hpp::floatSeq* RbprmBuilder::getConfigAtState(unsigned short state) throw (hpp::Error)
     {
         try
