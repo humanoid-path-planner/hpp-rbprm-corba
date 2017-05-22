@@ -44,7 +44,7 @@ fullBody.setStartState(q_init,[rLegId,lLegId]) #,rarmId,larmId])
 #~ fullBody.setStartState(q_init,[lLegId,rLegId]) #,rarmId,larmId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
 
-configs = d(0.005); e()
+configs = d(0.005,filt=True); e()
 
 from bezier_traj import *
 init_bezier_traj(model.fullBody, r, pp, configs, model.limbsCOMConstraints)

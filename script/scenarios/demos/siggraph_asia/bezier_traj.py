@@ -174,7 +174,7 @@ def test_ineq(stateid, constraints, n_samples = 10, color=[1,1,1,1.]):
 #~ test_ineq(0, limbsCOMConstraints, 1000, [0,1,1,1])
 
 
-def gen(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s = 1., effector = False, mu =0.5):
+def gen(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s = 1., effector = False, mu =0.5, gen_traj = True):
     n_fail = 0;
     for i in range (start, start+len_con):
         viewer(configs[i])
@@ -193,9 +193,9 @@ def gen(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s = 1., effector
             if not res[0]:
                 n_fail += 1
     print "n_fail ", n_fail
-        
-    a = gen_trajectory_to_play(fullBody, ppl, allpaths, flatten([[s*0.2, s* 0.6, s* 0.2] for _ in range(len(allpaths) / 3)]))
-    return a
+    if(gen_traj):
+        a = gen_trajectory_to_play(fullBody, ppl, allpaths, flatten([[s*0.2, s* 0.6, s* 0.2] for _ in range(len(allpaths) / 3)]))
+        return a
 
 
 def gen_several_states(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s = 1., effector = False, mu =0.5, init_vel = [0.,0.,0.], init_acc = [0.,0.,0.]):
@@ -383,6 +383,7 @@ def gen_several_states_partial(start = 0, len_con = 1, num_optim = 0, ine_curve 
                 #~ print "FOR STATE ", start+j 
                 #~ print "USING PATHS", i 
                 paths_ids = [int(el) for el in fullBody.comRRTFromPos(start+j,i,i+1,i+2,num_optim)]    
+                #~ paths_ids = [int(el) for el in fullBody.effectorRRT(start+j,i,i+1,i+2,num_optim)]    
             except:
                 print "COULD NOT SOLVE COMRRT"
                 return [], com_vel, com_acc
@@ -391,7 +392,8 @@ def gen_several_states_partial(start = 0, len_con = 1, num_optim = 0, ine_curve 
             allpaths += paths_ids[:-1]
     #~ p0 = fullBody.generateCurveTrajParts(bezier_0,partions)
         
-    a = gen_trajectory_to_play(fullBody, ppl, allpaths, flatten([[s*0.2, s* 0.6, s* 0.2] for _ in range(len(allpaths) / 3)]))
+    #~ a = gen_trajectory_to_play(fullBody, ppl, allpaths, flatten([[s*0.2, s* 0.6, s* 0.2] for _ in range(len(allpaths) / 3)]))
+    a = [] #TODO
     return a, com_vel, com_acc
     
     

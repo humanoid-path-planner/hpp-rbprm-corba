@@ -44,12 +44,17 @@ fullBody.setStartState(q_init,[rLegId,lLegId,rarmId]) #,rarmId,larmId])
 #~ fullBody.setStartState(q_init,[rLegId,lLegId]) #,rarmId,larmId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
 
-configs = d(0.005); e()
+configs = d(0.05); e()
 
+qs = configs
+fb = fullBody
+ttp = path_planner
 from bezier_traj import *
-init_bezier_traj(model.fullBody, r, pp, configs, model.limbsCOMConstraints)
+init_bezier_traj(fb, r, pp, qs, limbsCOMConstraints)
 #~ AFTER loading obstacles
-
+configs = qs
+fullBody = fb
+tp = ttp
 
 #~ test_ineq(0,{ rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'}}, 1000, [1,0,0,1])
 #~ test_ineq(0,{ lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}}, 1000, [0,0,1,1])
@@ -66,38 +71,52 @@ accs = []
 #~ gen(0,1)
 
 path = []
-
-def go(sid, rg = 2, num_optim = 0, mu = 0.5):
+a_s = []
+def go(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
     global com_vel
     global com_acc
     global vels
     global accs
+    global path
+    global a_s
+    a = []
     for l in range(sid,sid+rg):
         print "STATE ", l
-        a,com_vel,com_acc = gen_several_states_partial(l,2,mu=mu,num_optim=num_optim, s=2,init_vel=com_vel, init_acc=com_acc, path=True)
+        s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1
+        a,com_vel,com_acc = gen_several_states_partial(l,window,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc, path=True)
+        a_s+=[a]
         vels += [com_vel[:]]
         accs += [com_acc[:]]
-    global path
     print "STATE ", sid+rg
-    path,com_vel,com_acc = gen_several_states(sid+rg,1,mu=mu,num_optim=num_optim, s=2,init_vel=com_vel, init_acc=com_acc)
+    #~ path,com_vel,com_acc = gen_several_states(sid+rg,1,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
     vels += [com_vel[:]]
     accs += [com_acc[:]]
     return a
     
-def go0(sid, rg, num_optim = 0, mu = 0.5, s =None):
-    global com_vel
-    global com_acc
-    global vels
-    global accs
-    global path
-    if s == None:
-        s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1.2
-        print "$$$$$$$$$$$$$$$ S $$$$$$$$ *********************444444444444444444444444444 ", s
-    for i in range(rg):
-        path = gen(sid+i,sid+i+1,mu=mu,num_optim=num_optim, s=s)
-    return path
-
-def go2(sid, num_optim = 0, mu = 0.5, s =None):
+def go_stop(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
+	global com_vel
+	global com_acc
+	global vels
+	global accs
+	global path
+	global a_s
+	a = []
+	for l in range(sid,sid+rg):
+		print "STATE ", l		
+		s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1
+		a,com_vel,com_acc = gen_several_states_partial(l,window,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc, path=True)
+		a_s+=[a]
+		vels += [com_vel[:]]
+		accs += [com_acc[:]]
+	print "STATE ", sid+rg
+	s = max(norm(array(configs[sid+rg+1]) - array(configs[sid+rg])), 1.) * 1
+	a,com_vel,com_acc = gen_several_states(sid+rg,1,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
+	a_s+=[a]
+	vels += [com_vel[:]]
+	accs += [com_acc[:]]
+	return a
+    
+def go0(sid, rg, num_optim = 0, mu = 0.6, s =None):
     global com_vel
     global com_acc
     global vels
@@ -105,11 +124,27 @@ def go2(sid, num_optim = 0, mu = 0.5, s =None):
     global path
     if s == None:
         s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1.5
-        print "$$$$$$$$$$$$$$$ S $$$$$$$$ ", s
-    path,com_vel,com_acc = gen_several_states(sid,sid+2,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
-    vels += [com_vel[:]]
-    accs += [com_acc[:]]
-    return a
+        print "$$$$$$$$$$$$$$$ S $$$$$$$$ *********************444444444444444444444444444 ", s
+    for i in range(rg-1):
+        path = gen(sid+i,1,mu=mu,num_optim=num_optim, s=s, gen_traj = False)
+	i = rg -1
+    path = gen(sid+i,1,mu=mu,num_optim=num_optim, s=s, gen_traj = True)
+    return path
+
+def go2(sid, rg = 1, num_optim = 0, mu = 0.5, t =2, s =None):
+    global com_vel
+    global com_acc
+    global vels
+    global accs
+    global path
+    for i in range(rg):
+		if s == None:
+			s = max(norm(array(configs[sid+i+1]) - array(configs[sid+i])), 1.) * 0.6
+			print "$$$$$$$$$$$$$$$ S $$$$$$$$ ", s
+		path,com_vel,com_acc = gen_several_states(sid+i,sid+i+t,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
+		vels += [com_vel[:]]
+		accs += [com_acc[:]]
+    return path
     
 #~ a = go2(0, s = 1)
 #~ a = go2(0, num_optim=0, s = 1.2, mu=0.6)
@@ -121,8 +156,14 @@ def reset():
     global com_acc
     global vels
     global accs
+    global a_s
+    global path
     com_vel = [0.,0.,0.]
     com_acc = [0.,0.,0.]
     clean_path();
     vels = []
     accs = []
+    path = []
+    a_s = []
+    for i, config in enumerate(configs):
+		fullBody.setConfigAtState(i,config)

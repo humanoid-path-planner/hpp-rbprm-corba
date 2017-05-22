@@ -257,8 +257,7 @@ def go(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
     a = []
     for l in range(sid,sid+rg):
         print "STATE ", l
-        if s == None:
-			s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 0.8
+        s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1
         a,com_vel,com_acc = gen_several_states_partial(l,window,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc, path=True)
         a_s+=[a]
         vels += [com_vel[:]]
@@ -279,13 +278,13 @@ def go_stop(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
 	a = []
 	for l in range(sid,sid+rg):
 		print "STATE ", l		
-		if s == None:
-			s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 0.8
+		s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1
 		a,com_vel,com_acc = gen_several_states_partial(l,window,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc, path=True)
 		a_s+=[a]
 		vels += [com_vel[:]]
 		accs += [com_acc[:]]
 	print "STATE ", sid+rg
+	s = max(norm(array(configs[sid+rg+1]) - array(configs[sid+rg])), 1.) * 1
 	a,com_vel,com_acc = gen_several_states(sid+rg,1,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
 	a_s+=[a]
 	vels += [com_vel[:]]
@@ -354,5 +353,37 @@ def reset():
 #~ a = go_stop(4,1,3);
 #~ a = go_stop(6,1,3);
 
+#~ a = go_stop(0,1,mu=2)
+#~ a = go_stop(0,1,mu=2)
+#~ a = go_stop(4,1,0,mu=2)
+#~ a = go_stop(6,1,0,mu=2)
+#~ a = go_stop(8,1,0,mu=2)
+#~ a = go(10,1,0,mu =2)
+
+a = go0    (0 ,10,0,mu=2)
+#~ a = go0    (1 ,1,0,mu=2)
+#~ a = go0    (2 ,1,0,mu=2)
+#~ a = go0    (3 ,1,0,mu=2)
+#~ a = go_stop(4 ,1,0,mu=2)
+#~ a = go_stop(6 ,1,0,mu=2)
+#~ a = go0    (8 ,1,0,mu=2)
+#~ a = go_stop(9 ,1,0,mu=2)
+#~ a = go_stop(11,1,0,mu=2)
+#~ a = go0    (13,1,0,mu=2)
+#~ a = go_stop(0 ,2,0,mu=2)
+#~ a = go_stop(0 ,1,0,mu=2)
+#~ a = go_stop(2 ,1,0,mu=2)
+#~ a = go0    (4 ,1,0,mu=2)
+#~ a = go_stop(5 ,1,0,mu=2)
+#~ a = go0    (6 ,1,0,mu=2)
+#~ a = go0    (7 ,1,0,mu=2)
+#~ a = go_stop(8 ,2,0,mu=2)
+#~ a = go_stop(11 ,1,0,mu=2)
+#~ a = go_stop(2 ,1,0,mu=2)
+#~ a = go0    (4 ,1,0,mu=2)
+#~ a = go_stop(5 ,1,0,mu=2)
+#~ a = go_stop(3 ,1,0,mu=2)
+#~ a = go_stop(5 ,1,0,mu=2)
+#~ a = go_stop(7 ,1,0,mu=2)
 
 
