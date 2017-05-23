@@ -1709,10 +1709,8 @@ assert(s2 == s1 +1);
                 throw std::runtime_error("in comRRTFromPos, at least one com trajectory is not present in problem solver");
             }
             State& state1=lastStatesComputed_[s1], state2=lastStatesComputed_[s2];
-std::cout << "state 1" << paths[cT1]->end().head<3>() << std::endl;
             State s1Bis(state1);
             s1Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Bis,paths[cT1]->end().head<3>());
-std::cout << "ok. state 2" << paths[cT2]->end().head<3>() << std::endl;
             State s2Bis(state2);
             s2Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Bis,paths[cT2]->end().head<3>());
 

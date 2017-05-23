@@ -58,8 +58,7 @@ tp = ttp
 
 #~ test_ineq(0,{ rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'}}, 1000, [1,0,0,1])
 #~ test_ineq(0,{ lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}}, 1000, [0,0,1,1])
-#~ gen(0,1)
-
+#~ g
 com_vel = [0.,0.,0.]
 com_acc = [0.,0.,0.]
 
@@ -125,10 +124,8 @@ def go0(sid, rg, num_optim = 0, mu = 0.6, s =None):
     if s == None:
         s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1.5
         print "$$$$$$$$$$$$$$$ S $$$$$$$$ *********************444444444444444444444444444 ", s
-    for i in range(rg-1):
-        path = gen(sid+i,1,mu=mu,num_optim=num_optim, s=s, gen_traj = False)
-	i = rg -1
-    path = gen(sid+i,1,mu=mu,num_optim=num_optim, s=s, gen_traj = True)
+    for i in range(rg):
+        path = gen(sid+i,1,mu=mu,num_optim=num_optim, s=s)
     return path
 
 def go2(sid, rg = 1, num_optim = 0, mu = 0.5, t =2, s =None):

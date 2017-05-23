@@ -6,6 +6,7 @@
 
 # Precompiled Headers
 *.gch
+*.txt
 *.pch
 
 # Compiled Dynamic libraries
