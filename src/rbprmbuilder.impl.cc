@@ -28,6 +28,7 @@
 #include "hpp/rbprm/interpolation/spline/effector-rrt.hh"
 #include "hpp/rbprm/projection/projection.hh"
 #include "hpp/rbprm/contact_generation/contact_generation.hh"
+#include "hpp/rbprm/contact_generation/algorithm.hh"
 #include "hpp/rbprm/stability/stability.hh"
 #include "hpp/rbprm/sampling/sample-db.hh"
 #include "hpp/model/urdf/util.hh"
@@ -673,7 +674,7 @@ namespace hpp {
     	        throw hpp::Error ("No affordances found. Unable to generate Contacts.");
       		  }
             model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
-            rbprm::State state = rbprm::ComputeContacts(fullBody_,config,
+            rbprm::State state = rbprm::contact::ComputeContacts(fullBody_,config,
 							affMap, bindShooter_.affFilter_, dir);
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(_CORBA_ULong(state.configuration_.rows()));
@@ -1369,7 +1370,6 @@ namespace hpp {
              std::size_t returned_pathId =problemSolver_->addPath(res);
              for (int i = 1; i < config.rows(); ++i)
              {
-                 std::cout << "j ajoute " << config(i-1) << " " << config(i) << std::endl;
                 core::PathPtr_t cutPath = path->extract(interval_t (config(i-1), config(i)));
                 res = core::PathVector::create(3, 3);
                 res->appendPath(cutPath);
