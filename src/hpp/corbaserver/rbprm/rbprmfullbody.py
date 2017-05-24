@@ -405,7 +405,7 @@ class FullBody (object):
     # \param limb name of the limb for which the request aplies
     # \return all limbs in contact at this state
     def getLimbsInContact(self, limbNames, state1):
-		return [limbName for limbName in limbNames if self.isLimbInContact(limbname, state1)]
+        return [limbName for limbName in limbNames if self.isLimbInContact(limbName, state1)]
 		
 	##
     # 
