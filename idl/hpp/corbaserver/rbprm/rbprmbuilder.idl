@@ -554,6 +554,17 @@ module hpp
     /// \param logFile name of the file where to dump the profiling data
     void dumpProfile(in string logFile) raises (Error);
 
+    /// tries to add a new contact to the state
+    /// if the limb is already in contact, replace the
+    /// previous contact. Only considers kinematic limitations.
+    /// collision and equilibrium are NOT considered.
+    /// \param state State considered
+    /// \param limbName name of the considered limb to create contact with
+    /// \param p 3d position of the point
+    /// \param n 3d normal of the contact location center
+    /// \return (success,NState) whether the creation was successful, as well as the new state
+    short addNewContact(in unsigned short stateId, in string limbName, in floatSeq position, in floatSeq normal) raises (Error);
+
   }; // interface Robot
   }; // module rbprm
   }; // module corbaserver

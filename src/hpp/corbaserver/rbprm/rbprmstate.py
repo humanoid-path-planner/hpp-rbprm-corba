@@ -92,11 +92,11 @@ class State (object):
     # \return world position of the limb end effector given the current robot configuration.
     # array of size 4, where each entry is the position of a corner of the contact surface
     def getContactPosAndNormalsForLimb(self, limbName):
-        assert self.isLimbInContact(limbname), "in getContactPosAndNormals: limb " + limbName +  "is not in contact at  state" + str(stateId) 
+        assert self.isLimbInContact(limbName), "in getContactPosAndNormals: limb " + limbName +  "is not in contact at  state" + str(stateId) 
         if(self.isIntermediate):  
-            rawdata = cl.computeContactPointsAtStateForLimb(self.sId,1)
+            rawdata = self.cl.computeContactPointsAtStateForLimb(self.sId,1, limbName)
         else:            
-            rawdata = cl.computeContactPointsAtStateForLimb(self.sId,0) 
+            rawdata = self.cl.computeContactPointsAtStateForLimb(self.sId,0, limbName) 
         return [[b[i:i+3] for i in range(0, len(b), 6)] for b in rawdata], [[b[i+3:i+6] for i in range(0, len(b), 6)] for b in rawdata]
         
     

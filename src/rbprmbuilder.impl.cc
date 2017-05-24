@@ -240,7 +240,7 @@ namespace hpp {
     typedef Eigen::Ref<Matrix43> Ref_matrix43;
 
     std::vector<fcl::Vec3f> computeRectangleContact(const rbprm::RbPrmFullBodyPtr_t device,
-                                                    const rbprm::State& state)
+                                                    const rbprm::State& state, const std::vector<std::string> limbSelected = std::vector<std::string>())
     {
         device->device_->currentConfiguration(state.configuration_);
         device->device_->computeForwardKinematics();
@@ -252,66 +252,69 @@ namespace hpp {
             cit != state.contactPositions_.end(); ++cit)
         {
             const std::string& name = cit->first;
-            const fcl::Vec3f& position = cit->second;
-            limb = limbs.at(name);
-            const fcl::Vec3f& normal = state.contactNormals_.at(name);
-            const fcl::Vec3f z = limb->effector_->currentTransformation().getRotation() * limb->normal_;
-            const fcl::Matrix3f alignRotation = tools::GetRotationMatrix(z,normal);
-            const fcl::Matrix3f rotation = alignRotation * limb->effector_->currentTransformation().getRotation();
-            const fcl::Vec3f offset = rotation * limb->offset_;
-            const double& lx = limb->x_, ly = limb->y_;
-            p << lx,  ly, 0,
-                 lx, -ly, 0,
-                -lx, -ly, 0,
-                -lx,  ly, 0;
-            if(limb->contactType_ == _3_DOF)
+            if(limbSelected.empty() || std::find(limbSelected.begin(), limbSelected.end(), name) != limbSelected.end())
             {
-                //create rotation matrix from normal
-                fcl::Vec3f z_fcl = state.contactNormals_.at(name);
-                Eigen::Vector3d z,x,y;
-                for(int i =0; i<3; ++i) z[i] = z_fcl[i];
-                x = z.cross(Eigen::Vector3d(0,-1,0));
-                if(x.norm() < 10e-6)
+                const fcl::Vec3f& position = cit->second;
+                limb = limbs.at(name);
+                const fcl::Vec3f& normal = state.contactNormals_.at(name);
+                const fcl::Vec3f z = limb->effector_->currentTransformation().getRotation() * limb->normal_;
+                const fcl::Matrix3f alignRotation = tools::GetRotationMatrix(z,normal);
+                const fcl::Matrix3f rotation = alignRotation * limb->effector_->currentTransformation().getRotation();
+                const fcl::Vec3f offset = rotation * limb->offset_;
+                const double& lx = limb->x_, ly = limb->y_;
+                p << lx,  ly, 0,
+                     lx, -ly, 0,
+                    -lx, -ly, 0,
+                    -lx,  ly, 0;
+                if(limb->contactType_ == _3_DOF)
                 {
-                    y = z.cross(fcl::Vec3f(1,0,0));
-                    y.normalize();
-                    x = y.cross(z);
+                    //create rotation matrix from normal
+                    fcl::Vec3f z_fcl = state.contactNormals_.at(name);
+                    Eigen::Vector3d z,x,y;
+                    for(int i =0; i<3; ++i) z[i] = z_fcl[i];
+                    x = z.cross(Eigen::Vector3d(0,-1,0));
+                    if(x.norm() < 10e-6)
+                    {
+                        y = z.cross(fcl::Vec3f(1,0,0));
+                        y.normalize();
+                        x = y.cross(z);
+                    }
+                    else
+                    {
+                        x.normalize();
+                        y = z.cross(x);
+                    }
+                    R.block<3,1>(0,0) = x;
+                    R.block<3,1>(0,1) = y;
+                    R.block<3,1>(0,2) = z;
+                    /*for(std::size_t i =0; i<4; ++i)
+                    {
+                        res.push_back(position + (R*(p.row(i).transpose())) + offset);
+                        res.push_back(state.contactNormals_.at(name));
+                    }*/
+                    res.push_back(position + (R*(offset)));
+                    res.push_back(state.contactNormals_.at(name));
                 }
                 else
                 {
-                    x.normalize();
-                    y = z.cross(x);
-                }
-                R.block<3,1>(0,0) = x;
-                R.block<3,1>(0,1) = y;
-                R.block<3,1>(0,2) = z;
-                /*for(std::size_t i =0; i<4; ++i)
-                {
-                    res.push_back(position + (R*(p.row(i).transpose())) + offset);
-                    res.push_back(state.contactNormals_.at(name));
-                }*/
-                res.push_back(position + (R*(offset)));
-                res.push_back(state.contactNormals_.at(name));
-            }
-            else
-            {
-                const fcl::Matrix3f& fclRotation = state.contactRotation_.at(name);
-                for(int i =0; i< 3; ++i)
-                    for(int j =0; j<3;++j)
-                        R(i,j) = fclRotation(i,j);
-                fcl::Vec3f z_axis(0,0,1);
-                fcl::Matrix3f rotationLocal = tools::GetRotationMatrix(z_axis, limb->normal_);
-                for(std::size_t i =0; i<4; ++i)
-                {
-                    res.push_back(position + (R*(rotationLocal*(p.row(i).transpose() + limb->offset_))));
-                    res.push_back(state.contactNormals_.at(name));
+                    const fcl::Matrix3f& fclRotation = state.contactRotation_.at(name);
+                    for(int i =0; i< 3; ++i)
+                        for(int j =0; j<3;++j)
+                            R(i,j) = fclRotation(i,j);
+                    fcl::Vec3f z_axis(0,0,1);
+                    fcl::Matrix3f rotationLocal = tools::GetRotationMatrix(z_axis, limb->normal_);
+                    for(std::size_t i =0; i<4; ++i)
+                    {
+                        res.push_back(position + (R*(rotationLocal*(p.row(i).transpose() + limb->offset_))));
+                        res.push_back(state.contactNormals_.at(name));
+                    }
                 }
             }
         }
         return res;
     }
 
-    std::vector<fcl::Vec3f> computeRectangleContact(const rbprm::RbPrmFullBodyPtr_t device,
+    std::vector<fcl::Vec3f> computeRectangleContactLocalTr(const rbprm::RbPrmFullBodyPtr_t device,
                                                     const rbprm::State& state,
                                                     const std::string& limbName)
     {
@@ -1029,7 +1032,6 @@ namespace hpp {
         state.nbContacts = state.contactNormals_.size() ;
         state.configuration_ = config;
         state.robustness =  stability::IsStable(fullBody,state);
-        std::cout  << "is stable " << state.robustness << std::endl;
         state.stable = state.robustness >= 0;
         fullBody->device_->currentConfiguration(old);
     }
@@ -1057,7 +1059,7 @@ namespace hpp {
             std::vector<std::string> limbs; limbs.push_back(limbNam);
             SetPositionAndNormal(state,fullBody_, configuration, limbs);
 
-            const std::vector<fcl::Vec3f>& positions = computeRectangleContact(fullBody_,state,limb);
+            const std::vector<fcl::Vec3f>& positions = computeRectangleContactLocalTr(fullBody_,state,limb);
             _CORBA_ULong size = (_CORBA_ULong) (positions.size () * 3);
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(size);
@@ -1529,18 +1531,18 @@ namespace hpp {
         std::string limb(limbName);
         const State& firstState = lastStatesComputed_[cId], thirdState = lastStatesComputed_[cId+1];
         std::vector<std::vector<fcl::Vec3f> > allStates;
-        allStates.push_back(computeRectangleContact(fullBody_, firstState, limb));
+        allStates.push_back(computeRectangleContactLocalTr(fullBody_, firstState, limb));
         std::vector<std::string> creations;
         bool success(false);
         State intermediaryState = intermediary(firstState, thirdState, cId, success);
         if(success)
         {
-            allStates.push_back(computeRectangleContact(fullBody_, intermediaryState, limb));
+            allStates.push_back(computeRectangleContactLocalTr(fullBody_, intermediaryState, limb));
         }
         thirdState.contactCreations(firstState, creations);
         if(creations.size() == 1)
         {
-            allStates.push_back(computeRectangleContact(fullBody_, thirdState, limb));
+            allStates.push_back(computeRectangleContactLocalTr(fullBody_, thirdState, limb));
         }
         if(creations.size() > 1)
         {
@@ -1592,7 +1594,8 @@ namespace hpp {
                 state = interm;
         }
         std::vector<std::vector<fcl::Vec3f> > allStates;
-        allStates.push_back(computeRectangleContact(fullBody_, state,limb));
+        std::vector<std::string> limbs ; limbs.push_back(limb);
+        allStates.push_back(computeRectangleContact(fullBody_, state,limbs));
 
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
@@ -2364,6 +2367,36 @@ assert(s2 == s1 +1);
         }
         catch(std::runtime_error& e)
         {
+            throw Error(e.what());
+        }
+    }
+
+
+    CORBA::Short RbprmBuilder::addNewContact(unsigned short stateId, const char* limbName,
+                                        const hpp::floatSeq& position, const hpp::floatSeq& normal) throw (hpp::Error)
+    {
+        try
+        {
+            if(lastStatesComputed_.size() <= stateId)
+                throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
+            const State& ns = lastStatesComputed_[stateId];
+            const std::string limb(limbName);
+            model::Configuration_t config = dofArrayToConfig (std::size_t(3), position);
+            fcl::Vec3f p; for(int i =0; i<3; ++i) p[i] = config[i];
+            config = dofArrayToConfig (std::size_t(3), normal);
+            fcl::Vec3f n; for(int i =0; i<3; ++i) n[i] = config[i];
+
+            projection::ProjectionReport rep = projection::projectStateToObstacle(fullBody_,limb, fullBody_->GetLimbs().at(limb), ns, n,p);
+            if(rep.success_)
+            {
+                lastStatesComputed_.push_back(rep.result_);
+                return lastStatesComputed_.size() -1;
+            }
+            return -1;
+        }
+        catch(std::runtime_error& e)
+        {
+            std::cout << "ERROR " << e.what() << std::endl;
             throw Error(e.what());
         }
     }
