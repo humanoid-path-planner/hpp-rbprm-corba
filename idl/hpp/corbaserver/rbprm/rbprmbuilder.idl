@@ -275,6 +275,19 @@ module hpp
     /// \return list of 2 or 3 lists of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
     floatSeqSeq computeContactPointsForLimb(in unsigned short stateId, in string limbname) raises (Error);
 
+    /// Provided a discrete contact sequence has already been computed, computes
+    /// all the contact positions and normals for a given state
+    /// \param stateId normalized step for generation along the path (ie the path has a length of 1).
+    /// \return list of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
+    floatSeqSeq computeContactPointsAtStateForLimb(in unsigned short stateId, in unsigned short isIntermediate, in string limbname) raises (Error);
+
+    /// Provided a discrete contact sequence has already been computed, computes
+    /// all the contact positions and normals for a given state
+    /// \param stateId iD of the considered state
+    /// \param isIntermediate whether the intermediate state should be considerred rather than this one
+    /// \return list of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
+    floatSeqSeq computeContactPointsAtState(in unsigned short stateId, in unsigned short isIntermediate) raises (Error);
+
     /// Provided a path has already been computed, interpolates it and generates the statically stable
     /// constact configurations along it. setStartState and setEndState must have been called prior
     /// to this function. If these conditions are not met an error is raised.

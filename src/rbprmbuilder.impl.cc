@@ -1473,6 +1473,53 @@ namespace hpp {
         return res;
     }
 
+    floatSeqSeq* RbprmBuilder::computeContactPointsAtState(unsigned short cId, unsigned short isIntermediate) throw (hpp::Error)
+    {
+        if(lastStatesComputed_.size() <= cId + isIntermediate)
+        {
+            throw std::runtime_error ("Unexisting state " + std::string(""+(cId)));
+        }
+        State state = lastStatesComputed_[cId];
+        if(isIntermediate > 0)
+        {
+            const State&  thirdState = lastStatesComputed_[cId+1];
+            bool success(false);
+            State interm = intermediary(state, thirdState, cId, success);
+            if(success)
+                state = interm;
+        }
+        std::vector<std::vector<fcl::Vec3f> > allStates;
+        allStates.push_back(computeRectangleContact(fullBody_, state));
+
+        hpp::floatSeqSeq *res;
+        res = new hpp::floatSeqSeq ();
+
+        // compute array of contact positions
+
+        res->length ((_CORBA_ULong)allStates.size());
+        std::size_t i=0;
+        for(std::vector<std::vector<fcl::Vec3f> >::const_iterator cit = allStates.begin();
+                    cit != allStates.end(); ++cit, ++i)
+        {
+            const std::vector<fcl::Vec3f>& positions = *cit;
+            _CORBA_ULong size = (_CORBA_ULong) positions.size () * 3;
+            double* dofArray = hpp::floatSeq::allocbuf(size);
+            hpp::floatSeq floats (size, size, dofArray, true);
+            //convert the config in dofseq
+            for(std::size_t h = 0; h<positions.size(); ++h)
+            {
+                for(std::size_t k =0; k<3; ++k)
+                {
+                    model::size_type j (h*3 + k);
+                    dofArray[j] = positions[h][k];
+                }
+            }
+            (*res) [(_CORBA_ULong)i] = floats;
+        }
+        return res;
+    }
+
+
     floatSeqSeq* RbprmBuilder::computeContactPointsForLimb(unsigned short cId, const char *limbName) throw (hpp::Error)
     {
         if(lastStatesComputed_.size() <= cId + 1)
@@ -1499,6 +1546,53 @@ namespace hpp {
         {
             throw std::runtime_error ("too many contact creations between states" + std::string(""+cId) + "and " + std::string(""+(cId + 1)));
         }
+
+        hpp::floatSeqSeq *res;
+        res = new hpp::floatSeqSeq ();
+
+        // compute array of contact positions
+
+        res->length ((_CORBA_ULong)allStates.size());
+        std::size_t i=0;
+        for(std::vector<std::vector<fcl::Vec3f> >::const_iterator cit = allStates.begin();
+                    cit != allStates.end(); ++cit, ++i)
+        {
+            const std::vector<fcl::Vec3f>& positions = *cit;
+            _CORBA_ULong size = (_CORBA_ULong) positions.size () * 3;
+            double* dofArray = hpp::floatSeq::allocbuf(size);
+            hpp::floatSeq floats (size, size, dofArray, true);
+            //convert the config in dofseq
+            for(std::size_t h = 0; h<positions.size(); ++h)
+            {
+                for(std::size_t k =0; k<3; ++k)
+                {
+                    model::size_type j (h*3 + k);
+                    dofArray[j] = positions[h][k];
+                }
+            }
+            (*res) [(_CORBA_ULong)i] = floats;
+        }
+        return res;
+    }
+
+    floatSeqSeq* RbprmBuilder::computeContactPointsAtStateForLimb(unsigned short cId, unsigned short isIntermediate, const char *limbName) throw (hpp::Error)
+    {
+        if(lastStatesComputed_.size() <= cId + isIntermediate)
+        {
+            throw std::runtime_error ("Unexisting state " + std::string(""+(cId)));
+        }
+        std::string limb(limbName);
+        State state = lastStatesComputed_[cId];
+        if(isIntermediate > 0)
+        {
+            const State&  thirdState = lastStatesComputed_[cId+1];
+            bool success(false);
+            State interm = intermediary(state, thirdState, cId, success);
+            if(success)
+                state = interm;
+        }
+        std::vector<std::vector<fcl::Vec3f> > allStates;
+        allStates.push_back(computeRectangleContact(fullBody_, state,limb));
 
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
