@@ -2293,6 +2293,22 @@ assert(s2 == s1 +1);
 
     }
 
+    Names_t* RbprmBuilder::getAllLimbsNames()throw (hpp::Error)
+    {
+      if(!fullBodyLoaded_){
+        throw std::runtime_error ("fullBody not loaded");
+      }
+      std::vector<std::string> names = rbprm::interpolation::extractEffectorsName(fullBody_->GetLimbs());
+      CORBA::ULong size = (CORBA::ULong) names.size ();
+      char** nameList = Names_t::allocbuf(size);
+      Names_t *limbsNames = new Names_t (size,size,nameList);
+      for (std::size_t i = 0 ; i < names.size() ; ++i){
+        nameList[i] = (char*) malloc (sizeof(char)*(names[i].length ()+1));
+        strcpy (nameList [i], names[i].c_str ());
+      }
+      return limbsNames;
+    }
+
     } // namespace impl
   } // namespace rbprm
 } // namespace hpp

@@ -263,7 +263,7 @@ namespace hpp {
         virtual void dumpProfile(const char* logFile) throw (hpp::Error);
         virtual double getTimeAtState(unsigned short stateId)throw (hpp::Error);
         virtual Names_t* getContactsVariations(unsigned short stateIdFrom,unsigned short stateIdTo )throw (hpp::Error);
-
+        virtual Names_t* getAllLimbsNames()throw (hpp::Error);
         public:
         void SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver);
 

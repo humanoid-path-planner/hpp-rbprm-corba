@@ -894,3 +894,13 @@ class FullBody (object):
     # \param stateIdTo : index of the second state
     def getContactsVariations(self,stateIdFrom,stateIdTo):
         return self.client.rbprm.rbprm.getContactsVariations(stateIdFrom,stateIdTo)
+
+    ## return a list of all the limbs names
+    def getAllLimbsNames(self):
+        return self.client.rbprm.rbprm.getAllLimbsNames()
+
+    ## return a list of all the limbs in contact
+    # \param stateId : index of the state
+    def getAllLimbsInContact(self,stateId):
+        return self.getLimbsInContact(self.getAllLimbsNames(),stateId)
+

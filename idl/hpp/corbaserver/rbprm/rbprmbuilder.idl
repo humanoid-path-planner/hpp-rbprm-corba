@@ -522,6 +522,9 @@ module hpp
 	/// \param stateIdTo : index of the second state
     Names_t getContactsVariations(in unsigned short stateIdFrom,in unsigned short stateIdTo) raises (Error);
 
+    /// return a list of all the limbs names
+    Names_t getAllLimbsNames() raises (Error);
+
   }; // interface Robot
   }; // module rbprm
   }; // module corbaserver
