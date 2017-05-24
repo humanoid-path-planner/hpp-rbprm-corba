@@ -19,7 +19,7 @@ srdfSuffix = ""
 fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz", [-0.135,2.5, -1, 1, 0, 2.2])
+fullBody.setJointBounds ("base_joint_xyz", [-2,2.5, -1, 1, 0, 2.2])
 
 
 ps = tp.ProblemSolver( fullBody )

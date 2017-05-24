@@ -388,7 +388,8 @@ namespace hpp {
                         else*/
                         {
                             res.push_back(rotationLocal*(p.row(i).transpose()) + limb->offset_);
-                            res.push_back(roEffector.getRotation() * state.contactNormals_.at(name));
+                            //res.push_back(roEffector.getRotation() * state.contactNormals_.at(name));
+                           res.push_back( limb->normal_);
                         }
                     }
                 }

@@ -32,3 +32,26 @@ from hpp.corbaserver.rbprm.rbprmstate import State
 def addNewContact(state, limbName, p, n):
     return State(state.fullBody, state.cl.addNewContact(state.sId, limbName, p, n))
     
+
+## Given a target location
+## computes the closest transformation from the current configuration
+## which is the most likely feaasible through projection
+# \param state State considered
+# \param limbName name of the considered limb to create contact with
+# \param p 3d position of the point
+# \param n 3d normal of the contact location center
+# \return (success,NState) whether the creation was successful, as well as the new state
+def predictTransform(state, limbName, p, n):
+
+## Uses a lp to determine whether the com kinematic constraints
+## will be satisfied at a given configuration
+## if the limb is already in contact, replace the 
+## previous contact. Only considers kinematic limitations.
+## collision and equilibrium are NOT considered.
+# \param state State considered
+# \param limbName name of the considered limb to create contact with
+# \param p 3d position of the point
+# \param n 3d normal of the contact location center
+# \return (success,NState) whether the creation was successful, as well as the new state
+def isContactReachable(state, limbName, p, n):
+    
