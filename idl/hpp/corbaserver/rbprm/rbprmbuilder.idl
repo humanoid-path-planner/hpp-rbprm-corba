@@ -565,6 +565,16 @@ module hpp
     /// \return (success,NState) whether the creation was successful, as well as the new state
     short addNewContact(in unsigned short stateId, in string limbName, in floatSeq position, in floatSeq normal) raises (Error);
 
+
+    /// Computes the closest projection matrix that will bring a limb's effector
+    /// from its current configuration to a specified location
+    /// \param limbname name of the considered limb
+    /// \param configuration considered configuration of the robot
+    /// \param p target position
+    /// \param n target normal
+    /// \return 7D Transform of effector in contact (position + quaternion)
+    floatSeq computeTargetTransform(in string limbname, in floatSeq configuration, in floatSeq p, in floatSeq n) raises (Error);
+
   }; // interface Robot
   }; // module rbprm
   }; // module corbaserver

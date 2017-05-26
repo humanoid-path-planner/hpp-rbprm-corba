@@ -30,32 +30,47 @@ def quaternion_matrix(quaternion):
         [                0.0,                 0.0,                 0.0, 1.0]])
 
 def __get_com(robot, config):
-	save = robot.getCurrentConfig()
-	robot.setCurrentConfig(config)
-	com = robot.getCenterOfMass()
-	robot.setCurrentConfig(save)
-	return com
+    save = robot.getCurrentConfig()
+    robot.setCurrentConfig(config)
+    com = robot.getCenterOfMass()
+    robot.setCurrentConfig(save)
+    return com
 
 constraintsComLoaded = {}
 
 lastspeed = np.array([0,0,0])
 
-def get_com_constraint(fullBody, state, config, limbsCOMConstraints, interm = False):
-	global constraintsLoaded
-	As = [];	bs = []
-	fullBody.setCurrentConfig(config)
-	contacts = []
-	for i, v in limbsCOMConstraints.iteritems():
-		if not constraintsComLoaded.has_key(i):
-			constraintsComLoaded[i] = ineq_from_file(ineqPath+v['file'])
-		contact = (interm and fullBody.isLimbInContactIntermediary(i, state)) or (not interm and fullBody.isLimbInContact(i, state))
-		if contact:
-			ineq = constraintsComLoaded[i]
-			qEffector = fullBody.getJointPosition(v['effector'])
-			tr = quaternion_matrix(qEffector[3:7])			
-			tr[:3,3] = np.array(qEffector[0:3])
-			ineq_r = rotate_inequalities(ineq, tr)
-			As.append(ineq_r.A); bs.append(ineq_r.b);
-			contacts.append(v['effector'])
-	return [np.vstack(As), np.hstack(bs)]
-		
+def get_com_constraint(fullBody, state, config, limbsCOMConstraints, interm = False, exceptList = []):
+    global constraintsLoaded
+    As = [];    bs = []
+    fullBody.setCurrentConfig(config)
+    contacts = []
+    for i, v in limbsCOMConstraints.iteritems():
+        if not constraintsComLoaded.has_key(i):
+            constraintsComLoaded[i] = ineq_from_file(ineqPath+v['file'])
+        contact = (interm and fullBody.isLimbInContactIntermediary(i, state)) or (not interm and fullBody.isLimbInContact(i, state))
+        if(contact):
+            for _, el in enumerate(exceptList):
+                if el == i:
+                    contact = False
+                    print "removeed contact ", el 
+                    break
+        if contact:
+            ineq = constraintsComLoaded[i]
+            qEffector = fullBody.getJointPosition(v['effector'])
+            tr = quaternion_matrix(qEffector[3:7])            
+            tr[:3,3] = np.array(qEffector[0:3])
+            ineq_r = rotate_inequalities(ineq, tr)
+            As.append(ineq_r.A); bs.append(ineq_r.b);
+            contacts.append(v['effector'])
+    return [np.vstack(As), np.hstack(bs)]
+    
+def get_com_constraint_at_transform(pos_quat, limb, limbsCOMConstraints):
+    global constraintsLoaded
+    if not constraintsComLoaded.has_key(limb):
+            constraintsComLoaded[limb] = ineq_from_file(ineqPath+limbsCOMConstraints[limb]['file'])
+    tr = quaternion_matrix(pos_quat[3:7])            
+    tr[:3,3] = np.array(pos_quat[0:3])
+    ineq_r = rotate_inequalities(constraintsComLoaded[limb], tr)
+    return [ineq_r.A, ineq_r.b]
+        

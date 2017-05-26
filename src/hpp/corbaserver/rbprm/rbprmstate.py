@@ -18,6 +18,7 @@
 
 from hpp.corbaserver.rbprm import Client as RbprmClient
 from hpp.corbaserver import Client as BasicClient
+from hpp.corbaserver.rbprm.tools.com_constraints import *
 from numpy import array
 
 
@@ -27,12 +28,20 @@ from numpy import array
 #  trunk of the robot, one for the range of motion
 class State (object):
     ## Constructor
-    def __init__ (self, fullBody, sId, isIntermediate = False):
+    def __init__ (self, fullBody, sId=-1, isIntermediate = False, q = None, limbsIncontact = []):
+        assert ((sId > -1 and len(limbsIncontact) == 0) or sId == -1), "state created from existing id can't specify limbs in contact"
         self.cl = fullBody.client.rbprm.rbprm
-        self.sId = sId
-        self.isIntermediate = isIntermediate    
+        if(sId == -1):            
+            print "limbsIncontact ", limbsIncontact
+            self.sId = self.cl.createState(q, limbsIncontact)
+            self.isIntermediate = False    
+        else:
+            self.sId = sId
+            self.isIntermediate = isIntermediate    
         self.fullBody = fullBody
-    
+        self.H_h = None
+        self.__last_used_friction = None
+            
     ## assert for case where functions can't be used with intermediate state
     def _cni(self):
         assert not self.isIntermediate, "method can't be called with intermediate state"
@@ -102,10 +111,10 @@ class State (object):
     
     ## Get position of center of mass
     def getCenterOfMass (self):
-        q0 = fullBody.client.basic.robot.getCurrentConfig()
-        fullBody.client.basic.robot.setCurrentConfig(self.q())
-        c = fullBody.client.basic.robot.getComPosition()
-        fullBody.client.basic.robot.setCurrentConfig(q0)
+        q0 = self.fullBody.client.basic.robot.getCurrentConfig()
+        self.fullBody.client.basic.robot.setCurrentConfig(self.q())
+        c = self.fullBody.client.basic.robot.getComPosition()
+        self.fullBody.client.basic.robot.setCurrentConfig(q0)
         return c
     
     
@@ -115,9 +124,14 @@ class State (object):
     # \return world position of the limb end effector given the current robot configuration.
     # array of size 4, where each entry is the position of a corner of the contact surface
     def getContactCone(self, friction):
-        if(self.isIntermediate):  
-            rawdata = self.cl.getContactIntermediateCone(self.sId,friction)
-        else:            
-            rawdata = self.cl.getContactCone(self.sId,friction) 
-        H_h =  array(rawdata)
-        return H_h[:,:-1], H_h[:, -1]
+        if (self.H_h == None or self.__last_used_friction != friction):
+            self.__last_used_friction = friction
+            if(self.isIntermediate):  
+                rawdata = self.cl.getContactIntermediateCone(self.sId,friction)
+            else:            
+                rawdata = self.cl.getContactCone(self.sId,friction) 
+            self.H_h =  array(rawdata)
+        return self.H_h[:,:-1], self.H_h[:, -1]
+        
+    def getComConstraint(self, limbsCOMConstraints, exceptList = []):
+        return get_com_constraint(self.fullBody, self.sId, self.cl.getConfigAtState(self.sId), limbsCOMConstraints, interm = self.isIntermediate, exceptList = exceptList)

@@ -626,6 +626,7 @@ namespace hpp {
         }
         catch(std::runtime_error& e)
         {
+            std::cout << "ERREUR " << std::endl;
             throw Error(e.what());
         }
     }
@@ -2228,6 +2229,35 @@ assert(s2 == s1 +1);
         }
     }
 
+    hpp::floatSeq* RbprmBuilder::computeTargetTransform(const char* limbName, const hpp::floatSeq& configuration,
+                                                        const hpp::floatSeq& p_a, const hpp::floatSeq& n_a) throw (hpp::Error)
+    {
+        try{
+        model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
+        model::Configuration_t vec_conf = dofArrayToConfig (std::size_t(3), p_a);
+        fcl::Vec3f p; for(int i =0; i<3; ++i) p[i] = vec_conf[i];
+        vec_conf = dofArrayToConfig (std::size_t(3), n_a);
+        fcl::Vec3f n; for(int i =0; i<3; ++i) n[i] = vec_conf[i];
+        const hpp::rbprm::RbPrmLimbPtr_t limb =fullBody_->GetLimbs().at(std::string(limbName));
+
+        const fcl::Transform3f transform = projection::computeProjectionMatrix(fullBody_, limb, config, n,p);
+        const fcl::Quaternion3f& quat = transform.getQuatRotation();
+        const fcl::Vec3f& position = transform.getTranslation();
+        hpp::floatSeq *dofArray;
+        dofArray = new hpp::floatSeq();
+        dofArray->length(_CORBA_ULong(7));
+        for(std::size_t i=0; i< 3; i++)
+          (*dofArray)[(_CORBA_ULong)i] = position [i];
+        for(std::size_t i=0; i< 4; i++)
+          (*dofArray)[(_CORBA_ULong)i+3] = quat [i];
+        return dofArray;
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
     CORBA::Short RbprmBuilder::isConfigBalanced(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs, double robustnessTreshold) throw (hpp::Error)
     {
         try{
@@ -2391,6 +2421,7 @@ assert(s2 == s1 +1);
             if(rep.success_)
             {
                 lastStatesComputed_.push_back(rep.result_);
+                lastStatesComputedTime_.push_back(std::make_pair(-1., rep.result_));
                 return lastStatesComputed_.size() -1;
             }
             return -1;
