@@ -25,10 +25,9 @@ def __normal(points):
     p3 = array(points[2])
     normal = cross((p2 - p1),(p3 - p1))
     normal /= norm(normal)
-    return normal
+    return normal.tolist()
     
 def __centroid(points):
-    print "points", type(points[0])
     return sum(points) / len(points)
 
 def __centroid_list(list_points):
@@ -44,7 +43,7 @@ b_id = 0
 
 def draw_centroid(gui, winId, pt, scene="n_name", color = [1,1,1,0.3]):
     p = pt[0]
-    n = pt[0] + 0.03 * pt[1]
+    n = array(pt[0]) + 0.03 * array(pt[1])
     resolution = 0.01
     global b_id
     boxname = scene+"/"+str(b_id)
