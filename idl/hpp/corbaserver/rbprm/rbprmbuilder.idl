@@ -565,6 +565,13 @@ module hpp
     /// \return (success,NState) whether the creation was successful, as well as the new state
     short addNewContact(in unsigned short stateId, in string limbName, in floatSeq position, in floatSeq normal) raises (Error);
 
+    /// removes a contact from the state
+    /// if the limb is not already in contact, does nothing
+    /// \param state State considered
+    /// \param limbName name of the considered limb to create contact with
+    /// \return stateId of the state without the contact
+    short removeContact(in unsigned short stateId, in string limbName) raises (Error);
+
 
     /// Computes the closest projection matrix that will bring a limb's effector
     /// from its current configuration to a specified location

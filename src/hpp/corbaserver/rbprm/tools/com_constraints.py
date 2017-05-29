@@ -53,7 +53,6 @@ def get_com_constraint(fullBody, state, config, limbsCOMConstraints, interm = Fa
             for _, el in enumerate(exceptList):
                 if el == i:
                     contact = False
-                    print "removeed contact ", el 
                     break
         if contact:
             ineq = constraintsComLoaded[i]
@@ -63,7 +62,11 @@ def get_com_constraint(fullBody, state, config, limbsCOMConstraints, interm = Fa
             ineq_r = rotate_inequalities(ineq, tr)
             As.append(ineq_r.A); bs.append(ineq_r.b);
             contacts.append(v['effector'])
-    return [np.vstack(As), np.hstack(bs)]
+    if(len(As) > 0):
+        return [np.vstack(As), np.hstack(bs)]
+    else:
+        print "Warning: no active contact in get_com_constraint"
+        return [np.zeros([3,3]), np.zeros(3)]
     
 def get_com_constraint_at_transform(pos_quat, limb, limbsCOMConstraints):
     global constraintsLoaded

@@ -2433,6 +2433,26 @@ assert(s2 == s1 +1);
         }
     }
 
+    CORBA::Short RbprmBuilder::removeContact(unsigned short stateId, const char* limbName) throw (hpp::Error)
+    {
+        try
+        {
+            if(lastStatesComputed_.size() <= stateId)
+                throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
+            State ns = lastStatesComputed_[stateId];
+            const std::string limb(limbName);
+            ns.RemoveContact(limb);
+            lastStatesComputed_.push_back(ns);
+            lastStatesComputedTime_.push_back(std::make_pair(-1., ns));
+            return lastStatesComputed_.size() -1;
+        }
+        catch(std::runtime_error& e)
+        {
+            std::cout << "ERROR " << e.what() << std::endl;
+            throw Error(e.what());
+        }
+    }
+
     void RbprmBuilder::dumpProfile(const char* logFile) throw (hpp::Error)
     {
         try

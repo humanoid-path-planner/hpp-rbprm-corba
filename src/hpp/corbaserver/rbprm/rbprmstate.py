@@ -31,8 +31,7 @@ class State (object):
     def __init__ (self, fullBody, sId=-1, isIntermediate = False, q = None, limbsIncontact = []):
         assert ((sId > -1 and len(limbsIncontact) == 0) or sId == -1), "state created from existing id can't specify limbs in contact"
         self.cl = fullBody.client.rbprm.rbprm
-        if(sId == -1):            
-            print "limbsIncontact ", limbsIncontact
+        if(sId == -1):
             self.sId = self.cl.createState(q, limbsIncontact)
             self.isIntermediate = False    
         else:

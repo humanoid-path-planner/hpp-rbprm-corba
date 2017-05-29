@@ -69,7 +69,20 @@ def isContactReachable(state, limbName, p, n, limbsCOMConstraints):
 def addNewContact(state, limbName, p, n):
     sId = state.cl.addNewContact(state.sId, limbName, p, n)
     if(sId != -1):
-        return State(state.fullBody, sId = state.cl.addNewContact(sId, limbName, p, n)), True
+        return State(state.fullBody, sId = sId), True
+    return state, False
+
+## tries to remove a new contact from a state
+## if the limb is already in contact, replace the 
+## previous contact. Only considers kinematic limitations.
+## collision and equilibrium are NOT considered.
+# \param state State considered
+# \param limbName name of the considered limb to create contact with
+# \return (State, success) whether the removal was successful, as well as the new state
+def removeContact(state, limbName):
+    sId = state.cl.removeContact(state.sId, limbName)
+    if(sId != -1):
+        return State(state.fullBody, sId = sId), True
     return state, False
 
 ## tries to add a new contact to the state
