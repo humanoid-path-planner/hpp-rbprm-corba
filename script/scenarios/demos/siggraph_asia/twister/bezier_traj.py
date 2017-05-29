@@ -48,14 +48,14 @@ def play_all_paths_qs():
             ppl(pid)
 
 def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, num_optim = 0, effector = False, mu=0.5) :
-    com_1 = __get_com(fullBody, configs[stateid])
-    com_2 = __get_com(fullBody, configs[stateid+1])
+    com_1 = __get_com(fullBody, fullBody.getConfigAtState(stateid))
+    com_2 = __get_com(fullBody, fullBody.getConfigAtState(stateid+1))
     createPtBox(viewer.client.gui, 0, com_1, 0.01, [0,1,1,1.])
     createPtBox(viewer.client.gui, 0, com_2, 0.01, [0,1,1,1.])
     data = gen_sequence_data_from_state(fullBody,stateid,configs, mu = mu)
-    c_bounds_1 = get_com_constraint(fullBody, stateid, configs[stateid], limbsCOMConstraints, interm = False)
-    c_bounds_mid = get_com_constraint(fullBody, stateid, configs[stateid], limbsCOMConstraints, interm = True)
-    c_bounds_2 = get_com_constraint(fullBody, stateid, configs[stateid+1], limbsCOMConstraints, interm = False)
+    c_bounds_1 = get_com_constraint(fullBody, stateid, fullBody.getConfigAtState(stateid), limbsCOMConstraints, interm = False)
+    c_bounds_mid = get_com_constraint(fullBody, stateid, fullBody.getConfigAtState(stateid), limbsCOMConstraints, interm = True)
+    c_bounds_2 = get_com_constraint(fullBody, stateid, fullBody.getConfigAtState(stateid+1), limbsCOMConstraints, interm = False)
     success, c_mid_1, c_mid_2 = solve_quasi_static(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand, mu = mu)
     #~ success, c_mid_1, c_mid_2 = solve_dyn(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand)
     #~ success, c_mid_1, c_mid_2 = solve_dyn(data, c_bounds = [c_bounds_1, c_bounds_2])
@@ -154,10 +154,10 @@ def createPtBox(gui, winId, config, res = 0.01, color = [1,1,1,0.3]):
     #~ gui.refresh()
 
 def test_ineq(stateid, constraints, n_samples = 10, color=[1,1,1,1.]):
-    Kin = get_com_constraint(fullBody, stateid, configs[stateid], constraints, interm = False)
+    Kin = get_com_constraint(fullBody, stateid, fullBody.getConfigAtState(stateid), constraints, interm = False)
     #~ print "kin ", Kin
     #create box around current com
-    fullBody.setCurrentConfig(configs[stateid])
+    fullBody.setCurrentConfig(fullBody.getConfigAtState(stateid))
     com = fullBody.getCenterOfMass()
     bounds_c = flatten([[com[i]-1., com[i]+1.] for i in range(3)]) # arbitrary
     for i in range(n_samples):
@@ -177,7 +177,7 @@ def test_ineq(stateid, constraints, n_samples = 10, color=[1,1,1,1.]):
 def gen(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s = 1., effector = False, mu =0.5, gen_traj = True):
     n_fail = 0;
     for i in range (start, start+len_con):
-        viewer(configs[i])
+        #~ viewer(configs[i])
         res =  test(i, True, False, ine_curve,num_optim, effector, mu)
         if(not res[0]):       
             print "lp failed"
@@ -448,7 +448,7 @@ def go(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
     a = []
     for l in range(sid,sid+rg):
         print "STATE ", l
-        s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1
+        s = max(norm(array(fullBody.getConfigAtState(sid+1)) - array(fullBody.getConfigAtState(sid))), 1.) * 1
         a,com_vel,com_acc = gen_several_states_partial(l,window,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc, path=True)
         a_s+=[a]
         vels += [com_vel[:]]
@@ -469,7 +469,7 @@ def go_stop(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
 	a = []
 	for l in range(sid,sid+rg):
 		print "STATE ", l		
-		s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1
+		s = max(norm(array(fullBody.getConfigAtState(sid+1)) - array(fullBody.getConfigAtState(sid))), 1.) * 1
 		a,com_vel,com_acc = gen_several_states_partial(l,window,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc, path=True)
 		a_s+=[a]
 		vels += [com_vel[:]]
@@ -489,7 +489,7 @@ def go0(sid, rg, num_optim = 0, mu = 0.6, s =None):
     global accs
     global path
     if s == None:
-        s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1.5
+        s = max(norm(array(fullBody.getConfigAtState(sid+1)) - array(fullBody.getConfigAtState(sid))), 1.) * 1.5
         print "$$$$$$$$$$$$$$$ S $$$$$$$$ *********************444444444444444444444444444 ", s
     for i in range(rg):
         path = gen(sid+i,1,mu=mu,num_optim=num_optim, s=s)
@@ -503,7 +503,7 @@ def go2(sid, rg = 1, num_optim = 0, mu = 0.5, t =2, s =None):
     global path
     for i in range(rg):
 		if s == None:
-			s = max(norm(array(configs[sid+i+1]) - array(configs[sid+i])), 1.) * 0.6
+			s = max(norm(array(fullBody.getConfigAtState(sid+1)) - array(fullBody.getConfigAtState(sid))), 1.) * 0.6
 			print "$$$$$$$$$$$$$$$ S $$$$$$$$ ", s
 		path,com_vel,com_acc = gen_several_states(sid+i,sid+i+t,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
 		vels += [com_vel[:]]

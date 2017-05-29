@@ -2404,13 +2404,13 @@ assert(s2 == s1 +1);
 
 
     CORBA::Short RbprmBuilder::addNewContact(unsigned short stateId, const char* limbName,
-                                        const hpp::floatSeq& position, const hpp::floatSeq& normal) throw (hpp::Error)
+                                        const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample) throw (hpp::Error)
     {
         try
         {
             if(lastStatesComputed_.size() <= stateId)
                 throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
-            const State& ns = lastStatesComputed_[stateId];
+            State ns = lastStatesComputed_[stateId];
             const std::string limb(limbName);
             model::Configuration_t config = dofArrayToConfig (std::size_t(3), position);
             fcl::Vec3f p; for(int i =0; i<3; ++i) p[i] = config[i];
@@ -2418,13 +2418,23 @@ assert(s2 == s1 +1);
             fcl::Vec3f n; for(int i =0; i<3; ++i) n[i] = config[i];
 
             projection::ProjectionReport rep = projection::projectStateToObstacle(fullBody_,limb, fullBody_->GetLimbs().at(limb), ns, n,p);
+            if (!rep.success_ && max_num_sample > 0)
+            {
+                BasicConfigurationShooterPtr_t shooter = BasicConfigurationShooter::create(fullBody_->device_);
+                for(std::size_t i =0; !rep.success_ && i< max_num_sample; ++i)
+                {
+                    ns.configuration_ = *shooter->shoot();
+                    rep = projection::projectStateToObstacle(fullBody_,limb, fullBody_->GetLimbs().at(limb), ns, n,p);
+                }
+            }
             if(rep.success_)
             {
                 lastStatesComputed_.push_back(rep.result_);
                 lastStatesComputedTime_.push_back(std::make_pair(-1., rep.result_));
                 return lastStatesComputed_.size() -1;
             }
-            return -1;
+            else
+                return -1;
         }
         catch(std::runtime_error& e)
         {

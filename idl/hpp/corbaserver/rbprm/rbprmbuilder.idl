@@ -562,8 +562,9 @@ module hpp
     /// \param limbName name of the considered limb to create contact with
     /// \param p 3d position of the point
     /// \param n 3d normal of the contact location center
+    /// \param max_num_sample number of times it will try to randomly sample a configuration before failing
     /// \return (success,NState) whether the creation was successful, as well as the new state
-    short addNewContact(in unsigned short stateId, in string limbName, in floatSeq position, in floatSeq normal) raises (Error);
+    short addNewContact(in unsigned short stateId, in string limbName, in floatSeq position, in floatSeq normal, in unsigned short max_num_sample) raises (Error);
 
     /// removes a contact from the state
     /// if the limb is not already in contact, does nothing

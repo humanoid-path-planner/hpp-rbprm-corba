@@ -1,58 +1,33 @@
 from twister_geom import *
-
 from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 from hpp.gepetto import PathPlayer
 
-import twister_path as path_planner
-import hrp2_model as model
-#~ import hrp2_model_grasp as model
-from hrp2_model import *
+import twister_spidey_path as path_planner
+import spidey_model as model
+from spidey_model import *
 import time
-
-
-
+tp = path_planner
 
 ps = path_planner.ProblemSolver( model.fullBody )
 r = path_planner.Viewer (ps, viewerClient=path_planner.r.client)
-pp = PathPlayer (fullBody.client.basic, r)
+pp = PathPlayer (model.fullBody.client.basic, r)
 fullBody = model.fullBody
 fullBody.setJointBounds ("base_joint_xyz", [-2,2.5, -2, 2, 0, 2.2])
 
 from plan_execute import a, b, c, d, e, init_plan_execute
 init_plan_execute(model.fullBody, r, path_planner, pp)
 
-q_0 = fullBody.getCurrentConfig(); 
-#~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
+#~ base_joint_xyz_limits = tp.base_joint_xyz_limits
+
+q_0 = fullBody.getCurrentConfig(); r(q_0)
+
+
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = path_planner.q_init[0:7]
 q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = path_planner.q_goal[0:7]
-
-
-fullBody.setCurrentConfig (q_init)
-q_init =  [
-        0.1, -0.82, 0.648702, 1.0, 0.0 , 0.0, 0.0,                         	 # Free flyer 0-6
-        0.0, 0.0, 0.0, 0.0,                                                  # CHEST HEAD 7-10
-        0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # LARM       11-17
-        0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # RARM       18-24
-        0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # LLEG       25-30
-        0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # RLEG       31-36
-        ]; r (q_init)
-
-fullBody.setCurrentConfig (q_goal)
-q_goal = fullBody.generateContacts(q_goal, [0,0,1])
-
-fullBody.setStartState(q_init,[rLegId,lLegId])#,larmId])
-fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
-i = 0;
-configs = []
-
-
-#~ d(0.1); e(0.01)
-
-print "confgs ", configs
-
-qs = configs
+#~ q_init = fullBody.generateContacts(q_init, [0,0,1])
+qs = []
 fb = fullBody
 ttp = path_planner
 from bezier_traj import *
@@ -63,9 +38,10 @@ fullBody = fb
 tp = ttp
 
 from hpp.corbaserver.rbprm.rbprmstate import State
-from hpp.corbaserver.rbprm.state_alg  import addNewContact, isContactReachable, closestTransform, removeContact, addNewContactIfReachable
+from hpp.corbaserver.rbprm.state_alg  import addNewContact, isContactReachable, closestTransform, removeContact, addNewContactIfReachable, projectToFeasibleCom
 
-s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId])  
+#~ s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId])  
+s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId])  
 
 q0 = s1.q()[:]
 
@@ -100,14 +76,14 @@ def test(p, n):
         print "time to check reachable", t3- t2
         print "time to project", t4- t3
 
-a = computeAffordanceCentroids(tp.afftool) 
-def computeNext(state, limb):
+a = computeAffordanceCentroids(tp.afftool, ["Support"]) 
+def computeNext(state, limb, max_num_samples = 10):
     global a
     t1 = time.clock()
-    #~ candidates = [el for el in a if addNewContactIfReachable(state, limb, el[0], el[1], limbsCOMConstraints)[0] ]
+    #~ candidates = [el for el in a if isContactReachable(state, limb, el[0], el[1], limbsCOMConstraints)[0] ]
     #~ print "num candidates", len(candidates)
     #~ t3 = time.clock()
-    results = [addNewContactIfReachable(state, limb, el[0], el[1], limbsCOMConstraints) for el in a]
+    results = [addNewContactIfReachable(state, limb, el[0], el[1], limbsCOMConstraints, max_num_samples) for el in a]
     t2 = time.clock()
     #~ t4 = time.clock()
     resultsFinal = [el[0] for el in results if el[1]]
@@ -116,7 +92,33 @@ def computeNext(state, limb):
     print "num res", len(resultsFinal)
     return resultsFinal
 
-#~ res = computeNext(s1, rLegId)
+scene = "bb"
+r.client.gui.createScene(scene)
+b_id = 0
+
+
+def plot_feasible(state):
+    for i in range(10):
+        for j in range(10):
+            for k in range(20):
+                c = array([(i - 5)*0.1, (j - 5.)*0.1, (k-10)*0.1])
+                active_ineq = state.getComConstraint(limbsCOMConstraints)
+                if(active_ineq[0].dot( c )<= active_ineq[1]).all():
+                    #~ print 'active'
+                    createPtBox(r.client.gui, 0, c, color = [0,1,0,1])
+                else:
+                    if(active_ineq[0].dot( c )>= active_ineq[1]).all():
+                        #~ print "inactive"
+                        createPtBox(r.client.gui, 0, c)
+    return -1
+
+i = 0
+s0 = removeContact(s1,rLegId)[0]
+res = computeNext(s1, rLegId)
+s1 = res[2]
 s2 = removeContact(s1,lLegId)[0]
-s3 = computeNext(s2, larmId)[0]
+res = computeNext(s0,larmId)
+#~ s2 = removeContact(s2,rLegId)[0]
+#~ s3 = computeNext(s2, larmId)[0]
 #~ go0(s2.sId,1, s=1)
+#~ plot_feasible(s1)
