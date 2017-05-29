@@ -53,7 +53,7 @@ rArmOffset = [0,0,-0.1]
 rArmNormal = [0,0,1]
 rArmx = 0.024; rArmy = 0.024
 #disabling collision for hook
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 50000, "manipulability", 0.05, "_6_DOF", True)
+fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 50000, "manipulability", 0.05, "_6_DOF", False)
 
 """
 
@@ -159,7 +159,7 @@ player = Player(fullBody,pp,tp,configs,draw=False,optim_effector=False,use_veloc
 
 
 
-player.displayContactPlan()
+#player.displayContactPlan()
 
 
 
@@ -173,7 +173,7 @@ print "####################################"
 
 from planning.configs.stairs_config import *
 from generate_contact_sequence import *
-cs = generateContactSequence(fullBody,configs[:-2],r)
+cs = generateContactSequence(fullBody,configs[:5],r)
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, CONTACT_SEQUENCE_XML_TAG)
 print "save contact sequence : ",filename

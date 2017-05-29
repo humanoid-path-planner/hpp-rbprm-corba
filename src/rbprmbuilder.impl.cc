@@ -1723,13 +1723,19 @@ assert(s2 == s1 +1);
 
             ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
             fullBody_->device_->currentConfiguration(s1Bis.configuration_);
-            if(!(problemSolver_->problem()->configValidations()->validate(s1Bis.configuration_, rport)
-                    && problemSolver_->problem()->configValidations()->validate(s2Bis.configuration_, rport)))
+            if(!(problemSolver_->problem()->configValidations()->validate(s1Bis.configuration_, rport)))
             {
-                std::cout << "could not project without collision at state " << s1  << std::endl;
+                std::cout << "could not project s1Bis without collision at state " << s1  << std::endl;
                 rport->print(std::cout);
                 throw std::runtime_error ("could not project without collision at state " + s1 );
             }
+            if(!(problemSolver_->problem()->configValidations()->validate(s2Bis.configuration_, rport)))
+            {
+                std::cout << "could not project s2Bis without collision at state " << s1  << std::endl;
+                rport->print(std::cout);
+                throw std::runtime_error ("could not project without collision at state " + s1 );
+            }
+
 
             try{
                 hppDout(notice,"begin comRRT states 1 and 1bis");
