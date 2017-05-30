@@ -40,13 +40,13 @@ r.client.gui.refresh()
 
 
 #COM : 
+name = 'scom'
+r.client.gui.addSphere(name,0.01,r.color.red)
+r.client.gui.setVisibility(name,"ALWAYS_ON_TOP")
+r.client.gui.addToGroup(name,r.sceneName)
+r.addLandmark(name,1)
 
-r.client.gui.addSphere("scom",0.01,r.color.red)
-r.client.gui.setVisibility("scom","ALWAYS_ON_TOP")
-r.client.gui.addToGroup("scom",r.sceneName)
-r.addLandmark("scom",2)
-
-r.client.gui.applyConfiguration("scom",q+[0,0,-1,0])
+r.client.gui.applyConfiguration(name,fullBody.getCenterOfMass()+[0,0,-1,0])
 r.client.gui.refresh()
 
 

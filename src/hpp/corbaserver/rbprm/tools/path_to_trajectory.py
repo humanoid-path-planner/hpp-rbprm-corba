@@ -31,7 +31,7 @@ def __find_q_t(robot, path_player, path_id, t):
 		if(a >= b):
 			print "ERROR, a > b, t does not exist"
 		if abs(current_t - t) < __EPS:
-			print "last config q = ",q[-1]
+			#print "last config q = ",q[-1]
 			return q[:-1]
 		elif(current_t - t) < __EPS:
 			a = u
@@ -67,12 +67,12 @@ def gen_trajectory_to_play(robot, path_player, path_ids, total_time_per_paths, d
 	activeid = 0
 	print "path_ids = ", path_ids
 	for i, path_id in enumerate(path_ids):
-		config_size_path = len(path_player.client.problem.configAtParam (path_id, 0))
+		config_size_path = len(path_player.client.problem.configAtParam (int(path_id), 0))
 		if(config_size_path > config_size):
 		#~ if(i == 1 ):
-			res+= follow_trajectory_path(robot, path_player, path_id, total_time_per_paths[i], dt_framerate)
+			res+= follow_trajectory_path(robot, path_player, int(path_id), total_time_per_paths[i], dt_framerate)
 		else:
-			res+= linear_interpolate_path(robot, path_player, path_id, total_time_per_paths[i], dt_framerate)
+			res+= linear_interpolate_path(robot, path_player, int(path_id), total_time_per_paths[i], dt_framerate)
 		activeid +=1
 	return res
 	
