@@ -32,20 +32,20 @@ r = Viewer (ps)
 
 n_samples = 10000
 
-#~ AFTER loading obstacles
 rLegId = '0rLeg'
 rLeg = 'RLEG_JOINT0'
-rLegOffset = [0,-0.105,0,]
-rLegNormal = [0,1,0]
+rLegOffset = [0,0,-0.105]
+rLegNormal = [0,0,1]       
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, n_samples, "manipulability", 0.1)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 10000, "manipulability", 0.1)
+                                                                                                
+lLegId = '1lLeg'                                                                                
+lLeg = 'LLEG_JOINT0'                                                                     
+lLegx = 0.09; lLegy = 0.05      
+lLegOffset = [0,0,-0.105]
+lLegNormal = [0,0,1]                                                                  
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.1)
 
-lLegId = '1lLeg'
-lLeg = 'LLEG_JOINT0'
-lLegOffset = [0,-0.105,0]
-lLegNormal = [0,1,0]
-lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, n_samples, "manipulability", 0.1)
 
 rarmId = '3Rarm'
 rarm = 'RARM_JOINT0'
@@ -53,20 +53,44 @@ rHand = 'RARM_JOINT5'
 rArmOffset = [0,0,-0.1]
 rArmNormal = [0,0,1]
 rArmOffset = [-0.045,-0.01,-0.085]
-rArmNormal = [1,0,0]
+rArmNormal = [0,1,0]
 rArmx = 0.015; rArmy = 0.02
-#disabling collision for hook
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, n_samples, "manipulability", 0.05, "_6_DOF", True)
+#~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, n_samples, "manipulability", 0.05, "_6_DOF", True)
 
 #~ AFTER loading obstacles
 larmId = '4Larm'
 larm = 'LARM_JOINT0'
 lHand = 'LARM_JOINT5'
-#~ lArmOffset = [-0.05,-0.050,-0.050]
 lArmOffset = [-0.045,0.01,-0.085]
-lArmNormal = [1,0,0]
+lArmNormal = [0,1,0]
 lArmx = 0.015; lArmy = 0.02
-fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, n_samples, "manipulability", 0.05, "_6_DOF", True)
+#~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, n_samples, "manipulability", 0.05, "_6_DOF", True)
+
+
+rarmId = '3Rarm'
+rarm = 'RARM_JOINT0'
+rHand = 'RARM_JOINT5'
+rArmOffset = [0,0,-0.1075]
+rArmNormal = [0,0,1]
+
+rArmOffset = [-0.01,-0.045,0.085]
+rArmNormal = [0,1,0]
+rArmx = 0.024; rArmy = 0.024
+#disabling collision for hook
+fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF", True)
+
+#~ AFTER loading obstacles
+larmId = '4Larm'
+larm = 'LARM_JOINT0'
+lHand = 'LARM_JOINT5'
+lArmOffset = [0,0,-0.1075]
+lArmNormal = [0,0,1]
+lArmOffset = [0.01,-0.045,0.085]
+lArmNormal = [0,1,0]
+lArmx = 0.024; lArmy = 0.024
+fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.1, "_6_DOF", True)
+
+
 
 limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},  
                         lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}, 
@@ -153,8 +177,15 @@ def draw_com(config):
 def fill_contact_points(limbs, fullbody, data):
     data["contact_points"] = {}
     for limb in limbs:
+        print "LIMB ", limb
         effector = limbsCOMConstraints[limb]['effector']
-        P, N = fullBody.computeContactForConfig(fullbody.getCurrentConfig(), limb)   
+        P, N = fullBody.computeContactForConfig(fullbody.getCurrentConfig(), limb)  
+        print "\t P \n"
+        for _,p in enumerate (P):
+            print "\t ", p
+        print "\t N \n"
+        for _,p in enumerate (N):
+            print "\t ", p
         data["contact_points"][effector] = {}
         data["contact_points"][effector]["P"] = P
         data["contact_points"][effector]["N"] = N
@@ -393,13 +424,16 @@ q_init =  [
         
 #~ limbs = [[lLegId,rLegId],[lLegId,rLegId, rarmId], [lLegId,rLegId, larmId], [lLegId,rLegId, rarmId, larmId] ]
 #~ limbs = [[lLegId,rLegId] ]
-limbs = [[lLegId,rLegId, rarmId]]
+limbs = [[lLegId,rLegId, rarmId, larmId]]
 #~ limbs = [[larmId, rarmId]]
+
+
+q_init = fullBody.getCurrentConfig()
 
 #~ gen(limbs[0], 1000)
 for ls in limbs:
-    gen(ls, 1000, False, unstable=True)
-gen(limbs[0], 1000, unstable=True)
+    gen(ls, 1, False, unstable=True)
+#~ gen(limbs[0], 1000, unstable=True)
     
 i = 0
 a = None

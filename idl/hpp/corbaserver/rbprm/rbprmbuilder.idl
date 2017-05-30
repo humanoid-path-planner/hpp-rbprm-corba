@@ -128,6 +128,12 @@ module hpp
 		/// \param com target com
 		double projectStateToCOM(in unsigned short stateId,  in floatSeq com) raises (Error);
 
+                /// Project a state into a COM
+                ///
+                /// \param stateId target state
+                /// \param com target com
+                double setConfigAtState(in unsigned short stateId,  in floatSeq config) raises (Error);
+
 		/// Create a state and push it to the state array
 		///
 		/// \param q configuration
@@ -231,7 +237,8 @@ module hpp
     /// \param disableEffectorCollision whether collision detection should be disabled for the end effector bones
     void addLimb(in string id, in string limb, in string effector, in floatSeq offset, in floatSeq normal,
                  in double x, in double y, in unsigned short samples, in string heuristicName,
-                 in double resolution, in string contactType,  in double disableEffectorCollision) raises (Error);
+                 in double resolution, in string contactType,  in double disableEffectorCollision,
+                 in double grasp) raises (Error);
 
     /// Specifies a subchain of the robot as a limb, which can be used to create contacts.
     /// A limb must consist in a simple kinematic chain, where every node has only one child
@@ -241,7 +248,7 @@ module hpp
     /// \param loadValues whether other values computed for the limb database should be loaded
     /// \param disableEffectorCollision whether collision detection should be disabled for the end effector bones
     void addLimbDatabase(in string databasepath, in string id, in string heuristicName, in double loadValues,
-                         in double disableEffectorCollision) raises (Error);
+                         in double disableEffectorCollision,in double grasp) raises (Error);
 
     /// Set the start state of a contact generation problem
     /// environment, ordered by their efficiency
@@ -272,6 +279,19 @@ module hpp
     /// \param stateId normalized step for generation along the path (ie the path has a length of 1).
     /// \return list of 2 or 3 lists of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
     floatSeqSeq computeContactPointsForLimb(in unsigned short stateId, in string limbname) raises (Error);
+
+    /// Provided a discrete contact sequence has already been computed, computes
+    /// all the contact positions and normals for a given state
+    /// \param stateId normalized step for generation along the path (ie the path has a length of 1).
+    /// \return list of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
+    floatSeqSeq computeContactPointsAtStateForLimb(in unsigned short stateId, in unsigned short isIntermediate, in string limbname) raises (Error);
+
+    /// Provided a discrete contact sequence has already been computed, computes
+    /// all the contact positions and normals for a given state
+    /// \param stateId iD of the considered state
+    /// \param isIntermediate whether the intermediate state should be considerred rather than this one
+    /// \return list of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
+    floatSeqSeq computeContactPointsAtState(in unsigned short stateId, in unsigned short isIntermediate) raises (Error);
 
     /// Provided a path has already been computed, interpolates it and generates the statically stable
     /// constact configurations along it. setStartState and setEndState must have been called prior
@@ -331,6 +351,28 @@ module hpp
     /// \param dt time between two points
     /// \return id of the root path computed
     short generateComTraj(in floatSeqSeq positions, in floatSeqSeq velocities, in floatSeqSeq accelerations, in double dt) raises (Error);
+
+		/// Create a linear path given list of positions
+		/// The path is composed of n+1 integrations
+		/// between the n positions.
+		/// The resulting path
+		/// is added to the problem solver
+		/// \param positions array of positions
+		/// \return id of the root path computed
+		short straightPath(in floatSeqSeq positions) raises (Error);
+
+		/// Create a trajectory corresponding to a bezier curve.
+		/// The coefficients give the order of the spline
+		/// \param coefficients array of positions
+		/// \return id of the path computed
+		short generateCurveTraj(in floatSeqSeq coefficients) raises (Error);
+
+		/// Create a trajectory corresponding to a bezier curve.
+		/// The coefficients give the order of the spline
+		/// \param coefficients array of positions
+		/// \param partitions array of positions
+		/// \return id of the path computed
+		short generateCurveTrajParts(in floatSeqSeq coefficients, in floatSeq partitions) raises (Error);
 
     /// Provided a path has already been computed and interpolated, generate a continuous path
     /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
@@ -487,6 +529,10 @@ module hpp
     /// \return size 7 position + quaternion of the octree root
     floatSeq getOctreeTransform(in string limbname, in floatSeq dofArray) raises (Error);
 
+    /// returns whether a state is in static equilibrium
+    /// \param state id of the state
+    double isStateBalanced(in unsigned short state) raises (Error);
+
     /// returns octree transform for a given robot configuration
     /// \param config configuration tested on the robot
     /// \param contacts name of the limbs in contact
@@ -524,6 +570,26 @@ module hpp
 
     /// return a list of all the limbs names
     Names_t getAllLimbsNames() raises (Error);
+    /// tries to add a new contact to the state
+    /// if the limb is already in contact, replace the
+    /// previous contact. Only considers kinematic limitations.
+    /// collision and equilibrium are NOT considered.
+    /// \param state State considered
+    /// \param limbName name of the considered limb to create contact with
+    /// \param p 3d position of the point
+    /// \param n 3d normal of the contact location center
+    /// \return (success,NState) whether the creation was successful, as well as the new state
+    short addNewContact(in unsigned short stateId, in string limbName, in floatSeq position, in floatSeq normal) raises (Error);
+
+
+    /// Computes the closest projection matrix that will bring a limb's effector
+    /// from its current configuration to a specified location
+    /// \param limbname name of the considered limb
+    /// \param configuration considered configuration of the robot
+    /// \param p target position
+    /// \param n target normal
+    /// \return 7D Transform of effector in contact (position + quaternion)
+    floatSeq computeTargetTransform(in string limbname, in floatSeq configuration, in floatSeq p, in floatSeq n) raises (Error);
 
   }; // interface Robot
   }; // module rbprm

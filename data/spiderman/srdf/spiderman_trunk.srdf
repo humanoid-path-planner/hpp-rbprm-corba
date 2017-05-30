@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<robot name="spiderman_trunk">
+
+<!-- Disable collision pairs of inner links -->
+<!-- torso -->
+<disable_collisions link1="Pelvis" link2="Thorax" />
+<disable_collisions link1="Thorax" link2="Skull" />
+
+
+</robot>

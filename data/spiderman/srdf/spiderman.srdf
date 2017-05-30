@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<robot name="spiderman">
+
+<!-- Disable collision pairs of inner links -->
+<!-- torso -->
+<disable_collisions link1="Pelvis" link2="Thorax" />
+<disable_collisions link1="Thorax" link2="Skull" />
+
+<!-- Left leg -->
+<disable_collisions link1="Pelvis" link2="LThigh" />
+<disable_collisions link1="LThigh" link2="LShank" />
+<disable_collisions link1="LShank" link2="LFoot" />
+<disable_collisions link1="LFoot" link2="LFootToe" />
+
+<!-- Right leg -->
+<disable_collisions link1="Pelvis" link2="RThigh" />
+<disable_collisions link1="RThigh" link2="RShank" />
+<disable_collisions link1="RShank" link2="RFoot" />
+<disable_collisions link1="RFoot" link2="RFootToe" />
+
+<!-- Left arm -->
+<disable_collisions link1="Thorax" link2="LHumerus" />
+<disable_collisions link1="LHumerus" link2="LForearm" />
+<disable_collisions link1="LForearm" link2="LHand" />
+
+<!-- Right arm -->
+<disable_collisions link1="Thorax" link2="RHumerus" />
+<disable_collisions link1="RHumerus" link2="RForearm" />
+<disable_collisions link1="RForearm" link2="RHand" />
+
+</robot>

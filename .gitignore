@@ -6,6 +6,7 @@
 
 # Precompiled Headers
 *.gch
+*.txt
 *.pch
 
 # Compiled Dynamic libraries
@@ -23,6 +24,9 @@
 *.lib
 *.pyc
 *.~
+*_config
+*_unstable
+*_coplanar
 
 # Executables
 *.exe
@@ -30,6 +34,7 @@
 *.app
 
 build/
+build-rel/
 profile/logs
 
 CMakeLists.txt.user

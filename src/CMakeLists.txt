@@ -103,13 +103,16 @@ INSTALL(
 	${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/client.py
 	${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/rbprmbuilder.py
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/rbprmfullbody.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/rbprmstate.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/state_alg.py
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/problem_solver.py
   DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm
   )
 INSTALL(
   FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/__init__.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools//generateROMs.py
+				${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/generateROMs.py
+				${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/com_constraints.py
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/plot_analytics.py
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/cwc_trajectory.py
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/cwc_trajectory_helper.py

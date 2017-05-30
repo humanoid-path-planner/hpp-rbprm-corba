@@ -94,6 +94,20 @@ install(FILES
   data/urdf/darpa.urdf
   data/urdf/car.urdf
   data/urdf/polaris.urdf
+  data/urdf/siggraph_asia/down.urdf
+  data/urdf/siggraph_asia/scale.urdf
+  data/urdf/siggraph_asia/scale_spidey.urdf
+  data/urdf/siggraph_asia/grasp.urdf
+  data/urdf/siggraph_asia/plane_hole.urdf
+  data/urdf/siggraph_asia/stairs_lower.urdf
+  data/urdf/siggraph_asia/wall.urdf
+  data/spiderman/urdf/SpidermanLFootSphere.urdf
+  data/spiderman/urdf/SpidermanLHandSphere.urdf
+  data/spiderman/urdf/SpidermanRFootSphere.urdf
+  data/spiderman/urdf/SpidermanRHandSphere.urdf
+  data/spiderman/urdf/spiderman_trunk.urdf
+  data/spiderman/urdf/spiderman.urdf
+
   #~ data/urdf/scene2.urdf
   data/urdf/robot_test/robot_test_lleg_rom.urdf
   data/urdf/robot_test/robot_test_rleg_rom.urdf
@@ -143,6 +157,20 @@ install(FILES
   data/srdf/darpa.srdf
   data/srdf/car.srdf
   data/srdf/polaris.srdf
+  data/srdf/siggraph_asia/down.srdf
+  data/srdf/siggraph_asia/scale.srdf
+  data/srdf/siggraph_asia/scale_spidey.srdf
+  data/srdf/siggraph_asia/grasp.srdf
+  data/srdf/siggraph_asia/wall.srdf
+  data/srdf/siggraph_asia/plane_hole.srdf
+  data/srdf/siggraph_asia/stairs_lower.srdf
+  data/spiderman/srdf/SpidermanLFootSphere.srdf
+  data/spiderman/srdf/SpidermanLHandSphere.srdf
+  data/spiderman/srdf/SpidermanRFootSphere.srdf
+  data/spiderman/srdf/SpidermanRHandSphere.srdf
+  data/spiderman/srdf/spiderman.srdf
+  data/spiderman/srdf/spiderman_trunk.srdf
+
   #~ data/srdf/scene2.srdf
   data/srdf/robot_test/robot_test_lleg_rom.srdf
   data/srdf/robot_test/robot_test_rleg_rom.srdf
@@ -215,8 +243,48 @@ install(FILES
 	data/meshes/downSlope2.stl
 	data/meshes/slalom.stl
 	data/meshes/flat_step.stl
+	data/meshes/polaris.stl
+	data/meshes/polaris_reduced.stl
+	data/meshes/siggraph_asia/down.stl
+	data/meshes/siggraph_asia/scale.stl
+    data/meshes/siggraph_asia/scale_spidey.stl
+    data/meshes/siggraph_asia/grasp.stl
+    data/meshes/siggraph_asia/plane_hole.stl
+    data/meshes/siggraph_asia/wall.stl
+    data/meshes/siggraph_asia/stairs_lower.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
   )
+
+
+install(FILES
+        data/spiderman/meshes/spiderman-LFoot.stl
+        data/spiderman/meshes/spiderman-LFootToe.stl
+        data/spiderman/meshes/spiderman-LForearm.stl
+        data/spiderman/meshes/spiderman-LHand.stl
+        data/spiderman/meshes/spiderman-LHumerus.stl
+        data/spiderman/meshes/spiderman-LShank.stl
+        data/spiderman/meshes/spiderman-LThigh.stl
+        data/spiderman/meshes/spiderman-pelvis_box.stl
+        data/spiderman/meshes/spiderman-pelvis.stl
+        data/spiderman/meshes/spiderman-RFoot.stl
+        data/spiderman/meshes/spiderman-RFootToe.stl
+        data/spiderman/meshes/spiderman-RForearm.stl
+        data/spiderman/meshes/spiderman-RHand.stl
+        data/spiderman/meshes/spiderman-RHumerus.stl
+        data/spiderman/meshes/spiderman-RShank.stl
+        data/spiderman/meshes/spiderman-RThigh.stl
+        data/spiderman/meshes/spiderman-skull_box.stl
+        data/spiderman/meshes/spiderman-skull.stl
+        data/spiderman/meshes/spiderman-thorax_box.stl
+        data/spiderman/meshes/spiderman-thorax.stl
+        data/spiderman/meshes/lfoot_rom.stl
+        data/spiderman/meshes/lhand_rom.stl
+        data/spiderman/meshes/rfoot_rom.stl
+        data/spiderman/meshes/rhand_rom.stl
+
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes/spiderman
+  )
+
 install(FILES
 	data/meshes/hyq/hyq_all.stl
 	data/meshes/hyq/hyq_all_realist.stl

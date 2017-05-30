@@ -31,32 +31,32 @@ rootName = 'base_joint_xyz'
 rLegId = 'RL'
 rLeg = 'RLEG_JOINT0'
 rfoot = 'RLEG_JOINT5'
-rLegOffset = [0,-0.105,0,]
-rLegNormal = [0,1,0]
+rLegOffset = [0,0,-0.105]
+rLegNormal = [0,0,1]       
 rLegx = 0.09; rLegy = 0.05
 fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, nbSamples, "manipulability", 0.1)
 
 lLegId = 'LL'
 lLeg = 'LLEG_JOINT0'
-lfoot = 'LLEG_JOINT5'
-lLegOffset = [0,-0.105,0]
-lLegNormal = [0,1,0]
-lLegx = 0.09; lLegy = 0.05
+lfoot = 'LLEG_JOINT5'                                                              
+lLegx = 0.09; lLegy = 0.05      
+lLegOffset = [0,0,-0.105]
+lLegNormal = [0,0,1]          
 fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, nbSamples, "manipulability", 0.1)
 
 rarmId = 'RA'
 rarm = 'RARM_JOINT0'
 rHand = 'RARM_JOINT5'
-rArmOffset = [-0.05,-0.050,-0.050]
-rArmNormal = [1,0,0]
+rArmOffset = [0,0,-0.1075]
+rArmNormal = [0,0,1]
 rArmx = 0.024; rArmy = 0.024
 fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, nbSamples, "manipulability", 0.05)
 
 larmId = 'LA'
 larm = 'LARM_JOINT0'
 lHand = 'LARM_JOINT5'
-lArmOffset = [-0.05,-0.050,-0.050]
-lArmNormal = [1,0,0]
+lArmOffset = [0,0,-0.1075]
+lArmNormal = [0,0,1]
 lArmx = 0.024; lArmy = 0.024
 fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, nbSamples, "manipulability", 0.05)
 
@@ -123,6 +123,9 @@ import numpy as np
 
 points = [[],[],[],[]]
 
+success = 0
+fails = 0
+
 def printComPosition(nbConfigs):
 	for i in range(0,nbConfigs):
 		q = fullBody.shootRandomConfig()
@@ -135,6 +138,8 @@ def printComPosition(nbConfigs):
 		#~ print ("final com" + str(com))
 		#~ print ("final com" + str(fullBody.getCenterOfMass()))
 		if(fullBody.isConfigValid(q)[0]):
+			global success
+			success +=1
 			for j in range(0,len(effectors)):
 				effectorName = effectors[j]
 				limbId = limbIds[j]
@@ -153,7 +158,9 @@ def printComPosition(nbConfigs):
 				p = invrm.dot([0,0,0,1])
 				points[j].append(p)
 				#~ print (points[j])
-		#~ else:
+		else:			
+			global fails
+			fails +=1
 			#~ print fullBody.isConfigValid(q)[1]
 	for j in range(0,len(limbIds)):
 		f1=open('./'+str(limbIds[j])+'_com.erom', 'w+')
@@ -166,3 +173,5 @@ def printComPosition(nbConfigs):
 #~ printRootPosition(rarmId, rHand, nbSamples)
 #~ printRootPosition(larmId, lHand, nbSamples) 
 printComPosition(100000)
+print "successes ", success
+print "fails  ", fails

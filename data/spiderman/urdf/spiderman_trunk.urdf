@@ -1,0 +1,193 @@
+<?xml version="1.0"?>
+<robot name="spiderman_trunk">
+  <material name="White"> <!-- for bones -->
+    <color rgba="1 1 1 1"/>
+  </material>
+  <material name="Green"> <!-- for bones -->
+    <color rgba="0 1 0.1 0.2"/>
+  </material>
+  <material name="Red"> <!-- for bones -->
+    <color rgba="1 0 0 1"/>
+  </material>
+
+  <link name="base_link"/>
+  <joint name="base_link_J" type="fixed">
+      <parent link="base_link"/>
+      <child link="Pelvis"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+   </joint>
+
+   <link name="Pelvis">
+      <inertial>
+         <origin rpy="0 0 0" xyz="0 0 0"/>
+         <mass value="8.4552"/>
+         <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+      </inertial>
+      <visual>
+         <origin xyz="0 0 0" rpy="0 0 0"/>
+         <geometry>
+            <mesh filename="package://hpp-rbprm-corba/meshes/spiderman/spiderman-pelvis_box.stl"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin xyz="0 0 0" rpy="0 0 0"/>
+         <geometry>
+            <mesh filename="package://hpp-rbprm-corba/meshes/spiderman/spiderman-pelvis_box.stl"/>
+         </geometry>
+      </collision>
+   </link>
+
+  <joint name="pelvis_rfoot_rom_joint" type="fixed">
+      <parent link="Pelvis"/>
+      <child link="pelvis_rfoot_rom"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+   </joint>
+
+  <link name="pelvis_rfoot_rom">
+      <visual>
+         <origin xyz="0 0 0" rpy="0 0 0"/>
+         <geometry>
+            <mesh filename="package://hpp-rbprm-corba/meshes/spiderman/rfoot_rom.stl"/>
+         </geometry>
+         <material name="Green"/>
+      </visual>
+   </link>
+
+  <joint name="pelvis_lfoot_rom_joint" type="fixed">
+      <parent link="Pelvis"/>
+      <child link="pelvis_lfoot_rom"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+   </joint>
+
+  <link name="pelvis_lfoot_rom">
+      <visual>
+         <origin xyz="0 0 0" rpy="0 0 0"/>
+         <geometry>
+            <mesh filename="package://hpp-rbprm-corba/meshes/spiderman/lfoot_rom.stl"/>
+         </geometry>
+         <material name="Green"/>
+      </visual>
+   </link>
+
+   <link name="Thorax_rx"/>
+   <link name="Thorax_ry"/>
+   <link name="Thorax">
+      <inertial>
+         <origin rpy="0 0 0" xyz="0 0 0"/>
+         <mass value="19.8372"/>
+         <inertia ixx="-0.16485" ixy="0.25777" ixz="0.0015499" iyy="0.20309" iyz="-0.0061998" izz="-0.18263"/>
+      </inertial>
+      <visual>
+         <origin xyz="0 0 0" rpy="0 0 0"/>
+         <geometry>
+            <mesh filename="package://hpp-rbprm-corba/meshes/spiderman/spiderman-thorax_box.stl"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin xyz="0 0 0" rpy="0 0 0"/>
+         <geometry>
+            <mesh filename="package://hpp-rbprm-corba/meshes/spiderman/spiderman-thorax_box.stl"/>
+         </geometry>
+      </collision>
+   </link>
+
+  <joint name="thorax_rhand_rom_joint" type="fixed">
+      <parent link="Thorax"/>
+      <child link="thorax_rhand_rom"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+   </joint>
+
+  <link name="thorax_rhand_rom">
+      <visual>
+         <origin xyz="0 0 0" rpy="0 0 0"/>
+         <geometry>
+            <mesh filename="package://hpp-rbprm-corba/meshes/spiderman/rhand_rom.stl"/>
+         </geometry>
+         <material name="Green"/>
+      </visual>
+   </link>
+
+  <joint name="thorax_lhand_rom_joint" type="fixed">
+      <parent link="Thorax"/>
+      <child link="thorax_lhand_rom"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+   </joint>
+
+  <link name="thorax_lhand_rom">
+      <visual>
+         <origin xyz="0 0 0" rpy="0 0 0"/>
+         <geometry>
+            <mesh filename="package://hpp-rbprm-corba/meshes/spiderman/lhand_rom.stl"/>
+         </geometry>
+         <material name="Green"/>
+      </visual>
+   </link>
+
+   <link name="Skull_rx"/>
+   <link name="Skull_ry"/>
+   <link name="Skull">
+      <inertial>
+         <origin rpy="0 0 0" xyz="0 0 0"/>
+         <mass value="4.2276"/>
+         <inertia ixx="0.0071027" ixy="-0.00059867" ixz="-2.9564e-05" iyy="0.0046194" iyz="6.6519e-05" izz="0.0080488"/>
+      </inertial>
+      <visual>
+         <origin xyz="0 0 0" rpy="0 0 0"/>
+         <geometry>
+            <mesh filename="package://hpp-rbprm-corba/meshes/spiderman/spiderman-skull_box.stl"/>
+         </geometry>
+         <material name="Red"/>
+      </visual>
+      <collision>
+         <origin xyz="0 0 0" rpy="0 0 0"/>
+         <geometry>
+            <mesh filename="package://hpp-rbprm-corba/meshes/spiderman/spiderman-skull_box.stl"/>
+         </geometry>
+      </collision>
+   </link>
+
+  <joint name="A_Thorax_rx" type="revolute"> <!-- A_ added for order while parsing with ROS -->
+      <parent link="Pelvis"/>
+      <child link="Thorax_rx"/>
+      <origin rpy="0 0 0" xyz="0.0373 0.0006 0.0788"/>
+      <axis xyz="1 0 0"/>
+      <limit effort="0" lower="-1" upper="1" velocity="1.0"/>
+   </joint>
+   <joint name="Thorax_ry" type="revolute">
+      <parent link="Thorax_rx"/>
+      <child link="Thorax_ry"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit effort="0" lower="-0.8" upper="0.8" velocity="1.0"/>
+   </joint>
+   <joint name="Thorax_rz" type="revolute">
+      <parent link="Thorax_ry"/>
+      <child link="Thorax"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="0" lower="-1.5" upper="1.5" velocity="1.0"/>
+   </joint>
+   <joint name="A_Skull_rx" type="revolute"> <!-- A_ added for order while parsing with ROS -->
+      <parent link="Thorax"/>
+      <child link="Skull_rx"/>
+      <origin rpy="0 0 0" xyz="0.0711 -0.0005 0.6039"/>
+      <axis xyz="1 0 0"/>
+      <limit effort="0" lower="-0.3" upper="0.3" velocity="1.0"/>
+   </joint>
+   <joint name="Skull_ry" type="revolute">
+      <parent link="Skull_rx"/>
+      <child link="Skull_ry"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit effort="0" lower="-1.1" upper="0.6" velocity="1.0"/>
+   </joint>
+   <joint name="Skull_rz" type="revolute">
+      <parent link="Skull_ry"/>
+      <child link="Skull"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="0" lower="-1.4" upper="1." velocity="1.0"/>
+   </joint>
+</robot>
