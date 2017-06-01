@@ -572,6 +572,21 @@ class FullBody (object):
      def comRRTFromPos(self, state1, comPos1, comPos2, comPos3, numOptim = 10):
           return self.client.rbprm.rbprm.comRRTFromPos(state1, comPos1, comPos2, comPos3, numOptim)
           
+     ## Provided a path has already been computed and interpolated, generate a continuous path
+     # between two indicated states. The states do not need to be consecutive, but increasing in Id.
+     # Will fail if the index of the states do not exist
+     # The path of the COM of thr robot and limbs not considered by the contact transitions between
+     # two states is assumed to be already computed, and registered in the solver under the id specified by the user.
+     # It must be valid in the sense of the active PathValidation.
+     # \param state1 index of first state.
+     # \param rootPositions1 com positions to track for 1st phase
+     # \param rootPositions1 com positions to track for 2nd phase
+     # \param rootPositions1 com positions to track for 3rd phase
+     # \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
+     # \return id of the root path computed
+     def comRRTFromPosBetweenState(self, state1, state2, comPos1, comPos2, comPos3, numOptim = 10):
+          return self.client.rbprm.rbprm.comRRTFromPosBetweenState(state1, state2, comPos1, comPos2, comPos3, numOptim)
+          
                 
      ## Provided a path has already been computed and interpolated, generate a continuous path
      # between two indicated states. The states do not need to be consecutive, but increasing in Id.
@@ -610,8 +625,8 @@ class FullBody (object):
      # \param state index of first state.
      # \param targetCom 3D vector for the com position
      # \return projected configuration
-     def projectToCom(self, state, targetCom):
-          return self.client.rbprm.rbprm.projectToCom(state, targetCom)     
+     def projectToCom(self, state, targetCom, maxNumSample = 0):
+          return self.client.rbprm.rbprm.projectToCom(state, targetCom, maxNumSample)     
           
      ## Returns the configuration at a given state
      # Will fail if the index of the state does not exist.
@@ -625,8 +640,8 @@ class FullBody (object):
      # \param state index of first state.
      # \param targetCom 3D vector for the com position
      # \return whether the projection was successful
-     def projectStateToCOM(self, state, targetCom):
-          return self.client.rbprm.rbprm.projectStateToCOM(state, targetCom)     > 0
+     def projectStateToCOM(self, state, targetCom, maxNumSample = 0):
+          return self.client.rbprm.rbprm.projectStateToCOM(state, targetCom, maxNumSample)     > 0
           
      ## Project a given state into a given COM position
      # and update the state configuration.

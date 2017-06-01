@@ -605,7 +605,26 @@ namespace hpp {
 
     }
 
-    double RbprmBuilder::projectStateToCOMEigen(unsigned short stateId, const model::Configuration_t& com_target) throw (hpp::Error)
+    rbprm::T_Limb GetFreeLimbs(const RbPrmFullBodyPtr_t fullBody, const hpp::rbprm::State &from, const hpp::rbprm::State &to)
+    {
+        rbprm::T_Limb res;
+        std::vector<std::string> fixedContacts = to.fixedContacts(from);
+        std::vector<std::string> variations = to.contactVariations(from);
+        for(rbprm::CIT_Limb cit = fullBody->GetLimbs().begin();
+            cit != fullBody->GetLimbs().end(); ++cit)
+        {
+            if(std::find(fixedContacts.begin(), fixedContacts.end(), cit->first) == fixedContacts.end())
+            {
+                if(std::find(variations.begin(), variations.end(), cit->first) != variations.end())
+                {
+                    res.insert(*cit);
+                }
+            }
+        }
+        return res;
+    }
+
+    double RbprmBuilder::projectStateToCOMEigen(unsigned short stateId, const model::Configuration_t& com_target, unsigned short maxNumeSamples) throw (hpp::Error)
     {
         try
         {
@@ -614,9 +633,27 @@ namespace hpp {
                 throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
             }
             State s = lastStatesComputed_[stateId];
-            bool succes (false);
-            hpp::model::Configuration_t c = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s,com_target,succes);
-            if(succes)
+//            /hpp::model::Configuration_t c = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s,com_target,succes);
+            rbprm::projection::ProjectionReport rep = rbprm::projection::projectToComPosition(fullBody_,com_target,s);
+            hpp::model::Configuration_t& c = rep.result_.configuration_;
+            ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
+            CollisionValidationPtr_t val = fullBody_->GetCollisionValidation();
+            rep.success_ =  rep.success_ &&  val->validate(rep.result_.configuration_,rport);
+            if (! rep.success_ && maxNumeSamples>0)
+            {
+                Configuration_t head = s.configuration_.head<7>();
+                BasicConfigurationShooterPtr_t shooter = BasicConfigurationShooter::create(fullBody_->device_);
+                for(std::size_t i =0; !rep.success_ && i< maxNumeSamples; ++i)
+                {
+                    s.configuration_ = *shooter->shoot();
+                    s.configuration_.head<7>() = head;
+                    //c = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s,com_target,succes);
+                    rep = rbprm::projection::projectToComPosition(fullBody_,com_target,s);
+                    rep.success_ = rep.success_ && val->validate(rep.result_.configuration_,rport);
+                    c = rep.result_.configuration_;
+                }
+            }
+            if(rep.success_)
             {
                 lastStatesComputed_[stateId].configuration_ = c;
                 lastStatesComputedTime_[stateId].second.configuration_ = c;
@@ -655,10 +692,10 @@ namespace hpp {
         return lastStatesComputed_.size()-1;
     }
 
-    double RbprmBuilder::projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com) throw (hpp::Error)
+    double RbprmBuilder::projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com, unsigned short max_num_sample) throw (hpp::Error)
     {        
         model::Configuration_t com_target = dofArrayToConfig (3, com);
-        return projectStateToCOMEigen(stateId, com_target);
+        return projectStateToCOMEigen(stateId, com_target, max_num_sample);
     }
 
     hpp::floatSeq* RbprmBuilder::generateContacts(const hpp::floatSeq& configuration,
@@ -1779,25 +1816,30 @@ assert(s2 == s1 +1);
         }
     }
 
-    core::Configuration_t project_or_throw(rbprm::RbPrmFullBodyPtr_t fulllBody, ProblemPtr_t problem, const State& state, const fcl::Vec3f& targetCom)
+    core::Configuration_t project_or_throw(rbprm::RbPrmFullBodyPtr_t fulllBody, const State& state, const fcl::Vec3f& targetCom, const bool checkCollision = false)
     {
-        bool success(false);
-        core::Configuration_t res = rbprm::interpolation::projectOnCom(fulllBody, problem,state,targetCom, success);
-        if(!success)
+        rbprm::projection::ProjectionReport rep;
+        if(checkCollision)
+            rep =rbprm::projection::projectToColFreeComPosition(fulllBody, targetCom, state);
+        else
+            rep= rbprm::projection::projectToComPosition(fulllBody, targetCom, state);
+        core::Configuration_t res = rep.result_.configuration_;
+        if(!rep.success_)
         {
+            std::cout << "projection failed in project or throw " << std::endl;
             throw std::runtime_error("could not project state on COM constraint");
         }
         return res;
     }
 
-    hpp::floatSeq* RbprmBuilder::rrt(t_rrt functor,  double state1,
+    hpp::floatSeq* RbprmBuilder::rrt(t_rrt functor,  double state1, double state2,
                                     unsigned short cT1, unsigned short cT2, unsigned short cT3,
                                     unsigned short numOptimizations)  throw (hpp::Error)
     {
         try
         {
             std::vector<CORBA::Short> pathsIds;
-            std::size_t s1((std::size_t)state1), s2((std::size_t)state1+1);
+            std::size_t s1((std::size_t)state1), s2((std::size_t)state2);
             if(lastStatesComputed_.size () < s1 || lastStatesComputed_.size () < s2 )
             {
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
@@ -1807,24 +1849,60 @@ assert(s2 == s1 +1);
             {
                 throw std::runtime_error("in comRRTFromPos, at least one com trajectory is not present in problem solver");
             }
+
+            std::cout << "com 0 " << paths[cT1]->initial().head<3>().transpose() << std::endl;
+            std::cout << "com 1 " << paths[cT1]->end().head<3>().transpose() << std::endl;
+            std::cout << "com 2 " << paths[cT2]->initial().head<3>().transpose() << std::endl;
+            std::cout << "com 3 " << paths[cT2]->end().head<3>().transpose() << std::endl;
+            std::cout << "com 4 " << paths[cT3]->initial().head<3>().transpose() << std::endl;
+            std::cout << "com 5 " << paths[cT3]->end().head<3>().transpose() << std::endl;
+
             State& state1=lastStatesComputed_[s1], state2=lastStatesComputed_[s2];
             State s1Bis(state1);
-            s1Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Bis,paths[cT1]->end().head<3>());
+            s1Bis.configuration_ = project_or_throw(fullBody_, s1Bis,paths[cT1]->end().head<3>(), true);
+            std::cout << "projection succeedded " << paths[cT1]->end().head<3>() << std::endl;
             State s2Bis(state2);
-            s2Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Bis,paths[cT2]->end().head<3>());
+            s2Bis.configuration_ = project_or_throw(fullBody_, s2Bis,paths[cT2]->end().head<3>(), true);
 
             core::PathVectorPtr_t resPath = core::PathVector::create(fullBody_->device_->configSize(), fullBody_->device_->numberDof());
+            std::cout << "projection succeedded " << paths[cT2]->end().head<3>() << std::endl;
 
+           /* ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
 
-
-            ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
-            fullBody_->device_->currentConfiguration(s1Bis.configuration_);
-            if(!(problemSolver_->problem()->configValidations()->validate(s1Bis.configuration_, rport)
-                    && problemSolver_->problem()->configValidations()->validate(s2Bis.configuration_, rport)))
+            BasicConfigurationShooterPtr_t shooter = BasicConfigurationShooter::create(fullBody_->device_);
+            bool found = false;
+            for (int i = 0; i< 100 && !found;  ++i)
+            {
+                fullBody_->device_->currentConfiguration(s1Bis.configuration_);
+                found =problemSolver_->problem()->configValidations()->validate(s1Bis.configuration_, rport);
+                if(!found)
+                {
+                    std::cout << "collission " << *rport << std::endl;
+                    s1Bis.configuration_ = *shooter->shoot();
+                    s1Bis.configuration_ = project_or_throw(fullBody_, s1Bis,paths[cT1]->end().head<3>());
+                    std::cout << "projection succeedded " << paths[cT1]->end().head<3>() << std::endl;
+                }
+            }
+            if(found)
+                std::cout << "got out ! " << std::endl;
+            bool found2 = false;
+            for (int i = 0; i< 100 && found && !found2; ++i)
+            {
+                fullBody_->device_->currentConfiguration(s2Bis.configuration_);
+                found2 =problemSolver_->problem()->configValidations()->validate(s2Bis.configuration_, rport);
+                if(!found2)
+                {
+                    std::cout << "collission " << *rport << std::endl;
+                    s2Bis.configuration_ = *shooter->shoot();
+                    s2Bis.configuration_ = project_or_throw(fullBody_, s2Bis,paths[cT2]->end().head<3>());
+                    std::cout << "projection succeedded " << paths[cT2]->end().head<3>() << std::endl;
+                }
+            }
+            if(!found || !found2)
             {
                 std::cout << "could not project without collision at state " << s1  << std::endl;
 //throw std::runtime_error ("could not project without collision at state " + s1 );
-            }
+            }*/
 
             {
                 core::PathPtr_t p1 = interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[cT1],
@@ -1836,6 +1914,7 @@ assert(s2 == s1 +1);
                 PathPtr_t reducedPath = core::SubchainPath::create(p1,intervals);
                 resPath->appendPath(reducedPath);
                 pathsIds.push_back(AddPath(p1,problemSolver_));
+                std::cout << "PATH 1 OK " << std::endl;
             }
 
 
@@ -1849,6 +1928,7 @@ assert(s2 == s1 +1);
                 intervals.push_back(interval);
                 PathPtr_t reducedPath = core::SubchainPath::create(p2,intervals);
                 resPath->appendPath(reducedPath);
+                std::cout << "PATH 2 OK " << std::endl;
             }
 
             //if(s2Bis.configuration_ != state2.configuration_)
@@ -1862,6 +1942,7 @@ assert(s2 == s1 +1);
                 PathPtr_t reducedPath = core::SubchainPath::create(p3,intervals);
                 resPath->appendPath(reducedPath);
                 pathsIds.push_back(AddPath(p3,problemSolver_));
+                std::cout << "PATH 3 OK " << std::endl;
             }
             pathsIds.push_back(AddPath(resPath,problemSolver_));
 
@@ -1885,7 +1966,17 @@ assert(s2 == s1 +1);
                                                unsigned short cT3,
                                                unsigned short numOptimizations) throw (hpp::Error)
     {
-        return rrt(&interpolation::comRRT, state1, cT1, cT2, cT3, numOptimizations);
+        return rrt(&interpolation::comRRT, state1,state1+1, cT1, cT2, cT3, numOptimizations);
+
+    }
+
+    hpp::floatSeq* RbprmBuilder::comRRTFromPosBetweenState(double state1, double state2,
+                                               unsigned short cT1,
+                                               unsigned short cT2,
+                                               unsigned short cT3,
+                                               unsigned short numOptimizations) throw (hpp::Error)
+    {
+        return rrt(&interpolation::comRRT, state1,state2, cT1, cT2, cT3, numOptimizations);
 
     }
 
@@ -1895,7 +1986,7 @@ assert(s2 == s1 +1);
                                              unsigned short cT3,
                                              unsigned short numOptimizations) throw (hpp::Error)
     {
-        return rrt(&interpolation::effectorRRT, state1, cT1, cT2, cT3, numOptimizations);
+        return rrt(&interpolation::effectorRRT, state1, state1+1, cT1, cT2, cT3, numOptimizations);
     }
 
     hpp::floatSeq* RbprmBuilder::effectorRRTFromPath(double state1,
@@ -1954,7 +2045,7 @@ assert(s2 == s1 +1);
         }
     }
 
-    hpp::floatSeq* RbprmBuilder::projectToCom(double state, const hpp::floatSeq& targetCom) throw (hpp::Error)
+    hpp::floatSeq* RbprmBuilder::projectToCom(double state, const hpp::floatSeq& targetCom, unsigned short max_num_sample) throw (hpp::Error)
     {
         try
         {
@@ -1964,7 +2055,7 @@ assert(s2 == s1 +1);
             }
             model::Configuration_t config = dofArrayToConfig (std::size_t(3), targetCom);
             fcl::Vec3f comTarget; for(int i =0; i<3; ++i) comTarget[i] = config[i];
-            model::Configuration_t  res = project_or_throw(fullBody_,problemSolver_->problem(), lastStatesComputed_[state],comTarget);
+            model::Configuration_t  res = project_or_throw(fullBody_, lastStatesComputed_[state],comTarget);
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(res.rows());
             for(std::size_t i=0; i< res.rows(); ++i)
@@ -2201,6 +2292,30 @@ assert(s2 == s1 +1);
         }
     }
 
+
+    CORBA::Short  RbprmBuilder::computeIntermediary(unsigned short stateFrom, unsigned short stateTo) throw (hpp::Error)
+    try
+    {
+        std::size_t s((std::size_t)stateFrom);
+        std::size_t s2((std::size_t)stateTo);
+        if(lastStatesComputed_.size () < s+1 || lastStatesComputed_.size () < s2+1)
+        {
+            throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s));
+        }
+        const State& state1 = lastStatesComputed_[s];
+        const State& state2 = lastStatesComputed_[s2];
+        bool unused;
+        short unsigned cId = s;
+        const State state = intermediary(state1, state2,cId,unused);
+        lastStatesComputed_.push_back(state);
+        lastStatesComputedTime_.push_back(std::make_pair(-1., state));
+        return lastStatesComputed_.size() -1;
+    }
+    catch(std::runtime_error& e)
+    {
+        throw Error(e.what());
+    }
+
     hpp::floatSeq* RbprmBuilder::getOctreeTransform(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error)
     {
         try{
@@ -2418,13 +2533,19 @@ assert(s2 == s1 +1);
             fcl::Vec3f n; for(int i =0; i<3; ++i) n[i] = config[i];
 
             projection::ProjectionReport rep = projection::projectStateToObstacle(fullBody_,limb, fullBody_->GetLimbs().at(limb), ns, n,p);
+            ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
+            CollisionValidationPtr_t val = fullBody_->GetCollisionValidation();
+            rep.success_ =  rep.success_ &&  val->validate(rep.result_.configuration_,rport);
             if (!rep.success_ && max_num_sample > 0)
             {
                 BasicConfigurationShooterPtr_t shooter = BasicConfigurationShooter::create(fullBody_->device_);
+                Configuration_t head = ns.configuration_.head<7>();
                 for(std::size_t i =0; !rep.success_ && i< max_num_sample; ++i)
                 {
                     ns.configuration_ = *shooter->shoot();
+                    ns.configuration_.head<7>() = head;
                     rep = projection::projectStateToObstacle(fullBody_,limb, fullBody_->GetLimbs().at(limb), ns, n,p);
+                    rep.success_ = rep.success_ && val->validate(rep.result_.configuration_,rport);
                 }
             }
             if(rep.success_)

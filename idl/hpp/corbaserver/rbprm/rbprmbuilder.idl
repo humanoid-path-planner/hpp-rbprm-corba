@@ -121,7 +121,7 @@ module hpp
 		///
 		/// \param stateId target state
 		/// \param com target com
-		double projectStateToCOM(in unsigned short stateId,  in floatSeq com) raises (Error);
+                double projectStateToCOM(in unsigned short stateId,  in floatSeq com, in  unsigned short max_num_sample) raises (Error);
 
                 /// Project a state into a COM
                 ///
@@ -413,7 +413,7 @@ module hpp
     short comRRT(in double state1, in double state2,  in  unsigned short comPath, in unsigned short numOptimizations) raises (Error);
 
     /// Provided a path has already been computed and interpolated, generate a continuous path
-    /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
+    /// between two indicated states. The states do need to be consecutive.
     /// Will fail if the index of the states do not exist
     /// The path of the COM of thr robot and limbs not considered by the contact transitions between
     /// two states is assumed to be already computed, and registered in the solver under the id specified by the user.
@@ -425,6 +425,26 @@ module hpp
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
     /// \return id of the root path computed
     floatSeq comRRTFromPos(in double state1,
+                        in  unsigned short comTraj1,
+                        in  unsigned short comTraj2,
+                        in  unsigned short comTraj3,
+                        in unsigned short numOptimizations) raises (Error);
+
+
+    /// Provided a path has already been computed and interpolated, generate a continuous path
+    /// between three indicated states. The states do not need to be consecutive.
+    /// Will fail if the index of the states do not exist
+    /// The path of the COM of thr robot and limbs not considered by the contact transitions between
+    /// two states is assumed to be already computed, and registered in the solver under the id specified by the user.
+    /// It must be valid in the sense of the active PathValidation.
+    /// \param state1 index of first state.
+    /// \param state2 index of end state.
+    /// \param rootPositions1 com positions to track for 1st phase
+    /// \param rootPositions1 com positions to track for 2nd phase
+    /// \param rootPositions1 com positions to track for 3rd phase
+    /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
+    /// \return id of the root path computed
+    floatSeq comRRTFromPosBetweenState(in double state1,in double state2,
                         in  unsigned short comTraj1,
                         in  unsigned short comTraj2,
                         in  unsigned short comTraj3,
@@ -474,8 +494,9 @@ module hpp
     /// Will fail if the index of the state does not exist.
     /// \param state index of first state.
     /// \param targetCom 3D vector for the com position
+    /// \param max_num_sample number of samples that can be used at worst before failing
     /// \return projected configuration
-    floatSeq projectToCom(in double state, in floatSeq targetCom) raises (Error);
+    floatSeq projectToCom(in double state, in floatSeq targetCom, in  unsigned short max_num_sample) raises (Error);
 
     /// Retrieve the configuration at a given state
     /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
@@ -494,6 +515,12 @@ module hpp
     /// \param state1 current state considered
     /// \return whether the limb is in contact at this state
     short isLimbInContactIntermediary(in string limbname, in double state1) raises (Error);
+
+    /// Generate intermediary state
+    /// \param state1 initial state considered
+    /// \param state2 target state considered
+    /// \return whether the limb is in contact at this state
+    short computeIntermediary(in unsigned short state1, in unsigned short state2) raises (Error);
 
     /// Saves the last computed states by the function interpolate in a filename.
     /// Raises an error if interpolate has not been called, or the file could not be opened.

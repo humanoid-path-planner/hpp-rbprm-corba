@@ -2,14 +2,7 @@ from gen_data_from_rbprm import *
 
 from hpp.corbaserver.rbprm.tools.com_constraints import get_com_constraint
 from hpp.gepetto import PathPlayer
-
-#computing com bounds 0 and 1
-def __get_com(robot, config):
-    save = robot.getCurrentConfig()
-    robot.setCurrentConfig(config)
-    com = robot.getCenterOfMass()
-    robot.setCurrentConfig(save)
-    return com
+from hpp.corbaserver.rbprm.state_alg  import computeIntermediateState
 
 from numpy import matrix, asarray
 from numpy.linalg import norm
@@ -47,18 +40,21 @@ def play_all_paths_qs():
         if i % 2 == 0 :
             ppl(pid)
 
-def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, num_optim = 0, effector = False, mu=0.5) :
-    com_1 = __get_com(fullBody, fullBody.getConfigAtState(stateid))
-    com_2 = __get_com(fullBody, fullBody.getConfigAtState(stateid+1))
+def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_optim = 0, effector = False, mu=0.5) :
+    q1 = s1.q()
+    q2 = s2.q()
+    stateid = s1.sId
+    stateid1 = s2.sId
+    sInt = computeIntermediateState(s1,s2)
+    com_1 = s1.getCenterOfMass()
+    com_2 = s2.getCenterOfMass()
     createPtBox(viewer.client.gui, 0, com_1, 0.01, [0,1,1,1.])
     createPtBox(viewer.client.gui, 0, com_2, 0.01, [0,1,1,1.])
-    data = gen_sequence_data_from_state(fullBody,stateid,configs, mu = mu)
-    c_bounds_1 = get_com_constraint(fullBody, stateid, fullBody.getConfigAtState(stateid), limbsCOMConstraints, interm = False)
-    c_bounds_mid = get_com_constraint(fullBody, stateid, fullBody.getConfigAtState(stateid), limbsCOMConstraints, interm = True)
-    c_bounds_2 = get_com_constraint(fullBody, stateid, fullBody.getConfigAtState(stateid+1), limbsCOMConstraints, interm = False)
+    data = gen_sequence_data_from_state_objects(s1,s2,sInt,mu = mu)
+    c_bounds_1 =   s1.getComConstraint(limbsCOMConstraints)
+    c_bounds_mid = sInt.getComConstraint(limbsCOMConstraints)
+    c_bounds_2 = s2.getComConstraint(limbsCOMConstraints)
     success, c_mid_1, c_mid_2 = solve_quasi_static(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand, mu = mu)
-    #~ success, c_mid_1, c_mid_2 = solve_dyn(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand)
-    #~ success, c_mid_1, c_mid_2 = solve_dyn(data, c_bounds = [c_bounds_1, c_bounds_2])
     
     print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ calling effector", effector
     paths_ids = []
@@ -71,15 +67,24 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
             createPtBox(viewer.client.gui, 0, c_mid_1[0].tolist(), 0.01, [0,1,0,1.])
             createPtBox(viewer.client.gui, 0, c_mid_2[0].tolist(), 0.01, [0,1,0,1.])
         
-            partions = [0.,0.2,0.8,1.]
+            partions = [0.,0.1,0.9,1.]
             p0 = fullBody.generateCurveTrajParts(bezier_0,partions)
             #testing intermediary configurations 
-            print 'wtf', partions[1], " "
+            print 'paritions:', partions[1], " "
             com_interm1 = curve(partions[1])
             com_interm2 = curve(partions[2])
             print "com_1", com_1
+            print "com_1", curve(partions[0])
+            print "com_interm1", com_interm1
+            print "com_interm2", com_interm2
+            print "com_2", com_2
+            print "com_2", curve(partions[-1])
             success_proj1 = project_com_colfree(fullBody, stateid  , asarray((com_interm1).transpose()).tolist()[0])
-            success_proj2 = project_com_colfree(fullBody, stateid+1, asarray((com_interm2).transpose()).tolist()[0])
+            success_proj2 = project_com_colfree(fullBody, stateid1 , asarray((com_interm2).transpose()).tolist()[0])
+            
+            #~ if success_proj1:
+                #~ q_1 = fullBody.projectToCom(stateid, asarray((com_interm1).transpose()).tolist()[0])
+                #~ viewer(q_1)
             
             if not success_proj1:
                 print "proj 1 failed"
@@ -92,20 +97,20 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
             print "p0", p0
             #~ pp.displayPath(p0+1)
             #~ pp.displayPath(p0+2)
-            ppl.displayPath(p0)
-            #~ pp.displayPath(p0+1)
-            #~ pp.displayPath(p0+2)
-            #~ pp.displayPath(p0+3)
+            #~ ppl.displayPath(p0)
+            ppl.displayPath(p0+1)
+            ppl.displayPath(p0+2)
+            ppl.displayPath(p0+3)
             if(effector):
-                print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ calling effector"
-                paths_ids = [int(el) for el in fullBody.effectorRRT(stateid,p0+1,p0+2,p0+3,num_optim)]
+                assert False, "Cant deal with effectors right now"
+                #~ paths_ids = [int(el) for el in fullBody.effectorRRT(stateid,p0+1,p0+2,p0+3,num_optim)]
             else:
-                paths_ids = [int(el) for el in fullBody.comRRTFromPos(stateid,p0+1,p0+2,p0+3,num_optim)]
+                paths_ids = [int(el) for el in fullBody.comRRTFromPosBetweenState(stateid,stateid1,p0+1,p0+2,p0+3,num_optim)]
             
         else:
             
             success_proj1 = project_com_colfree(fullBody, stateid  , c_mid_1[0].tolist())
-            success_proj2 = project_com_colfree(fullBody, stateid+1, c_mid_2[0].tolist())
+            success_proj2 = project_com_colfree(fullBody, stateid1 , c_mid_2[0].tolist())
             
             if not success_proj1:
                 print "proj 1 failed"
@@ -127,7 +132,7 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
             ppl.displayPath(p0)
             ppl.displayPath(p0+1)
             ppl.displayPath(p0+2)
-            paths_ids = [int(el) for el in fullBody.comRRTFromPos(stateid,p0,p0+1,p0+2,num_optim)]
+            paths_ids = [int(el) for el in fullBody.comRRTFromPosBetweenState(stateid,stateid1, p0,p0+1,p0+2,num_optim)]
         #~ paths_ids = []
         global allpaths
         allpaths += paths_ids[:-1]
@@ -144,14 +149,14 @@ from hpp.corbaserver.rbprm.tools.path_to_trajectory import *
 
 def createPtBox(gui, winId, config, res = 0.01, color = [1,1,1,0.3]):
     resolution = res
-    #~ global scene
-    #~ global b_id
-    #~ boxname = scene+"/"+str(b_id)
-    #~ b_id += 1
-    #~ gui.addBox(boxname,resolution,resolution,resolution, color)
-    #~ gui.applyConfiguration(boxname,[config[0],config[1],config[2],1,0,0,0])
-    #~ gui.addSceneToWindow(scene,winId)
-    #~ gui.refresh()
+    global scene
+    global b_id
+    boxname = scene+"/"+str(b_id)
+    b_id += 1
+    gui.addBox(boxname,resolution,resolution,resolution, color)
+    gui.applyConfiguration(boxname,[config[0],config[1],config[2],1,0,0,0])
+    gui.addSceneToWindow(scene,winId)
+    gui.refresh()
 
 def test_ineq(stateid, constraints, n_samples = 10, color=[1,1,1,1.]):
     Kin = get_com_constraint(fullBody, stateid, fullBody.getConfigAtState(stateid), constraints, interm = False)
@@ -174,27 +179,27 @@ def test_ineq(stateid, constraints, n_samples = 10, color=[1,1,1,1.]):
 #~ test_ineq(0, limbsCOMConstraints, 1000, [0,1,1,1])
 
 
-def gen(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s = 1., effector = False, mu =0.5, gen_traj = True):
+def gen(s1, s2, num_optim = 0, ine_curve =True, s = 1., effector = False, mu =0.5, gen_traj = True):
     n_fail = 0;
-    for i in range (start, start+len_con):
-        #~ viewer(configs[i])
-        res =  test(i, True, False, ine_curve,num_optim, effector, mu)
-        if(not res[0]):       
-            print "lp failed"
-            createPtBox(viewer.client.gui, 0, res[1][0], 0.01, [1,0,0,1.])
-            createPtBox(viewer.client.gui, 0, res[2][0], 0.01, [1,0,0,1.])
-            found = False
-            for j in range(10):
-                res = test(i, True, True, ine_curve, num_optim, effector, mu)               
-                createPtBox(viewer.client.gui, 0, res[1][0], 0.01, [0,1,0,1.])
-                createPtBox(viewer.client.gui, 0, res[2][0], 0.01, [0,1,0,1.])
-                if res[0]:
-                    break
-            if not res[0]:
-                n_fail += 1
+    #~ viewer(configs[i])
+    res =  test(s1, s2, True, False, ine_curve,num_optim, effector, mu)
+    if(not res[0]):       
+        print "lp failed"
+        createPtBox(viewer.client.gui, 0, res[1][0], 0.01, [1,0,0,1.])
+        createPtBox(viewer.client.gui, 0, res[2][0], 0.01, [1,0,0,1.])
+        found = False
+        for j in range(1):
+            res = test(s1, s2, True, True, ine_curve, num_optim, effector, mu)               
+            createPtBox(viewer.client.gui, 0, res[1][0], 0.01, [0,1,0,1.])
+            createPtBox(viewer.client.gui, 0, res[2][0], 0.01, [0,1,0,1.])
+            if res[0]:
+                break
+        if not res[0]:
+            n_fail += 1
     print "n_fail ", n_fail
     if(gen_traj):
         a = gen_trajectory_to_play(fullBody, ppl, allpaths, flatten([[s*0.2, s* 0.6, s* 0.2] for _ in range(len(allpaths) / 3)]))
+        #~ a = gen_trajectory_to_play(fullBody, ppl, allpaths, flatten([[s] for _ in range(len(allpaths) )]))
         return a
 
 
@@ -432,83 +437,23 @@ com_acc = [0.,0.,0.]
 vels = []
 accs = []
 
-#~ test_ineq(0,{ rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'}}, 1000, [1,0,0,1])
-#~ test_ineq(0,{ lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}}, 1000, [0,0,1,1])
-#~ gen(0,1)
-
 path = []
 a_s = []
-def go(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
+
+        
+def go0(states, num_optim = 0, mu = 0.6, s =None):
     global com_vel
     global com_acc
     global vels
     global accs
-    global path
-    global a_s
-    a = []
-    for l in range(sid,sid+rg):
-        print "STATE ", l
-        s = max(norm(array(fullBody.getConfigAtState(sid+1)) - array(fullBody.getConfigAtState(sid))), 1.) * 1
-        a,com_vel,com_acc = gen_several_states_partial(l,window,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc, path=True)
-        a_s+=[a]
-        vels += [com_vel[:]]
-        accs += [com_acc[:]]
-    print "STATE ", sid+rg
-    #~ path,com_vel,com_acc = gen_several_states(sid+rg,1,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
-    vels += [com_vel[:]]
-    accs += [com_acc[:]]
-    return a
-    
-def go_stop(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
-	global com_vel
-	global com_acc
-	global vels
-	global accs
-	global path
-	global a_s
-	a = []
-	for l in range(sid,sid+rg):
-		print "STATE ", l		
-		s = max(norm(array(fullBody.getConfigAtState(sid+1)) - array(fullBody.getConfigAtState(sid))), 1.) * 1
-		a,com_vel,com_acc = gen_several_states_partial(l,window,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc, path=True)
-		a_s+=[a]
-		vels += [com_vel[:]]
-		accs += [com_acc[:]]
-	print "STATE ", sid+rg
-	s = max(norm(array(configs[sid+rg+1]) - array(configs[sid+rg])), 1.) * 1
-	a,com_vel,com_acc = gen_several_states(sid+rg,1,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
-	a_s+=[a]
-	vels += [com_vel[:]]
-	accs += [com_acc[:]]
-	return a
-    
-def go0(sid, rg, num_optim = 0, mu = 0.6, s =None):
-    global com_vel
-    global com_acc
-    global vels
-    global accs
-    global path
-    if s == None:
-        s = max(norm(array(fullBody.getConfigAtState(sid+1)) - array(fullBody.getConfigAtState(sid))), 1.) * 1.5
-        print "$$$$$$$$$$$$$$$ S $$$$$$$$ *********************444444444444444444444444444 ", s
-    for i in range(rg):
-        path = gen(sid+i,1,mu=mu,num_optim=num_optim, s=s)
+    global path    
+    sc = s
+    for i, el in enumerate(states[:-1]):
+        if s == None:
+            sc = max(norm(array(states[i+1].q()) - array(el.q())), 1.) * 1
+        path = gen(el,states[i+1],mu=mu,num_optim=num_optim, s=sc)
     return path
 
-def go2(sid, rg = 1, num_optim = 0, mu = 0.5, t =2, s =None):
-    global com_vel
-    global com_acc
-    global vels
-    global accs
-    global path
-    for i in range(rg):
-		if s == None:
-			s = max(norm(array(fullBody.getConfigAtState(sid+1)) - array(fullBody.getConfigAtState(sid))), 1.) * 0.6
-			print "$$$$$$$$$$$$$$$ S $$$$$$$$ ", s
-		path,com_vel,com_acc = gen_several_states(sid+i,sid+i+t,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
-		vels += [com_vel[:]]
-		accs += [com_acc[:]]
-    return path
     
 def reset():
     global com_vel
