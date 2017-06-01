@@ -67,7 +67,7 @@ def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_opti
             createPtBox(viewer.client.gui, 0, c_mid_1[0].tolist(), 0.01, [0,1,0,1.])
             createPtBox(viewer.client.gui, 0, c_mid_2[0].tolist(), 0.01, [0,1,0,1.])
         
-            partions = [0.,0.1,0.9,1.]
+            partions = [0.,0.2,0.8,1.]
             p0 = fullBody.generateCurveTrajParts(bezier_0,partions)
             #testing intermediary configurations 
             print 'paritions:', partions[1], " "
@@ -450,7 +450,7 @@ def go0(states, num_optim = 0, mu = 0.6, s =None):
     sc = s
     for i, el in enumerate(states[:-1]):
         if s == None:
-            sc = max(norm(array(states[i+1].q()) - array(el.q())), 1.) * 1
+            sc = max(norm(array(states[i+1].q()) - array(el.q())), 1.) * 0.5
         path = gen(el,states[i+1],mu=mu,num_optim=num_optim, s=sc)
     return path
 

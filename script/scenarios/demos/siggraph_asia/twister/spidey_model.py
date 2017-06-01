@@ -39,7 +39,7 @@ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 
 
 limbsCOMConstraints = { rLegId : {'file': "spiderman/RL_com.ineq", 'effector' : rfoot},  
-						lLegId : {'file': "spiderman/LL_com.ineq", 'effector' : rHand},
+						lLegId : {'file': "spiderman/LL_com.ineq", 'effector' : lfoot},
 						rarmId : {'file': "spiderman/RA_com.ineq", 'effector' : rHand},
 						larmId : {'file': "spiderman/LA_com.ineq", 'effector' : lHand} }
 
