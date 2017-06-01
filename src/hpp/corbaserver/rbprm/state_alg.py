@@ -131,7 +131,8 @@ def projectToFeasibleCom(state, ddc =[0.,0.,0.], max_num_samples = 10, friction 
     res = find_valid_c_cwc_qp(H, c_ref, ddc, state.fullBody.getMass())
     if res['success']:
         x = res['x'].tolist()
-        x[2] += 0.5
+        #~ if x[2] < 0.9:
+        x[2] += 0.35
         for i in range(10):
             if state.fullBody.projectStateToCOM(state.sId ,x, max_num_samples):
                 print "success after " + str(i) + " trials"
