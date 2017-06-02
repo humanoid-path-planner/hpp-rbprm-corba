@@ -106,16 +106,16 @@ r.client.gui.createScene(scene)
 b_id = 0
 
 
-def plot_feasible(state):
+def plot_feasible_Kin(state):
     com = array(state.getCenterOfMass())
     for i in range(5):
         for j in range(5):
             for k in range(10):
                 c = com + array([(i - 2.5)*0.2, (j - 2.5)*0.2, (k-5)*0.2])
-                active_ineq = state.getComConstraint(limbsCOMConstraints)
-                if(active_ineq[0].dot( c )<= active_ineq[1]).all() and fullBody.isConfigBalanced(state.q(), s1.getLimbsInContact()):
+                active_ineq = state.getComConstraint(limbsCOMConstraints,[])
+                if(active_ineq[0].dot( c )<= active_ineq[1]).all():
                     #~ print 'active'
-                    createPtBox(r.client.gui, 0, c, color = [1,0,0,1])
+                    createPtBox(r.client.gui, 0, c, color = [0,1,0,1])
                 else:
                     if(active_ineq[0].dot( c )>= active_ineq[1]).all():
                         #~ print "inactive"
@@ -152,6 +152,26 @@ def plot_feasible_cone(state):
                     createPtBox(r.client.gui, 0, c, color = [1,0,0,1])
     return H
 
+def plot_feasible(state):
+    com = array(state.getCenterOfMass())
+    ps = state.getContactPosAndNormals()
+    p = ps[0][0]
+    N = ps[1][0]
+    H = compute_CWC(p, N, state.fullBody.client.basic.robot.getMass(), mu = 1, simplify_cones = False)
+    for i in range(5):
+        for j in range(5):
+            for k in range(10):
+                c = com + array([(i - 2.5)*0.2, (j - 2.5)*0.2, (k-5)*0.2])
+                w = compute_w(c)           
+                active_ineq = state.getComConstraint(limbsCOMConstraints,[])
+                if(active_ineq[0].dot( c )<= active_ineq[1]).all() and (H.dot( w )<= 0).all():
+                    #~ print 'active'
+                    createPtBox(r.client.gui, 0, c, color = [0,1,0,1])
+                else:
+                    if(active_ineq[0].dot( c )>= active_ineq[1]).all():
+                        #~ print "inactive"
+                        createPtBox(r.client.gui, 0, c, color = [1,0,0,1])
+    return -1
  
 def plot(c):
     createPtBox(r.client.gui, 0, c, color = [0,1,0,1])
