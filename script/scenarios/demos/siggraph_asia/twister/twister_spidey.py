@@ -122,6 +122,37 @@ def plot_feasible(state):
                         createPtBox(r.client.gui, 0, c, color = [1,0,0,1])
     return -1
     
+def compute_w(c, ddc=array([0.,0.,0.]), dL=array([0.,0.,0.]), m = 54., g_vec=array([0.,0.,-9.81])):
+	w1 = m * (ddc - g_vec)
+	return array(w1.tolist() + (cross(c, w1) + dL).tolist())
+    
+def plot_feasible_cone(state):
+    com = array(state.getCenterOfMass())
+    #~ H, h = state.getContactCone(0.6)  
+    ps = state.getContactPosAndNormals()
+    p = ps[0][0]
+    N = ps[1][0]
+    H = compute_CWC(p, N, state.fullBody.client.basic.robot.getMass(), mu = 0.6, simplify_cones = False)
+    #~ H = comp
+    #~ H = -array(H)
+    #~ h = array(h)
+    #~ print "h", h
+    for i in range(10):
+        for j in range(10):
+            for k in range(1):
+                c = com + array([(i - 5)*0.1, (j - 5)*0.1, k])   
+                w = compute_w(c)             
+                print "w, " , w
+                if(H.dot( w )<= 0).all():
+                    #~ print 'active'
+                    createPtBox(r.client.gui, 0, c, color = [0,1,0,1])
+                else:
+                    #~ if(H.dot( w )>= 0).all():
+                        #~ print "inactive"
+                    createPtBox(r.client.gui, 0, c, color = [1,0,0,1])
+    return H
+
+ 
 def plot(c):
     createPtBox(r.client.gui, 0, c, color = [0,1,0,1])
 

@@ -19,6 +19,7 @@
 from hpp.corbaserver.rbprm.rbprmstate import State
 from lp_find_point import find_valid_c_cwc, find_valid_c_cwc_qp, lp_ineq_4D
 from hpp.corbaserver.rbprm.tools.com_constraints import *
+from CWC_methods import compute_CWC, is_stable
 
 ## algorithmic methods on state
    
@@ -50,7 +51,7 @@ def isContactReachable(state, limbName, p, n, limbsCOMConstraints):
     new_ineq = get_com_constraint_at_transform(tr, limbName, limbsCOMConstraints)
     active_ineq = state.getComConstraint(limbsCOMConstraints, [limbName])
     res_ineq = [np.vstack([new_ineq[0],active_ineq[0]]), np.hstack([new_ineq[1],active_ineq[1]])]
-    success, status_ok , res = lp_ineq_4D(res_ineq[0],-res_ineq[1])
+    success, status_ok , res = lp_ineq_4D(res_ineq[0],res_ineq[1])
     if not success:
         print "In isContactReachable no stability, Lp failed (should not happen) ", status_ok
         return False, [-1,-1,-1]
@@ -125,10 +126,16 @@ def addNewContactIfReachable(state, limbName, p, n, limbsCOMConstraints, project
 # \param max_num_samples max number of sampling in case projection ends up in collision
 # \param friction considered friction coefficient
 # \return whether the projection was successful
-def projectToFeasibleCom(state, ddc =[0.,0.,0.], max_num_samples = 10, friction = 0.6):
-    H, h = state.getContactCone(friction)
+def projectToFeasibleCom(state,  ddc =[0.,0.,0.], max_num_samples = 10, friction = 0.6):
+    #~ H, h = state.getContactCone(friction)
+    ps = state.getContactPosAndNormals()
+    p = ps[0][0]
+    N = ps[1][0]
+    H = compute_CWC(p, N, state.fullBody.client.basic.robot.getMass(), mu = friction, simplify_cones = False)
     c_ref = state.getCenterOfMass()
-    res = find_valid_c_cwc_qp(H, c_ref, ddc, state.fullBody.getMass())
+    #~ Kin = state.getComConstraint(limbsCOMConstraints, [])
+    #~ res = find_valid_c_cwc_qp(H, c_ref, Kin, ddc, state.fullBody.getMass())
+    res = find_valid_c_cwc_qp(H, c_ref,None, ddc, state.fullBody.getMass())
     if res['success']:
         x = res['x'].tolist()
         #~ if x[2] < 0.9:
