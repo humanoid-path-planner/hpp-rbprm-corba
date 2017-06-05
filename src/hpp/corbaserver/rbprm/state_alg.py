@@ -51,7 +51,7 @@ def isContactReachable(state, limbName, p, n, limbsCOMConstraints):
     new_ineq = get_com_constraint_at_transform(tr, limbName, limbsCOMConstraints)
     active_ineq = state.getComConstraint(limbsCOMConstraints, [limbName])
     res_ineq = [np.vstack([new_ineq[0],active_ineq[0]]), np.hstack([new_ineq[1],active_ineq[1]])]
-    success, status_ok , res = lp_ineq_4D(res_ineq[0],res_ineq[1])
+    success, status_ok , res = lp_ineq_4D(res_ineq[0],-res_ineq[1])
     if not success:
         print "In isContactReachable no stability, Lp failed (should not happen) ", status_ok
         return False, [-1,-1,-1]
@@ -89,12 +89,12 @@ def addNewContact(state, limbName, p, n, num_max_sample = 0):
 # \param state State considered
 # \param limbName name of the considered limb to create contact with
 # \return (State, success) whether the removal was successful, as well as the new state
-def removeContact(state, limbName, projectToCOM = False):
+def removeContact(state, limbName, projectToCOM = False, friction = 0.6):
     sId = state.cl.removeContact(state.sId, limbName)
     if(sId != -1):        
         s = State(state.fullBody, sId = sId)
         if projectToCOM:
-            return s, projectToFeasibleCom(s, ddc =[0.,0.,0.], max_num_samples = 10, friction = 0.6)
+            return s, projectToFeasibleCom(s, ddc =[0.,0.,0.], max_num_samples = 10, friction = friction)
         else:
             return s, True
     return state, False
@@ -135,9 +135,9 @@ def projectToFeasibleCom(state,  ddc =[0.,0.,0.], max_num_samples = 10, friction
     c_ref = state.getCenterOfMass()
     #~ Kin = state.getComConstraint(limbsCOMConstraints, [])
     #~ res = find_valid_c_cwc_qp(H, c_ref, Kin, ddc, state.fullBody.getMass())
-    res = find_valid_c_cwc_qp(H, c_ref,None, ddc, state.fullBody.getMass())
-    if res['success']:
-        x = res['x'].tolist()
+    success, p_solved , x = find_valid_c_cwc_qp(H, c_ref,None, ddc, state.fullBody.getMass())
+    if success:
+        x = x.tolist()
         #~ if x[2] < 0.9:
         x[2] += 0.35
         for i in range(10):

@@ -67,20 +67,41 @@ def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_opti
             createPtBox(viewer.client.gui, 0, c_mid_1[0].tolist(), 0.01, [0,1,0,1.])
             createPtBox(viewer.client.gui, 0, c_mid_2[0].tolist(), 0.01, [0,1,0,1.])
         
-            partions = [0.,0.2,0.8,1.]
-            p0 = fullBody.generateCurveTrajParts(bezier_0,partions)
             #testing intermediary configurations 
+            partions = [0.,0.2,0.8,1.]
             print 'paritions:', partions[1], " "
-            com_interm1 = curve(partions[1])
             com_interm2 = curve(partions[2])
-            print "com_1", com_1
-            print "com_1", curve(partions[0])
-            print "com_interm1", com_interm1
-            print "com_interm2", com_interm2
-            print "com_2", com_2
-            print "com_2", curve(partions[-1])
-            success_proj1 = project_com_colfree(fullBody, stateid  , asarray((com_interm1).transpose()).tolist()[0])
-            success_proj2 = project_com_colfree(fullBody, stateid1 , asarray((com_interm2).transpose()).tolist()[0])
+            #~ print "com_1", com_1
+            #~ print "com_1", curve(partions[0])
+            #~ print "com_interm2", com_interm2
+            #~ print "com_2", com_2
+            #~ print "com_2", curve(partions[-1])
+            success_proj1 = False;
+            success_proj2 = False
+            for _ in range(5):
+				print "WRTFF", partions[1]
+				com_interm1 = curve(partions[1])
+				print "com_interm1", com_interm1
+				success_proj1 = project_com_colfree(fullBody, stateid  , asarray((com_interm1).transpose()).tolist()[0])
+				if success_proj1:
+					break
+				else:
+					print "decreasing com"
+					partions[1] -= 0.04
+					
+			
+            for _ in range(6):
+				print "WRTFF", partions[-2]
+				com_interm2 = curve(partions[-2])
+				print "com_interm2", com_interm2
+				success_proj2 = project_com_colfree(fullBody, stateid1  , asarray((com_interm2).transpose()).tolist()[0])
+				if success_proj2:
+					break
+				else:
+					print "decreasing com"
+					partions[-2] += 0.039
+					
+            #~ success_proj2 = project_com_colfree(fullBody, stateid1 , asarray((com_interm2).transpose()).tolist()[0])
             
             #~ if success_proj1:
                 #~ q_1 = fullBody.projectToCom(stateid, asarray((com_interm1).transpose()).tolist()[0])
@@ -93,6 +114,9 @@ def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_opti
             if not success_proj2:
                 print "proj 2 failed"
                 return False, c_mid_1, c_mid_2, paths_ids
+            
+            
+            p0 = fullBody.generateCurveTrajParts(bezier_0,partions)
             
             print "p0", p0
             #~ pp.displayPath(p0+1)
@@ -441,7 +465,7 @@ path = []
 a_s = []
 
         
-def go0(states, num_optim = 0, mu = 0.6, s =None):
+def go0(states, one_curve = True, num_optim = 0, mu = 0.6, s =None):
     global com_vel
     global com_acc
     global vels
@@ -451,7 +475,7 @@ def go0(states, num_optim = 0, mu = 0.6, s =None):
     for i, el in enumerate(states[:-1]):
         if s == None:
             sc = max(norm(array(states[i+1].q()) - array(el.q())), 1.) * 0.5
-        path = gen(el,states[i+1],mu=mu,num_optim=num_optim, s=sc)
+        path = gen(el,states[i+1],mu=mu,num_optim=num_optim, s=sc, ine_curve = one_curve)
     return path
 
     

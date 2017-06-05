@@ -1859,16 +1859,19 @@ assert(s2 == s1 +1);
 
             State& state1=lastStatesComputed_[s1], state2=lastStatesComputed_[s2];
             State s1Bis(state1);
-            s1Bis.configuration_ = project_or_throw(fullBody_, s1Bis,paths[cT1]->end().head<3>(), true);
+            State s2Bis(state2);
+           /* s1Bis.configuration_ = project_or_throw(fullBody_, s1Bis,paths[cT1]->end().head<3>(), true);
             std::cout << "projection succeedded " << paths[cT1]->end().head<3>() << std::endl;
             State s2Bis(state2);
             s2Bis.configuration_ = project_or_throw(fullBody_, s2Bis,paths[cT2]->end().head<3>(), true);
 
             core::PathVectorPtr_t resPath = core::PathVector::create(fullBody_->device_->configSize(), fullBody_->device_->numberDof());
-            std::cout << "projection succeedded " << paths[cT2]->end().head<3>() << std::endl;
+            std::cout << "projection succeedded " << paths[cT2]->end().head<3>() << std::endl;*/
 
-           /* ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
+            ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
 
+            s1Bis.configuration_ = project_or_throw(fullBody_, s1Bis,paths[cT1]->end().head<3>());
+            s2Bis.configuration_ = project_or_throw(fullBody_, s2Bis,paths[cT2]->end().head<3>(), true);
             BasicConfigurationShooterPtr_t shooter = BasicConfigurationShooter::create(fullBody_->device_);
             bool found = false;
             for (int i = 0; i< 100 && !found;  ++i)
@@ -1901,8 +1904,11 @@ assert(s2 == s1 +1);
             if(!found || !found2)
             {
                 std::cout << "could not project without collision at state " << s1  << std::endl;
-//throw std::runtime_error ("could not project without collision at state " + s1 );
-            }*/
+                throw std::runtime_error ("could not project without collision at state " + s1 );
+            }
+
+            core::PathVectorPtr_t resPath = core::PathVector::create(fullBody_->device_->configSize(), fullBody_->device_->numberDof());
+
 
             {
                 core::PathPtr_t p1 = interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[cT1],
