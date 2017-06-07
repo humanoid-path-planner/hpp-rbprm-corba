@@ -86,6 +86,44 @@ namespace hpp {
 				affMap_t affMap_;
     };
 
+    class FullBodyMap {
+      public:
+        typedef std::map<std::string, rbprm::RbPrmFullBodyPtr_t> fMap_t;
+
+        std::string selected_;
+        fMap_t map_;
+
+        FullBodyMap (const std::string& name = "None") :
+          selected_ (name)
+          {
+            //map_[selected_] = init;
+          }
+
+        rbprm::RbPrmFullBodyPtr_t operator-> () {
+          return selected();
+        }
+        operator rbprm::RbPrmFullBodyPtr_t () {
+          return selected();
+        }
+        rbprm::RbPrmFullBodyPtr_t selected () {
+          return map_[selected_];
+        }
+        bool has (const std::string& name) const
+        {
+          // ProblemMap_t::const_iterator it = map_.find (name);
+          // return it != map_.end ();
+          return map_.end() != map_.find (name);
+        }
+        template <typename ReturnType> ReturnType keys () const
+        {
+          ReturnType l;
+          for (fMap_t::const_iterator it = map_.begin ();
+              it != map_.end (); ++it)
+            l.push_back (it->first);
+          return l;
+        }
+    };
+
       class RbprmBuilder : public virtual POA_hpp::corbaserver::rbprm::RbprmBuilder
       {
         public:
@@ -243,10 +281,17 @@ namespace hpp {
         {
             return psMap_->selected();
         }
+        FullBodyMap fullBodyMap_;
+        rbprm::RbPrmFullBodyPtr_t fullBody()
+        {
+            if(!fullBodyLoaded_)
+                throw Error ("No full body robot was loaded");
+            return fullBodyMap_.selected();
+        }
 
         private:
         model::T_Rom romDevices_;
-        rbprm::RbPrmFullBodyPtr_t fullBody_;
+        //rbprm::RbPrmFullBodyPtr_t fullBody_;
         bool romLoaded_;
         bool fullBodyLoaded_;
         BindShooter bindShooter_;
