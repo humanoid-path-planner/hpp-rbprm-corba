@@ -149,7 +149,8 @@ namespace hpp {
                  const char* packageName,
                  const char* modelName,
                  const char* urdfSuffix,
-                 const char* srdfSuffix) throw (hpp::Error);
+                 const char* srdfSuffix,
+                 const char* selectedProblem) throw (hpp::Error);
 
         virtual void loadFullBodyRobotFromExistingRobot () throw (hpp::Error);
 
@@ -269,6 +270,15 @@ namespace hpp {
                                             const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample) throw (hpp::Error);
         virtual CORBA::Short removeContact(unsigned short stateId, const char* limbName) throw (hpp::Error);
         virtual hpp::floatSeq* computeTargetTransform(const char* limbName, const hpp::floatSeq& configuration, const hpp::floatSeq& p, const hpp::floatSeq& n) throw (hpp::Error);
+
+        void selectFullBody (const char* name) throw (hpp::Error)
+        {
+          std::string psName (name);
+          bool has = fullBodyMap_.has (psName);
+          if (!has)
+              throw hpp::Error("unknown fullBody Problem");
+          fullBodyMap_.selected_ = psName;
+        }
 
         public:
         void SetProblemSolverMap (hpp::corbaServer::ProblemSolverMapPtr_t psMap);

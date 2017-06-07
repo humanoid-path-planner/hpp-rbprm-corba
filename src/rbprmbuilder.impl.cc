@@ -131,7 +131,8 @@ namespace hpp {
          const char* packageName,
          const char* modelName,
          const char* urdfSuffix,
-         const char* srdfSuffix) throw (hpp::Error)
+         const char* srdfSuffix,
+         const char* selectedProblem) throw (hpp::Error)
     {
         try
         {
@@ -142,7 +143,7 @@ namespace hpp {
                     std::string (modelName),
                     std::string (urdfSuffix),
                     std::string (srdfSuffix));
-            std::string name("default");
+            std::string name(selectedProblem);
             fullBodyLoaded_ = true;
             fullBodyMap_.map_[name] = rbprm::RbPrmFullBody::create(device);
             fullBodyMap_.selected_ = name;

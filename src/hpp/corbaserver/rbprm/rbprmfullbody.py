@@ -54,7 +54,7 @@ class FullBody (object):
      # \param urdfSuffix optional suffix for the urdf of the robot package
      # \param srdfSuffix optional suffix for the srdf of the robot package
      def loadFullBodyModel (self, urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix):
-          self.client.rbprm.rbprm.loadFullBodyRobot(urdfName, rootJointType, packageName, urdfName, urdfSuffix, srdfSuffix)
+          self.client.rbprm.rbprm.loadFullBodyRobot(urdfName, rootJointType, packageName, urdfName, urdfSuffix, srdfSuffix, self.client.basic.problem.getSelected("problem")[0])
           self.name = urdfName
           self.displayName = urdfName
           self.tf_root = "base_link"

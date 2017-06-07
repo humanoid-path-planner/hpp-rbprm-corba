@@ -84,7 +84,7 @@ module hpp
     ///
     void loadFullBodyRobot (in string trunkRobotName, in string rootJointType,
              in string packageName, in string modelName,
-             in string urdfSuffix, in string srdfSuffix)
+             in string urdfSuffix, in string srdfSuffix, in string selectedProblem)
       raises (Error);
 
 		/// Create a RbprmFullBody object
@@ -92,6 +92,8 @@ module hpp
 		/// root joint.
 		void loadFullBodyRobotFromExistingRobot ()
 			raises (Error);
+
+    void selectFullBody (in string name) raises (Error);
 
     /// Set Rom constraints for the configuration shooter
     /// a configuration will only be valid if all roms indicated
