@@ -102,6 +102,12 @@ module hpp
     void setFilter (in Names_t roms)
       raises (Error);
 
+    /// Called if several problem solvers are used
+    /// is colliding with the environment.
+    ///
+    void initNewProblemSolver ()
+      raises (Error);
+
     /// Set Rom surface constraints for the configuration shooter
     /// a Rom configuration will only be valid it collides with a surface
     /// that forms a given affordance (support, lean, etc.)

@@ -115,8 +115,8 @@ namespace hpp {
                     std::string (urdfSuffix),
                     std::string (srdfSuffix));
             // Add device to the planner
-            problemSolver_->robot (device);
-            problemSolver_->robot ()->controlComputation
+            problemSolver()->robot (device);
+            problemSolver()->robot ()->controlComputation
             (model::Device::JOINT_POSITION);
         }
         catch (const std::exception& exc)
@@ -143,10 +143,10 @@ namespace hpp {
                     std::string (urdfSuffix),
                     std::string (srdfSuffix));
             fullBody_ = rbprm::RbPrmFullBody::create(device);
-            problemSolver_->pathValidationType ("Discretized",0.05); // reset to avoid conflict with rbprm path
-            problemSolver_->robot (fullBody_->device_);
-            problemSolver_->resetProblem();
-            problemSolver_->robot ()->controlComputation
+            problemSolver()->pathValidationType ("Discretized",0.05); // reset to avoid conflict with rbprm path
+            problemSolver()->robot (fullBody_->device_);
+            problemSolver()->resetProblem();
+            problemSolver()->robot ()->controlComputation
             (model::Device::JOINT_POSITION);
         }
         catch (const std::exception& exc)
@@ -162,11 +162,11 @@ namespace hpp {
     {
         try
         {
-            fullBody_ = rbprm::RbPrmFullBody::create(problemSolver_->problem()->robot());
-            problemSolver_->pathValidationType ("Discretized",0.05); // reset to avoid conflict with rbprm path
-            problemSolver_->robot (fullBody_->device_);
-            problemSolver_->resetProblem();
-            problemSolver_->robot ()->controlComputation
+            fullBody_ = rbprm::RbPrmFullBody::create(problemSolver()->problem()->robot());
+            problemSolver()->pathValidationType ("Discretized",0.05); // reset to avoid conflict with rbprm path
+            problemSolver()->robot (fullBody_->device_);
+            problemSolver()->resetProblem();
+            problemSolver()->robot ()->controlComputation
             (model::Device::JOINT_POSITION);
         }
         catch (const std::exception& exc)
@@ -633,7 +633,7 @@ namespace hpp {
                 throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
             }
             State s = lastStatesComputed_[stateId];
-//            /hpp::model::Configuration_t c = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s,com_target,succes);
+//            /hpp::model::Configuration_t c = rbprm::interpolation::projectOnCom(fullBody_, problemSolver()->problem(),s,com_target,succes);
             rbprm::projection::ProjectionReport rep = rbprm::projection::projectToComPosition(fullBody_,com_target,s);
             hpp::model::Configuration_t& c = rep.result_.configuration_;
             ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
@@ -647,7 +647,7 @@ namespace hpp {
                 {
                     s.configuration_ = *shooter->shoot();
                     s.configuration_.head<7>() = head;
-                    //c = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s,com_target,succes);
+                    //c = rbprm::interpolation::projectOnCom(fullBody_, problemSolver()->problem(),s,com_target,succes);
                     rep = rbprm::projection::projectToComPosition(fullBody_,com_target,s);
                     rep.success_ = rep.success_ && val->validate(rep.result_.configuration_,rport);
                     c = rep.result_.configuration_;
@@ -710,7 +710,7 @@ namespace hpp {
             {
                 dir[i] = direction[(_CORBA_ULong)i];
             }
-						const affMap_t &affMap = problemSolver_->map
+                        const affMap_t &affMap = problemSolver()->map
 							<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
 		        if (affMap.empty ()) {
     	        throw hpp::Error ("No affordances found. Unable to generate Contacts.");
@@ -773,7 +773,7 @@ namespace hpp {
                 Configuration_t config = *configptr;
                 if(proj->apply(config) && config[2]> 0.3)
                 {
-                    if(problemSolver_->problem()->configValidations()->validate(config,report))
+                    if(problemSolver()->problem()->configValidations()->validate(config,report))
                     {
                         State tmp;
                         for(std::vector<std::string>::const_iterator cit = names.begin(); cit !=names.end(); ++cit)
@@ -835,11 +835,11 @@ namespace hpp {
             const RbPrmLimbPtr_t& limb = lit->second;
             fcl::Transform3f transform = limb->limb_->robot()->rootJoint()->childJoint(0)->currentTransformation (); // get root transform from configuration
                         // TODO fix as in rbprm-fullbody.cc!!
-            std::vector<sampling::T_OctreeReport> reports(problemSolver_->collisionObstacles().size());
+            std::vector<sampling::T_OctreeReport> reports(problemSolver()->collisionObstacles().size());
             std::size_t i (0);
             //#pragma omp parallel for
-            for(model::ObjectVector_t::const_iterator oit = problemSolver_->collisionObstacles().begin();
-                oit != problemSolver_->collisionObstacles().end(); ++oit, ++i)
+            for(model::ObjectVector_t::const_iterator oit = problemSolver()->collisionObstacles().begin();
+                oit != problemSolver()->collisionObstacles().end(); ++oit, ++i)
             {
                 sampling::GetCandidates(limb->sampleContainer_, transform, *oit, dir, reports[i]);
             }
@@ -889,7 +889,7 @@ namespace hpp {
             const RbPrmLimbPtr_t& limb = lit->second;
             fcl::Transform3f transform = limb->octreeRoot(); // get root transform from configuration
                         // TODO fix as in rbprm-fullbody.cc!!
-            const affMap_t &affMap = problemSolver_->map
+            const affMap_t &affMap = problemSolver()->map
                         <std::vector<boost::shared_ptr<model::CollisionObject> > > ();
             if (affMap.empty ())
             {
@@ -1016,7 +1016,7 @@ namespace hpp {
                 cType = hpp::rbprm::_3_DOF;
             }
             fullBody_->AddLimb(std::string(id), std::string(limb), std::string(effector), off, norm, x, y,
-                               problemSolver_->collisionObstacles(), samples,heuristicName,resolution,cType,disableEffectorCollision > 0.5, grasp > 0.5);
+                               problemSolver()->collisionObstacles(), samples,heuristicName,resolution,cType,disableEffectorCollision > 0.5, grasp > 0.5);
         }
         catch(std::runtime_error& e)
         {
@@ -1032,7 +1032,7 @@ namespace hpp {
         try
         {
             std::string fileName(databasePath);
-            fullBody_->AddLimb(fileName, std::string(id), problemSolver_->collisionObstacles(), heuristicName, loadValues > 0.5,
+            fullBody_->AddLimb(fileName, std::string(id), problemSolver()->collisionObstacles(), heuristicName, loadValues > 0.5,
                                disableEffectorCollision > 0.5, grasp > 0.5);
         }
         catch(std::runtime_error& e)
@@ -1155,7 +1155,7 @@ namespace hpp {
                 throw std::runtime_error ("End state not initialized, can not interpolate ");
             }
             T_Configuration configurations = doubleDofArrayToConfig(fullBody_->device_, configs);
-            const affMap_t &affMap = problemSolver_->map
+            const affMap_t &affMap = problemSolver()->map
                         <std::vector<boost::shared_ptr<model::CollisionObject> > > ();
             if (affMap.empty ())
             {
@@ -1344,7 +1344,7 @@ namespace hpp {
         try
         {
             model::Configuration_t q1 = dofArrayToConfig(4, q1Seq), q2 = dofArrayToConfig(4, q2Seq);
-            return problemSolver_->addPath(generateTrunkPath(fullBody_, problemSolver_, rootPositions, q1, q2));
+            return problemSolver()->addPath(generateTrunkPath(fullBody_, problemSolver(), rootPositions, q1, q2));
         }
         catch(std::runtime_error& e)
         {
@@ -1370,7 +1370,7 @@ namespace hpp {
                  model::vector3_t speed = (*cit) -  *(cit-1);
                  res->appendPath(interpolation::ComTrajectory::create(*(cit-1),*cit,speed,zero,1.));
              }
-             return problemSolver_->addPath(res);
+             return problemSolver()->addPath(res);
          }
          catch(std::runtime_error& e)
          {
@@ -1389,7 +1389,7 @@ namespace hpp {
              hpp::rbprm::interpolation::PolynomTrajectoryPtr_t path = hpp::rbprm::interpolation::PolynomTrajectory::create(curvePtr);
              core::PathVectorPtr_t res = core::PathVector::create(3, 3);
              res->appendPath(path);
-             return problemSolver_->addPath(res);
+             return problemSolver()->addPath(res);
          }
          catch(std::runtime_error& e)
          {
@@ -1408,13 +1408,13 @@ namespace hpp {
              hpp::rbprm::interpolation::PolynomTrajectoryPtr_t path = hpp::rbprm::interpolation::PolynomTrajectory::create(curvePtr);
              core::PathVectorPtr_t res = core::PathVector::create(3, 3);
              res->appendPath(path);
-             std::size_t returned_pathId =problemSolver_->addPath(res);
+             std::size_t returned_pathId =problemSolver()->addPath(res);
              for (int i = 1; i < config.rows(); ++i)
              {
                 core::PathPtr_t cutPath = path->extract(interval_t (config(i-1), config(i)));
                 res = core::PathVector::create(3, 3);
                 res->appendPath(cutPath);
-                problemSolver_->addPath(res);
+                problemSolver()->addPath(res);
              }
              return returned_pathId;
          }
@@ -1451,7 +1451,7 @@ namespace hpp {
              {
                  res->appendPath(interpolation::ComTrajectory::create(*(cit-1),*cit,*cdit,*cddit,dt));
              }
-             return problemSolver_->addPath(res);
+             return problemSolver()->addPath(res);
          }
          catch(std::runtime_error& e)
          {
@@ -1678,11 +1678,11 @@ namespace hpp {
             throw std::runtime_error ("End state not initialized, cannot interpolate ");
         }
 
-        if(problemSolver_->paths().size() <= pathId)
+        if(problemSolver()->paths().size() <= pathId)
         {
             throw std::runtime_error ("No path computed, cannot interpolate ");
         }
-        const affMap_t &affMap = problemSolver_->map
+        const affMap_t &affMap = problemSolver()->map
 					<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
         if (affMap.empty ())
         {
@@ -1690,7 +1690,7 @@ namespace hpp {
         }
 
         hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = 
-					rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver_->paths()[pathId]);
+                    rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver()->paths()[pathId]);
         lastStatesComputedTime_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
                     timestep,robustnessTreshold, filterStates != 0);
 		lastStatesComputed_ = TimeStatesToStates(lastStatesComputedTime_);
@@ -1742,10 +1742,10 @@ namespace hpp {
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
             }
             //create helper
-//            /interpolation::TimeConstraintHelper helper(fullBody_, problemSolver_->problem());
-            core::PathPtr_t path = interpolation::limbRRT(fullBody_,problemSolver_->problem(),
+//            /interpolation::TimeConstraintHelper helper(fullBody_, problemSolver()->problem());
+            core::PathPtr_t path = interpolation::limbRRT(fullBody_,problemSolver()->problem(),
                                                                           lastStatesComputed_.begin()+s1,lastStatesComputed_.begin()+s2, numOptimizations);
-            return AddPath(path,problemSolver_);
+            return AddPath(path,problemSolver());
         }
         catch(std::runtime_error& e)
         {
@@ -1763,13 +1763,13 @@ namespace hpp {
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
             }
             unsigned int pathId = (unsigned int)(path);
-            if(problemSolver_->paths().size() <= pathId)
+            if(problemSolver()->paths().size() <= pathId)
             {
                 throw std::runtime_error ("No path computed, cannot interpolate ");
             }
-            core::PathPtr_t path = interpolation::limbRRTFromPath(fullBody_,problemSolver_->problem(), problemSolver_->paths()[pathId],
+            core::PathPtr_t path = interpolation::limbRRTFromPath(fullBody_,problemSolver()->problem(), problemSolver()->paths()[pathId],
                                                                           lastStatesComputedTime_.begin()+s1,lastStatesComputedTime_.begin()+s2, numOptimizations);
-            return AddPath(path,problemSolver_);
+            return AddPath(path,problemSolver());
         }
         catch(std::runtime_error& e)
         {
@@ -1785,9 +1785,9 @@ namespace hpp {
         //for(CIT_Configuration pit = positions.begin();pit != positions.end()-1; ++pit)
         for(CIT_Configuration pit = positions.begin();pit != positions.end()-200; ++pit)
         {
-            res->appendPath(makePath(fullBody_->device_,problemSolver_->problem(), *pit,*(pit+1)));
+            res->appendPath(makePath(fullBody_->device_,problemSolver()->problem(), *pit,*(pit+1)));
         }
-        return problemSolver_->addPath(res);
+        return problemSolver()->addPath(res);
     }
 
     CORBA::Short RbprmBuilder::comRRT(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error)
@@ -1802,13 +1802,13 @@ assert(s2 == s1 +1);
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
             }
             unsigned int pathId = (unsigned int)(path);
-            if(problemSolver_->paths().size() <= pathId)
+            if(problemSolver()->paths().size() <= pathId)
             {
                 throw std::runtime_error ("No path computed, cannot interpolate ");
             }
-            core::PathPtr_t path = interpolation::comRRT(fullBody_,problemSolver_->problem(), problemSolver_->paths()[pathId],
+            core::PathPtr_t path = interpolation::comRRT(fullBody_,problemSolver()->problem(), problemSolver()->paths()[pathId],
                                                                           *(lastStatesComputed_.begin()+s1),*(lastStatesComputed_.begin()+s2), numOptimizations);
-            return AddPath(path,problemSolver_);
+            return AddPath(path,problemSolver());
         }
         catch(std::runtime_error& e)
         {
@@ -1844,7 +1844,7 @@ assert(s2 == s1 +1);
             {
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
             }
-            const core::PathVectors_t& paths = problemSolver_->paths();
+            const core::PathVectors_t& paths = problemSolver()->paths();
             if(paths.size() -1 < std::max(cT1, std::max(cT2, cT3)))
             {
                 throw std::runtime_error("in comRRTFromPos, at least one com trajectory is not present in problem solver");
@@ -1877,7 +1877,7 @@ assert(s2 == s1 +1);
             for (int i = 0; i< 100 && !found;  ++i)
             {
                 fullBody_->device_->currentConfiguration(s1Bis.configuration_);
-                found =problemSolver_->problem()->configValidations()->validate(s1Bis.configuration_, rport);
+                found =problemSolver()->problem()->configValidations()->validate(s1Bis.configuration_, rport);
                 if(!found)
                 {
                     std::cout << "collission " << *rport << std::endl;
@@ -1892,7 +1892,7 @@ assert(s2 == s1 +1);
             for (int i = 0; i< 100 && found && !found2; ++i)
             {
                 fullBody_->device_->currentConfiguration(s2Bis.configuration_);
-                found2 =problemSolver_->problem()->configValidations()->validate(s2Bis.configuration_, rport);
+                found2 =problemSolver()->problem()->configValidations()->validate(s2Bis.configuration_, rport);
                 if(!found2)
                 {
                     std::cout << "collission " << *rport << std::endl;
@@ -1911,7 +1911,7 @@ assert(s2 == s1 +1);
 
 
             {
-                core::PathPtr_t p1 = interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[cT1],
+                core::PathPtr_t p1 = interpolation::comRRT(fullBody_,problemSolver()->problem(), paths[cT1],
                         state1,s1Bis, numOptimizations,true);
                 // reduce path to remove extradof
                 core::SizeInterval_t interval(0, p1->initial().rows()-1);
@@ -1919,15 +1919,15 @@ assert(s2 == s1 +1);
                 intervals.push_back(interval);
                 PathPtr_t reducedPath = core::SubchainPath::create(p1,intervals);
                 resPath->appendPath(reducedPath);
-                pathsIds.push_back(AddPath(p1,problemSolver_));
+                pathsIds.push_back(AddPath(p1,problemSolver()));
                 std::cout << "PATH 1 OK " << std::endl;
             }
 
 
             {
-                core::PathPtr_t p2 =(*functor)(fullBody_,problemSolver_->problem(), paths[cT2],
+                core::PathPtr_t p2 =(*functor)(fullBody_,problemSolver()->problem(), paths[cT2],
                     s1Bis,s2Bis, numOptimizations,true);
-                pathsIds.push_back(AddPath(p2,problemSolver_));
+                pathsIds.push_back(AddPath(p2,problemSolver()));
                 // reduce path to remove extradof
                 core::SizeInterval_t interval(0, p2->initial().rows()-1);
                 core::SizeIntervals_t intervals;
@@ -1939,7 +1939,7 @@ assert(s2 == s1 +1);
 
             //if(s2Bis.configuration_ != state2.configuration_)
             {
-                core::PathPtr_t p3= interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[cT3],
+                core::PathPtr_t p3= interpolation::comRRT(fullBody_,problemSolver()->problem(), paths[cT3],
                         s2Bis,state2, numOptimizations,true);
                 // reduce path to remove extradof
                 core::SizeInterval_t interval(0, p3->initial().rows()-1);
@@ -1947,10 +1947,10 @@ assert(s2 == s1 +1);
                 intervals.push_back(interval);
                 PathPtr_t reducedPath = core::SubchainPath::create(p3,intervals);
                 resPath->appendPath(reducedPath);
-                pathsIds.push_back(AddPath(p3,problemSolver_));
+                pathsIds.push_back(AddPath(p3,problemSolver()));
                 std::cout << "PATH 3 OK " << std::endl;
             }
-            pathsIds.push_back(AddPath(resPath,problemSolver_));
+            pathsIds.push_back(AddPath(resPath,problemSolver()));
 
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(pathsIds.size());
@@ -2011,7 +2011,7 @@ assert(s2 == s1 +1);
             {
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
             }
-            const core::PathVectors_t& paths = problemSolver_->paths();
+            const core::PathVectors_t& paths = problemSolver()->paths();
             if(paths.size() -1 < std::max(cT1, std::max(cT2, cT3)))
             {
                 throw std::runtime_error("in comRRTFromPos, at least one com trajectory is not present in problem solver");
@@ -2023,10 +2023,10 @@ assert(s2 == s1 +1);
             comPath->appendPath(paths[cT2]);
             comPath->appendPath(paths[cT3]);
             std::vector<std::string> trackedEffectorNames = stringConversion(trackedEffector);
-            core::PathPtr_t refFullBody = problemSolver_->paths()[refpath]->extract(std::make_pair(path_from, path_to));
-            core::PathPtr_t p2 =interpolation::effectorRRTFromPath(fullBody_,problemSolver_->problem(), comPath,
+            core::PathPtr_t refFullBody = problemSolver()->paths()[refpath]->extract(std::make_pair(path_from, path_to));
+            core::PathPtr_t p2 =interpolation::effectorRRTFromPath(fullBody_,problemSolver()->problem(), comPath,
                     state1,state2, numOptimizations,true, refFullBody, trackedEffectorNames);
-            pathsIds.push_back(AddPath(p2,problemSolver_));
+            pathsIds.push_back(AddPath(p2,problemSolver()));
 
             // reduce path to remove extradof
             core::SizeInterval_t interval(0, p2->initial().rows()-1);
@@ -2036,7 +2036,7 @@ assert(s2 == s1 +1);
             core::PathVectorPtr_t resPath = core::PathVector::create(fullBody_->device_->configSize(), fullBody_->device_->numberDof());
             resPath->appendPath(reducedPath);
 
-            pathsIds.push_back(AddPath(resPath,problemSolver_));
+            pathsIds.push_back(AddPath(resPath,problemSolver()));
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(pathsIds.size());
             for(std::size_t i=0; i< pathsIds.size(); ++i)
@@ -2611,16 +2611,22 @@ assert(s2 == s1 +1);
         }
     }
 
-    void RbprmBuilder::SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver)
+    void RbprmBuilder::SetProblemSolverMap (hpp::corbaServer::ProblemSolverMapPtr_t psMap)
     {
-        problemSolver_ = problemSolver;
-        bindShooter_.problemSolver_ = problemSolver;
+        psMap_ = psMap;
+        //bind shooter creator to hide problem as a parameter and respect signature
+        //initNewProblemSolver();
+    }
+
+    void RbprmBuilder::initNewProblemSolver()
+    {
         //bind shooter creator to hide problem as a parameter and respect signature
 
         // add rbprmshooter
-        problemSolver->add<core::ConfigurationShooterBuilder_t>("RbprmShooter",
+        bindShooter_.problemSolver_ = problemSolver();
+        problemSolver()->add<core::ConfigurationShooterBuilder_t>("RbprmShooter",
                                                    boost::bind(&BindShooter::create, boost::ref(bindShooter_), _1));
-        problemSolver->add<core::PathValidationBuilder_t>("RbprmPathValidation",
+        problemSolver()->add<core::PathValidationBuilder_t>("RbprmPathValidation",
                                                    boost::bind(&BindShooter::createPathValidation, boost::ref(bindShooter_), _1, _2));
     }
 

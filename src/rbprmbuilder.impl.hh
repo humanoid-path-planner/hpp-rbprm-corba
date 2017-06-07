@@ -30,6 +30,8 @@
 # include <hpp/core/problem-solver.hh>
 # include <hpp/core/discretized-collision-checking.hh>
 # include <hpp/core/straight-path.hh>
+#include <hpp/corbaserver/affordance/server.hh>
+# include <hpp/corbaserver/problem-solver-map.hh>
 
 #include <hpp/fcl/BVH/BVH_model.h>
 
@@ -63,7 +65,7 @@ namespace hpp {
         hpp::core::PathValidationPtr_t createPathValidation (const hpp::model::DevicePtr_t& robot, const hpp::model::value_type& val)
         {
             hpp::model::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::model::RbPrmDevice>(robot);
-						affMap_ = problemSolver_->map
+                        affMap_ = problemSolver_->map
 							<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
 		        if (affMap_.empty ()) {
     	        throw hpp::Error ("No affordances found. Unable to create Path Validaton object.");
@@ -231,11 +233,16 @@ namespace hpp {
         virtual hpp::floatSeq* computeTargetTransform(const char* limbName, const hpp::floatSeq& configuration, const hpp::floatSeq& p, const hpp::floatSeq& n) throw (hpp::Error);
 
         public:
-        void SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver);
+        void SetProblemSolverMap (hpp::corbaServer::ProblemSolverMapPtr_t psMap);
+        void initNewProblemSolver ();
 
         private:
         /// \brief Pointer to hppPlanner object of hpp::corbaServer::Server.
-        core::ProblemSolverPtr_t problemSolver_;
+        corbaServer::ProblemSolverMapPtr_t psMap_;
+        core::ProblemSolverPtr_t problemSolver()
+        {
+            return psMap_->selected();
+        }
 
         private:
         model::T_Rom romDevices_;

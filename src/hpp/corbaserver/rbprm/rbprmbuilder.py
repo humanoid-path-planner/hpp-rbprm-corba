@@ -58,6 +58,7 @@ class Builder (object):
 				self.client.rbprm.rbprm.loadRobotRomModel(urdfNamerom, rootJointType, packageName, urdfNamerom, urdfSuffix, srdfSuffix)
 		else:
 			self.client.rbprm.rbprm.loadRobotRomModel(urdfNameroms, rootJointType, packageName, urdfNameroms, urdfSuffix, srdfSuffix)
+		self.client.rbprm.rbprm.initNewProblemSolver()
 		self.client.rbprm.rbprm.loadRobotCompleteModel(urdfName, rootJointType, packageName, urdfName, urdfSuffix, srdfSuffix)		
 		self.name = urdfName
 		self.displayName = urdfName
