@@ -17,6 +17,9 @@ class Robot (Parent):
 		self.client.basic = Client ()
 		self.load = load
 		
+cl = Client()
+cl.problem.selectProblem("robot2")
+
 rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
 meshPackageName = 'hpp-rbprm-corba'
@@ -104,13 +107,4 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 #~ pp.toFile(1, "/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
 #~ rbprmBuilder.exportPath (r, ps.client.problem, 1, 0.01, "stair_bauzil_hrp2_path.txt")
 
-cl = Client()
-cl.problem.selectProblem("rbprm_path")
-rbprmBuilder2 = Robot ("toto")
-ps2 = ProblemSolver( rbprmBuilder2 )
-cl.problem.selectProblem("default")
-#~ cl.problem.movePathToProblem(1,"rbprm_path",rbprmBuilder.getAllJointNames())
-r2 = Viewer (ps2, viewerClient=r.client)
-r.client.gui.setVisibility("toto", "OFF")
-r.client.gui.setVisibility("spiderman_trunk", "OFF")
 #~ r2(q_far)

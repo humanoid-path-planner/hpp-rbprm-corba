@@ -26,6 +26,9 @@ urdfNameRoms =  ['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom'
 urdfSuffix = ""
 srdfSuffix = ""
 
+cl = Client()
+cl.problem.selectProblem("robot1")
+rbprmBuilder2 = Robot ("root_robot1")
 rbprmBuilder = Builder ()
 
 rbprmBuilder.loadModel(urdfName, urdfNameRoms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
@@ -69,6 +72,7 @@ ps.addGoalConfig (q_goal)
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
+afftool.setAffordanceConfig('Lean', [0.5, 0.03, 0.00005])
 afftool.loadObstacleModel (packageName, "twister", "planning", r)
 #~ afftool.analyseAll()
 #~ afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
@@ -98,13 +102,12 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 #~ pp.toFile(1, "/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
 #~ rbprmBuilder.exportPath (r, ps.client.problem, 1, 0.01, "stair_bauzil_hrp2_path.txt")
 
-cl = Client()
-cl.problem.selectProblem("rbprm_path")
-rbprmBuilder2 = Robot ("toto")
-ps2 = ProblemSolver( rbprmBuilder2 )
-cl.problem.selectProblem("default")
+
+#~ rbprmBuilder2 = Robot ("root_robot1")
+#~ ps2 = ProblemSolver( rbprmBuilder2 )
+#~ cl.problem.selectProblem("default")
 #~ cl.problem.movePathToProblem(1,"rbprm_path",rbprmBuilder.getAllJointNames())
-r2 = Viewer (ps2, viewerClient=r.client)
-r.client.gui.setVisibility("toto", "OFF")
+#~ r2 = Viewer (ps2, viewerClient=r.client)
 r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
+#~ r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
 #~ r2(q_far)
