@@ -591,8 +591,18 @@ namespace hpp {
     }
 
     void RbprmBuilder::setStaticStability(const bool staticStability) throw (hpp::Error){
+      if(!fullBodyLoaded_)
+        throw Error ("No full body robot was loaded");
       fullBody_->staticStability(staticStability);
     }
+
+    void RbprmBuilder::setReferenceConfig(const hpp::floatSeq& referenceConfig) throw (hpp::Error){
+      if(!fullBodyLoaded_)
+        throw Error ("No full body robot was loaded");
+      model::ConfigurationPtr_t config(new Configuration_t(dofArrayToConfig (fullBody_->device_, referenceConfig)));
+      fullBody_->referenceConfig(config);
+    }
+
 
 
     void RbprmBuilder::setFilter(const hpp::Names_t& roms) throw (hpp::Error)

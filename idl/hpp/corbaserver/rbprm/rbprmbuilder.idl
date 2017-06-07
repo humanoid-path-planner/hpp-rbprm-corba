@@ -98,6 +98,10 @@ module hpp
     void setStaticStability(in boolean staticStability)
       raises (Error);
 
+    /// set a reference configuration in fullBody
+    void setReferenceConfig(in floatSeq referenceConfig)
+      raises (Error);
+
     /// Set Rom constraints for the configuration shooter
     /// a configuration will only be valid if all roms indicated
     /// are colliding with the environment.

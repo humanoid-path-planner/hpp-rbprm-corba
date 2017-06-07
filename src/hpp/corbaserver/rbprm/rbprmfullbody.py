@@ -950,6 +950,11 @@ class FullBody (object):
      def setStaticStability(self,staticStability):
           return self.client.rbprm.rbprm.setStaticStability(staticStability)
 
+    ## set a reference configuration in FullBody
+    # \param referenceConfig dofArray
+     def setReferenceConfig(self,referenceConfig):
+          return self.client.rbprm.rbprm.setReferenceConfig(referenceConfig)
+
 
      ## Convert a direction vector to a quaternion (use Eigen::Quaterniond::FromTwoVectors with Z vector)
      # \param u the vector director
