@@ -100,19 +100,20 @@ q0 = s1.q()[:]
         #~ print "time to project", t4- t3
 
 def dist(q0,q1):
+    #~ return norm(array(q0[7:]) - array(q1[7:]) )
     return norm(array(q0[7:]) - array(q1[7:]) )
 
 def distq_ref(q0):
     return lambda s: dist(s.q(),q0) 
 
 a = computeAffordanceCentroids(tp.afftool, ["Support"]) 
-def computeNext(state, limb, projectToCom = False, max_num_samples = 10):
+def computeNext(state, limb, projectToCom = False, max_num_samples = 10, mu = 0.6):
     global a
     t1 = time.clock()
     #~ candidates = [el for el in a if isContactReachable(state, limb, el[0], el[1], limbsCOMConstraints)[0] ]
     #~ print "num candidates", len(candidates)
     #~ t3 = time.clock()
-    results = [addNewContactIfReachable(state, limb, el[0], el[1], limbsCOMConstraints, projectToCom, max_num_samples) for el in a]
+    results = [addNewContactIfReachable(state, limb, el[0], el[1], limbsCOMConstraints, projectToCom, max_num_samples, mu) for el in a]
     t2 = time.clock()
     #~ t4 = time.clock()
     resultsFinal = [el[0] for el in results if el[1]]
@@ -230,6 +231,31 @@ play()
 
 r(q_init)
 #~ path = go0([s2,s1], mu=0.3,num_optim=1)
-s2 = computeNext(s1,rarmId,True,10)[0]; r(s2.q())
+res = computeNext(s1,rarmId,True,10)
+s2 = res[0]; r(s2.q())
 #~ s3 = computeNext(s2,rLegId,True,10)[0]; r(s3.q())
+#~ res2 = computeNext(s2,larmId,True,100)
+#~ s3 = res2[0]; r(s3.q())
+s4 = removeContact(s2,rLegId,True,0.1)[0]; r(s4.q())
+s5 = removeContact(s4,lLegId,True,0.1)[0]; r(s5.q())
+#~ path = go0([s1,s2,s3,s4,s5], mu=0.6,num_optim=1)
+#~ path = go0([s1,s2,s4,s5], mu=0.6,num_optim=1)
 
+states = [s1,s2,s4,s5]
+
+def add(lId):
+    sF = states[-1]
+    ns = computeNext(sF,lId,True,10)[0]
+    global states
+    states +=[ns]
+    r(ns.q())
+    
+def rm(lId):
+    sF = states[-1]
+    ns = removeContact(sF,lId,True)[0]
+    global states
+    states +=[ns]
+    r(ns.q())
+    
+def go():
+    return go0(states, mu=0.6,num_optim=2)

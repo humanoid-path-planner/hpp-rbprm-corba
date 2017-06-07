@@ -68,7 +68,7 @@ def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_opti
             createPtBox(viewer.client.gui, 0, c_mid_2[0].tolist(), 0.01, [0,1,0,1.])
         
             #testing intermediary configurations 
-            partions = [0.,0.2,0.8,1.]
+            partions = [0.,0.3,0.8,1.]
             print 'paritions:', partions[1], " "
             com_interm2 = curve(partions[2])
             #~ print "com_1", com_1
@@ -118,7 +118,6 @@ def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_opti
             
             p0 = fullBody.generateCurveTrajParts(bezier_0,partions)
             
-            print "p0", p0
             #~ pp.displayPath(p0+1)
             #~ pp.displayPath(p0+2)
             #~ ppl.displayPath(p0)
@@ -144,13 +143,11 @@ def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_opti
                 print "proj 2 failed"
                 return False, c_mid_1, c_mid_2, paths_ids
             
-            print "three curves"
             bezier_0, curve = __Bezier([com_1,c_mid_1[0].tolist()]              , end_acc = c_mid_1[1].tolist() , end_vel = [0.,0.,0.])
             bezier_1, curve = __Bezier([c_mid_1[0].tolist(),c_mid_2[0].tolist()], end_acc = c_mid_2[1].tolist(), init_acc = c_mid_1[1].tolist(), init_vel = [0.,0.,0.], end_vel = [0.,0.,0.])
             bezier_2, curve = __Bezier([c_mid_2[0].tolist(),com_2]              , init_acc = c_mid_2[1].tolist(), init_vel = [0.,0.,0.])
         
             p0 = fullBody.generateCurveTraj(bezier_0)
-            print "p0", p0
             fullBody.generateCurveTraj(bezier_1)
             fullBody.generateCurveTraj(bezier_2)
             ppl.displayPath(p0)
@@ -222,7 +219,8 @@ def gen(s1, s2, num_optim = 0, ine_curve =True, s = 1., effector = False, mu =0.
             n_fail += 1
     print "n_fail ", n_fail
     if(gen_traj):
-        a = gen_trajectory_to_play(fullBody, ppl, allpaths, flatten([[s*0.2, s* 0.6, s* 0.2] for _ in range(len(allpaths) / 3)]))
+        #~ a = gen_trajectory_to_play(fullBody, ppl, allpaths[:-3], flatten([[s*0.2, s* 0.6, s* 0.2] for _ in range(len(allpaths[:-3]) / 3)]))
+        a = gen_trajectory_to_play(fullBody, ppl, allpaths[-3:], flatten([[s*0.2, s* 0.6, s* 0.2] for _ in range(1)]))
         #~ a = gen_trajectory_to_play(fullBody, ppl, allpaths, flatten([[s] for _ in range(len(allpaths) )]))
         return a
 
@@ -475,7 +473,8 @@ def go0(states, one_curve = True, num_optim = 0, mu = 0.6, s =None):
     for i, el in enumerate(states[:-1]):
         if s == None:
             sc = max(norm(array(states[i+1].q()) - array(el.q())), 1.) * 0.5
-        path = gen(el,states[i+1],mu=mu,num_optim=num_optim, s=sc, ine_curve = one_curve)
+        path += gen(el,states[i+1],mu=mu,num_optim=num_optim, s=sc, ine_curve = one_curve)
+        print "path", len(path)
     return path
 
     

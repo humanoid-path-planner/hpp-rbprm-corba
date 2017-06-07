@@ -110,12 +110,12 @@ def removeContact(state, limbName, projectToCOM = False, friction = 0.6):
 # \param n 3d normal of the contact location center
 # \param max_num_samples max number of sampling in case projection ends up in collision
 # \return (State, success) whether the creation was successful, as well as the new state
-def addNewContactIfReachable(state, limbName, p, n, limbsCOMConstraints, projectToCom = False, max_num_samples = 0):
+def addNewContactIfReachable(state, limbName, p, n, limbsCOMConstraints, projectToCom = False, max_num_samples = 0, friction = 0.6):
     ok, res  = isContactReachable(state, limbName, p, n, limbsCOMConstraints)
     if(ok):
         s, success = addNewContact(state, limbName, p, n, max_num_samples)
         if success and projectToCom:
-            success = projectToFeasibleCom(s, ddc =[0.,0.,0.], max_num_samples = max_num_samples, friction = 0.6)
+            success = projectToFeasibleCom(s, ddc =[0.,0.,0.], max_num_samples = max_num_samples, friction = friction)
         return s, success
     else:
         return state, False
