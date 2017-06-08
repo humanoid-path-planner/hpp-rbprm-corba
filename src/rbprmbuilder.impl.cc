@@ -1871,6 +1871,10 @@ assert(s2 == s1 +1);
                                     unsigned short numOptimizations)  throw (hpp::Error)
     {
         hppDout(notice,"########## begin rrt for state "<<state1<<" ###########");
+        unsigned int seed =  (unsigned int) (time(NULL)) ;
+        std::cout<<"seed rrt = "<<seed<<std::endl;
+        hppDout(notice,"seed rrt = "<<seed);
+        srand ( seed);
 
         try
         {
