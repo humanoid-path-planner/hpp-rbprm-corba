@@ -150,9 +150,9 @@ def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_opti
             p0 = fullBody.generateCurveTraj(bezier_0)
             fullBody.generateCurveTraj(bezier_1)
             fullBody.generateCurveTraj(bezier_2)
-            ppl.displayPath(p0)
-            ppl.displayPath(p0+1)
-            ppl.displayPath(p0+2)
+            #~ ppl.displayPath(p0)
+            #~ ppl.displayPath(p0+1)
+            #~ ppl.displayPath(p0+2)
             paths_ids = [int(el) for el in fullBody.comRRTFromPosBetweenState(stateid,stateid1, p0,p0+1,p0+2,num_optim)]
         #~ paths_ids = []
         global allpaths
@@ -432,6 +432,8 @@ ppl = None
 fullBody = None
 b_id = 0
 scene = "bos"
+first_init = True
+
 
 def clean_path():
     global allpaths
@@ -445,11 +447,14 @@ def init_bezier_traj(robot, r, pplayer, qs, comConstraints):
     global fullBody
     global viewer
     global configs
+    global first_init
     configs = qs
     viewer = r
     ppl = pplayer
     fullBody = robot
-    viewer.client.gui.createScene(scene)
+    if first_init:
+        viewer.client.gui.createScene(scene)
+        first_init = False
     global limbsCOMConstraints
     limbsCOMConstraints = comConstraints
     

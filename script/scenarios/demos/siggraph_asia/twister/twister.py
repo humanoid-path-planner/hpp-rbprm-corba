@@ -241,7 +241,7 @@ s5 = removeContact(s4,lLegId,True,0.1)[0]; r(s5.q())
 #~ path = go0([s1,s2,s3,s4,s5], mu=0.6,num_optim=1)
 #~ path = go0([s1,s2,s4,s5], mu=0.6,num_optim=1)
 
-states = [s1,s2,s4,s5]
+states = [s1_hp,s2,s4,s5]
 
 def add(lId):
     sF = states[-1]

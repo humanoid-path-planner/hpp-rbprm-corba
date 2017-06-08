@@ -7,7 +7,10 @@ from hpp.gepetto import PathPlayer
 from numpy import array, sort
 from numpy.linalg import norm
 from plan_execute import a, b, c, d, e, init_plan_execute
-from bezier_traj import go0, init_bezier_traj
+from bezier_traj import go0, init_bezier_traj, reset
+from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import play_trajectory
+
+import time
 
 from hpp.corbaserver.rbprm.rbprmstate import State
 from hpp.corbaserver.rbprm.state_alg  import addNewContact, isContactReachable, closestTransform, removeContact, addNewContactIfReachable, projectToFeasibleCom
@@ -17,108 +20,165 @@ robot_context = None
 
 cl = Client()
 
-def save_globals():		
-	robot_context["states"] = states
-	robot_context["configs"] = configs
-	
-def set_globals():		
-	global robot_context
-	
-	global states
-	global tp
-	global model
-	global path_planner
-	global ps
-	global r
-	global pp
-	global fullBody
-	global configs
-	global lLegId
-	global rLegId
-	global larmId
-	global rarmId
-	global limbsCOMConstraints
-	global fullBody
-	global configs
-	global cl
-	
-	states 	= robot_context["states"]
-	tp 		= robot_context["tp"]
-	model	= robot_context["model"]
-	ps		= robot_context["ps"]
-	r		= robot_context["r"]
-	pp		= robot_context["pp"]
-	fullBody= robot_context["fullBody"]
-	configs = robot_context["configs"]
-	cl		= robot_context["cl"]
-	limbsCOMConstraints = model.limbsCOMConstraints
-	lLegId = model.lLegId
-	lLegId = model.rLegId
-	larmId = model.larmId
-	rarmId = model.rarmId
-	path_planner = tp
-	
-	init_plan_execute(fullBody, r, path_planner, pp)
-	init_bezier_traj(fullBody, r, pp, configs, limbsCOMConstraints)
-	
-	
-	#~ states 	= robot_context["states"]
-	#~ tp 		= robot_context["tp"]
-	#~ model	= robot_context["model"]
-	#~ ps		= robot_context["ps"]
-	#~ r		= robot_context["r"]
-	#~ pp		= robot_context["pp"]
-	#~ fullBody= robot_context["fullBody"]
-	#~ configs = robot_context["configs"]
-	#~ limbsCOMConstraints = model.limbsCOMConstraints
-	#~ lLegId = model.lLegId
-	#~ lLegId = model.rLegId
-	#~ larmId = model.larmId
-	#~ rarmId = model.rarmId
-	#~ path_planner = tp
+
+states                   = None
+tp                       = None
+model                    = None
+path_planner             = None
+ps                       = None
+r                        = None
+r_parent                 = None
+pp                       = None
+fullBody                 = None
+configs                  = None
+lLegId                   = None
+rLegId                   = None
+larmId                   = None
+rarmId                   = None
+limbsCOMConstraints      = None
+fullBody                 = None
+configs                  = None
+cl                       = None
+
+def save_globals():        
+    robot_context["states"] = states
+    robot_context["configs"] = configs
+    
+def set_globals():        
+    global robot_context
+    
+    global states
+    global tp
+    global model
+    global path_planner
+    global ps
+    global r
+    global pp
+    global fullBody
+    global configs
+    global lLegId
+    global rLegId
+    global larmId
+    global rarmId
+    global limbsCOMConstraints
+    global fullBody
+    global configs
+    global cl
+    
+    states     = robot_context["states"]
+    tp         = robot_context["tp"]
+    model    = robot_context["model"]
+    ps        = robot_context["ps"]
+    r        = robot_context["r"]
+    pp        = robot_context["pp"]
+    fullBody= robot_context["fullBody"]
+    configs = robot_context["configs"]
+    cl        = robot_context["cl"]
+    limbsCOMConstraints = model.limbsCOMConstraints
+    rLegId = model.rLegId
+    lLegId = model.lLegId
+    larmId = model.larmId
+    rarmId = model.rarmId
+    path_planner = tp
+    
+    init_plan_execute(fullBody, r, path_planner, pp)
+    init_bezier_traj(fullBody, r, pp, configs, limbsCOMConstraints)
+    
+    
+    #~ states     = robot_context["states"]
+    #~ tp         = robot_context["tp"]
+    #~ model    = robot_context["model"]
+    #~ ps        = robot_context["ps"]
+    #~ r        = robot_context["r"]
+    #~ pp        = robot_context["pp"]
+    #~ fullBody= robot_context["fullBody"]
+    #~ configs = robot_context["configs"]
+    #~ limbsCOMConstraints = model.limbsCOMConstraints
+    #~ lLegId = model.lLegId
+    #~ lLegId = model.rLegId
+    #~ larmId = model.larmId
+    #~ rarmId = model.rarmId
+    #~ path_planner = tp
 
 import importlib
 
-def init_context(path, wb ):	
-	global robot_contexts
-	rid = len(robot_contexts) 
-	
-	path_planner_1 = importlib.import_module(path)
-	path_planner_1.cl.problem.selectProblem("wb_robot" + str(rid))	
-	model_1  = importlib.import_module(wb)	
-	model_1.fullBody.setJointBounds ("base_joint_xyz", [-2,2.5, -2, 2, 0, 2.2])
-	ps1 =  path_planner_1.ProblemSolver( model_1.fullBody )
-	r  = path_planner_1.Viewer (ps1, viewerClient=path_planner_1.r.client)
-	robot_contexts[rid] = {"model" : model_1, 
-	"states" : [], "tp" :  path_planner_1,
-	"ps" : ps1, 
-	"fullBody" : model_1.fullBody,
-	"r" : r, "fullBody" : model_1.fullBody,
-	"configs" : [],
-	"pp" : PathPlayer (model_1.fullBody.client.basic, r),
-	"cl" : path_planner_1.cl }
-	
-	#~ cl.problem.selectProblem("wb_robot2")	
-	#~ import twister_spidey_path as path_planner_2
-	#~ import spidey_model as model_2
-	#~ ps2 =  path_planner_2.ProblemSolver( model_2.fullBody )
-	#~ robot2_context = {"model" : model_2, "twister_path" : path_planner_2, "states" : [], "tp" :  path_planner_1, "ps" : ps2, "fullBody" : model_2.fullBody, "r" = path_planner_2.Viewer (ps2, viewerClient=path_planner_2.r.client), "fullBody" : model_2.fullBody, "configs" : [] }
-	
+def init_context(path, wb, other_package ):    
+    global robot_contexts
+    rid = len(robot_contexts) 
+    
+    path_planner_1 = importlib.import_module(path)
+    path_planner_1.cl.problem.selectProblem("robot" + str(rid))  
+    global r_parent
+    loaded = r_parent == None
+    if loaded:
+        r_parent = path_planner_1.r
+    r  = path_planner_1.Viewer (path_planner_1.ps, viewerClient=r_parent.client)  
+    r.loadObstacleModel (*other_package)
+    model_1  = importlib.import_module(wb)    
+    model_1.fullBody.setJointBounds ("base_joint_xyz", [-2,2.5, -2, 2, 0, 2.2])
+    ps1 =  path_planner_1.ProblemSolver( model_1.fullBody )
+    r  = path_planner_1.Viewer (ps1, viewerClient=r_parent.client)  
+    #~ if not loaded:
+        #~ path_planner_1.afftool.loadObstacleModel ('hpp-rbprm-corba', "twister", "planning", r)
+    robot_contexts += [{"model" : model_1, 
+    "states" : [], "tp" :  path_planner_1,
+    "ps" : ps1, 
+    "fullBody" : model_1.fullBody,
+    "r" : r, "fullBody" : model_1.fullBody,
+    "configs" : [],
+    "pp" : PathPlayer (model_1.fullBody.client.basic, r),
+    "cl" : path_planner_1.cl }]    
+  
+def publishRobot_and_switch(context_to):
+    #~ r.robot.setCurrentConfig (self.robotConfig)
+    saves = {}
+    pos0 = None
+    for j, prefix, o in r.robotBodies:
+        pos = r.robot.getLinkPosition (j)
+        objectName = "other/" + o+ "_0"
+        #~ if pos0 == None:
+            #~ pos0 = pos[0:3]
+        #~ else:
+            #~ pos = (array(pos[0:3]) - (array(pos[0:3]) - array(pos0))).tolist() + pos[3:]
+            #~ pos = (array(pos[0:3]) - (array(pos[0:3]) )).tolist() + pos[3:]
+        if o.find("_r") <0:
+            #~ print  o
+            saves[objectName] = pos
+    switch_context(context_to)
+    for objectName, pos in saves.iteritems():
+        #~ r.client.gui.applyConfiguration (objectName, pos)
+        try:
+            r.moveObstacle (objectName, pos)
+        except:
+            pass
+    r.client.gui.refresh ()
+  
 def init_contexts():
-	init_context("twister_path", "hrp2_model")
-	init_context("twister_spidey_path", "spidey_model")
-	global robot_context
-	robot_context = robot_contexts[0]
-	set_globals()
+    init_context("twister_path", "hrp2_model", ['hpp-rbprm-corba', "spiderman", "other"])
+    init_context("twister_spidey_path", "spidey_model", ['hrp2_14_description', "hrp2_14_reduced", "other"])
+    global robot_context
+    robot_context = robot_contexts[0]
+    set_globals()
+    switch_context(0)
+    #now loading each robot as an object in the other robot 
+    #~ r.loadObstacleModel ('hpp-rbprm-corba', "spiderman", "other")
+    #~ switch_context(1)
+    #now loading each robot as an object in the other robot 
+    #~ r.loadObstacleModel ('hrp2_14_description', "hrp2_14_reduced", "other")
+    sc(0)
 
 def switch_context(rid):
-	save_globals()
-	global cl 
-	cl.problem.selectProblem("wb_robot" + str(rid))
-	robot_context = robot_contexts[rid]
-	set_globals()
-	
-		
+    save_globals()
+    global cl 
+    name = "robot" + str(rid)
+    cl.problem.selectProblem(name)
+    fullBody.client.rbprm.rbprm.selectFullBody(name)
+    global robot_context
+    robot_context = robot_contexts[rid]
+    set_globals()
+    
+def sc(rid):
+    publishRobot_and_switch(rid)
 
 def dist(q0,q1):
     return norm(array(q0[7:]) - array(q1[7:]) )
@@ -161,8 +221,8 @@ def plot_feasible_Kin(state):
     return -1
     
 def compute_w(c, ddc=array([0.,0.,0.]), dL=array([0.,0.,0.]), m = 54., g_vec=array([0.,0.,-9.81])):
-	w1 = m * (ddc - g_vec)
-	return array(w1.tolist() + (cross(c, w1) + dL).tolist())
+    w1 = m * (ddc - g_vec)
+    return array(w1.tolist() + (cross(c, w1) + dL).tolist())
     
 def plot_feasible_cone(state):
     com = array(state.getCenterOfMass())
@@ -237,14 +297,79 @@ def play():
         r(all_states[i-j].q())
         sleep(0.5)
 
+
+
 init_contexts()
-
-q_0 = fullBody.getCurrentConfig(); r(q_0)
-q_0[2] = 1.05
-s1 = State(fullBody,q=q_0, limbsIncontact = [rLegId, lLegId])  
-
-q0 = s1.q()[:]
-a = computeAffordanceCentroids(tp.afftool, ["Support"]) 
 scene = "bb"
 r.client.gui.createScene(scene)
 b_id = 0
+
+a = computeAffordanceCentroids(tp.afftool, ["Support"]) 
+
+
+def setupHrp2():
+    switch_context(0)
+    q_init =  [
+            0.1, -0.82, 0.648702, 1.0, 0.0 , 0.0, 0.0,                         	 # Free flyer 0-6
+            0.0, 0.0, 0.0, 0.0,                                                  # CHEST HEAD 7-10
+            0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # LARM       11-17
+            0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # RARM       18-24
+            0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # LLEG       25-30
+            0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # RLEG       31-36
+            ]; r (q_init)
+
+    #~ q_init[1] = -1.05
+    s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId]) 
+    q0 = s1.q()[:]
+    r(q0)
+    return s1
+
+def setupSpidey():
+    switch_context(1)
+    q_0 = fullBody.getCurrentConfig(); r(q_0)
+    q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.q_init[0:7]
+    q_init[1] += 1.05
+    #~ q_0[2] = 1.1
+    s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId]) 
+    q0 = s1.q()[:]
+    r(q0)
+    return s1
+
+s1_hp = setupHrp2()
+states+=[s1_hp]
+r(s1_hp.q())
+#~ 
+s1_sp = setupSpidey()
+states+=[s1_sp]
+r(s1_sp.q())
+
+switch_context(0)
+
+res = computeNext(s1_hp,rarmId,True,10)
+s2 = res[0]; r(s2.q())
+#~ s3 = computeNext(s2,rLegId,True,10)[0]; r(s3.q())
+#~ res2 = computeNext(s2,larmId,True,100)
+#~ s3 = res2[0]; r(s3.q())
+s4 = removeContact(s2,rLegId,True,0.1)[0]; r(s4.q())
+s5 = removeContact(s4,lLegId,True,0.1)[0]; r(s5.q())
+#~ path = go0([s1,s2,s3,s4,s5], mu=0.6,num_optim=1)
+#~ path = go0([s1,s2,s4,s5], mu=0.6,num_optim=1)
+
+#~ states = [s1,s2,s4,s5]
+
+def add(lId):
+    sF = states[-1]
+    ns = computeNext(sF,lId,True,10)[0]
+    global states
+    states +=[ns]
+    r(ns.q())
+    
+def rm(lId):
+    sF = states[-1]
+    ns = removeContact(sF,lId,True)[0]
+    global states
+    states +=[ns]
+    r(ns.q())
+    
+def go():
+    return go0(states, mu=0.6,num_optim=2)

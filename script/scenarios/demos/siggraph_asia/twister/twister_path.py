@@ -27,8 +27,8 @@ urdfSuffix = ""
 srdfSuffix = ""
 
 cl = Client()
-cl.problem.selectProblem("robot1")
-rbprmBuilder2 = Robot ("root_robot1")
+cl.problem.selectProblem("robot0")
+rbprmBuilder2 = Robot ("root_robot0")
 rbprmBuilder = Builder ()
 
 rbprmBuilder.loadModel(urdfName, urdfNameRoms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
@@ -75,8 +75,8 @@ afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
 afftool.setAffordanceConfig('Lean', [0.5, 0.03, 0.00005])
 afftool.loadObstacleModel (packageName, "twister", "planning", r)
 #~ afftool.analyseAll()
-#~ afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
-#~ afftool.visualiseAffordances('Lean', r, [0, 0, 0.9])
+afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
+afftool.visualiseAffordances('Lean', r, [0, 0, 0.9])
 
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)

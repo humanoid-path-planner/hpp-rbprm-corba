@@ -18,7 +18,7 @@ class Robot (Parent):
 		self.load = load
 		
 cl = Client()
-cl.problem.selectProblem("robot2")
+cl.problem.selectProblem("robot1")
 
 rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
@@ -52,20 +52,20 @@ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 
 ps = ProblemSolver( rbprmBuilder )
 
-r = Viewer (ps)
+#~ r = Viewer (ps)
 
 
 q_init = rbprmBuilder.getCurrentConfig ();
 #~ q_init [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
 q_init [0:3] = [0.19999999999999996, -0.82, 1.0];
-rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+#~ rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 #~ q_init [0:3] = [0.1, -0.82, 0.648702]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 #~ q_init [0:3] = [0, -0.63, 0.6]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 #~ q_init [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
 
 q_goal = q_init [::]
 #~ q_goal [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
-q_goal [0:3] = [0.6 	, -0.82, 1.5]; r (q_goal)
+#~ q_goal [0:3] = [0.6 	, -0.82, 1.5]; r (q_goal)
 #~ q_goal [0:3] = [3, -0.82, 6]; r(q_goal)
 #~ q_goal [0:3] = [1.2, -0.65, 1.1]; r (q_goal)
 
@@ -78,10 +78,10 @@ from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
 afftool.setAffordanceConfig('Lean', [0.5, 0.03, 0.00005])
-afftool.loadObstacleModel (packageName, "twister", "planning", r)
+
 #~ afftool.analyseAll()
-afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
-afftool.visualiseAffordances('Lean', r, [0, 0, 0.9])
+#~ afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
+#~ afftool.visualiseAffordances('Lean', r, [0, 0, 0.9])
 
 #~ ps.client.problem.selectConFigurationShooter("RbprmShooter")
 #~ ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
@@ -97,7 +97,7 @@ afftool.visualiseAffordances('Lean', r, [0, 0, 0.9])
 
 
 from hpp.gepetto import PathPlayer
-pp = PathPlayer (rbprmBuilder.client.basic, r)
+#~ pp = PathPlayer (rbprmBuilder.client.basic, r)
 #~ pp.fromFile("/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
 #~ 
 #~ pp (2)
