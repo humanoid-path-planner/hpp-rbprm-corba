@@ -19,6 +19,7 @@ class Robot (Parent):
 		
 cl = Client()
 cl.problem.selectProblem("robot1")
+#~ cl.problem.selectProblem("robot0")
 
 rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
@@ -52,7 +53,7 @@ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 
 ps = ProblemSolver( rbprmBuilder )
 
-#~ r = Viewer (ps)
+
 
 
 q_init = rbprmBuilder.getCurrentConfig ();
@@ -74,11 +75,18 @@ ps.addPathOptimizer("RandomShortcut")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
+
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
 afftool.setAffordanceConfig('Lean', [0.5, 0.03, 0.00005])
 
+r = None
+try:
+    r = Viewer (ps)    
+    afftool.loadObstacleModel (packageName, "twister", "planning", r)
+except:
+    pass
 #~ afftool.analyseAll()
 #~ afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 #~ afftool.visualiseAffordances('Lean', r, [0, 0, 0.9])

@@ -113,6 +113,7 @@ def init_context(path, wb, other_package ):
     if loaded:
         r_parent = path_planner_1.r
     r  = path_planner_1.Viewer (path_planner_1.ps, viewerClient=r_parent.client)  
+    path_planner_1.afftool.loadObstacleModel ('hpp-rbprm-corba', "twister", "planning", r)
     r.loadObstacleModel (*other_package)
     model_1  = importlib.import_module(wb)    
     model_1.fullBody.setJointBounds ("base_joint_xyz", [-2,2.5, -2, 2, 0, 2.2])
@@ -165,8 +166,9 @@ def init_contexts():
     #~ switch_context(1)
     #now loading each robot as an object in the other robot 
     #~ r.loadObstacleModel ('hrp2_14_description', "hrp2_14_reduced", "other")
-    sc(0)
-
+    #~ sc(0); sc(1)
+    r.client.gui.setVisibility("spiderman_trunk", "OFF")
+    sc(0)    
 def switch_context(rid):
     save_globals()
     global cl 
@@ -373,3 +375,5 @@ def rm(lId):
     
 def go():
     return go0(states, mu=0.6,num_optim=2)
+
+r.client.gui.setVisibility("other", "OFF")

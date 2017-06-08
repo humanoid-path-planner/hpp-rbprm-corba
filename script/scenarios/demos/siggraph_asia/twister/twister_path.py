@@ -73,13 +73,13 @@ from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
 afftool.setAffordanceConfig('Lean', [0.5, 0.03, 0.00005])
-afftool.loadObstacleModel (packageName, "twister", "planning", r)
+#~ afftool.loadObstacleModel (packageName, "twister", "planning", r)
 #~ afftool.analyseAll()
-afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
-afftool.visualiseAffordances('Lean', r, [0, 0, 0.9])
+#~ afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
+#~ afftool.visualiseAffordances('Lean', r, [0, 0, 0.9])
 
-ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
+#~ ps.client.problem.selectConFigurationShooter("RbprmShooter")
+#~ ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 #~ ps.solve ()
 #~ t = ps.solve ()
 #~ 
