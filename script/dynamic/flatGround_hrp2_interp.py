@@ -61,11 +61,11 @@ fullBody.setCurrentConfig (q_init)
 
 configSize = fullBody.getConfigSize() -fullBody.client.basic.robot.getDimensionExtraConfigSpace()
 
-q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.ps.configAtParam(pId,0.01)[0:7] # use this to get the correct orientation
-q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.ps.configAtParam(pId,tp.ps.pathLength(pId))[0:7]
-dir_init = tp.ps.configAtParam(pId,0.01)[tp.indexECS:tp.indexECS+3]
-acc_init = tp.ps.configAtParam(pId,0.01)[tp.indexECS+3:tp.indexECS+6]
-dir_goal = tp.ps.configAtParam(pId,tp.ps.pathLength(pId)-0.01)[tp.indexECS:tp.indexECS+3]
+q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.ps.configAtParam(pId,0.0001)[0:7] # use this to get the correct orientation
+q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.ps.configAtParam(pId,tp.ps.pathLength(pId)-0.0001)[0:7]
+dir_init = tp.ps.configAtParam(pId,0.0001)[tp.indexECS:tp.indexECS+3]
+acc_init = tp.ps.configAtParam(pId,0.0001)[tp.indexECS+3:tp.indexECS+6]
+dir_goal = tp.ps.configAtParam(pId,tp.ps.pathLength(pId)-0.0001)[tp.indexECS:tp.indexECS+3]
 acc_goal = [0,0,0]
 
 robTreshold = 2
@@ -121,8 +121,10 @@ print "number of configs :", len(configs)
 
 player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=1,optim_effector=True,use_velocity=False,pathId = pId)
 
-# remove the last config (= user defined q_goal, not consitent with the previous state)
 configs = configs[:-1]
+
+# remove the last config (= user defined q_goal, not consitent with the previous state)
+
 
 player.displayContactPlan(1.)
 
