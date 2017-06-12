@@ -24,9 +24,9 @@ nbSamples = 20000
 rootName = 'base_joint_xyz'
 
 cType = "_3_DOF"
-rLegId = 'rfleg'
-rLeg = 'rf_haa_joint'
-rfoot = 'rf_foot_joint'
+rLegId = 'rhleg' 
+rLeg =   'rh_haa_joint' 
+rfoot =  'rh_foot_joint'
 offset = [0.,-0.021,0.]
 normal = [0,1,0]
 legx = 0.02; legy = 0.02
@@ -41,9 +41,9 @@ lLeg = 'lh_haa_joint'
 lfoot = 'lh_foot_joint'
 fullBody.addLimb(lLegId,lLeg,lfoot,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
 #~ 
-rarmId = 'rhleg'
-rarm = 'rh_haa_joint'
-rHand = 'rh_foot_joint'
+rarmId = 'rfleg'
+rarm = 'rf_haa_joint'
+rHand = 'rf_foot_joint'
 fullBody.addLimb(rarmId,rarm,rHand,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
 
 larmId = 'lfleg'

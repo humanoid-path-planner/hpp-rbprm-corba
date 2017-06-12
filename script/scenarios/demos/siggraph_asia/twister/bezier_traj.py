@@ -2,7 +2,7 @@ from gen_data_from_rbprm import *
 
 from hpp.corbaserver.rbprm.tools.com_constraints import get_com_constraint
 from hpp.gepetto import PathPlayer
-from hpp.corbaserver.rbprm.state_alg  import computeIntermediateState
+from hpp.corbaserver.rbprm.state_alg  import computeIntermediateState, isContactCreated
 
 from numpy import matrix, asarray
 from numpy.linalg import norm
@@ -50,7 +50,9 @@ def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_opti
     com_2 = s2.getCenterOfMass()
     createPtBox(viewer.client.gui, 0, com_1, 0.01, [0,1,1,1.])
     createPtBox(viewer.client.gui, 0, com_2, 0.01, [0,1,1,1.])
-    data = gen_sequence_data_from_state_objects(s1,s2,sInt,mu = mu)
+    #~ isContactCreated_= isContactCreated(s1,s2)
+    isContactCreated_ = True
+    data = gen_sequence_data_from_state_objects(s1,s2,sInt,mu = mu, isContactCreated = isContactCreated_)
     c_bounds_1 =   s1.getComConstraint(limbsCOMConstraints)
     c_bounds_mid = sInt.getComConstraint(limbsCOMConstraints)
     c_bounds_2 = s2.getComConstraint(limbsCOMConstraints)
@@ -62,13 +64,14 @@ def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_opti
         #~ fullBody.straightPath([c_mid_1[0].tolist(),c_mid_2[0].tolist()])
         #~ fullBody.straightPath([c_mid_2[0].tolist(),com_2])
         if just_one_curve:
-            print "just one curve"
             bezier_0, curve = __Bezier([com_1,c_mid_1[0].tolist(),c_mid_2[0].tolist(),com_2])
             createPtBox(viewer.client.gui, 0, c_mid_1[0].tolist(), 0.01, [0,1,0,1.])
             createPtBox(viewer.client.gui, 0, c_mid_2[0].tolist(), 0.01, [0,1,0,1.])
         
             #testing intermediary configurations 
             partions = [0.,0.3,0.8,1.]
+            #~ if(not isContactCreated_):
+                #~ partions = [0.,0.6,0.8,1.]
             print 'paritions:', partions[1], " "
             com_interm2 = curve(partions[2])
             #~ print "com_1", com_1
@@ -78,7 +81,7 @@ def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_opti
             #~ print "com_2", curve(partions[-1])
             success_proj1 = False;
             success_proj2 = False
-            for _ in range(5):
+            for _ in range(7):
 				print "WRTFF", partions[1]
 				com_interm1 = curve(partions[1])
 				print "com_interm1", com_interm1
@@ -90,7 +93,7 @@ def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_opti
 					partions[1] -= 0.04
 					
 			
-            for _ in range(6):
+            for _ in range(7):
 				print "WRTFF", partions[-2]
 				com_interm2 = curve(partions[-2])
 				print "com_interm2", com_interm2
@@ -121,9 +124,9 @@ def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_opti
             #~ pp.displayPath(p0+1)
             #~ pp.displayPath(p0+2)
             #~ ppl.displayPath(p0)
-            ppl.displayPath(p0+1)
-            ppl.displayPath(p0+2)
-            ppl.displayPath(p0+3)
+            #~ ppl.displayPath(p0+1)
+            #~ ppl.displayPath(p0+2)
+            #~ ppl.displayPath(p0+3)
             if(effector):
                 assert False, "Cant deal with effectors right now"
                 #~ paths_ids = [int(el) for el in fullBody.effectorRRT(stateid,p0+1,p0+2,p0+3,num_optim)]
@@ -288,7 +291,7 @@ def gen_several_states(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s
     print "com_acc", com_acc
     
     p0 = fullBody.generateCurveTrajParts(bezier_0,all_partitions) + 1
-    ppl.displayPath(p0-1)
+    #~ ppl.displayPath(p0-1)
     # now we need to project all states to the new com positions
     print "WTF ", len(all_partitions)
     for k in range(3, len(all_partitions),3):

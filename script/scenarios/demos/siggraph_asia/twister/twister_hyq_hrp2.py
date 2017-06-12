@@ -20,7 +20,7 @@ robot_context = None
 
 cl = Client()
 
-
+context = 0
 states                   = None
 tp                       = None
 model                    = None
@@ -39,10 +39,12 @@ limbsCOMConstraints      = None
 fullBody                 = None
 configs                  = None
 cl                       = None
+path                     = None
 
 def save_globals():        
     robot_context["states"] = states
     robot_context["configs"] = configs
+    robot_context["path"] = path
     
 def set_globals():        
     global robot_context
@@ -64,6 +66,7 @@ def set_globals():
     global fullBody
     global configs
     global cl
+    global path
     
     states     = robot_context["states"]
     tp         = robot_context["tp"]
@@ -74,6 +77,7 @@ def set_globals():
     fullBody= robot_context["fullBody"]
     configs = robot_context["configs"]
     cl        = robot_context["cl"]
+    path        = robot_context["path"]
     limbsCOMConstraints = model.limbsCOMConstraints
     rLegId = model.rLegId
     lLegId = model.lLegId
@@ -128,7 +132,7 @@ def init_context(path, wb, other_package ):
     "r" : r, "fullBody" : model_1.fullBody,
     "configs" : [],
     "pp" : PathPlayer (model_1.fullBody.client.basic, r),
-    "cl" : path_planner_1.cl }]    
+    "cl" : path_planner_1.cl, "path" : [] }]    
   
 def publishRobot_and_switch(context_to):
     #~ r.robot.setCurrentConfig (self.robotConfig)
@@ -161,13 +165,7 @@ def init_contexts():
     robot_context = robot_contexts[0]
     set_globals()
     switch_context(0)
-    #now loading each robot as an object in the other robot 
-    #~ r.loadObstacleModel ('hpp-rbprm-corba', "spiderman", "other")
-    #~ switch_context(1)
-    #now loading each robot as an object in the other robot 
-    #~ r.loadObstacleModel ('hrp2_14_description', "hrp2_14_reduced", "other")
-    #~ sc(0); sc(1)
-    r.client.gui.setVisibility("spiderman_trunk", "OFF")
+    r.client.gui.setVisibility('hyq_trunk_large', "OFF")
     sc(0)    
 def switch_context(rid):
     save_globals()
@@ -178,6 +176,8 @@ def switch_context(rid):
     global robot_context
     robot_context = robot_contexts[rid]
     set_globals()
+    global context
+    context = rid
     
 def sc(rid):
     publishRobot_and_switch(rid)
@@ -194,7 +194,11 @@ def computeNext(state, limb, projectToCom = False, max_num_samples = 10):
     #~ candidates = [el for el in a if isContactReachable(state, limb, el[0], el[1], limbsCOMConstraints)[0] ]
     #~ print "num candidates", len(candidates)
     #~ t3 = time.clock()
-    results = [addNewContactIfReachable(state, limb, el[0], el[1], limbsCOMConstraints, projectToCom, max_num_samples) for el in a]
+    global context
+    if context == 0:
+        results = [addNewContactIfReachable(state, limb, el[0], el[1], limbsCOMConstraints, projectToCom, max_num_samples) for el in a]
+    else:
+        results = [addNewContactIfReachable(state, limb, el[0], el[1], None, projectToCom, max_num_samples) for el in a]
     t2 = time.clock()
     #~ t4 = time.clock()
     resultsFinal = [el[0] for el in results if el[1]]
@@ -306,8 +310,10 @@ scene = "bb"
 r.client.gui.createScene(scene)
 b_id = 0
 
-a = computeAffordanceCentroids(tp.afftool, ["Support"]) 
+suppTargets = computeAffordanceCentroids(tp.afftool, ['Support']) 
+leanTargets = computeAffordanceCentroids(tp.afftool, ["Support", 'Lean']) 
 
+a = suppTargets
 
 def setupHrp2():
     switch_context(0)
@@ -321,7 +327,8 @@ def setupHrp2():
             ]; r (q_init)
 
     #~ q_init[1] = -1.05
-    s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId]) 
+    #~ s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId]) 
+    s1 = State(fullBody,q=q_init, limbsIncontact = []) 
     q0 = s1.q()[:]
     r(q0)
     return s1
@@ -330,30 +337,75 @@ def setupSpidey():
     switch_context(1)
     q_0 = fullBody.getCurrentConfig(); r(q_0)
     #~ q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.q_init[0:7]
-    q_init = [-0.652528468457493,
- 1.06758953014152885,
- 0.6638277139631803,
- 0.9995752585582991,
- -0.016391515572502728,
- -0.011295242081121508,
- 0.02128469407050025,
- 0.17905666752078864,
- 0.9253512562075908,
- -0.8776870832724601,
- 0.11147422537786231,
- -0.15843632504615043,
- 1.150049183494211,
- -0.1704998924604114,
- 0.6859376445755911,
- -1.1831277202117043,
- 0.06262698472369518,
- -0.42708925470675,
- 1.2855999319965081]
+    #~ q_init = [1.4497476605315172,
+ #~ 0.586723585687863,
+ #~ 0.7007986764501943,
+ #~ 0.9992040068259673,
+ #~ 0.009915872351221816,
+ #~ -0.011224843288091112,
+ #~ 0.0369733838268027,
+ #~ -0.21440808741905482,
+ #~ 0.5819742125714021,
+ #~ -0.9540663648074178,
+ #~ -0.444827228611522,
+ #~ -0.2814234791010941,
+ #~ 0.6601172395940408,
+ #~ 0.05057907671648097,
+ #~ 0.03165298930985974,
+ #~ -0.8105513007687147,
+ #~ 0.23456431240474232,
+ #~ -0.6906832652645104,
+ #~ 1.042653827624378]  
+
+    #~ q_init = [1.403034485826222,
+ #~ -0.0680461187483179,
+ #~ 0.698067114148141,
+ #~ 0.9994021773454228,
+ #~ 0.029333888870596826,
+ #~ -0.01699029633207977,
+ #~ 0.006792695452013932,
+ #~ -0.2670125225627798,
+ #~ 0.5760223974412482,
+ #~ -0.6323579390738086,
+ #~ -0.3824808801598628,
+ #~ 0.12703791928011066,
+ #~ 0.41203223392262833,
+ #~ 0.3545295626633363,
+ #~ 0.4930851685230413,
+ #~ -0.7792461682735826,
+ #~ 0.1068537396039267,
+ #~ -0.7497836830029866,
+ #~ 1.1890550989396227]
+
+
+q_init = [1.6303944033191686,
+ 0.10667013920411265,
+ 0.7238819844104087,
+ 0.7730587306235782,
+ -0.043157980427418564,
+ 0.036281378036913704,
+ -0.6318237486355123,
+ -0.42574929300057496,
+ -0.18039933848395723,
+ -0.4860063822932892,
+ -0.2774144115119662,
+ -0.19134289512020888,
+ 0.9550299287798723,
+ 0.19509799193446575,
+ 0.3635785793155469,
+ -0.8606020394838575,
+ -0.07246675014760717,
+ -0.14938369232897578,
+ 0.6897688116897913]
+
+
     #~ q_init[0:7] = tp.q_init[0:7]
 
     #~ q_init[1] += 1.05
     #~ q_0[2] = 1.1
     s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId, rarmId, larmId]) 
+    #~ q_goal = fullBody.generateContacts(s1.q(), [0,0,1])
+    #~ s1.setQ(q_goal)
     q0 = s1.q()[:]
     r(q0)
     return s1
@@ -368,13 +420,13 @@ r(s1_sp.q())
 
 switch_context(0)
 
-res = computeNext(s1_hp,rarmId,True,10)
-s2 = res[0]; r(s2.q())
+#~ res = computeNext(s1_hp,rarmId,True,10)
+#~ s2 = res[0]; r(s2.q())
 #~ s3 = computeNext(s2,rLegId,True,10)[0]; r(s3.q())
 #~ res2 = computeNext(s2,larmId,True,100)
 #~ s3 = res2[0]; r(s3.q())
-s4 = removeContact(s2,rLegId,True,0.1)[0]; r(s4.q())
-s5 = removeContact(s4,lLegId,True,0.1)[0]; r(s5.q())
+#~ s4 = removeContact(s2,rLegId,True,0.1)[0]; r(s4.q())
+#~ s5 = removeContact(s4,lLegId,True,0.1)[0]; r(s5.q())
 #~ path = go0([s1,s2,s3,s4,s5], mu=0.6,num_optim=1)
 #~ path = go0([s1,s2,s4,s5], mu=0.6,num_optim=1)
 
@@ -389,10 +441,42 @@ def add(lId):
     
 def rm(lId):
     sF = states[-1]
-    ns = removeContact(sF,lId,True)[0]
+    ns, res = removeContact(sF,lId,True)
+    print "success ?", res
+    #~ ns = removeContact(sF,lId,True)[0]
     global states
-    states +=[ns]
-    r(ns.q())
+    if res:
+        states +=[ns]
+        r(ns.q())
+    
+def ast():
+    global states
+    states+=[res[i-1]]
+
+def cpa(mu = 1):
+    global path
+    reset()
+    try:
+        path += [go0(states[-2:], num_optim=1, mu=mu)]
+    except:
+        global states
+        states = states[:-1]
+
+def sg(mu = 1):
+    ast()
+    global path
+    reset()
+    try:
+        path += [go0(states[-2:], num_optim=1, mu=mu)]
+    except:
+        global states
+        states = states[:-1]
+    
+def pl(iid = None):
+    global path
+    if iid == None:
+        iid = len(path) -1 
+    play_trajectory(fullBody,pp,path[iid])
     
 def go():
     return go0(states, mu=0.6,num_optim=2)
