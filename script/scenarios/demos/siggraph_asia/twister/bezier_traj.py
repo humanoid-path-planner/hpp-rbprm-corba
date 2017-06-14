@@ -40,7 +40,7 @@ def play_all_paths_qs():
         if i % 2 == 0 :
             ppl(pid)
 
-def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_optim = 0, effector = False, mu=0.5) :
+def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_optim = 0, effector = False, mu=0.5, use_Kin = True) :
     q1 = s1.q()
     q2 = s2.q()
     stateid = s1.sId
@@ -56,7 +56,7 @@ def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_opti
     c_bounds_1 =   s1.getComConstraint(limbsCOMConstraints)
     c_bounds_mid = sInt.getComConstraint(limbsCOMConstraints)
     c_bounds_2 = s2.getComConstraint(limbsCOMConstraints)
-    success, c_mid_1, c_mid_2 = solve_quasi_static(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand, mu = mu)
+    success, c_mid_1, c_mid_2 = solve_quasi_static(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand, mu = mu, use_Kin = use_Kin)
     
     print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ calling effector", effector
     paths_ids = []
@@ -172,6 +172,7 @@ from hpp.corbaserver.rbprm.tools.path_to_trajectory import *
 
 
 def createPtBox(gui, winId, config, res = 0.01, color = [1,1,1,0.3]):
+    print "plottiun ", config
     resolution = res
     global scene
     global b_id
@@ -203,10 +204,10 @@ def test_ineq(stateid, constraints, n_samples = 10, color=[1,1,1,1.]):
 #~ test_ineq(0, limbsCOMConstraints, 1000, [0,1,1,1])
 
 
-def gen(s1, s2, num_optim = 0, ine_curve =True, s = 1., effector = False, mu =0.5, gen_traj = True):
+def gen(s1, s2, num_optim = 0, ine_curve =True, s = 1., effector = False, mu =0.5, gen_traj = True, use_Kin = True):
     n_fail = 0;
     #~ viewer(configs[i])
-    res =  test(s1, s2, True, False, ine_curve,num_optim, effector, mu)
+    res =  test(s1, s2, True, False, ine_curve,num_optim, effector, mu, use_Kin)
     if(not res[0]):       
         print "lp failed"
         createPtBox(viewer.client.gui, 0, res[1][0], 0.01, [1,0,0,1.])
@@ -471,7 +472,7 @@ path = []
 a_s = []
 
         
-def go0(states, one_curve = True, num_optim = 0, mu = 0.6, s =None):
+def go0(states, one_curve = True, num_optim = 0, mu = 0.6, s =None,  use_kin = True):
     global com_vel
     global com_acc
     global vels
@@ -481,7 +482,7 @@ def go0(states, one_curve = True, num_optim = 0, mu = 0.6, s =None):
     for i, el in enumerate(states[:-1]):
         if s == None:
             sc = max(norm(array(states[i+1].q()) - array(el.q())), 1.) * 0.5
-        path += gen(el,states[i+1],mu=mu,num_optim=num_optim, s=sc, ine_curve = one_curve)
+        path += gen(el,states[i+1],mu=mu,num_optim=num_optim, s=sc, ine_curve = one_curve,  use_Kin = use_kin)
         print "path", len(path)
     return path
 

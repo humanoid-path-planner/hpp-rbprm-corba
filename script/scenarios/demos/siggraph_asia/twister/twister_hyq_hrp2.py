@@ -327,8 +327,8 @@ def setupHrp2():
             ]; r (q_init)
 
     #~ q_init[1] = -1.05
-    #~ s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId]) 
-    s1 = State(fullBody,q=q_init, limbsIncontact = []) 
+    s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId]) 
+    #~ s1 = State(fullBody,q=q_init, limbsIncontact = []) 
     q0 = s1.q()[:]
     r(q0)
     return s1
@@ -378,25 +378,25 @@ def setupSpidey():
  #~ 1.1890550989396227]
 
 
-q_init = [1.6303944033191686,
- 0.10667013920411265,
- 0.7238819844104087,
- 0.7730587306235782,
- -0.043157980427418564,
- 0.036281378036913704,
- -0.6318237486355123,
- -0.42574929300057496,
- -0.18039933848395723,
- -0.4860063822932892,
- -0.2774144115119662,
- -0.19134289512020888,
- 0.9550299287798723,
- 0.19509799193446575,
- 0.3635785793155469,
- -0.8606020394838575,
- -0.07246675014760717,
- -0.14938369232897578,
- 0.6897688116897913]
+    q_init = [1.7248956090657142,
+ 0.10332894313987395,
+ 0.7135677069780713,
+ 0.8053782375870717,
+ 0.009162336020200251,
+ 0.017984134378282467,
+ -0.5924175190948179,
+ -0.09343758894532768,
+ -0.13260962085227604,
+ -0.7334459269711523,
+ -0.11305498904738602,
+ -0.1883955962566395,
+ 0.8346448329401047,
+ 0.27875376841185046,
+ 0.654114442736956,
+ -0.495495198017057,
+ -0.22902533402342157,
+ -0.0733460650991134,
+ 0.6485831393133032]
 
 
     #~ q_init[0:7] = tp.q_init[0:7]
@@ -457,17 +457,17 @@ def cpa(mu = 1):
     global path
     reset()
     try:
-        path += [go0(states[-2:], num_optim=1, mu=mu)]
+        path += [go0(states[-2:], num_optim=1, mu=mu, use_kin = context == 0)]
     except:
         global states
         states = states[:-1]
 
-def sg(mu = 1):
+def sg(mu = 1, nopt = 2):
     ast()
     global path
     reset()
     try:
-        path += [go0(states[-2:], num_optim=1, mu=mu)]
+        path += [go0(states[-2:], num_optim=nopt, mu=mu, use_kin = context == 0)]
     except:
         global states
         states = states[:-1]
@@ -479,6 +479,81 @@ def pl(iid = None):
     play_trajectory(fullBody,pp,path[iid])
     
 def go():
-    return go0(states, mu=0.6,num_optim=2)
+    return go0(states, mu=0.6,num_optim=2, use_kin = context == 0)
+    
+def plall(first = 0, second = 1):
+    global path
+    sc(first)
+    pIds = [i for i in range(len(path))]
+    cs = [item for sublist in [[[first,i],[second,i]] for i  in [j for j in range(len(path))]] for item in sublist]
+    i = 0
+    for ctx, pId in cs:
+        sc(ctx)
+        play_trajectory(fullBody,pp,path[pId])
+        
 
+from pickle import load, dump
+def save(fname):
+    sc(0)
+    all_data=[[],[]]
+    global states
+    for s in states:
+        all_data[0]+=[[s.q(), s.getLimbsInContact()]]
+    sc(1)
+    for s in states:
+        all_data[1]+=[[s.q(), s.getLimbsInContact()]]
+    f = open(fname, "w+")
+    dump(all_data,f)
+    f.close()
+
+def load_save(fname):
+    f = open(fname, "r+")
+    all_data = load (f)
+    f.close()
+    sc(0)
+    global states
+    states = []
+    #~ for i in range(0,len(all_data[0]),2):
+        #~ print "q",all_data[0][i]
+        #~ print "lic",all_data[0][i+1]
+        #~ states+=[State(fullBody,q=all_data[0][i], limbsIncontact = all_data[0][i+1]) ]
+    for _, s in enumerate(all_data[0]):
+        states+=[State(fullBody,q=s[0], limbsIncontact = s[1]) ]
+    sc(1)
+    global states
+    #~ for i in range(0,len(all_data[1]),2):
+        #~ states+=[State(fullBody,q=all_data[1][i], limbsIncontact = all_data[1][i+1]) ]
+    for _, s in enumerate(all_data[1]):
+        states+=[State(fullBody,q=s[0], limbsIncontact = s[1]) ]
+        
+def computeAllPath(nopt=1, mu=1, reverse = True):
+    global states
+    global path
+    if(reverse):
+        one = 0
+        zero = 1
+    else:
+        one = 1
+        zero = 0
+    sc(zero)
+    path = []
+    sc(one)
+    path = []
+    for i in range(len(states)-1):
+        sc(zero)        
+        global path
+        global states
+        print 'path ' + str(i) + 'for' + str(zero)
+        path += [go0([states[i],states[i+1]], num_optim=nopt, mu=mu, use_kin = context == 0)]
+        reset()
+        pl()
+        sc(one)
+        print 'path ' + str(i) + 'for' + str(one)
+        global path
+        global states
+        path += [go0([states[i],states[i+1]], num_optim=nopt, mu=mu, use_kin = context == 0)]
+        reset()
+        pl()
+    
+    
 r.client.gui.setVisibility("other", "OFF")

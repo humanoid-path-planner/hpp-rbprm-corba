@@ -111,7 +111,10 @@ def removeContact(state, limbName, projectToCOM = False, friction = 0.6):
 # \param max_num_samples max number of sampling in case projection ends up in collision
 # \return (State, success) whether the creation was successful, as well as the new state
 def addNewContactIfReachable(state, limbName, p, n, limbsCOMConstraints, projectToCom = False, max_num_samples = 0, friction = 0.6):
-    ok, res  = isContactReachable(state, limbName, p, n, limbsCOMConstraints)
+    if limbsCOMConstraints == None:
+        ok = True
+    else:
+        ok, res  = isContactReachable(state, limbName, p, n, limbsCOMConstraints)
     if(ok):
         s, success = addNewContact(state, limbName, p, n, max_num_samples)
         if success and projectToCom:
@@ -131,11 +134,14 @@ def projectToFeasibleCom(state,  ddc =[0.,0.,0.], max_num_samples = 10, friction
     ps = state.getContactPosAndNormals()
     p = ps[0][0]
     N = ps[1][0]
-    H = compute_CWC(p, N, state.fullBody.client.basic.robot.getMass(), mu = friction, simplify_cones = False)
-    c_ref = state.getCenterOfMass()
-    #~ Kin = state.getComConstraint(limbsCOMConstraints, [])
-    #~ res = find_valid_c_cwc_qp(H, c_ref, Kin, ddc, state.fullBody.getMass())
-    success, p_solved , x = find_valid_c_cwc_qp(H, c_ref,None, ddc, state.fullBody.getMass())
+    try:
+        H = compute_CWC(p, N, state.fullBody.client.basic.robot.getMass(), mu = friction, simplify_cones = False)
+        c_ref = state.getCenterOfMass()
+        #~ Kin = state.getComConstraint(limbsCOMConstraints, [])
+        #~ res = find_valid_c_cwc_qp(H, c_ref, Kin, ddc, state.fullBody.getMass())
+        success, p_solved , x = find_valid_c_cwc_qp(H, c_ref,None, ddc, state.fullBody.getMass())
+    except:
+        success = False
     if success:
         x = x.tolist()
         #~ if x[2] < 0.9:
@@ -149,3 +155,14 @@ def projectToFeasibleCom(state,  ddc =[0.,0.,0.], max_num_samples = 10, friction
     else:
         print "qp failed"
     return False;
+    
+def isContactCreated(s1, s2):
+    s15 = computeIntermediateState(s1,s2)
+    lcS15 = s15.getLimbsInContact()
+    lcS1 = s1.getLimbsInContact()
+    lcS2 = s2.getLimbsInContact()
+    if(len(lcS15) == len(lcS1)): #no contact breaks
+        return True
+    else:
+        return not (len(lcS15) == len(lcS2))
+        

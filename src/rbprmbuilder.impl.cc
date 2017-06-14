@@ -152,6 +152,7 @@ namespace hpp {
             problemSolver()->resetProblem();
             problemSolver()->robot ()->controlComputation
             (model::Device::JOINT_POSITION);
+            refPose = fullBody()->device_->currentConfiguration();
         }
         catch (const std::exception& exc)
         {
@@ -628,6 +629,21 @@ namespace hpp {
         return res;
     }
 
+    rbprm::T_Limb GetFreeLimbs(const RbPrmFullBodyPtr_t fullBody, const hpp::rbprm::State &state)
+    {
+        rbprm::T_Limb res;
+        std::vector<std::string> fixedContacts = state.fixedContacts(state);
+        for(rbprm::CIT_Limb cit = fullBody->GetLimbs().begin();
+            cit != fullBody->GetLimbs().end(); ++cit)
+        {
+            if(std::find(fixedContacts.begin(), fixedContacts.end(), cit->first) == fixedContacts.end())
+            {
+                    res.insert(*cit);
+            }
+        }
+        return res;
+    }
+
     double RbprmBuilder::projectStateToCOMEigen(unsigned short stateId, const model::Configuration_t& com_target, unsigned short maxNumeSamples) throw (hpp::Error)
     {
         try
@@ -659,6 +675,17 @@ namespace hpp {
             }
             if(rep.success_)
             {
+                hpp::model::Configuration_t trySave = c;
+                rbprm::T_Limb fLimbs = GetFreeLimbs(s);
+                for(rbprm::CIT_Limb cit = fLimbs.begin(); cit != fLimbs.end() && rep.success_; ++cit)
+                {
+                    // get part of reference configuration that concerns the limb.
+                    RbPrmLimbPtr_t limb = cit->second;
+                    const sampling::Sample& sample = limb->sampleContainer_.samples_[0];
+                    s.configuration_.segment(sample.startRank_, sample.length_) = refPose.segment(sample.startRank_, sample.length_) ;
+                    rep = rbprm::projection::projectToComPosition(fullBody(),com_target,s);
+                    rep.success_ = rep.success_ && val->validate(rep.result_.configuration_,rport);
+                }
                 lastStatesComputed_[stateId].configuration_ = c;
                 lastStatesComputedTime_[stateId].second.configuration_ = c;
                 return 1.;
