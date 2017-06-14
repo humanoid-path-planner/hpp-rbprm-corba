@@ -331,6 +331,8 @@ def setupHrp2():
     #~ s1 = State(fullBody,q=q_init, limbsIncontact = []) 
     q0 = s1.q()[:]
     r(q0)
+    
+    fullBody.setRefConfig(q0)
     return s1
 
 def setupSpidey():

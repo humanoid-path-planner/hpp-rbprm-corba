@@ -137,6 +137,12 @@ module hpp
                 /// \param com target com
                 double setConfigAtState(in unsigned short stateId,  in floatSeq config) raises (Error);
 
+
+                /// Set reference config for projection
+                ///
+                /// \param config target com
+                double setRefConfig(in floatSeq config) raises (Error);
+
 		/// Create a state and push it to the state array
 		///
 		/// \param q configuration

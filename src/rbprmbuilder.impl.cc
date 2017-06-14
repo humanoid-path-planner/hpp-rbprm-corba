@@ -676,7 +676,7 @@ namespace hpp {
             if(rep.success_)
             {
                 hpp::model::Configuration_t trySave = c;
-                rbprm::T_Limb fLimbs = GetFreeLimbs(s);
+                rbprm::T_Limb fLimbs = GetFreeLimbs(fullBody(), s);
                 for(rbprm::CIT_Limb cit = fLimbs.begin(); cit != fLimbs.end() && rep.success_; ++cit)
                 {
                     // get part of reference configuration that concerns the limb.
@@ -685,9 +685,18 @@ namespace hpp {
                     s.configuration_.segment(sample.startRank_, sample.length_) = refPose.segment(sample.startRank_, sample.length_) ;
                     rep = rbprm::projection::projectToComPosition(fullBody(),com_target,s);
                     rep.success_ = rep.success_ && val->validate(rep.result_.configuration_,rport);
+                    if(rep.success_)
+                    {
+                        std::cout << "yay " << std::endl;
+                        trySave = rep.result_.configuration_;
+                    }
+                    else
+                    {
+                        std::cout << "ow" << std::endl;
+                    }
                 }
-                lastStatesComputed_[stateId].configuration_ = c;
-                lastStatesComputedTime_[stateId].second.configuration_ = c;
+                lastStatesComputed_[stateId].configuration_ = trySave;
+                lastStatesComputedTime_[stateId].second.configuration_ = trySave;
                 return 1.;
             }
             return 0;
@@ -2128,6 +2137,20 @@ assert(s2 == s1 +1);
                 return 1.;
             }
             return 0.;
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    double RbprmBuilder::setRefConfig(const hpp::floatSeq& q) throw (hpp::Error)
+    {
+        try
+        {
+            model::Configuration_t res = dofArrayToConfig (fullBody()->device_, q);
+            refPose = res;
+            return 1.;
         }
         catch(std::runtime_error& e)
         {
