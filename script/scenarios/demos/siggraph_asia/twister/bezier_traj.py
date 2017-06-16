@@ -128,8 +128,8 @@ def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_opti
             #~ ppl.displayPath(p0+2)
             #~ ppl.displayPath(p0+3)
             if(effector):
-                assert False, "Cant deal with effectors right now"
-                #~ paths_ids = [int(el) for el in fullBody.effectorRRT(stateid,p0+1,p0+2,p0+3,num_optim)]
+                #~ assert False, "Cant deal with effectors right now"
+                paths_ids = [int(el) for el in fullBody.effectorRRT(stateid,p0+1,p0+2,p0+3,num_optim)]
             else:
                 paths_ids = [int(el) for el in fullBody.comRRTFromPosBetweenState(stateid,stateid1,p0+1,p0+2,p0+3,num_optim)]
             
@@ -472,7 +472,7 @@ path = []
 a_s = []
 
         
-def go0(states, one_curve = True, num_optim = 0, mu = 0.6, s =None,  use_kin = True):
+def go0(states, one_curve = True, num_optim = 0, mu = 0.6, s =None,  use_kin = True, effector = False):
     global com_vel
     global com_acc
     global vels
@@ -482,7 +482,7 @@ def go0(states, one_curve = True, num_optim = 0, mu = 0.6, s =None,  use_kin = T
     for i, el in enumerate(states[:-1]):
         if s == None:
             sc = max(norm(array(states[i+1].q()) - array(el.q())), 1.) * 0.5
-        path += gen(el,states[i+1],mu=mu,num_optim=num_optim, s=sc, ine_curve = one_curve,  use_Kin = use_kin)
+        path += gen(el,states[i+1],mu=mu,num_optim=num_optim, s=sc, ine_curve = one_curve,  use_Kin = use_kin, effector = effector)
         print "path", len(path)
     return path
 

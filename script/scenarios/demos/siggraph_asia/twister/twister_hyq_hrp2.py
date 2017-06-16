@@ -521,14 +521,16 @@ def load_save(fname):
         #~ states+=[State(fullBody,q=all_data[0][i], limbsIncontact = all_data[0][i+1]) ]
     for _, s in enumerate(all_data[0]):
         states+=[State(fullBody,q=s[0], limbsIncontact = s[1]) ]
+	r(states[-1].q())
     sc(1)
     global states
     #~ for i in range(0,len(all_data[1]),2):
         #~ states+=[State(fullBody,q=all_data[1][i], limbsIncontact = all_data[1][i+1]) ]
     for _, s in enumerate(all_data[1]):
         states+=[State(fullBody,q=s[0], limbsIncontact = s[1]) ]
+	r(states[-1].q())
         
-def computeAllPath(nopt=1, mu=1, reverse = True):
+def computeAllPath(nopt=1, mu=1, reverse = True, effector = False):
     global states
     global path
     if(reverse):
@@ -547,7 +549,7 @@ def computeAllPath(nopt=1, mu=1, reverse = True):
         global states
         print 'path ' + str(ol) + 'for' + str(zero)
         s = max(norm(array(states[i+1].q()) - array(states[i].q())), 1.) * 0.4
-        path += [go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = context == 0, s=s)]
+        path += [go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = context == 0, s=s, effector = effector)]
         reset()
         pl()
         sc(one)
