@@ -41,6 +41,8 @@ configs                  = None
 cl                       = None
 path                     = None
 
+all_paths = [[],[]]
+
 def save_globals():        
     robot_context["states"] = states
     robot_context["configs"] = configs
@@ -441,9 +443,9 @@ def add(lId):
     states +=[ns]
     r(ns.q())
     
-def rm(lId):
+def rm(lId, nu = 1):
     sF = states[-1]
-    ns, res = removeContact(sF,lId,True)
+    ns, res = removeContact(sF,lId,True,friction = nu)
     print "success ?", res
     #~ ns = removeContact(sF,lId,True)[0]
     global states
@@ -502,9 +504,10 @@ def save(fname):
     for s in states:
         all_data[0]+=[[s.q(), s.getLimbsInContact()]]
     sc(1)
+    global states
     for s in states:
         all_data[1]+=[[s.q(), s.getLimbsInContact()]]
-    f = open(fname, "w+")
+    f = open(fname, "w")
     dump(all_data,f)
     f.close()
 
@@ -521,16 +524,17 @@ def load_save(fname):
         #~ states+=[State(fullBody,q=all_data[0][i], limbsIncontact = all_data[0][i+1]) ]
     for _, s in enumerate(all_data[0]):
         states+=[State(fullBody,q=s[0], limbsIncontact = s[1]) ]
-	r(states[-1].q())
+	r(states[0].q())
     sc(1)
     global states
+    states = []
     #~ for i in range(0,len(all_data[1]),2):
         #~ states+=[State(fullBody,q=all_data[1][i], limbsIncontact = all_data[1][i+1]) ]
     for _, s in enumerate(all_data[1]):
         states+=[State(fullBody,q=s[0], limbsIncontact = s[1]) ]
-	r(states[-1].q())
+	r(states[0].q())
         
-def computeAllPath(nopt=1, mu=1, reverse = True, effector = False):
+def computeAllPath(nopt=1, mu=1, reverse = False, effector = False, start = 0):
     global states
     global path
     if(reverse):
@@ -543,24 +547,67 @@ def computeAllPath(nopt=1, mu=1, reverse = True, effector = False):
     path = []
     sc(one)
     path = []
-    for ol in range(len(states)-1):
+    for ol in range(start, len(states)-1):
         sc(zero)        
+        reset()
         global path
         global states
         print 'path ' + str(ol) + 'for' + str(zero)
         s = max(norm(array(states[i+1].q()) - array(states[i].q())), 1.) * 0.4
-        path += [go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = context == 0, s=s, effector = effector)]
+        if(ol > len(path) -1):
+            path += [go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = context == 0, s=s)]
+        else:
+            path[ol]=go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = ctxt == 0, s=s)
+        all_paths[zero] = path[:]
         reset()
         pl()
         sc(one)
+        reset()
         print 'path ' + str(ol) + 'for' + str(one)
         global path
         global states
         s = max(norm(array(states[i+1].q()) - array(states[i].q())), 1.) * 1
-        path += [go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = context == 0, s=s)]
+        if(ol > len(path) -1):
+            path += [go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = context == 0, s=s)]
+        else:
+            path[ol]=go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = ctxt == 0, s=s)
+        all_paths[one] = path[:]
         reset()
         pl()
+        save_paths("test_paths")
     
+def onepath(ol, ctxt, nopt=1, mu=1, effector = False):
+    sc(ctxt)
+    global path
+    global states
+    s = max(norm(array(states[i+1].q()) - array(states[i].q())), 1.) * 1
+    if ctxt == 0:
+        print "ctxt", ctxt
+        print "q", len(states[i+1].q())
+        s = max(norm(array(states[i+1].q()) - array(states[i].q())), 1.) * 0.4
+    if(ol > len(path) -1):
+        path += [go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = ctxt == 0, s=s)]
+    else:
+        path[ol]=go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = ctxt == 0, s=s)
+    all_paths[ctxt] = path
+    
+def save_paths(fname):
+    f = open(fname, "w")
+    dump(all_paths,f)
+    f.close()
+    
+def load_paths(fname):
+    f = open(fname, "r")
+    global all_paths
+    all_paths = load (f)
+    f.close()
+    sc(0)
+    global path
+    path = all_paths[0][:]
+    
+    sc(1)
+    global path
+    path = all_paths[1][:]
     
 r.client.gui.setVisibility("other", "OFF")
 r.client.gui.setVisibility("bos", "OFF")

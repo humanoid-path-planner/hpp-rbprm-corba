@@ -173,15 +173,15 @@ from hpp.corbaserver.rbprm.tools.path_to_trajectory import *
 
 def createPtBox(gui, winId, config, res = 0.01, color = [1,1,1,0.3]):
     print "plottiun ", config
-    resolution = res
-    global scene
-    global b_id
-    boxname = scene+"/"+str(b_id)
-    b_id += 1
-    gui.addBox(boxname,resolution,resolution,resolution, color)
-    gui.applyConfiguration(boxname,[config[0],config[1],config[2],1,0,0,0])
-    gui.addSceneToWindow(scene,winId)
-    gui.refresh()
+    #~ resolution = res
+    #~ global scene
+    #~ global b_id
+    #~ boxname = scene+"/"+str(b_id)
+    #~ b_id += 1
+    #~ gui.addBox(boxname,resolution,resolution,resolution, color)
+    #~ gui.applyConfiguration(boxname,[config[0],config[1],config[2],1,0,0,0])
+    #~ gui.addSceneToWindow(scene,winId)
+    #~ gui.refresh()
 
 def test_ineq(stateid, constraints, n_samples = 10, color=[1,1,1,1.]):
     Kin = get_com_constraint(fullBody, stateid, fullBody.getConfigAtState(stateid), constraints, interm = False)
