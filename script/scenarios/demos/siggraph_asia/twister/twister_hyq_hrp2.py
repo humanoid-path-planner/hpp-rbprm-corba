@@ -541,21 +541,24 @@ def computeAllPath(nopt=1, mu=1, reverse = True):
     path = []
     sc(one)
     path = []
-    for i in range(len(states)-1):
+    for ol in range(len(states)-1):
         sc(zero)        
         global path
         global states
-        print 'path ' + str(i) + 'for' + str(zero)
-        path += [go0([states[i],states[i+1]], num_optim=nopt, mu=mu, use_kin = context == 0)]
+        print 'path ' + str(ol) + 'for' + str(zero)
+        s = max(norm(array(states[i+1].q()) - array(states[i].q())), 1.) * 0.4
+        path += [go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = context == 0, s=s)]
         reset()
         pl()
         sc(one)
-        print 'path ' + str(i) + 'for' + str(one)
+        print 'path ' + str(ol) + 'for' + str(one)
         global path
         global states
-        path += [go0([states[i],states[i+1]], num_optim=nopt, mu=mu, use_kin = context == 0)]
+        s = max(norm(array(states[i+1].q()) - array(states[i].q())), 1.) * 1
+        path += [go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = context == 0, s=s)]
         reset()
         pl()
     
     
 r.client.gui.setVisibility("other", "OFF")
+r.client.gui.setVisibility("bos", "OFF")
