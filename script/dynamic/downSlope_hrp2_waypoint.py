@@ -3,6 +3,8 @@ from hpp.gepetto import Viewer
 from hpp.corbaserver import Client
 from hpp.corbaserver.robot import Robot as Parent
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
+import omniORB.any
+
 
 class Robot (Parent):
 	rootJointType = 'freeflyer'
@@ -26,8 +28,8 @@ urdfName = 'hrp2_trunk_flexible'
 urdfNameRom =  ['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = 4;
-aMax = 4.5;
+vMax = 4.;
+aMax = 6.;
 extraDof = 6
 
 # Creating an instance of the helper class, and loading the robot
@@ -48,17 +50,17 @@ rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
 # We also bound the rotations of the torso. (z, y, x)
 rbprmBuilder.boundSO3([-0.1,0.1,-0.65,0.65,-0.2,0.2])
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
-rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-4,4,-1,1,-2,2,0,0,0,0,0,0])
+rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax,-vMax,vMax,0,0,0,0,0,0])
 indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.basic.robot.getDimensionExtraConfigSpace()
 
 # Creating an instance of HPP problem solver and the viewer
 
 ps = ProblemSolver( rbprmBuilder )
-ps.client.problem.setParameter("aMax",aMax)
-ps.client.problem.setParameter("vMax",vMax)
-ps.client.problem.setParameter("tryJump",1)
-ps.client.problem.setParameter("sizeFootX",0.24)
-ps.client.problem.setParameter("sizeFootY",0.14)
+ps.client.problem.setParameter("aMax",omniORB.any.to_any(aMax))
+ps.client.problem.setParameter("vMax",omniORB.any.to_any(vMax))
+ps.client.problem.setParameter("tryJump",omniORB.any.to_any(1.))
+ps.client.problem.setParameter("sizeFootX",omniORB.any.to_any(0.24))
+ps.client.problem.setParameter("sizeFootY",omniORB.any.to_any(0.14))
 r = Viewer (ps)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
@@ -116,7 +118,7 @@ q2= q_goal[::]
 pbCl.addConfigToRoadmap (q1)
 
 pbCl.directPath(q_init,q1,False)
-pbCl.directPath(q1,q_goal,True)
+pbCl.directPath(q1,q_goal,False)
 
 pbCl.addEdgeToRoadmap (q_init, q1, 0, False)
 pbCl.addEdgeToRoadmap (q1, q_goal, 1, False)

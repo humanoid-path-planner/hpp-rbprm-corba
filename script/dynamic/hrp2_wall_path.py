@@ -66,9 +66,9 @@ afftool.visualiseAffordances('Lean', r, r.color.blue)
 
 
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init[0:3] = [2, -1, 0.58];
 #q_init[0:3] = [2, -1, 0.58];
-#q_init[0:3] = [1.85, -1, 0.58];
+#q_init[0:3] = [2, -1, 0.58];
+q_init[0:3] = [1.85, -1, 0.58];
 q_init[3:7] = [0.7071,0,0,0.7071]
 #q_init[indexECS:indexECS+3] = [2,0,0]
 q_init[indexECS:indexECS+3] = [1,0,0]

@@ -1,7 +1,7 @@
 from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
-
+import omniORB.any
 import downSlope_hrp2_waypoint as tp
 import time
 
@@ -23,8 +23,8 @@ fullBody.setJointBounds ("base_joint_xyz",  [-2,4, 0.5, 1.5, 0.3, 1.8])
 fullBody.client.basic.robot.setDimensionExtraConfigSpace(tp.extraDof)
 
 ps = tp.ProblemSolver( fullBody )
-ps.client.problem.setParameter("aMax",tp.aMax)
-ps.client.problem.setParameter("vMax",tp.vMax)
+ps.client.problem.setParameter("aMax",omniORB.any.to_any(tp.aMax))
+ps.client.problem.setParameter("vMax",omniORB.any.to_any(tp.vMax))
 r = tp.Viewer (ps,viewerClient=tp.r.client)
 
 #~ AFTER loading obstacles
