@@ -319,14 +319,43 @@ a = suppTargets
 
 def setupHrp2():
     switch_context(0)
-    q_init =  [
-            0.1, -0.82, 0.648702, 1.0, 0.0 , 0.0, 0.0,                         	 # Free flyer 0-6
-            0.0, 0.0, 0.0, 0.0,                                                  # CHEST HEAD 7-10
-            0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # LARM       11-17
-            0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # RARM       18-24
-            0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # LLEG       25-30
-            0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # RLEG       31-36
-            ]; r (q_init)
+    q_init =  [0.8728886120451924,
+ -0.8101285717720692,
+ 0.9831109373101212,
+ 0.9907480839443233,
+ 0.04566101822960869,
+ 6.080932806073498e-05,
+ -0.12780180701818292,
+ 0.0,
+ 0.0,
+ 0.700898687394426,
+ 0.2643416012373336,
+ 1.0472,
+ -0.04797431922382627,
+ -0.013276945338995495,
+ -0.1474914458541713,
+ -0.002729397895803521,
+ 0.0417439495415805,
+ -0.0959524864077709,
+ 1.0472,
+ -0.7688894346658527,
+ -0.12266497430814384,
+ -0.12242722827560858,
+ 0.0031594766930237773,
+ 0.0443584738891719,
+ 0.015217658052039982,
+ 0.6567108816211705,
+ 0.3519940697164601,
+ -0.3096847583571286,
+ 0.01661099687285411,
+ 0.6843606576274044,
+ -0.33788734650437907,
+ 0.3649203666768749,
+ -0.3603776588496829,
+ 0.1551833621146152,
+ -0.001045294421723865,
+ 0.23087743645539907,
+ 0.28930745214380776]; r (q_init)
 
     #~ q_init[1] = -1.05
     s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId]) 
@@ -382,25 +411,45 @@ def setupSpidey():
  #~ 1.1890550989396227]
 
 
-    q_init = [1.7248956090657142,
- 0.10332894313987395,
- 0.7135677069780713,
- 0.8053782375870717,
- 0.009162336020200251,
- 0.017984134378282467,
- -0.5924175190948179,
- -0.09343758894532768,
- -0.13260962085227604,
- -0.7334459269711523,
- -0.11305498904738602,
- -0.1883955962566395,
- 0.8346448329401047,
- 0.27875376841185046,
- 0.654114442736956,
- -0.495495198017057,
- -0.22902533402342157,
- -0.0733460650991134,
- 0.6485831393133032]
+    #~ q_init = [1.7248956090657142,
+ #~ 0.10332894313987395,
+ #~ 0.7135677069780713,
+ #~ 0.8053782375870717,
+ #~ 0.009162336020200251,
+ #~ 0.017984134378282467,
+ #~ -0.5924175190948179,
+ #~ -0.09343758894532768,
+ #~ -0.13260962085227604,
+ #~ -0.7334459269711523,
+ #~ -0.11305498904738602,
+ #~ -0.1883955962566395,
+ #~ 0.8346448329401047,
+ #~ 0.27875376841185046,
+ #~ 0.654114442736956,
+ #~ -0.495495198017057,
+ #~ -0.22902533402342157,
+ #~ -0.0733460650991134,
+ #~ 0.6485831393133032]
+    q_init = [2.0073705139562783,
+ 0.10455451701731842,
+ 0.6636982709906831,
+ 0.8052290989552832,
+ -0.010905503215389124,
+ -0.028433849502961527,
+ -0.5921812935222833,
+ 0.32502766737262234,
+ 0.15429143500131443,
+ -0.8306825282286409,
+ 0.3321441608555586,
+ 0.00475050546222314,
+ 0.9719582647982088,
+ -0.14368646477113056,
+ 0.8209795520480985,
+ -0.349065850399,
+ 0.32573656479055596,
+ -0.7194630454730782,
+ 0.349065850399]
+
 
 
     #~ q_init[0:7] = tp.q_init[0:7]
@@ -461,6 +510,9 @@ def cpa(mu = 1):
     global path
     reset()
     try:
+        s = max(norm(array(states[i+1].q()) - array(states[i].q())), 1.) * 1
+        if(context == 0):
+            s = max(norm(array(states[i+1].q()) - array(states[i].q())), 1.) * 0.6
         path += [go0(states[-2:], num_optim=1, mu=mu, use_kin = context == 0)]
     except:
         global states
@@ -482,6 +534,10 @@ def pl(iid = None):
         iid = len(path) -1 
     play_trajectory(fullBody,pp,path[iid])
     
+def plc(ctx = 0, iid = None):
+    sc(ctx)
+    pl(iid)
+
 def go():
     return go0(states, mu=0.6,num_optim=2, use_kin = context == 0)
     
@@ -555,9 +611,9 @@ def computeAllPath(nopt=1, mu=1, reverse = False, effector = False, start = 0):
         print 'path ' + str(ol) + 'for' + str(zero)
         s = max(norm(array(states[i+1].q()) - array(states[i].q())), 1.) * 0.4
         if(ol > len(path) -1):
-            path += [go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = context == 0, s=s)]
+            path += [go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = context == 0, s=s, effector = effector)]
         else:
-            path[ol]=go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = ctxt == 0, s=s)
+            path[ol]=go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = ctxt == 0, s=s, effector = effector)
         all_paths[zero] = path[:]
         reset()
         pl()
@@ -568,31 +624,44 @@ def computeAllPath(nopt=1, mu=1, reverse = False, effector = False, start = 0):
         global states
         s = max(norm(array(states[i+1].q()) - array(states[i].q())), 1.) * 1
         if(ol > len(path) -1):
-            path += [go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = context == 0, s=s)]
+            path += [go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = context == 0, s=s, effector = effector)]
         else:
-            path[ol]=go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = ctxt == 0, s=s)
+            path[ol]=go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = ctxt == 0, s=s, effector = effector)
         all_paths[one] = path[:]
         reset()
         pl()
         save_paths("test_paths")
     
 def onepath(ol, ctxt, nopt=1, mu=1, effector = False):
+    reset()
     sc(ctxt)
     global path
     global states
-    s = max(norm(array(states[i+1].q()) - array(states[i].q())), 1.) * 1
+    s = max(norm(array(states[ol+1].q()) - array(states[ol].q())), 1.) * 1
     if ctxt == 0:
         print "ctxt", ctxt
-        print "q", len(states[i+1].q())
-        s = max(norm(array(states[i+1].q()) - array(states[i].q())), 1.) * 0.4
+        print "q", len(states[ol+1].q())
+        s = max(norm(array(states[ol+1].q()) - array(states[ol].q())), 1.) * 0.4
     if(ol > len(path) -1):
-        path += [go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = ctxt == 0, s=s)]
+        path += [go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = ctxt == 0, s=s, effector = effector)]
     else:
-        path[ol]=go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = ctxt == 0, s=s)
+        path[ol]=go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = ctxt == 0, s=s, effector = effector)
     all_paths[ctxt] = path
     
 def save_paths(fname):
     f = open(fname, "w")
+    dump(all_paths,f)
+    f.close()
+    #now try with latest paths
+    global all_path
+    global path
+    sc(0)
+    all_paths[0] = path[:]
+    sc(1)
+    global all_path
+    global path
+    all_paths[1] = path[:]
+    f = open(fname+"all", "w")
     dump(all_paths,f)
     f.close()
     
@@ -609,5 +678,19 @@ def load_paths(fname):
     global path
     path = all_paths[1][:]
     
+def sh(ctxt, i):
+    sc(ctxt)
+    r(states[i].q())
+    
+def lc():
+    load_save("19_06_s")
+    load_paths("19_06_p")
+    save_paths("19_06_p_save")
+    save("19_06_s_save")
+    
+def sac():
+    save("19_06_s")
+    save_paths("19_06_p")
+    
 r.client.gui.setVisibility("other", "OFF")
-r.client.gui.setVisibility("bos", "OFF")
+#~ r.client.gui.setVisibility("bos", "OFF")
