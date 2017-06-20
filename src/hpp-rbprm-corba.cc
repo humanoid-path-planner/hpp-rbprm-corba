@@ -37,10 +37,16 @@ int main (int argc, char* argv [])
 															true, "rbprmChild");
     rbprmServer.setProblemSolver (problemSolver);
 
-    corbaServer.startCorbaServer ();
-		affordanceServer.startCorbaServer ("hpp", "corbaserver",
+    std::string contextId("hpp");
+    std::string postContextId("");
+    if(argc>1) {
+        postContextId = std::string(argv[1]);
+        contextId.append(std::string(argv[1]));
+    }
+
+    corbaServer.startCorbaServer (postContextId);
+    affordanceServer.startCorbaServer (contextId, "corbaserver",
 																			"affordanceCorba", "affordance");
-    rbprmServer.startCorbaServer ("hpp", "corbaserver",
-                "rbprm");
+    rbprmServer.startCorbaServer (contextId, "corbaserver", "rbprm");
     corbaServer.processRequest(true);
 }

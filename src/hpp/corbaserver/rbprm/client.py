@@ -35,7 +35,7 @@ class Client:
   """
   Connect and create clients for hpp-rbprm library.
   """
-  def __init__(self):
+  def __init__(self, postContextId = ""):
     """
     Initialize CORBA and create default clients.
     """
@@ -47,7 +47,7 @@ class Client:
         raise CorbaError ('failed to narrow the root context')
 
     # client of Rbprm interface
-    name = [CosNaming.NameComponent ("hpp", "corbaserver"),
+    name = [CosNaming.NameComponent ("hpp" + postContextId, "corbaserver"),
             CosNaming.NameComponent ("rbprm", "rbprmbuilder")]
 
     try:
@@ -64,4 +64,3 @@ class Client:
         raise CorbaError (
             'failed to narrow client for service rbprm')
     self.rbprm = client
-
