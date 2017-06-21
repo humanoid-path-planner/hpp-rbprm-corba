@@ -57,6 +57,7 @@ indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.basic.robot.getDim
 
 ps = ProblemSolver( rbprmBuilder )
 ps.client.problem.setParameter("aMax",omniORB.any.to_any(aMax))
+ps.client.problem.setParameter("aMaxZ",omniORB.any.to_any(10.))
 ps.client.problem.setParameter("vMax",omniORB.any.to_any(vMax))
 ps.client.problem.setParameter("tryJump",omniORB.any.to_any(1.))
 ps.client.problem.setParameter("sizeFootX",omniORB.any.to_any(0.24))
