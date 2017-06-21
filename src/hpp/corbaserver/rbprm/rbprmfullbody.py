@@ -24,23 +24,23 @@ from numpy import array
 ## Corba clients to the various servers
 #
 class CorbaClient:
-    """
-    Container for corba clients to various interfaces.
-    """
-    def __init__ (self):
-        self.basic = BasicClient ()
-        self.rbprm = RbprmClient ()
+     """
+     Container for corba clients to various interfaces.
+     """
+     def __init__ (self, postContextId=""):
+          self.basic = BasicClient (postContextId=postContextId)
+          self.rbprm = RbprmClient (postContextId=postContextId)
 
 ## Load and handle a RbprmFullbody robot for rbprm planning
 #
-#  A RbprmDevice robot is a set of two robots. One for the 
+#  A RbprmDevice robot is a set of two robots. One for the
 #  trunk of the robot, one for the range of motion
 class FullBody (object):
     ## Constructor
     def __init__ (self, load = True):
         self.tf_root = "base_link"
         self.rootJointType = dict()
-        self.client = CorbaClient ()
+        self.client = CorbaClient (postContextId=postContextId)
         self.load = load
 	
 	## Virtual function to load the fullBody robot model.
