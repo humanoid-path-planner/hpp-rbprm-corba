@@ -100,6 +100,7 @@ install(FILES
   data/urdf/siggraph_asia/stairs_lower.urdf
   data/urdf/siggraph_asia/wall.urdf
   data/urdf/siggraph_asia/twister.urdf
+  data/urdf/siggraph_asia/mount.urdf
   data/spiderman/urdf/SpidermanLFootSphere.urdf
   data/spiderman/urdf/SpidermanLHandSphere.urdf
   data/spiderman/urdf/SpidermanRFootSphere.urdf
@@ -146,6 +147,7 @@ install(FILES
   data/srdf/siggraph_asia/plane_hole.srdf
   data/srdf/siggraph_asia/stairs_lower.srdf
   data/srdf/siggraph_asia/twister.srdf
+  data/srdf/siggraph_asia/mount.srdf
   data/spiderman/srdf/SpidermanLFootSphere.srdf
   data/spiderman/srdf/SpidermanLHandSphere.srdf
   data/spiderman/srdf/SpidermanRFootSphere.srdf
@@ -194,6 +196,7 @@ install(FILES
 	data/meshes/siggraph_asia/down.stl
 	data/meshes/siggraph_asia/scale.stl
     data/meshes/siggraph_asia/scale_spidey.stl
+    data/meshes/siggraph_asia/mountain.stl
     data/meshes/siggraph_asia/grasp.stl
     data/meshes/siggraph_asia/plane_hole.stl
     data/meshes/siggraph_asia/wall.stl

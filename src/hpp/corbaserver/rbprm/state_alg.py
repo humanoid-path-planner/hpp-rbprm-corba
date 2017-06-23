@@ -166,3 +166,9 @@ def isContactCreated(s1, s2):
     else:
         return not (len(lcS15) == len(lcS2))
         
+def planToStates(fullBody, configs):
+    states = []
+    for i, _ in enumerate(configs):
+        states += [State(fullBody,i) ]
+    return states
+        

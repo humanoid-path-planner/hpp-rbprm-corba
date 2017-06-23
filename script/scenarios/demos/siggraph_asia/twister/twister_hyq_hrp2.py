@@ -42,6 +42,7 @@ cl                       = None
 path                     = None
 
 all_paths = [[],[]]
+all_paths_with_pauses = [[],[]]
 
 def save_globals():        
     robot_context["states"] = states
@@ -551,6 +552,16 @@ def plall(first = 0, second = 1):
         sc(ctx)
         play_trajectory(fullBody,pp,path[pId])
         
+def plallp(first = 0, second = 1):
+    global all_paths_with_pauses
+    pIds = [i for i in range(len(all_paths_with_pauses[0]))]
+    cs = [item for sublist in [[[first,i],[second,i]] for i  in [j for j in range(len(all_paths_with_pauses[0]))]] for item in sublist]
+    i = 0
+    print cs
+    for ctx, pId in cs:
+        sc(ctx)
+        play_trajectory(fullBody,pp,all_paths_with_pauses[ctx][pId])
+        
 
 from pickle import load, dump
 def save(fname):
@@ -641,7 +652,7 @@ def onepath(ol, ctxt, nopt=1, mu=1, effector = False):
     if ctxt == 0:
         print "ctxt", ctxt
         print "q", len(states[ol+1].q())
-        s = max(norm(array(states[ol+1].q()) - array(states[ol].q())), 1.) * 0.4
+        s = max(norm(array(states[ol+1].q()) - array(states[ol].q())), 1.) * 0.6
     if(ol > len(path) -1):
         path += [go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = ctxt == 0, s=s, effector = effector)]
     else:
@@ -694,3 +705,64 @@ def sac():
     
 r.client.gui.setVisibility("other", "OFF")
 #~ r.client.gui.setVisibility("bos", "OFF")
+
+def addVoidWhileOtherMoves(ctx1=0, ctx2=1):    
+    sc(0)
+    global path
+    all_paths[0] = path[:]
+    sc(1)
+    global path
+    all_paths[1] = path[:]
+    global all_paths_with_pauses
+    all_paths_with_pauses = [[],[]]
+    for i in range(len(all_paths[0])):
+        #get the last configuration
+        num_clones = len(all_paths[ctx1][i])
+        if i == 0:
+            ref = all_paths[ctx2][0][0][:]
+        else:
+            ref = all_paths[ctx2][i-1][-1][:]
+        val = [ref for _ in range(num_clones)]
+        all_paths_with_pauses[ctx2] += [val[:]]
+        all_paths_with_pauses[ctx1] += [all_paths[ctx1][i][:]]
+        
+        
+        num_clones = len(all_paths[ctx2][i])
+        ref = all_paths[ctx1][i][-1][:]
+        val = [ref for _ in range(num_clones)]
+        all_paths_with_pauses[ctx1] += [val[:]]
+        all_paths_with_pauses[ctx2] += [all_paths[ctx2][i][:]]
+        
+        
+def breathe(ctx, state, configs, height = 0.001, time=24):
+    sc(ctx)
+    initQ = state.q()[:]
+    initCom = state.getCenterOfMass()
+    num_breaths = max(len(configs) / 24,1)
+    height_step = height * num_breaths / len(configs) * 2
+    switch = len(configs) / 2
+    delta = [height_step * i for i in range(switch)] + [height_step * (len(configs) - i) for i in range(switch, len(configs))]
+    assert(len(delta) == len(configs))
+    res = []
+    for i,q in enumerate(configs):
+        x = initCom[:]; x[2]+=delta[i]
+        print "x", x
+        succ = state.fullBody.projectStateToCOM(state.sId ,x, 1)
+        if not succ:
+            print "failt to breahte, ", i
+            state.setQ(initQ)
+            return configs
+        else:
+            print "success to breahte, ", i
+            res+=[state.q()[:]]
+    state.setQ(initQ)
+    return res
+    
+def export(ctx1=0, ctx2=1):
+    addVoidWhileOtherMoves(ctx1, ctx2)
+    p0 = [val for sublist in all_paths_with_pauses[0] for val in sublist]
+    p1 = [val for sublist in all_paths_with_pauses[1] for val in sublist]
+    sc(0)
+    fullBody.exportMotion(r,p0,"hrp2_twister_path")
+    sc(1)
+    fullBody.exportMotion(r,p1,"hyq_twister_path")
