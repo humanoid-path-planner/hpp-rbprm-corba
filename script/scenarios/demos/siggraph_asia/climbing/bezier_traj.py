@@ -123,7 +123,7 @@ def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_opti
             
             #~ pp.displayPath(p0+1)
             #~ pp.displayPath(p0+2)
-            ppl.displayPath(p0)
+            #~ ppl.displayPath(p0)
             #~ ppl.displayPath(p0+1)
             #~ ppl.displayPath(p0+2)
             #~ ppl.displayPath(p0+3)
@@ -153,7 +153,7 @@ def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_opti
             p0 = fullBody.generateCurveTraj(bezier_0)
             fullBody.generateCurveTraj(bezier_1)
             fullBody.generateCurveTraj(bezier_2)
-            ppl.displayPath(p0)
+            #~ ppl.displayPath(p0)
             #~ ppl.displayPath(p0+1)
             #~ ppl.displayPath(p0+2)
             paths_ids = [int(el) for el in fullBody.comRRTFromPosBetweenState(stateid,stateid1, p0,p0+1,p0+2,num_optim)]
@@ -214,7 +214,7 @@ def gen(s1, s2, num_optim = 0, ine_curve =True, s = 1., effector = False, mu =0.
         createPtBox(viewer.client.gui, 0, res[2][0], 0.01, [1,0,0,1.])
         found = False
         for j in range(1):
-            res = test(s1, s2, True, True, ine_curve, num_optim, effector, mu, use_Kin)               
+            res = test(s1, s2, True, True, ine_curve, num_optim, effector, mu)               
             createPtBox(viewer.client.gui, 0, res[1][0], 0.01, [0,1,0,1.])
             createPtBox(viewer.client.gui, 0, res[2][0], 0.01, [0,1,0,1.])
             if res[0]:
@@ -229,57 +229,47 @@ def gen(s1, s2, num_optim = 0, ine_curve =True, s = 1., effector = False, mu =0.
         return a
 
 
-
-def gen_several_states(states, num_optim = 0, ine_curve =True, s = 1., effector = False, mu =0.5, init_vel = [0.,0.,0.], init_acc = [0.,0.,0.], use_Kin = True):
-    com_1 = states[0].getCenterOfMass()
-    com_2 = states[-1].getCenterOfMass() 
-    
-    stateid = states[0].sId
-    stateid1 = states[-1].sId
+def gen_several_states(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s = 1., effector = False, mu =0.5, init_vel = [0.,0.,0.], init_acc = [0.,0.,0.]):
+    com_1 = __get_com(fullBody, fullBody.getConfigAtState(start))
+    com_2 = __get_com(fullBody, fullBody.getConfigAtState(start+len_con))
     com_vel = init_vel[:]
     com_acc = init_acc[:]
-    start = states[0].sId
-    len_con = len(states)
-    
-    print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAA com_vel", com_vel
-    print "AAAAAAAAAAAAAAAAAAAAAAAAAAAA com_acc", com_acc
     print "going from, to ", com_1, "->", com_2
     print "going from, to ", start, "->", start + len_con
     allpoints = [com_1]  
     all_partitions = [] 
     n_fail = 0;
-    for i in range (len(states)-1):
+    for i in range (start, start+len_con):
         #~ viewer(configs[i])
-        res =  test(states[i], states[i+1], False, False, ine_curve,num_optim, effector, mu, use_Kin)
+        res =  test(i, False, False, ine_curve,num_optim, effector, mu)
         if(not res[0]):       
             print "lp failed"
             createPtBox(viewer.client.gui, 0, res[1][0], 0.01, [1,0,0,1.])
             createPtBox(viewer.client.gui, 0, res[2][0], 0.01, [1,0,0,1.])
             found = False
-            for j in range(1):
-                res = test(i, False, True, ine_curve, num_optim, effector, mu, use_Kin)               
+            for j in range(10):
+                res = test(i, False, True, ine_curve, num_optim, effector, mu)               
                 createPtBox(viewer.client.gui, 0, res[1][0], 0.01, [0,1,0,1.])
                 createPtBox(viewer.client.gui, 0, res[2][0], 0.01, [0,1,0,1.])
                 if res[0]:
                     allpoints+=[res[1][0],res[2][0]] 
                     step = (1./ len_con)
                     idx = step * (i - start)
-                    all_partitions +=  [idx +0.3*step,idx+0.7*step,idx+step]
+                    all_partitions +=  [idx +0.2*step,idx+0.8*step,idx+step]
                     break
             if not res[0]:
                 n_fail += 1
         else:      
             allpoints+=[res[1][0],res[2][0]] 
             step = (1./ len_con)
-            #~ idx = step * (i - start)
-            idx = step * i
+            idx = step * (i - start)
             all_partitions +=  [idx +0.2*step,idx+0.8*step,idx+step]
     all_partitions =  [0.] + all_partitions
     print "n_fail ", n_fail
     print "generating super curve"
     print all_partitions
     allpoints+=[com_2] 
-    bezier_0, curve = __Bezier(allpoints, init_acc = init_acc, init_vel = init_vel)    
+    bezier_0, curve = __Bezier(allpoints)    
     
     
     com_vel = curve.derivate(0.5,1)
@@ -297,9 +287,12 @@ def gen_several_states(states, num_optim = 0, ine_curve =True, s = 1., effector 
     com_vel = flatten(asarray(com_vel).transpose().tolist())
     com_acc = flatten(asarray(com_acc).transpose().tolist())
     
+    print "at", all_partitions[-1]
+    print "com_vel", com_vel
+    print "com_acc", com_acc
     
     p0 = fullBody.generateCurveTrajParts(bezier_0,all_partitions) + 1
-    ppl.displayPath(p0-1)
+    #~ ppl.displayPath(p0-1)
     # now we need to project all states to the new com positions
     print "WTF ", len(all_partitions)
     for k in range(3, len(all_partitions),3):
@@ -309,26 +302,11 @@ def gen_several_states(states, num_optim = 0, ine_curve =True, s = 1., effector 
         print "curve end ", curve(1.)
         ok = False
         #~ try:
-        st = states[k/3]
-        sid = st.sId
+        sid = start+k/3
         print "for state", sid
         print "before project to new com ", new_com
-        print "before previous com", st.getCenterOfMass()
-        for _ in range(7):
-            print "WRTFF", all_partitions[k]
-            new_com = flatten(asarray(curve(all_partitions[k]).transpose()).tolist())
-            #~ com_interm1 = flatten(asarray(curve(all_partitions[k]).transpose()).tolist())
-            print "com_interm1", new_com
-            ok = project_com_colfree(fullBody, sid  , new_com)
-            if ok:
-                #~ new_com = asarray((com_interm1).transpose()).tolist()[0]
-                print "ok !!!!!!!!!!!!!!!!!"
-                break
-            else:
-                print "decreasing com"
-                all_partitions[k] -= 0.04
-                
-        ok = fullBody.projectStateToCOM(sid, new_com,50)
+        print "before previous com", __get_com(fullBody, fullBody.getConfigAtState(sid))
+        ok = fullBody.projectStateToCOM(sid, new_com)
         print "projection", ok
         if ok:
             q1 = fullBody.getConfigAtState(sid)
@@ -342,19 +320,10 @@ def gen_several_states(states, num_optim = 0, ine_curve =True, s = 1., effector 
             return
     j = 0;
     print "WTF2"
-    print "len con", len_con
-    print "p0", p0
-    for i in range(p0,p0+(len_con-1)*3,3):
+    for i in range(p0,p0+len_con*3,3):
         print "paths ids", i, " ", i+1, " ", i+3
         print "state ", start + j
-        #~ paths_ids = [int(el) for el in fullBody.comRRTFromPos(start+j,i,i+1,i+2,num_optim)]            
-        #~ ppl.displayPath(p0)
-        if(effector):
-            #~ assert False, "Cant deal with effectors right now"
-            paths_ids = [int(el) for el in fullBody.effectorRRT(start+j,i,i+1,i+2,num_optim)]
-        else:
-            paths_ids = [int(el) for el in fullBody.comRRTFromPos(start+j,i,i+1,i+2,num_optim)] 
-            #~ paths_ids = [int(el) for el in fullBody.comRRTFromPosBetweenState(stateid,stateid1,p0+1,p0+2,p0+3,num_optim)]
+        paths_ids = [int(el) for el in fullBody.comRRTFromPos(start+j,i,i+1,i+2,num_optim)]    
         j += 1
         global allpaths
         allpaths += paths_ids[:-1]
@@ -517,33 +486,6 @@ def go0(states, one_curve = True, num_optim = 0, mu = 0.6, s =None,  use_kin = T
         print "path", len(path)
     return path
 
-def go2(states, one_curve = True, num_optim = 0, mu = 0.6, s =None,  use_kin = True, effector = False, init_vel =com_vel, init_acc = com_acc):
-    global com_vel
-    global com_acc
-    global vels
-    global accs
-    if init_vel == None:
-        init_vel =com_vel
-    if init_acc == None:
-        init_acc =com_acc
-    path = [] 
-    sc = s
-    try:
-        for i, el in enumerate(states[:-1]):
-            print "************ one call to ", i
-            if s == None:
-                sc = max(norm(array(states[i+1].q()) - array(el.q())), 1.) * 0.5
-            print "states idds ", i, " ", i+2, " ", len (states[i:i+2])
-            a, ve, ac = gen_several_states(states[i:i+2],mu=mu,num_optim=num_optim, s=sc, ine_curve = one_curve,  use_Kin = use_kin, effector = effector, init_vel =com_vel, init_acc = com_acc)
-            com_vel = ve
-            com_acc = ac
-            clean_path();
-            path += a
-    except:
-        print "FAILT"
-        return path
-    print "path", len(path)
-    return path
     
 def reset():
     global com_vel

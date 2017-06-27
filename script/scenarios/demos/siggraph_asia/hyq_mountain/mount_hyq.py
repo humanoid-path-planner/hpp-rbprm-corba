@@ -188,7 +188,7 @@ def e(step = 0.5):
 	contactPlan(step)
 
 
-from bezier_traj import go0, init_bezier_traj, reset
+from bezier_traj import go0, go2, init_bezier_traj, reset
 from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import play_trajectory
 
 import time
@@ -197,7 +197,6 @@ from hpp.corbaserver.rbprm.rbprmstate import State
 from hpp.corbaserver.rbprm.state_alg  import addNewContact, isContactReachable, closestTransform, removeContact, addNewContactIfReachable, projectToFeasibleCom
 
 path = []
-allpaths = []
 
 def sc(ec):
     pass
@@ -264,6 +263,22 @@ def onepath(ol, ctxt=1, nopt=1, mu=1, effector = False):
         path[ol]=go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = False, s=s, effector = effector)
     all_paths[ctxt] = path
     
+def onepath2(states_subset, ctxt=1, nopt=1, mu=1, effector = False):
+    reset()
+    sc(ctxt)
+    global path
+    global states
+    #~ print "ctxt", ctxt
+    #~ print "q", len(states[ol+1].q())
+    #~ s = max(norm(array(states_subset[1].q()) - array(states_subset[0].q())), 1.) * 0.4
+    #~ print "s",s
+    #~ if(ol > len(path) -1):
+    path = all_paths[ctxt][:]
+    path += [go2(states_subset, num_optim=nopt, mu=mu, use_kin = False, s=None, effector = effector)]
+    #~ else:
+        #~ path[ol]=go2(states_subset, num_optim=nopt, mu=mu, use_kin = False, s=s, effector = effector)
+    all_paths[ctxt] = path    
+
 def save_paths(fname):
     f = open(fname, "w")
     dump(all_paths,f)
@@ -293,7 +308,7 @@ def sh(ctxt, i):
 def lc():
     load_save("19_06_s")
     load_paths("19_06_p")
-    save_paths("19_06_p_save")
+    #~ save_paths("19_06_p_save")
     save("19_06_s_save")
     
 def sac():
@@ -301,7 +316,14 @@ def sac():
     save_paths("19_06_p")
     
 init_bezier_traj(fullBody, r, pp, configs, limbsCOMConstraints)
-#~ d(0.07);e(0.01)
-#~ states = planToStates(fullBody,configs)
-lc()
+
 all_paths = [[],[]]
+from hpp.corbaserver.rbprm.state_alg import *
+#~ d(0.07);e(0.01)
+i=0
+#~ d(0.09); e(0.01); states = planToStates(fullBody,configs)
+
+#~ lc()
+#~ le = min(38, len(states)-10)
+#~ onepath2(states [0:-1],nopt=3,mu=0.99,effector=True)
+#~ e(0.01)
