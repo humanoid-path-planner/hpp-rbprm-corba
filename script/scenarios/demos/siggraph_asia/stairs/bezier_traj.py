@@ -240,6 +240,9 @@ def gen_several_states(states, num_optim = 0, ine_curve =True, s = 1., effector 
     com_acc = init_acc[:]
     start = states[0].sId
     len_con = len(states)
+    
+    print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAA com_vel", com_vel
+    print "AAAAAAAAAAAAAAAAAAAAAAAAAAAA com_acc", com_acc
     print "going from, to ", com_1, "->", com_2
     print "going from, to ", start, "->", start + len_con
     allpoints = [com_1]  
@@ -261,7 +264,7 @@ def gen_several_states(states, num_optim = 0, ine_curve =True, s = 1., effector 
                     allpoints+=[res[1][0],res[2][0]] 
                     step = (1./ len_con)
                     idx = step * (i - start)
-                    all_partitions +=  [idx +0.3*step,idx+0.7*step,idx+step]
+                    all_partitions +=  [idx +0.3*step,idx+0.7*step,idx+step+0.002]
                     break
             if not res[0]:
                 n_fail += 1
@@ -270,7 +273,7 @@ def gen_several_states(states, num_optim = 0, ine_curve =True, s = 1., effector 
             step = (1./ len_con)
             #~ idx = step * (i - start)
             idx = step * i
-            all_partitions +=  [idx +0.2*step,idx+0.8*step,idx+step]
+            all_partitions +=  [idx +0.4*step,idx+0.9*step,idx+step]
     all_partitions =  [0.] + all_partitions
     print "n_fail ", n_fail
     print "generating super curve"
@@ -525,16 +528,24 @@ def go2(states, one_curve = True, num_optim = 0, mu = 0.6, s =None,  use_kin = T
         init_acc =com_acc
     path = [] 
     sc = s
-    for i, el in enumerate(states[:-1]):
-        print "************ one call to ", i
-        if s == None:
-            sc = max(norm(array(states[i+1].q()) - array(el.q())), 1.) * 0.3
-        print "states idds ", i, " ", i+2, " ", len (states[i:i+2])
-        a, ve, ac = gen_several_states(states[i:i+2],mu=mu,num_optim=num_optim, s=sc, ine_curve = one_curve,  use_Kin = use_kin, effector = effector, init_vel =com_vel, init_acc = com_acc)
+    try:
+        for i, el in enumerate(states[:-2]):
+            print "************ one call to ", i
+            if s == None:
+                sc = max(norm(array(states[i+1].q()) - array(el.q())), 1.) * 0.6
+            print "states idds ", i, " ", i+2, " ", len (states[i:i+2])
+            a, ve, ac = gen_several_states(states[i:i+2],mu=mu,num_optim=num_optim, s=sc, ine_curve = one_curve,  use_Kin = use_kin, effector = effector, init_vel =com_vel, init_acc = com_acc)
+            com_vel = ve
+            com_acc = ac
+            clean_path();
+            path += a
+        a, ve, ac = gen_several_states(states[-2:],mu=mu,num_optim=num_optim, s=sc, ine_curve = one_curve,  use_Kin = use_kin, effector = effector, init_vel =com_vel, init_acc = com_acc)
         com_vel = ve
         com_acc = ac
-        clean_path();
         path += a
+    except:
+        print "FAILT"
+        return path
     print "path", len(path)
     return path
     

@@ -73,8 +73,8 @@ afftool.loadObstacleModel (packageName, "stairs_lower", "planning", r)
 #~ afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 #~ afftool.visualiseAffordances('Lean', r, [0, 0, 0.9])
 
-ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
+#~ ps.client.problem.selectConFigurationShooter("RbprmShooter")
+#~ ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 #~ ps.solve ()
 t = ps.solve ()
 

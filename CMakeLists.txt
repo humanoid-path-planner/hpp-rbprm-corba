@@ -92,6 +92,7 @@ install(FILES
   data/urdf/darpa.urdf
   data/urdf/car.urdf
   data/urdf/polaris.urdf
+  data/urdf/siggraph_asia/chair.urdf
   data/urdf/siggraph_asia/down.urdf
   data/urdf/siggraph_asia/scale.urdf
   data/urdf/siggraph_asia/scale_spidey.urdf
@@ -139,6 +140,7 @@ install(FILES
   data/srdf/darpa.srdf
   data/srdf/car.srdf
   data/srdf/polaris.srdf
+  data/srdf/siggraph_asia/chair.srdf
   data/srdf/siggraph_asia/down.srdf
   data/srdf/siggraph_asia/scale.srdf
   data/srdf/siggraph_asia/scale_spidey.srdf
@@ -188,13 +190,13 @@ install(FILES
 	data/meshes/stair_bauzil_reduced.stl
 	data/meshes/climb.stl
 	data/meshes/stepladder.stl
-	data/meshes/chair.stl
 	data/meshes/car.stl
 	data/meshes/polaris.stl
 	data/meshes/polaris_reduced.stl
 	data/meshes/siggraph_asia/twister.stl
 	data/meshes/siggraph_asia/down.stl
 	data/meshes/siggraph_asia/scale.stl
+    data/meshes/siggraph_asia/chair.stl
     data/meshes/siggraph_asia/scale_spidey.stl
     data/meshes/siggraph_asia/mountain.stl
     data/meshes/siggraph_asia/grasp.stl

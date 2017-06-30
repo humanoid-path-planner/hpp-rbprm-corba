@@ -138,11 +138,11 @@ def onepath2(states_subset, ctxt=1, nopt=1, mu=1, effector = False):
     global states
     #~ print "ctxt", ctxt
     #~ print "q", len(states[ol+1].q())
-    #~ s = max(norm(array(states_subset[1].q()) - array(states_subset[0].q())), 1.) * 0.4
+    s = max(norm(array(states_subset[1].q()) - array(states_subset[0].q())), 1.) * 0.4
     #~ print "s",s
     #~ if(ol > len(path) -1):
     path = all_paths[ctxt][:]
-    path += [go2(states_subset, num_optim=nopt, mu=mu, use_kin = True, s=None, effector = effector)]
+    path += [go2(states_subset, num_optim=nopt, mu=mu, use_kin = True, s=s, effector = effector)]
     #~ else:
         #~ path[ol]=go2(states_subset, num_optim=nopt, mu=mu, use_kin = False, s=s, effector = effector)
     all_paths[ctxt] = path    
@@ -232,16 +232,16 @@ states+=[s]
 #~ lc()
 #~ le = min(38, len(states)-10)
 
-#~ lc()
+lc()
 #~ path = []
 #~ all_paths = [[],[]]
-states = list(reversed(states))
+#~ states = list(reversed(states))
 #~ for i in range(0,4):
     #~ print i
     #~ onepath(i,0,nopt=1,effector=False,mu=1);
     #~ 
 #~ 
-#~ onepath2(states [0:-2],nopt=3,mu=1,effector=False)
+#~ onepath2(states [2:-2],nopt=0,mu=1,effector=False)
 
 #~ e(0.01)
 
