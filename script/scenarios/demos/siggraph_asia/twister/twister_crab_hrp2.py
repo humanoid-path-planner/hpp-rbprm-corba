@@ -191,7 +191,7 @@ def dist(q0,q1):
 def distq_ref(q0):
     return lambda s: dist(s.q(),q0) 
 
-def computeNext(state, limb, projectToCom = False, max_num_samples = 10):
+def computeNext(state, limb, projectToCom = False, max_num_samples = 10, mu = 0.6):
     global a
     t1 = time.clock()
     #~ candidates = [el for el in a if isContactReachable(state, limb, el[0], el[1], limbsCOMConstraints)[0] ]
@@ -199,9 +199,9 @@ def computeNext(state, limb, projectToCom = False, max_num_samples = 10):
     #~ t3 = time.clock()
     global context
     if context == 0:
-        results = [addNewContactIfReachable(state, limb, el[0], el[1], limbsCOMConstraints, projectToCom, max_num_samples) for el in a]
+        results = [addNewContactIfReachable(state, limb, el[0], el[1], limbsCOMConstraints, projectToCom, max_num_samples, mu) for el in a]
     else:
-        results = [addNewContactIfReachable(state, limb, el[0], el[1], None, projectToCom, max_num_samples) for el in a]
+        results = [addNewContactIfReachable(state, limb, el[0], el[1], None, projectToCom, max_num_samples, mu) for el in a]
     t2 = time.clock()
     #~ t4 = time.clock()
     resultsFinal = [el[0] for el in results if el[1]]
@@ -371,34 +371,31 @@ def setupSpidey():
     switch_context(1)
     q_0 = fullBody.getCurrentConfig(); r(q_0)
     
-    q_init = [1.5118243482119733,
- 0.1515578829873285,
- 0.48976931477040697,
- 0.9915264175846067,
- -0.018363722321990766,
- -0.068500987098437,
- -0.10883819045195667,
- 0.5302771431871597,
- 0.5441203380575321,
- 0.2782134865083353,
- -0.06010765345021368,
- -0.8900451738361533,
- 0.276589550853067,
- -0.34163470046205424,
- -0.2710174858398316,
- 0.06526434276718414,
- -0.43672572993852576,
- -0.9562437680837305,
- 0.9084315210259988,
- -0.6088478466994447,
- -0.13563212555983598,
+    q_init = [1.8644820749752133,
+ -0.05907835662004786,
+ 0.36244227429714687,
+ 0.796622257271051,
+ -0.01123057286487888,
+ -0.04124810131291858,
+ 0.6029638858104035,
+ -0.03547067445226691,
+ 0.6709217094864277,
+ 0.26125134036900377,
+ 0.018790826902884056,
+ 1.0472,
+ -0.12716727062306263,
+ -0.4194108294469009,
+ -0.5282737768672232,
+ 0.6483375025026266,
+ -0.36743071075802436,
+ -1.3354344044074755,
+ 0.8731280507393882,
+ -0.6564341232652954,
+ -0.14124478581057368,
  0.0349066,
- 0.9658270566778959,
- -0.6362233126122913,
- 1.5]
-
-
-
+ 1.0782285414916801,
+ -1.2054219129402555,
+ 0.6375403038065977]
 
 
 
@@ -407,7 +404,7 @@ def setupSpidey():
 
     #~ q_init[1] += 1.05
     #~ q_0[2] = 1.1
-    s1 = State(fullBody,q=q_init, limbsIncontact = ['r1', 'r3', 'l3', 'l2']) 
+    s1 = State(fullBody,q=q_init, limbsIncontact = ['r1', 'r3', 'l3']) 
     #~ q_goal = fullBody.generateContacts(s1.q(), [0,0,1])
     #~ s1.setQ(q_goal)
     q0 = s1.q()[:]
@@ -452,6 +449,9 @@ def rm(lId, nu = 1):
     if res:
         states +=[ns]
         r(ns.q())
+        return True
+    else :
+        return False
     
 def ast():
     global states
@@ -465,10 +465,14 @@ def cpa(mu = 1):
         if(context == 0):
             s = max(norm(array(states[i+1].q()) - array(states[i].q())), 1.) * 0.6
         #~ path += [go0(states[-2:], num_optim=1, mu=mu, use_kin = context == 0)]
-        path += [go0(states[-2:], num_optim=1, mu=0.6, use_kin = context == 0)]
+        path += [go0(states[-2:], num_optim=0, mu=mu, use_kin = context == 0)]
+        return True
     except:
+        e = sys.exc_info()[0]
+        print( "Error in rm : " + str(e))
         global states
         states = states[:-1]
+        return False
 
 def sg(mu = 1, nopt = 2):
     ast()
@@ -542,7 +546,7 @@ def load_save(fname):
         #~ states+=[State(fullBody,q=all_data[0][i], limbsIncontact = all_data[0][i+1]) ]
     for _, s in enumerate(all_data[0]):
         states+=[State(fullBody,q=s[0], limbsIncontact = s[1]) ]
-	r(states[0].q())
+    r(states[0].q())
     sc(1)
     global states
     states = []
@@ -550,7 +554,7 @@ def load_save(fname):
         #~ states+=[State(fullBody,q=all_data[1][i], limbsIncontact = all_data[1][i+1]) ]
     for _, s in enumerate(all_data[1]):
         states+=[State(fullBody,q=s[0], limbsIncontact = s[1]) ]
-	r(states[0].q())
+    r(states[0].q())
         
 def computeAllPath(nopt=1, mu=1, reverse = False, effector = False, start = 0):
     global states
@@ -679,6 +683,7 @@ def addVoidWhileOtherMoves(ctx1=0, ctx2=1):
         
         
         num_clones = len(all_paths[ctx2][i])
+        
         ref = all_paths[ctx1][i][-1][:]
         val = [ref for _ in range(num_clones)]
         all_paths_with_pauses[ctx1] += [val[:]]
@@ -717,3 +722,70 @@ def export(ctx1=0, ctx2=1):
     fullBody.exportMotion(r,p0,"hrp2_twister_path")
     sc(1)
     fullBody.exportMotion(r,p1,"hyq_twister_path")
+
+import random
+import sys
+
+def generatePossibilities():
+    global states
+    s = states[-1]
+    lNames = fullBody.limbNames[:]
+    lix = s.getLimbsInContact()
+    #first generate contact creation possibilities
+    poss  = [ ["add", l] for l in lNames if(len(lix) > 1) or lix[0] != l]
+    global context
+    if(len(lix) > 3):    
+        poss += [ ["rm", l] for l in s.getLimbsInContact()]    
+    return random.sample(poss, len(poss))
+    
+    
+from numpy.linalg import norm
+def one_step(mu = 1):
+    reset()
+    poss = generatePossibilities()
+    found = False
+    global states
+    s = states[-1]
+    while(not found and len(poss) > 0):
+        ac, lId = poss.pop(0)
+        print "selected " , ac, lId , "\n nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+        if(ac == 'rm'):
+            ok = rm(lId, mu);
+            if(not ok):
+                pass
+            else:
+                found = cpa()
+                print "found PATH ?", cpa
+        else: # add
+            res = computeNext(s,lId,True,10, mu)
+            print "CANDIDATES ", len(res)
+            while(not found and len(res) >0):
+                print "GOING IN"
+                sc = res.pop(0)
+                if (norm(array(s.getEffectorPosition(lId) [0]) - array(sc.getEffectorPosition(lId) [0])) < 0.02):
+                    print "too close"
+                else:
+                    ol = len(path)
+                    try:
+                        global path
+                        path += [go0([states[-1],sc], num_optim=0, mu=mu, use_kin = context == 0)]                        
+                        if len(path) > 0 and len(path[-1]) == 0:
+                            path = path[:-1]
+                            print "empty path"
+                        else:
+                            print "found PATH !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! \, !!!!!!!!!!!!!!!!!!!!!"
+                            found = True         
+                            states+=[sc]       
+                    except:
+                        e = sys.exc_info()[0]
+                        print( "Error in go0 : " + str(e))
+        if found:
+            onepath(len(path)-1,context,4)
+            pl()
+            sac()
+                
+def one_step_both():
+    sc(0); one_step();
+    sc(1);one_step();
+    
+sc(1);sc(0)

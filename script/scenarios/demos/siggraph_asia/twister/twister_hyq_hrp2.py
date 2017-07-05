@@ -191,7 +191,7 @@ def dist(q0,q1):
 def distq_ref(q0):
     return lambda s: dist(s.q(),q0) 
 
-def computeNext(state, limb, projectToCom = False, max_num_samples = 10):
+def computeNext(state, limb, projectToCom = False, max_num_samples = 10, mu = 0.6):
     global a
     t1 = time.clock()
     #~ candidates = [el for el in a if isContactReachable(state, limb, el[0], el[1], limbsCOMConstraints)[0] ]
@@ -199,9 +199,9 @@ def computeNext(state, limb, projectToCom = False, max_num_samples = 10):
     #~ t3 = time.clock()
     global context
     if context == 0:
-        results = [addNewContactIfReachable(state, limb, el[0], el[1], limbsCOMConstraints, projectToCom, max_num_samples) for el in a]
+        results = [addNewContactIfReachable(state, limb, el[0], el[1], limbsCOMConstraints, projectToCom, max_num_samples, mu) for el in a]
     else:
-        results = [addNewContactIfReachable(state, limb, el[0], el[1], None, projectToCom, max_num_samples) for el in a]
+        results = [addNewContactIfReachable(state, limb, el[0], el[1], None, projectToCom, max_num_samples, mu) for el in a]
     t2 = time.clock()
     #~ t4 = time.clock()
     resultsFinal = [el[0] for el in results if el[1]]
@@ -320,43 +320,81 @@ a = suppTargets
 
 def setupHrp2():
     switch_context(0)
-    q_init =  [0.8728886120451924,
- -0.8101285717720692,
- 0.9831109373101212,
- 0.9907480839443233,
- 0.04566101822960869,
- 6.080932806073498e-05,
- -0.12780180701818292,
- 0.0,
- 0.0,
- 0.700898687394426,
- 0.2643416012373336,
+    #~ q_init =  [0.8728886120451924,
+ #~ -0.8101285717720692,
+ #~ 0.9831109373101212,
+ #~ 0.9907480839443233,
+ #~ 0.04566101822960869,
+ #~ 6.080932806073498e-05,
+ #~ -0.12780180701818292,
+ #~ 0.0,
+ #~ 0.0,
+ #~ 0.700898687394426,
+ #~ 0.2643416012373336,
+ #~ 1.0472,
+ #~ -0.04797431922382627,
+ #~ -0.013276945338995495,
+ #~ -0.1474914458541713,
+ #~ -0.002729397895803521,
+ #~ 0.0417439495415805,
+ #~ -0.0959524864077709,
+ #~ 1.0472,
+ #~ -0.7688894346658527,
+ #~ -0.12266497430814384,
+ #~ -0.12242722827560858,
+ #~ 0.0031594766930237773,
+ #~ 0.0443584738891719,
+ #~ 0.015217658052039982,
+ #~ 0.6567108816211705,
+ #~ 0.3519940697164601,
+ #~ -0.3096847583571286,
+ #~ 0.01661099687285411,
+ #~ 0.6843606576274044,
+ #~ -0.33788734650437907,
+ #~ 0.3649203666768749,
+ #~ -0.3603776588496829,
+ #~ 0.1551833621146152,
+ #~ -0.001045294421723865,
+ #~ 0.23087743645539907,
+ #~ 0.28930745214380776]; 
+ 
+    q_init =  [1.465951314830228,
+ -0.9176187491454572,
+ 0.556996332024304,
+ 0.8949373222781749,
+ 0.004991393277543945,
+ 0.09328595707567328,
+ 0.43630265344046976,
+ -0.03547067445226664,
+ 0.6709217094864276,
+ 0.2612513403690041,
+ 0.018790826902884042,
  1.0472,
- -0.04797431922382627,
- -0.013276945338995495,
- -0.1474914458541713,
- -0.002729397895803521,
- 0.0417439495415805,
- -0.0959524864077709,
+ -0.12716727062306263,
+ 0.014121758070711707,
+ 0.0349066,
+ -0.005336299638361007,
+ 0.09555844824139348,
+ -0.15100592820137693,
  1.0472,
- -0.7688894346658527,
- -0.12266497430814384,
- -0.12242722827560858,
- 0.0031594766930237773,
- 0.0443584738891719,
- 0.015217658052039982,
- 0.6567108816211705,
- 0.3519940697164601,
- -0.3096847583571286,
- 0.01661099687285411,
- 0.6843606576274044,
- -0.33788734650437907,
- 0.3649203666768749,
- -0.3603776588496829,
- 0.1551833621146152,
- -0.001045294421723865,
- 0.23087743645539907,
- 0.28930745214380776]; r (q_init)
+ -0.6564341232652954,
+ -0.14124478581057368,
+ 0.0349066,
+ 0.006442792051943824,
+ 0.0976416359755596,
+ 0.048557325328327426,
+ 0.025298798438044116,
+ 0.5088603837394758,
+ 0.09277155854142789,
+ 0.06056704285485918,
+ -0.40397983120647746,
+ -0.3442592958713712,
+ -0.5709648671805531,
+ -0.5813136986745363,
+ -0.8406045693532259,
+ 0.5508411880503161,
+ 0.06566162355557537,
+ 0.5817029063967701]; r (q_init)
 
     #~ q_init[1] = -1.05
     s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId]) 
@@ -431,25 +469,25 @@ def setupSpidey():
  #~ -0.22902533402342157,
  #~ -0.0733460650991134,
  #~ 0.6485831393133032]
-    q_init = [2.0073705139562783,
- 0.10455451701731842,
- 0.6636982709906831,
- 0.8052290989552832,
- -0.010905503215389124,
- -0.028433849502961527,
- -0.5921812935222833,
- 0.32502766737262234,
- 0.15429143500131443,
- -0.8306825282286409,
- 0.3321441608555586,
- 0.00475050546222314,
- 0.9719582647982088,
- -0.14368646477113056,
- 0.8209795520480985,
- -0.349065850399,
- 0.32573656479055596,
- -0.7194630454730782,
- 0.349065850399]
+    q_init = [1.6670312616342942,
+ 0.20127376202858566,
+ 0.739444139081984,
+ 0.8130958130273452,
+ -0.06868653920670141,
+ 0.00679181431311124,
+ -0.5780235543881778,
+ 0.1654216543489246,
+ 0.5734730044598786,
+ -0.4499452491995113,
+ -0.3154352960993857,
+ 0.33799033217639185,
+ 0.4989495980795661,
+ 0.0374165716925084,
+ 0.14610413723674062,
+ -0.42273615519042024,
+ -0.06059877573098429,
+ -0.18210341174296363,
+ 0.8073354599499604]
 
 
 
@@ -458,6 +496,7 @@ def setupSpidey():
     #~ q_init[1] += 1.05
     #~ q_0[2] = 1.1
     s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId, rarmId, larmId]) 
+    #~ s1 = State(fullBody,q=q_init, limbsIncontact = []) 
     #~ q_goal = fullBody.generateContacts(s1.q(), [0,0,1])
     #~ s1.setQ(q_goal)
     q0 = s1.q()[:]
@@ -543,6 +582,7 @@ def go():
     return go0(states, mu=0.6,num_optim=2, use_kin = context == 0)
     
 def plall(first = 0, second = 1):
+    sc(0);r(states[0].q());sc(1);r(states[0].q())
     global path
     sc(first)
     pIds = [i for i in range(len(path))]
@@ -591,7 +631,7 @@ def load_save(fname):
         #~ states+=[State(fullBody,q=all_data[0][i], limbsIncontact = all_data[0][i+1]) ]
     for _, s in enumerate(all_data[0]):
         states+=[State(fullBody,q=s[0], limbsIncontact = s[1]) ]
-	r(states[0].q())
+    r(states[0].q())
     sc(1)
     global states
     states = []
@@ -599,7 +639,7 @@ def load_save(fname):
         #~ states+=[State(fullBody,q=all_data[1][i], limbsIncontact = all_data[1][i+1]) ]
     for _, s in enumerate(all_data[1]):
         states+=[State(fullBody,q=s[0], limbsIncontact = s[1]) ]
-	r(states[0].q())
+    r(states[0].q())
         
 def computeAllPath(nopt=1, mu=1, reverse = False, effector = False, start = 0):
     global states
@@ -648,7 +688,7 @@ def onepath(ol, ctxt, nopt=1, mu=1, effector = False):
     sc(ctxt)
     global path
     global states
-    s = max(norm(array(states[ol+1].q()) - array(states[ol].q())), 1.) * 1
+    s = max(norm(array(states[ol+1].q()) - array(states[ol].q())), 1.) * 1.3
     if ctxt == 0:
         print "ctxt", ctxt
         print "q", len(states[ol+1].q())
@@ -698,6 +738,11 @@ def lc():
     load_paths("19_06_p")
     save_paths("19_06_p_save")
     save("19_06_s_save")
+    sc(0)
+    r(states[-1].q())
+    sc(1)
+    r(states[-1].q())
+    sc(0)
     
 def sac():
     save("19_06_s")
@@ -759,10 +804,123 @@ def breathe(ctx, state, configs, height = 0.001, time=24):
     return res
     
 def export(ctx1=0, ctx2=1):
-    addVoidWhileOtherMoves(ctx1, ctx2)
+    #~ addVoidWhileOtherMoves(ctx1, ctx2)
     p0 = [val for sublist in all_paths_with_pauses[0] for val in sublist]
     p1 = [val for sublist in all_paths_with_pauses[1] for val in sublist]
     sc(0)
     fullBody.exportMotion(r,p0,"hrp2_twister_path")
     sc(1)
     fullBody.exportMotion(r,p1,"hyq_twister_path")
+    
+def computeSupportPolygon(state, filename = "sp"):
+    com = array(state.getCenterOfMass())
+    ps = state.getContactPosAndNormals()
+    p = ps[0][0]
+    N = ps[1][0]
+    H = compute_CWC(p, N, state.fullBody.client.basic.robot.getMass(), mu = 0.3, simplify_cones = False)
+    res = []
+    rg = 2000
+    eq = rg /2
+    scale = 0.001
+    rg = 20
+    eq = rg /2
+    scale = 0.1
+    for i in range(rg):
+        for j in range(rg):
+            for k in range(1):
+                c = com + array([(i - eq)*scale, (j - eq)*scale, k])
+                w = compute_w(c)           
+                if(H.dot( w )<= 0).all():
+                #~ print 'active'
+                    res+=[c]
+                    c[2]=1
+                    res+=[c]
+                    createPtBox(r.client.gui, 0, c, color = [1,0,0,1])
+    f = open(filename, "w")
+    dump(res,f)
+    f.close()
+    return res
+    
+import random
+import sys
+
+def generatePossibilities():
+    global states
+    s = states[-1]
+    lNames = fullBody.limbNames[:]
+    lix = s.getLimbsInContact()
+    #first generate contact creation possibilities
+    poss  = [ ["add", l] for l in lNames if(len(lix) > 1) or lix[0] != l]
+    global context
+    if(len(lix) > 1 + context):    
+        poss += [ ["rm", l] for l in s.getLimbsInContact()]    
+    return random.sample(poss, len(poss))
+    
+    
+from numpy.linalg import norm
+def one_step(mu = 1):
+    reset()
+    poss = generatePossibilities()
+    found = False
+    global states
+    s = states[-1]
+    while(not found and len(poss) > 0):
+        ac, lId = poss.pop(0)
+        print "selected " , ac, lId , "\n nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+        if(ac == 'rm'):
+            ok = rm(lId, mu);
+            if(not ok):
+                pass
+            else:
+                found = cpa()
+                print "found PATH ?", cpa
+        else: # add
+            res = computeNext(s,lId,True,10, mu)
+            print "CANDIDATES ", len(res)
+            while(not found and len(res) >0):
+                print "GOING IN"
+                sc = res.pop(0)
+                if (norm(array(s.getEffectorPosition(lId) [0]) - array(sc.getEffectorPosition(lId) [0])) < 0.02):
+                    print "too close"
+                else:
+                    ol = len(path)
+                    try:
+                        global path
+                        path += [go0([states[-1],sc], num_optim=0, mu=mu, use_kin = context == 0)]                        
+                        if len(path) > 0 and len(path[-1]) == 0:
+                            path = path[:-1]
+                            print "empty path"
+                        else:
+                            print "found PATH !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! \, !!!!!!!!!!!!!!!!!!!!!"
+                            found = True         
+                            states+=[sc]       
+                    except:
+                        e = sys.exc_info()[0]
+                        print( "Error in go0 : " + str(e))
+        if found:
+            onepath(len(path)-1,context,2)
+            pl()
+            sac()
+                
+def one_step_both():
+    sc(0); one_step();
+    sc(1);one_step();
+    
+sc(1);sc(0)
+lc();
+#~ sc(0)
+#~ r(states[-1].q())
+#~ sc(1)
+#~ r(states[-1].q())
+#~ 
+#~ for i in range(20):
+    #~ one_step_both();sc(0)
+#~ sc(1)
+#~ for i in range(len(path)):
+    #~ sc(0)
+    #~ r(states[i+1].q())
+    #~ sc(1)
+    #~ print "***************************************IIIIIIIIIIIIIIIIIIIIIIIIIII*************** ", i
+    #~ onepath(i,1,4,effector=True,mu=0.6)
+    #~ sac()
+    #~ 

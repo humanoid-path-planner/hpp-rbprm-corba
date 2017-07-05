@@ -11,7 +11,7 @@ import hrp2_model as model
 from hrp2_model import *
 import time
 
-
+from CWC_methods import compute_CWC, is_stable
 
 
 ps = path_planner.ProblemSolver( model.fullBody )

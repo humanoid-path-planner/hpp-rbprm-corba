@@ -129,7 +129,7 @@ def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_opti
             #~ ppl.displayPath(p0+3)
             if(effector):
                 #~ assert False, "Cant deal with effectors right now"
-                paths_ids = [int(el) for el in fullBody.effectorRRT(stateid,p0+1,p0+2,p0+3,num_optim)]
+                paths_ids = [int(el) for el in fullBody.effectorRRTFromPosBetweenState(stateid,p0+1,p0+2,p0+3,num_optim)]
             else:
                 paths_ids = [int(el) for el in fullBody.comRRTFromPosBetweenState(stateid,stateid1,p0+1,p0+2,p0+3,num_optim)]
             
@@ -156,7 +156,11 @@ def test(s1,s2, path = False, use_rand = False, just_one_curve = False, num_opti
             ppl.displayPath(p0)
             #~ ppl.displayPath(p0+1)
             #~ ppl.displayPath(p0+2)
-            paths_ids = [int(el) for el in fullBody.comRRTFromPosBetweenState(stateid,stateid1, p0,p0+1,p0+2,num_optim)]
+            if(effector):
+                #~ assert False, "Cant deal with effectors right now"
+                paths_ids = [int(el) for el in fullBody.effectorRRTFromPosBetweenState(stateid,stateid1,p0+1,p0+2,p0+3,num_optim)]
+            else:
+                paths_ids = [int(el) for el in fullBody.comRRTFromPosBetweenState(stateid,stateid1,p0+1,p0+2,p0+3,num_optim)]
         #~ paths_ids = []
         global allpaths
         allpaths += paths_ids[:-1]

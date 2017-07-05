@@ -162,13 +162,13 @@ def publishRobot_and_switch(context_to):
     r.client.gui.refresh ()
   
 def init_contexts():
-    init_context("scale_hrp2_path", "hrp2_model_grasp", ['hyq_description', "hyq", "other"])
+    init_context("scale_hrp2_path", "crab_model", ['hyq_description', "hyq", "other"])
     #~ init_context("twister_hyq_path", "hyq_model", ['hrp2_14_description', "hrp2_14_reduced", "other"])
     global robot_context
     robot_context = robot_contexts[0]
     set_globals()
     switch_context(0)
-    r.client.gui.setVisibility('hyq_trunk_large', "OFF")
+    #~ r.client.gui.setVisibility('hyq_trunk_large', "OFF")
     sc(0)    
     
 def switch_context(rid):
@@ -325,17 +325,18 @@ def setupHrp2():
     #~ q_init [3:7] = [ 0.98877108,  0.        ,  0.14943813,  0.        ]
     #~ q_init [0:3] = [-0.05, -0.82, 0.50]; 
     
-    q_init =  [
-        -0.05, -0.82, 0.65, 1.0, 0.0 , 0.0, 0.0,                         	 # Free flyer 0-6
-        0.0, 0.0, 0.0, 0.0,                                                  # CHEST HEAD 7-10
-        0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # LARM       11-17
-        0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # RARM       18-24
-        0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # LLEG       25-30
-        0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # RLEG       31-36
-        ]; r (q_init)
+    #~ q_init =  [
+        #~ -0.05, -0.82, 0.65, 1.0, 0.0 , 0.0, 0.0,                         	 # Free flyer 0-6
+        #~ 0.0, 0.0, 0.0, 0.0,                                                  # CHEST HEAD 7-10
+        #~ 0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # LARM       11-17
+        #~ 0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # RARM       18-24
+        #~ 0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # LLEG       25-30
+        #~ 0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # RLEG       31-36
+        #~ ]; r (q_init)
     #~ q_init[1] = -1.05
-    s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId]) 
-    #~ s1 = State(fullBody,q=q_init, limbsIncontact = []) 
+    q_init[0:3] = [-0.2,-1, 0.24];
+    #~ s1 = State(fullBody,q=q_init, limbsIncontact = ['l3','r3','l1','r1']) 
+    s1 = State(fullBody,q=q_init, limbsIncontact = []) 
     q0 = s1.q()[:]
     r(q0)
     
@@ -345,6 +346,8 @@ def setupHrp2():
 s1_hp = setupHrp2()
 states+=[s1_hp]
 r(s1_hp.q())
+
+
 #~ 
 switch_context(0)
 
@@ -364,6 +367,8 @@ def rm(lId, nu = 1):
     if res:
         states +=[ns]
         r(ns.q())
+        return True
+    return False
     
 def ast():
     global states
@@ -377,19 +382,27 @@ def cpa(mu = 1):
         if(context == 0):
             s = max(norm(array(states[i+1].q()) - array(states[i].q())), 1.) * 0.6
         path += [go0(states[-2:], num_optim=1, mu=mu, use_kin = context == 0)]
+        print "success "
+        #~ print tg
+        return True
     except:
         global states
         states = states[:-1]
+        print "fail "
+        #~ print tg
+        return False
 
-def sg(mu = 1, nopt = 2):
+def sg(mu = 0, nopt = 2):
     ast()
     global path
     reset()
     try:
         path += [go0(states[-2:], num_optim=nopt, mu=mu, use_kin = context == 0)]
+        return True
     except:
         global states
         states = states[:-1]
+        return False
     
 def pl(iid = None):
     global path
@@ -515,9 +528,78 @@ def export():
     #~ sc(0)
 	fullBody.exportMotion(r,p0,"hrp2_climbing_path")
     
-lc()
+    
+
+import random
+import sys
+
+def generatePossibilities():
+    global states
+    s = states[-1]
+    lNames = fullBody.limbNames[:]
+    lix = s.getLimbsInContact()
+    #first generate contact creation possibilities
+    poss  = [ ["add", l] for l in lNames if(len(lix) > 1) or lix[0] != l]
+    global context
+    if(len(lix) > 3):    
+        poss += [ ["rm", l] for l in s.getLimbsInContact()]    
+    return random.sample(poss, len(poss))
+    
+    
+from numpy.linalg import norm
+def one_step(mu = 0.6):
+    reset()
+    poss = generatePossibilities()
+    found = False
+    global states
+    s = states[-1]
+    while(not found and len(poss) > 0):
+        ac, lId = poss.pop(0)
+        print "selected " , ac, lId , "\n nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn \n", 
+        if(ac == 'rm'):
+            if(states[-1].getLimbsInContact() <= 3):
+                print "passing"
+                print erjiejrjr
+                pass
+            ok = rm(lId, mu);
+            print "limbs in contact " , states[-1].getLimbsInContact()
+            if(not ok):
+                pass
+            else:
+                found = cpa()
+                print "found PATH ?", found
+        else: # add
+            res = computeNext(s,lId,True,10, mu)
+            print "CANDIDATES ", len(res)
+            while(not found and len(res) >0):
+                print "GOING IN"
+                sc = res.pop(0)
+                if (norm(array(s.getEffectorPosition(lId) [0]) - array(sc.getEffectorPosition(lId) [0])) < 0.02):
+                    print "too close"
+                else:
+                    ol = len(path)
+                    try:
+                        global path
+                        path += [go0([states[-1],sc], num_optim=0, mu=mu, use_kin = context == 0)]                        
+                        if len(path) > 0 and len(path[-1]) == 0:
+                            path = path[:-1]
+                            print "empty path"
+                        else:
+                            print "found PATH !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! \, !!!!!!!!!!!!!!!!!!!!!"
+                            found = True         
+                            states+=[sc]       
+                    except:
+                        e = sys.exc_info()[0]
+                        print( "Error in go0 : " + str(e))
+        if found:
+            onepath(len(path)-1,context,mu=mu, nopt=2)
+            pl()
+            sac()
+#~ lc()
 #~ for i in range(len(states)-1):
 	#~ print "I ", i
 	#~ onepath(i,0,3,effector=False,mu=10)
 	#~ pl()
 	#~ sac()
+	#~ 
+

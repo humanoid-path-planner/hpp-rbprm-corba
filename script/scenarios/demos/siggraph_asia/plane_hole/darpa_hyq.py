@@ -6,11 +6,8 @@ from hpp.gepetto import Viewer
 #reference pose for hyq
 from hyq_ref_pose import hyq_ref
 
-from hpp.corbaserver.rbprm.state_alg import *
-from numpy import array
-
 #calling script darpa_hyq_path to compute root path
-import mount_hyq_path as tp
+import darpa_hyq_path as tp
 
 from os import environ
 ins_dir = environ['DEVEL_DIR']
@@ -32,7 +29,7 @@ srdfSuffix = ""
 #  This time we load the full body model of HyQ
 fullBody = FullBody () 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz", [-4,6, -1, 1, 0.3, 4])
+fullBody.setJointBounds ("base_joint_xyz", [0,6, -1, 1, 0.3, 4])
 
 #  Setting a number of sample configurations used
 nbSamples = 20000
@@ -97,7 +94,7 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
 
 r(q_init)
 configs = []
-
+from numpy import array
 
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
@@ -118,6 +115,17 @@ limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : rfoot
 						larmId : {'file': "hrp2/LA_com.ineq", 'effector' : lHand} }
 
 
+def act(i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True, verbose = False, draw = False):
+	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, 0.4, optim_effectors = optim_effectors, time_scale = 20., useCOMConstraints = False, use_window = use_window,
+	verbose = verbose, draw = draw)
+
+def play(frame_rate = 1./24.):
+	play_traj(fullBody,pp,frame_rate)
+	
+
+import time
+
+#DEMO METHODS
 
 def initConfig():
 	r.client.gui.setVisibility("hyq", "ON")
@@ -161,7 +169,6 @@ def contactPlan(step = 0.5):
 	tp.cl.problem.selectProblem("default")
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
-	global configs
 	for i in range(0,len(configs)):
 		r(configs[i]);
 		time.sleep(step)		
@@ -186,7 +193,14 @@ def d(step=0.06):
 def e(step = 0.5):
 	print "displaying contact plan"
 	contactPlan(step)
+	
+print "Root path generated in " + str(tp.t) + " ms."
 
+#~ d();e()
+#~ d(0.1);e(0.01)
+
+
+#~ configs = d(0.005); e()
 
 from bezier_traj import go0, go2, init_bezier_traj, reset
 from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import play_trajectory
@@ -263,22 +277,21 @@ def onepath(ol, ctxt=1, nopt=1, mu=1, effector = False):
         path[ol]=go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = False, s=s, effector = effector)
     all_paths[ctxt] = path
     
-def onepath2(states_subset, ctxt=1, nopt=1, mu=1, effector = False):
+def onepath2(states_subset, ctxt=1, nopt=1, mu=1, effector = False, init_vel =None, init_acc = None):
     reset()
     sc(ctxt)
     global path
     global states
     #~ print "ctxt", ctxt
     #~ print "q", len(states[ol+1].q())
-    #~ s = max(norm(array(states_subset[1].q()) - array(states_subset[0].q())), 1.) * 0.4
+    s = max(norm(array(states_subset[1].q()) - array(states_subset[0].q())), 1.) * 0.8
     #~ print "s",s
     #~ if(ol > len(path) -1):
     path = all_paths[ctxt][:]
-    path += [go2(states_subset, num_optim=nopt, mu=mu, use_kin = False, s=None, effector = effector)]
+    path += [go2(states_subset, num_optim=nopt, mu=mu, use_kin = False, s=s, effector = effector)]
     #~ else:
         #~ path[ol]=go2(states_subset, num_optim=nopt, mu=mu, use_kin = False, s=s, effector = effector)
     all_paths[ctxt] = path    
-    sac()
 
 def save_paths(fname):
     f = open(fname, "w")
@@ -309,20 +322,26 @@ def sh(ctxt, i):
 def lc():
     load_save("19_06_s")
     load_paths("19_06_p")
-    #~ save_paths("19_06_p_save")
+    save_paths("19_06_p_save")
     save("19_06_s_save")
     
 def sac():
     save("19_06_s")
     save_paths("19_06_p")
     
-init_bezier_traj(fullBody, r, pp, configs, limbsCOMConstraints)
+init_bezier_traj(fullBody, r, pp, [], limbsCOMConstraints)
 
 all_paths = [[],[]]
 from hpp.corbaserver.rbprm.state_alg import *
 #~ d(0.07);e(0.01)
 i=0
-d(0.07); e(0.01); states = planToStates(fullBody,configs)
+d(0.1); e(0.01); states = planToStates(fullBody,configs)
 
-onepath2(states [0:-5],nopt=1,mu=0.99,effector=True)
-#~ e(0.01)
+#~ lc()
+#~ fullBody.setReferenceConfig(configs[-1])
+fullBody.setReferenceConfig(states[0].q())
+onepath2(states [0:-1],nopt=0,mu=1,effector=False,init_acc=[0,0,0.], init_vel=[0.,0.,0.])
+plall()
+
+
+
