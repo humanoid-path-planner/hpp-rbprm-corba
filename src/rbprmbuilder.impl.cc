@@ -2026,6 +2026,16 @@ assert(s2 == s1 +1);
 
     }
 
+    hpp::floatSeq* RbprmBuilder::effectorRRTFromPosBetweenState(double state1, double state2,
+                                               unsigned short cT1,
+                                               unsigned short cT2,
+                                               unsigned short cT3,
+                                               unsigned short numOptimizations) throw (hpp::Error)
+    {
+        return rrt(&interpolation::effectorRRT, state1,state2, cT1, cT2, cT3, numOptimizations);
+
+    }
+
     hpp::floatSeq* RbprmBuilder::effectorRRT(double state1,
                                              unsigned short cT1,
                                              unsigned short cT2,

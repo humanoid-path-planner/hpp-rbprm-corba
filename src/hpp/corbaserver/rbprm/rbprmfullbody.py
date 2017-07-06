@@ -584,6 +584,9 @@ class FullBody (object):
      # \param rootPositions1 com positions to track for 3rd phase
      # \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
      # \return id of the root path computed
+     def effectorRRTFromPosBetweenState(self, state1, state2, comPos1, comPos2, comPos3, numOptim = 10):
+          return self.client.rbprm.rbprm.effectorRRTFromPosBetweenState(state1, state2, comPos1, comPos2, comPos3, numOptim)
+          
      def comRRTFromPosBetweenState(self, state1, state2, comPos1, comPos2, comPos3, numOptim = 10):
           return self.client.rbprm.rbprm.comRRTFromPosBetweenState(state1, state2, comPos1, comPos2, comPos3, numOptim)
           

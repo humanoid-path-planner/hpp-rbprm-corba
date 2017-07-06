@@ -134,14 +134,16 @@ def projectToFeasibleCom(state,  ddc =[0.,0.,0.], max_num_samples = 10, friction
     ps = state.getContactPosAndNormals()
     p = ps[0][0]
     N = ps[1][0]
-    try:
-        H = compute_CWC(p, N, state.fullBody.client.basic.robot.getMass(), mu = friction, simplify_cones = False)
-        c_ref = state.getCenterOfMass()
+    print "p", p
+    print "N", N
+    #~ try:
+    H = compute_CWC(p, N, state.fullBody.client.basic.robot.getMass(), mu = friction, simplify_cones = False)
+    c_ref = state.getCenterOfMass()
         #~ Kin = state.getComConstraint(limbsCOMConstraints, [])
         #~ res = find_valid_c_cwc_qp(H, c_ref, Kin, ddc, state.fullBody.getMass())
-        success, p_solved , x = find_valid_c_cwc_qp(H, c_ref,None, ddc, state.fullBody.getMass())
-    except:
-        success = False
+    success, p_solved , x = find_valid_c_cwc_qp(H, c_ref,None, ddc, state.fullBody.getMass())
+    #~ except:
+        #~ success = False
     if success:
         x = x.tolist()
         #~ if x[2] < 0.9:

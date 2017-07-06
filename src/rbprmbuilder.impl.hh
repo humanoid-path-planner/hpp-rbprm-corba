@@ -233,6 +233,11 @@ namespace hpp {
                                            unsigned short comTraj2,
                                            unsigned short comTraj3,
                                            unsigned short numOptimizations) throw (hpp::Error);
+        virtual hpp::floatSeq* effectorRRTFromPosBetweenState(double state1,double state2,
+                                           unsigned short comTraj1,
+                                           unsigned short comTraj2,
+                                           unsigned short comTraj3,
+                                           unsigned short numOptimizations) throw (hpp::Error);
         virtual hpp::floatSeq* effectorRRT(double state1,
                                            unsigned short comTraj1,
                                            unsigned short comTraj2,
