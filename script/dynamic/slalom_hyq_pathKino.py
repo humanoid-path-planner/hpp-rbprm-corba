@@ -4,6 +4,8 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 # Importing Gepetto viewer helper class
 from hpp.gepetto import Viewer
 import time
+import omniORB.any
+from planning.config import *
 
 rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
@@ -14,9 +16,10 @@ urdfName = 'hyq_trunk_large'
 urdfNameRom = ['hyq_lhleg_rom','hyq_lfleg_rom','hyq_rfleg_rom','hyq_rhleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = 1;
-aMax = 5;
+vMax = 1.;
+aMax = 5.;
 extraDof = 6
+mu=omniORB.any.to_any(MU)
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
@@ -36,8 +39,10 @@ rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax
 # Creating an instance of HPP problem solver and the viewer
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 ps = ProblemSolver( rbprmBuilder )
-ps.client.problem.setParameter("aMax",aMax)
-ps.client.problem.setParameter("vMax",vMax)
+ps.client.problem.setParameter("aMax",omniORB.any.to_any(aMax))
+ps.client.problem.setParameter("vMax",omniORB.any.to_any(vMax))
+ps.client.problem.setParameter("orientedPath",omniORB.any.to_any(1.))
+ps.client.problem.setParameter("friction",mu)
 r = Viewer (ps)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
@@ -68,7 +73,7 @@ ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 # Choosing RBPRM shooter and path validation methods.
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
+ps.client.problem.selectPathValidation("RbprmDynamicPathValidation",0.05)
 # Choosing kinodynamic methods : 
 ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
@@ -83,10 +88,10 @@ q_far = q_init[::]
 q_far[2] = -3
 r(q_far)
 
-#r.solveAndDisplay("rm",1,0.01)
+r.solveAndDisplay("rm",1,0.01)
 
 
-t = ps.solve ()
+#t = ps.solve ()
 
 
 

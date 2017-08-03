@@ -1919,12 +1919,15 @@ assert(s2 == s1 +1);
             if(!(problemSolver_->problem()->configValidations()->validate(s1Bis.configuration_, rport)))
             {
                 std::cout << "could not project s1Bis without collision at state " << s1  << std::endl;
+                hppDout(error,"could not project s1Bis without collision at state " + s1  );
                 rport->print(std::cout);
+                std::cout<<"report printed"<<std::endl;
                 throw std::runtime_error ("could not project without collision at state " + s1 );
             }
             if(!(problemSolver_->problem()->configValidations()->validate(s2Bis.configuration_, rport)))
             {
                 std::cout << "could not project s2Bis without collision at state " << s1  << std::endl;
+                hppDout(error,"could not project s2Bis without collision at state " + s1  );
                 rport->print(std::cout);
                 throw std::runtime_error ("could not project without collision at state " + s1 );
             }

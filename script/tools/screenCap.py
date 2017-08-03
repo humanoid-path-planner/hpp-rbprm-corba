@@ -45,7 +45,7 @@ tp.r.stopCapture ()
 """
 
 ## avconv (bash) commands
-avconv -i capture_0_%d.png -r 30 -vcodec mpeg4 -qscale 1 -mbd rd -flags +mv4+aic -trellis 2 -cmp 2 -subcmp 2 -g 300 -y downSlope_hrp2_interpolation2.mp4
+avconv -i capture_0_%d.png  -r 25 -vcodec mpeg4 -filter:v "setpts=2.*PTS" -qscale 1 -mbd rd -flags +mv4+aic -trellis 2 -cmp 2 -subcmp 2 -g 300 -y comRRT_flatGroundV2.mp4
 
 avconv -i capture_0_%d.png -r 30 -vcodec mpeg4 -qscale 1 -mbd rd -flags +mv4+aic -trellis 2 -cmp 2 -subcmp 2 -g 300 -pass 2  hyq_darpa.mp4
 

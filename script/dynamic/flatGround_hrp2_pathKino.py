@@ -95,7 +95,7 @@ ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 # Choosing RBPRM shooter and path validation methods.
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
+ps.client.problem.selectPathValidation("RbprmDynamicPathValidation",0.05)
 # Choosing kinodynamic methods : 
 ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
@@ -112,8 +112,8 @@ t = ps.solve ()
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp.dt=0.03
-pp.displayVelocityPath(0)
-r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
+#pp.displayVelocityPath(0)
+#r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
 
 
 """
