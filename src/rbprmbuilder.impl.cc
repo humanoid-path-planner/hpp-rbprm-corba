@@ -48,6 +48,8 @@
 #include "spline/bezier_curve.h"
 #include "hpp/rbprm/interpolation/polynom-trajectory.hh"
 #include <hpp/rbprm/planner/random-shortcut-dynamic.hh>
+#include <hpp/rbprm/planner/oriented-path-optimizer.hh>
+
 #ifdef PROFILE
     #include "hpp/rbprm/rbprm-profiler.hh"
 #endif
@@ -2597,6 +2599,7 @@ assert(s2 == s1 +1);
         problemSolver->add<core::PathPlannerBuilder_t>("DynamicPlanner",DynamicPlanner::createWithRoadmap);
         problemSolver->add <core::SteeringMethodBuilder_t> ("RBPRMKinodynamic", SteeringMethodKinodynamic::create);
         problemSolver->add <core::PathOptimizerBuilder_t> ("RandomShortcutDynamic", RandomShortcutDynamic::create);
+        problemSolver->add <core::PathOptimizerBuilder_t> ("OrientedPathOptimizer", OrientedPathOptimizer::create);
 
 
     }
