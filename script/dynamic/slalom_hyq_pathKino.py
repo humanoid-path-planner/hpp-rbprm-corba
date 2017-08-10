@@ -78,6 +78,7 @@ ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
 ps.addPathOptimizer("RandomShortcutDynamic")
+ps.addPathOptimizer("OrientedPathOptimizer")
 ps.selectPathPlanner("DynamicPlanner")
 
 #solve the problem :
@@ -110,7 +111,7 @@ r.client.gui.setCameraTransform(0,camera)
 
 #t = ps.solve ()
 
-r.solveAndDisplay("rm",1,0.01)
+t=r.solveAndDisplay("rm",1,0.01)
 
 r.client.gui.removeFromGroup("rm_group",r.sceneName)
 
@@ -139,7 +140,7 @@ raw_input()
 i=0
 r.client.gui.removeFromGroup("path_0_root",r.sceneName)
 pp.displayVelocityPath(1)
-for i in range(1,10):
+for i in range(1,5):
   time.sleep(3)
   ps.optimizePath(i)
   r.client.gui.removeFromGroup("path_"+str(i)+"_root",r.sceneName)
