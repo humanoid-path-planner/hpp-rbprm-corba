@@ -834,7 +834,7 @@ namespace hpp {
             for(model::ObjectVector_t::const_iterator oit = problemSolver_->collisionObstacles().begin();
                 oit != problemSolver_->collisionObstacles().end(); ++oit, ++i)
             {
-                sampling::GetCandidates(limb->sampleContainer_, transform, *oit, dir, reports[i]);
+                sampling::GetCandidates(limb->sampleContainer_, transform, *oit, dir, reports[i], sampling::HeuristicParam());
             }
             for(std::vector<sampling::T_OctreeReport>::const_iterator cit = reports.begin();
                 cit != reports.end(); ++cit)
@@ -897,7 +897,7 @@ namespace hpp {
             for(model::ObjectVector_t::const_iterator oit = objects.begin();
                 oit != objects.end(); ++oit, ++i)
             {
-                sampling::GetCandidates(limb->sampleContainer_, transform, *oit, dir, reports[i]);
+                sampling::GetCandidates(limb->sampleContainer_, transform, *oit, dir, reports[i], sampling::HeuristicParam());
             }
             for(std::vector<sampling::T_OctreeReport>::const_iterator cit = reports.begin();
                 cit != reports.end(); ++cit)
