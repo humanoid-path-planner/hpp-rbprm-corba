@@ -144,16 +144,16 @@ fullBody.setStartState(q_init,[rLegId,lLegId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])
 
 
-"""
+
 
 from hpp.gepetto import PathPlayer
 from fullBodyPlayerHrp2 import Player
 pp = PathPlayer (fullBody.client.basic, r)
-"""
+
 
 #~ configs = fullBody.interpolate(0.08,pathId=0,robustnessTreshold = 1, filterStates = False)
 #~ configs = fullBody.interpolate(0.04,pathId=0,robustnessTreshold = 1, filterStates = True)
-configs = fullBody.interpolate(0.001,pathId=0,robustnessTreshold = 0, filterStates = True)
+configs = fullBody.interpolate(0.08,pathId=0,robustnessTreshold = 0, filterStates = True)
 
 
 
@@ -163,13 +163,13 @@ print "number of configs :", len(configs)
 
 
 
-"""
+
 player = Player(fullBody,pp,tp,configs,use_window =1,draw=False,optim_effector=False,use_velocity=True,pathId= 0)
 
-#player.displayContactPlan()
+player.displayContactPlan()
 
 
 
-player.interpolate(0, 17)
-"""
+#player.interpolate(0, 17)
+
 
