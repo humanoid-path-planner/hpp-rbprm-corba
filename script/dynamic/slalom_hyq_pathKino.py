@@ -4,6 +4,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 # Importing Gepetto viewer helper class
 from hpp.gepetto import Viewer
 import time
+import math
 import omniORB.any
 from planning.config import *
 
@@ -32,9 +33,9 @@ rbprmBuilder.setAffordanceFilter('hyq_rfleg_rom', ['Support',])
 rbprmBuilder.setAffordanceFilter('hyq_lhleg_rom', ['Support'])
 rbprmBuilder.setAffordanceFilter('hyq_lfleg_rom', ['Support',])
 # We also bound the rotations of the torso. (z, y, x)
-#rbprmBuilder.boundSO3([-3,3,-0.1,0.1,-0.1,0.1])
+rbprmBuilder.boundSO3([-math.pi,math.pi,-0.1,0.1,-0.1,0.1])
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
-rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax,0,0,0,0,0,0,0,0])
+rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([0,0,0,0,0,0,0,0,0,0,0,0])
 
 # Creating an instance of HPP problem solver and the viewer
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
@@ -73,12 +74,12 @@ ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 # Choosing RBPRM shooter and path validation methods.
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
+ps.client.problem.selectPathValidation("RbprmDynamicPathValidation",0.05)
 # Choosing kinodynamic methods : 
 ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
-ps.addPathOptimizer("RandomShortcutDynamic")
-ps.addPathOptimizer("OrientedPathOptimizer")
+#ps.addPathOptimizer("RandomShortcutDynamic")
+#ps.addPathOptimizer("OrientedPathOptimizer")
 ps.selectPathPlanner("DynamicPlanner")
 
 #solve the problem :
@@ -109,11 +110,14 @@ r.client.gui.setCameraTransform(0,camera)
 """
 
 
-#t = ps.solve ()
+t = ps.solve ()
 
-t=r.solveAndDisplay("rm",1,0.01)
+r.displayRoadmap('rm',radiusSphere=0.01)
+#r.displayPathMap("pm",0)
 
-r.client.gui.removeFromGroup("rm_group",r.sceneName)
+#tf=r.solveAndDisplay("rm",1,0.01)
+#t = [0,0,tf,0]
+#r.client.gui.removeFromGroup("rm_group",r.sceneName)
 
 
 
@@ -123,29 +127,34 @@ r.client.gui.removeFromGroup("rm_group",r.sceneName)
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp.dt=0.03
-pp.displayVelocityPath(0)
-r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
+#pp.displayVelocityPath(0)
+#r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
 #display path
 pp.speed=0.5
 #pp (0)
 
+import parse_bench
+
+parse_bench.parseBenchmark(t)
 
 
 ###########################
 #display path with post-optimisation
 
-
+"""
 print("Press Enter to display the optimization ...")
 raw_input()
 i=0
+
 r.client.gui.removeFromGroup("path_0_root",r.sceneName)
 pp.displayVelocityPath(1)
+
 for i in range(1,5):
   time.sleep(3)
   ps.optimizePath(i)
   r.client.gui.removeFromGroup("path_"+str(i)+"_root",r.sceneName)
   pp.displayVelocityPath(i+1)
-
+"""
 
 ###########################
 
