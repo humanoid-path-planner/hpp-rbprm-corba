@@ -60,7 +60,7 @@ def parseBenchmark(tPlanningTab):
             dic[i][2] = dic[i][2]+it
 
 
-  print "Benchmark results : \n"
+  print "Benchmark results (average, in ms): \n"
 
 
   for i in range(0,len(dic)):
@@ -84,9 +84,8 @@ def parseBenchmark(tPlanningTab):
     print "\t \t - check accelerations  : "+str((dic[9][1]/mt)*100.)+" %"
     print "\t * path validation : "+str((dic[10][1]/mt)*100.)+" %"
     print "\t \t - Dynamic validation : "+str((dic[11][1]/mt)*100.)+" %"
-
-    print "# Random shortcut       : "+str((dic[12][1]/mt)*100.)+" %"
-    print "# Orientation optimizer : "+str((dic[13][1]/mt)*100.)+" %"
+    print "# Random shortcut       : "+str((dic[13][1]/mt)*100.)+" %"
+    print "# Orientation optimizer : "+str((dic[12][1]/mt)*100.)+" %"
 
 
 
