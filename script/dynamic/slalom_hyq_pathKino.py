@@ -78,8 +78,8 @@ ps.client.problem.selectPathValidation("RbprmDynamicPathValidation",0.05)
 # Choosing kinodynamic methods : 
 ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
-#ps.addPathOptimizer("RandomShortcutDynamic")
-#ps.addPathOptimizer("OrientedPathOptimizer")
+ps.addPathOptimizer("RandomShortcutDynamic")
+ps.addPathOptimizer("OrientedPathOptimizer")
 ps.selectPathPlanner("DynamicPlanner")
 
 #solve the problem :
@@ -112,7 +112,7 @@ r.client.gui.setCameraTransform(0,camera)
 
 t = ps.solve ()
 
-r.displayRoadmap('rm',radiusSphere=0.01)
+#r.displayRoadmap('rm',radiusSphere=0.01)
 #r.displayPathMap("pm",0)
 
 #tf=r.solveAndDisplay("rm",1,0.01)
@@ -127,7 +127,7 @@ r.displayRoadmap('rm',radiusSphere=0.01)
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp.dt=0.03
-#pp.displayVelocityPath(0)
+pp.displayVelocityPath(1)
 #r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
 #display path
 pp.speed=0.5
