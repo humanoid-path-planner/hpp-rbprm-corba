@@ -30,6 +30,8 @@
 # include <hpp/core/problem-solver.hh>
 # include <hpp/core/discretized-collision-checking.hh>
 # include <hpp/core/straight-path.hh>
+#include <hpp/corbaserver/affordance/server.hh>
+# include <hpp/corbaserver/problem-solver-map.hh>
 # include <hpp/rbprm/rbprm-path-validation.hh>
 # include <hpp/fcl/BVH/BVH_model.h>
 # include <hpp/core/config-validations.hh>
@@ -66,11 +68,11 @@ namespace hpp {
         hpp::core::PathValidationPtr_t createPathValidation (const hpp::model::DevicePtr_t& robot, const hpp::model::value_type& val)
         {
             hpp::model::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::model::RbPrmDevice>(robot);
-            affMap_ = problemSolver_->map
-              <std::vector<boost::shared_ptr<model::CollisionObject> > > ();
-            if (affMap_.empty ()) {
-              throw hpp::Error ("No affordances found. Unable to create Path Validaton object.");
-            }
+                        affMap_ = problemSolver_->map
+							<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
+		        if (affMap_.empty ()) {
+    	        throw hpp::Error ("No affordances found. Unable to create Path Validaton object.");
+      		  }
             hpp::rbprm::RbPrmValidationPtr_t validation
               (hpp::rbprm::RbPrmValidation::create(robotcast, romFilter_, affFilter_, affMap_));
             hpp::rbprm::RbPrmPathValidationPtr_t collisionChecking = hpp::rbprm::RbPrmPathValidation::create(robot,val);
@@ -133,6 +135,44 @@ namespace hpp {
 				affMap_t affMap_;
     };
 
+    class FullBodyMap {
+      public:
+        typedef std::map<std::string, rbprm::RbPrmFullBodyPtr_t> fMap_t;
+
+        std::string selected_;
+        fMap_t map_;
+
+        FullBodyMap (const std::string& name = "None") :
+          selected_ (name)
+          {
+            //map_[selected_] = init;
+          }
+
+        rbprm::RbPrmFullBodyPtr_t operator-> () {
+          return selected();
+        }
+        operator rbprm::RbPrmFullBodyPtr_t () {
+          return selected();
+        }
+        rbprm::RbPrmFullBodyPtr_t selected () {
+          return map_[selected_];
+        }
+        bool has (const std::string& name) const
+        {
+          // ProblemMap_t::const_iterator it = map_.find (name);
+          // return it != map_.end ();
+          return map_.end() != map_.find (name);
+        }
+        template <typename ReturnType> ReturnType keys () const
+        {
+          ReturnType l;
+          for (fMap_t::const_iterator it = map_.begin ();
+              it != map_.end (); ++it)
+            l.push_back (it->first);
+          return l;
+        }
+    };
+
       class RbprmBuilder : public virtual POA_hpp::corbaserver::rbprm::RbprmBuilder
       {
         public:
@@ -158,7 +198,8 @@ namespace hpp {
                  const char* packageName,
                  const char* modelName,
                  const char* urdfSuffix,
-                 const char* srdfSuffix) throw (hpp::Error);
+                 const char* srdfSuffix,
+                 const char* selectedProblem) throw (hpp::Error);
 
         virtual void loadFullBodyRobotFromExistingRobot () throw (hpp::Error);
 
@@ -231,11 +272,21 @@ namespace hpp {
             (RbPrmFullBodyPtr_t, core::ProblemPtr_t, const core::PathPtr_t,
              const  State &, const State &, const  std::size_t, const bool);
 
-        hpp::floatSeq* rrt(t_rrt functor , double state1,
+        hpp::floatSeq* rrt(t_rrt functor ,double state1,double state2,
                            unsigned short comTraj1, unsigned short comTraj2, unsigned short comTraj3,
                            unsigned short numOptimizations) throw (hpp::Error);
 
         virtual hpp::floatSeq* comRRTFromPos(double state1,
+                                           unsigned short comTraj1,
+                                           unsigned short comTraj2,
+                                           unsigned short comTraj3,
+                                           unsigned short numOptimizations) throw (hpp::Error);
+        virtual hpp::floatSeq* comRRTFromPosBetweenState(double state1,double state2,
+                                           unsigned short comTraj1,
+                                           unsigned short comTraj2,
+                                           unsigned short comTraj3,
+                                           unsigned short numOptimizations) throw (hpp::Error);
+        virtual hpp::floatSeq* effectorRRTFromPosBetweenState(double state1,double state2,
                                            unsigned short comTraj1,
                                            unsigned short comTraj2,
                                            unsigned short comTraj3,
@@ -254,17 +305,18 @@ namespace hpp {
                                            unsigned short comTraj3,
                                            unsigned short numOptimizations,
                                            const hpp::Names_t& trackedEffectors) throw (hpp::Error);
-        virtual hpp::floatSeq* projectToCom(double state, const hpp::floatSeq& targetCom) throw (hpp::Error);
+        virtual hpp::floatSeq* projectToCom(double state, const hpp::floatSeq& targetCom, unsigned short max_num_sample) throw (hpp::Error);
         virtual CORBA::Short createState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);
         virtual hpp::floatSeq* getConfigAtState(unsigned short stateId) throw (hpp::Error);
         virtual double setConfigAtState(unsigned short stateId, const hpp::floatSeq& config) throw (hpp::Error);
-        double projectStateToCOMEigen(unsigned short stateId, const model::Configuration_t& com_target)throw (hpp::Error);
-        virtual double projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com) throw (hpp::Error);
+        double projectStateToCOMEigen(unsigned short stateId, const model::Configuration_t& com_target, unsigned short maxNumeSamples)throw (hpp::Error);
+        virtual double projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com, unsigned short max_num_sample) throw (hpp::Error);
         virtual void saveComputedStates(const char* filepath) throw (hpp::Error);
         virtual void saveLimbDatabase(const char* limbname,const char* filepath) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeBox(const char* limbName, double sampleId) throw (hpp::Error);
         virtual CORBA::Short  isLimbInContact(const char* limbName, double state) throw (hpp::Error);
         virtual CORBA::Short  isLimbInContactIntermediary(const char* limbName, double state) throw (hpp::Error);
+        virtual CORBA::Short  computeIntermediary(unsigned short state1, unsigned short state2) throw (hpp::Error);
         virtual hpp::floatSeqSeq* getOctreeBoxes(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeTransform(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
         virtual CORBA::Short isConfigBalanced(const hpp::floatSeq& config, const hpp::Names_t& contactLimbs, double robustnessTreshold) throw (hpp::Error);
@@ -276,19 +328,41 @@ namespace hpp {
         virtual Names_t* getContactsVariations(unsigned short stateIdFrom,unsigned short stateIdTo )throw (hpp::Error);
         virtual Names_t* getAllLimbsNames()throw (hpp::Error);
         virtual CORBA::Short addNewContact(unsigned short stateId, const char* limbName,
-                                            const hpp::floatSeq& position, const hpp::floatSeq& normal) throw (hpp::Error);
+                                            const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample) throw (hpp::Error);
+        virtual CORBA::Short removeContact(unsigned short stateId, const char* limbName) throw (hpp::Error);
         virtual hpp::floatSeq* computeTargetTransform(const char* limbName, const hpp::floatSeq& configuration, const hpp::floatSeq& p, const hpp::floatSeq& n) throw (hpp::Error);
 
+        void selectFullBody (const char* name) throw (hpp::Error)
+        {
+          std::string psName (name);
+          bool has = fullBodyMap_.has (psName);
+          if (!has)
+              throw hpp::Error("unknown fullBody Problem");
+          fullBodyMap_.selected_ = psName;
+        }
+
         public:
-        void SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver);
+        void SetProblemSolverMap (hpp::corbaServer::ProblemSolverMapPtr_t psMap);
+        void initNewProblemSolver ();
 
         private:
         /// \brief Pointer to hppPlanner object of hpp::corbaServer::Server.
-        core::ProblemSolverPtr_t problemSolver_;
+        corbaServer::ProblemSolverMapPtr_t psMap_;
+        core::ProblemSolverPtr_t problemSolver()
+        {
+            return psMap_->selected();
+        }
+        FullBodyMap fullBodyMap_;
+        rbprm::RbPrmFullBodyPtr_t fullBody()
+        {
+            if(!fullBodyLoaded_)
+                throw Error ("No full body robot was loaded");
+            return fullBodyMap_.selected();
+        }
 
         private:
         model::T_Rom romDevices_;
-        rbprm::RbPrmFullBodyPtr_t fullBody_;
+        //rbprm::RbPrmFullBodyPtr_t fullBody_;
         bool romLoaded_;
         bool fullBodyLoaded_;
         BindShooter bindShooter_;
@@ -297,6 +371,7 @@ namespace hpp {
         std::vector<rbprm::State> lastStatesComputed_;
         rbprm::T_StateFrame lastStatesComputedTime_;
         sampling::AnalysisFactory* analysisFactory_;
+        model::Configuration_t refPose;
       }; // class RobotBuilder
     } // namespace impl
   } // namespace manipulation

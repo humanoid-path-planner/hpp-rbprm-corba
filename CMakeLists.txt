@@ -94,6 +94,7 @@ install(FILES
   data/urdf/darpa.urdf
   data/urdf/car.urdf
   data/urdf/polaris.urdf
+  data/urdf/siggraph_asia/chair.urdf
   data/urdf/siggraph_asia/down.urdf
   data/urdf/siggraph_asia/scale.urdf
   data/urdf/siggraph_asia/scale_spidey.urdf
@@ -101,6 +102,9 @@ install(FILES
   data/urdf/siggraph_asia/plane_hole.urdf
   data/urdf/siggraph_asia/stairs_lower.urdf
   data/urdf/siggraph_asia/wall.urdf
+  data/urdf/siggraph_asia/twister.urdf
+  data/urdf/siggraph_asia/overview.urdf
+  data/urdf/siggraph_asia/mount.urdf
   data/spiderman/urdf/SpidermanLFootSphere.urdf
   data/spiderman/urdf/SpidermanLHandSphere.urdf
   data/spiderman/urdf/SpidermanRFootSphere.urdf
@@ -157,6 +161,7 @@ install(FILES
   data/srdf/darpa.srdf
   data/srdf/car.srdf
   data/srdf/polaris.srdf
+  data/srdf/siggraph_asia/chair.srdf
   data/srdf/siggraph_asia/down.srdf
   data/srdf/siggraph_asia/scale.srdf
   data/srdf/siggraph_asia/scale_spidey.srdf
@@ -164,6 +169,9 @@ install(FILES
   data/srdf/siggraph_asia/wall.srdf
   data/srdf/siggraph_asia/plane_hole.srdf
   data/srdf/siggraph_asia/stairs_lower.srdf
+  data/srdf/siggraph_asia/overview.srdf
+  data/srdf/siggraph_asia/twister.srdf
+  data/srdf/siggraph_asia/mount.srdf
   data/spiderman/srdf/SpidermanLFootSphere.srdf
   data/spiderman/srdf/SpidermanLHandSphere.srdf
   data/spiderman/srdf/SpidermanRFootSphere.srdf
@@ -221,7 +229,6 @@ install(FILES
 	data/meshes/stair_bauzil_reduced.stl
 	data/meshes/climb.stl
 	data/meshes/stepladder.stl
-	data/meshes/chair.stl
 	data/meshes/car.stl
   data/meshes/polaris.stl
   data/meshes/polaris_reduced.stl
@@ -245,9 +252,13 @@ install(FILES
 	data/meshes/flat_step.stl
 	data/meshes/polaris.stl
 	data/meshes/polaris_reduced.stl
+	data/meshes/siggraph_asia/twister.stl
+	data/meshes/siggraph_asia/overview.stl
 	data/meshes/siggraph_asia/down.stl
 	data/meshes/siggraph_asia/scale.stl
+    data/meshes/siggraph_asia/chair.stl
     data/meshes/siggraph_asia/scale_spidey.stl
+    data/meshes/siggraph_asia/mountain.stl
     data/meshes/siggraph_asia/grasp.stl
     data/meshes/siggraph_asia/plane_hole.stl
     data/meshes/siggraph_asia/wall.stl

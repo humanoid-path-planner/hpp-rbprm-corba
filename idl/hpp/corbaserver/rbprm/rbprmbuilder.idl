@@ -84,7 +84,7 @@ module hpp
     ///
     void loadFullBodyRobot (in string trunkRobotName, in string rootJointType,
              in string packageName, in string modelName,
-             in string urdfSuffix, in string srdfSuffix)
+             in string urdfSuffix, in string srdfSuffix, in string selectedProblem)
       raises (Error);
 
 		/// Create a RbprmFullBody object
@@ -92,6 +92,8 @@ module hpp
 		/// root joint.
 		void loadFullBodyRobotFromExistingRobot ()
 			raises (Error);
+
+    void selectFullBody (in string name) raises (Error);
 
     /// set a boolean in rbprmFullBody
     /// if true, the acceleration doesn't account for the stability check
@@ -109,6 +111,12 @@ module hpp
     /// is colliding with the environment.
     ///
     void setFilter (in Names_t roms)
+      raises (Error);
+
+    /// Called if several problem solvers are used
+    /// is colliding with the environment.
+    ///
+    void initNewProblemSolver ()
       raises (Error);
 
     /// Set Rom surface constraints for the configuration shooter
@@ -130,13 +138,19 @@ module hpp
 		///
 		/// \param stateId target state
 		/// \param com target com
-		double projectStateToCOM(in unsigned short stateId,  in floatSeq com) raises (Error);
+                double projectStateToCOM(in unsigned short stateId,  in floatSeq com, in  unsigned short max_num_sample) raises (Error);
 
                 /// Project a state into a COM
                 ///
                 /// \param stateId target state
                 /// \param com target com
                 double setConfigAtState(in unsigned short stateId,  in floatSeq config) raises (Error);
+
+
+                /// Set reference config for projection
+                ///
+                /// \param config target com
+                double setRefConfig(in floatSeq config) raises (Error);
 
 		/// Create a state and push it to the state array
 		///
@@ -422,7 +436,7 @@ module hpp
     short comRRT(in double state1, in double state2,  in  unsigned short comPath, in unsigned short numOptimizations) raises (Error);
 
     /// Provided a path has already been computed and interpolated, generate a continuous path
-    /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
+    /// between two indicated states. The states do need to be consecutive.
     /// Will fail if the index of the states do not exist
     /// The path of the COM of thr robot and limbs not considered by the contact transitions between
     /// two states is assumed to be already computed, and registered in the solver under the id specified by the user.
@@ -438,6 +452,47 @@ module hpp
                         in  unsigned short comTraj2,
                         in  unsigned short comTraj3,
                         in unsigned short numOptimizations) raises (Error);
+
+
+    /// Provided a path has already been computed and interpolated, generate a continuous path
+    /// between three indicated states. The states do not need to be consecutive.
+    /// Will fail if the index of the states do not exist
+    /// The path of the COM of thr robot and limbs not considered by the contact transitions between
+    /// two states is assumed to be already computed, and registered in the solver under the id specified by the user.
+    /// It must be valid in the sense of the active PathValidation.
+    /// \param state1 index of first state.
+    /// \param state2 index of end state.
+    /// \param rootPositions1 com positions to track for 1st phase
+    /// \param rootPositions1 com positions to track for 2nd phase
+    /// \param rootPositions1 com positions to track for 3rd phase
+    /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
+    /// \return id of the root path computed
+    floatSeq comRRTFromPosBetweenState(in double state1,in double state2,
+                        in  unsigned short comTraj1,
+                        in  unsigned short comTraj2,
+                        in  unsigned short comTraj3,
+                        in unsigned short numOptimizations) raises (Error);
+
+
+    /// Provided a path has already been computed and interpolated, generate a continuous path
+    /// between three indicated states. The states do not need to be consecutive.
+    /// Will fail if the index of the states do not exist
+    /// The path of the COM of thr robot and limbs not considered by the contact transitions between
+    /// two states is assumed to be already computed, and registered in the solver under the id specified by the user.
+    /// It must be valid in the sense of the active PathValidation.
+    /// \param state1 index of first state.
+    /// \param state2 index of end state.
+    /// \param rootPositions1 com positions to track for 1st phase
+    /// \param rootPositions1 com positions to track for 2nd phase
+    /// \param rootPositions1 com positions to track for 3rd phase
+    /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
+    /// \return id of the root path computed
+    floatSeq effectorRRTFromPosBetweenState(in double state1,in double state2,
+                        in  unsigned short comTraj1,
+                        in  unsigned short comTraj2,
+                        in  unsigned short comTraj3,
+                        in unsigned short numOptimizations) raises (Error);
+
 
     /// Provided a path has already been computed and interpolated, generate a continuous path
     /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
@@ -483,8 +538,9 @@ module hpp
     /// Will fail if the index of the state does not exist.
     /// \param state index of first state.
     /// \param targetCom 3D vector for the com position
+    /// \param max_num_sample number of samples that can be used at worst before failing
     /// \return projected configuration
-    floatSeq projectToCom(in double state, in floatSeq targetCom) raises (Error);
+    floatSeq projectToCom(in double state, in floatSeq targetCom, in  unsigned short max_num_sample) raises (Error);
 
     /// Retrieve the configuration at a given state
     /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
@@ -503,6 +559,12 @@ module hpp
     /// \param state1 current state considered
     /// \return whether the limb is in contact at this state
     short isLimbInContactIntermediary(in string limbname, in double state1) raises (Error);
+
+    /// Generate intermediary state
+    /// \param state1 initial state considered
+    /// \param state2 target state considered
+    /// \return whether the limb is in contact at this state
+    short computeIntermediary(in unsigned short state1, in unsigned short state2) raises (Error);
 
     /// Saves the last computed states by the function interpolate in a filename.
     /// Raises an error if interpolate has not been called, or the file could not be opened.
@@ -582,8 +644,16 @@ module hpp
     /// \param limbName name of the considered limb to create contact with
     /// \param p 3d position of the point
     /// \param n 3d normal of the contact location center
+    /// \param max_num_sample number of times it will try to randomly sample a configuration before failing
     /// \return (success,NState) whether the creation was successful, as well as the new state
-    short addNewContact(in unsigned short stateId, in string limbName, in floatSeq position, in floatSeq normal) raises (Error);
+    short addNewContact(in unsigned short stateId, in string limbName, in floatSeq position, in floatSeq normal, in unsigned short max_num_sample) raises (Error);
+
+    /// removes a contact from the state
+    /// if the limb is not already in contact, does nothing
+    /// \param state State considered
+    /// \param limbName name of the considered limb to create contact with
+    /// \return stateId of the state without the contact
+    short removeContact(in unsigned short stateId, in string limbName) raises (Error);
 
 
     /// Computes the closest projection matrix that will bring a limb's effector

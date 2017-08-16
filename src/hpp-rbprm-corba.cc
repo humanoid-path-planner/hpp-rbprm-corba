@@ -35,16 +35,15 @@ int main (int argc, char* argv [])
                const_cast<const char**> (argv), true);
 		AffordanceServer affordanceServer (argc, const_cast<const char**> (argv),
 																				true);
-		affordanceServer.setProblemSolver (problemSolver);
+        affordanceServer.setProblemSolverMap(corbaServer.problemSolverMap());
 
 		RbprmServer rbprmServer (argc, const_cast<const char**> (argv),
 															true, "rbprmChild");
-    rbprmServer.setProblemSolver (problemSolver);
+    rbprmServer.setProblemSolverMap (corbaServer.problemSolverMap());
 
     corbaServer.startCorbaServer ();
 		affordanceServer.startCorbaServer ("hpp", "corbaserver",
 																			"affordanceCorba", "affordance");
-    rbprmServer.startCorbaServer ("hpp", "corbaserver",
-                "rbprm");
+    rbprmServer.startCorbaServer ("hpp", "corbaserver", "rbprm");
     corbaServer.processRequest(true);
 }

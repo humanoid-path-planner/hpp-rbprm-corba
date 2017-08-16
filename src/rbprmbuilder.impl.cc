@@ -121,8 +121,8 @@ namespace hpp {
                     std::string (urdfSuffix),
                     std::string (srdfSuffix));
             // Add device to the planner
-            problemSolver_->robot (device);
-            problemSolver_->robot ()->controlComputation
+            problemSolver()->robot (device);
+            problemSolver()->robot ()->controlComputation
             (model::Device::JOINT_POSITION);
         }
         catch (const std::exception& exc)
@@ -137,7 +137,8 @@ namespace hpp {
          const char* packageName,
          const char* modelName,
          const char* urdfSuffix,
-         const char* srdfSuffix) throw (hpp::Error)
+         const char* srdfSuffix,
+         const char* selectedProblem) throw (hpp::Error)
     {
         try
         {
@@ -148,7 +149,10 @@ namespace hpp {
                     std::string (modelName),
                     std::string (urdfSuffix),
                     std::string (srdfSuffix));
-            fullBody_ = rbprm::RbPrmFullBody::create(device);
+            std::string name(selectedProblem);
+            fullBodyLoaded_ = true;
+            fullBodyMap_.map_[name] = rbprm::RbPrmFullBody::create(device);
+            fullBodyMap_.selected_ = name;
             try {
               boost::any value = problemSolver_->problem()->get<boost::any> (std::string("friction"));
               fullBody_->setFriction(boost::any_cast<double>(value));
@@ -156,30 +160,31 @@ namespace hpp {
             } catch (const std::exception& e) {
               hppDout(notice,"fullbody : mu not defined, take : "<<fullBody_->getFriction()<<" as default.");
             }
-            problemSolver_->pathValidationType ("Discretized",0.05); // reset to avoid conflict with rbprm path
-            problemSolver_->robot (fullBody_->device_);
-            problemSolver_->resetProblem();
-            problemSolver_->robot ()->controlComputation
+            problemSolver()->pathValidationType ("Discretized",0.05); // reset to avoid conflict with rbprm path
+            problemSolver()->robot (fullBody()->device_);
+            problemSolver()->resetProblem();
+            problemSolver()->robot ()->controlComputation
             (model::Device::JOINT_POSITION);
+            refPose = fullBody()->device_->currentConfiguration();
         }
         catch (const std::exception& exc)
         {
+            fullBodyLoaded_ = false;
             hppDout (error, exc.what ());
             throw hpp::Error (exc.what ());
         }
-        fullBodyLoaded_ = true;
-        analysisFactory_ = new sampling::AnalysisFactory(fullBody_);
+        analysisFactory_ = new sampling::AnalysisFactory(fullBody());
     }
 
     void RbprmBuilder::loadFullBodyRobotFromExistingRobot() throw (hpp::Error)
     {
         try
         {
-            fullBody_ = rbprm::RbPrmFullBody::create(problemSolver_->problem()->robot());
-            problemSolver_->pathValidationType ("Discretized",0.05); // reset to avoid conflict with rbprm path
-            problemSolver_->robot (fullBody_->device_);
-            problemSolver_->resetProblem();
-            problemSolver_->robot ()->controlComputation
+            fullBody() = rbprm::RbPrmFullBody::create(problemSolver()->problem()->robot());
+            problemSolver()->pathValidationType ("Discretized",0.05); // reset to avoid conflict with rbprm path
+            problemSolver()->robot (fullBody()->device_);
+            problemSolver()->resetProblem();
+            problemSolver()->robot ()->controlComputation
             (model::Device::JOINT_POSITION);
         }
         catch (const std::exception& exc)
@@ -188,23 +193,23 @@ namespace hpp {
             throw hpp::Error (exc.what ());
         }
         fullBodyLoaded_ = true;
-        analysisFactory_ = new sampling::AnalysisFactory(fullBody_);
+        analysisFactory_ = new sampling::AnalysisFactory(fullBody());
     }
 
     hpp::floatSeq* RbprmBuilder::getSampleConfig(const char* limb, unsigned short sampleId) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
-        const T_Limb& limbs = fullBody_->GetLimbs();
+        const T_Limb& limbs = fullBody()->GetLimbs();
         T_Limb::const_iterator lit = limbs.find(std::string(limb));
         if(lit == limbs.end())
         {
-            std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody_->device_->name());
+            std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody()->device_->name());
             throw Error (err.c_str());
         }
         const RbPrmLimbPtr_t& limbPtr = lit->second;
         hpp::floatSeq *dofArray;
-        Eigen::VectorXd config = fullBody_->device_->currentConfiguration ();
+        Eigen::VectorXd config = fullBody()->device_->currentConfiguration ();
         if(sampleId > limbPtr->sampleContainer_.samples_.size())
         {
             std::string err("Limb " + std::string(limb) + "does not have samples.");
@@ -224,11 +229,11 @@ namespace hpp {
     {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
-        const T_Limb& limbs = fullBody_->GetLimbs();
+        const T_Limb& limbs = fullBody()->GetLimbs();
         T_Limb::const_iterator lit = limbs.find(std::string(limb));
         if(lit == limbs.end())
         {
-            std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody_->device_->name());
+            std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody()->device_->name());
             throw Error (err.c_str());
         }
         const RbPrmLimbPtr_t& limbPtr = lit->second;
@@ -459,10 +464,10 @@ namespace hpp {
         try
         {
             const std::string limbName(lb);
-            const RbPrmLimbPtr_t limb = fullBody_->GetLimbs().at(limbName);
-            model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
-            fullBody_->device_->currentConfiguration(config);
-            fullBody_->device_->computeForwardKinematics();
+            const RbPrmLimbPtr_t limb = fullBody()->GetLimbs().at(limbName);
+            model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+            fullBody()->device_->currentConfiguration(config);
+            fullBody()->device_->computeForwardKinematics();
             State state;
             state.configuration_ = config;
             state.contacts_[limbName] = true;
@@ -498,11 +503,11 @@ namespace hpp {
 
     CORBA::UShort RbprmBuilder::getNumSamples(const char* limb) throw (hpp::Error)
     {
-        const T_Limb& limbs = fullBody_->GetLimbs();
+        const T_Limb& limbs = fullBody()->GetLimbs();
         T_Limb::const_iterator lit = limbs.find(std::string(limb));
         if(lit == limbs.end())
         {
-            std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody_->device_->name());
+            std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody()->device_->name());
             throw Error (err.c_str());
         }
         return (CORBA::UShort)(lit->second->sampleContainer_.samples_.size());
@@ -510,11 +515,11 @@ namespace hpp {
 
     floatSeq *RbprmBuilder::getOctreeNodeIds(const char* limb) throw (hpp::Error)
     {
-        const T_Limb& limbs = fullBody_->GetLimbs();
+        const T_Limb& limbs = fullBody()->GetLimbs();
         T_Limb::const_iterator lit = limbs.find(std::string(limb));
         if(lit == limbs.end())
         {
-            std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody_->device_->name());
+            std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody()->device_->name());
             throw Error (err.c_str());
         }
         const sampling::T_VoxelSampleId& ids =  lit->second->sampleContainer_.samplesInVoxels_;
@@ -530,11 +535,11 @@ namespace hpp {
 
     double RbprmBuilder::getSampleValue(const char* limb, const char* valueName, unsigned short sampleId) throw (hpp::Error)
     {
-        const T_Limb& limbs = fullBody_->GetLimbs();
+        const T_Limb& limbs = fullBody()->GetLimbs();
         T_Limb::const_iterator lit = limbs.find(std::string(limb));
         if(lit == limbs.end())
         {
-            std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody_->device_->name());
+            std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody()->device_->name());
             throw Error (err.c_str());
         }
         const sampling::SampleDB& database = lit->second->sampleContainer_;
@@ -632,7 +637,41 @@ namespace hpp {
 
     }
 
-    double RbprmBuilder::projectStateToCOMEigen(unsigned short stateId, const model::Configuration_t& com_target) throw (hpp::Error)
+    rbprm::T_Limb GetFreeLimbs(const RbPrmFullBodyPtr_t fullBody, const hpp::rbprm::State &from, const hpp::rbprm::State &to)
+    {
+        rbprm::T_Limb res;
+        std::vector<std::string> fixedContacts = to.fixedContacts(from);
+        std::vector<std::string> variations = to.contactVariations(from);
+        for(rbprm::CIT_Limb cit = fullBody->GetLimbs().begin();
+            cit != fullBody->GetLimbs().end(); ++cit)
+        {
+            if(std::find(fixedContacts.begin(), fixedContacts.end(), cit->first) == fixedContacts.end())
+            {
+                if(std::find(variations.begin(), variations.end(), cit->first) != variations.end())
+                {
+                    res.insert(*cit);
+                }
+            }
+        }
+        return res;
+    }
+
+    rbprm::T_Limb GetFreeLimbs(const RbPrmFullBodyPtr_t fullBody, const hpp::rbprm::State &state)
+    {
+        rbprm::T_Limb res;
+        std::vector<std::string> fixedContacts = state.fixedContacts(state);
+        for(rbprm::CIT_Limb cit = fullBody->GetLimbs().begin();
+            cit != fullBody->GetLimbs().end(); ++cit)
+        {
+            if(std::find(fixedContacts.begin(), fixedContacts.end(), cit->first) == fixedContacts.end())
+            {
+                    res.insert(*cit);
+            }
+        }
+        return res;
+    }
+
+    double RbprmBuilder::projectStateToCOMEigen(unsigned short stateId, const model::Configuration_t& com_target, unsigned short maxNumeSamples) throw (hpp::Error)
     {
         try
         {
@@ -641,12 +680,50 @@ namespace hpp {
                 throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
             }
             State s = lastStatesComputed_[stateId];
-            bool succes (false);
-            hpp::model::Configuration_t c = rbprm::interpolation::projectOnCom(fullBody_, problemSolver_->problem(),s,com_target,succes);
-            if(succes)
+//            /hpp::model::Configuration_t c = rbprm::interpolation::projectOnCom(fullBody(), problemSolver()->problem(),s,com_target,succes);
+            rbprm::projection::ProjectionReport rep = rbprm::projection::projectToComPosition(fullBody(),com_target,s);
+            hpp::model::Configuration_t& c = rep.result_.configuration_;
+            ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
+            CollisionValidationPtr_t val = fullBody()->GetCollisionValidation();
+            rep.success_ =  rep.success_ &&  val->validate(rep.result_.configuration_,rport);
+            if (! rep.success_ && maxNumeSamples>0)
             {
-                lastStatesComputed_[stateId].configuration_ = c;
-                lastStatesComputedTime_[stateId].second.configuration_ = c;
+                Configuration_t head = s.configuration_.head<7>();
+                BasicConfigurationShooterPtr_t shooter = BasicConfigurationShooter::create(fullBody()->device_);
+                for(std::size_t i =0; !rep.success_ && i< maxNumeSamples; ++i)
+                {
+                    s.configuration_ = *shooter->shoot();
+                    s.configuration_.head<7>() = head;
+                    //c = rbprm::interpolation::projectOnCom(fullBody(), problemSolver()->problem(),s,com_target,succes);
+                    rep = rbprm::projection::projectToComPosition(fullBody(),com_target,s);
+                    rep.success_ = rep.success_ && val->validate(rep.result_.configuration_,rport);
+                    c = rep.result_.configuration_;
+                }
+            }
+            if(rep.success_)
+            {
+                hpp::model::Configuration_t trySave = c;
+                rbprm::T_Limb fLimbs = GetFreeLimbs(fullBody(), s);
+                for(rbprm::CIT_Limb cit = fLimbs.begin(); cit != fLimbs.end() && rep.success_; ++cit)
+                {
+                    // get part of reference configuration that concerns the limb.
+                    RbPrmLimbPtr_t limb = cit->second;
+                    const sampling::Sample& sample = limb->sampleContainer_.samples_[0];
+                    s.configuration_.segment(sample.startRank_, sample.length_) = refPose.segment(sample.startRank_, sample.length_) ;
+                    rep = rbprm::projection::projectToComPosition(fullBody(),com_target,s);
+                    rep.success_ = rep.success_ && val->validate(rep.result_.configuration_,rport);
+                    if(rep.success_)
+                    {
+                        std::cout << "yay " << std::endl;
+                        trySave = rep.result_.configuration_;
+                    }
+                    else
+                    {
+                        std::cout << "ow" << std::endl;
+                    }
+                }
+                lastStatesComputed_[stateId].configuration_ = trySave;
+                lastStatesComputedTime_[stateId].second.configuration_ = trySave;
                 return 1.;
             }
             return 0;
@@ -660,15 +737,15 @@ namespace hpp {
 
     CORBA::Short RbprmBuilder::createState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error)
     {
-        model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
-        fullBody_->device_->currentConfiguration(config);
-        fullBody_->device_->computeForwardKinematics();
+        model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+        fullBody()->device_->currentConfiguration(config);
+        fullBody()->device_->computeForwardKinematics();
         State state;
         state.configuration_ = config;
         std::vector<std::string> names = stringConversion(contactLimbs);
         for(std::vector<std::string>::const_iterator cit = names.begin(); cit != names.end(); ++cit)
         {
-            rbprm::RbPrmLimbPtr_t limb = fullBody_->GetLimbs().at(*cit);
+            rbprm::RbPrmLimbPtr_t limb = fullBody()->GetLimbs().at(*cit);
             const std::string& limbName = *cit;
             state.contacts_[limbName] = true;
             const fcl::Vec3f position = limb->effector_->currentTransformation().getTranslation();
@@ -682,10 +759,10 @@ namespace hpp {
         return lastStatesComputed_.size()-1;
     }
 
-    double RbprmBuilder::projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com) throw (hpp::Error)
+    double RbprmBuilder::projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com, unsigned short max_num_sample) throw (hpp::Error)
     {        
         model::Configuration_t com_target = dofArrayToConfig (3, com);
-        return projectStateToCOMEigen(stateId, com_target);
+        return projectStateToCOMEigen(stateId, com_target, max_num_sample);
     }
 
     hpp::floatSeq* RbprmBuilder::generateContacts(const hpp::floatSeq& configuration,
@@ -701,15 +778,14 @@ namespace hpp {
                 dir[i] = direction[(_CORBA_ULong)i];
                 acc[i] = acceleration[(_CORBA_ULong)i];
             }
-            const affMap_t &affMap = problemSolver_->map
+                        const affMap_t &affMap = problemSolver()->map
 							<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
 		        if (affMap.empty ()) {
     	        throw hpp::Error ("No affordances found. Unable to generate Contacts.");
       		  }
-            model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
-
-            rbprm::State state = rbprm::contact::ComputeContacts(fullBody_,config,affMap, bindShooter_.affFilter_, dir,robustnessThreshold,acc);
-
+            model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+            rbprm::State state = rbprm::contact::ComputeContacts(fullBody(),config,
+							affMap, bindShooter_.affFilter_, dir,acc);
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(_CORBA_ULong(state.configuration_.rows()));
             for(std::size_t i=0; i< _CORBA_ULong(config.rows()); i++)
@@ -722,30 +798,29 @@ namespace hpp {
 
     hpp::floatSeq* RbprmBuilder::generateGroundContact(const hpp::Names_t& contactLimbs) throw (hpp::Error)
     {
-        std::cout<<"generate ground contact"<<std::endl;
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
         try
         {
             fcl::Vec3f z(0,0,1);
             ValidationReportPtr_t report = ValidationReportPtr_t(new CollisionValidationReport);
-            core::BasicConfigurationShooterPtr_t  shooter = core::BasicConfigurationShooter::create(fullBody_->device_);
+            core::BasicConfigurationShooterPtr_t  shooter = core::BasicConfigurationShooter::create(fullBody()->device_);
             for(int i =0; i< 1000; ++i)
             {
-                core::DevicePtr_t device = fullBody_->device_->clone();
+                core::DevicePtr_t device = fullBody()->device_->clone();
                 std::vector<std::string> names = stringConversion(contactLimbs);
                 core::ConfigProjectorPtr_t proj = core::ConfigProjector::create(device,"proj", 1e-4, 40);
                 //hpp::tools::LockJointRec(limb->limb_->name(), body->device_->rootJoint(), proj);
                 for(std::vector<std::string>::const_iterator cit = names.begin(); cit !=names.end(); ++cit)
                 {
-                    rbprm::RbPrmLimbPtr_t limb = fullBody_->GetLimbs().at(*cit);
+                    rbprm::RbPrmLimbPtr_t limb = fullBody()->GetLimbs().at(*cit);
                     fcl::Transform3f localFrame, globalFrame;
                     localFrame.setTranslation(-limb->offset_);
                     std::vector<bool> posConstraints;
                     std::vector<bool> rotConstraints;
                     posConstraints.push_back(false);posConstraints.push_back(false);posConstraints.push_back(true);
                     rotConstraints.push_back(true);rotConstraints.push_back(true);rotConstraints.push_back(true);
-                    proj->add(core::NumericalConstraint::create (constraints::Position::create("",fullBody_->device_,
+                    proj->add(core::NumericalConstraint::create (constraints::Position::create("",fullBody()->device_,
                                                                                                limb->effector_,
                                                                                                globalFrame,
                                                                                                localFrame,
@@ -756,7 +831,7 @@ namespace hpp {
                         value_type theta = 2*(value_type(rand()) / value_type(RAND_MAX) - 0.5) * M_PI;
                         fcl::Matrix3f r = tools::GetZRotMatrix(theta);
                         fcl::Matrix3f rotation = r * limb->effector_->initialPosition ().getRotation();
-                        proj->add(core::NumericalConstraint::create (constraints::Orientation::create("",fullBody_->device_,
+                        proj->add(core::NumericalConstraint::create (constraints::Orientation::create("",fullBody()->device_,
                                                                                                       limb->effector_,
                                                                                                       fcl::Transform3f(rotation),
                                                                                                       rotConstraints)));
@@ -766,13 +841,13 @@ namespace hpp {
                 Configuration_t config = *configptr;
                 if(proj->apply(config) && config[2]> 0.3)
                 {
-                    if(problemSolver_->problem()->configValidations()->validate(config,report))
+                    if(problemSolver()->problem()->configValidations()->validate(config,report))
                     {
                         State tmp;
                         for(std::vector<std::string>::const_iterator cit = names.begin(); cit !=names.end(); ++cit)
                         {
                             std::string limbId = *cit;
-                            rbprm::RbPrmLimbPtr_t limb = fullBody_->GetLimbs().at(*cit);
+                            rbprm::RbPrmLimbPtr_t limb = fullBody()->GetLimbs().at(*cit);
                             tmp.contacts_[limbId] = true;
                             tmp.contactPositions_[limbId] = limb->effector_->currentTransformation().getTranslation();
                             tmp.contactRotation_[limbId] = limb->effector_->currentTransformation().getRotation();
@@ -780,7 +855,7 @@ namespace hpp {
                             tmp.configuration_ = config;
                             ++tmp.nbContacts;
                         }
-                        if(stability::IsStable(fullBody_,tmp)>=0)
+                        if(stability::IsStable(fullBody(),tmp)>=0)
                         {
                             config[0]=0;
                             config[1]=0;
@@ -814,13 +889,13 @@ namespace hpp {
             {
                 dir[i] = direction[(_CORBA_ULong)i];
             }
-            model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
-            model::Configuration_t save = fullBody_->device_->currentConfiguration();
-            fullBody_->device_->currentConfiguration(config);
+            model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+            model::Configuration_t save = fullBody()->device_->currentConfiguration();
+            fullBody()->device_->currentConfiguration(config);
 
             sampling::T_OctreeReport finalSet;
-            rbprm::T_Limb::const_iterator lit = fullBody_->GetLimbs().find(std::string(limbname));
-            if(lit == fullBody_->GetLimbs().end())
+            rbprm::T_Limb::const_iterator lit = fullBody()->GetLimbs().find(std::string(limbname));
+            if(lit == fullBody()->GetLimbs().end())
             {
                 throw std::runtime_error ("Impossible to find limb for joint "
                                           + std::string(limbname) + " to robot; limb not defined.");
@@ -828,11 +903,11 @@ namespace hpp {
             const RbPrmLimbPtr_t& limb = lit->second;
             fcl::Transform3f transform = limb->limb_->robot()->rootJoint()->childJoint(0)->currentTransformation (); // get root transform from configuration
                         // TODO fix as in rbprm-fullbody.cc!!
-            std::vector<sampling::T_OctreeReport> reports(problemSolver_->collisionObstacles().size());
+            std::vector<sampling::T_OctreeReport> reports(problemSolver()->collisionObstacles().size());
             std::size_t i (0);
             //#pragma omp parallel for
-            for(model::ObjectVector_t::const_iterator oit = problemSolver_->collisionObstacles().begin();
-                oit != problemSolver_->collisionObstacles().end(); ++oit, ++i)
+            for(model::ObjectVector_t::const_iterator oit = problemSolver()->collisionObstacles().begin();
+                oit != problemSolver()->collisionObstacles().end(); ++oit, ++i)
             {
                 sampling::GetCandidates(limb->sampleContainer_, transform, *oit, dir, reports[i], sampling::HeuristicParam());
             }
@@ -848,7 +923,7 @@ namespace hpp {
             {
               (*dofArray)[(_CORBA_ULong)i] = (double)candCit->sample_->id_;
             }
-            fullBody_->device_->currentConfiguration(save);
+            fullBody()->device_->currentConfiguration(save);
             return dofArray;
         } catch (const std::exception& exc) {
         throw hpp::Error (exc.what ());
@@ -869,12 +944,12 @@ namespace hpp {
             {
                 dir[i] = direction[(_CORBA_ULong)i];
             }
-            model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
-            fullBody_->device_->currentConfiguration(config);
+            model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+            fullBody()->device_->currentConfiguration(config);
 
             sampling::T_OctreeReport finalSet;
-            rbprm::T_Limb::const_iterator lit = fullBody_->GetLimbs().find(std::string(limbname));
-            if(lit == fullBody_->GetLimbs().end())
+            rbprm::T_Limb::const_iterator lit = fullBody()->GetLimbs().find(std::string(limbname));
+            if(lit == fullBody()->GetLimbs().end())
             {
                 throw std::runtime_error ("Impossible to find limb for joint "
                                           + std::string(limbname) + " to robot; limb not defined.");
@@ -882,7 +957,7 @@ namespace hpp {
             const RbPrmLimbPtr_t& limb = lit->second;
             fcl::Transform3f transform = limb->octreeRoot(); // get root transform from configuration
                         // TODO fix as in rbprm-fullbody.cc!!
-            const affMap_t &affMap = problemSolver_->map
+            const affMap_t &affMap = problemSolver()->map
                         <std::vector<boost::shared_ptr<model::CollisionObject> > > ();
             if (affMap.empty ())
             {
@@ -918,7 +993,7 @@ namespace hpp {
                 State state;
                 state.configuration_ = config;
                 hpp::rbprm::projection::ProjectionReport rep =
-                hpp::rbprm::projection::projectSampleToObstacle(fullBody_,std::string(limbname), limb, report, fullBody_->GetCollisionValidation(), sampleConfig, state);
+                hpp::rbprm::projection::projectSampleToObstacle(fullBody(),std::string(limbname), limb, report, fullBody()->GetCollisionValidation(), sampleConfig, state);
                 if(rep.success_)
                 {
                     results.push_back(sampleConfig);
@@ -961,11 +1036,11 @@ namespace hpp {
         try
         {
             long ocId ((long)octreeNodeId);
-            const T_Limb& limbs = fullBody_->GetLimbs();
+            const T_Limb& limbs = fullBody()->GetLimbs();
             T_Limb::const_iterator lit = limbs.find(std::string(limb));
             if(lit == limbs.end())
             {
-                std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody_->device_->name());
+                std::string err("No limb " + std::string(limb) + "was defined for robot" + fullBody()->device_->name());
                 throw Error (err.c_str());
             }
             const sampling::T_VoxelSampleId& sampleIds =  lit->second->sampleContainer_.samplesInVoxels_;
@@ -973,7 +1048,7 @@ namespace hpp {
             if(cit == sampleIds.end())
             {
                 std::stringstream ss; ss << ocId;
-                std::string err("No octree node with id " + ss.str() + "was defined for robot" + fullBody_->device_->name());
+                std::string err("No octree node with id " + ss.str() + "was defined for robot" + fullBody()->device_->name());
                 throw Error (err.c_str());
             }
             const sampling::VoxelSampleId& ids = cit->second;
@@ -1008,8 +1083,8 @@ namespace hpp {
             {
                 cType = hpp::rbprm::_3_DOF;
             }
-            fullBody_->AddLimb(std::string(id), std::string(limb), std::string(effector), off, norm, x, y,
-                               problemSolver_->collisionObstacles(), samples,heuristicName,resolution,cType,disableEffectorCollision > 0.5, grasp > 0.5);
+            fullBody()->AddLimb(std::string(id), std::string(limb), std::string(effector), off, norm, x, y,
+                               problemSolver()->collisionObstacles(), samples,heuristicName,resolution,cType,disableEffectorCollision > 0.5, grasp > 0.5);
         }
         catch(std::runtime_error& e)
         {
@@ -1025,7 +1100,7 @@ namespace hpp {
         try
         {
             std::string fileName(databasePath);
-            fullBody_->AddLimb(fileName, std::string(id), problemSolver_->collisionObstacles(), heuristicName, loadValues > 0.5,
+            fullBody()->AddLimb(fileName, std::string(id), problemSolver()->collisionObstacles(), heuristicName, loadValues > 0.5,
                                disableEffectorCollision > 0.5, grasp > 0.5);
         }
         catch(std::runtime_error& e)
@@ -1072,7 +1147,7 @@ namespace hpp {
         try
         {
             std::vector<std::string> names = stringConversion(contactLimbs);
-            SetPositionAndNormal(startState_,fullBody_, configuration, names);
+            SetPositionAndNormal(startState_,fullBody(), configuration, names);
         }
         catch(std::runtime_error& e)
         {
@@ -1088,9 +1163,9 @@ namespace hpp {
         try
         {
             std::vector<std::string> limbs; limbs.push_back(limbNam);
-            SetPositionAndNormal(state,fullBody_, configuration, limbs);
+            SetPositionAndNormal(state,fullBody(), configuration, limbs);
 
-            const std::vector<fcl::Vec3f>& positions = computeRectangleContactLocalTr(fullBody_,state,limb);
+            const std::vector<fcl::Vec3f>& positions = computeRectangleContactLocalTr(fullBody(),state,limb);
             _CORBA_ULong size = (_CORBA_ULong) (positions.size () * 3);
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(size);
@@ -1116,7 +1191,7 @@ namespace hpp {
         try
         {
             std::vector<std::string> names = stringConversion(contactLimbs);
-            SetPositionAndNormal(endState_,fullBody_, configuration, names);
+            SetPositionAndNormal(endState_,fullBody(), configuration, names);
         }
         catch(std::runtime_error& e)
         {
@@ -1195,14 +1270,14 @@ namespace hpp {
             {
                 throw std::runtime_error ("End state not initialized, can not interpolate ");
             }
-            T_Configuration configurations = doubleDofArrayToConfig(fullBody_->device_, configs);
-            const affMap_t &affMap = problemSolver_->map
+            T_Configuration configurations = doubleDofArrayToConfig(fullBody()->device_, configs);
+            const affMap_t &affMap = problemSolver()->map
                         <std::vector<boost::shared_ptr<model::CollisionObject> > > ();
             if (affMap.empty ())
             {
                 throw hpp::Error ("No affordances found. Unable to interpolate.");
             }
-            hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_);
+            hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = rbprm::interpolation::RbPrmInterpolation::create(fullBody(),startState_,endState_);
             lastStatesComputedTime_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,configurations,robustnessTreshold, filterStates != 0);
             lastStatesComputed_ = TimeStatesToStates(lastStatesComputedTime_);
             hpp::floatSeqSeq *res;
@@ -1234,7 +1309,7 @@ namespace hpp {
         }
     }
 
-    hpp::floatSeqSeq* contactCone(RbPrmFullBodyPtr_t& fullBody, State& state, const double friction)
+    hpp::floatSeqSeq* contactCone(RbPrmFullBodyPtr_t fullBody, State& state, const double friction)
     {
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
@@ -1265,7 +1340,7 @@ namespace hpp {
             {
                 throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
             }
-            return contactCone(fullBody_, lastStatesComputed_[stateId],friction);
+            return contactCone(fullBody(), lastStatesComputed_[stateId],friction);
         }
         catch(std::runtime_error& e)
         {
@@ -1308,7 +1383,7 @@ namespace hpp {
             {
                 throw std::runtime_error ("No contact breaks, hence no intermediate state from state " + std::string(""+(stateId)));
             }
-            return contactCone(fullBody_,intermediaryState, friction);
+            return contactCone(fullBody(),intermediaryState, friction);
         }
         catch(std::runtime_error& e)
         {
@@ -1359,7 +1434,7 @@ namespace hpp {
         return res;
     }
 
-   core::PathVectorPtr_t generateTrunkPath(RbPrmFullBodyPtr_t& fullBody, core::ProblemSolverPtr_t problemSolver, const hpp::floatSeqSeq& rootPositions,
+   core::PathVectorPtr_t generateTrunkPath(RbPrmFullBodyPtr_t fullBody, core::ProblemSolverPtr_t problemSolver, const hpp::floatSeqSeq& rootPositions,
                           const model::Configuration_t q1, const model::Configuration_t q2) throw (hpp::Error)
     {
         try
@@ -1385,7 +1460,7 @@ namespace hpp {
         try
         {
             model::Configuration_t q1 = dofArrayToConfig(4, q1Seq), q2 = dofArrayToConfig(4, q2Seq);
-            return problemSolver_->addPath(generateTrunkPath(fullBody_, problemSolver_, rootPositions, q1, q2));
+            return problemSolver()->addPath(generateTrunkPath(fullBody(), problemSolver(), rootPositions, q1, q2));
         }
         catch(std::runtime_error& e)
         {
@@ -1411,7 +1486,7 @@ namespace hpp {
                  model::vector3_t speed = (*cit) -  *(cit-1);
                  res->appendPath(interpolation::ComTrajectory::create(*(cit-1),*cit,speed,zero,1.));
              }
-             return problemSolver_->addPath(res);
+             return problemSolver()->addPath(res);
          }
          catch(std::runtime_error& e)
          {
@@ -1430,7 +1505,7 @@ namespace hpp {
              hpp::rbprm::interpolation::PolynomTrajectoryPtr_t path = hpp::rbprm::interpolation::PolynomTrajectory::create(curvePtr);
              core::PathVectorPtr_t res = core::PathVector::create(3, 3);
              res->appendPath(path);
-             return problemSolver_->addPath(res);
+             return problemSolver()->addPath(res);
          }
          catch(std::runtime_error& e)
          {
@@ -1449,13 +1524,13 @@ namespace hpp {
              hpp::rbprm::interpolation::PolynomTrajectoryPtr_t path = hpp::rbprm::interpolation::PolynomTrajectory::create(curvePtr);
              core::PathVectorPtr_t res = core::PathVector::create(3, 3);
              res->appendPath(path);
-             std::size_t returned_pathId =problemSolver_->addPath(res);
+             std::size_t returned_pathId =problemSolver()->addPath(res);
              for (int i = 1; i < config.rows(); ++i)
              {
                 core::PathPtr_t cutPath = path->extract(interval_t (config(i-1), config(i)));
                 res = core::PathVector::create(3, 3);
                 res->appendPath(cutPath);
-                problemSolver_->addPath(res);
+                problemSolver()->addPath(res);
              }
              return returned_pathId;
          }
@@ -1492,7 +1567,7 @@ namespace hpp {
              {
                  res->appendPath(interpolation::ComTrajectory::create(*(cit-1),*cit,*cdit,*cddit,dt));
              }
-             return problemSolver_->addPath(res);
+             return problemSolver()->addPath(res);
          }
          catch(std::runtime_error& e)
          {
@@ -1509,18 +1584,18 @@ namespace hpp {
         }
         const State& firstState = lastStatesComputed_[cId], thirdState = lastStatesComputed_[cId+1];
         std::vector<std::vector<fcl::Vec3f> > allStates;
-        allStates.push_back(computeRectangleContact(fullBody_, firstState));
+        allStates.push_back(computeRectangleContact(fullBody(), firstState));
         std::vector<std::string> creations;
         bool success(false);
         State intermediaryState = intermediary(firstState, thirdState, cId, success);
         if(success)
         {
-            allStates.push_back(computeRectangleContact(fullBody_, intermediaryState));
+            allStates.push_back(computeRectangleContact(fullBody(), intermediaryState));
         }
         thirdState.contactCreations(firstState, creations);
         if(creations.size() == 1)
         {
-            allStates.push_back(computeRectangleContact(fullBody_, thirdState));
+            allStates.push_back(computeRectangleContact(fullBody(), thirdState));
         }
         if(creations.size() > 1)
         {
@@ -1571,7 +1646,7 @@ namespace hpp {
                 state = interm;
         }
         std::vector<std::vector<fcl::Vec3f> > allStates;
-        allStates.push_back(computeRectangleContact(fullBody_, state));
+        allStates.push_back(computeRectangleContact(fullBody(), state));
 
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
@@ -1611,18 +1686,18 @@ namespace hpp {
         std::string limb(limbName);
         const State& firstState = lastStatesComputed_[cId], thirdState = lastStatesComputed_[cId+1];
         std::vector<std::vector<fcl::Vec3f> > allStates;
-        allStates.push_back(computeRectangleContactLocalTr(fullBody_, firstState, limb));
+        allStates.push_back(computeRectangleContactLocalTr(fullBody(), firstState, limb));
         std::vector<std::string> creations;
         bool success(false);
         State intermediaryState = intermediary(firstState, thirdState, cId, success);
         if(success)
         {
-            allStates.push_back(computeRectangleContactLocalTr(fullBody_, intermediaryState, limb));
+            allStates.push_back(computeRectangleContactLocalTr(fullBody(), intermediaryState, limb));
         }
         thirdState.contactCreations(firstState, creations);
         if(creations.size() == 1)
         {
-            allStates.push_back(computeRectangleContactLocalTr(fullBody_, thirdState, limb));
+            allStates.push_back(computeRectangleContactLocalTr(fullBody(), thirdState, limb));
         }
         if(creations.size() > 1)
         {
@@ -1675,7 +1750,7 @@ namespace hpp {
         }
         std::vector<std::vector<fcl::Vec3f> > allStates;
         std::vector<std::string> limbs ; limbs.push_back(limb);
-        allStates.push_back(computeRectangleContact(fullBody_, state,limbs));
+        allStates.push_back(computeRectangleContact(fullBody(), state,limbs));
 
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
@@ -1719,11 +1794,11 @@ namespace hpp {
             throw std::runtime_error ("End state not initialized, cannot interpolate ");
         }
 
-        if(problemSolver_->paths().size() <= pathId)
+        if(problemSolver()->paths().size() <= pathId)
         {
             throw std::runtime_error ("No path computed, cannot interpolate ");
         }
-        const affMap_t &affMap = problemSolver_->map
+        const affMap_t &affMap = problemSolver()->map
 					<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
         if (affMap.empty ())
         {
@@ -1731,7 +1806,7 @@ namespace hpp {
         }
 
         hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = 
-					rbprm::interpolation::RbPrmInterpolation::create(fullBody_,startState_,endState_,problemSolver_->paths()[pathId]);
+                    rbprm::interpolation::RbPrmInterpolation::create(fullBody(),startState_,endState_,problemSolver()->paths()[pathId]);
         lastStatesComputedTime_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
                     timestep,robustnessTreshold, filterStates != 0);
 		lastStatesComputed_ = TimeStatesToStates(lastStatesComputedTime_);
@@ -1783,10 +1858,10 @@ namespace hpp {
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
             }
             //create helper
-//            /interpolation::TimeConstraintHelper helper(fullBody_, problemSolver_->problem());
-            core::PathPtr_t path = interpolation::limbRRT(fullBody_,problemSolver_->problem(),
+//            /interpolation::TimeConstraintHelper helper(fullBody(), problemSolver()->problem());
+            core::PathPtr_t path = interpolation::limbRRT(fullBody(),problemSolver()->problem(),
                                                                           lastStatesComputed_.begin()+s1,lastStatesComputed_.begin()+s2, numOptimizations);
-            return AddPath(path,problemSolver_);
+            return AddPath(path,problemSolver());
         }
         catch(std::runtime_error& e)
         {
@@ -1804,13 +1879,13 @@ namespace hpp {
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
             }
             unsigned int pathId = (unsigned int)(path);
-            if(problemSolver_->paths().size() <= pathId)
+            if(problemSolver()->paths().size() <= pathId)
             {
                 throw std::runtime_error ("No path computed, cannot interpolate ");
             }
-            core::PathPtr_t path = interpolation::limbRRTFromPath(fullBody_,problemSolver_->problem(), problemSolver_->paths()[pathId],
+            core::PathPtr_t path = interpolation::limbRRTFromPath(fullBody(),problemSolver()->problem(), problemSolver()->paths()[pathId],
                                                                           lastStatesComputedTime_.begin()+s1,lastStatesComputedTime_.begin()+s2, numOptimizations);
-            return AddPath(path,problemSolver_);
+            return AddPath(path,problemSolver());
         }
         catch(std::runtime_error& e)
         {
@@ -1820,15 +1895,15 @@ namespace hpp {
 
     CORBA::Short RbprmBuilder::configToPath(const hpp::floatSeqSeq& configs) throw (hpp::Error)
     {
-        T_Configuration positions =  doubleDofArrayToConfig(fullBody_->device_, configs);
-        core::PathVectorPtr_t res = core::PathVector::create(fullBody_->device_->configSize(),
-                                                             fullBody_->device_->numberDof());
+        T_Configuration positions =  doubleDofArrayToConfig(fullBody()->device_, configs);
+        core::PathVectorPtr_t res = core::PathVector::create(fullBody()->device_->configSize(),
+                                                             fullBody()->device_->numberDof());
         //for(CIT_Configuration pit = positions.begin();pit != positions.end()-1; ++pit)
         for(CIT_Configuration pit = positions.begin();pit != positions.end()-200; ++pit)
         {
-            res->appendPath(makePath(fullBody_->device_,problemSolver_->problem(), *pit,*(pit+1)));
+            res->appendPath(makePath(fullBody()->device_,problemSolver()->problem(), *pit,*(pit+1)));
         }
-        return problemSolver_->addPath(res);
+        return problemSolver()->addPath(res);
     }
 
     CORBA::Short RbprmBuilder::comRRT(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error)
@@ -1843,13 +1918,13 @@ assert(s2 == s1 +1);
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
             }
             unsigned int pathId = (unsigned int)(path);
-            if(problemSolver_->paths().size() <= pathId)
+            if(problemSolver()->paths().size() <= pathId)
             {
                 throw std::runtime_error ("No path computed, cannot interpolate ");
             }
-            core::PathPtr_t path = interpolation::comRRT(fullBody_,problemSolver_->problem(), problemSolver_->paths()[pathId],
+            core::PathPtr_t path = interpolation::comRRT(fullBody(),problemSolver()->problem(), problemSolver()->paths()[pathId],
                                                                           *(lastStatesComputed_.begin()+s1),*(lastStatesComputed_.begin()+s2), numOptimizations);
-            return AddPath(path,problemSolver_);
+            return AddPath(path,problemSolver());
         }
         catch(std::runtime_error& e)
         {
@@ -1857,18 +1932,23 @@ assert(s2 == s1 +1);
         }
     }
 
-    core::Configuration_t project_or_throw(rbprm::RbPrmFullBodyPtr_t fulllBody, ProblemPtr_t problem, const State& state, const fcl::Vec3f& targetCom)
+    core::Configuration_t project_or_throw(rbprm::RbPrmFullBodyPtr_t fulllBody, const State& state, const fcl::Vec3f& targetCom, const bool checkCollision = false)
     {
-        bool success(false);
-        core::Configuration_t res = rbprm::interpolation::projectOnCom(fulllBody, problem,state,targetCom, success);
-        if(!success)
+        rbprm::projection::ProjectionReport rep;
+        if(checkCollision)
+            rep =rbprm::projection::projectToColFreeComPosition(fulllBody, targetCom, state);
+        else
+            rep= rbprm::projection::projectToComPosition(fulllBody, targetCom, state);
+        core::Configuration_t res = rep.result_.configuration_;
+        if(!rep.success_)
         {
+            std::cout << "projection failed in project or throw " << std::endl;
             throw std::runtime_error("could not project state on COM constraint");
         }
         return res;
     }
 
-    hpp::floatSeq* RbprmBuilder::rrt(t_rrt functor,  double state1,
+    hpp::floatSeq* RbprmBuilder::rrt(t_rrt functor,  double state1, double state2,
                                     unsigned short cT1, unsigned short cT2, unsigned short cT3,
                                     unsigned short numOptimizations)  throw (hpp::Error)
     {
@@ -1881,12 +1961,12 @@ assert(s2 == s1 +1);
         try
         {
             std::vector<CORBA::Short> pathsIds;
-            std::size_t s1((std::size_t)state1), s2((std::size_t)state1+1);
+            std::size_t s1((std::size_t)state1), s2((std::size_t)state2);
             if(lastStatesComputed_.size () < s1 || lastStatesComputed_.size () < s2 )
             {
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
             }
-            const core::PathVectors_t& paths = problemSolver_->paths();
+            const core::PathVectors_t& paths = problemSolver()->paths();
             if(paths.size() -1 < std::max(cT1, std::max(cT2, cT3)))
             {
                 throw std::runtime_error("in comRRTFromPos, at least one com trajectory is not present in problem solver");
@@ -1905,35 +1985,56 @@ assert(s2 == s1 +1);
             }
 
             State s2Bis(state2);
-            hppDout(notice,"state2 = "<<model::displayConfig(state2.configuration_));
-            s2Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s2Bis,paths[cT2]->end().head<3>());
-            hppDout(notice,"state2 after projection= "<<model::displayConfig(s2Bis.configuration_));
-            for(std::map<std::string,bool>::const_iterator cit = s2Bis.contacts_.begin();cit!=s2Bis.contacts_.end(); ++ cit)
-            {
-              hppDout(notice,"contact : "<<cit->first<<" = "<<cit->second);
-            }
-            core::PathVectorPtr_t resPath = core::PathVector::create(fullBody_->device_->configSize(), fullBody_->device_->numberDof());
+           /* s1Bis.configuration_ = project_or_throw(fullBody(), s1Bis,paths[cT1]->end().head<3>(), true);
+            std::cout << "projection succeedded " << paths[cT1]->end().head<3>() << std::endl;
+            State s2Bis(state2);
+            s2Bis.configuration_ = project_or_throw(fullBody(), s2Bis,paths[cT2]->end().head<3>(), true);
 
-
+            core::PathVectorPtr_t resPath = core::PathVector::create(fullBody()->device_->configSize(), fullBody()->device_->numberDof());
+            std::cout << "projection succeedded " << paths[cT2]->end().head<3>() << std::endl;*/
 
             ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
-            fullBody_->device_->currentConfiguration(s1Bis.configuration_);
-            if(!(problemSolver_->problem()->configValidations()->validate(s1Bis.configuration_, rport)))
+
+            s1Bis.configuration_ = project_or_throw(fullBody(), s1Bis,paths[cT1]->end().head<3>());
+            s2Bis.configuration_ = project_or_throw(fullBody(), s2Bis,paths[cT2]->end().head<3>(), true);
+            BasicConfigurationShooterPtr_t shooter = BasicConfigurationShooter::create(fullBody()->device_);
+            bool found = false;
+            for (int i = 0; i< 100 && !found;  ++i)
             {
-                std::cout << "could not project s1Bis without collision at state " << s1  << std::endl;
-                hppDout(error,"could not project s1Bis without collision at state " + s1  );
-                rport->print(std::cout);
-                std::cout<<"report printed"<<std::endl;
-                throw std::runtime_error ("could not project without collision at state " + s1 );
+                fullBody()->device_->currentConfiguration(s1Bis.configuration_);
+                found =problemSolver()->problem()->configValidations()->validate(s1Bis.configuration_, rport);
+                if(!found)
+                {
+	                std::cout << "could not project s1Bis without collision at state " << s1  << std::endl;
+                    std::cout << "collission " << *rport << std::endl;
+                    s1Bis.configuration_ = *shooter->shoot();
+                    s1Bis.configuration_ = project_or_throw(fullBody(), s1Bis,paths[cT1]->end().head<3>());
+                    std::cout << "projection succeedded " << paths[cT1]->end().head<3>() << std::endl;
+                }
             }
-            if(!(problemSolver_->problem()->configValidations()->validate(s2Bis.configuration_, rport)))
+            if(found)
+                std::cout << "got out ! " << std::endl;
+            bool found2 = false;
+            for (int i = 0; i< 100 && found && !found2; ++i)
             {
-                std::cout << "could not project s2Bis without collision at state " << s1  << std::endl;
-                hppDout(error,"could not project s2Bis without collision at state " + s1  );
-                rport->print(std::cout);
+                fullBody()->device_->currentConfiguration(s2Bis.configuration_);
+                found2 =problemSolver()->problem()->configValidations()->validate(s2Bis.configuration_, rport);
+                if(!found2)
+                {
+					std::cout << "could not project s2Bis without collision at state " << s1  << std::endl;
+                    std::cout << "collission " << *rport << std::endl;
+                    s2Bis.configuration_ = *shooter->shoot();
+                    s2Bis.configuration_ = project_or_throw(fullBody(), s2Bis,paths[cT2]->end().head<3>());
+                    std::cout << "projection succeedded " << paths[cT2]->end().head<3>() << std::endl;
+                }
+            }
+            if(!found || !found2)
+            {
+                std::cout << "could not project without collision at state " << s1  << std::endl;
                 throw std::runtime_error ("could not project without collision at state " + s1 );
             }
 
+            core::PathVectorPtr_t resPath = core::PathVector::create(fullBody()->device_->configSize(), fullBody()->device_->numberDof());
 
             try{
                 hppDout(notice,"begin comRRT states 1 and 1bis");
@@ -1946,7 +2047,7 @@ assert(s2 == s1 +1);
                 intervals.push_back(interval);
                 PathPtr_t reducedPath = core::SubchainPath::create(p1,intervals);
                 resPath->appendPath(reducedPath);
-                pathsIds.push_back(AddPath(p1,problemSolver_));
+                pathsIds.push_back(AddPath(p1,problemSolver()));
             }
             catch(std::runtime_error& e)
             {
@@ -1956,10 +2057,10 @@ assert(s2 == s1 +1);
 
             try{
                 hppDout(notice,"begin comRRT between statebis 1 and 2");
-                core::PathPtr_t p2 =(*functor)(fullBody_,problemSolver_->problem(), paths[cT2],
+                core::PathPtr_t p2 =(*functor)(fullBody(),problemSolver()->problem(), paths[cT2],
                     s1Bis,s2Bis, numOptimizations,true);
                 hppDout(notice,"end comRRT");
-                pathsIds.push_back(AddPath(p2,problemSolver_));
+                pathsIds.push_back(AddPath(p2,problemSolver()));
                 // reduce path to remove extradof
                 core::SizeInterval_t interval(0, p2->initial().rows()-1);
                 core::SizeIntervals_t intervals;
@@ -1975,7 +2076,7 @@ assert(s2 == s1 +1);
             //if(s2Bis.configuration_ != state2.configuration_)
             try{
                 hppDout(notice,"begin comRRT states 2bis and 2");
-                core::PathPtr_t p3= interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[cT3],
+                core::PathPtr_t p3= interpolation::comRRT(fullBody(),problemSolver()->problem(), paths[cT3],
                         s2Bis,state2, numOptimizations,true);
                 hppDout(notice,"end comRRT");
                 // reduce path to remove extradof
@@ -1984,13 +2085,14 @@ assert(s2 == s1 +1);
                 intervals.push_back(interval);
                 PathPtr_t reducedPath = core::SubchainPath::create(p3,intervals);
                 resPath->appendPath(reducedPath);
-                pathsIds.push_back(AddPath(p3,problemSolver_));
+                pathsIds.push_back(AddPath(p3,problemSolver()));
+                std::cout << "PATH 3 OK " << std::endl;
             }
             catch(std::runtime_error& e)
             {
                 throw Error(e.what());
             }
-            pathsIds.push_back(AddPath(resPath,problemSolver_));
+            pathsIds.push_back(AddPath(resPath,problemSolver()));
 
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(pathsIds.size());
@@ -2012,7 +2114,27 @@ assert(s2 == s1 +1);
                                                unsigned short cT3,
                                                unsigned short numOptimizations) throw (hpp::Error)
     {
-        return rrt(&interpolation::comRRT, state1, cT1, cT2, cT3, numOptimizations);
+        return rrt(&interpolation::comRRT, state1,state1+1, cT1, cT2, cT3, numOptimizations);
+
+    }
+
+    hpp::floatSeq* RbprmBuilder::comRRTFromPosBetweenState(double state1, double state2,
+                                               unsigned short cT1,
+                                               unsigned short cT2,
+                                               unsigned short cT3,
+                                               unsigned short numOptimizations) throw (hpp::Error)
+    {
+        return rrt(&interpolation::comRRT, state1,state2, cT1, cT2, cT3, numOptimizations);
+
+    }
+
+    hpp::floatSeq* RbprmBuilder::effectorRRTFromPosBetweenState(double state1, double state2,
+                                               unsigned short cT1,
+                                               unsigned short cT2,
+                                               unsigned short cT3,
+                                               unsigned short numOptimizations) throw (hpp::Error)
+    {
+        return rrt(&interpolation::effectorRRT, state1,state2, cT1, cT2, cT3, numOptimizations);
 
     }
 
@@ -2022,7 +2144,7 @@ assert(s2 == s1 +1);
                                              unsigned short cT3,
                                              unsigned short numOptimizations) throw (hpp::Error)
     {
-        return rrt(&interpolation::effectorRRT, state1, cT1, cT2, cT3, numOptimizations);
+        return rrt(&interpolation::effectorRRT, state1, state1+1, cT1, cT2, cT3, numOptimizations);
     }
 
     hpp::floatSeq* RbprmBuilder::effectorRRTFromPath(double state1,
@@ -2041,7 +2163,7 @@ assert(s2 == s1 +1);
             {
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
             }
-            const core::PathVectors_t& paths = problemSolver_->paths();
+            const core::PathVectors_t& paths = problemSolver()->paths();
             if(paths.size() -1 < std::max(cT1, std::max(cT2, cT3)))
             {
                 throw std::runtime_error("in comRRTFromPos, at least one com trajectory is not present in problem solver");
@@ -2053,20 +2175,20 @@ assert(s2 == s1 +1);
             comPath->appendPath(paths[cT2]);
             comPath->appendPath(paths[cT3]);
             std::vector<std::string> trackedEffectorNames = stringConversion(trackedEffector);
-            core::PathPtr_t refFullBody = problemSolver_->paths()[refpath]->extract(std::make_pair(path_from, path_to));
-            core::PathPtr_t p2 =interpolation::effectorRRTFromPath(fullBody_,problemSolver_->problem(), comPath,
+            core::PathPtr_t refFullBody = problemSolver()->paths()[refpath]->extract(std::make_pair(path_from, path_to));
+            core::PathPtr_t p2 =interpolation::effectorRRTFromPath(fullBody(),problemSolver()->problem(), comPath,
                     state1,state2, numOptimizations,true, refFullBody, trackedEffectorNames);
-            pathsIds.push_back(AddPath(p2,problemSolver_));
+            pathsIds.push_back(AddPath(p2,problemSolver()));
 
             // reduce path to remove extradof
             core::SizeInterval_t interval(0, p2->initial().rows()-1);
             core::SizeIntervals_t intervals;
             intervals.push_back(interval);
             PathPtr_t reducedPath = core::SubchainPath::create(p2,intervals);
-            core::PathVectorPtr_t resPath = core::PathVector::create(fullBody_->device_->configSize(), fullBody_->device_->numberDof());
+            core::PathVectorPtr_t resPath = core::PathVector::create(fullBody()->device_->configSize(), fullBody()->device_->numberDof());
             resPath->appendPath(reducedPath);
 
-            pathsIds.push_back(AddPath(resPath,problemSolver_));
+            pathsIds.push_back(AddPath(resPath,problemSolver()));
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(pathsIds.size());
             for(std::size_t i=0; i< pathsIds.size(); ++i)
@@ -2081,7 +2203,7 @@ assert(s2 == s1 +1);
         }
     }
 
-    hpp::floatSeq* RbprmBuilder::projectToCom(double state, const hpp::floatSeq& targetCom) throw (hpp::Error)
+    hpp::floatSeq* RbprmBuilder::projectToCom(double state, const hpp::floatSeq& targetCom, unsigned short max_num_sample) throw (hpp::Error)
     {
         try
         {
@@ -2091,7 +2213,7 @@ assert(s2 == s1 +1);
             }
             model::Configuration_t config = dofArrayToConfig (std::size_t(3), targetCom);
             fcl::Vec3f comTarget; for(int i =0; i<3; ++i) comTarget[i] = config[i];
-            model::Configuration_t  res = project_or_throw(fullBody_,problemSolver_->problem(), lastStatesComputed_[state],comTarget);
+            model::Configuration_t  res = project_or_throw(fullBody(), lastStatesComputed_[state],comTarget);
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(res.rows());
             for(std::size_t i=0; i< res.rows(); ++i)
@@ -2115,7 +2237,7 @@ assert(s2 == s1 +1);
             {
                 throw std::runtime_error ("did not find a states at indicated index: " + std::string(""+(std::size_t)(state)));
             }
-            model::Configuration_t res = dofArrayToConfig (fullBody_->device_, q);
+            model::Configuration_t res = dofArrayToConfig (fullBody()->device_, q);
             if(lastStatesComputed_.size() <= state)
             {
                 throw std::runtime_error ("Unexisting state in setConfigAtstate");
@@ -2159,8 +2281,6 @@ assert(s2 == s1 +1);
 
     void RbprmBuilder::saveComputedStates(const char* outfilename) throw (hpp::Error)
     {
-      std::cout<<"saveComputedStates"<<std::endl;
-
         std::stringstream ss;
         ss << lastStatesComputed_.size()-2 << "\n";
         std::vector<rbprm::State>::iterator cit = lastStatesComputed_.begin()+1;
@@ -2170,7 +2290,7 @@ assert(s2 == s1 +1);
         for(std::vector<rbprm::State>::iterator cit2 = lastStatesComputed_.begin()+2;
             cit2 != lastStatesComputed_.end()-1; ++cit2, ++cit, ++i)
         {
-            cit2->robustness = stability::IsStable(this->fullBody_, *cit2);
+            cit2->robustness = stability::IsStable(this->fullBody(), *cit2);
             ss << i<< " ";
             cit2->print(ss,*cit);
         }
@@ -2195,8 +2315,8 @@ assert(s2 == s1 +1);
         std::string limbName(limbname);
         std::ofstream fout;
         fout.open(filepath, std::fstream::out | std::fstream::app);
-        rbprm::saveLimbInfoAndDatabase(fullBody_->GetLimbs().at(limbName),fout);
-        //sampling::saveLimbDatabase(fullBody_->GetLimbs().at(limbName)->sampleContainer_,fout);
+        rbprm::saveLimbInfoAndDatabase(fullBody()->GetLimbs().at(limbName),fout);
+        //sampling::saveLimbDatabase(fullBody()->GetLimbs().at(limbName)->sampleContainer_,fout);
         fout.close();
         }
         catch(std::runtime_error& e)
@@ -2209,13 +2329,13 @@ assert(s2 == s1 +1);
     {
         try
         {
-        model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
-        model::Configuration_t save = fullBody_->device_->currentConfiguration();
-        fullBody_->device_->currentConfiguration(config);
-        fullBody_->device_->computeForwardKinematics();
+        model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+        model::Configuration_t save = fullBody()->device_->currentConfiguration();
+        fullBody()->device_->currentConfiguration(config);
+        fullBody()->device_->computeForwardKinematics();
         const std::map<std::size_t, fcl::CollisionObject*>& boxes =
-                fullBody_->GetLimbs().at(std::string(limbName))->sampleContainer_.boxes_;
-        const double resolution = fullBody_->GetLimbs().at(std::string(limbName))->sampleContainer_.resolution_;
+                fullBody()->GetLimbs().at(std::string(limbName))->sampleContainer_.boxes_;
+        const double resolution = fullBody()->GetLimbs().at(std::string(limbName))->sampleContainer_.resolution_;
         std::size_t i =0;
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
@@ -2234,8 +2354,8 @@ assert(s2 == s1 +1);
             dofArray[3] = resolution;
             (*res) [(_CORBA_ULong)i] = floats;
         }
-        fullBody_->device_->currentConfiguration(save);
-        fullBody_->device_->computeForwardKinematics();
+        fullBody()->device_->currentConfiguration(save);
+        fullBody()->device_->computeForwardKinematics();
         return res;
         }
         catch(std::runtime_error& e)
@@ -2251,20 +2371,20 @@ assert(s2 == s1 +1);
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
         long ocId ((long)octreeNodeId);
-        const T_Limb& limbs = fullBody_->GetLimbs();
+        const T_Limb& limbs = fullBody()->GetLimbs();
         T_Limb::const_iterator lit = limbs.find(std::string(limbName));
         if(lit == limbs.end())
         {
-            std::string err("No limb " + std::string(limbName) + "was defined for robot" + fullBody_->device_->name());
+            std::string err("No limb " + std::string(limbName) + "was defined for robot" + fullBody()->device_->name());
             throw Error (err.c_str());
         }
         const std::map<std::size_t, fcl::CollisionObject*>& boxes =
-                fullBody_->GetLimbs().at(std::string(limbName))->sampleContainer_.boxes_;
+                fullBody()->GetLimbs().at(std::string(limbName))->sampleContainer_.boxes_;
         std::map<std::size_t, fcl::CollisionObject*>::const_iterator cit = boxes.find(ocId);
         if(cit == boxes.end())
         {
             std::stringstream ss; ss << ocId;
-            std::string err("No octree node with id " + ss.str() + "was defined for robot" + fullBody_->device_->name());
+            std::string err("No octree node with id " + ss.str() + "was defined for robot" + fullBody()->device_->name());
             throw Error (err.c_str());
         }
         const fcl::CollisionObject* box = cit->second;
@@ -2275,7 +2395,7 @@ assert(s2 == s1 +1);
         {
           (*dofArray)[(_CORBA_ULong)i] = pos[i];
         }
-        (*dofArray)[(_CORBA_ULong)3] = fullBody_->GetLimbs().at(std::string(limbName))->sampleContainer_.resolution_;
+        (*dofArray)[(_CORBA_ULong)3] = fullBody()->GetLimbs().at(std::string(limbName))->sampleContainer_.resolution_;
         return dofArray;
         }
         catch(std::runtime_error& e)
@@ -2330,14 +2450,38 @@ assert(s2 == s1 +1);
         }
     }
 
+
+    CORBA::Short  RbprmBuilder::computeIntermediary(unsigned short stateFrom, unsigned short stateTo) throw (hpp::Error)
+    try
+    {
+        std::size_t s((std::size_t)stateFrom);
+        std::size_t s2((std::size_t)stateTo);
+        if(lastStatesComputed_.size () < s+1 || lastStatesComputed_.size () < s2+1)
+        {
+            throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s));
+        }
+        const State& state1 = lastStatesComputed_[s];
+        const State& state2 = lastStatesComputed_[s2];
+        bool unused;
+        short unsigned cId = s;
+        const State state = intermediary(state1, state2,cId,unused);
+        lastStatesComputed_.push_back(state);
+        lastStatesComputedTime_.push_back(std::make_pair(-1., state));
+        return lastStatesComputed_.size() -1;
+    }
+    catch(std::runtime_error& e)
+    {
+        throw Error(e.what());
+    }
+
     hpp::floatSeq* RbprmBuilder::getOctreeTransform(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error)
     {
         try{
-        model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
-        model::Configuration_t save = fullBody_->device_->currentConfiguration();
-        fullBody_->device_->currentConfiguration(config);
-        fullBody_->device_->computeForwardKinematics();
-        const hpp::rbprm::RbPrmLimbPtr_t limb =fullBody_->GetLimbs().at(std::string(limbName));
+        model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+        model::Configuration_t save = fullBody()->device_->currentConfiguration();
+        fullBody()->device_->currentConfiguration(config);
+        fullBody()->device_->computeForwardKinematics();
+        const hpp::rbprm::RbPrmLimbPtr_t limb =fullBody()->GetLimbs().at(std::string(limbName));
         const fcl::Transform3f transform = limb->octreeRoot();
         const fcl::Quaternion3f& quat = transform.getQuatRotation();
         const fcl::Vec3f& position = transform.getTranslation();
@@ -2348,8 +2492,8 @@ assert(s2 == s1 +1);
           (*dofArray)[(_CORBA_ULong)i] = position [i];
         for(std::size_t i=0; i< 4; i++)
           (*dofArray)[(_CORBA_ULong)i+3] = quat [i];
-        fullBody_->device_->currentConfiguration(save);
-        fullBody_->device_->computeForwardKinematics();
+        fullBody()->device_->currentConfiguration(save);
+        fullBody()->device_->computeForwardKinematics();
         return dofArray;
         }
         catch(std::runtime_error& e)
@@ -2362,14 +2506,14 @@ assert(s2 == s1 +1);
                                                         const hpp::floatSeq& p_a, const hpp::floatSeq& n_a) throw (hpp::Error)
     {
         try{
-        model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
+        model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
         model::Configuration_t vec_conf = dofArrayToConfig (std::size_t(3), p_a);
         fcl::Vec3f p; for(int i =0; i<3; ++i) p[i] = vec_conf[i];
         vec_conf = dofArrayToConfig (std::size_t(3), n_a);
         fcl::Vec3f n; for(int i =0; i<3; ++i) n[i] = vec_conf[i];
-        const hpp::rbprm::RbPrmLimbPtr_t limb =fullBody_->GetLimbs().at(std::string(limbName));
+        const hpp::rbprm::RbPrmLimbPtr_t limb =fullBody()->GetLimbs().at(std::string(limbName));
 
-        const fcl::Transform3f transform = projection::computeProjectionMatrix(fullBody_, limb, config, n,p);
+        const fcl::Transform3f transform = projection::computeProjectionMatrix(fullBody(), limb, config, n,p);
         const fcl::Quaternion3f& quat = transform.getQuatRotation();
         const fcl::Vec3f& position = transform.getTranslation();
         hpp::floatSeq *dofArray;
@@ -2391,14 +2535,14 @@ assert(s2 == s1 +1);
     {
         try{
         rbprm::State testedState;
-        model::Configuration_t config = dofArrayToConfig (fullBody_->device_, configuration);
-        model::Configuration_t save = fullBody_->device_->currentConfiguration();
+        model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+        model::Configuration_t save = fullBody()->device_->currentConfiguration();
         std::vector<std::string> names = stringConversion(contactLimbs);
-        fullBody_->device_->currentConfiguration(config);
-        fullBody_->device_->computeForwardKinematics();
+        fullBody()->device_->currentConfiguration(config);
+        fullBody()->device_->computeForwardKinematics();
         for(std::vector<std::string>::const_iterator cit = names.begin(); cit != names.end();++cit)
         {
-            const hpp::rbprm::RbPrmLimbPtr_t limb =fullBody_->GetLimbs().at(std::string(*cit));
+            const hpp::rbprm::RbPrmLimbPtr_t limb =fullBody()->GetLimbs().at(std::string(*cit));
             testedState.contacts_[*cit] = true;
             testedState.contactPositions_[*cit] = limb->effector_->currentTransformation().getTranslation();
             testedState.contactRotation_[*cit] = limb->effector_->currentTransformation().getRotation();
@@ -2408,9 +2552,9 @@ assert(s2 == s1 +1);
             testedState.configuration_ = config;
             ++testedState.nbContacts;
         }
-        fullBody_->device_->currentConfiguration(save);
-        fullBody_->device_->computeForwardKinematics();
-        if (stability::IsStable(fullBody_, testedState) >= robustnessTreshold)
+        fullBody()->device_->currentConfiguration(save);
+        fullBody()->device_->computeForwardKinematics();
+        if (stability::IsStable(fullBody(), testedState) >= robustnessTreshold)
         {
             return (CORBA::Short)(1);
         }
@@ -2433,7 +2577,7 @@ assert(s2 == s1 +1);
             {
                 throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
             }
-            return stability::IsStable(fullBody_,lastStatesComputed_[stateId]);
+            return stability::IsStable(fullBody(),lastStatesComputed_[stateId]);
         }
         catch(std::runtime_error& e)
         {
@@ -2455,7 +2599,7 @@ assert(s2 == s1 +1);
             for(sampling::T_evaluate::const_iterator analysisit = analysisFactory_->evaluate_.begin();
                 analysisit != analysisFactory_->evaluate_.end(); ++ analysisit)
             {
-                for(T_Limb::const_iterator cit = fullBody_->GetLimbs().begin(); cit !=fullBody_->GetLimbs().end();++cit)
+                for(T_Limb::const_iterator cit = fullBody()->GetLimbs().begin(); cit !=fullBody()->GetLimbs().end();++cit)
                 {
                     sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (cit->second->sampleContainer_);
                     sampling::addValue(sampleDB, analysisit->first, analysisit->second, isstatic > 0.5, isstatic > 0.5);
@@ -2470,7 +2614,7 @@ assert(s2 == s1 +1);
                 std::string err("No analysis named  " + eval + "was defined for analyzing database sample");
                 throw Error (err.c_str());
             }
-            for(T_Limb::const_iterator cit = fullBody_->GetLimbs().begin(); cit !=fullBody_->GetLimbs().end();++cit)
+            for(T_Limb::const_iterator cit = fullBody()->GetLimbs().begin(); cit !=fullBody()->GetLimbs().end();++cit)
             {
                 sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (cit->second->sampleContainer_);
                 sampling::addValue(sampleDB, analysisit->first, analysisit->second, isstatic > 0.5, isstatic > 0.5);
@@ -2490,10 +2634,10 @@ assert(s2 == s1 +1);
         rbprm::sampling::ValueBound bounds;
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
-        T_Limb::const_iterator lit = fullBody_->GetLimbs().find(std::string(limbname));
-        if(lit == fullBody_->GetLimbs().end())
+        T_Limb::const_iterator lit = fullBody()->GetLimbs().find(std::string(limbname));
+        if(lit == fullBody()->GetLimbs().end())
         {
-            std::string err("No limb " + std::string(limbname) + "was defined for robot" + fullBody_->device_->name());
+            std::string err("No limb " + std::string(limbname) + "was defined for robot" + fullBody()->device_->name());
             throw Error (err.c_str());
         }
         std::string eval(analysis);
@@ -2533,27 +2677,63 @@ assert(s2 == s1 +1);
 
 
     CORBA::Short RbprmBuilder::addNewContact(unsigned short stateId, const char* limbName,
-                                        const hpp::floatSeq& position, const hpp::floatSeq& normal) throw (hpp::Error)
+                                        const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample) throw (hpp::Error)
     {
         try
         {
             if(lastStatesComputed_.size() <= stateId)
                 throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
-            const State& ns = lastStatesComputed_[stateId];
+            State ns = lastStatesComputed_[stateId];
             const std::string limb(limbName);
             model::Configuration_t config = dofArrayToConfig (std::size_t(3), position);
             fcl::Vec3f p; for(int i =0; i<3; ++i) p[i] = config[i];
             config = dofArrayToConfig (std::size_t(3), normal);
             fcl::Vec3f n; for(int i =0; i<3; ++i) n[i] = config[i];
 
-            projection::ProjectionReport rep = projection::projectStateToObstacle(fullBody_,limb, fullBody_->GetLimbs().at(limb), ns, n,p);
+            projection::ProjectionReport rep = projection::projectStateToObstacle(fullBody(),limb, fullBody()->GetLimbs().at(limb), ns, n,p);
+            ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
+            CollisionValidationPtr_t val = fullBody()->GetCollisionValidation();
+            rep.success_ =  rep.success_ &&  val->validate(rep.result_.configuration_,rport);
+            if (!rep.success_ && max_num_sample > 0)
+            {
+                BasicConfigurationShooterPtr_t shooter = BasicConfigurationShooter::create(fullBody()->device_);
+                Configuration_t head = ns.configuration_.head<7>();
+                for(std::size_t i =0; !rep.success_ && i< max_num_sample; ++i)
+                {
+                    ns.configuration_ = *shooter->shoot();
+                    ns.configuration_.head<7>() = head;
+                    rep = projection::projectStateToObstacle(fullBody(),limb, fullBody()->GetLimbs().at(limb), ns, n,p);
+                    rep.success_ = rep.success_ && val->validate(rep.result_.configuration_,rport);
+                }
+            }
             if(rep.success_)
             {
                 lastStatesComputed_.push_back(rep.result_);
                 lastStatesComputedTime_.push_back(std::make_pair(-1., rep.result_));
                 return lastStatesComputed_.size() -1;
             }
-            return -1;
+            else
+                return -1;
+        }
+        catch(std::runtime_error& e)
+        {
+            std::cout << "ERROR " << e.what() << std::endl;
+            throw Error(e.what());
+        }
+    }
+
+    CORBA::Short RbprmBuilder::removeContact(unsigned short stateId, const char* limbName) throw (hpp::Error)
+    {
+        try
+        {
+            if(lastStatesComputed_.size() <= stateId)
+                throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
+            State ns = lastStatesComputed_[stateId];
+            const std::string limb(limbName);
+            ns.RemoveContact(limb);
+            lastStatesComputed_.push_back(ns);
+            lastStatesComputedTime_.push_back(std::make_pair(-1., ns));
+            return lastStatesComputed_.size() -1;
         }
         catch(std::runtime_error& e)
         {
@@ -2583,16 +2763,22 @@ assert(s2 == s1 +1);
         }
     }
 
-    void RbprmBuilder::SetProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver)
+    void RbprmBuilder::SetProblemSolverMap (hpp::corbaServer::ProblemSolverMapPtr_t psMap)
     {
-        problemSolver_ = problemSolver;
-        bindShooter_.problemSolver_ = problemSolver;
+        psMap_ = psMap;
+        //bind shooter creator to hide problem as a parameter and respect signature
+        //initNewProblemSolver();
+    }
+
+    void RbprmBuilder::initNewProblemSolver()
+    {
         //bind shooter creator to hide problem as a parameter and respect signature
 
         // add rbprmshooter
-        problemSolver->add<core::ConfigurationShooterBuilder_t>("RbprmShooter",
+        bindShooter_.problemSolver_ = problemSolver();
+        problemSolver()->add<core::ConfigurationShooterBuilder_t>("RbprmShooter",
                                                    boost::bind(&BindShooter::create, boost::ref(bindShooter_), _1));
-        problemSolver->add<core::PathValidationBuilder_t>("RbprmPathValidation",
+        problemSolver()->add<core::PathValidationBuilder_t>("RbprmPathValidation",
                                                    boost::bind(&BindShooter::createPathValidation, boost::ref(bindShooter_), _1, _2));
         problemSolver->add<core::PathValidationBuilder_t>("RbprmDynamicPathValidation",
                                                    boost::bind(&BindShooter::createDynamicPathValidation, boost::ref(bindShooter_), _1, _2));

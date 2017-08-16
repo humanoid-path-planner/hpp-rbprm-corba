@@ -33,9 +33,9 @@ namespace hpp {
       delete rbprmBuilder_;
     }
 
-    void Server::setProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver)
+    void Server::setProblemSolverMap (hpp::corbaServer::ProblemSolverMapPtr_t psMap)
     {
-        rbprmBuilder_->implementation ().SetProblemSolver(problemSolver);
+        rbprmBuilder_->implementation ().SetProblemSolverMap(psMap);
     }
 
     /// Start corba server

@@ -22,6 +22,7 @@
 
 # include <hpp/corba/template/server.hh>
 # include <hpp/corbaserver/rbprm/config.hh>
+# include <hpp/corbaserver/problem-solver-map.hh>
 
 namespace hpp {
   namespace rbprm {
@@ -35,7 +36,7 @@ namespace hpp {
           const std::string& poaName = "child");
       ~Server ();
       /// Set planner that will be controlled by server
-      void setProblemSolver (hpp::core::ProblemSolverPtr_t problemSolver);
+      void setProblemSolverMap (hpp::corbaServer::ProblemSolverMapPtr_t psMap);
 
       /// Start corba server
 
@@ -43,7 +44,7 @@ namespace hpp {
       void startCorbaServer(const std::string& contextId,
                 const std::string& contextKind,
                 const std::string& objectId);
-    private:
+    public:
       corba::Server <impl::RbprmBuilder>* rbprmBuilder_;
     }; // class Server
   } // namespace rbprm
