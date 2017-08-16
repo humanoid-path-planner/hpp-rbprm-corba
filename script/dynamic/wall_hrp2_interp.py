@@ -35,14 +35,16 @@ rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,0,-0.105]
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 20000, "manipulability", 0.1)
+#fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 20000, "manipulability", 0.1)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 20000, "dynamic", 0.1)
 
 lLegId = 'hrp2_lleg_rom'
 lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,0,-0.105]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 20000, "manipulability", 0.1)
+#fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 20000, "manipulability", 0.1)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 20000, "dynamic", 0.1)
 
 
 rarmId = 'hrp2_rarm_rom'
@@ -142,16 +144,16 @@ fullBody.setStartState(q_init,[rLegId,lLegId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])
 
 
-"""
+
 
 from hpp.gepetto import PathPlayer
 from fullBodyPlayerHrp2 import Player
 pp = PathPlayer (fullBody.client.basic, r)
-"""
+
 
 #~ configs = fullBody.interpolate(0.08,pathId=0,robustnessTreshold = 1, filterStates = False)
 #~ configs = fullBody.interpolate(0.04,pathId=0,robustnessTreshold = 1, filterStates = True)
-configs = fullBody.interpolate(0.001,pathId=0,robustnessTreshold = 0, filterStates = True)
+configs = fullBody.interpolate(0.08,pathId=0,robustnessTreshold = 0, filterStates = True)
 
 
 
@@ -161,13 +163,13 @@ print "number of configs :", len(configs)
 
 
 
-"""
+
 player = Player(fullBody,pp,tp,configs,use_window =1,draw=False,optim_effector=False,use_velocity=True,pathId= 0)
 
-#player.displayContactPlan()
+player.displayContactPlan()
 
 
 
-player.interpolate(0, 17)
-"""
+#player.interpolate(0, 17)
+
 
