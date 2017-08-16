@@ -31,7 +31,7 @@ class Robot (Parent):
 rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
 meshPackageName = 'hpp-rbprm-corba'
-urdfName = 'hrp2_trunk_flexible'
+urdfName = 'hrp2_trunk_arms_flexible'
 urdfNameRoms =  ['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
@@ -56,6 +56,7 @@ extraDof = 6
 
 rbprmBuilder.setJointBounds ("base_joint_xyz", [-5.5,5.5, -2.5, 2.5, 0.55, 0.6])
 rbprmBuilder.setJointBounds('CHEST_JOINT0',[-0.05,0.05])
+rbprmBuilder.setJointBounds('CHEST_JOINT1',[-0.05,0.05])
 # We also bound the rotations of the torso. (z, y, x)
 rbprmBuilder.boundSO3([-math.pi,math.pi,-0.1,0.1,-0.1,0.1])
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
