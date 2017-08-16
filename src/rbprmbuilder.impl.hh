@@ -371,7 +371,7 @@ namespace hpp {
         std::vector<rbprm::State> lastStatesComputed_;
         rbprm::T_StateFrame lastStatesComputedTime_;
         sampling::AnalysisFactory* analysisFactory_;
-        model::Configuration_t refPose;
+        model::Configuration_t refPose_;
       }; // class RobotBuilder
     } // namespace impl
   } // namespace manipulation

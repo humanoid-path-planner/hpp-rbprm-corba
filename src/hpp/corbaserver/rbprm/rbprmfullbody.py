@@ -957,3 +957,45 @@ class FullBody (object):
      def getJacobianCenterOfMass (self):
           return self.client.basic.robot.getJacobianCenterOfMass ()
      ##\}
+     ## Get the dimension of the extra configuration space
+     def getDimensionExtraConfigSpace(self):
+          return self.client.basic.robot.getDimensionExtraConfigSpace()
+
+
+      ## set a boolean in rbprmFullBody
+      # if true, the acceleration doesn't account for the stability check
+      #
+        # \param staticStability boolean
+     def setStaticStability(self,staticStability):
+          return self.client.rbprm.rbprm.setStaticStability(staticStability)
+
+     ## set a reference configuration in FullBody
+     # \param referenceConfig dofArray
+     def setReferenceConfig(self,referenceConfig):
+          return self.client.rbprm.rbprm.setReferenceConfig(referenceConfig)
+
+
+      ## Convert a direction vector to a quaternion (use Eigen::Quaterniond::FromTwoVectors with Z vector)
+      # \param u the vector director
+     def quaternionFromVector(self,vector):
+          return self.client.basic.robot.quaternionFromVector(vector)
+
+      ## return the time at the given state index (in the path computed during the first phase)
+      # \param stateId : index of the state
+     def getTimeAtState(self,stateId):
+          return self.client.rbprm.rbprm.getTimeAtState(stateId)
+
+      ## return the contacts variation between two states
+      # \param stateIdFrom : index of the first state
+      # \param stateIdTo : index of the second state
+     def getContactsVariations(self,stateIdFrom,stateIdTo):
+          return self.client.rbprm.rbprm.getContactsVariations(stateIdFrom,stateIdTo)
+
+      ## return a list of all the limbs names
+     def getAllLimbsNames(self):
+          return self.client.rbprm.rbprm.getAllLimbsNames()
+
+      ## return a list of all the limbs in contact
+      # \param stateId : index of the state
+     def getAllLimbsInContact(self,stateId):
+          return self.getLimbsInContact(self.getAllLimbsNames(),stateId)

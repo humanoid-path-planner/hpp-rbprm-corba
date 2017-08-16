@@ -154,18 +154,18 @@ namespace hpp {
             fullBodyMap_.map_[name] = rbprm::RbPrmFullBody::create(device);
             fullBodyMap_.selected_ = name;
             try {
-              boost::any value = problemSolver_->problem()->get<boost::any> (std::string("friction"));
-              fullBody_->setFriction(boost::any_cast<double>(value));
-              hppDout(notice,"fullbody : mu define in python : "<<fullBody_->getFriction());
+              boost::any value = problemSolver()->problem()->get<boost::any> (std::string("friction"));
+              fullBody()->setFriction(boost::any_cast<double>(value));
+              hppDout(notice,"fullbody : mu define in python : "<<fullBody()->getFriction());
             } catch (const std::exception& e) {
-              hppDout(notice,"fullbody : mu not defined, take : "<<fullBody_->getFriction()<<" as default.");
+              hppDout(notice,"fullbody : mu not defined, take : "<<fullBody()->getFriction()<<" as default.");
             }
             problemSolver()->pathValidationType ("Discretized",0.05); // reset to avoid conflict with rbprm path
             problemSolver()->robot (fullBody()->device_);
             problemSolver()->resetProblem();
             problemSolver()->robot ()->controlComputation
             (model::Device::JOINT_POSITION);
-            refPose = fullBody()->device_->currentConfiguration();
+            refPose_ = fullBody()->device_->currentConfiguration();
         }
         catch (const std::exception& exc)
         {
@@ -475,7 +475,7 @@ namespace hpp {
             state.contactPositions_[limbName] = position;
             state.contactNormals_[limbName] = fcl::Vec3f(0,0,1);
             state.contactRotation_[limbName] = limb->effector_->currentTransformation().getRotation();
-            std::vector<fcl::Vec3f> poss = (computeRectangleContact(fullBody_, state));
+            std::vector<fcl::Vec3f> poss = (computeRectangleContact(fullBody(), state));
 
             hpp::floatSeqSeq *res;
             res = new hpp::floatSeqSeq ();
@@ -600,14 +600,15 @@ namespace hpp {
     void RbprmBuilder::setStaticStability(const bool staticStability) throw (hpp::Error){
       if(!fullBodyLoaded_)
         throw Error ("No full body robot was loaded");
-      fullBody_->staticStability(staticStability);
+      fullBody()->staticStability(staticStability);
     }
 
     void RbprmBuilder::setReferenceConfig(const hpp::floatSeq& referenceConfig) throw (hpp::Error){
       if(!fullBodyLoaded_)
         throw Error ("No full body robot was loaded");
-      model::ConfigurationPtr_t config(new Configuration_t(dofArrayToConfig (fullBody_->device_, referenceConfig)));
-      fullBody_->referenceConfig(config);
+      model::ConfigurationPtr_t config(new Configuration_t(dofArrayToConfig (fullBody()->device_, referenceConfig)));
+      refPose_ = *config;
+      fullBody()->referenceConfig(config);
     }
 
 
@@ -709,7 +710,7 @@ namespace hpp {
                     // get part of reference configuration that concerns the limb.
                     RbPrmLimbPtr_t limb = cit->second;
                     const sampling::Sample& sample = limb->sampleContainer_.samples_[0];
-                    s.configuration_.segment(sample.startRank_, sample.length_) = refPose.segment(sample.startRank_, sample.length_) ;
+                    s.configuration_.segment(sample.startRank_, sample.length_) = refPose_.segment(sample.startRank_, sample.length_) ;
                     rep = rbprm::projection::projectToComPosition(fullBody(),com_target,s);
                     rep.success_ = rep.success_ && val->validate(rep.result_.configuration_,rport);
                     if(rep.success_)
@@ -785,7 +786,7 @@ namespace hpp {
       		  }
             model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
             rbprm::State state = rbprm::contact::ComputeContacts(fullBody(),config,
-							affMap, bindShooter_.affFilter_, dir,acc);
+              affMap, bindShooter_.affFilter_, dir,robustnessThreshold,acc);
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(_CORBA_ULong(state.configuration_.rows()));
             for(std::size_t i=0; i< _CORBA_ULong(config.rows()); i++)
@@ -1232,7 +1233,7 @@ namespace hpp {
           }
           State stateFrom = lastStatesComputed_[stateIdFrom];
           State stateTo = lastStatesComputed_[stateIdTo];
-          std::vector<std::string> variations_s = stateTo.allVariations(stateFrom,rbprm::interpolation::extractEffectorsName(fullBody_->GetLimbs()));
+          std::vector<std::string> variations_s = stateTo.allVariations(stateFrom,rbprm::interpolation::extractEffectorsName(fullBody()->GetLimbs()));
           CORBA::ULong size = (CORBA::ULong) variations_s.size ();
           char** nameList = Names_t::allocbuf(size);
           Names_t *variations = new Names_t (size,size,nameList);
@@ -1976,7 +1977,7 @@ assert(s2 == s1 +1);
 
             State s1Bis(state1);
             hppDout(notice,"state1 = "<<model::displayConfig(state1.configuration_));
-            s1Bis.configuration_ = project_or_throw(fullBody_, problemSolver_->problem(),s1Bis,paths[cT1]->end().head<3>());
+            s1Bis.configuration_ = project_or_throw(fullBody(),s1Bis,paths[cT1]->end().head<3>());
 
             hppDout(notice,"state1 after projection= "<<model::displayConfig(s1Bis.configuration_));
             for(std::map<std::string,bool>::const_iterator cit = s1Bis.contacts_.begin();cit!=s1Bis.contacts_.end(); ++ cit)
@@ -2038,7 +2039,7 @@ assert(s2 == s1 +1);
 
             try{
                 hppDout(notice,"begin comRRT states 1 and 1bis");
-                core::PathPtr_t p1 = interpolation::comRRT(fullBody_,problemSolver_->problem(), paths[cT1],
+                core::PathPtr_t p1 = interpolation::comRRT(fullBody(),problemSolver()->problem(), paths[cT1],
                         state1,s1Bis, numOptimizations,true);
                 hppDout(notice,"end comRRT");
                 // reduce path to remove extradof
@@ -2780,12 +2781,12 @@ assert(s2 == s1 +1);
                                                    boost::bind(&BindShooter::create, boost::ref(bindShooter_), _1));
         problemSolver()->add<core::PathValidationBuilder_t>("RbprmPathValidation",
                                                    boost::bind(&BindShooter::createPathValidation, boost::ref(bindShooter_), _1, _2));
-        problemSolver->add<core::PathValidationBuilder_t>("RbprmDynamicPathValidation",
+        problemSolver()->add<core::PathValidationBuilder_t>("RbprmDynamicPathValidation",
                                                    boost::bind(&BindShooter::createDynamicPathValidation, boost::ref(bindShooter_), _1, _2));
-        problemSolver->add<core::PathPlannerBuilder_t>("DynamicPlanner",DynamicPlanner::createWithRoadmap);
-        problemSolver->add <core::SteeringMethodBuilder_t> ("RBPRMKinodynamic", SteeringMethodKinodynamic::create);
-        problemSolver->add <core::PathOptimizerBuilder_t> ("RandomShortcutDynamic", RandomShortcutDynamic::create);
-        problemSolver->add <core::PathOptimizerBuilder_t> ("OrientedPathOptimizer", OrientedPathOptimizer::create);
+        problemSolver()->add<core::PathPlannerBuilder_t>("DynamicPlanner",DynamicPlanner::createWithRoadmap);
+        problemSolver()->add <core::SteeringMethodBuilder_t> ("RBPRMKinodynamic", SteeringMethodKinodynamic::create);
+        problemSolver()->add <core::PathOptimizerBuilder_t> ("RandomShortcutDynamic", RandomShortcutDynamic::create);
+        problemSolver()->add <core::PathOptimizerBuilder_t> ("OrientedPathOptimizer", OrientedPathOptimizer::create);
 
 
     }
@@ -2795,7 +2796,7 @@ assert(s2 == s1 +1);
       if(!fullBodyLoaded_){
         throw std::runtime_error ("fullBody not loaded");
       }
-      std::vector<std::string> names = rbprm::interpolation::extractEffectorsName(fullBody_->GetLimbs());
+      std::vector<std::string> names = rbprm::interpolation::extractEffectorsName(fullBody()->GetLimbs());
       CORBA::ULong size = (CORBA::ULong) names.size ();
       char** nameList = Names_t::allocbuf(size);
       Names_t *limbsNames = new Names_t (size,size,nameList);
