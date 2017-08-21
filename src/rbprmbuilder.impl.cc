@@ -779,8 +779,9 @@ namespace hpp {
                 dir[i] = direction[(_CORBA_ULong)i];
                 acc[i] = acceleration[(_CORBA_ULong)i];
             }
-                        const affMap_t &affMap = problemSolver()->map
-							<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
+            dir = dir.normalize();
+
+            const affMap_t &affMap = problemSolver()->map<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
 		        if (affMap.empty ()) {
     	        throw hpp::Error ("No affordances found. Unable to generate Contacts.");
       		  }
