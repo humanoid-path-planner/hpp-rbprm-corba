@@ -606,8 +606,8 @@ namespace hpp {
     void RbprmBuilder::setReferenceConfig(const hpp::floatSeq& referenceConfig) throw (hpp::Error){
       if(!fullBodyLoaded_)
         throw Error ("No full body robot was loaded");
-      model::ConfigurationPtr_t config(new Configuration_t(dofArrayToConfig (fullBody()->device_, referenceConfig)));
-      refPose_ = *config;
+      Configuration_t config(dofArrayToConfig (fullBody()->device_, referenceConfig));
+      refPose_ = config;
       fullBody()->referenceConfig(config);
     }
 
