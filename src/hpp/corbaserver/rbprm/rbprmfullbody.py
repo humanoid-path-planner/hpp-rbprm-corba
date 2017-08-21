@@ -653,10 +653,7 @@ class FullBody (object):
      # \return whether the projection was successful
      def setConfigAtState(self, state, targetCom):
           return self.client.rbprm.rbprm.setConfigAtState(state, targetCom)     > 0
-          
-     def setRefConfig(self, targetCom):
-          return self.client.rbprm.rbprm.setRefConfig(targetCom)     > 0
-          
+
      ## Given start and goal states
      #  generate a contact sequence over a list of configurations
      #
