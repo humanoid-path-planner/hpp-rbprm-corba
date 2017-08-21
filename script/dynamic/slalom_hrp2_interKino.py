@@ -28,21 +28,39 @@ ps.client.problem.setParameter("vMax",omniORB.any.to_any(tp.vMax))
 
 r = tp.Viewer (ps,viewerClient=tp.r.client,displayArrows = True, displayCoM = True)
 
+q_init =[0.1, -0.82, 0.648702, 1.0, 0.0 , 0.0, 0.0,0.0, 0.0, 0.0, 0.0,0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17,0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17,0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,0,0,0,0,0,0]; r (q_init)
+q_ref = q_init[::]
+fullBody.setCurrentConfig (q_init)
+fullBody.setReferenceConfig (q_ref)
+fullBody.setStaticStability(False)
+
+
 #~ AFTER loading obstacles
 rLegId = 'hrp2_rleg_rom'
+lLegId = 'hrp2_lleg_rom'
+
+
 rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,0,-0.105]
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "forward", 0.1)
+fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
+#fullBody.saveLimbDatabase(rLegId, "./db/hrp2_rleg_db.db")
 
-lLegId = 'hrp2_lleg_rom'
+
+
+
 lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,0,-0.105]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
 fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "forward", 0.1)
+fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
+#fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
 
+#fullBody.addLimbDatabase("./db/hrp2_rleg_db.db",rLegId,"forward")
+#fullBody.addLimbDatabase("./db/hrp2_lleg_db.db",lLegId,"forward")
 
 
 
@@ -50,10 +68,7 @@ q_0 = fullBody.getCurrentConfig();
 #~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
 
 
-q_init =[0.1, -0.82, 0.648702, 1.0, 0.0 , 0.0, 0.0,0.0, 0.0, 0.0, 0.0,0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17,0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17,0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,0,0,0,0,0,0]; r (q_init)
-q_ref = q_init[::]
-fullBody.setCurrentConfig (q_init)
-fullBody.setReferenceConfig (q_ref)
+
 
 configSize = fullBody.getConfigSize() -fullBody.client.basic.robot.getDimensionExtraConfigSpace()
 
@@ -76,7 +91,7 @@ q_goal[configSize+3:configSize+6] = [0,0,0]
 q_init[2] = q_init[2]+0.1
 q_goal[2] = q_goal[2]+0.1
 
-fullBody.setStaticStability(True)
+
 # Randomly generating a contact configuration at q_init
 fullBody.setCurrentConfig (q_init)
 r(q_init)
@@ -98,29 +113,25 @@ fullBody.setEndState(q_goal,[rLegId,lLegId])
 
 
 
-"""
-
-fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
-fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
-
-"""
 
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
 import fullBodyPlayerHrp2
 
+tStart = time.time()
 configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 1, filterStates = True)
-print "number of configs :", len(configs)
-
-
+tInterpolate = time.time()-tStart
+print "number of configs : ", len(configs)
+print "generated in "+str(tInterpolate)+" s"
+r(configs[len(configs)-1])
 
 
 player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=1,optim_effector=True,use_velocity=False,pathId = pId)
 
 # remove the last config (= user defined q_goal, not consitent with the previous state)
-r(configs[0])
 
+#r(configs[0])
 #player.displayContactPlan(1.)
 
 #player.interpolate(2,len(configs)-1)
