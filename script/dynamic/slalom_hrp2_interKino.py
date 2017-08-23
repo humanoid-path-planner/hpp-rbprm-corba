@@ -45,7 +45,7 @@ rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,0,-0.105]
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "forward", 0.1)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "forward", 0.05,"_6_DOF")
 fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/hrp2_rleg_db.db")
 
@@ -53,7 +53,7 @@ lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,0,-0.105]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "forward", 0.1)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "forward", 0.05,"_6_DOF")
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
 tGenerate =  time.time() - tStart
@@ -83,7 +83,7 @@ acc_init = tp.ps.configAtParam(pId,0)[tp.indexECS+3:tp.indexECS+6]
 dir_goal = tp.ps.configAtParam(pId,tp.ps.pathLength(pId))[tp.indexECS:tp.indexECS+3]
 acc_goal = [0,0,0]
 
-robTreshold = 1
+robTreshold = 5
 # copy extraconfig for start and init configurations
 q_init[configSize:configSize+3] = dir_init[::]
 q_init[configSize+3:configSize+6] = acc_init[::]
@@ -125,7 +125,7 @@ pp = PathPlayer (fullBody.client.basic, r)
 import fullBodyPlayerHrp2
 
 tStart = time.time()
-configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = robTreshold, filterStates = True)
+configs = fullBody.interpolate(0.02,pathId=pId,robustnessTreshold = robTreshold, filterStates = True)
 tInterpolate = time.time()-tStart
 print "number of configs : ", len(configs)
 print "generated in "+str(tInterpolate)+" s"
@@ -146,7 +146,7 @@ player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=
 
 from planning.config import *
 from generate_contact_sequence import *
-cs = generateContactSequence(fullBody,configs[0:3],r)
+cs = generateContactSequence(fullBody,configs,r)
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")
 print "save contact sequence : ",filename

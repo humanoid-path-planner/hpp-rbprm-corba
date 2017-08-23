@@ -2037,7 +2037,7 @@ assert(s2 == s1 +1);
             }
 
             core::PathVectorPtr_t resPath = core::PathVector::create(fullBody()->device_->configSize(), fullBody()->device_->numberDof());
-
+            hppDout(notice,"ComRRT : projections done. begin rrt");
             try{
                 hppDout(notice,"begin comRRT states 1 and 1bis");
                 core::PathPtr_t p1 = interpolation::comRRT(fullBody(),problemSolver()->problem(), paths[cT1],

@@ -50,8 +50,8 @@ rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
 #rbprmBuilder.setAffordanceFilter('hrp2_larm_rom', ['Lean'])
 rbprmBuilder.setAffordanceFilter('hrp2_lleg_rom', ['Support',])
 rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
-vMax = 1.;
-aMax = 5.;
+vMax = 0.3;
+aMax = 0.5;
 extraDof = 6
 
 rbprmBuilder.setJointBounds ("base_joint_xyz", [-5.5,5.5, -2.5, 2.5, 0.55, 0.6])
@@ -163,7 +163,7 @@ pp.dt=0.03
 pp.displayVelocityPath(pi)
 r.client.gui.setVisibility("path_"+str(pi)+"_root","ALWAYS_ON_TOP")
 #display path
-pp.speed=0.5
+pp.speed=1
 #pp (0)
 
 
