@@ -2677,6 +2677,36 @@ assert(s2 == s1 +1);
         }
     }
 
+    hpp::floatSeq* RbprmBuilder::evaluateConfig(const hpp::floatSeq& configuration,const hpp::floatSeq& direction) throw (hpp::Error){
+      if(!fullBodyLoaded_)
+          throw Error ("No full body robot was loaded");
+      if(fullBody()->GetLimbs().size()<= 0)
+          throw Error ("No Limbs defined for this robot");
+      fcl::Vec3f dir;
+      for(std::size_t i =0; i <3; ++i)
+      {
+          dir[i] = direction[(_CORBA_ULong)i];
+      }
+      dir = dir.normalize();
+
+
+      hpp::floatSeq* dofArray = new hpp::floatSeq();
+      dofArray->length(fullBody()->GetLimbs().size());
+      size_t id = 0;
+      model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+      for(T_Limb::const_iterator lit = fullBody()->GetLimbs().begin() ; lit != fullBody()->GetLimbs().end() ; ++lit){
+        sampling::Sample sample(lit->second->limb_, lit->second->effector_, config,  lit->second->offset_, 0);
+        (*dofArray)[(_CORBA_ULong)id] = lit->second->evaluate_(sample,dir,lit->second->normal_,sampling::HeuristicParam());
+        hppDout(notice,"Evaluate for limb : "<<lit->second->effector_->name()<<" = "<<(*dofArray)[(_CORBA_ULong)id]);
+        hppDout(notice,"eff position = "<<sample.effectorPosition_);
+        hppDout(notice,"limb frame   = "<<sample.effectorPositionInLimbFrame_);
+        hppDout(notice,"direction    = "<<dir);
+        id++;
+      }
+      return dofArray;
+    }
+
+
 
     CORBA::Short RbprmBuilder::addNewContact(unsigned short stateId, const char* limbName,
                                         const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample) throw (hpp::Error)

@@ -615,6 +615,10 @@ module hpp
     /// \return min and max values obtained
     floatSeq runLimbSampleAnalysis(in string limbname, in string analysis, in double isstatic) raises (Error);
 
+    // call the heuristic function on each limb for the given configuration
+    floatSeq evaluateConfig(in floatSeq configuration, in floatSeq direction) raises (Error);
+
+
     /// if the preprocessor variable PROFILE is active
     /// dump the profiling data into a logFile
     /// \param logFile name of the file where to dump the profiling data

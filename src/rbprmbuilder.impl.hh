@@ -323,6 +323,7 @@ namespace hpp {
         virtual double isStateBalanced(unsigned short stateId) throw (hpp::Error);
         virtual void runSampleAnalysis(const char* analysis, double isstatic) throw (hpp::Error);
         virtual hpp::floatSeq* runLimbSampleAnalysis(const char* limbname, const char* analysis, double isstatic) throw (hpp::Error);
+        virtual hpp::floatSeq* evaluateConfig(const hpp::floatSeq& configuration, const hpp::floatSeq &direction) throw (hpp::Error);
         virtual void dumpProfile(const char* logFile) throw (hpp::Error);
         virtual double getTimeAtState(unsigned short stateId)throw (hpp::Error);
         virtual Names_t* getContactsVariations(unsigned short stateIdFrom,unsigned short stateIdTo )throw (hpp::Error);
