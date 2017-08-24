@@ -239,7 +239,7 @@ namespace hpp {
                                                    double octreeNodeId) throw (hpp::Error);
 
         virtual void addLimb(const char* id, const char* limb, const char* effector, const hpp::floatSeq& offset, const hpp::floatSeq& normal, double x, double y,
-                             unsigned short samples, const char *heuristicName, double resolution, const char *contactType,
+                             unsigned int samples, const char *heuristicName, double resolution, const char *contactType,
                              double disableEffectorCollision, double grasp) throw (hpp::Error);
         virtual void addLimbDatabase(const char* databasePath, const char* id, const char* heuristicName, double loadValues,
                                      double disableEffectorCollision, double grasp) throw (hpp::Error);

@@ -1068,7 +1068,7 @@ namespace hpp {
     }
 
     void RbprmBuilder::addLimb(const char* id, const char* limb, const char* effector, const hpp::floatSeq& offset, const hpp::floatSeq& normal, double x, double y,
-                               unsigned short samples, const char* heuristicName, double resolution, const char *contactType, double disableEffectorCollision, double grasp) throw (hpp::Error)
+                               unsigned int samples, const char* heuristicName, double resolution, const char *contactType, double disableEffectorCollision, double grasp) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");

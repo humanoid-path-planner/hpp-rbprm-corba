@@ -249,7 +249,7 @@ module hpp
     /// \param contactType whether the contact is punctual ("_3_DOF") or surfacic ("_6_DOF")
     /// \param disableEffectorCollision whether collision detection should be disabled for the end effector bones
     void addLimb(in string id, in string limb, in string effector, in floatSeq offset, in floatSeq normal,
-                 in double x, in double y, in unsigned short samples, in string heuristicName,
+                 in double x, in double y, in unsigned long samples, in string heuristicName,
                  in double resolution, in string contactType,  in double disableEffectorCollision,
                  in double grasp) raises (Error);
 
