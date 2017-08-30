@@ -2697,7 +2697,7 @@ assert(s2 == s1 +1);
       size_t id = 0;
       model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
       for(T_Limb::const_iterator lit = fullBody()->GetLimbs().begin() ; lit != fullBody()->GetLimbs().end() ; ++lit){
-        sampling::Sample sample(lit->second->limb_, lit->second->effector_, config,  lit->second->offset_, 0);
+        sampling::Sample sample(lit->second->limb_, lit->second->effector_, config,  lit->second->offset_,lit->second->limbOffset_, 0);
         (*dofArray)[(_CORBA_ULong)id] = lit->second->evaluate_(sample,dir,lit->second->normal_,sampling::HeuristicParam());
         hppDout(notice,"Evaluate for limb : "<<lit->second->effector_->name()<<" = "<<(*dofArray)[(_CORBA_ULong)id]);
         hppDout(notice,"eff position = "<<sample.effectorPosition_);
