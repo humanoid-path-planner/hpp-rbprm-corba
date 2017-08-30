@@ -43,17 +43,21 @@ tStart = time.time()
 
 rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,0,-0.105]
+rLegLimbOffset=[0,0,-0.04]
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "forward", 0.05,"_6_DOF")
+#fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "forward", 0.1,"_6_DOF")
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "forward", 0.05,"_6_DOF",limbOffset=rLegLimbOffset)
 fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/hrp2_rleg_db.db")
 
 lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,0,-0.105]
+lLegLimbOffset=[0,0,0.04]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "forward", 0.05,"_6_DOF")
+#fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "forward", 0.1,"_6_DOF")
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "forward", 0.05,"_6_DOF",limbOffset=lLegLimbOffset)
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
 tGenerate =  time.time() - tStart

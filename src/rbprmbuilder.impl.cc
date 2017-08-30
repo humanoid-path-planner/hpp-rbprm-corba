@@ -1068,24 +1068,26 @@ namespace hpp {
     }
 
     void RbprmBuilder::addLimb(const char* id, const char* limb, const char* effector, const hpp::floatSeq& offset, const hpp::floatSeq& normal, double x, double y,
-                               unsigned int samples, const char* heuristicName, double resolution, const char *contactType, double disableEffectorCollision, double grasp) throw (hpp::Error)
+                               unsigned int samples, const char* heuristicName, double resolution, const char *contactType, double disableEffectorCollision, double grasp, const hpp::floatSeq &limbOffset) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
         try
         {
-            fcl::Vec3f off, norm;
+            fcl::Vec3f off, norm,limbOff;
             for(std::size_t i =0; i <3; ++i)
             {
                 off[i] = offset[(_CORBA_ULong)i];
                 norm[i] = normal[(_CORBA_ULong)i];
+                limbOff[i] = limbOffset[(_CORBA_ULong)i];
+
             }
             ContactType cType = hpp::rbprm::_6_DOF;
             if(std::string(contactType) == "_3_DOF")
             {
                 cType = hpp::rbprm::_3_DOF;
             }
-            fullBody()->AddLimb(std::string(id), std::string(limb), std::string(effector), off, norm, x, y,
+            fullBody()->AddLimb(std::string(id), std::string(limb), std::string(effector), off,limbOff, norm, x, y,
                                problemSolver()->collisionObstacles(), samples,heuristicName,resolution,cType,disableEffectorCollision > 0.5, grasp > 0.5);
         }
         catch(std::runtime_error& e)

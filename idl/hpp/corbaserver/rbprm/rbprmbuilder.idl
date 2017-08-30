@@ -248,10 +248,11 @@ module hpp
     /// \param resolution resolution of the octree used to store the samples (a typical value is 0.01 meters)
     /// \param contactType whether the contact is punctual ("_3_DOF") or surfacic ("_6_DOF")
     /// \param disableEffectorCollision whether collision detection should be disabled for the end effector bones
+    /// \param limbOffset the offset between the limb joint and it's link
     void addLimb(in string id, in string limb, in string effector, in floatSeq offset, in floatSeq normal,
                  in double x, in double y, in unsigned long samples, in string heuristicName,
                  in double resolution, in string contactType,  in double disableEffectorCollision,
-                 in double grasp) raises (Error);
+                 in double grasp,in floatSeq limbOffset) raises (Error);
 
     /// Specifies a subchain of the robot as a limb, which can be used to create contacts.
     /// A limb must consist in a simple kinematic chain, where every node has only one child

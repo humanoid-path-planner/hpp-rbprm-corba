@@ -164,14 +164,14 @@ class FullBody (object):
      # This can be problematic in terms of performance. The default value is 3 cm.
      # \param contactType whether the contact is punctual ("_3_DOF") or surfacic ("_6_DOF")
      # \param disableEffectorCollision: whether collision detection should be disabled for end effector bones
-     def addLimb(self, limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution, contactType="_6_DOF",disableEffectorCollision = False, grasp =False):
+     def addLimb(self, limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution, contactType="_6_DOF",disableEffectorCollision = False, grasp =False,limbOffset=[0,0,0]):
           boolValEff = 0.
           if(disableEffectorCollision):
                 boolValEff = 1.
           graspv = 0.
           if(grasp):
                 graspv = 1.
-          self.client.rbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution,contactType, boolValEff,graspv)
+          self.client.rbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution,contactType, boolValEff,graspv,limbOffset)
           self.limbNames += [limbId]
 
      ## Returns the configuration of a limb described by a sample
