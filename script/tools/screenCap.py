@@ -38,8 +38,8 @@ tp.r.stopCapture ()
 
 
 
-#id = rr.client.gui.getWindowID("window_hpp_")
-#rr.client.gui.attachCameraToNode("spiderman/Skull",id)
+id = r.client.gui.getWindowID("window_hpp_")
+r.client.gui.attachCameraToNode( 'hrp2_14/BODY_0',id)
 
 
 """
