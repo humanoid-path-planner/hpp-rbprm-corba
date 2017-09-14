@@ -43,23 +43,39 @@ tStart = time.time()
 
 rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,0,-0.105]
-rLegLimbOffset=[0,0,-0.06]#0.035
+rLegLimbOffset=[0,0,-0.035]#0.035
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 #fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "forward", 0.1,"_6_DOF")
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "dynamicWalk", 0.05,"_6_DOF",limbOffset=rLegLimbOffset)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "dynamicWalk", 0.01,"_6_DOF",limbOffset=rLegLimbOffset)
 fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/hrp2_rleg_db.db")
 
 lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,0,-0.105]
-lLegLimbOffset=[0,0,0.06]
+lLegLimbOffset=[0,0,0.035]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
 #fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "forward", 0.1,"_6_DOF")
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "dynamicWalk", 0.05,"_6_DOF",limbOffset=lLegLimbOffset)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "dynamicWalk", 0.01,"_6_DOF",limbOffset=lLegLimbOffset)
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
+
+## Add arms (not used for contact) : 
+
+
+rarmId = 'hrp2_rarm_rom'
+rarm = 'RARM_JOINT0'
+rHand = 'RARM_JOINT5'
+fullBody.addNonContactingLimb(rarmId,rarm,rHand, 50000)
+fullBody.runLimbSampleAnalysis(rarmId, "ReferenceConfiguration", True)
+larmId = 'hrp2_larm_rom'
+larm = 'LARM_JOINT0'
+lHand = 'LARM_JOINT5'
+fullBody.addNonContactingLimb(larmId,larm,lHand, 50000)
+fullBody.runLimbSampleAnalysis(larmId, "ReferenceConfiguration", True)
+
+
 tGenerate =  time.time() - tStart
 print "generate databases in : "+str(tGenerate)+" s"
 
@@ -145,11 +161,6 @@ player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=
 
 #player.interpolate(2,len(configs)-1)
 
-"""
-r(configs[5])
-dir = configs[5][37:40]
-fullBody.client.rbprm.rbprm.evaluateConfig(configs[5],dir)
-"""
 
 from planning.config import *
 from generate_contact_sequence import *
@@ -163,6 +174,20 @@ print "save contact sequence : ",filename
 r(q_init)
 pos=fullBody.getJointPosition('RLEG_JOINT0')
 addSphere(r,r.color.blue,pos)
+
+
+dir = fullBody.getCurrentConfig()[37:40]
+fullBody.client.rbprm.rbprm.evaluateConfig(fullBody.getCurrentConfig(),dir)
+
+vd[0:3] = fullBody.getCurrentConfig()[0:3]
+addVector(r,fullBody,r.color.black,vd)
+
+vl[0:3] = fullBody.getCurrentConfig()[0:3]
+addVector(r,fullBody,r.color.blue,vl)
+
+vlb[0:3] = fullBody.getCurrentConfig()[0:3]
+addVector(r,fullBody,r.color.red,vlb)
+
 """
 
 

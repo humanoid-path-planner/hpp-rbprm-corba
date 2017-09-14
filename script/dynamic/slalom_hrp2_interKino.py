@@ -60,6 +60,8 @@ lLegx = 0.09; lLegy = 0.05
 fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "dynamicWalk", 0.05,"_6_DOF",limbOffset=lLegLimbOffset)
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
+
+
 tGenerate =  time.time() - tStart
 print "generate databases in : "+str(tGenerate)+" s"
 

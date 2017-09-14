@@ -25,9 +25,9 @@ for i in range(0,len(q2)):
 r.client.gui.refresh()
 
 
+
 color = r.color.blue
 name = "vec2"
-
 quat = rbprmBuilder.quaternionFromVector(v[3:6])
 v[3:7] = quat[::]
 r.client.gui.addArrow(name,0.02,1,color)
