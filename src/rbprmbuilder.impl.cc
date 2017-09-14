@@ -1096,6 +1096,21 @@ namespace hpp {
         }
     }
 
+    void RbprmBuilder::addNonContactingLimb(const char* id, const char* limb, const char* effector, unsigned int samples) throw (hpp::Error)
+    {
+        if(!fullBodyLoaded_)
+            throw Error ("No full body robot was loaded");
+        try
+        {
+
+            fullBody()->AddNonContactingLimb(std::string(id), std::string(limb), std::string(effector), problemSolver()->collisionObstacles(), samples);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
 
     void RbprmBuilder::addLimbDatabase(const char* databasePath, const char* id, const char* heuristicName, double loadValues, double disableEffectorCollision, double grasp) throw (hpp::Error)
     {
@@ -2638,19 +2653,14 @@ assert(s2 == s1 +1);
         rbprm::sampling::ValueBound bounds;
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
-        T_Limb::const_iterator lit = fullBody()->GetLimbs().find(std::string(limbname));
-        if(lit == fullBody()->GetLimbs().end())
-        {
-            std::string err("No limb " + std::string(limbname) + "was defined for robot" + fullBody()->device_->name());
-            throw Error (err.c_str());
-        }
+        rbprm::RbPrmLimbPtr_t limb = fullBody()->GetLimb(limbname);
         std::string eval(analysis);
         if (eval == "all")
         {
             for(sampling::T_evaluate::const_iterator analysisit = analysisFactory_->evaluate_.begin();
                 analysisit != analysisFactory_->evaluate_.end(); ++ analysisit)
             {
-                sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (lit->second->sampleContainer_);
+                sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (limb->sampleContainer_);
                 sampling::addValue(sampleDB, analysisit->first, analysisit->second, isstatic > 0.5, isstatic > 0.5);
                 bounds = sampleDB.valueBounds_[analysisit->first];
             }
@@ -2663,7 +2673,7 @@ assert(s2 == s1 +1);
                 std::string err("No analysis named  " + eval + "was defined for analyzing database sample");
                 throw Error (err.c_str());
             }
-            sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (lit->second->sampleContainer_);
+            sampling::SampleDB & sampleDB =const_cast<sampling::SampleDB &> (limb->sampleContainer_);
             sampling::addValue(sampleDB, analysisit->first, analysisit->second, isstatic > 0.5, isstatic > 0.5);
             bounds = sampleDB.valueBounds_[analysisit->first];
         }

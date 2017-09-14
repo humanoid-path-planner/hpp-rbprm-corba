@@ -241,6 +241,8 @@ namespace hpp {
         virtual void addLimb(const char* id, const char* limb, const char* effector, const hpp::floatSeq& offset, const hpp::floatSeq& normal, double x, double y,
                              unsigned int samples, const char *heuristicName, double resolution, const char *contactType,
                              double disableEffectorCollision, double grasp,const hpp::floatSeq& limbOffset) throw (hpp::Error);
+        virtual void addNonContactingLimb(const char* id, const char* limb, const char* effector, unsigned int samples) throw (hpp::Error);
+
         virtual void addLimbDatabase(const char* databasePath, const char* id, const char* heuristicName, double loadValues,
                                      double disableEffectorCollision, double grasp) throw (hpp::Error);
 

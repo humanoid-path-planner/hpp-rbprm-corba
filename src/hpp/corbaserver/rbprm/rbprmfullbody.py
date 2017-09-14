@@ -124,6 +124,18 @@ class FullBody (object):
           self.client.rbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, "EFORT", 0.03)
           self.limbNames += [limbId]
 
+     ## Add a limb no used for contact generation to the model
+     #
+     # \param id: user defined id for the limb. Must be unique.
+     #  The id is used if several contact points are defined for the same limb (ex: the knee and the foot)
+     # \param name: name of the joint corresponding to the root of the limb.
+     # \param effectorName name of the joint to be considered as the effector of the limb
+     # \param collisionObjects objects to be considered for collisions with the limb. TODO remove
+     # \param nbSamples number of samples to generate for the limb
+     def addNonContactingLimb(self, limbId, name, effectorname, samples):
+          self.client.rbprm.rbprm.addNonContactingLimb(limbId, name, effectorname, samples)
+          self.limbNames += [limbId]
+
      ## Add a limb to the model
      #
      # \param databasepath: path to the database describing the robot
