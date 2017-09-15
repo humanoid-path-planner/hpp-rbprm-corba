@@ -3,6 +3,7 @@ from hpp.gepetto import Viewer
 from hpp.corbaserver import Client
 from hpp.corbaserver.robot import Robot as Parent
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
+import omniORB.any
 
 class Robot (Parent):
 	rootJointType = 'freeflyer'
@@ -26,8 +27,8 @@ urdfName = 'hrp2_trunk_flexible'
 urdfNameRom =  ['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = 4;
-aMax = 6;
+vMax = 4.;
+aMax = 6.;
 extraDof = 6
 
 # Creating an instance of the helper class, and loading the robot
@@ -46,7 +47,7 @@ rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
 rbprmBuilder.setAffordanceFilter('hrp2_lleg_rom', ['Support',])
 rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
 # We also bound the rotations of the torso. (z, y, x)
-rbprmBuilder.boundSO3([-0.1,0.1,-0.65,0.65,-0.2,0.2])
+rbprmBuilder.boundSO3([-0.01,0.01,-0.1,0.1,-0.1,0.1])
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
 rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-4,4,-1,1,-2,2,0,0,0,0,0,0])
 indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.basic.robot.getDimensionExtraConfigSpace()
@@ -54,11 +55,13 @@ indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.basic.robot.getDim
 # Creating an instance of HPP problem solver and the viewer
 
 ps = ProblemSolver( rbprmBuilder )
-ps.client.problem.setParameter("aMax",aMax)
-ps.client.problem.setParameter("vMax",vMax)
-ps.client.problem.setParameter("tryJump",vMax)
-ps.client.problem.setParameter("sizeFootX",0.24)
-ps.client.problem.setParameter("sizeFootY",0.14)
+ps.client.problem.setParameter("aMax",omniORB.any.to_any(aMax))
+ps.client.problem.setParameter("vMax",omniORB.any.to_any(vMax))
+ps.client.problem.setParameter("friction",omniORB.any.to_any(0.5))
+ps.client.problem.setParameter("tryJump",omniORB.any.to_any(1.))
+ps.client.problem.setParameter("sizeFootX",omniORB.any.to_any(0.24))
+ps.client.problem.setParameter("sizeFootY",omniORB.any.to_any(0.14))
+ps.client.problem.setTimeOutPathPlanning(1200)
 r = Viewer (ps)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
@@ -94,11 +97,12 @@ ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 # Choosing RBPRM shooter and path validation methods.
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
+ps.client.problem.selectPathValidation("RbprmDynamicPathValidation",0.05)
 # Choosing kinodynamic methods : 
 ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
 ps.selectPathPlanner("DynamicPlanner")
+#ps.addPathOptimizer("RandomShortcutDynamic")
 
 #solve the problem :
 r(q_init)
@@ -113,6 +117,14 @@ pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp.dt=0.03
 pp.displayVelocityPath(0)
 r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
+
+
+import parse_bench
+
+parse_bench.parseBenchmark(t)
+print "path lenght = ",str(ps.client.problem.pathLength(ps.numberPaths()-1))
+
+
 
 
 """

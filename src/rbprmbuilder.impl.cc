@@ -1801,6 +1801,7 @@ namespace hpp {
 
     floatSeqSeq* RbprmBuilder::interpolate(double timestep, double path, double robustnessTreshold, unsigned short filterStates) throw (hpp::Error)
     {
+        hppDout(notice,"### Begin interpolate");
         try
         {
         unsigned int pathId = int(path);
@@ -2830,7 +2831,6 @@ assert(s2 == s1 +1);
         problemSolver()->add <core::SteeringMethodBuilder_t> ("RBPRMKinodynamic", SteeringMethodKinodynamic::create);
         problemSolver()->add <core::PathOptimizerBuilder_t> ("RandomShortcutDynamic", RandomShortcutDynamic::create);
         problemSolver()->add <core::PathOptimizerBuilder_t> ("OrientedPathOptimizer", OrientedPathOptimizer::create);
-
 
     }
 

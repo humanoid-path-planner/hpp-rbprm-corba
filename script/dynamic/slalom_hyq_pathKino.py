@@ -17,8 +17,8 @@ urdfName = 'hyq_trunk_large'
 urdfNameRom = ['hyq_lhleg_rom','hyq_lfleg_rom','hyq_rfleg_rom','hyq_rhleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = 1.;
-aMax = 5.;
+vMax = 3.;
+aMax = 1.;
 extraDof = 6
 mu=omniORB.any.to_any(0.5)
 # Creating an instance of the helper class, and loading the robot
@@ -35,15 +35,16 @@ rbprmBuilder.setAffordanceFilter('hyq_lfleg_rom', ['Support',])
 # We also bound the rotations of the torso. (z, y, x)
 rbprmBuilder.boundSO3([-math.pi,math.pi,-0.1,0.1,-0.1,0.1])
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
-rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([0,0,0,0,0,0,0,0,0,0,0,0])
+rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax,0,0,0,0,0,0,0,0])
 
 # Creating an instance of HPP problem solver and the viewer
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 ps = ProblemSolver( rbprmBuilder )
 ps.client.problem.setParameter("aMax",omniORB.any.to_any(aMax))
 ps.client.problem.setParameter("vMax",omniORB.any.to_any(vMax))
-ps.client.problem.setParameter("orientedPath",omniORB.any.to_any(0.))
+ps.client.problem.setParameter("orientedPath",omniORB.any.to_any(1.))
 ps.client.problem.setParameter("friction",mu)
+ps.client.problem.setTimeOutPathPlanning(500)
 r = Viewer (ps,displayArrows = True)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
@@ -78,8 +79,8 @@ ps.client.problem.selectPathValidation("RbprmDynamicPathValidation",0.05)
 # Choosing kinodynamic methods : 
 ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
-ps.addPathOptimizer("RandomShortcutDynamic")
-ps.addPathOptimizer("OrientedPathOptimizer")
+#ps.addPathOptimizer("RandomShortcutDynamic")
+#ps.addPathOptimizer("OrientedPathOptimizer")
 ps.selectPathPlanner("DynamicPlanner")
 
 #solve the problem :
@@ -127,7 +128,7 @@ t = ps.solve ()
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp.dt=0.03
-pp.displayVelocityPath(1)
+pp.displayVelocityPath(ps.numberPaths()-1)
 #r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
 #display path
 pp.speed=0.5
@@ -136,7 +137,7 @@ pp.speed=0.5
 import parse_bench
 
 parse_bench.parseBenchmark(t)
-
+print "path lenght = ",str(ps.client.problem.pathLength(ps.numberPaths()-1))
 
 ###########################
 #display path with post-optimisation
