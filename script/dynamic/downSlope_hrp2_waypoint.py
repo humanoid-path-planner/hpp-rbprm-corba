@@ -62,7 +62,7 @@ ps.client.problem.setParameter("vMax",omniORB.any.to_any(vMax))
 ps.client.problem.setParameter("tryJump",omniORB.any.to_any(1.))
 ps.client.problem.setParameter("sizeFootX",omniORB.any.to_any(0.24))
 ps.client.problem.setParameter("sizeFootY",omniORB.any.to_any(0.14))
-r = Viewer (ps)
+r = Viewer (ps,displayArrows = True)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
@@ -118,8 +118,8 @@ q2= q_goal[::]
 
 pbCl.addConfigToRoadmap (q1)
 
-pbCl.directPath(q_init,q1,False)
-pbCl.directPath(q1,q_goal,False)
+pbCl.directPath(q_init,q1,True)
+pbCl.directPath(q1,q_goal,True)
 
 pbCl.addEdgeToRoadmap (q_init, q1, 0, False)
 pbCl.addEdgeToRoadmap (q1, q_goal, 1, False)

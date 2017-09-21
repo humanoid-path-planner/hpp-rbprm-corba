@@ -88,16 +88,17 @@ r.addLandmark(r.sceneName,1)
 
 # Setting initial and goal configurations
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init[3:7] = [0.7071,0,0,0.7071]
+q_init[3:7] = [1,0,0,0]
 q_init [0:3] = [-0.9, 0.2, 0.58]; r (q_init)
-
+q_init[-6]=0.1
 
 rbprmBuilder.setCurrentConfig (q_init)
 q_goal = q_init [::]
 
 q_goal[3:7] = [0.7071,0,0,-0.7071]
 q_goal [0:3] = [3.5, -0.5, 0.58]; r(q_goal)
-
+q_goal[-6]=0
+q_goal[-5]=-0.1
 r (q_goal)
 
 
@@ -106,7 +107,7 @@ ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 # Choosing RBPRM shooter and path validation methods.
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmDynamicPathValidation",0.05)
+ps.client.problem.selectPathValidation("RbprmDynamicPathValidation",0.01)
 # Choosing kinodynamic methods : 
 ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")

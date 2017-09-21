@@ -27,7 +27,7 @@ urdfName = 'hrp2_trunk_flexible'
 urdfNameRom =  ['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = 4.;
+vMax = 4.5;
 aMax = 6.;
 extraDof = 6
 
@@ -35,7 +35,7 @@ extraDof = 6
 rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 #rbprmBuilder.setJointBounds ("base_joint_xyz", [-1.25,2, -0.5, 5.5, 0.6, 1.8])
-rbprmBuilder.setJointBounds ("base_joint_xyz", [-2,4, 0.5, 1.5, 0.25, 1.8])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [-1.7,2.75, 0.95, 1.05, 0.1, 1.8])
 rbprmBuilder.setJointBounds('CHEST_JOINT0',[0,0])
 rbprmBuilder.setJointBounds('CHEST_JOINT1',[-0.35,0.1])
 rbprmBuilder.setJointBounds('HEAD_JOINT0',[0,0])
@@ -47,22 +47,22 @@ rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
 rbprmBuilder.setAffordanceFilter('hrp2_lleg_rom', ['Support',])
 rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
 # We also bound the rotations of the torso. (z, y, x)
-rbprmBuilder.boundSO3([-0.01,0.01,-0.1,0.1,-0.1,0.1])
+rbprmBuilder.boundSO3([-0.001,0.001,-0.001,0.001,-0.001,0.001])
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
-rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-4,4,-1,1,-2,2,0,0,0,0,0,0])
+rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-4.5,4.5,0,0,-2,2,0,0,0,0,0,0])
 indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.basic.robot.getDimensionExtraConfigSpace()
 
 # Creating an instance of HPP problem solver and the viewer
 
 ps = ProblemSolver( rbprmBuilder )
 ps.client.problem.setParameter("aMax",omniORB.any.to_any(aMax))
+ps.client.problem.setParameter("aMaxZ",omniORB.any.to_any(10.))
 ps.client.problem.setParameter("vMax",omniORB.any.to_any(vMax))
-ps.client.problem.setParameter("friction",omniORB.any.to_any(0.5))
 ps.client.problem.setParameter("tryJump",omniORB.any.to_any(1.))
 ps.client.problem.setParameter("sizeFootX",omniORB.any.to_any(0.24))
 ps.client.problem.setParameter("sizeFootY",omniORB.any.to_any(0.14))
-ps.client.problem.setTimeOutPathPlanning(1200)
-r = Viewer (ps)
+ps.client.problem.setTimeOutPathPlanning(3600)
+r = Viewer (ps,displayArrows = True)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
@@ -97,7 +97,8 @@ ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 # Choosing RBPRM shooter and path validation methods.
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmDynamicPathValidation",0.05)
+#ps.client.problem.selectPathValidation("RbprmDynamicPathValidation",0.05)
+ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 # Choosing kinodynamic methods : 
 ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
