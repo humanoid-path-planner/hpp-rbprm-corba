@@ -84,13 +84,14 @@ def generateContactSequence(fb,configs,viewer=None):
     n_double_support = len(configs)
     # config only contains the double support stance
     n_steps = n_double_support*2 -1 
+    # Notice : what we call double support / simple support are in fact the state with all the contacts and the state without the next moving contact
     
     cs = ContactSequenceHumanoid(n_steps)
     unusedPatch = cs.contact_phases[0].LF_patch.copy()
     unusedPatch.placement = SE3.Identity()
     unusedPatch.active= False
     
-    # for contact state we must create 2 phase (one with all the contact and one with the next replaced contact(s) broken)
+    # for each contact state we must create 2 phase (one with all the contact and one with the next replaced contact(s) broken)
     for k in range(0,n_double_support-1):
         # %%%%%%%%%  all the contacts : %%%%%%%%%%%%%
         phase_d = cs.contact_phases[k*2]

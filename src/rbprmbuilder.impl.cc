@@ -1982,6 +1982,7 @@ assert(s2 == s1 +1);
         {
             std::vector<CORBA::Short> pathsIds;
             std::size_t s1((std::size_t)state1), s2((std::size_t)state2);
+            hppDout(notice,"index first state = "<<s1<<" ; index second state : "<<s2);
             if(lastStatesComputed_.size () < s1 || lastStatesComputed_.size () < s2 )
             {
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
@@ -1996,27 +1997,27 @@ assert(s2 == s1 +1);
 
             State s1Bis(state1);
             hppDout(notice,"state1 = "<<model::displayConfig(state1.configuration_));
-            s1Bis.configuration_ = project_or_throw(fullBody(),s1Bis,paths[cT1]->end().head<3>());
-
+            hppDout(notice,"proj to CoM position : "<<paths[cT1]->end().head<3>());
+            s1Bis.configuration_ = project_or_throw(fullBody(),s1Bis,paths[cT1]->end().head<3>(),true);
             hppDout(notice,"state1 after projection= "<<model::displayConfig(s1Bis.configuration_));
+
             for(std::map<std::string,bool>::const_iterator cit = s1Bis.contacts_.begin();cit!=s1Bis.contacts_.end(); ++ cit)
             {
               hppDout(notice,"contact : "<<cit->first<<" = "<<cit->second);
             }
 
             State s2Bis(state2);
-           /* s1Bis.configuration_ = project_or_throw(fullBody(), s1Bis,paths[cT1]->end().head<3>(), true);
-            std::cout << "projection succeedded " << paths[cT1]->end().head<3>() << std::endl;
-            State s2Bis(state2);
+            hppDout(notice,"state2 = "<<model::displayConfig(state2.configuration_));
+            hppDout(notice,"proj to CoM position : "<<paths[cT2]->end().head<3>());
             s2Bis.configuration_ = project_or_throw(fullBody(), s2Bis,paths[cT2]->end().head<3>(), true);
+            hppDout(notice,"state2 after projection= "<<model::displayConfig(s2Bis.configuration_));
 
-            core::PathVectorPtr_t resPath = core::PathVector::create(fullBody()->device_->configSize(), fullBody()->device_->numberDof());
-            std::cout << "projection succeedded " << paths[cT2]->end().head<3>() << std::endl;*/
+            for(std::map<std::string,bool>::const_iterator cit = s2Bis.contacts_.begin();cit!=s2Bis.contacts_.end(); ++ cit)
+            {
+              hppDout(notice,"contact : "<<cit->first<<" = "<<cit->second);
+            }
 
             ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
-
-            s1Bis.configuration_ = project_or_throw(fullBody(), s1Bis,paths[cT1]->end().head<3>());
-            s2Bis.configuration_ = project_or_throw(fullBody(), s2Bis,paths[cT2]->end().head<3>(), true);
             BasicConfigurationShooterPtr_t shooter = BasicConfigurationShooter::create(fullBody()->device_);
             bool found = false;
             for (int i = 0; i< 100 && !found;  ++i)

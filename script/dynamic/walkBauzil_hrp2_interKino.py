@@ -103,7 +103,7 @@ acc_init = tp.ps.configAtParam(pId,0)[tp.indexECS+3:tp.indexECS+6]
 dir_goal = tp.ps.configAtParam(pId,tp.ps.pathLength(pId)-eps)[tp.indexECS:tp.indexECS+3]
 acc_goal = [0,0,0]
 
-robTreshold = 1
+robTreshold = 5
 # copy extraconfig for start and init configurations
 q_init[configSize:configSize+3] = dir_init[::]
 q_init[configSize+3:configSize+6] = acc_init[::]
@@ -156,18 +156,20 @@ player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=
 
 # remove the last config (= user defined q_goal, not consitent with the previous state)
 
-#r(configs[0])
-#player.displayContactPlan()
+r(configs[0])
+
 
 #player.interpolate(2,len(configs)-1)
 
 
 from planning.config import *
 from generate_contact_sequence import *
-cs = generateContactSequence(fullBody,configs,r)
+cs = generateContactSequence(fullBody,configs[:4],r)
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")
 print "save contact sequence : ",filename
+
+#player.displayContactPlan()
 
 
 """
