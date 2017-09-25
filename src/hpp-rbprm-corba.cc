@@ -19,9 +19,6 @@
 #include <hpp/corbaserver/affordance/server.hh>
 #include <hpp/corbaserver/rbprm/server.hh>
 #include <hpp/core/problem-solver.hh>
-#include <hpp/rbprm/planner/steering-dynamic.hh>
-#include <hpp/rbprm/planner/steering-method-parabola.hh>
-#include <hpp/rbprm/planner/dynamic-planner.hh>
 
 typedef hpp::rbprm::Server RbprmServer;
 typedef hpp::corbaServer::Server CorbaServer;
