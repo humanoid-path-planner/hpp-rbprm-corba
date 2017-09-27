@@ -132,6 +132,10 @@ r(q_goal)
 r.addLandmark('hrp2_14/BODY',0.3)
 r(q_init)
 
+wid = r.client.gui.getWindowID("window_hpp_")
+r.client.gui.attachCameraToNode( 'hrp2_14/BODY_0',wid)
+
+
 
 fullBody.setStartState(q_init,[rLegId,lLegId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])
@@ -161,15 +165,17 @@ r(configs[0])
 
 #player.interpolate(2,len(configs)-1)
 
-
+"""
 from planning.config import *
 from generate_contact_sequence import *
 cs = generateContactSequence(fullBody,configs[:4],r)
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")
 print "save contact sequence : ",filename
+"""
 
-#player.displayContactPlan()
+
+player.displayContactPlan()
 
 
 """
@@ -192,9 +198,6 @@ addVector(r,fullBody,r.color.red,vlb)
 
 """
 
-
-wid = r.client.gui.getWindowID("window_hpp_")
-#r.client.gui.attachCameraToNode( 'hrp2_14/BODY_0',wid)
 
 
 
