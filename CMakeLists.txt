@@ -213,6 +213,7 @@ install(FILES
 	data/meshes/darpa.stl
 	data/meshes/darpa_no_mid.stl
 	data/meshes/darpa_no_ctc_mid.stl
+	data/meshes/darpa_no_ctc_mid_collision.stl
 	data/meshes/darpareduced.stl
 	data/meshes/car.stl
 	data/meshes/car_simple.stl

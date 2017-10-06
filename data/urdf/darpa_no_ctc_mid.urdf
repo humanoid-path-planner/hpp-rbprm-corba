@@ -12,7 +12,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://hpp-rbprm-corba/meshes/darpa_no_ctc_mid.stl"/>
+        <mesh filename="package://hpp-rbprm-corba/meshes/darpa_no_ctc_mid_collision.stl"/>
       </geometry>
     </collision>
   </link>
