@@ -68,6 +68,7 @@ install(FILES
 install(FILES
   data/urdf/hrp2_trunk.urdf
   data/urdf/hrp2_trunk_flexible.urdf
+  data/urdf/hrp2_trunk_lowBody_flexible.urdf
   data/urdf/hrp2_trunk_arms_flexible.urdf
   data/urdf/hrp2_rom.urdf
   data/urdf/hrp2_larm_rom.urdf
@@ -139,6 +140,7 @@ install(FILES
 install(FILES
   data/srdf/hrp2_trunk.srdf
   data/srdf/hrp2_trunk_flexible.srdf
+  data/srdf/hrp2_trunk_lowBody_flexible.srdf
   data/srdf/hrp2_trunk_arms_flexible.srdf
   data/srdf/hrp2_rom.srdf
   data/srdf/hrp2_larm_rom.srdf
@@ -218,9 +220,11 @@ install(FILES
 	data/meshes/ground_table.stl
 	data/meshes/hrp2_trunk.stl
 	data/meshes/hrp2_trunk_body.stl
+	data/meshes/hrp2_trunk_body_low.stl
 	data/meshes/hrp2_trunk_torso.stl
 	data/meshes/hrp2_trunk_torso_arms.stl
 	data/meshes/hrp2_trunk_body_view.dae
+	data/meshes/hrp2_trunk_body_low_view.dae
 	data/meshes/hrp2_trunk_torso_arms_view.dae
 	data/meshes/hrp2_trunk_torso_view.dae
 	data/meshes/hrp2_rom.stl
