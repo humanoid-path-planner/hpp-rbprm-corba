@@ -93,6 +93,8 @@ install(FILES
   data/urdf/ground.urdf
   data/urdf/groundcrouch.urdf
   data/urdf/darpa.urdf
+  data/urdf/darpa_no_mid.urdf
+  data/urdf/darpa_no_ctc_mid.urdf
   data/urdf/car.urdf
   data/urdf/polaris.urdf
   data/urdf/siggraph_asia/chair.urdf
@@ -162,6 +164,8 @@ install(FILES
   data/srdf/ground.srdf
   data/srdf/groundcrouch.srdf
   data/srdf/darpa.srdf
+  data/srdf/darpa_no_ctc_mid.srdf
+  data/srdf/darpa_no_mid.srdf
   data/srdf/car.srdf
   data/srdf/polaris.srdf
   data/srdf/siggraph_asia/chair.srdf
@@ -205,6 +209,8 @@ install(FILES
   )
 install(FILES
 	data/meshes/darpa.stl
+	data/meshes/darpa_no_mid.stl
+	data/meshes/darpa_no_ctc_mid.stl
 	data/meshes/darpareduced.stl
 	data/meshes/car.stl
 	data/meshes/car_simple.stl
