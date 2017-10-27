@@ -1,6 +1,6 @@
 # Importing helper class for setting up a reachability planning problem
 from hpp.corbaserver.rbprm.rbprmbuilder import Builder
-
+import omniORB.any
 # Importing Gepetto viewer helper class
 from hpp.gepetto import Viewer
 import time
@@ -42,7 +42,7 @@ r = Viewer (ps)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
-afftool.loadObstacleModel (packageName, "darpa", "planning", r)
+afftool.loadObstacleModel (packageName,ENV_NAME,ENV_PREFIX, r)
 #r.loadObstacleModel (packageName, "ground", "planning")
 afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 r.addLandmark(r.sceneName,1)

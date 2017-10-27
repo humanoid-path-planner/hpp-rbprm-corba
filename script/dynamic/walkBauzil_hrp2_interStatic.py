@@ -164,7 +164,7 @@ player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=
 
 from planning.config import *
 from generate_contact_sequence import *
-cs = generateContactSequence(fullBody,configs,r)
+cs = generateContactSequence(fullBody,configs[:5],r)
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")
 print "save contact sequence : ",filename
