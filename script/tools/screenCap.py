@@ -36,7 +36,12 @@ player.play(1/2.)
 tp.r.stopCapture ()
 
 
-
+r(configs[0])
+tp.r.startCapture ("capture/capture","png")
+time.sleep(2)
+play_trajectory(fullBody,pp, trajectory)
+time.sleep(1)
+tp.r.stopCapture ()
 
 id = r.client.gui.getWindowID("window_hpp_")
 r.client.gui.attachCameraToNode( 'hrp2_14/BODY_0',id)
@@ -45,7 +50,7 @@ r.client.gui.attachCameraToNode( 'hrp2_14/BODY_0',id)
 """
 
 ## avconv (bash) commands
-avconv -i capture_0_%d.png  -r 25 -vcodec mpeg4 -filter:v "setpts=2.*PTS" -qscale 1 -mbd rd -flags +mv4+aic -trellis 2 -cmp 2 -subcmp 2 -g 300 -y slalom_contact_sequence0.mp4
+avconv -i capture_0_%d.png  -r 25 -vcodec mpeg4 -filter:v "setpts=2.*PTS" -qscale 1 -mbd rd -flags +mv4+aic -trellis 2 -cmp 2 -subcmp 2 -g 300 -y walk_effectorRRT.mp4
 
 avconv -i capture_0_%d.png -r 30 -vcodec mpeg4 -qscale 1 -mbd rd -flags +mv4+aic -trellis 2 -cmp 2 -subcmp 2 -g 300 -pass 2  hyq_darpa.mp4
 
