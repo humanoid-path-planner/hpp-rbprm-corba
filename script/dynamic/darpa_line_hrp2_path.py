@@ -48,10 +48,10 @@ rbprmBuilder.loadModel(urdfName, urdfNameRoms, rootJointType, meshPackageName, p
 rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
 #rbprmBuilder.setAffordanceFilter('hrp2_rarm_rom', ['Lean'])
 #rbprmBuilder.setAffordanceFilter('hrp2_larm_rom', ['Lean'])
-rbprmBuilder.setAffordanceFilter('hrp2_lleg_rom', ['Support'])
-rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
-vMax = 0.3;
-aMax = 0.5;
+#rbprmBuilder.setAffordanceFilter('hrp2_lleg_rom', ['Support'])
+#rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
+vMax = 0.2;
+aMax = 0.1;
 extraDof = 6
 
 rbprmBuilder.setJointBounds ("base_joint_xyz", [-1.2,1.5,-0.1 ,0.1, 0.55, 0.85])
@@ -82,7 +82,7 @@ r = Viewer (ps,displayArrows = True)
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.005])
-afftool.loadObstacleModel (packageName, ENV_NAME, ENV_PREFIX, r,reduceSizes=[0.1,0])
+afftool.loadObstacleModel (packageName, ENV_NAME, ENV_PREFIX, r,reduceSizes=[0.14,0])
 #r.loadObstacleModel (packageName, "ground", "planning")
 afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 r.addLandmark(r.sceneName,1)
@@ -90,13 +90,13 @@ r.addLandmark(r.sceneName,1)
 # Setting initial and goal configurations
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init[3:7] = [1,0,0,0]
-q_init [0:3] = [-0.8, 0, 0.58]; r (q_init)
+q_init [0:3] =[-0.37, 0, 0.74]; r (q_init)
 #q_init [0:3] = [-0.5, 0, 0.75]; r (q_init)
 
 rbprmBuilder.setCurrentConfig (q_init)
 q_goal = q_init [::]
 
-q_goal [0:3] = [1.2, 0, 0.58]; r(q_goal)
+q_goal [0:3] =[0.85, 0, 0.74]; r(q_goal)
 #q_goal [0:3] = [1, 0, 0.75]; r(q_goal)
 r (q_goal)
 
@@ -124,30 +124,11 @@ r(q_init)
 
 ps.client.problem.prepareSolveStepByStep()
 
-
-q1=q_init[::]
-q1[0:3] = [-0.45, 0, 0.75]
-q2=q_goal[::]
-q2[0:3] = [0.9, 0, 0.75]
-pbCl = rbprmBuilder.client.basic.problem
-
-
-pbCl.addConfigToRoadmap (q1)
-pbCl.addConfigToRoadmap (q2)
-
-pbCl.directPath(q_init,q1,True)
-pbCl.directPath(q1,q2,True)
-pbCl.directPath(q2,q_goal,False)
-
-
-pbCl.addEdgeToRoadmap (q_init, q1, 0, False)
-pbCl.addEdgeToRoadmap (q1, q2, 1, False)
-pbCl.addEdgeToRoadmap (q2, q_goal, 2, False)
-
 ps.client.problem.finishSolveStepByStep()
-ps.optimizePath(3)
 
 
+rbprmBuilder.setAffordanceFilter('hrp2_lleg_rom', ['Support'])
+rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
 
 
 q_far = q_init[::]

@@ -2,7 +2,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 from tools import *
-import darpa_hrp2_path as tp
+import darpa_line_hrp2_path as tp
 import time
 import omniORB.any
 
@@ -47,7 +47,7 @@ rLegLimbOffset=[0,0,-0.035]#0.035
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 #fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "forward", 0.1,"_6_DOF")
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "dynamicWalk", 0.01,"_6_DOF",limbOffset=rLegLimbOffset)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "dynamicWalk", 0.01,"_6_DOF",limbOffset=rLegLimbOffset)
 fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/hrp2_rleg_db.db")
 
@@ -57,11 +57,11 @@ lLegLimbOffset=[0,0,0.035]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
 #fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "forward", 0.1,"_6_DOF")
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "dynamicWalk", 0.01,"_6_DOF",limbOffset=lLegLimbOffset)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "dynamicWalk", 0.01,"_6_DOF",limbOffset=lLegLimbOffset)
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
 
-## Add arms (not used for contact) : 
+
 
 
 tGenerate =  time.time() - tStart
@@ -91,7 +91,7 @@ acc_init = tp.ps.configAtParam(pId,0)[tp.indexECS+3:tp.indexECS+6]
 dir_goal = tp.ps.configAtParam(pId,tp.ps.pathLength(pId)-eps)[tp.indexECS:tp.indexECS+3]
 acc_goal = [0,0,0]
 
-robTreshold = 3
+robTreshold = 1
 # copy extraconfig for start and init configurations
 q_init[configSize:configSize+3] = dir_init[::]
 q_init[configSize+3:configSize+6] = acc_init[::]
@@ -99,7 +99,8 @@ q_goal[configSize:configSize+3] = dir_goal[::]
 q_goal[configSize+3:configSize+6] = [0,0,0]
 
 
-
+q_init[2] = q_init[2]+0.02
+q_goal[2] = q_goal[2]+0.02
 
 
 # Randomly generating a contact configuration at q_init
@@ -131,7 +132,7 @@ pp = PathPlayer (fullBody.client.basic, r)
 import fullBodyPlayerHrp2
 
 tStart = time.time()
-configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = robTreshold, filterStates = False)
+configs = fullBody.interpolate(0.1,pathId=pId,robustnessTreshold = robTreshold, filterStates = True)
 tInterpolate = time.time()-tStart
 print "number of configs : ", len(configs)
 print "generated in "+str(tInterpolate)+" s"
@@ -143,14 +144,16 @@ player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=
 # remove the last config (= user defined q_goal, not consitent with the previous state)
 
 #r(configs[0])
-player.displayContactPlan()
+#player.displayContactPlan()
 
-configs=configs[:-1]
+beginState=2
+endState=4
 
+configs=configs[beginState:endState+1]
 
 from planning.config import *
 from generate_contact_sequence import *
-cs = generateContactSequence(fullBody,configs,r)
+cs = generateContactSequence(fullBody,configs,beginState,endState,r)
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")
 print "save contact sequence : ",filename
