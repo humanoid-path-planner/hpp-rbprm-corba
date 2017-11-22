@@ -686,9 +686,20 @@ namespace hpp {
             hpp::model::Configuration_t& c = rep.result_.configuration_;
             ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
             CollisionValidationPtr_t val = fullBody()->GetCollisionValidation();
-            rep.success_ =  rep.success_ &&  val->validate(rep.result_.configuration_,rport);
+            if(!rep.success_){
+                hppDout(notice,"Projection failed for state "<<stateId<<" , config = "<<model::displayConfig(c));
+            }
+            if(rep.success_){
+                hppDout(notice,"Projection successfull for state "<<stateId<<" without collision check.");
+                rep.success_ =  rep.success_ &&  val->validate(rep.result_.configuration_,rport);
+                if(!rep.success_){
+                    hppDout(notice,"Projection failed after collision check for state "<<stateId<<" , config = "<<model::displayConfig(c));
+                    hppDout(notice,"report : "<<*rport);
+                }
+            }
             if (! rep.success_ && maxNumeSamples>0)
             {
+                hppDout(notice,"Projection for state "<<stateId<<" failed, try to randomly sample other initial point : ");
                 Configuration_t head = s.configuration_.head<7>();
                 BasicConfigurationShooterPtr_t shooter = BasicConfigurationShooter::create(fullBody()->device_);
                 for(std::size_t i =0; !rep.success_ && i< maxNumeSamples; ++i)
@@ -697,7 +708,17 @@ namespace hpp {
                     s.configuration_.head<7>() = head;
                     //c = rbprm::interpolation::projectOnCom(fullBody(), problemSolver()->problem(),s,com_target,succes);
                     rep = rbprm::projection::projectToComPosition(fullBody(),com_target,s);
-                    rep.success_ = rep.success_ && val->validate(rep.result_.configuration_,rport);
+                    if(!rep.success_){
+                        hppDout(notice,"Projection failed on iter "<<i<<" for state "<<stateId<<" , config = "<<model::displayConfig(c));
+                    }
+                    if(rep.success_){
+                        hppDout(notice,"Projection successfull on iter "<<i<<" for state "<<stateId<<" without collision check.");
+                        rep.success_ =  rep.success_ &&  val->validate(rep.result_.configuration_,rport);
+                        if(!rep.success_){
+                            hppDout(notice,"Projection failed on iter "<<i<<" after collision check for state "<<stateId<<" , config = "<<model::displayConfig(c));
+                            hppDout(notice,"report : "<<*rport);
+                        }
+                    }
                     c = rep.result_.configuration_;
                 }
             }
