@@ -54,7 +54,7 @@ vMax = 0.3;
 aMax = 0.5;
 extraDof = 6
 
-rbprmBuilder.setJointBounds ("base_joint_xyz", [-3,4.5,-2 ,2.5, 0.55, 0.6])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [-3,4.5,-2 ,2.5, 0.55, 0.65])
 rbprmBuilder.setJointBounds('CHEST_JOINT0',[-0.05,0.05])
 rbprmBuilder.setJointBounds('CHEST_JOINT1',[-0.05,0.05])
 # We also bound the rotations of the torso. (z, y, x)

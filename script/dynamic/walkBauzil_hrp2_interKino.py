@@ -112,15 +112,15 @@ q_goal[configSize+3:configSize+6] = [0,0,0]
 
 
 # FIXME : test
-q_init[2] = q_init[2]+0.1
-q_goal[2] = q_goal[2]+0.1
+q_init[2] = q_init[2]
+q_goal[2] = q_goal[2]
 
 
 # Randomly generating a contact configuration at q_init
 fullBody.setStaticStability(True)
 fullBody.setCurrentConfig (q_init)
 r(q_init)
-q_init = fullBody.generateContacts(q_init,dir_init,acc_init,robTreshold)
+#q_init = fullBody.generateContacts(q_init,dir_init,acc_init,robTreshold)
 r(q_init)
 
 # Randomly generating a contact configuration at q_end
