@@ -15,12 +15,13 @@ begin=0 *2 # expressed in cs index (and not configs index!)
 end=(len(configsFull)) *2 -1
 
 numStep = int( math.ceil((end-begin)/(stepSize-2)))
+#numStep=2
 P3_Num_step = 100
 
 sequences= []
 outputs=[]
 isInit=True
-for i in range(0,2):
+for i in range(0,numStep):
     for k in range(0,stepSize):
         sequences += [ContactSequenceHumanoid(stepSize)]
         sequences[i].contact_phases[k] = cs.contact_phases[(stepSize-3)*i + k] # last phases of sequence i is the second phase of sequence i+1, not the first
@@ -45,10 +46,9 @@ for i in range(0,2):
 
 
 ## merge sequences outputs together : 
-    
-finalSeq = ContactSequenceHumanoid((stepSize-3)*2 +3) # replace 2 with numSTep
-for id_steps in range(0,2):
-    init_time_at_step = 0.
+init_time_at_step = 0.    
+finalSeq = ContactSequenceHumanoid((stepSize-3)*numStep +3) # replace 2 with numSTep
+for id_steps in range(0,numStep):
     if id_steps>0 : 
         # merging phase, we should merge state_trajectory; the first half (up to P3_num_step) is in the first half or mid_phase0
         # the second half is the full trajectory in mid_phase1, it should be reduced and the time step should be adjusted
