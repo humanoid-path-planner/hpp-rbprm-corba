@@ -47,10 +47,23 @@ id = r.client.gui.getWindowID("window_hpp_")
 r.client.gui.attachCameraToNode( 'hrp2_14/BODY_0',id)
 
 
+tp.r.startCapture ("capture/capture","png")
+tp.r.stopCapture ()
+
+
+
+tp.r.startCapture ("capture/capture","png")
+time.sleep(1)
+pp(int(total_paths_ids[10]))
+time.sleep(1)
+tp.r.stopCapture ()
+
+
+
 """
 
 ## avconv (bash) commands
-avconv -i capture_0_%d.png  -r 25 -vcodec mpeg4 -filter:v "setpts=2.*PTS" -qscale 1 -mbd rd -flags +mv4+aic -trellis 2 -cmp 2 -subcmp 2 -g 300 -y walk_effectorRRT.mp4
+avconv -i capture_0_%d.png  -r 25 -vcodec mpeg4 -filter:v "setpts=2.*PTS" -qscale 1 -mbd rd -flags +mv4+aic -trellis 2 -cmp 2 -subcmp 2 -g 300 -y end_effector_old_traj.mp4
 
 avconv -i capture_0_%d.png -r 30 -vcodec mpeg4 -qscale 1 -mbd rd -flags +mv4+aic -trellis 2 -cmp 2 -subcmp 2 -g 300 -pass 2  hyq_darpa.mp4
 
