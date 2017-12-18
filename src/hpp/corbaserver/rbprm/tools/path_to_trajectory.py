@@ -86,6 +86,11 @@ def play_trajectory(fullBody, path_player, configs, dt_framerate=__24fps):
 		if elapsed < dt_framerate :
 			time.sleep(dt_framerate-elapsed)
 
+def displayFeetTrajectory(path_player,end_effector_names,colors,path_ids):
+	assert len(end_effector_names)==len(colors)
+	for path_id in path_ids:
+		for i in range(len(end_effector_names)):
+			path_player.displayPath(int(path_id),colors[i],end_effector_names[i])
 
 #~ import numpy as np	
 #~ com_waypoints = [np.array([i,i,i]) for i in range(6)]
