@@ -1432,6 +1432,73 @@ namespace hpp {
         }
     }
 
+    Names_t* RbprmBuilder::getEffectorsTrajectoriesNames(unsigned short pathId)throw (hpp::Error){
+        try{
+            if(!fullBodyLoaded_)
+                throw std::runtime_error ("No Fullbody loaded");
+            EffectorTrajectoriesMap_t map;
+            if(! fullBody()->getEffectorsTrajectories(pathId,map))
+                //throw std::runtime_error ("Error while retrieving the End effector map for pathId = "+ std::string(""+pathId));
+                return new Names_t(); // Return an empty list or throw an error ??
+            std::vector<std::string> names;
+            for(EffectorTrajectoriesMap_t::const_iterator it = map.begin() ; it != map.end() ; ++it){
+                names.push_back(it->first);
+            }
+            // convert names (vector of string) to corba Names_t
+            CORBA::ULong size = (CORBA::ULong) names.size ();
+            char** nameList = Names_t::allocbuf(size);
+            Names_t *limbsNames = new Names_t (size,size,nameList);
+            for (std::size_t i = 0 ; i < names.size() ; ++i){
+              nameList[i] = (char*) malloc (sizeof(char)*(names[i].length ()+1));
+              strcpy (nameList [i], names[i].c_str ());
+            }
+            return limbsNames;
+        }
+        catch(std::runtime_error& e)
+        {
+            std::cout << "ERROR " << e.what() << std::endl;
+            throw Error(e.what());
+        }
+    }
+
+    hpp::floatSeqSeq* RbprmBuilder::getEffectorTrajectoryWaypoints(unsigned short pathId,const char* effectorName)throw (hpp::Error){
+        try{
+            if(!fullBodyLoaded_)
+                throw std::runtime_error ("No Fullbody loaded");
+            bezier_Ptr curve;
+            if(! fullBody()->getEffectorTrajectory(pathId,effectorName,curve))
+                throw std::runtime_error ("There is no trajectory stored for path Id = "+ boost::lexical_cast<std::string>(pathId) +" and end effector name = "+std::string(effectorName));
+            const bezier_t::t_point_t waypoints = curve->waypoints();
+            // build a floatSeqSeq from the waypoints :
+            hpp::floatSeqSeq *res;
+            res = new hpp::floatSeqSeq ();
+            res->length ((_CORBA_ULong)waypoints.size());
+            std::size_t i=0;
+            for(bezier_t::t_point_t::const_iterator wit = waypoints.begin(); wit != waypoints.end(); ++wit,++i)
+            {
+                const bezier_t::point_t position = *wit;
+                _CORBA_ULong size = (_CORBA_ULong) position.size ();
+                double* dofArray = hpp::floatSeq::allocbuf(size);
+                hpp::floatSeq floats (size, size, dofArray, true);
+                //convert the config in dofseq
+                for(std::size_t h = 0; h<position.size(); ++h)
+                {
+                    dofArray[h] = position[h];
+                }
+                (*res) [(_CORBA_ULong)i] = floats;
+            }
+            return res;
+        }
+        catch(std::runtime_error& e)
+        {
+            std::cout << "ERROR " << e.what() << std::endl;
+            throw Error(e.what());
+        }
+    }
+
+
+
+
     core::PathPtr_t makePath(DevicePtr_t device,
                              const ProblemPtr_t& problem,
                              model::ConfigurationIn_t q1,

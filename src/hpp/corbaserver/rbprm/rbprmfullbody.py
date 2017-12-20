@@ -19,8 +19,8 @@
 from hpp.corbaserver.rbprm import Client as RbprmClient
 from hpp.corbaserver import Client as BasicClient
 import hpp.gepetto.blender.exportmotion as em
-from numpy import array
-
+from numpy import array, matrix
+from spline import bezier
 ## Corba clients to the various servers
 #
 class CorbaClient:
@@ -991,6 +991,31 @@ class FullBody (object):
       # \param stateId : index of the state
      def getTimeAtState(self,stateId):
           return self.client.rbprm.rbprm.getTimeAtState(stateId)
+
+     ## Return the names of all the effector for which a trajectory have been computed for a given path index.
+     #  \param pathId : index of the path, the same index as the wholeBody path stored in problem-solver
+     #  \return the list of all the end-effector (joint names) for which a trajectory have been defined
+     def getEffectorsTrajectoriesNames(self, pathId):
+         return self.client.rbprm.rbprm.getEffectorsTrajectoriesNames(pathId)
+
+     ## Return the waypoints of the bezier curve for a given pathIndex and effector name
+     #  \param pathId : index of the path, the same index as the wholeBody path stored in problem-solver
+     #  \param effectorName : the name of the desired effector (Joint name)
+     #  \return the waypoints of the bezier curve followed by this end effector
+     #  Throw an error if there is no trajectory computed for the given id/name
+     def getEffectorTrajectoryWaypoints(self,pathId,effectorName):
+         return self.client.rbprm.rbprm.getEffectorTrajectoryWaypoints(pathId,effectorName)
+
+
+     ## Return the bezier curve for a given pathIndex and effector name
+     #  \param pathId : index of the path, the same index as the wholeBody path stored in problem-solver
+     #  \param effectorName : the name of the desired effector (Joint name)
+     #  \return the bezier curve (from spline library) followed by the end effector
+     #  Throw an error if there is no trajectory computed for the given id/name
+     def getEffectorTrajectory(self,pathId,effectorName):
+         wp =  self.client.rbprm.rbprm.getEffectorTrajectoryWaypoints(pathId,effectorName)
+         waypoints=matrix(wp).transpose()
+         return bezier(waypoints)
 
       ## return the contacts variation between two states
       # \param stateIdFrom : index of the first state
