@@ -75,7 +75,7 @@ afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 # Setting initial and goal configurations
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init[3:7] = [1,0,0,0]
-q_init [0:3] = [0, 0, 0.55]; r (q_init)
+q_init [0:3] = [0, 0, 0.58]; r (q_init)
 
 #q_init[3:7] = [0.7071,0,0,0.7071]
 #q_init [0:3] = [1, 1, 0.65]
@@ -85,7 +85,7 @@ q_goal = q_init [::]
 
 
 q_goal[3:7] = [1,0,0,0]
-q_goal [0:3] = [2, 0, 0.55]; r (q_goal)
+q_goal [0:3] = [2, 0, 0.58]; r (q_goal)
 
 r (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
@@ -100,7 +100,7 @@ ps.client.problem.selectPathValidation("RbprmDynamicPathValidation",0.05)
 ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
 ps.selectPathPlanner("DynamicPlanner")
-
+ps.selectPathProjector('Progressive',0.05)
 #solve the problem :
 r(q_init)
 

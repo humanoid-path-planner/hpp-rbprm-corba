@@ -5,7 +5,7 @@ from pinocchio.utils import *
 import locomote
 from locomote import WrenchCone,SOC6,ControlType,IntegratorType,ContactPatch, ContactPhaseHumanoid, ContactSequenceHumanoid
 SPEED=0.5
-DURATION_n_CONTACTS = 0.3 # percentage of time allocated to the movement of the com without moving the contacts
+DURATION_n_CONTACTS = 0.2 # percentage of time allocated to the movement of the com without moving the contacts
 global i_sphere 
 DISPLAY_CONTACTS = True
 rleg_id = "RLEG_JOINT5"

@@ -70,6 +70,7 @@ ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
 ps.selectPathPlanner("DynamicPlanner")
+ps.selectPathProjector('Progressive',0.05)
 
 #solve the problem :
 r(q_init)

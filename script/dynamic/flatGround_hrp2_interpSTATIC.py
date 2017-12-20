@@ -158,7 +158,7 @@ from planning.config import *
 from generate_contact_sequence import *
 
 beginState = 0
-endState = len(configsFull)-1
+endState = 4
 configs=configsFull[beginState:endState+1]
 cs = generateContactSequence(fullBody,configs,beginState, endState,r)
 #player.displayContactPlan()
