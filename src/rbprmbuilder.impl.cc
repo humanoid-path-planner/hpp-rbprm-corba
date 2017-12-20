@@ -1997,7 +1997,7 @@ assert(s2 == s1 +1);
         unsigned int seed =  (unsigned int) (time(NULL)) ;
         std::cout<<"seed rrt = "<<seed<<std::endl;
         hppDout(notice,"seed rrt = "<<seed);
-        srand ( seed);
+        srand (seed);
 
         try
         {
@@ -2100,7 +2100,7 @@ assert(s2 == s1 +1);
             try{
                 hppDout(notice,"begin comRRT between statebis 1 and 2");
                 core::PathPtr_t p2 =(*functor)(fullBody(),problemSolver()->problem(), paths[cT2],
-                    s1Bis,s2Bis, numOptimizations,true);
+                    s1Bis,s2Bis, numOptimizations,true,problemSolver()->paths().size());
                 hppDout(notice,"end comRRT");
                 pathsIds.push_back(AddPath(p2,problemSolver()));
                 // reduce path to remove extradof
@@ -2219,7 +2219,7 @@ assert(s2 == s1 +1);
             std::vector<std::string> trackedEffectorNames = stringConversion(trackedEffector);
             core::PathPtr_t refFullBody = problemSolver()->paths()[refpath]->extract(std::make_pair(path_from, path_to));
             core::PathPtr_t p2 =interpolation::effectorRRTFromPath(fullBody(),problemSolver()->problem(), comPath,
-                    state1,state2, numOptimizations,true, refFullBody, trackedEffectorNames);
+                    state1,state2, numOptimizations,true,problemSolver()->paths().size(), refFullBody, trackedEffectorNames);
             pathsIds.push_back(AddPath(p2,problemSolver()));
 
             // reduce path to remove extradof

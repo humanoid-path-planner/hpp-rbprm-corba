@@ -272,7 +272,7 @@ namespace hpp {
 
         typedef core::PathPtr_t (*t_rrt)
             (RbPrmFullBodyPtr_t, core::ProblemPtr_t, const core::PathPtr_t,
-             const  State &, const State &, const  std::size_t, const bool);
+             const  State &, const State &, const  std::size_t, const bool,const std::size_t);
 
         hpp::floatSeq* rrt(t_rrt functor ,double state1,double state2,
                            unsigned short comTraj1, unsigned short comTraj2, unsigned short comTraj3,
