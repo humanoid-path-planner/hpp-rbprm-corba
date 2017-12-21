@@ -1010,17 +1010,21 @@ class FullBody (object):
      ## Return the bezier curve for a given pathIndex and effector name
      #  \param pathId : index of the path, the same index as the wholeBody path stored in problem-solver
      #  \param effectorName : the name of the desired effector (Joint name)
-     #  \return the bezier curve (from spline library) followed by the end effector
+     #  \return a list of bezier curve (from spline library) followed by the end effector.
      #  Throw an error if there is no trajectory computed for the given id/name
      def getEffectorTrajectory(self,pathId,effectorName):
-         wp =  self.client.rbprm.rbprm.getEffectorTrajectoryWaypoints(pathId,effectorName)
-         if len(wp[0]) == 1: # length is provided :
-            waypoints = matrix(wp[1:]).transpose()
-            curve = bezier(waypoints,wp[0][0])
-         else :
-            waypoints=matrix(wp).transpose()
-            curve = bezier(waypoints)
-         return curve
+         curvesWp =  self.client.rbprm.rbprm.getEffectorTrajectoryWaypoints(pathId,effectorName)
+         res=[]
+         for cid in range(len(curvesWp)):
+             wp=curvesWp[cid]
+             if len(wp[0]) == 1: # length is provided :
+                waypoints = matrix(wp[1:]).transpose()
+                curve = bezier(waypoints,wp[0][0])
+             else :
+                waypoints=matrix(wp).transpose()
+                curve = bezier(waypoints)
+             res +=[curve]
+         return res
 
       ## return the contacts variation between two states
       # \param stateIdFrom : index of the first state
