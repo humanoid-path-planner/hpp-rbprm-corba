@@ -1014,8 +1014,13 @@ class FullBody (object):
      #  Throw an error if there is no trajectory computed for the given id/name
      def getEffectorTrajectory(self,pathId,effectorName):
          wp =  self.client.rbprm.rbprm.getEffectorTrajectoryWaypoints(pathId,effectorName)
-         waypoints=matrix(wp).transpose()
-         return bezier(waypoints)
+         if len(wp[0]) == 1: # length is provided :
+            waypoints = matrix(wp[1:]).transpose()
+            curve = bezier(waypoints,wp[0][0])
+         else :
+            waypoints=matrix(wp).transpose()
+            curve = bezier(waypoints)
+         return curve
 
       ## return the contacts variation between two states
       # \param stateIdFrom : index of the first state

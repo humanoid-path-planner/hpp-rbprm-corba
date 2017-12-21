@@ -22,8 +22,10 @@
 
 module hpp
 {
+  typedef sequence<floatSeqSeq> floatSeqSeqSeq;
   module corbaserver {
   module rbprm {
+
   interface RbprmBuilder
   {
     /// Create a Device for the ROM of the robot
@@ -680,9 +682,10 @@ module hpp
     /// Return the waypoints of the bezier curve for a given pathIndex and effector name
     ///  \param pathId : index of the path, the same index as the wholeBody path stored in problem-solver
     ///  \param effectorName : the name of the desired effector (Joint name)
-    ///  \return the waypoints of the bezier curve followed by this end effector
+    ///  \return A list with the length of the curve at the first index
+    ///  and then the waypoints of the bezier curve followed by this end effector
     ///  Throw an error if there is no trajectory computed for the given id/name
-    floatSeqSeq getEffectorTrajectoryWaypoints(in unsigned short pathId,in string effectorName) raises (Error);
+    floatSeqSeqSeq getEffectorTrajectoryWaypoints(in unsigned short pathId,in string effectorName) raises (Error);
 
   }; // interface Robot
   }; // module rbprm

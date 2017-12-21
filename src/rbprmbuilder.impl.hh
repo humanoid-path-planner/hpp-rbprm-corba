@@ -335,7 +335,7 @@ namespace hpp {
         virtual CORBA::Short removeContact(unsigned short stateId, const char* limbName) throw (hpp::Error);
         virtual hpp::floatSeq* computeTargetTransform(const char* limbName, const hpp::floatSeq& configuration, const hpp::floatSeq& p, const hpp::floatSeq& n) throw (hpp::Error);
         virtual Names_t* getEffectorsTrajectoriesNames(unsigned short pathId)throw (hpp::Error);
-        virtual hpp::floatSeqSeq* getEffectorTrajectoryWaypoints(unsigned short pathId,const char* effectorName)throw (hpp::Error);
+        virtual hpp::floatSeqSeqSeq* getEffectorTrajectoryWaypoints(unsigned short pathId,const char* effectorName)throw (hpp::Error);
 
 
         void selectFullBody (const char* name) throw (hpp::Error)

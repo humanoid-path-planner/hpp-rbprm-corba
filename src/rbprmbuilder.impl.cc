@@ -17,7 +17,7 @@
 
 //#include <hpp/fcl/math/transform.h>
 #include <hpp/util/debug.hh>
-#include "hpp/corbaserver/rbprm/rbprmbuilder.hh"
+#include <hpp/corbaserver/rbprm/rbprmbuilder.hh>
 #include "rbprmbuilder.impl.hh"
 #include "hpp/rbprm/rbprm-device.hh"
 #include "hpp/rbprm/rbprm-validation.hh"
@@ -70,6 +70,18 @@ namespace hpp {
     , analysisFactory_(0)
     {
         // NOTHING
+    }
+
+
+    hpp::floatSeq vectorToFloatseq (const hpp::core::vector_t& input)
+    {
+      CORBA::ULong size = (CORBA::ULong) input.size ();
+      double* dofArray = hpp::floatSeq::allocbuf(size);
+      hpp::floatSeq floats (size, size, dofArray, true);
+      for (std::size_t i=0; i<size; ++i) {
+        dofArray [i] = input [i];
+      }
+      return floats;
     }
 
     void RbprmBuilder::loadRobotRomModel(const char* robotName,
@@ -1461,31 +1473,40 @@ namespace hpp {
         }
     }
 
-    hpp::floatSeqSeq* RbprmBuilder::getEffectorTrajectoryWaypoints(unsigned short pathId,const char* effectorName)throw (hpp::Error){
+    hpp::floatSeqSeqSeq* RbprmBuilder::getEffectorTrajectoryWaypoints(unsigned short pathId,const char* effectorName)throw (hpp::Error){
         try{
             if(!fullBodyLoaded_)
                 throw std::runtime_error ("No Fullbody loaded");
-            bezier_Ptr curve;
-            if(! fullBody()->getEffectorTrajectory(pathId,effectorName,curve))
+            std::vector<bezier_Ptr> curvesVector;
+            if(! fullBody()->getEffectorTrajectory(pathId,effectorName,curvesVector))
                 throw std::runtime_error ("There is no trajectory stored for path Id = "+ boost::lexical_cast<std::string>(pathId) +" and end effector name = "+std::string(effectorName));
-            const bezier_t::t_point_t waypoints = curve->waypoints();
-            // build a floatSeqSeq from the waypoints :
-            hpp::floatSeqSeq *res;
-            res = new hpp::floatSeqSeq ();
-            res->length ((_CORBA_ULong)waypoints.size());
-            std::size_t i=0;
-            for(bezier_t::t_point_t::const_iterator wit = waypoints.begin(); wit != waypoints.end(); ++wit,++i)
-            {
-                const bezier_t::point_t position = *wit;
-                _CORBA_ULong size = (_CORBA_ULong) position.size ();
-                double* dofArray = hpp::floatSeq::allocbuf(size);
-                hpp::floatSeq floats (size, size, dofArray, true);
-                //convert the config in dofseq
-                for(std::size_t h = 0; h<position.size(); ++h)
-                {
-                    dofArray[h] = position[h];
+            // 3 dimensionnal array : first index is the curve, second index is the wp of the curve, third index is the coordinate of each wp
+            hpp::floatSeqSeqSeq *res;
+            res = new hpp::floatSeqSeqSeq();
+            res->length((_CORBA_ULong) curvesVector.size());
+            size_t curveId = 0;
+            for(std::vector<bezier_Ptr>::const_iterator cit=curvesVector.begin() ; cit != curvesVector.end();++cit,curveId++){
+                const bezier_t::t_point_t waypoints = (*cit)->waypoints();
+                // build a floatSeqSeq from the waypoints :
+                hpp::floatSeqSeq *curveWp;
+                curveWp = new hpp::floatSeqSeq ();
+                _CORBA_ULong size = (_CORBA_ULong)waypoints.size()+1;
+                curveWp->length (size); // +1 because the first value is the length (time)
+                { // add the time at the first index :
+                    double* dofArray = hpp::floatSeq::allocbuf(1);
+                    hpp::floatSeq floats (1, 1, dofArray, true);
+                    dofArray[0] = (*cit)->max();
+                    (*curveWp) [(_CORBA_ULong)0] = floats; // Always assume the curve start at 0. There isn't any ways to create it otherwise in python
                 }
-                (*res) [(_CORBA_ULong)i] = floats;
+                // now add the waypoints :
+                std::size_t i=1;
+                for(bezier_t::t_point_t::const_iterator wit = waypoints.begin(); wit != waypoints.end(); ++wit,++i)
+                {
+
+                    const bezier_t::point_t position = *wit;
+                    (*curveWp) [(_CORBA_ULong)i] = vectorToFloatseq(position);
+                }
+                (*res)[(_CORBA_ULong)curveId] = (*curveWp);
             }
             return res;
         }
