@@ -165,12 +165,20 @@ namespace hpp {
             fullBodyLoaded_ = true;
             fullBodyMap_.map_[name] = rbprm::RbPrmFullBody::create(device);
             fullBodyMap_.selected_ = name;
-            try {
-              boost::any value = problemSolver()->problem()->get<boost::any> (std::string("friction"));
-              fullBody()->setFriction(boost::any_cast<double>(value));
-              hppDout(notice,"fullbody : mu define in python : "<<fullBody()->getFriction());
-            } catch (const std::exception& e) {
-              hppDout(notice,"fullbody : mu not defined, take : "<<fullBody()->getFriction()<<" as default.");
+            if(problemSolver()){
+                if(problemSolver()->problem()){
+                    try {
+                      boost::any value = problemSolver()->problem()->get<boost::any> (std::string("friction"));
+                      fullBody()->setFriction(boost::any_cast<double>(value));
+                      hppDout(notice,"fullbody : mu define in python : "<<fullBody()->getFriction());
+                    } catch (const std::exception& e) {
+                      hppDout(notice,"fullbody : mu not defined, take : "<<fullBody()->getFriction()<<" as default.");
+                    }
+                }else{
+                    hppDout(warning,"No instance of problem while initializing fullBody");
+                }
+            }else{
+                hppDout(warning,"No instance of problemSolver while initializing fullBody");
             }
             problemSolver()->pathValidationType ("Discretized",0.05); // reset to avoid conflict with rbprm path
             problemSolver()->robot (fullBody()->device_);
