@@ -2195,8 +2195,8 @@ assert(s2 == s1 +1);
 
             try{
                 hppDout(notice,"begin comRRT between statebis 1 and 2");
-                core::PathPtr_t p2 =(*functor)(fullBody(),problemSolver()->problem(), paths[cT2],
-                    s1Bis,s2Bis, numOptimizations,true,problemSolver()->paths().size());
+                core::PathPtr_t p2 =(*functor)(fullBody(),problemSolver(), paths[cT2],
+                    s1Bis,s2Bis, numOptimizations,true);
                 hppDout(notice,"end comRRT");
                 pathsIds.push_back(AddPath(p2,problemSolver()));
                 // reduce path to remove extradof
@@ -2314,8 +2314,8 @@ assert(s2 == s1 +1);
             comPath->appendPath(paths[cT3]);
             std::vector<std::string> trackedEffectorNames = stringConversion(trackedEffector);
             core::PathPtr_t refFullBody = problemSolver()->paths()[refpath]->extract(std::make_pair(path_from, path_to));
-            core::PathPtr_t p2 =interpolation::effectorRRTFromPath(fullBody(),problemSolver()->problem(), comPath,
-                    state1,state2, numOptimizations,true,problemSolver()->paths().size(), refFullBody, trackedEffectorNames);
+            core::PathPtr_t p2 =interpolation::effectorRRTFromPath(fullBody(),problemSolver(), comPath,
+                    state1,state2, numOptimizations,true, refFullBody, trackedEffectorNames);
             pathsIds.push_back(AddPath(p2,problemSolver()));
 
             // reduce path to remove extradof
