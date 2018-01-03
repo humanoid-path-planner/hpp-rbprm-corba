@@ -9,19 +9,70 @@ class PolyBezier:
         self.curves=curves
         self.times=[]
         self.times +=[0]
+        self.d_curves=[]
+        self.dd_curves=[]
         for i in range(len(curves)):
             if not isinstance(curves[i],bezier):
                 raise TypeError("PolyBezier must be called with a list of bezier curves (or a single bezier curve)")
             self.times+=[curves[i].max() + self.times[-1]]
             
-            
-    def __call__(self,t):
+    def findInterval(self,t):
         if t>self.times[-1] or t<0:
-            raise ValueError("Parameter is outside of definition range of the curves")
+            raise ValueError("Parameter is outside of definition range of the curves, t = "+str(t) )       
         for cit in range(len(self.times)):
             if t<=self.times[cit+1]:
-                tc = t-self.times[cit]
-                return self.curves[cit](tc)
+                return cit  
+        raise ValueError("Error in times intervals for t = "+str(t))        
+            
+    def findIntervalAdjustTime(self,t):
+        id = self.findInterval(t)
+        t -= self.times[id]
+        return id
+    
+    def getBezierAt(self,t):
+        id = self.findInterval(t)
+        return self.curves[id]
+       
+    def __call__(self,t):
+        id = self.findInterval(t)
+        tc = t-self.times[id]
+        return self.curves[id](tc)
             
     def length(self):
         return self.times[-1]
+    
+    def isInFirst(self,t):
+        id = self.findInterval(t)
+        return id==0
+    
+    def isInLast(self,t):
+        id = self.findInterval(t)
+        return id == (len(self.curves)-1)
+    
+    def isInExtermities(self,t):
+        return self.isInFirst(t) or self.isInLast(t)
+    
+    def computeDerivates(self):
+        if len(self.d_curves)!=len(self.curves) or len(self.dd_curves)!=len(self.curves) :
+            self.d_curves=[]
+            self.dd_curves=[]
+            for c in self.curves:   
+                self.d_curves += [c.compute_derivate(1)]
+                self.dd_curves += [c.compute_derivate(2)]                
+        else:
+            print "Derivatives curves were already computed"
+    
+    def d(self,t):
+        id = self.findIntervalAdjustTime(t)         
+        if len(self.d_curves) == len(self.curves):
+            return self.d_curves[id](t) 
+        else : 
+            return self.curves[id].derivate(t,1)
+        
+    
+    def dd(self,t):
+        id = self.findIntervalAdjustTime(t)         
+        if len(self.dd_curves) == len(self.curves):
+            return self.dd_curves[id](t) 
+        else : 
+            return self.curves[id].derivate(t,2)        
