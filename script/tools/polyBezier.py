@@ -27,7 +27,7 @@ class PolyBezier:
     def findIntervalAdjustTime(self,t):
         id = self.findInterval(t)
         t -= self.times[id]
-        return id
+        return id,t
     
     def getBezierAt(self,t):
         id = self.findInterval(t)
@@ -63,7 +63,7 @@ class PolyBezier:
             print "Derivatives curves were already computed"
     
     def d(self,t):
-        id = self.findIntervalAdjustTime(t)         
+        id,t = self.findIntervalAdjustTime(t)  
         if len(self.d_curves) == len(self.curves):
             return self.d_curves[id](t) 
         else : 
@@ -71,7 +71,7 @@ class PolyBezier:
         
     
     def dd(self,t):
-        id = self.findIntervalAdjustTime(t)         
+        id,t = self.findIntervalAdjustTime(t)         
         if len(self.dd_curves) == len(self.curves):
             return self.dd_curves[id](t) 
         else : 
