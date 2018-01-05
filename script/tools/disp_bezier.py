@@ -27,3 +27,4 @@ def displayBezierWaypoints(r,wp,step=0.001,color=[0.85, 0.75, 0.15, 1.0],name=No
     waypoints=matrix(wp).transpose()
     curve = bezier(waypoints)
     displayBezierCurve(r,curve,step,color,name)
+    return curve

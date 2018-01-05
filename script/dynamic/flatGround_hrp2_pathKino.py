@@ -29,8 +29,8 @@ urdfName = 'hrp2_trunk_flexible'
 urdfNameRom =  ['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = omniORB.any.to_any(0.3);
-aMax = omniORB.any.to_any(0.5);
+vMax = omniORB.any.to_any(0.2);
+aMax = omniORB.any.to_any(0.3);
 extraDof = 6
 mu=omniORB.any.to_any(MU)
 # Creating an instance of the helper class, and loading the robot
