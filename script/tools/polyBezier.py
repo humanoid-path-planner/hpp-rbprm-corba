@@ -11,6 +11,7 @@ class PolyBezier:
         self.times +=[0]
         self.d_curves=[]
         self.dd_curves=[]
+        self.jerk_curves=[]
         for i in range(len(curves)):
             if not isinstance(curves[i],bezier):
                 raise TypeError("PolyBezier must be called with a list of bezier curves (or a single bezier curve)")
@@ -58,7 +59,8 @@ class PolyBezier:
             self.dd_curves=[]
             for c in self.curves:   
                 self.d_curves += [c.compute_derivate(1)]
-                self.dd_curves += [c.compute_derivate(2)]                
+                self.dd_curves += [c.compute_derivate(2)]  
+                self.jerk_curves +=[c.compute_derivate(3)]
         else:
             print "Derivatives curves were already computed"
     
@@ -75,4 +77,11 @@ class PolyBezier:
         if len(self.dd_curves) == len(self.curves):
             return self.dd_curves[id](t) 
         else : 
-            return self.curves[id].derivate(t,2)        
+            return self.curves[id].derivate(t,2)   
+        
+    def jerk(self,t):
+        id,t = self.findIntervalAdjustTime(t)         
+        if len(self.jerk_curves) == len(self.curves):
+            return self.jerk_curves[id](t) 
+        else : 
+            return self.curves[id].derivate(t,3)                
