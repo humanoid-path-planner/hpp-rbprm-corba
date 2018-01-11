@@ -1,10 +1,14 @@
 from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
+import time
+
+
 
 import flatGround_hrp2_pathKino as tp
 import time
 
+tPlanning = tp.tPlanning
 
 
 packageName = "hrp2_14_description"
@@ -139,7 +143,9 @@ pp = PathPlayer (fullBody.client.basic, r)
 
 import fullBodyPlayerHrp2
 
+tStart = time.time()
 configsFull = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 3, filterStates = True)
+tInterpolateConfigs = time.time() - tStart
 print "number of configs :", len(configsFull)
 
 

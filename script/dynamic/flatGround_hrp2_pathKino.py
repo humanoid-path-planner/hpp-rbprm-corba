@@ -5,7 +5,7 @@ from hpp.corbaserver.robot import Robot as Parent
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 import omniORB.any
 from planning.configs.straight_walk_config import *
-
+import time
 
 class Robot (Parent):
 	rootJointType = 'freeflyer'
@@ -96,7 +96,7 @@ ps.addGoalConfig (q_goal)
 # Choosing RBPRM shooter and path validation methods.
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmDynamicPathValidation",0.05)
-# Choosing kinodynamic methods : 
+# Choosing kinodynamic methods :
 ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
 ps.selectPathPlanner("DynamicPlanner")
@@ -106,8 +106,11 @@ r(q_init)
 
 
 #r.solveAndDisplay("rm",1,0.01)
+tStart=time.time()
 
 t = ps.solve ()
+
+tPlanning = time.time() -tStart
 
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
