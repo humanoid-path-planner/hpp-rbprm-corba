@@ -1,7 +1,12 @@
 from planning.config import *
 import subprocess
 
-cmd = "ssh -X iwaki 'cd "+MUSCOD_DIR+" ; source /local/pfernbac/config.sh ; muscod_release "+DAT_NAME+" ; killall pgxwin_server '"
+if DISPLAY_MUSCOD:
+  d=" -X "
+else:
+  d=" "
+
+cmd = "ssh"+d+"iwaki 'cd "+MUSCOD_DIR+" ; source /local/pfernbac/config.sh ; muscod_release "+DAT_NAME+" ; killall pgxwin_server '"
 
 #cmd = "ssh -X iwaki 'cd /local/pfernbac/muscod/walk/uc-dual/build ; source /local/pfernbac/config.sh ; muscod_release straight_walk_planning ; killall pgxwin_server'"
 

@@ -1,13 +1,11 @@
 import pinocchio as se3
 from pinocchio import SE3, Quaternion
 from pinocchio.utils import *
+from config import *
 
 import locomote
 from locomote import WrenchCone,SOC6,ControlType,IntegratorType,ContactPatch, ContactPhaseHumanoid, ContactSequenceHumanoid
-SPEED=0.5
-DURATION_n_CONTACTS = 0.2 # percentage of time allocated to the movement of the com without moving the contacts
 global i_sphere 
-DISPLAY_CONTACTS = True
 rleg_id = "RLEG_JOINT5"
 lleg_id = "LLEG_JOINT5"
 rhand_id = "RARM_JOINT5"
