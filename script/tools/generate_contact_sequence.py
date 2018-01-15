@@ -1,7 +1,7 @@
 import pinocchio as se3
 from pinocchio import SE3, Quaternion
 from pinocchio.utils import *
-from config import *
+from planning.config import *
 
 import locomote
 from locomote import WrenchCone,SOC6,ControlType,IntegratorType,ContactPatch, ContactPhaseHumanoid, ContactSequenceHumanoid
@@ -58,7 +58,8 @@ def addContactLandmark(M,color,viewer):
     p +=  [rot.w]
     p += rot.coeffs().transpose().tolist()[0][0:3]
     gui.applyConfiguration(name,p)
-    gui.addLandmark(name,0.1)    
+    gui.addLandmark(name,0.1) 
+    #print "contact altitude : "+str(p[2])
     
     
 def displayContactsFromPhase(phase,viewer):
@@ -88,6 +89,7 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None):
     unusedPatch = cs.contact_phases[0].LF_patch.copy()
     unusedPatch.placement = SE3.Identity()
     unusedPatch.active= False
+
     
     # for each contact state we must create 2 phase (one with all the contact and one with the next replaced contact(s) broken)
     for stateId in range(beginId,endId):
@@ -101,6 +103,7 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None):
         q_ll = fb.getJointPosition(lleg_id)
         q_rh = fb.getJointPosition(rhand_id)
         q_lh = fb.getJointPosition(lhand_id)
+        
         
         # feets
         MRF = SE3()

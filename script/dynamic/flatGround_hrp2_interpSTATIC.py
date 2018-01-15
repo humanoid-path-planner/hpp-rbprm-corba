@@ -118,7 +118,7 @@ r(q_init)
 
 # Randomly generating a contact configuration at q_end
 fullBody.setCurrentConfig (q_goal)
-q_goal = fullBody.generateContacts(q_goal, dir_goal,acc_goal,robTreshold)
+#q_goal = fullBody.generateContacts(q_goal, dir_goal,acc_goal,robTreshold)
 r(q_goal)
 
 # specifying the full body configurations as start and goal state of the problem
@@ -164,7 +164,7 @@ from planning.config import *
 from generate_contact_sequence import *
 
 beginState = 0
-endState = 4
+endState = 6
 configs=configsFull[beginState:endState+1]
 cs = generateContactSequence(fullBody,configs,beginState, endState,r)
 #player.displayContactPlan()

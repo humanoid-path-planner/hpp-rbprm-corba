@@ -30,7 +30,8 @@ urdfNameRom =  ['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
 vMax = omniORB.any.to_any(0.2);
-aMax = omniORB.any.to_any(0.3);
+aMax = omniORB.any.to_any(0.1);
+#aMax = omniORB.any.to_any(0.3);
 extraDof = 6
 mu=omniORB.any.to_any(MU)
 # Creating an instance of the helper class, and loading the robot
@@ -85,7 +86,7 @@ q_goal = q_init [::]
 
 
 q_goal[3:7] = [1,0,0,0]
-q_goal [0:3] = [2, 0, 0.58]; r (q_goal)
+q_goal [0:3] = [1, 0, 0.58]; r (q_goal)
 
 r (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
@@ -115,8 +116,8 @@ tPlanning = time.time() -tStart
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp.dt=0.03
-#pp.displayVelocityPath(0)
-#r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
+pp.displayVelocityPath(0)
+r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
 
 
 """
