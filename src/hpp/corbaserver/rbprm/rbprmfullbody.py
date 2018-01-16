@@ -992,6 +992,17 @@ class FullBody (object):
      def getTimeAtState(self,stateId):
           return self.client.rbprm.rbprm.getTimeAtState(stateId)
 
+      ## return the duration for the given state index
+      # note : it depend on the implementation of interpolate : which state do we add to the list : the first one or the last or one in the middle
+      # current implementation : the last one
+      # \param stateId : index of the state
+     def getDurationForState(self,stateId):
+          if stateId == 0:
+               return self.client.rbprm.rbprm.getTimeAtState(stateId)
+          else:
+               return (self.client.rbprm.rbprm.getTimeAtState(stateId) - self.client.rbprm.rbprm.getTimeAtState(stateId-1))
+
+
      ## Return the names of all the effector for which a trajectory have been computed for a given path index.
      #  \param pathId : index of the path, the same index as the wholeBody path stored in problem-solver
      #  \return the list of all the end-effector (joint names) for which a trajectory have been defined

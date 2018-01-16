@@ -187,7 +187,7 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None):
         phase_d.init_state=init_state
         phase_d.final_state=init_state
         phase_d.reference_configurations.append(np.matrix(pinnochioQuaternion(configs[config_id][:-6])))
-        phase_d.time_trajectory.append((fb.getTimeAtState(stateId+1) - fb.getTimeAtState(stateId))*DURATION_n_CONTACTS/SPEED)
+        phase_d.time_trajectory.append((fb.getDurationForState(stateId))*DURATION_n_CONTACTS/SPEED)
         
         
         if DISPLAY_CONTACTS and viewer:
@@ -220,7 +220,7 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None):
         final_state[3:9] = np.matrix(configs[config_id+1][-6:]).transpose()        
         phase_s.final_state=final_state
         phase_s.reference_configurations.append(np.matrix(pinnochioQuaternion(configs[config_id][:-6])))
-        phase_s.time_trajectory.append((fb.getTimeAtState(stateId+1) - fb.getTimeAtState(stateId))*(1-DURATION_n_CONTACTS)/SPEED)
+        phase_s.time_trajectory.append((fb.getDurationForState(stateId))*(1-DURATION_n_CONTACTS)/SPEED)
         
         if DISPLAY_CONTACTS and viewer:
             displayContactsFromPhase(phase_s,viewer)        
