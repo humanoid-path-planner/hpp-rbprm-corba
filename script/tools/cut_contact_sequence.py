@@ -23,19 +23,19 @@ def solveMuscodProblem(configsFull,cs):
     sequences= []
     outputs=[]
     isInit=True
-    for i in range(0,numStep+1):
-        if i < numStep : 
+    for i in range(0,numStep):
+        if i == (numStep-1) : 
+            # last call, include all the phases left (it may be more than stepSize)
+            currentSteps = (stepSize-3)*(numStep-1) # id of the next phase to compute            
+            sequences += [ContactSequenceHumanoid(cs.size()-currentSteps)]  
+            print "currentSteps :",currentSteps
+            print "last size = ",(cs.size()-currentSteps)            
+            for k in range (cs.size() - currentSteps):
+                sequences[i].contact_phases[k] = cs.contact_phases[currentSteps + k] # last phases of sequence i is the second phase of sequence i+1, not the first        
+        else : 
             sequences += [ContactSequenceHumanoid(stepSize)]
             for k in range(0,stepSize):
                 sequences[i].contact_phases[k] = cs.contact_phases[(stepSize-3)*i + k] # last phases of sequence i is the second phase of sequence i+1, not the first
-        else:
-            # last call to muscod, it may left less than stepSize states :
-            currentSteps = (stepSize-3)*(numStep-1)+stepSize-1 # id of the next phase to compute
-            sequences += [ContactSequenceHumanoid(cs.size()-currentSteps)]  
-            print "currentSteps :",currentSteps
-            print "last size = ",(cs.size()-currentSteps)
-            for k in range (cs.size() - currentSteps):
-                sequences[i].contact_phases[k] = cs.contact_phases[currentSteps + k] # last phases of sequence i is the second phase of sequence i+1, not the first                
         if i > 0:
             sequences[i].contact_phases[0].init_state = outputs[i-1].contact_phases[stepSize-3].state_trajectory[P3_Num_step]
             sequences[i].contact_phases[0].reference_configurations[0] = outputs[i-1].contact_phases[stepSize-3].reference_configurations[0]
@@ -49,12 +49,13 @@ def solveMuscodProblem(configsFull,cs):
         assert success,"Error in muscod call"
         outputs += [ContactSequenceHumanoid(0)]
         outputs[i].loadFromXML(CONTACT_SEQUENCE_WHOLEBODY_FILE,CONTACT_SEQUENCE_XML_TAG)
+        print "cut contact sequence, call "+str(i)+" size = "+str(outputs[i].size())
     
     
     
     ## merge sequences outputs together : 
     init_time_at_step = 0.    
-    finalSeq = ContactSequenceHumanoid((stepSize-3)*numStep +3) 
+    finalSeq = ContactSequenceHumanoid(cs.size()) 
     for id_steps in range(0,numStep):
         if id_steps>0 : 
             # merging phase, we should merge state_trajectory; the first half (up to P3_num_step) is in the first half of mid_phase0
@@ -84,12 +85,15 @@ def solveMuscodProblem(configsFull,cs):
     
             
             
-    for id_phase in range(stepSize-3,stepSize):
+    for id_phase in range(stepSize-3,outputs[id_steps].size()):
         phase=outputs[id_steps].contact_phases[id_phase]
         for i in range(0,len(phase.time_trajectory)):
             phase.time_trajectory[i] += init_time_at_step # offset all the times by the last value of the last step       
         finalSeq.contact_phases[(stepSize-3)*id_steps+id_phase]=phase
-        
+        print "id = ",((stepSize-3)*id_steps+id_phase)
+        print "id_phase = ",id_phase
+    print "cut_contact_sequence, write file : ",CONTACT_SEQUENCE_WHOLEBODY_FILE
+    print "contact_sequence size = ",finalSeq.size()
     finalSeq.saveAsXML(CONTACT_SEQUENCE_WHOLEBODY_FILE,CONTACT_SEQUENCE_XML_TAG)
 
     
