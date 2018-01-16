@@ -50,8 +50,8 @@ rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
 #rbprmBuilder.setAffordanceFilter('hrp2_larm_rom', ['Lean'])
 rbprmBuilder.setAffordanceFilter('hrp2_lleg_rom', ['Support',])
 rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
-vMax = 0.3;
-aMax = 0.5;
+vMax = 0.2;
+aMax = 0.1;
 extraDof = 6
 
 rbprmBuilder.setJointBounds ("base_joint_xyz", [-3,4.5,-2 ,2.5, 0.55, 0.65])
@@ -90,7 +90,7 @@ r.addLandmark(r.sceneName,1)
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init[3:7] = [1,0,0,0]
 q_init [0:3] = [-0.9, 0.2, 0.58]; r (q_init)
-q_init[-6]=0.1
+q_init[-6]=0.05
 
 rbprmBuilder.setCurrentConfig (q_init)
 q_goal = q_init [::]
@@ -153,7 +153,7 @@ t = ps.solve ()
 #r.client.gui.removeFromGroup("rm_group",r.sceneName)
 
 
-
+ps.client.problem.extractPath(2,0,13)
 
 
 # Playing the computed path

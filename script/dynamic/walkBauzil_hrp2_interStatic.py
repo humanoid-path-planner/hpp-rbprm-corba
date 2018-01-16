@@ -103,7 +103,7 @@ acc_init = [0,0,0]
 dir_goal = tp.ps.configAtParam(pId,eps)[tp.indexECS:tp.indexECS+3]
 acc_goal = [0,0,0]
 
-robTreshold = 3
+robTreshold = 1
 # copy extraconfig for start and init configurations
 q_init[configSize:configSize+3] = dir_init[::]
 q_init[configSize+3:configSize+6] = acc_init[::]
@@ -113,7 +113,7 @@ q_goal[configSize+3:configSize+6] = [0,0,0]
 
 # FIXME : test
 q_init[2] = q_ref[2] +0.01
-q_goal[2] = q_ref[2] 
+q_goal[2] = q_ref[2] +0.01
 
 
 # Randomly generating a contact configuration at q_init
@@ -126,7 +126,7 @@ r(q_init)
 
 # Randomly generating a contact configuration at q_end
 fullBody.setCurrentConfig (q_goal)
-q_goal = fullBody.generateContacts(q_goal, dir_goal,acc_goal,robTreshold)
+#q_goal = fullBody.generateContacts(q_goal, dir_goal,acc_goal,robTreshold)
 r(q_goal)
 
 # specifying the full body configurations as start and goal state of the problem
