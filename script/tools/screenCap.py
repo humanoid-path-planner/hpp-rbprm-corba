@@ -51,6 +51,10 @@ tp.r.startCapture ("capture/capture","png")
 tp.r.stopCapture ()
 
 
+r.startCapture ("capture/capture","png")
+r.stopCapture ()
+
+
 
 tp.r.startCapture ("capture/capture","png")
 time.sleep(1)

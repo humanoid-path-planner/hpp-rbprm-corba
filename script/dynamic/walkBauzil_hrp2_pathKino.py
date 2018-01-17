@@ -161,7 +161,7 @@ pi = ps.numberPaths()-1
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp.dt=0.03
-pp.displayVelocityPath(pi)
+#pp.displayVelocityPath(pi)
 r.client.gui.setVisibility("path_"+str(pi)+"_root","ALWAYS_ON_TOP")
 #display path
 pp.speed=1
