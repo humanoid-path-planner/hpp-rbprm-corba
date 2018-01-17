@@ -49,7 +49,7 @@
 #include "hpp/rbprm/interpolation/polynom-trajectory.hh"
 #include <hpp/rbprm/planner/random-shortcut-dynamic.hh>
 #include <hpp/rbprm/planner/oriented-path-optimizer.hh>
-
+#include <hpp/rbprm/sampling/heuristic-tools.hh>
 #ifdef PROFILE
     #include "hpp/rbprm/rbprm-profiler.hh"
 #endif
