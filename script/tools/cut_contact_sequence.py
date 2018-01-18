@@ -64,13 +64,13 @@ def solveMuscodProblem(configsFull,cs):
             mid_phase0 = outputs[id_steps-1].contact_phases[stepSize-3]
             old_state_traj=[]
             old_time_traj=[]
-            init_time_at_step += mid_phase0.time_trajectory[P3_Num_step] # need to offset all the times of the next phases by this value
             for j in range (0,len(mid_phase1.state_trajectory)): # save the traj from mid_phase1 before overwriting them
                 old_state_traj.append(mid_phase1.state_trajectory[j])
                 old_time_traj.append(mid_phase1.time_trajectory[j])
             for j in range (0,P3_Num_step): # first half, take mid_phase0
                 mid_phase1.state_trajectory[j] = mid_phase0.state_trajectory[j]
-                mid_phase1.time_trajectory[j]=mid_phase0.time_trajectory[j]
+                mid_phase1.time_trajectory[j]=mid_phase0.time_trajectory[j] + init_time_at_step
+            init_time_at_step += mid_phase0.time_trajectory[P3_Num_step] # need to offset all the times of the next phases by this value
             for j in range (P3_Num_step,len(mid_phase1.state_trajectory)): # second half, take and expand mid_phase1
                 mid_phase1.state_trajectory[j]=old_state_traj[(j-P3_Num_step)*2] 
                 mid_phase1.time_trajectory[j] = old_time_traj[(j-P3_Num_step)*2] +init_time_at_step
