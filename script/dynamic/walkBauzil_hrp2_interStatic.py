@@ -31,7 +31,7 @@ r = tp.Viewer (ps,viewerClient=tp.r.client,displayArrows = True, displayCoM = Tr
 q_init =[0, 0, 0.648702, 1.0, 0.0 , 0.0, 0.0,0.0, 0.0, 0.0, 0.0,0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17,0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17,0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,0,0,0,0,0,0]; r (q_init)
 q_ref = q_init[::]
 fullBody.setCurrentConfig (q_init)
-fullBody.setReferenceConfig (q_ref)
+
 
 
 
@@ -47,7 +47,7 @@ rLegLimbOffset=[0,0,-0.035]#0.035
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 #fullBody.addLimbDatabase("./db/hrp2_rleg_db.db",rLegId,"forward")
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "fixedStep1", 0.01,"_6_DOF",limbOffset=rLegLimbOffset)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "fixedStep06", 0.01,"_6_DOF",limbOffset=rLegLimbOffset)
 fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/hrp2_rleg_db.db")
 
@@ -57,7 +57,7 @@ lLegLimbOffset=[0,0,0.035]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
 #fullBody.addLimbDatabase("./db/hrp2_lleg_db.db",lLegId,"forward")
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fixedStep1", 0.01,"_6_DOF",limbOffset=lLegLimbOffset)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fixedStep06", 0.01,"_6_DOF",limbOffset=lLegLimbOffset)
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
 
@@ -75,7 +75,7 @@ lHand = 'LARM_JOINT5'
 fullBody.addNonContactingLimb(larmId,larm,lHand, 10000)
 fullBody.runLimbSampleAnalysis(larmId, "ReferenceConfiguration", True)
 
-
+fullBody.setReferenceConfig (q_ref) # must be called after adding the limbs
 tGenerate =  time.time() - tStart
 print "generate databases in : "+str(tGenerate)+" s"
 
@@ -134,8 +134,8 @@ r.addLandmark('hrp2_14/BODY',0.3)
 r(q_init)
 
 
-fullBody.setStartState(q_init,[rLegId,lLegId])
-fullBody.setEndState(q_goal,[rLegId,lLegId])
+fullBody.setStartState(q_init,[lLegId,rLegId])
+fullBody.setEndState(q_goal,[lLegId,rLegId])
 fullBody.setStaticStability(True) # only set it after the init/goal configuration are computed
 
 

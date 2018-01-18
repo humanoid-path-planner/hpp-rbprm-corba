@@ -161,7 +161,7 @@ pi = ps.numberPaths()-1
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp.dt=0.03
-#pp.displayVelocityPath(pi)
+pp.displayVelocityPath(pi)
 r.client.gui.setVisibility("path_"+str(pi)+"_root","ALWAYS_ON_TOP")
 #display path
 pp.speed=1
@@ -249,5 +249,18 @@ r.client.gui.captureTransformOnRefresh(False)
 r.client.gui.writeNodeFile('path_1_root','meshs/slalom_path.obj')
 
 """
+
+global i_sphere
+i_sphere=0
+
+def displaySpheres(q,color=r.color.black,size=0.03):
+  global i_sphere
+  for i in range(0,len(q)):
+    r.client.gui.addSphere("s"+str(i+i_sphere),size,color)
+    r.client.gui.applyConfiguration("s"+str(i+i_sphere),q[i]+[1,0,0,0])
+    r.client.gui.setVisibility("s"+str(i+i_sphere),"ALWAYS_ON_TOP")
+    r.client.gui.addToGroup("s"+str(i+i_sphere),r.sceneName)
+  i_sphere += len(q)
+  r.client.gui.refresh()
 
 
