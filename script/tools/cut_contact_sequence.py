@@ -90,8 +90,6 @@ def solveMuscodProblem(configsFull,cs):
         for i in range(0,len(phase.time_trajectory)):
             phase.time_trajectory[i] += init_time_at_step # offset all the times by the last value of the last step       
         finalSeq.contact_phases[(stepSize-3)*id_steps+id_phase]=phase
-        print "id = ",((stepSize-3)*id_steps+id_phase)
-        print "id_phase = ",id_phase
     print "cut_contact_sequence, write file : ",CONTACT_SEQUENCE_WHOLEBODY_FILE
     print "contact_sequence size = ",finalSeq.size()
     finalSeq.saveAsXML(CONTACT_SEQUENCE_WHOLEBODY_FILE,CONTACT_SEQUENCE_XML_TAG)
