@@ -142,9 +142,10 @@ camera = [0.6293167471885681,
 r.client.gui.setCameraTransform(0,camera)
 """
 
-
+tic = time.time()
 t = ps.solve ()
-
+toc = time.time()
+tPlanning = toc-tic
 #r.displayRoadmap('rm',radiusSphere=0.01)
 #r.displayPathMap("pm",0)
 

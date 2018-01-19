@@ -16,6 +16,7 @@ urdfName = "hrp2_14"
 urdfSuffix = "_reduced"
 srdfSuffix = ""
 pId = tp.ps.numberPaths() -1
+tPlanning = tp.tPlanning
 fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
