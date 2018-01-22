@@ -148,10 +148,10 @@ import fullBodyPlayerHrp2
 
 tStart = time.time()
 configsFull = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = robTreshold, filterStates = True)
-tInterpolate = time.time()-tStart
+tInterpolateConfigs = time.time()-tStart
 print "number of configs : ", len(configsFull)
-print "generated in "+str(tInterpolate)+" s"
-r(configsFull[len(configsFull)-2])
+print "generated in "+str(tInterpolateConfigs)+" s"
+r(configsFull[len(configsFull)-1])
 
 
 player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configsFull,draw=False,use_window=1,optim_effector=True,use_velocity=False,pathId = pId)
