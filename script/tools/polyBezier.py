@@ -39,8 +39,18 @@ class PolyBezier:
         tc = t-self.times[id]
         return self.curves[id](tc)
             
+    def numCurves(self):
+        return len(self.curves)
+    
     def length(self):
         return self.times[-1]
+    
+    def lengthNonZero(self):
+        length = 0
+        for c in self.curves:
+            if c.degree > 0:
+                length += (c.max() - c.min())
+        return length
     
     def isInFirst(self,t):
         id = self.findInterval(t)
@@ -49,6 +59,35 @@ class PolyBezier:
     def isInLast(self,t):
         id = self.findInterval(t)
         return id == (len(self.curves)-1)
+
+    def idFirstNonZero(self):
+        id_nonZero = 0
+        while (self.curves[id_nonZero].degree == 0):
+            id_nonZero += 1  
+        return id_nonZero
+    
+    def idLastNonZero(self):
+        id_nonZero = len(self.curves)-1
+        while (self.curves[id_nonZero].degree == 0):
+            id_nonZero -= 1
+        return id_nonZero
+    
+    def isInFirstNonZero(self,t):
+        id = self.findInterval(t)
+        id_nonZero = self.idFirstNonZero()
+        return id <= id_nonZero
+    
+    def isInLastNonZero(self,t):
+        id = self.findInterval(t)
+        id_nonZero = self.idLastNonZero()
+        return id >= id_nonZero  
+    
+    def firstNonZero(self):
+        return self.curves[self.idFirstNonZero()]
+    
+    def lastNonZero(self):
+        return self.curves[self.idLastNonZero()]
+        
     
     def isInExtermities(self,t):
         return self.isInFirst(t) or self.isInLast(t)
