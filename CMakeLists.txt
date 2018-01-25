@@ -342,6 +342,10 @@ install(FILES
 install(FILES
 	data/com_inequalities/LLEG_JOINT0_com_constraints.obj
 	data/com_inequalities/RLEG_JOINT0_com_constraints.obj
+	data/com_inequalities/LLEG_JOINT0_com_constraints.dae
+	data/com_inequalities/RLEG_JOINT0_com_constraints.dae
+	data/com_inequalities/LLEG_LINK5_Kinematics.dae
+	data/com_inequalities/RLEG_LINK5_Kinematics.dae
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/com_inequalities
   )
   

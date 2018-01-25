@@ -70,7 +70,7 @@ afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
 afftool.loadObstacleModel (ENV_PACKAGE_NAME, ENV_NAME, ENV_PREFIX, r)
 #r.loadObstacleModel (packageName, "ground", "planning")
-afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
+#afftool.visualiseAffordances('Support', r, r.color.lightBrown)
 #r.addLandmark(r.sceneName,1)
 
 # Setting initial and goal configurations
