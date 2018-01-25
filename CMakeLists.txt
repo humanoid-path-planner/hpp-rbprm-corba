@@ -338,6 +338,12 @@ install(FILES
 	data/meshes/robot_test/Rleg_rom.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes/robot_test
   )
+
+install(FILES
+	data/com_inequalities/LLEG_JOINT0_com_constraints.obj
+	data/com_inequalities/RLEG_JOINT0_com_constraints.obj
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/com_inequalities
+  )
   
 install(DIRECTORY data/hyq_description
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/../

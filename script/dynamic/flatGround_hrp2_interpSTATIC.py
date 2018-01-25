@@ -35,7 +35,7 @@ r = tp.Viewer (ps,viewerClient=tp.r.client,displayArrows = True, displayCoM = Tr
 q_init =[0.1, -0.82, 0.648702, 1.0, 0.0 , 0.0, 0.0,0.0, 0.0, 0.0, 0.0,0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17,0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17,0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,0,0,0,0,0,0]; r (q_init)
 q_ref = q_init[::]
 fullBody.setCurrentConfig (q_init)
-fullBody.setReferenceConfig (q_ref)
+
 
 #~ AFTER loading obstacles
 rLegId = 'hrp2_rleg_rom'
@@ -62,7 +62,7 @@ lLegx = 0.09; lLegy = 0.05
 fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "dynamicWalk", 0.01,"_6_DOF",limbOffset=lLegLimbOffset)
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
-
+fullBody.setReferenceConfig (q_ref)
 ## Add arms (not used for contact) : 
 
 
