@@ -1051,3 +1051,8 @@ class FullBody (object):
       # \param stateId : index of the state
      def getAllLimbsInContact(self,stateId):
           return self.getLimbsInContact(self.getAllLimbsNames(),stateId)
+
+     ## check the kinematics constraints for the given point
+     # \param point : test if the point is inside the kinematics constraints for the current configuration
+     def isKinematicsConstraintsVerified(self,point):
+          return self.client.rbprm.rbprm.isKinematicsConstraintsVerified(point)

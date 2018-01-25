@@ -687,6 +687,8 @@ module hpp
     ///  Throw an error if there is no trajectory computed for the given id/name
     floatSeqSeqSeq getEffectorTrajectoryWaypoints(in unsigned short pathId,in string effectorName) raises (Error);
 
+    boolean isKinematicsConstraintsVerified(in floatSeq point)raises (Error);
+
   }; // interface Robot
   }; // module rbprm
   }; // module corbaserver

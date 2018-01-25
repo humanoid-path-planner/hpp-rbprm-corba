@@ -50,6 +50,7 @@
 #include <hpp/rbprm/planner/random-shortcut-dynamic.hh>
 #include <hpp/rbprm/planner/oriented-path-optimizer.hh>
 #include <hpp/rbprm/sampling/heuristic-tools.hh>
+#include <hpp/rbprm/contact_generation/kinematics_constraints.hh>
 #ifdef PROFILE
     #include "hpp/rbprm/rbprm-profiler.hh"
 #endif
@@ -2957,6 +2958,8 @@ assert(s2 == s1 +1);
 
     }
 
+
+
     Names_t* RbprmBuilder::getAllLimbsNames()throw (hpp::Error)
     {
       if(!fullBodyLoaded_){
@@ -2972,6 +2975,29 @@ assert(s2 == s1 +1);
       }
       return limbsNames;
     }
+
+    bool RbprmBuilder::isKinematicsConstraintsVerified(const hpp::floatSeq &point)throw (hpp::Error){
+        if(!fullBodyLoaded_){
+          throw std::runtime_error ("fullBody not loaded");
+        }
+        Configuration_t pt_config = dofArrayToConfig(3,point);
+        fcl::Vec3f pt(pt_config[0],pt_config[1],pt_config[2]);
+        bool success(true);
+        bool successLimb;
+        hppDout(notice,"Test kinematic constraint for point : "<<pt);
+        for(CIT_Limb lit = fullBody()->GetLimbs().begin() ; lit != fullBody()->GetLimbs().end() ; ++lit){
+            hppDout(notice,"for limb : "<<lit->first);
+            if(lit->second->kinematicConstraints_.first.size()==0){
+                hppDout(notice,"Kinematics constraints not initialized");
+            }else{
+                successLimb = verifyKinematicConstraints(lit->second->kinematicConstraints_,lit->second->effector_->currentTransformation(),pt);
+                hppDout(notice,"kinematic constraints verified : "<<successLimb);
+                success = success && successLimb;
+            }
+        }
+        return success;
+    }
+
 
     } // namespace impl
   } // namespace rbprm
