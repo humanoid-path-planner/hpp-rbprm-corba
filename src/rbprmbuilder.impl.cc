@@ -2990,7 +2990,7 @@ assert(s2 == s1 +1);
             if(lit->second->kinematicConstraints_.first.size()==0){
                 hppDout(notice,"Kinematics constraints not initialized");
             }else{
-                successLimb = verifyKinematicConstraints(lit->second->kinematicConstraints_,lit->second->effector_->currentTransformation(),pt);
+                successLimb = rbprm::reachability::verifyKinematicConstraints(lit->second->kinematicConstraints_,lit->second->effector_->currentTransformation(),pt);
                 hppDout(notice,"kinematic constraints verified : "<<successLimb);
                 success = success && successLimb;
             }
