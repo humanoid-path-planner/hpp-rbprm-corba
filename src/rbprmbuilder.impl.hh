@@ -338,7 +338,8 @@ namespace hpp {
         virtual Names_t* getEffectorsTrajectoriesNames(unsigned short pathId)throw (hpp::Error);
         virtual hpp::floatSeqSeqSeq* getEffectorTrajectoryWaypoints(unsigned short pathId,const char* effectorName)throw (hpp::Error);
 
-        virtual bool isKinematicsConstraintsVerified(const hpp::floatSeq &point)throw (hpp::Error);
+        virtual bool areKinematicsConstraintsVerified(const hpp::floatSeq &point)throw (hpp::Error);
+        virtual bool areKinematicsConstraintsVerifiedForState(unsigned short stateId,const hpp::floatSeq &point)throw (hpp::Error);
         virtual bool isReachableFromState(unsigned short stateFrom,unsigned short stateTo)throw (hpp::Error);
 
 

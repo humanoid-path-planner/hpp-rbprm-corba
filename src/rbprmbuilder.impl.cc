@@ -2994,7 +2994,7 @@ assert(s2 == s1 +1);
       return limbsNames;
     }
 
-    bool RbprmBuilder::isKinematicsConstraintsVerified(const hpp::floatSeq &point)throw (hpp::Error){
+    bool RbprmBuilder::areKinematicsConstraintsVerified(const hpp::floatSeq &point)throw (hpp::Error){
         if(!fullBodyLoaded_){
           throw std::runtime_error ("fullBody not loaded");
         }
@@ -3015,6 +3015,19 @@ assert(s2 == s1 +1);
         }
         return success;
     }
+
+    bool RbprmBuilder::areKinematicsConstraintsVerifiedForState(unsigned short stateId,const hpp::floatSeq &point)throw (hpp::Error){
+        if(!fullBodyLoaded_){
+          throw std::runtime_error ("fullBody not loaded");
+        }
+        if(stateId >= lastStatesComputed_.size()){
+            throw std::runtime_error ("Unexisting state ID");
+        }
+        Configuration_t pt_config = dofArrayToConfig(3,point);
+        fcl::Vec3f pt(pt_config[0],pt_config[1],pt_config[2]);
+        return reachability::verifyKinematicConstraints(fullBody(),lastStatesComputed_[stateId],pt);
+    }
+
 
     bool RbprmBuilder::isReachableFromState(unsigned short stateFrom,unsigned short stateTo)throw (hpp::Error){
         if(!fullBodyLoaded_){

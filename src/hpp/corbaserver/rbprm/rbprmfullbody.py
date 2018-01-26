@@ -1070,8 +1070,13 @@ class FullBody (object):
 
      ## check the kinematics constraints for the given point, assuming all contact are established
      # \param point : test if the point is inside the kinematics constraints for the current configuration
-     def isKinematicsConstraintsVerified(self,point):
-          return self.client.rbprm.rbprm.isKinematicsConstraintsVerified(point)
+     def areKinematicsConstraintsVerified(self,point):
+          return self.client.rbprm.rbprm.areKinematicsConstraintsVerified(point)
+
+     def areKinematicsConstraintsVerifiedForState(self,stateFrom, point):
+         return self.client.rbprm.rbprm.areKinematicsConstraintsVerifiedForState(stateFrom,point)
+
+
 
      def isReachableFromState(self,stateFrom,stateTo):
           return self.client.rbprm.rbprm.isReachableFromState(stateFrom,stateTo)

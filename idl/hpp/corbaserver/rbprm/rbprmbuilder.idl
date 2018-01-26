@@ -693,7 +693,9 @@ module hpp
     ///  Throw an error if there is no trajectory computed for the given id/name
     floatSeqSeqSeq getEffectorTrajectoryWaypoints(in unsigned short pathId,in string effectorName) raises (Error);
 
-    boolean isKinematicsConstraintsVerified(in floatSeq point)raises (Error);
+    boolean areKinematicsConstraintsVerified(in floatSeq point)raises (Error);
+
+    boolean areKinematicsConstraintsVerifiedForState(in unsigned short stateFrom,in floatSeq point)raises (Error);
 
     boolean isReachableFromState(in unsigned short stateFrom, in unsigned short stateTo)raises (Error);
 
