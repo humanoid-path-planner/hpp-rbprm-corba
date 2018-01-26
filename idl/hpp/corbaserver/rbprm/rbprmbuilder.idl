@@ -695,6 +695,8 @@ module hpp
 
     boolean isKinematicsConstraintsVerified(in floatSeq point)raises (Error);
 
+    boolean isReachableFromState(in unsigned short stateFrom, in unsigned short stateTo)raises (Error);
+
   }; // interface Robot
   }; // module rbprm
   }; // module corbaserver

@@ -50,7 +50,7 @@
 #include <hpp/rbprm/planner/random-shortcut-dynamic.hh>
 #include <hpp/rbprm/planner/oriented-path-optimizer.hh>
 #include <hpp/rbprm/sampling/heuristic-tools.hh>
-#include <hpp/rbprm/contact_generation/kinematics_constraints.hh>
+#include <hpp/rbprm/contact_generation/reachability.hh>
 #ifdef PROFILE
     #include "hpp/rbprm/rbprm-profiler.hh"
 #endif
@@ -3015,6 +3015,18 @@ assert(s2 == s1 +1);
         }
         return success;
     }
+
+    bool RbprmBuilder::isReachableFromState(unsigned short stateFrom,unsigned short stateTo)throw (hpp::Error){
+        if(!fullBodyLoaded_){
+          throw std::runtime_error ("fullBody not loaded");
+        }
+        if(stateTo >= lastStatesComputed_.size() || stateFrom >= lastStatesComputed_.size()){
+            throw std::runtime_error ("Unexisting state ID");
+        }
+        reachability::Result res = reachability::isReachable(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo]);
+        return (res.status==reachability::REACHABLE);
+    }
+
 
 
     } // namespace impl
