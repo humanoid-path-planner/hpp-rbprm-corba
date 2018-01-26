@@ -1260,6 +1260,24 @@ namespace hpp {
         }
     }
 
+    CORBA::Short RbprmBuilder::addState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error)
+    {
+        try
+        {
+            State state;
+            std::vector<std::string> names = stringConversion(contactLimbs);
+            SetPositionAndNormal(state,fullBody(), configuration, names);
+            lastStatesComputed_.push_back(state);
+            lastStatesComputedTime_.push_back(std::make_pair(0.,state));
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+        return lastStatesComputed_.size()-1;
+    }
+
+
     double RbprmBuilder::getTimeAtState(unsigned short stateId)throw (hpp::Error){
       try
       {
