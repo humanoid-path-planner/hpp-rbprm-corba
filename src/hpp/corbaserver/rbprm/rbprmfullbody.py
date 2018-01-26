@@ -351,6 +351,15 @@ class FullBody (object):
           rawdata = self.client.rbprm.rbprm.computeContactPoints(stateId)
           return [[b[i:i+3] for i in range(0, len(b), 6)] for b in rawdata], [[b[i+3:i+6] for i in range(0, len(b), 6)] for b in rawdata]
      
+     ### Provided a discrete contact sequence has already been computed, computes
+     # all the contact positions and normals for a given state
+     # \param stateId iD of the considered state
+     # \param isIntermediate whether the intermediate state should be considerred rather than this one
+     # \return list of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
+     def computeContactPointsAtState(self, stateId,isIntermediate=False):
+          rawdata =  self.client.rbprm.rbprm.computeContactPointsAtState(stateId,isIntermediate)
+          return [[b[i:i+6] for i in range(0, len(b), 6)] for b in rawdata][0]
+
      ## Provided a discrete contact sequence has already been computed, computes
      # all the contact positions and normals for a given state, the next one, and the intermediate between them.
      #
