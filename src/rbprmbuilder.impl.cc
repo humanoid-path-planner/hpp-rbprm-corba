@@ -3037,7 +3037,7 @@ assert(s2 == s1 +1);
             throw std::runtime_error ("Unexisting state ID");
         }
         reachability::Result res = reachability::isReachable(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo]);
-        return (res.status==reachability::REACHABLE);
+        return (res.success());
     }
 
 
