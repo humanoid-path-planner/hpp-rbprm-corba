@@ -37,14 +37,14 @@ rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,0,-0.105]
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "manipulability", 0.1)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "manipulability", 0.01,"_6_DOF")
 
 lLegId = 'hrp2_lleg_rom'
 lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,0,-0.105]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "manipulability", 0.1)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "manipulability", 0.01,"_6_DOF")
 
 rarmId = 'hrp2_rarm_rom'
 rarm = 'RARM_JOINT0'
@@ -53,7 +53,7 @@ rArmOffset = [0,0,-0.1]
 rArmNormal = [0,0,1]
 rArmx = 0.024; rArmy = 0.024
 #disabling collision for hook
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 50000, "manipulability", 0.05, "_6_DOF", False)
+fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 100000, "manipulability", 0.01, "_6_DOF", True)
 
 """
 
@@ -120,6 +120,8 @@ fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 # FIXME : test
 q_init[2] = q_init[2]+0.02
 q_goal[2] = q_goal[2]+0.02
+
+q_init[0:3]=[0.28994563306701016,-0.82,0.6191688248477717]
 
 
 fullBody.setStaticStability(True)

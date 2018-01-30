@@ -70,7 +70,7 @@ r.addLandmark(r.sceneName,1)
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
-afftool.loadObstacleModel (packageName, "stair_bauzil", "planning", r)
+afftool.loadObstacleModel (packageName, "stair_bauzil", "planning", r,reduceSizes=[0.1,0])
 afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 
 
