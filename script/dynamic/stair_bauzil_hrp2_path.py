@@ -49,7 +49,7 @@ aMax = 5.;
 extraDof = 6
 mu=omniORB.any.to_any(MU)
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
-rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-vMax,vMax,-0.2,0.2,-vMax,vMax,0,0,0,0,0,0])
+rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([0,0,0,0,0,0,0,0,0,0,0,0])
 indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.basic.robot.getDimensionExtraConfigSpace()
 
 #~ from hpp.corbaserver.rbprm. import ProblemSolver
@@ -71,8 +71,7 @@ from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
 afftool.loadObstacleModel (packageName, "stair_bauzil", "planning", r)
-
-
+afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 
 
 q_init = rbprmBuilder.getCurrentConfig ();

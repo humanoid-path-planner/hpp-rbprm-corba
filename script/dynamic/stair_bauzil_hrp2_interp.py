@@ -98,7 +98,9 @@ q_0 = fullBody.getCurrentConfig();
 
 
 q_init =[0.1, -0.82, 0.648702, 1.0, 0.0 , 0.0, 0.0,0.0, 0.0, 0.0, 0.0,0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17,0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17,0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,0,0,0,0,0,0]; r (q_init)
+q_ref = q_init[::]
 fullBody.setCurrentConfig (q_init)
+fullBody.setReferenceConfig (q_ref)
 
 configSize = fullBody.getConfigSize() -fullBody.client.basic.robot.getDimensionExtraConfigSpace()
 
@@ -111,8 +113,8 @@ acc_goal = tp.ps.configAtParam(0,tp.ps.pathLength(0))[tp.indexECS+3:tp.indexECS+
 
 
 
-fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
-fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
+fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
+fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 
 
 # FIXME : test
@@ -141,8 +143,8 @@ q_goal[configSize+3:configSize+6] = acc_goal[::]
 r(q_init)
 
 
-fullBody.setStartState(q_init,[rLegId,lLegId,rarmId])
-fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId])
+fullBody.setStartState(q_init,[rLegId,lLegId])
+fullBody.setEndState(q_goal,[rLegId,lLegId])
 
 
 
@@ -159,7 +161,7 @@ player = Player(fullBody,pp,tp,configs,draw=False,optim_effector=False,use_veloc
 
 
 
-#player.displayContactPlan()
+player.displayContactPlan()
 
 
 
