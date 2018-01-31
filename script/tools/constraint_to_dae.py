@@ -177,9 +177,13 @@ global i_two_step
 i_two_step=0
     
 
-def displayStabilityConstraints(r):
+def displayStabilityConstraints(r,quasiStatic=False):
     global i_stab
-    generate_off_file_2d(STAB_NAME)
+    if quasiStatic:
+        generate_off_file_2d(STAB_NAME)
+    else:
+        generate_off_file(STAB_NAME)
+        
     convert_off_dae(STAB_NAME)
     insert_color_material(STAB_NAME,"yellow",[1,0.75,0],0.5)
     
@@ -209,10 +213,10 @@ def displayALlConstraints(r):
     i_const +=1    
     
 
-def displayOneStepConstraints(r):    
+def displayOneStepConstraints(r,quasiStatic=False):    
     removeAllConstraints(r)
     displayALlConstraints(r)
-    displayStabilityConstraints(r)    
+    displayStabilityConstraints(r,quasiStatic)    
     displayKinematicsConstraints(r)
     
 def displayTwoStepConstraints(r,inter_exist):
