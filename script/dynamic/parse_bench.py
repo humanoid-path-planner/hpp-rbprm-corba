@@ -28,6 +28,12 @@ def parseBenchmark(tPlanningTab):
   dic.append(["ORIENTED_OPTIMIZER:",0.,0])
   dic.append(["RANDOM_SHORTCUT:",0.,0])
   dic.append(["SHOOT_COLLISION:",0.,0])
+  dic.append(["IS_REACHABLE:",0.,0])
+  dic.append(["QP_REACHABLE:",0.,0])
+  dic.append(["REACHABLE_STABILITY:",0.,0])
+  dic.append(["REACHABLE_KINEMATIC:",0.,0])
+  dic.append(["REACHABLE_STACK:",0.,0])
+  dic.append(["REACHABLE_CALL_CENTROIDAL:",0.,0])
 
   import subprocess
   process = subprocess.Popen("pidof hpp-rbprm-server".split(),stdout=subprocess.PIPE)
@@ -87,5 +93,12 @@ def parseBenchmark(tPlanningTab):
     print "# Random shortcut       : "+str((dic[13][1]/mt)*100.)+" %"
     print "# Orientation optimizer : "+str((dic[12][1]/mt)*100.)+" %"
 
+"""
+    print "% Is Reachable test     : called "+str(dic[15][2])+" times, average of "+str(dic[15][1]/dic[15][2])+" ms."
+    print "% QP solver isReachable : called "+str(dic[16][2])+" times, average of "+str(dic[16][1]/dic[16][2])+" ms." 
+    print "% stability constraints : called "+str(dic[17][2])+" times, average of "+str(dic[17][1]/dic[17][2])+" ms." 
+    print "% kinematic constraints : called "+str(dic[18][2])+" times, average of "+str(dic[18][1]/dic[18][2])+" ms." 
+    print "% stack matrices        : called "+str(dic[19][2])+" times, average of "+str(dic[19][1]/dic[19][2])+" ms." 
 
+"""
 

@@ -174,10 +174,17 @@ player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configsFull,draw=False,use_win
 
 
 
-player.displayContactPlan(1.)
+#player.displayContactPlan(1.)
 
+r(fullBody.getConfigAtState(3))
+q1 = fullBody.getConfigAtState(3)
+q1[-3:]=[2,0,0]
+r(q1)
+s0 = fullBody.addState(q1,[rLegId,lLegId])
+s1 = fullBody.addState(q1,[rLegId])
 
-fullBody.isReachableFromState(2,3)
+fullBody.isReachableFromState(s0,s1)
+displayOneStepConstraints(r)
 
 #player.interpolate(2,len(configs)-1)
 

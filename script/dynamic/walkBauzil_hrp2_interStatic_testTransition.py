@@ -154,6 +154,11 @@ print "generated in "+str(tInterpolateConfigs)+" s"
 r(configsFull[len(configsFull)-1])
 
 
+tPlanning = tp.tPlanning
+import parse_bench
+parse_bench.parseBenchmark(tp.t)
+
+
 player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configsFull,draw=False,use_window=1,optim_effector=True,use_velocity=False,pathId = pId)
 
 # remove the last config (= user defined q_goal, not consitent with the previous state)
