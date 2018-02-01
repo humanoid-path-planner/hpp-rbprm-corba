@@ -3042,6 +3042,18 @@ assert(s2 == s1 +1);
 
 
 
+    bool RbprmBuilder::isDynamicallyReachableFromState(unsigned short stateFrom,unsigned short stateTo)throw (hpp::Error){
+        if(!fullBodyLoaded_){
+          throw std::runtime_error ("fullBody not loaded");
+        }
+        if(stateTo >= lastStatesComputed_.size() || stateFrom >= lastStatesComputed_.size()){
+            throw std::runtime_error ("Unexisting state ID");
+        }
+        reachability::Result res = reachability::isReachableDynamic(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo]);
+        return (res.success());
+    }
+
+
     } // namespace impl
   } // namespace rbprm
 } // namespace hpp

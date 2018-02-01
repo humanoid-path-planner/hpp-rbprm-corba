@@ -1076,8 +1076,9 @@ class FullBody (object):
      def areKinematicsConstraintsVerifiedForState(self,stateFrom, point):
          return self.client.rbprm.rbprm.areKinematicsConstraintsVerifiedForState(stateFrom,point)
 
-
-
      def isReachableFromState(self,stateFrom,stateTo):
           return self.client.rbprm.rbprm.isReachableFromState(stateFrom,stateTo)
+
+     def isDynamicallyReachableFromState(self,stateFrom,stateTo):
+          return self.client.rbprm.rbprm.isDynamicallyReachableFromState(stateFrom,stateTo)
 
