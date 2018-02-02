@@ -4,6 +4,8 @@ DIR = "/home/pfernbac/Documents/com_ineq_test/"
 STAB_NAME = "stability"
 CONS_NAME = "constraints"
 KIN_NAME = "kinematics"
+BEZIER_NAME = "bezier_wp"
+
 
 def generate_off_file(name):
     os.remove(DIR+name+"_.off") if os.path.isfile(DIR+name+"_.off") else None
@@ -175,6 +177,8 @@ global i_const
 i_const = 0
 global i_two_step
 i_two_step=0
+global i_bezier
+i_bezier=0
     
 
 def displayStabilityConstraints(r,quasiStatic=False):
@@ -243,11 +247,23 @@ def removeAllConstraints(r):
     global i_kin
     global i_const
     global i_two_step
+    global i_bezier
+
     r.client.gui.removeFromGroup("constraint_twoStep_c"+str(i_two_step-1),r.sceneName)
     r.client.gui.removeFromGroup("constraint_twoStep_b"+str(i_two_step-1),r.sceneName)
     r.client.gui.removeFromGroup("all_constraint_"+str(i_const-1),r.sceneName)
     r.client.gui.removeFromGroup("kin_constraint_"+str(i_kin-1),r.sceneName)
     r.client.gui.removeFromGroup("stab_constraint_"+str(i_stab-1),r.sceneName)
+    r.client.gui.removeFromGroup("bezier_contraint_"+str(i_bezier-1),r.sceneName)
     
 
 
+def displayBezierConstraints(r):
+    global i_bezier
+    generate_off_file(BEZIER_NAME)
+    convert_off_dae(BEZIER_NAME)
+    insert_color_material(BEZIER_NAME,"green",[0,1,0],0.3)
+    
+    r.client.gui.addMesh("bezier_constraint_"+str(i_bezier),DIR+BEZIER_NAME+".dae")
+    r.client.gui.addToGroup("bezier_constraint_"+str(i_bezier),r.sceneName)        
+    i_bezier +=1        

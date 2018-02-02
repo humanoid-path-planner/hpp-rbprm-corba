@@ -164,19 +164,25 @@ print "number of configs :", len(configsFull)
 
 
 
-from 
-
-
 
 
 player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configsFull,draw=False,use_window=1,optim_effector=True,use_velocity=False,pathId = pId)
 
-
+from display_tools import *
 
 
 #player.displayContactPlan(1.)
 
 r(fullBody.getConfigAtState(3))
+pid = fullBody.isDynamicallyReachableFromState(2,3)
+pp.displayPath(pid,r.color.blue)
+displayBezierConstraints(r)
+
+createSphere("s",r)
+moveSphere("s",r,x)
+
+
+
 q1 = fullBody.getConfigAtState(3)
 q1[-3:]=[2,0,0]
 r(q1)
