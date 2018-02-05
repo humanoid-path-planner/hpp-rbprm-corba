@@ -259,8 +259,10 @@ def removeAllConstraints(r):
 
 
 def displayBezierConstraints(r):
+    removeAllConstraints(r)
     global i_bezier
     generate_off_file(BEZIER_NAME)
+    #generate_off_file_2d(BEZIER_NAME)
     convert_off_dae(BEZIER_NAME)
     insert_color_material(BEZIER_NAME,"green",[0,1,0],0.3)
     
