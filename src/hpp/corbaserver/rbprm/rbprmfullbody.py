@@ -1079,6 +1079,12 @@ class FullBody (object):
      def isReachableFromState(self,stateFrom,stateTo):
           return self.client.rbprm.rbprm.isReachableFromState(stateFrom,stateTo)
 
-     def isDynamicallyReachableFromState(self,stateFrom,stateTo):
-          return self.client.rbprm.rbprm.isDynamicallyReachableFromState(stateFrom,stateTo)
+     def isDynamicallyReachableFromState(self,stateFrom,stateTo,timings=[],T=0):
+          if T>0 and len(timings) != 3: # timings vector must be of size 3
+              if len(timings) > 3:
+                  timings = timings[:3]
+              else:
+                  while len(timings) < 3:
+                      timings +=[0]
+          return self.client.rbprm.rbprm.isDynamicallyReachableFromState(stateFrom,stateTo,timings,T)
 
