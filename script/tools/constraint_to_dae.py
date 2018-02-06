@@ -254,7 +254,7 @@ def removeAllConstraints(r):
     r.client.gui.removeFromGroup("all_constraint_"+str(i_const-1),r.sceneName)
     r.client.gui.removeFromGroup("kin_constraint_"+str(i_kin-1),r.sceneName)
     r.client.gui.removeFromGroup("stab_constraint_"+str(i_stab-1),r.sceneName)
-    r.client.gui.removeFromGroup("bezier_contraint_"+str(i_bezier-1),r.sceneName)
+    r.client.gui.removeFromGroup("bezier_constraint_"+str(i_bezier-1),r.sceneName)
     
 
 
