@@ -173,21 +173,32 @@ from display_tools import *
 
 #player.displayContactPlan(1.)
 
-r(fullBody.getConfigAtState(3))
+r(fullBody.getConfigAtState(2))
+q2 = fullBody.getConfigAtState(2)
+q3 = fullBody.getConfigAtState(3)
+q2[-6:]=[0]*6
+q3[-6:]=[0]*6
+r(q2)
+
+s2 = fullBody.addState(q2,[rLegId,lLegId])
+s3 = fullBody.addState(q3,[rLegId,lLegId])
 pid = fullBody.isDynamicallyReachableFromState(2,3)
-pp.displayPath(pid,r.color.blue)
+pid
+
 displayBezierConstraints(r)
 
+#r.client.gui.removeFromGroup("path_"+str(pid-1)+"_root",r.sceneName)
+pp.displayPath(pid,r.color.blue)
 createSphere("s",r)
 moveSphere("s",r,x)
+r(q_ref)
 
 
-
-q1 = fullBody.getConfigAtState(3)
-q1[-3:]=[2,0,0]
+q1 = fullBody.getConfigAtState(2)
+#q1[-3:]=[2,0,0]
 r(q1)
 s0 = fullBody.addState(q1,[rLegId,lLegId])
-s1 = fullBody.addState(q1,[rLegId])
+s1 = fullBody.addState(q1,[rLegId,lLegId])
 
 fullBody.isReachableFromState(s0,s1)
 displayOneStepConstraints(r)
