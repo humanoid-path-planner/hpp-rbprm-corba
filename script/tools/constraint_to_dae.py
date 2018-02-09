@@ -219,9 +219,10 @@ def displayALlConstraints(r):
 
 def displayOneStepConstraints(r,quasiStatic=False):    
     removeAllConstraints(r)
-    displayALlConstraints(r)
-    displayStabilityConstraints(r,quasiStatic)    
     displayKinematicsConstraints(r)
+    displayStabilityConstraints(r,quasiStatic)        
+    displayALlConstraints(r)
+    
     
 def displayTwoStepConstraints(r,inter_exist):
     removeAllConstraints(r)

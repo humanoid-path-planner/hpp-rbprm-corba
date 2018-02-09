@@ -158,7 +158,7 @@ pp = PathPlayer (fullBody.client.basic, r)
 import fullBodyPlayerHrp2
 
 tStart = time.time()
-configsFull = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 3, filterStates = True)
+configsFull = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 3, filterStates = False)
 tInterpolateConfigs = time.time() - tStart
 print "number of configs :", len(configsFull)
 

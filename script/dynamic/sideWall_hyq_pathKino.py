@@ -4,6 +4,8 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 # Importing Gepetto viewer helper class
 from hpp.gepetto import Viewer
 import time
+import omniORB.any
+
 
 rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
@@ -15,8 +17,8 @@ urdfName = 'hyq_trunk'
 urdfNameRom = ['hyq_lhleg_rom','hyq_lfleg_rom','hyq_rfleg_rom','hyq_rhleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = 2;
-aMax = 10;
+vMax = omniORB.any.to_any(1.);
+aMax = omniORB.any.to_any(3.);
 extraDof = 6
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Builder ()
@@ -32,7 +34,7 @@ rbprmBuilder.setAffordanceFilter('hyq_lfleg_rom', ['Support',])
 # We also bound the rotations of the torso.
 rbprmBuilder.boundSO3([-0.2,0.2,-0.3,0.3,-0.3,0.3])
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
-rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax,0,0,0,0,0,0,0,0])
+rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-2,2,-2,2,0,0,0,0,0,0,0,0])
 
 # Creating an instance of HPP problem solver and the viewer
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver

@@ -3,7 +3,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
-
+import omniORB.any
 #calling script darpa_hyq_path to compute root path
 import slalom_hyq_pathKino as tp
 
@@ -33,8 +33,8 @@ nbSamples = 20000
 dynamic=True
 
 ps = tp.ProblemSolver(fullBody)
-ps.client.problem.setParameter("aMax",tp.aMax)
-ps.client.problem.setParameter("vMax",tp.vMax)
+ps.client.problem.setParameter("aMax",omniORB.any.to_any(tp.aMax))
+ps.client.problem.setParameter("vMax",omniORB.any.to_any(tp.vMax))
 r = tp.Viewer (ps,viewerClient=tp.r.client)
 
 rootName = 'base_joint_xyz'
@@ -69,10 +69,10 @@ q_goal[configSize:configSize+3] = dir_goal[::]
 q_goal[configSize+3:configSize+6] = acc_goal[::]
 
 
-fullBody.setStaticStability(False)
+fullBody.setStaticStability(True)
 # Randomly generating a contact configuration at q_init
 fullBody.setCurrentConfig (q_init)
-q_init = fullBody.generateContacts(q_init,dir_init,acc_init,2)
+q_init = fullBody.generateContacts(q_init,dir_init,[0,0,0],2)
 
 # Randomly generating a contact configuration at q_end
 fullBody.setCurrentConfig (q_goal)
