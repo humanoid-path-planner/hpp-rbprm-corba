@@ -2,8 +2,8 @@
 from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
-from hpp.corbaserver.rbprm.rbprmstate import State
-from hpp.corbaserver.rbprm.state_alg import StateAlgo
+from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
+
 
 from hpp.gepetto import Viewer
 
@@ -73,11 +73,12 @@ configSize = fullBody.getConfigSize() -fullBody.client.basic.robot.getDimensionE
 fullBody.setStaticStability(True)
 # Randomly generating a contact configuration at q_init
 fullBody.setCurrentConfig (q_init) ; r(q_init)
-q_init = fullBody.generateContacts(q_init,dir_init,acc_init)
+s_init = StateHelper.generateStateInContact(fullBody,q_init,dir_init,acc_init)
+r(s_init.q())
 
 # Randomly generating a contact configuration at q_end
 fullBody.setCurrentConfig (q_goal)
-q_goal = fullBody.generateContacts(q_goal, dir_goal,acc_goal)
+s_goal = StateHelper.generateStateInContact(fullBody,q_goal, dir_goal,acc_goal)
 
 # copy extraconfig for start and init configurations
 q_init[configSize:configSize+3] = dir_init[::]
@@ -85,8 +86,8 @@ q_init[configSize+3:configSize+6] = acc_init[::]
 q_goal[configSize:configSize+3] = dir_goal[::]
 q_goal[configSize+3:configSize+6] = acc_goal[::]
 # specifying the full body configurations as start and goal state of the problem
-fullBody.setStartState(q_init,[larmId,rLegId,rarmId,lLegId])
-fullBody.setEndState(q_goal,[larmId,rLegId,rarmId,lLegId])
+fullBody.setStartStateId(s_init.sId)
+fullBody.setEndStateId(s_goal.sId)
 
 
 r(q_init)
@@ -105,7 +106,7 @@ pp = PathPlayer (fullBody.client.basic, r)
 from fullBodyPlayer import Player
 player = Player(fullBody,pp,tp,configs,draw=True,optim_effector=False,use_velocity=dynamic,pathId = 1)
 
-player.displayContactPlan()
+#player.displayContactPlan()
 
 
 from display_tools import *
@@ -113,7 +114,7 @@ from constraint_to_dae import *
 
 q=[1.00015,0,0.85,1,0,0,0,-0.304349,0.161872,-1.39148,-0.292088,-0.169484,1.38697,-0.361248,0.194963,-1.44666,-0.370341,-0.170618,1.43348,0.0299991,0,8.5612e-05,2.99991,0,0.0085612,]
 q[-6:] = [0]*6
-s0 = fullBody.createState(q,[rLegId,lLegId,rarmId,larmId])
+s0 = State(fullBody,q=q,limbsIncontact = [rLegId,lLegId,rarmId,larmId])
 s1 = fullBody.createState(q,[rLegId,lLegId,larmId])
 pid = fullBody.isReachableFromState(s0,s1)
 pid
