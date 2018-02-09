@@ -223,8 +223,20 @@ class FullBody (object):
      #
      # \param configuration the initial robot configuration
      # \param direction a 3d vector specifying the desired direction of motion
+     # \return the configuration in contact
      def generateContacts(self, configuration, direction,acceleration = [0,0,0], robustnessThreshold = 0):
           return self.client.rbprm.rbprm.generateContacts(configuration, direction, acceleration, robustnessThreshold)
+
+     ## Generates a balanced contact configuration, considering the
+     #  given current configuration of the robot, and a direction of motion.
+     #  Typically used to generate a start and / or goal configuration automatically for a planning problem.
+     #
+     # \param configuration the initial robot configuration
+     # \param direction a 3d vector specifying the desired direction of motion
+     # \return the Id of the new state
+     def generateStateInContact(self, configuration, direction,acceleration = [0,0,0], robustnessThreshold = 0):
+          return self.client.rbprm.rbprm.generateStateInContact(configuration, direction, acceleration, robustnessThreshold)
+
 
      ## Generate an autocollision free configuration with limbs in contact with the ground
      # \param contactLimbs name of the limbs to project in contact
@@ -290,7 +302,7 @@ class FullBody (object):
      # \param contacts the array of limbs in contact
      def setStartState(self, configuration, contacts):
           return self.client.rbprm.rbprm.setStartState(configuration, contacts)
-          
+
      ## Create a state given a configuration and contacts
      #
      # \param configuration the desired start configuration

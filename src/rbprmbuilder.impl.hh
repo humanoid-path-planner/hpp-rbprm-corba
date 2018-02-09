@@ -221,7 +221,11 @@ namespace hpp {
         virtual double getSampleValue(const char* limb, const char* valueName, unsigned short sampleId) throw (hpp::Error);
         virtual double getEffectorDistance(unsigned short  state1, unsigned short  state2) throw (hpp::Error);
 
+        rbprm::State generateContacts_internal(const hpp::floatSeq& configuration,
+          const hpp::floatSeq& direction,const hpp::floatSeq& acceleration, const double robustnessThreshold ) throw (hpp::Error);
         virtual hpp::floatSeq* generateContacts(const hpp::floatSeq& configuration,
+                                                const hpp::floatSeq& direction, const hpp::floatSeq& acceleration, const double robustnessThreshold) throw (hpp::Error);
+        virtual CORBA::Short generateStateInContact(const hpp::floatSeq& configuration,
                                                 const hpp::floatSeq& direction, const hpp::floatSeq& acceleration, const double robustnessThreshold) throw (hpp::Error);
 
         virtual hpp::floatSeq* generateGroundContact(const hpp::Names_t& contactLimbs) throw (hpp::Error);

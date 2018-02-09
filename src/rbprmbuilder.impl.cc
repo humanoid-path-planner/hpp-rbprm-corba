@@ -808,7 +808,7 @@ namespace hpp {
         return projectStateToCOMEigen(stateId, com_target, max_num_sample);
     }
 
-    hpp::floatSeq* RbprmBuilder::generateContacts(const hpp::floatSeq& configuration,
+    rbprm::State RbprmBuilder::generateContacts_internal(const hpp::floatSeq& configuration,
       const hpp::floatSeq& direction,const hpp::floatSeq& acceleration, const double robustnessThreshold ) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
@@ -826,15 +826,41 @@ namespace hpp {
             const affMap_t &affMap = problemSolver()->map<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
 		        if (affMap.empty ()) {
     	        throw hpp::Error ("No affordances found. Unable to generate Contacts.");
-      		  }
+              }
             model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
             rbprm::State state = rbprm::contact::ComputeContacts(fullBody(),config,
               affMap, bindShooter_.affFilter_, dir,robustnessThreshold,acc);
+            return state;
+        } catch (const std::exception& exc) {
+        throw hpp::Error (exc.what ());
+        }
+    }
+
+    hpp::floatSeq* RbprmBuilder::generateContacts(const hpp::floatSeq& configuration,
+      const hpp::floatSeq& direction,const hpp::floatSeq& acceleration, const double robustnessThreshold ) throw (hpp::Error)
+    {
+        try
+        {
+            rbprm::State state = generateContacts_internal(configuration,direction,acceleration,robustnessThreshold);
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(_CORBA_ULong(state.configuration_.rows()));
-            for(std::size_t i=0; i< _CORBA_ULong(config.rows()); i++)
+            for(std::size_t i=0; i< _CORBA_ULong(state.configuration_.rows()); i++)
               (*dofArray)[(_CORBA_ULong)i] = state.configuration_ [i];
             return dofArray;
+        } catch (const std::exception& exc) {
+        throw hpp::Error (exc.what ());
+        }
+    }
+
+    CORBA::Short RbprmBuilder::generateStateInContact(const hpp::floatSeq& configuration,
+      const hpp::floatSeq& direction,const hpp::floatSeq& acceleration, const double robustnessThreshold ) throw (hpp::Error)
+    {
+        try
+        {
+            rbprm::State state = generateContacts_internal(configuration,direction,acceleration,robustnessThreshold);
+            lastStatesComputed_.push_back(state);
+            lastStatesComputedTime_.push_back(std::make_pair(-1., state));
+            return lastStatesComputed_.size()-1;
         } catch (const std::exception& exc) {
         throw hpp::Error (exc.what ());
         }

@@ -208,6 +208,12 @@ module hpp
     /// \return transformed configuration for which all possible contacts have been created
     floatSeq generateContacts(in floatSeq dofArray, in floatSeq direction, in floatSeq acceleration, in double robustnessThreshold) raises (Error);
 
+    /// Generate all possible contact in a given configuration and add the state in fullBody
+    /// \param dofArray initial configuration of the robot
+    /// \param direction desired direction of motion for the robot
+    /// \return the Id of the new state
+    short generateStateInContact(in floatSeq dofArray, in floatSeq direction, in floatSeq acceleration, in double robustnessThreshold) raises (Error);
+
     /// Generate an autocollision free configuration with limbs in contact with the ground
     /// \param contactLimbs name of the limbs to project in contact
     /// \return a sampled contact configuration
