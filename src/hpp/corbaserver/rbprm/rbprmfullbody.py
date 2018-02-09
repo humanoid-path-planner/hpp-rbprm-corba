@@ -291,13 +291,6 @@ class FullBody (object):
      def setStartState(self, configuration, contacts):
           return self.client.rbprm.rbprm.setStartState(configuration, contacts)
           
-     ## Add a state to fullBody, defined by it's configurations and contacts
-     #
-     # \param configuration the desired state configuration
-     # \param contacts the array of limbs in contact
-     def addState(self, configuration, contacts):
-         return self.client.rbprm.rbprm.addState(configuration, contacts)
-
      ## Create a state given a configuration and contacts
      #
      # \param configuration the desired start configuration

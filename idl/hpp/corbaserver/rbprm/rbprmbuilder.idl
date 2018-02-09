@@ -279,12 +279,6 @@ module hpp
     /// \param contactLimbs ids of the limb in contact for the state
     void setStartState(in floatSeq dofArray, in Names_t contactLimbs) raises (Error);
 
-    /// Add a state to fullBody, defined by it's configuration and contacts
-    /// \param dofArray configuration of the robot
-    /// \param contactLimbs ids of the limb in contact for the state
-    short addState(in floatSeq dofArray, in Names_t contactLimbs) raises (Error);
-
-
     /// Compute effector contact points and normals for a given configuration
     /// in local coordinates
     /// \param dofArray configuration of the robot
