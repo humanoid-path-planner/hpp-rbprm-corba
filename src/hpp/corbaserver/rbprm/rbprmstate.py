@@ -144,31 +144,41 @@ class State (object):
 
 
 
-## tries to add a new contact to the state
-## if the limb is already in contact, replace the
-## previous contact. Only considers kinematic limitations.
-## collision and equilibrium are NOT considered.
-# \param state State considered
-# \param limbName name of the considered limb to create contact with
-# \param p 3d position of the point
-# \param n 3d normal of the contact location center
-# \return (State, success) whether the creation was successful, as well as the new state
-def addNewContact(state, limbName, p, n, num_max_sample = 0):
-    sId = state.cl.addNewContact(state.sId, limbName, p, n, num_max_sample)
-    if(sId != -1):
-        return State(state.fullBody, sId = sId), True
-    return state, False
+class StateHelper(object):
 
-## tries to remove a new contact from a state
-## if the limb is already in contact, replace the
-## previous contact. Only considers kinematic limitations.
-## collision and equilibrium are NOT considered.
-# \param state State considered
-# \param limbName name of the considered limb to create contact with
-# \return (State, success) whether the removal was successful, as well as the new state
-def removeContact(state, limbName):
-    sId = state.cl.removeContact(state.sId, limbName)
-    if(sId != -1):
-        s = State(state.fullBody, sId = sId)
-        return s, True
-    return state, False
+    ## tries to add a new contact to the state
+    ## if the limb is already in contact, replace the
+    ## previous contact. Only considers kinematic limitations.
+    ## collision and equilibrium are NOT considered.
+    # \param state State considered
+    # \param limbName name of the considered limb to create contact with
+    # \param p 3d position of the point
+    # \param n 3d normal of the contact location center
+    # \return (State, success) whether the creation was successful, as well as the new state
+    @staticmethod
+    def addNewContact(state, limbName, p, n, num_max_sample = 0):
+        sId = state.cl.addNewContact(state.sId, limbName, p, n, num_max_sample)
+        if(sId != -1):
+            return State(state.fullBody, sId = sId), True
+        return state, False
+
+    ## tries to remove a new contact from a state
+    ## if the limb is already in contact, replace the
+    ## previous contact. Only considers kinematic limitations.
+    ## collision and equilibrium are NOT considered.
+    # \param state State considered
+    # \param limbName name of the considered limb to create contact with
+    # \return (State, success) whether the removal was successful, as well as the new state
+    @staticmethod
+    def removeContact(state, limbName):
+        sId = state.cl.removeContact(state.sId, limbName)
+        if(sId != -1):
+            s = State(state.fullBody, sId = sId)
+            return s, True
+        return state, False
+
+    @staticmethod
+    def generateStateInContact(fullBody,q,direction,acceleration):
+        sId = fullBody.generateStateInContact(q,direction,acceleration)
+        s = State(fullBody,sId=sId)
+        return s
