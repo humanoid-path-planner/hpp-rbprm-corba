@@ -280,10 +280,17 @@ module hpp
                          in double disableEffectorCollision,in double grasp) raises (Error);
 
     /// Set the start state of a contact generation problem
-    /// environment, ordered by their efficiency
     /// \param dofArray start configuration of the robot
     /// \param contactLimbs ids of the limb in contact for the state
     void setStartState(in floatSeq dofArray, in Names_t contactLimbs) raises (Error);
+
+    /// Set the start state of a contact generation problem
+    /// \param stateId : the id of the state, in fullBody
+    void setStartStateId(in unsigned short stateId) raises (Error);
+
+    /// Set the end state of a contact generation problem
+    /// \param stateId : the id of the state, in fullBody
+    void setEndStateId(in unsigned short stateId) raises (Error);
 
     /// Compute effector contact points and normals for a given configuration
     /// in local coordinates

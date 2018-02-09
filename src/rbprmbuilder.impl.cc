@@ -1286,6 +1286,41 @@ namespace hpp {
         }
     }
 
+    void RbprmBuilder::setStartStateId(unsigned short stateId) throw (hpp::Error){
+        try{
+            if(lastStatesComputed_.size() == 0)
+            {
+                throw std::runtime_error ("states not yet computed, call interpolate() first.");
+            }
+            if(lastStatesComputed_.size() <= stateId){
+              throw std::runtime_error ("invalid state id : "+std::string(""+stateId)+" number of state = "+std::string(""+lastStatesComputed_.size()));
+            }
+            startState_ = lastStatesComputed_[stateId];
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
+    void RbprmBuilder::setEndStateId(unsigned short stateId) throw (hpp::Error){
+        try{
+            if(lastStatesComputed_.size() == 0)
+            {
+                throw std::runtime_error ("states not yet computed, call interpolate() first.");
+            }
+            if(lastStatesComputed_.size() <= stateId){
+              throw std::runtime_error ("invalid state id : "+std::string(""+stateId)+" number of state = "+std::string(""+lastStatesComputed_.size()));
+            }
+            endState_ = lastStatesComputed_[stateId];
+
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
 
     double RbprmBuilder::getTimeAtState(unsigned short stateId)throw (hpp::Error){
       try

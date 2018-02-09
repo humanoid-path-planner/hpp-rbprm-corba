@@ -295,13 +295,24 @@ class FullBody (object):
      def getSampleValue(self, limbName, valueName, sampleId):
           return self.client.rbprm.rbprm.getSampleValue(limbName, valueName, sampleId)
           
-     ## Initialize the first configuration of the path discretization 
+     ## Initialize the first configuration of the path interpolation
      # with a balanced configuration for the interpolation problem;
      #
      # \param configuration the desired start configuration
      # \param contacts the array of limbs in contact
      def setStartState(self, configuration, contacts):
           return self.client.rbprm.rbprm.setStartState(configuration, contacts)
+
+     ## Initialize the first state of the path interpolation
+     # \param stateId the Id of the desired start state in fullBody
+     def setStartStateId(self,stateId):
+          return self.client.rbprm.rbprm.setStartStateId(stateId)
+
+     ## Initialize the goal state of the path interpolation
+     # \param stateId the Id of the desired start state in fullBody
+     def setEndStateId(self,stateId):
+          return self.client.rbprm.rbprm.setEndStateId(stateId)
+
 
      ## Create a state given a configuration and contacts
      #

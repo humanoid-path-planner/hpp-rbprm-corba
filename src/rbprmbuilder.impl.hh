@@ -252,6 +252,8 @@ namespace hpp {
 
         virtual void setStartState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);
         virtual void setEndState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);
+        virtual void setStartStateId(unsigned short stateId) throw (hpp::Error);
+        virtual void setEndStateId(unsigned short stateId) throw (hpp::Error);
         virtual hpp::floatSeq*  computeContactForConfig(const hpp::floatSeq& configuration, const char* limbNam) throw (hpp::Error);
         virtual hpp::floatSeqSeq* computeContactPoints(unsigned short cId) throw (hpp::Error);
         virtual hpp::floatSeqSeq* computeContactPointsAtState(unsigned short cId, unsigned short isIntermediate) throw (hpp::Error);
