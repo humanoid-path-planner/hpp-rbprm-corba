@@ -3,8 +3,8 @@ from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 import time
 from constraint_to_dae import *
-
-
+from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
+from display_tools import *
 import flatGround_hrp2_pathKino as tp
 import time
 
@@ -35,7 +35,8 @@ r = tp.Viewer (ps,viewerClient=tp.r.client,displayArrows = True, displayCoM = Tr
 q_init =[0.1, -0.82, 0.648702, 1.0, 0.0 , 0.0, 0.0,0.0, 0.0, 0.0, 0.0,0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17,0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17,0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,0,0,0,0,0,0]; r (q_init)
 q_ref = q_init[::]
 fullBody.setCurrentConfig (q_init)
-
+qfar=q_ref[::]
+qfar[2] = -5
 
 #~ AFTER loading obstacles
 rLegId = 'hrp2_rleg_rom'
@@ -49,7 +50,7 @@ rLegLimbOffset=[0,0,-0.035]#0.035
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 #fullBody.addLimbDatabase("./db/hrp2_rleg_db.db",rLegId,"forward")
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "forward", 0.01,"_6_DOF",limbOffset=rLegLimbOffset)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "fixedStep06", 0.01,"_6_DOF",limbOffset=rLegLimbOffset)
 fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/hrp2_rleg_db.db")
 
@@ -59,7 +60,7 @@ lLegLimbOffset=[0,0,0.035]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
 #fullBody.addLimbDatabase("./db/hrp2_lleg_db.db",lLegId,"forward")
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "forward", 0.01,"_6_DOF",limbOffset=lLegLimbOffset)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fixedStep06", 0.01,"_6_DOF",limbOffset=lLegLimbOffset)
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
 fullBody.setReferenceConfig (q_ref)
@@ -168,7 +169,7 @@ print "number of configs :", len(configsFull)
 
 player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configsFull,draw=False,use_window=1,optim_effector=True,use_velocity=False,pathId = pId)
 
-from display_tools import *
+
 
 
 #player.displayContactPlan(1.)
