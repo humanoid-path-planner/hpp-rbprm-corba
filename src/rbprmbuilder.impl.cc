@@ -3086,7 +3086,7 @@ assert(s2 == s1 +1);
 
 
 
-    CORBA::Short RbprmBuilder::isDynamicallyReachableFromState(unsigned short stateFrom,unsigned short stateTo,const hpp::floatSeq &timings, double T )throw (hpp::Error){
+    CORBA::Short RbprmBuilder::isDynamicallyReachableFromState(unsigned short stateFrom, unsigned short stateTo, const hpp::floatSeq &timings, unsigned short numPointPerPhase )throw (hpp::Error){
         if(!fullBodyLoaded_){
           throw std::runtime_error ("fullBody not loaded");
         }
@@ -3094,14 +3094,15 @@ assert(s2 == s1 +1);
             throw std::runtime_error ("Unexisting state ID");
         }
         reachability::Result res;
-        if(T>0){
+        if(timings.length()>0){
             std::vector<double> Ts;
-            Configuration_t t_config = dofArrayToConfig(3,timings);
-            for(size_t i = 0 ; i < 3 ; ++i)
+
+            Configuration_t t_config = dofArrayToConfig(timings.length(),timings);
+            for(size_t i = 0 ; i < timings.length() ; ++i)
                 Ts.push_back(t_config[i]);
-            res = reachability::isReachableDynamic(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo],Ts,T);
+            res = reachability::isReachableDynamic(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo],false,Ts,numPointPerPhase);
         }else{
-            res = reachability::isReachableDynamic(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo]);
+            res = reachability::isReachableDynamic(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo],false);
         }
         if (res.success()){
             core::PathVectorPtr_t pathVector = core::PathVector::create(res.path_->outputSize(),res.path_->outputDerivativeSize());

@@ -346,7 +346,7 @@ namespace hpp {
         virtual bool areKinematicsConstraintsVerified(const hpp::floatSeq &point)throw (hpp::Error);
         virtual bool areKinematicsConstraintsVerifiedForState(unsigned short stateId,const hpp::floatSeq &point)throw (hpp::Error);
         virtual bool isReachableFromState(unsigned short stateFrom,unsigned short stateTo)throw (hpp::Error);
-        virtual CORBA::Short isDynamicallyReachableFromState(unsigned short stateFrom,unsigned short stateTo,const hpp::floatSeq &timings, double T )throw (hpp::Error);
+        virtual CORBA::Short isDynamicallyReachableFromState(unsigned short stateFrom, unsigned short stateTo, const hpp::floatSeq &timings, unsigned short numPointPerPhase )throw (hpp::Error);
 
 
         void selectFullBody (const char* name) throw (hpp::Error)

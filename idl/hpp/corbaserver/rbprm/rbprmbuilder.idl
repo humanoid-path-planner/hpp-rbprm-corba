@@ -706,7 +706,7 @@ module hpp
 
     boolean isReachableFromState(in unsigned short stateFrom, in unsigned short stateTo)raises (Error);
 
-    short isDynamicallyReachableFromState(in unsigned short stateFrom, in unsigned short stateTo,in floatSeq timings,in double T)raises (Error);
+    short isDynamicallyReachableFromState(in unsigned short stateFrom, in unsigned short stateTo,in floatSeq timings,in unsigned short numPointsPerPhase)raises (Error);
 
 
   }; // interface Robot
