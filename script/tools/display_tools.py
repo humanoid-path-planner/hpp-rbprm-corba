@@ -2,6 +2,7 @@
 def createSphere(name,r,size=0.01,color=[0,0,0,1]):
   r.client.gui.addSphere(name,size,color)
   r.client.gui.addToGroup(name,r.sceneName)
+  r.client.gui.setVisibility(name,'ALWAYS_ON_TOP')
   r.client.gui.refresh()
 
 def moveSphere(name,r,pos):
