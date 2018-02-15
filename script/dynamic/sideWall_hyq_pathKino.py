@@ -17,8 +17,8 @@ urdfName = 'hyq_trunk'
 urdfNameRom = ['hyq_lhleg_rom','hyq_lfleg_rom','hyq_rfleg_rom','hyq_rhleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = omniORB.any.to_any(1.);
-aMax = omniORB.any.to_any(3.);
+vMax = omniORB.any.to_any(0.1);
+aMax = omniORB.any.to_any(1.);
 extraDof = 6
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Builder ()

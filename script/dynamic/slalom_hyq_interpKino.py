@@ -87,7 +87,7 @@ fullBody.setEndState(q_goal,[larmId,rLegId,rarmId,lLegId])
 r(q_init)
 # computing the contact sequence
 
-configs = fullBody.interpolate(0.001,pathId=pathId,robustnessTreshold = 0, filterStates = True)
+configs = fullBody.interpolate(0.01,pathId=pathId,robustnessTreshold = 0, filterStates = True)
 
 
 print "number of configs =", len(configs)
