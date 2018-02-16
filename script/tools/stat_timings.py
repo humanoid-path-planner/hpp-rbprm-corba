@@ -1,5 +1,6 @@
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
+import plotly.plotly as py
+import plotly.graph_objs as go
+import plotly
 import numpy as np
 
 f = open("/home/pfernbac/Documents/com_ineq_test/timings_hyq_flat_v02.txt","r")
@@ -19,18 +20,19 @@ for line in f.readlines():
         timings +=[float(s)]
     success = (int(tab[3])==1)
     quasiStatic = (int(tab[4])==1)
-    if success:
-        if (timings[0],timings[1],timings[2]) in results :
-            # there is already a success for this timing, increase the number
-            results[(timings[0],timings[1],timings[2])] += 1
+    v = 1 if success else 0
+    if (timings[0],timings[1],timings[2]) in results :
+        # there is already a success for this timing, increase the number
+        results[(timings[0],timings[1],timings[2])] += v
+    else :
+        #create an entry in the dic : 
+        results[(timings[0],timings[1],timings[2])] = v
+    for i in range(3):
+        if timings[i] in dicPhases[i]:
+            dicPhases[i][timings[i]] += v
         else :
-            #create an entry in the dic : 
-            results[(timings[0],timings[1],timings[2])] = 1
-        for i in range(3):
-            if timings[i] in dicPhases[i]:
-                dicPhases[i][timings[i]] += 1
-            else :
-                dicPhases[i][timings[i]] = 1
+            dicPhases[i][timings[i]] = v
+    if success :
         if quasiStatic:
             if (timings[0],timings[1],timings[2]) in quasiStaticResults :
                 # there is already a success for this timing, increase the number
@@ -51,33 +53,67 @@ f.close()
 
 
 #compute arrays from dic :
-x = []
-y = []
-z = []
+p0 = []
+p1 = []
+p2 = []
 v = []
 for keys in results.keys():
-    x += [keys[0]]
-    y += [keys[1]]
-    z += [keys[2]]
+    p0 += [keys[0]]
+    p1 += [keys[1]]
+    p2 += [keys[2]]
     v += [results[keys]]
 
 # plot a scatter 3D 
-max_value = max(results.values())
-cmhot = plt.get_cmap("hot")
-range_value = range(max_value)
 
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
+trace1 = go.Scatter3d(
+    x=p0,
+    y=p2,
+    z=p1,
+    mode='markers',
+    marker=dict(
+        size=5,
+        color=v,                # set color to an array/list of desired values
+        colorscale='Hot',   # choose a colorscale
+        opacity=0.8
+    )
+)
 
-ax.scatter(x,y,z,v,c=v,cmap=cmhot)
+data = [trace1]
+layout = go.Layout(
+    title='Success on flat ground : more yellow = more success',    
+    scene = dict(
+    xaxis=dict(
+        title='timing p0 (4 supports) (s)',
+        titlefont=dict(
+            family='Courier New, monospace',
+            size=12,
+            color='#7f7f7f'
+        )
+    ),
+    yaxis=dict(
+        title='timing p2 (4 supports) (s)',
+        titlefont=dict(
+            family='Courier New, monospace',
+            size=12,
+            color='#7f7f7f'
+        )
+    ),
+    zaxis=dict(
+        title='timing p1 (3 supports) (s)',
+        titlefont=dict(
+            family='Courier New, monospace',
+            size=12,
+            color='#7f7f7f'
+        )
+    )
+    )
+)
+fig = go.Figure(data=data, layout=layout)
+plotly.offline.plot(fig,filename="/home/pfernbac/Documents/com_ineq_test/3D-hyq")
 
-ax.set_xlabel("timing P1 (s)")
-ax.set_ylabel("timing P2 (s)")
-ax.set_zlabel("timing P3 (s)")
-ax.set_title("success for each timings : yellow = more success, red = less success")
 
 # plot histogram for each phase (each timings taken independantly)
-
+"""
 t_range = dicP0.keys()
 
 for i in range(3):
@@ -94,4 +130,11 @@ for i in range(3):
     
 
 plt.show()
+"""
 
+# fix tuple with the maximal value : 
+m = max(results.values())
+for keys in results:
+    if results[keys] == m:
+        print keys
+    
