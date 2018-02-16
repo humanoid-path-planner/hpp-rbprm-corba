@@ -4,6 +4,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 # Importing Gepetto viewer helper class
 from hpp.gepetto import Viewer
 import time
+import omniORB.any
 
 rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
@@ -14,8 +15,8 @@ urdfName = 'hyq_trunk_large'
 urdfNameRom = ['hyq_lhleg_rom','hyq_lfleg_rom','hyq_rfleg_rom','hyq_rhleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = 1;
-aMax = 1;
+vMax = omniORB.any.to_any(0.2);
+aMax = omniORB.any.to_any(0.1);
 extraDof = 6
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Builder ()
@@ -31,7 +32,7 @@ rbprmBuilder.setAffordanceFilter('hyq_lfleg_rom', ['Support',])
 # We also bound the rotations of the torso.
 rbprmBuilder.boundSO3([-0.4,0.4,-3,3,-3,3])
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
-rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax,0,0,0,0,0,0,0,0])
+rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-0.2,0.2,-0.2,0.2,0,0,0,0,0,0,0,0])
 
 # Creating an instance of HPP problem solver and the viewer
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
@@ -56,7 +57,7 @@ q_goal = q_init [::]
 q_goal[0:3]=[2,0,0.63]#position easy
 #q_goal [0:3] = [4, 0, 0.71]
 #q_goal[7:10]=[2,0,0.9]#velocity
-q_goal[7:10]=[1,0,0]#velocity
+#q_goal[7:10]=[1,0,0]#velocity
 r (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
 

@@ -3,7 +3,9 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
-
+from constraint_to_dae import *
+from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
+from display_tools import *
 #calling script darpa_hyq_path to compute root path
 import flatGround_hyq_pathKino as tp
 
@@ -32,7 +34,7 @@ nbSamples = 20000
 dynamic=True
 
 ps = tp.ProblemSolver(fullBody)
-r = tp.Viewer (ps,viewerClient=tp.r.client)
+r = tp.Viewer (ps,viewerClient=tp.r.client,displayCoM = True)
 
 rootName = 'base_joint_xyz'
 
@@ -43,15 +45,16 @@ rootName = 'base_joint_xyz'
 def addLimbDb(limbId, heuristicName, loadValues = True, disableEffectorCollision = False):
 	fullBody.addLimbDatabase(str(db_dir+limbId+'.db'), limbId, heuristicName,loadValues, disableEffectorCollision)
 
-rLegId = 'rfleg'
-lLegId = 'lhleg'
-rarmId = 'rhleg'
-larmId = 'lfleg'
+rfLegId = 'rfleg'
+lhLegId = 'lhleg'
+rhLegId = 'rhleg'
+lfLegId = 'lfleg'
 
-addLimbDb(rLegId, "manipulability")
-addLimbDb(lLegId, "manipulability")
-addLimbDb(rarmId, "manipulability")
-addLimbDb(larmId, "manipulability")
+addLimbDb(rfLegId, "manipulability")
+addLimbDb(lhLegId, "manipulability")
+addLimbDb(lfLegId, "manipulability")
+addLimbDb(rhLegId, "manipulability")
+
 
 q_0 = fullBody.getCurrentConfig(); 
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.ps.configAtParam(0,0.01)[0:7] # use this to get the correct orientation
@@ -62,14 +65,17 @@ dir_goal = tp.ps.configAtParam(0,tp.ps.pathLength(0))[7:10]
 acc_goal = tp.ps.configAtParam(0,tp.ps.pathLength(0))[10:13]
 configSize = fullBody.getConfigSize() -fullBody.client.basic.robot.getDimensionExtraConfigSpace()
 
-fullBody.setStaticStability(False)
+fullBody.setStaticStability(True)
 # Randomly generating a contact configuration at q_init
-fullBody.setCurrentConfig (q_init)
-q_init = fullBody.generateContacts(q_init,dir_init,acc_init)
+fullBody.setCurrentConfig (q_init) ; r(q_init)
+s_init = StateHelper.generateStateInContact(fullBody,q_init,dir_init,acc_init)
+q_init = s_init.q()
+r(q_init)
 
 # Randomly generating a contact configuration at q_end
 fullBody.setCurrentConfig (q_goal)
-q_goal = fullBody.generateContacts(q_goal, dir_goal,acc_goal)
+s_goal = StateHelper.generateStateInContact(fullBody,q_goal, dir_goal,acc_goal)
+q_goal = s_goal.q()
 
 # copy extraconfig for start and init configurations
 q_init[configSize:configSize+3] = dir_init[::]
@@ -77,27 +83,27 @@ q_init[configSize+3:configSize+6] = acc_init[::]
 q_goal[configSize:configSize+3] = dir_goal[::]
 q_goal[configSize+3:configSize+6] = acc_goal[::]
 # specifying the full body configurations as start and goal state of the problem
-fullBody.setStartState(q_init,[larmId,rLegId,rarmId,lLegId])
-fullBody.setEndState(q_goal,[larmId,rLegId,rarmId,lLegId])
+fullBody.setStartStateId(s_init.sId)
+fullBody.setEndStateId(s_goal.sId)
 
-
-r(q_init)
-# computing the contact sequence
-
-configs = fullBody.interpolate(0.001,pathId=0,robustnessTreshold = 0, filterStates = True)
-r(configs[-1])
-
-#~ r.loadObstacleModel ('hpp-rbprm-corba', "darpa", "contact")
+q_far = q_init[::]
+q_far[2] = -5
 
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
+
+configs = fullBody.interpolate(0.01,pathId=0,robustnessTreshold = 2, filterStates = True)
+r(configs[-1])
+
+#~ r.loadObstacleModel ('hpp-rbprm-corba', "darpa", "contact")
+
 from fullBodyPlayer import Player
 player = Player(fullBody,pp,tp,configs,draw=True,optim_effector=False,use_velocity=dynamic,pathId = 0)
 
-#player.displayContactPlan()
+player.displayContactPlan()
 
-player.interpolate(5,len(configs)-2)
+#player.interpolate(5,len(configs)-2)
 
 #player.play()
 
