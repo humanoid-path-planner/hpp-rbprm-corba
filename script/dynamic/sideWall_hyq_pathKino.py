@@ -46,10 +46,10 @@ r = Viewer (ps)
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.6, 0.03, 0.00005])
-afftool.loadObstacleModel (packageName, "sideWall", "planning", r)
+afftool.loadObstacleModel (packageName, "sideWall", "planning",r)
 #r.loadObstacleModel (packageName, "ground", "planning")
 afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
-r.addLandmark(r.sceneName,1)
+#r.addLandmark(r.sceneName,1)
 
 # Setting initial and goal configurations
 q_init = rbprmBuilder.getCurrentConfig ();
@@ -58,7 +58,7 @@ q_goal = q_init [::]
 q_goal [0:3] = [5.5, 0, 0.9]
 #q_goal[0:3]=[3,-4,0.4]#position easy
 #q_goal[7:10]=[0,0,0]#velocity
-r (q_goal)
+#r (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
 
 # Choosing a path optimizer
@@ -73,7 +73,7 @@ ps.selectDistance("KinodynamicDistance")
 ps.selectPathPlanner("DynamicPlanner")
 
 #solve the problem :
-r(q_init)
+#r(q_init)
 
 #ps.client.problem.prepareSolveStepByStep()
 

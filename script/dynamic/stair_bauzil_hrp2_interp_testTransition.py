@@ -4,7 +4,10 @@ from hpp.gepetto import Viewer
 import omniORB.any
 import stair_bauzil_hrp2_path as tp
 import time
+from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
 
+from display_tools import *
+from constraint_to_dae import *
 
 
 packageName = "hrp2_14_description"
@@ -123,18 +126,17 @@ q_goal[2] = q_goal[2]+0.02
 
 q_init[0:3]=[0.28994563306701016,-0.82,0.6191688248477717]
 
-
 fullBody.setStaticStability(True)
 # Randomly generating a contact configuration at q_init
-fullBody.setCurrentConfig (q_init)
-r(q_init)
-q_init = fullBody.generateContacts(q_init,dir_init,acc_init)
+fullBody.setCurrentConfig (q_init) ; r(q_init)
+s_init = StateHelper.generateStateInContact(fullBody,q_init,dir_init,acc_init)
+q_init = s_init.q()
 r(q_init)
 
 # Randomly generating a contact configuration at q_end
 fullBody.setCurrentConfig (q_goal)
-q_goal = fullBody.generateContacts(q_goal, dir_goal,acc_goal)
-
+s_goal = StateHelper.generateStateInContact(fullBody,q_goal, dir_goal,acc_goal)
+q_goal = s_goal.q()
 # copy extraconfig for start and init configurations
 q_init[configSize:configSize+3] = dir_init[::]
 q_init[configSize+3:configSize+6] = acc_init[::]
@@ -144,19 +146,26 @@ q_goal[configSize+3:configSize+6] = acc_goal[::]
 
 r(q_init)
 
+fullBody.setStartStateId(s_init.sId)
+fullBody.setEndStateId(s_goal.sId)
 
-fullBody.setStartState(q_init,[rLegId,lLegId,rarmId])
-fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId])
+from hpp.gepetto import PathPlayer
+pp = PathPlayer (fullBody.client.basic, r)
+pp.dt=0.001
 
-
-
-configs = fullBody.interpolate(0.03,pathId=0,robustnessTreshold = 2, filterStates = True)
+configs = fullBody.interpolate(0.001,pathId=0,robustnessTreshold = 2, filterStates = False)
 print "number of configs :", len(configs)
 r(configs[-1])
 
 
-from hpp.gepetto import PathPlayer
-pp = PathPlayer (fullBody.client.basic, r)
+f = open("/home/pfernbac/Documents/com_ineq_test/log_success.log","a")
+f.write("num states : "+str(len(configs))+" \n")
+f.close()
+
+
+
+
+"""
 
 from fullBodyPlayerHrp2 import Player
 player = Player(fullBody,pp,tp,configs,draw=False,optim_effector=False,use_velocity=False,pathId = 0)
@@ -204,5 +213,5 @@ print "#               DONE               #"
 print "####################################"
 
 
-
+"""
 

@@ -36,24 +36,45 @@ dynamic=True
 ps = tp.ProblemSolver(fullBody)
 r = tp.Viewer (ps,viewerClient=tp.r.client,displayCoM = True)
 
+#  Setting a number of sample configurations used
+nbSamples = 20000
 rootName = 'base_joint_xyz'
-
-
-
-
-
-def addLimbDb(limbId, heuristicName, loadValues = True, disableEffectorCollision = False):
-	fullBody.addLimbDatabase(str(db_dir+limbId+'.db'), limbId, heuristicName,loadValues, disableEffectorCollision)
-
+#  Creating limbs
+# cType is "_3_DOF": positional constraint, but no rotation (contacts are punctual)
+cType = "_3_DOF"
+# string identifying the limb
 rfLegId = 'rfleg'
-lhLegId = 'lhleg'
-rhLegId = 'rhleg'
-lfLegId = 'lfleg'
+# First joint of the limb, as in urdf file
+rfLeg = 'rf_haa_joint'
+# Last joint of the limb, as in urdf file
+rfFoot = 'rf_foot_joint'
+# Specifying the distance between last joint and contact surface
+offset = [0.,-0.021,0.]
+# Specifying the contact surface direction when the limb is in rest pose
+normal = [0,1,0]
+# Specifying the rectangular contact surface length
+legx = 0.02; legy = 0.02
+# remaining parameters are the chosen heuristic (here, manipulability), and the resolution of the octree (here, 10 cm).
+fullBody.addLimb(rfLegId,rfLeg,rfFoot,offset,normal, legx, legy, nbSamples, "manipulability", 0.05, cType)
+fullBody.runLimbSampleAnalysis(rfLegId, "jointLimitsDistance", True)
 
-addLimbDb(rfLegId, "manipulability")
-addLimbDb(lhLegId, "manipulability")
-addLimbDb(lfLegId, "manipulability")
-addLimbDb(rhLegId, "manipulability")
+lhLegId = 'lhleg'
+lhLeg = 'lh_haa_joint'
+lhFoot = 'lh_foot_joint'
+fullBody.addLimb(lhLegId,lhLeg,lhFoot,offset,normal, legx, legy, nbSamples, "manipulability", 0.05, cType)
+fullBody.runLimbSampleAnalysis(lhLegId, "jointLimitsDistance", True)
+
+lfLegId = 'lfleg'
+lfLeg = 'lf_haa_joint'
+lfFoot = 'lf_foot_joint'
+fullBody.addLimb(lfLegId,lfLeg,lfFoot,offset,normal, legx, legy, nbSamples, "manipulability", 0.05, cType)
+fullBody.runLimbSampleAnalysis(lfLegId, "jointLimitsDistance", True)
+
+rhLegId = 'rhleg'
+rhLeg = 'rh_haa_joint'
+rhFoot = 'rh_foot_joint'
+fullBody.addLimb(rhLegId,rhLeg,rhFoot,offset,normal, legx, legy, nbSamples, "manipulability", 0.05, cType)
+fullBody.runLimbSampleAnalysis(rhLegId, "jointLimitsDistance", True)
 
 
 q_0 = fullBody.getCurrentConfig(); 
@@ -93,11 +114,11 @@ from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
 
-configs = fullBody.interpolate(0.01,pathId=0,robustnessTreshold = 2, filterStates = True)
+configs = fullBody.interpolate(0.001,pathId=0,robustnessTreshold = 2, filterStates = True)
 r(configs[-1])
 
 #~ r.loadObstacleModel ('hpp-rbprm-corba', "darpa", "contact")
-
+"""
 from fullBodyPlayer import Player
 player = Player(fullBody,pp,tp,configs,draw=True,optim_effector=False,use_velocity=dynamic,pathId = 0)
 
@@ -107,7 +128,7 @@ player.displayContactPlan()
 
 #player.play()
 
-
+"""
 
 """
 

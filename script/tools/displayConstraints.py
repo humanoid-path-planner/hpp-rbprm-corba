@@ -1,12 +1,12 @@
 
-id = 0
-leg = rLegId
+id = 2
+leg = rhLegId
 s0 = State(fullBody,sId=id)
 s2 = State(fullBody,sId=id+1)
 s1,success = StateHelper.removeContact(s0,leg)
 
-removeAllConstraints(r)
 r(s1.q())
+removeAllConstraints(r)
 pid = fullBody.isDynamicallyReachableFromState(s0.sId,s2.sId)
 pp.displayPath(pid,color=r.color.blue)
 r.client.gui.setVisibility('path_'+str(pid)+'_root','ALWAYS_ON_TOP')
@@ -42,4 +42,6 @@ displayOneStepConstraints(r,True)
 
 r.startCapture ("capture/capture","png")
 r.stopCapture ()
+
+
 

@@ -6,7 +6,7 @@ from hpp.gepetto import Viewer
 import time
 import math
 import omniORB.any
-from planning.config import *
+from planning.configs.stairs_config import *
 
 from hpp.corbaserver import Client
 from hpp.corbaserver.robot import Robot as Parent

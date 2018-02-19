@@ -56,6 +56,7 @@ r.stopCapture ()
 
 
 
+
 tp.r.startCapture ("capture/capture","png")
 time.sleep(1)
 pp(int(total_paths_ids[10]))

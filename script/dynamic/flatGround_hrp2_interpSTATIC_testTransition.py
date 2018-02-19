@@ -159,13 +159,18 @@ pp = PathPlayer (fullBody.client.basic, r)
 import fullBodyPlayerHrp2
 
 tStart = time.time()
-configsFull = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 3, filterStates = False)
+configsFull = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = 2, filterStates = False)
 tInterpolateConfigs = time.time() - tStart
 print "number of configs :", len(configsFull)
 
 
+f = open("/home/pfernbac/Documents/com_ineq_test/log_success.log","a")
+f.write("num states : "+str(len(configsFull))+" \n")
+f.close()
 
 
+
+"""
 
 player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configsFull,draw=False,use_window=1,optim_effector=True,use_velocity=False,pathId = pId)
 
@@ -173,6 +178,7 @@ player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configsFull,draw=False,use_win
 
 
 #player.displayContactPlan(1.)
+
 
 r(fullBody.getConfigAtState(2))
 q2 = fullBody.getConfigAtState(2)
@@ -206,4 +212,4 @@ displayOneStepConstraints(r)
 
 #player.interpolate(2,len(configs)-1)
 
-
+"""
