@@ -665,6 +665,17 @@ class FullBody (object):
      # \return id of the root path computed
      def effectorRRTFromPath(self, state1, refPathId, path_start, path_to, comPos1, comPos2, comPos3, numOptim = 10, trackedEffectors = []):
           return self.client.rbprm.rbprm.effectorRRTFromPath(state1, refPathId, path_start, path_to, comPos1, comPos2, comPos3, numOptim, trackedEffectors)
+
+
+    # compute and add a trajectory for the end effector between the 2 states
+    # represented as a bezier curve.
+    # Do not check the kinematic feasability of this trajectory
+    # \param state1 index of first state.
+    # \param state2 index of end state.
+    # \param rootPositions com positions to track
+     def generateEndEffectorBezier(self, state1, state2, comPos):
+          return self.client.rbprm.rbprm.generateEndEffectorBezier(state1, state2, comPos)
+
           
      ## Project a given state into a given COM position
      # between two indicated states. The states do not need to be consecutive, but increasing in Id.

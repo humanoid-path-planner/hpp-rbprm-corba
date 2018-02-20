@@ -2410,6 +2410,33 @@ assert(s2 == s1 +1);
         }
     }
 
+    CORBA::Short RbprmBuilder::generateEndEffectorBezier(double state1, double state2,
+    unsigned short cT)throw (hpp::Error){
+        try
+        {
+            hppDout(notice,"Begin generateEndEffectorBezier");
+            std::size_t s1((std::size_t)state1), s2((std::size_t)state2);
+            hppDout(notice,"index first state = "<<s1<<" ; index second state : "<<s2);
+            if(lastStatesComputed_.size () < s1 || lastStatesComputed_.size () < s2 )
+            {
+                throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s1) + ", " + std::string(""+s2));
+            }
+            const core::PathVectors_t& paths = problemSolver()->paths();
+            if(paths.size() -1 < cT)
+            {
+                throw std::runtime_error("in generateEndEffectorBezier, at least one com trajectory is not present in problem solver");
+            }
+            State& state1=lastStatesComputed_[s1], state2=lastStatesComputed_[s2];
+            hppDout(notice,"start generateEndEffectorBezier");
+            interpolation::generateEndEffectorBezier(fullBody(),problemSolver(),paths[cT],state1,state2);
+            return problemSolver()->paths().size()-1;
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
     hpp::floatSeq* RbprmBuilder::projectToCom(double state, const hpp::floatSeq& targetCom, unsigned short max_num_sample) throw (hpp::Error)
     {
         try

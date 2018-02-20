@@ -313,6 +313,10 @@ namespace hpp {
                                            unsigned short comTraj3,
                                            unsigned short numOptimizations,
                                            const hpp::Names_t& trackedEffectors) throw (hpp::Error);
+
+        virtual CORBA::Short generateEndEffectorBezier(double state1, double state2,
+        unsigned short cT) throw (hpp::Error);
+
         virtual hpp::floatSeq* projectToCom(double state, const hpp::floatSeq& targetCom, unsigned short max_num_sample) throw (hpp::Error);
         virtual CORBA::Short createState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);
         virtual hpp::floatSeq* getConfigAtState(unsigned short stateId) throw (hpp::Error);

@@ -551,6 +551,17 @@ module hpp
                                     in unsigned short numOptimizations,
                                     in Names_t trackedEffectors) raises (Error);
 
+
+
+    /// compute and add a trajectory for the end effector between the 2 states
+    /// represented as a bezier curve.
+    /// Do not check the kinematic feasability of this trajectory
+    /// \param state1 index of first state.
+    /// \param state2 index of end state.
+    /// \param rootPositions com positions to track
+    short generateEndEffectorBezier(in double state1,in double state2,
+                        in  unsigned short comTraj) raises (Error);
+
     /// Project a given state into a given COM position
     /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
     /// Will fail if the index of the state does not exist.
