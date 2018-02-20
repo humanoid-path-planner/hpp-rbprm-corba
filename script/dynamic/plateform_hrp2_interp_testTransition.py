@@ -150,11 +150,12 @@ si = State(fullBody,q=q_init,limbsIncontact=[lLegId,rLegId])
 sf = State(fullBody,q=q_goal,limbsIncontact=[lLegId,rLegId])
 
 n = [0.0, -0.42261828000211843, 0.9063077785212101]
-p = [0.75, 0.3, 0.03]
+p = [0.8, 0.3, 0.03]
 moveSphere('s',r,p)
 smid,success = StateHelper.addNewContact(si,lLegId,p,n)
+assert(success)
 smid2,success = StateHelper.addNewContact(sf,lLegId,p,n)
-
+assert(success)
 r(smid.q())
 """
 com = fullBody.getCenterOfMass()
@@ -177,13 +178,14 @@ for pid in pids :
 
 
 n = [0,0,1]
-p = [1.1,0.1,0]
+p = [1.2,0.1,0]
 moveSphere('s',r,p)
 
 sE,success = StateHelper.addNewContact(si,lLegId,p,n)
-p = [1.1,-0.1,0] 
+assert(success)
+p = [1.2,-0.1,0] 
 sfe, success = StateHelper.addNewContact(sE,rLegId,p,n)
-
+assert(success)
 
 pids = []
 pids += [fullBody.isDynamicallyReachableFromState(si.sId,sE.sId)]
