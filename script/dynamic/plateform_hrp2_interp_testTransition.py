@@ -155,7 +155,7 @@ si = State(fullBody,q=q_init,limbsIncontact=[lLegId,rLegId])
 
 
 n = [0.0, -0.42261828000211843, 0.9063077785212101]
-p = [0.775, 0.25, 0.01]
+p = [0.775, 0.23, -0.02]
 moveSphere('s',r,p)
 smid,success = StateHelper.addNewContact(si,lLegId,p,n)
 assert(success)
