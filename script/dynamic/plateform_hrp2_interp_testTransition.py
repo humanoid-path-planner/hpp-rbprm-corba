@@ -144,13 +144,14 @@ print "number of configs :", len(configsFull)
 """
 
 q_init[0] += 0.05
-
+createSphere('s',r)
 
 si = State(fullBody,q=q_init,limbsIncontact=[lLegId,rLegId])
 sf = State(fullBody,q=q_goal,limbsIncontact=[lLegId,rLegId])
 
 n = [0.0, -0.42261828000211843, 0.9063077785212101]
-p = [0.7, 0.3, 0.03]
+p = [0.75, 0.3, 0.03]
+moveSphere('s',r,p)
 smid,success = StateHelper.addNewContact(si,lLegId,p,n)
 smid2,success = StateHelper.addNewContact(sf,lLegId,p,n)
 
@@ -160,21 +161,43 @@ com = fullBody.getCenterOfMass()
 com[1] = 0
 """
 
-fullBody.isDynamicallyReachableFromState(si.sId,smid.sId)
-fullBody.isDynamicallyReachableFromState(smid.sId,smid2.sId)
-fullBody.isDynamicallyReachableFromState(smid2.sId,sf.sId)
+pids = []
+pids += [fullBody.isDynamicallyReachableFromState(si.sId,smid.sId)]
+pids += [fullBody.isDynamicallyReachableFromState(smid.sId,smid2.sId)]
+pids += [fullBody.isDynamicallyReachableFromState(smid2.sId,sf.sId)]
+
+for pid in pids :
+  if pid > 0:
+    print "success"
+    pp.displayPath(pid,color=r.color.blue)
+    r.client.gui.setVisibility('path_'+str(pid)+'_root','ALWAYS_ON_TOP')
+  else:
+    print "fail."
+
 
 
 n = [0,0,1]
-p = [1,0.1,0]
+p = [1.1,0.1,0]
 moveSphere('s',r,p)
 
 sE,success = StateHelper.addNewContact(si,lLegId,p,n)
-p = [1,-0.1,0] 
+p = [1.1,-0.1,0] 
 sfe, success = StateHelper.addNewContact(sE,rLegId,p,n)
 
-fullBody.isDynamicallyReachableFromState(si.sId,sE.sId)
-fullBody.isDynamicallyReachableFromState(sE.sId,sfe.sId)
+
+pids = []
+pids += [fullBody.isDynamicallyReachableFromState(si.sId,sE.sId)]
+pids += [fullBody.isDynamicallyReachableFromState(sE.sId,sfe.sId)]
+for pid in pids :
+  if pid > 0:
+    print "success"
+    pp.displayPath(pid,color=r.color.blue)
+    r.client.gui.setVisibility('path_'+str(pid)+'_root','ALWAYS_ON_TOP')
+  else:
+    print "fail."
+
+
+
 
 """
 

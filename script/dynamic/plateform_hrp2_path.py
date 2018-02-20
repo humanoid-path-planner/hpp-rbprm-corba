@@ -46,7 +46,7 @@ rbprmBuilder.setJointBounds('HEAD_JOINT1',[0,0])
 
 # The following lines set constraint on the valid configurations:
 # a configuration is valid only if all limbs can create a contact ...
-rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
+rbprmBuilder.setFilter(['hrp2_lleg_rom'])
 rbprmBuilder.setAffordanceFilter('hrp2_lleg_rom', ['Support',])
 rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
 # We also bound the rotations of the torso. (z, y, x)
@@ -87,7 +87,7 @@ q_goal = q_init [::]
 
 
 q_goal[3:7] = [1,0,0,0]
-q_goal [0:3] = [1, 0, 0.58]; r (q_goal)
+q_goal [0:3] = [1.1, 0, 0.58]; r (q_goal)
 
 r (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
