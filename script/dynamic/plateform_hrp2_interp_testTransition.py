@@ -25,7 +25,7 @@ fullBody = FullBody ()
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 fullBody.setJointBounds ("base_joint_xyz", [-1,2, -0.5, 0.5, 0.5, 0.8])
 fullBody.client.basic.robot.setDimensionExtraConfigSpace(tp.extraDof)
-
+fullBody.client.basic.robot.setExtraConfigSpaceBounds([-1,1,-1,1,-0.5,0.5,0,0,0,0,0,0])
 ps = tp.ProblemSolver( fullBody )
 ps.client.problem.setParameter("aMax",tp.aMax)
 ps.client.problem.setParameter("vMax",tp.vMax)
@@ -146,17 +146,24 @@ print "number of configs :", len(configsFull)
 q_init[0] += 0.05
 createSphere('s',r)
 
-si = State(fullBody,q=q_init,limbsIncontact=[lLegId,rLegId])
+n = [0,0,1]
+p = [0,0.1,0]
+
+
 sf = State(fullBody,q=q_goal,limbsIncontact=[lLegId,rLegId])
+si = State(fullBody,q=q_init,limbsIncontact=[lLegId,rLegId])
+
 
 n = [0.0, -0.42261828000211843, 0.9063077785212101]
-p = [0.8, 0.3, 0.03]
+p = [0.775, 0.25, 0.01]
 moveSphere('s',r,p)
 smid,success = StateHelper.addNewContact(si,lLegId,p,n)
 assert(success)
 smid2,success = StateHelper.addNewContact(sf,lLegId,p,n)
 assert(success)
 r(smid.q())
+
+sf2 = State(fullBody,q=q_goal,limbsIncontact=[lLegId,rLegId])
 """
 com = fullBody.getCenterOfMass()
 com[1] = 0
@@ -165,25 +172,25 @@ com[1] = 0
 pids = []
 pids += [fullBody.isDynamicallyReachableFromState(si.sId,smid.sId)]
 pids += [fullBody.isDynamicallyReachableFromState(smid.sId,smid2.sId)]
-pids += [fullBody.isDynamicallyReachableFromState(smid2.sId,sf.sId)]
+pids += [fullBody.isDynamicallyReachableFromState(smid2.sId,sf2.sId)]
 
 for pid in pids :
   if pid > 0:
     print "success"
-    pp.displayPath(pid,color=r.color.blue)
-    r.client.gui.setVisibility('path_'+str(pid)+'_root','ALWAYS_ON_TOP')
+    #pp.displayPath(pid,color=r.color.blue)
+    #r.client.gui.setVisibility('path_'+str(pid)+'_root','ALWAYS_ON_TOP')
   else:
     print "fail."
 
-
+"""
 
 n = [0,0,1]
-p = [1.2,0.1,0]
+p = [1.15,0.1,0]
 moveSphere('s',r,p)
 
 sE,success = StateHelper.addNewContact(si,lLegId,p,n)
 assert(success)
-p = [1.2,-0.1,0] 
+p = [1.15,-0.1,0] 
 sfe, success = StateHelper.addNewContact(sE,rLegId,p,n)
 assert(success)
 
@@ -198,17 +205,30 @@ for pid in pids :
   else:
     print "fail."
 
-
-
-
 """
 
-player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configsFull,draw=False,use_window=1,optim_effector=True,use_velocity=False,pathId = pId)
+configs = []
+configs += [si.q()]
+configs += [smid.q()]
+configs += [smid2.q()]
+configs += [sf2.q()]
+
+
+
+from planning.config import *
+from generate_contact_sequence import *
+
+beginState = si.sId
+endState = sf2.sId
+cs = generateContactSequence(fullBody,configs,beginState, endState,r)
+
+
+filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
+cs.saveAsXML(filename, "ContactSequence")
+print "save contact sequence : ",filename
 
 
 
 
-#player.displayContactPlan(1.)
 
 
-"""

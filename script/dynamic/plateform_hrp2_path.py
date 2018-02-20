@@ -52,7 +52,7 @@ rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
 # We also bound the rotations of the torso. (z, y, x)
 rbprmBuilder.boundSO3([-0.1,0.1,-0.65,0.65,-0.2,0.2])
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
-rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-1,1,-1,1,-2,2,0,0,0,0,0,0])
+rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-1,1,-1,1,-0.5,0.5,0,0,0,0,0,0])
 indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.basic.robot.getDimensionExtraConfigSpace()
 
 # Creating an instance of HPP problem solver and the viewer
@@ -87,7 +87,7 @@ q_goal = q_init [::]
 
 
 q_goal[3:7] = [1,0,0,0]
-q_goal [0:3] = [1.2, 0, 0.58]; r (q_goal)
+q_goal [0:3] = [1.15, 0, 0.58]; r (q_goal)
 
 r (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
