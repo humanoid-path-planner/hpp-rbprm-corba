@@ -135,6 +135,7 @@ install(FILES
 	data/urdf/slalom.urdf
 	data/urdf/bauzil_stairs.urdf
 	data/urdf/flat_step.urdf
+	data/urdf/flat_hole.urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
   )
 install(FILES
@@ -207,6 +208,7 @@ install(FILES
 	data/srdf/slalom.srdf
 	data/srdf/bauzil_stairs.srdf
 	data/srdf/flat_step.srdf
+	data/srdf/flat_hole.srdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
   )
 install(FILES
@@ -282,6 +284,7 @@ install(FILES
     data/meshes/siggraph_asia/plane_hole.stl
     data/meshes/siggraph_asia/wall.stl
     data/meshes/siggraph_asia/stairs_lower.stl
+  data/meshes/flat_hole.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
   )
 
