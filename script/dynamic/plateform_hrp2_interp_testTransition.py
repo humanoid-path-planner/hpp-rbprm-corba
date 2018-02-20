@@ -165,6 +165,17 @@ fullBody.isDynamicallyReachableFromState(smid.sId,smid2.sId)
 fullBody.isDynamicallyReachableFromState(smid2.sId,sf.sId)
 
 
+n = [0,0,1]
+p = [1,0.1,0]
+moveSphere('s',r,p)
+
+sE,success = StateHelper.addNewContact(si,lLegId,p,n)
+p = [1,-0.1,0] 
+sfe, success = StateHelper.addNewContact(sE,rLegId,p,n)
+
+fullBody.isDynamicallyReachableFromState(si.sId,sE.sId)
+fullBody.isDynamicallyReachableFromState(sE.sId,sfe.sId)
+
 """
 
 player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configsFull,draw=False,use_window=1,optim_effector=True,use_velocity=False,pathId = pId)
