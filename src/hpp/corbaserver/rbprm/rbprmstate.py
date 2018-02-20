@@ -134,9 +134,9 @@ class State (object):
         
     def projectToCOM(self, targetCom, toNewState=False):
         if toNewState:
-            return self.client.rbprm.rbprm.projectToCom(self.sId, targetCom)     
+            return self.fullBody.projectToCom(self.sId, targetCom)
         else:
-            return self.client.rbprm.rbprm.projectStateToCOM(self.sId, targetCom)     > 0
+            return self.fullBody.projectStateToCOM(self.sId, targetCom)     > 0
         
     def getComConstraint(self, limbsCOMConstraints, exceptList = []):
         return get_com_constraint(self.fullBody, self.sId, self.cl.getConfigAtState(self.sId), limbsCOMConstraints, interm = self.isIntermediate, exceptList = exceptList)
