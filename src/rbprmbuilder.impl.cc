@@ -795,8 +795,9 @@ namespace hpp {
             state.contactPositions_[limbName] = position;
             state.contactNormals_[limbName] = limb->effector_->currentTransformation().getRotation() * limb->normal_;
             state.contactRotation_[limbName] = limb->effector_->currentTransformation().getRotation();
-
+            state.contactOrder_.push(limbName);
         }
+        state.nbContacts = state.contactNormals_.size();
         lastStatesComputed_.push_back(state);
         lastStatesComputedTime_.push_back(std::make_pair(-1., state));
         return lastStatesComputed_.size()-1;
@@ -2925,6 +2926,8 @@ assert(s2 == s1 +1);
             ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
             CollisionValidationPtr_t val = fullBody()->GetCollisionValidation();
             rep.success_ =  rep.success_ &&  val->validate(rep.result_.configuration_,rport);
+            size_t extraDofSize = fullBody()->device_->extraConfigSpace().dimension();
+            Configuration_t extraDof = ns.configuration_.tail(extraDofSize);
             if (!rep.success_ && max_num_sample > 0)
             {
                 BasicConfigurationShooterPtr_t shooter = BasicConfigurationShooter::create(fullBody()->device_);
@@ -2939,6 +2942,8 @@ assert(s2 == s1 +1);
             }
             if(rep.success_)
             {
+                rep.result_.configuration_.tail(extraDofSize) = extraDof;
+                rep.result_.nbContacts= rep.result_.contactNormals_.size();
                 lastStatesComputed_.push_back(rep.result_);
                 lastStatesComputedTime_.push_back(std::make_pair(-1., rep.result_));
                 return lastStatesComputed_.size() -1;
