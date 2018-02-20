@@ -112,8 +112,8 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None):
         MLF.translation = np.matrix(q_ll[0:3])
         rot_rl = Quaternion(q_rl[3],q_rl[4],q_rl[5],q_rl[6])
         rot_ll = Quaternion(q_ll[3],q_ll[4],q_ll[5],q_ll[6])
-        #MRF.rotation = rot_rl.matrix()
-        #MLF.rotation = rot_ll.matrix()
+        MRF.rotation = rot_rl.matrix()
+        MLF.rotation = rot_ll.matrix()
         
         # apply the transform ankle -> center of contact
         MRF *= MRsole_offset
@@ -241,8 +241,8 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None):
     MLF.translation = np.matrix(q_ll[0:3])
     rot_rl = Quaternion(q_rl[3],q_rl[4],q_rl[5],q_rl[6])
     rot_ll = Quaternion(q_ll[3],q_ll[4],q_ll[5],q_ll[6])
-    #MRF.rotation = rot_rl.matrix()
-    #MLF.rotation = rot_ll.matrix()
+    MRF.rotation = rot_rl.matrix()
+    MLF.rotation = rot_ll.matrix()
     # apply the transform ankle -> center of contact
     MRF *= MRsole_offset
     MLF *= MLsole_offset
