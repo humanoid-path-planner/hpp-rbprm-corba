@@ -85,7 +85,7 @@ def check_projection_path(s0,s1,c,dc,ddc,t_qp,t_per_phase):
     
         
 
-def check_one_transition(s0,s1,r=None,pp=None):
+def check_one_transition(ps,fullBody,s0,s1,r=None,pp=None):
     pid = fullBody.isDynamicallyReachableFromState(s0.sId,s1.sId,True)
     if len(pid)==0:
         print "unable to compute trajectory"
@@ -106,11 +106,27 @@ def check_one_transition(s0,s1,r=None,pp=None):
     return valid
   
         
+   
+ 
+def check_contact_plan(ps,r,pp,fullBody,idBegin,idEnd):
+    fullBody.client.basic.robot.setExtraConfigSpaceBounds([-0,0,-0,0,-0,0,0,0,0,0,0,0])
+    fullBody.setStaticStability(False)
+    valid = True
+    for id_state in range(idBegin,idEnd-1):
+        print "#### check for transition between state "+str(id_state) +" and "+str(id_state+1)
+        s0 = State(fullBody, sId = id_state)
+        s1 = State(fullBody, sId = id_state + 1)
+        # make a copy of each state because they are modified by the projection
+        s0_ = State(fullBody,q = s0.q(),limbsIncontact=s0.getLimbsInContact())
+        s1_ = State(fullBody,q = s1.q(),limbsIncontact=s1.getLimbsInContact())
+        valid = valid and check_one_transition(ps,fullBody,s0_,s1_,r,pp)        
     
-    
+    return valid
 
-    
-    
+
+
+
+"""
     
 fullBody.client.basic.robot.setExtraConfigSpaceBounds([-0,0,-0,0,-0,0,0,0,0,0,0,0])
 fullBody.setStaticStability(False)
@@ -127,3 +143,5 @@ ddc_qp = dc_qp.compute_derivate(1)
 valid = True
 t_qp = [ps.pathLength(int(pid[1])), ps.pathLength(int(pid[2])), ps.pathLength(int(pid[3]))]  
 t_discretized,t_per_phase = compute_time_array(t_qp)
+
+"""

@@ -25,7 +25,7 @@ fullBody = FullBody ()
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 fullBody.setJointBounds ("base_joint_xyz", [-5,5, -1.5, 1.5, 0.5, 0.8])
 fullBody.client.basic.robot.setDimensionExtraConfigSpace(tp.extraDof)
-
+fullBody.client.basic.robot.setExtraConfigSpaceBounds([-0,0,-0,0,-0,0,0,0,0,0,0,0])
 ps = tp.ProblemSolver( fullBody )
 ps.client.problem.setParameter("aMax",tp.aMax)
 ps.client.problem.setParameter("vMax",tp.vMax)
@@ -162,6 +162,11 @@ tStart = time.time()
 configsFull = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = 2, filterStates = False)
 tInterpolateConfigs = time.time() - tStart
 print "number of configs :", len(configsFull)
+
+
+import check_qp
+
+check_qp.check_contact_plan(ps,r,pp,fullBody,0,len(configsFull)-1)
 
 
 """
