@@ -323,6 +323,12 @@ module hpp
     floatSeqSeq computeContactPointsAtStateForLimb(in unsigned short stateId, in unsigned short isIntermediate, in string limbname) raises (Error);
 
     /// Provided a discrete contact sequence has already been computed, computes
+    /// the position of the contact center and the normal
+    /// \param stateId normalized step for generation along the path (ie the path has a length of 1).
+    /// \return 2 3D vector : the first is the position the second is the normal
+    floatSeqSeq computeCenterOfContactAtStateForLimb(in unsigned short cId,in  unsigned short isIntermediate, in string limbName) raises(Error);
+
+    /// Provided a discrete contact sequence has already been computed, computes
     /// all the contact positions and normals for a given state
     /// \param stateId iD of the considered state
     /// \param isIntermediate whether the intermediate state should be considerred rather than this one

@@ -107,6 +107,9 @@ class State (object):
             rawdata = self.cl.computeContactPointsAtStateForLimb(self.sId,0, limbName) 
         return [[b[i:i+3] for i in range(0, len(b), 6)] for b in rawdata], [[b[i+3:i+6] for i in range(0, len(b), 6)] for b in rawdata]
         
+    def getCenterOfContactForLimb(self,limbName):
+        assert self.isLimbInContact(limbName), "in getContactPosAndNormals: limb " + limbName +  "is not in contact at  state" + str(stateId)
+        return self.cl.computeCenterOfContactAtStateForLimb(self.sId,self.isIntermediate, limbName)
     
     ## Get position of center of mass
     def getCenterOfMass (self):

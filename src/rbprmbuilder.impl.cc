@@ -1980,6 +1980,59 @@ namespace hpp {
         return res;
     }
 
+    floatSeqSeq* RbprmBuilder::computeCenterOfContactAtStateForLimb(unsigned short cId, unsigned short isIntermediate, const char *limbName) throw (hpp::Error)
+    {
+        if(lastStatesComputed_.size() <= cId + isIntermediate)
+        {
+            throw std::runtime_error ("Unexisting state " + std::string(""+(cId)));
+        }
+        std::string limb(limbName);
+        State state = lastStatesComputed_[cId];
+        if(isIntermediate > 0)
+        {
+            const State&  thirdState = lastStatesComputed_[cId+1];
+            bool success(false);
+            State interm = intermediary(state, thirdState, cId, success);
+            if(success)
+                state = interm;
+        }
+        if(state.contacts_.find(limb) == state.contacts_.end()){
+            throw std::runtime_error ("Limb : "+limb+" is not in contact at state "+std::string(""+(cId)));
+        }
+
+
+        hpp::floatSeqSeq *res;
+        res = new hpp::floatSeqSeq ();
+
+
+        res->length ((_CORBA_ULong)2);
+
+        fcl::Vec3f& position = state.contactPositions_.at(limbName);
+        position += fullBody()->GetLimb(limb)->offset_;
+        _CORBA_ULong size = (_CORBA_ULong) 3;
+        double* dofArray = hpp::floatSeq::allocbuf(size);
+        hpp::floatSeq floats (size, size, dofArray, true);
+        //convert the config in dofseq
+        for(std::size_t k =0; k<3; ++k)
+        {
+            dofArray[k] = position[k];
+        }
+        (*res) [(_CORBA_ULong)0] = floats;
+
+        const fcl::Vec3f& normal = state.contactNormals_.at(limbName);
+        double* dofArray_n = hpp::floatSeq::allocbuf(size);
+        hpp::floatSeq floats_n (size, size, dofArray_n, true);
+        //convert the config in dofseq
+        for(std::size_t k =0; k<3; ++k)
+        {
+            dofArray_n[k] = normal[k];
+        }
+        (*res) [(_CORBA_ULong)1] = floats_n;
+
+        return res;
+    }
+
+
     floatSeqSeq* RbprmBuilder::interpolate(double timestep, double path, double robustnessTreshold, unsigned short filterStates) throw (hpp::Error)
     {
         hppDout(notice,"### Begin interpolate");

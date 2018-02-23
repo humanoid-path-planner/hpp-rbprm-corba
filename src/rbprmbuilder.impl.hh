@@ -259,6 +259,7 @@ namespace hpp {
         virtual hpp::floatSeqSeq* computeContactPointsAtState(unsigned short cId, unsigned short isIntermediate) throw (hpp::Error);
         virtual hpp::floatSeqSeq* computeContactPointsForLimb(unsigned short cId, const char* limbName) throw (hpp::Error);
         virtual hpp::floatSeqSeq* computeContactPointsAtStateForLimb(unsigned short cId, unsigned short isIntermediate, const char* limbName) throw (hpp::Error);
+        virtual hpp::floatSeqSeq* computeCenterOfContactAtStateForLimb(unsigned short cId, unsigned short isIntermediate, const char *limbName) throw (hpp::Error);
         virtual hpp::floatSeqSeq* interpolate(double timestep, double path, double robustnessTreshold, unsigned short filterStates) throw (hpp::Error);
         virtual hpp::floatSeqSeq* interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold, unsigned short filterStates) throw (hpp::Error);
         virtual hpp::floatSeqSeq* getContactCone(unsigned short stateId, double friction) throw (hpp::Error);
