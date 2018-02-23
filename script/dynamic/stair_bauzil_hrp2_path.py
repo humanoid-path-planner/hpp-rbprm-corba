@@ -39,13 +39,13 @@ rbprmBuilder.setJointBounds('CHEST_JOINT1',[0,0.45])
 rbprmBuilder.setJointBounds('HEAD_JOINT0',[0,0])
 rbprmBuilder.setJointBounds('HEAD_JOINT1',[0,0])
 
-rbprmBuilder.setFilter(['hrp2_rarm_rom'])
+rbprmBuilder.setFilter(['hrp2_rleg_rom'])
 rbprmBuilder.setAffordanceFilter('hrp2_rarm_rom', ['Support'])
 rbprmBuilder.setAffordanceFilter('hrp2_lleg_rom', ['Support',])
 rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
 rbprmBuilder.boundSO3([-0.,0,-1,1,-1,1])
-vMax = 0.1;
-aMax = 5.;
+vMax = 0.3;
+aMax = 0.3;
 extraDof = 6
 mu=omniORB.any.to_any(MU)
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
@@ -57,10 +57,11 @@ indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.basic.robot.getDim
 
 ps = ProblemSolver( rbprmBuilder )
 ps.client.problem.setParameter("aMax",omniORB.any.to_any(aMax))
+ps.client.problem.setParameter("aMaxZ",omniORB.any.to_any(2.))
 ps.client.problem.setParameter("vMax",omniORB.any.to_any(vMax))
 ps.client.problem.setParameter("sizeFootX",omniORB.any.to_any(0.24))
 ps.client.problem.setParameter("sizeFootY",omniORB.any.to_any(0.14))
-r = Viewer (ps)
+r = Viewer (ps,displayArrows=True)
 r.addLandmark(r.sceneName,1)
 
 

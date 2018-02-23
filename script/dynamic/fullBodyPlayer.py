@@ -100,7 +100,7 @@ class Player (object):
         self.tp.r.client.gui.setVisibility("hyq_trunk", "OFF")
         for i in range(begin,end):
             self.act(i,1,optim_effectors=self.optim_effector,draw=self.draw)
-		
+
     def play(self,frame_rate = 0.01):
 	    play_traj(self.fullBody,self.pp,frame_rate)
 	

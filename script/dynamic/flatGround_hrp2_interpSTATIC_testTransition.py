@@ -42,7 +42,7 @@ qfar[2] = -5
 rLegId = 'hrp2_rleg_rom'
 lLegId = 'hrp2_lleg_rom'
 tStart = time.time()
-
+fullBody.setReferenceConfig (q_ref)
 
 rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,0,-0.105]
@@ -164,10 +164,11 @@ tInterpolateConfigs = time.time() - tStart
 print "number of configs :", len(configsFull)
 
 
+"""
 f = open("/home/pfernbac/Documents/com_ineq_test/log_success.log","a")
 f.write("num states : "+str(len(configsFull))+" \n")
 f.close()
-
+"""
 
 
 """
