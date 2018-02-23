@@ -717,6 +717,12 @@ module hpp
     ///  Throw an error if there is no trajectory computed for the given id/name
     floatSeqSeqSeq getEffectorTrajectoryWaypoints(in unsigned short pathId,in string effectorName) raises (Error);
 
+    /// Return the waypoints of the bezier curve at given index
+    /// \param pathId the path index
+    /// \return a list of lenght degree+ 2 : the first item is the time of the curve, the others are the waypoints
+    floatSeqSeq getPathAsBezier(in unsigned short pathId)raises (Error);
+
+
     boolean areKinematicsConstraintsVerified(in floatSeq point)raises (Error);
 
     boolean areKinematicsConstraintsVerifiedForState(in unsigned short stateFrom,in floatSeq point)raises (Error);

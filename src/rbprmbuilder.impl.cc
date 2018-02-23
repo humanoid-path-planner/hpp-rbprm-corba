@@ -1589,6 +1589,46 @@ namespace hpp {
         }
     }
 
+    hpp::floatSeqSeq* RbprmBuilder::getPathAsBezier(unsigned short pathId)throw (hpp::Error){
+        try{
+            if(!fullBodyLoaded_)
+                throw std::runtime_error ("No Fullbody loaded");
+            if(problemSolver()->paths().size() <= pathId)
+                throw std::runtime_error ("No path at index "+ boost::lexical_cast<std::string>(pathId));
+            PathVectorPtr_t pathVector = problemSolver()->paths()[pathId];
+            PathPtr_t path = pathVector->pathAtRank(0);
+            // try to cast path as BezierPath :
+            BezierPathPtr_t bezierPath = boost::dynamic_pointer_cast<BezierPath>(path);
+            if(!bezierPath)
+                throw std::runtime_error ("Not a bezier path at index "+ boost::lexical_cast<std::string>(pathId));
+
+            const bezier_t::t_point_t waypoints = bezierPath->getWaypoints();
+
+            // build the floatSeqSeq : first value is the time, the others are the waypoints
+            hpp::floatSeqSeq *res;
+            res = new hpp::floatSeqSeq ();
+            _CORBA_ULong size = (_CORBA_ULong)waypoints.size()+1;
+            res->length (size); // +1 because the first value is the length (time)
+            { // add the time at the first index :
+                double* dofArray = hpp::floatSeq::allocbuf(1);
+                hpp::floatSeq floats (1, 1, dofArray, true);
+                dofArray[0] = bezierPath->length();
+                (*res) [(_CORBA_ULong)0] = floats; // Always assume the curve start at 0. There isn't any ways to create it otherwise in python
+            }
+            // now add the waypoints :
+            std::size_t i=1;
+            for(bezier_t::t_point_t::const_iterator wit = waypoints.begin(); wit != waypoints.end(); ++wit,++i)
+            {
+                (*res) [(_CORBA_ULong)i] = vectorToFloatseq(*wit);
+            }
+            return res;
+        }
+        catch(std::runtime_error& e)
+        {
+            std::cout << "ERROR " << e.what() << std::endl;
+            throw Error(e.what());
+        }
+    }
 
 
 

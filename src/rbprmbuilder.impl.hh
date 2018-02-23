@@ -347,6 +347,8 @@ namespace hpp {
         virtual hpp::floatSeq* computeTargetTransform(const char* limbName, const hpp::floatSeq& configuration, const hpp::floatSeq& p, const hpp::floatSeq& n) throw (hpp::Error);
         virtual Names_t* getEffectorsTrajectoriesNames(unsigned short pathId)throw (hpp::Error);
         virtual hpp::floatSeqSeqSeq* getEffectorTrajectoryWaypoints(unsigned short pathId,const char* effectorName)throw (hpp::Error);
+        virtual hpp::floatSeqSeq* getPathAsBezier(unsigned short pathId)throw (hpp::Error);
+
 
         virtual bool areKinematicsConstraintsVerified(const hpp::floatSeq &point)throw (hpp::Error);
         virtual bool areKinematicsConstraintsVerifiedForState(unsigned short stateId,const hpp::floatSeq &point)throw (hpp::Error);

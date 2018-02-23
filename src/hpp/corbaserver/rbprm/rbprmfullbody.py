@@ -1080,6 +1080,15 @@ class FullBody (object):
              res +=[curve]
          return res
 
+    ## Return the bezier curve corresponding to a given path index
+     def getPathAsBezier(self,pathId):
+         l = self.client.rbprm.rbprm.getPathAsBezier(pathId)
+         t = l[0][0]
+         wps = matrix(l[1:]).transpose()
+         curve = bezier(wps,t)
+         return curve
+
+
       ## return the contacts variation between two states
       # \param stateIdFrom : index of the first state
       # \param stateIdTo : index of the second state
