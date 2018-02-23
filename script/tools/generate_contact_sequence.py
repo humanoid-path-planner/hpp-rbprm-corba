@@ -2,6 +2,8 @@ import pinocchio as se3
 from pinocchio import SE3, Quaternion
 from pinocchio.utils import *
 from planning.config import *
+from spline import bezier
+import inspect
 
 import locomote
 from locomote import WrenchCone,SOC6,ControlType,IntegratorType,ContactPatch, ContactPhaseHumanoid, ContactSequenceHumanoid
@@ -74,7 +76,7 @@ def displayContactsFromPhase(phase,viewer):
     viewer.client.gui.refresh()                    
         
 
-def generateContactSequence(fb,configs,beginId,endId,viewer=None):
+def generateContactSequence(fb,configs,beginId,endId,viewer=None, curves_initGuess = [], timings_initGuess = []):
     print "generate contact sequence from planning : "
     global i_sphere
     i_sphere = 0
@@ -84,6 +86,11 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None):
     # config only contains the double support stance
     n_steps = n_double_support*2 -1 
     # Notice : what we call double support / simple support are in fact the state with all the contacts and the state without the next moving contact
+    if len(curves_initGuess) == (len(configs)-1) and len(timings_initGuess) == (len(configs)-1):
+        init_guess_provided = True
+    else : 
+        init_guess_provided = False
+    print "generate CS, init guess provided : "+str(init_guess_provided)
     
     cs = ContactSequenceHumanoid(n_steps)
     unusedPatch = cs.contact_phases[0].LF_patch.copy()
@@ -98,6 +105,15 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None):
         config_id=stateId-beginId
         phase_d = cs.contact_phases[cs_id]
         fb.setCurrentConfig(configs[config_id])
+        init_guess_for_phase = init_guess_provided
+        if init_guess_for_phase:
+            c_init_guess = curves_initGuess[config_id]
+            t_init_guess = timings_initGuess[config_id]
+            init_guess_for_phase = isinstance(c_init_guess,bezier)
+            if init_guess_for_phase:
+                print "bezier curve provided for config id : "+str(config_id)
+
+        
         # compute MRF and MLF : the position of the contacts
         q_rl = fb.getJointPosition(rleg_id)
         q_ll = fb.getJointPosition(lleg_id)
@@ -181,15 +197,78 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None):
                     phase_d.RH_patch.placement = MRH
                     
         # retrieve the COM position for init and final state (equal for double support phases)
-        init_state = phase_d.init_state
-        init_state[0:3] = np.matrix(fb.getCenterOfMass()).transpose()
-        init_state[3:9] = np.matrix(configs[config_id][-6:]).transpose()
+        if init_guess_for_phase :
+            dc_init_guess = c_init_guess.compute_derivate(1)
+            ddc_init_guess = dc_init_guess.compute_derivate(1)
+            if stateId != beginId: # not the first state. Take the trajectory for p2 of the previous curve and merge it with p0 of the current curve : 
+                c_prev = curves_initGuess[config_id-1]
+                dc_prev = c_prev.compute_derivate(1)
+                ddc_prev = dc_prev.compute_derivate(1)                
+                timings_prev = timings_initGuess[config_id-1]
+                # generate init state : 
+                init_state = [0]*9
+                init_state[0:3] = c_prev(timings_prev[1]).transpose().tolist()[0]
+                init_state[3:6] = dc_prev(timings_prev[1]).transpose().tolist()[0]
+                init_state[6:9] = ddc_prev(timings_prev[1]).transpose().tolist()[0]   
+                init_state = np.matrix(init_state).transpose()   
+            else : # first traj
+                # generate init state : 
+                init_state = [0]*9
+                init_state[0:3] = c_init_guess(0).transpose().tolist()[0]
+                init_state[3:6] = dc_init_guess(0).transpose().tolist()[0]
+                init_state[6:9] = ddc_init_guess(0).transpose().tolist()[0]   
+                init_state = np.matrix(init_state).transpose()            
+            # generate final state : 
+            final_state = [0]*9            
+            final_state[0:3] = c_init_guess(t_init_guess[0]).transpose().tolist()[0]
+            final_state[3:6] = dc_init_guess(t_init_guess[0]).transpose().tolist()[0]
+            final_state[6:9] = ddc_init_guess(t_init_guess[0]).transpose().tolist()[0] 
+            final_state = np.matrix(final_state).transpose()
+            # set timing :
+            t_tot = t_init_guess[0]
+            if stateId != beginId:
+                t_prev = (timings_prev[2] - timings_prev[1]) 
+                t_tot += t_prev
+            phase_d.time_trajectory.append(t_tot)
+            # generate init guess traj for state and control from bezier curve and it's derivative : 
+            if config_id == 0:
+                num_nodes = NUM_NODES_INIT
+            else :
+                num_nodes = NUM_NODES_DS
+            time = np.linspace(0,t_tot,num=num_nodes,endpoint=False)  
+            #print time
+            for t in time:
+                state = [0]*9
+                if stateId == beginId:
+                    state[0:3] = c_init_guess(t).transpose().tolist()[0]
+                    state[3:6] = dc_init_guess(t).transpose().tolist()[0]
+                    state[6:9] = ddc_init_guess(t).transpose().tolist()[0]
+                else:
+                    if t < t_prev : 
+                        state[0:3] = c_prev(timings_prev[1]+t).transpose().tolist()[0]
+                        state[3:6] = dc_prev(timings_prev[1]+t).transpose().tolist()[0]
+                        state[6:9] = ddc_prev(timings_prev[1]+t).transpose().tolist()[0]  
+                    else : 
+                        state[0:3] = c_init_guess(t-t_prev).transpose().tolist()[0]
+                        state[3:6] = dc_init_guess(t-t_prev).transpose().tolist()[0]
+                        state[6:9] = ddc_init_guess(t-t_prev).transpose().tolist()[0]                        
+                u = [0]*6
+                u [0:3] = state[6:9]
+                #print t
+                #print np.matrix(u).transpose()
+                #print np.matrix(state).transpose()
+                phase_d.control_trajectory.append(np.matrix(u).transpose())
+                phase_d.state_trajectory.append(np.matrix(state).transpose())
+        else :
+            init_state = phase_d.init_state.copy()
+            init_state[0:3] = np.matrix(fb.getCenterOfMass()).transpose()
+            init_state[3:9] = np.matrix(configs[config_id][-6:]).transpose()
+            final_state = init_state.copy()
+            phase_d.time_trajectory.append((fb.getDurationForState(stateId))*DURATION_n_CONTACTS/SPEED)
         phase_d.init_state=init_state
-        phase_d.final_state=init_state
-        phase_d.reference_configurations.append(np.matrix(pinnochioQuaternion(configs[config_id][:-6])))
-        phase_d.time_trajectory.append((fb.getDurationForState(stateId))*DURATION_n_CONTACTS/SPEED)
-        
-        
+        phase_d.final_state=final_state
+        phase_d.reference_configurations.append(np.matrix(pinnochioQuaternion(configs[config_id][:-6])))        
+        #print "done for double support"
         if DISPLAY_CONTACTS and viewer:
             displayContactsFromPhase(phase_d,viewer)
         
@@ -213,15 +292,44 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None):
             if var == rhand_rom:
                 phase_s.RH_patch.active = False
         # retrieve the COM position for init and final state 
-        phase_s.init_state=init_state.copy()
-        final_state = phase_d.final_state.copy()
-        fb.setCurrentConfig(configs[config_id+1])
-        final_state[0:3] = np.matrix(fb.getCenterOfMass()).transpose()
-        final_state[3:9] = np.matrix(configs[config_id+1][-6:]).transpose()        
-        phase_s.final_state=final_state
+         
         phase_s.reference_configurations.append(np.matrix(pinnochioQuaternion(configs[config_id][:-6])))
-        phase_s.time_trajectory.append((fb.getDurationForState(stateId))*(1-DURATION_n_CONTACTS)/SPEED)
-        
+        if init_guess_for_phase:
+            # generate init state : 
+            init_state = [0]*9
+            init_state[0:3] = c_init_guess(t_init_guess[0]).transpose().tolist()[0]
+            init_state[3:6] = dc_init_guess(t_init_guess[0]).transpose().tolist()[0]
+            init_state[6:9] = ddc_init_guess(t_init_guess[0]).transpose().tolist()[0]
+            init_state = np.matrix(init_state).transpose()            
+            # generate final state : 
+            final_state = [0]*9
+            final_state[0:3] = c_init_guess(t_init_guess[1]).transpose().tolist()[0]
+            final_state[3:6] = dc_init_guess(t_init_guess[1]).transpose().tolist()[0]
+            final_state[6:9] = ddc_init_guess(t_init_guess[1]).transpose().tolist()[0]
+            final_state = np.matrix(final_state).transpose()            
+            
+            # set timing : 
+            phase_s.time_trajectory.append(t_init_guess[1]) 
+            time = np.linspace(t_init_guess[0],t_init_guess[1],num=NUM_NODES_SS,endpoint=False)  
+            for t in time:
+                state = [0]*9
+                state[0:3] = c_init_guess(t).transpose().tolist()[0]
+                state[3:6] = dc_init_guess(t).transpose().tolist()[0]
+                state[6:9] = ddc_init_guess(t).transpose().tolist()[0]
+                u = [0]*6
+                u [0:3] = state[6:9]                
+                phase_s.control_trajectory.append(np.matrix(u).transpose())
+                phase_s.state_trajectory.append(np.matrix(state).transpose())        
+        else :
+            init_state = phase_d.init_state.copy()
+            final_state = phase_d.final_state.copy()
+            fb.setCurrentConfig(configs[config_id+1])
+            final_state[0:3] = np.matrix(fb.getCenterOfMass()).transpose()
+            final_state[3:9] = np.matrix(configs[config_id+1][-6:]).transpose()              
+            phase_s.time_trajectory.append((fb.getDurationForState(stateId))*(1-DURATION_n_CONTACTS)/SPEED) 
+        phase_s.init_state=init_state
+        phase_s.final_state=final_state
+        #print "done for single support"
         if DISPLAY_CONTACTS and viewer:
             displayContactsFromPhase(phase_s,viewer)        
         
@@ -283,15 +391,42 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None):
             phase_d.LH_patch.placement = MLH
         if var == rhand_rom:
             phase_d.RH_patch.placement = MRH
-    # retrieve the COM position for init and final state (equal for double support phases)
-    init_state = phase_d.init_state
-    init_state[0:3] = np.matrix(fb.getCenterOfMass()).transpose()
-    init_state[3:9] = np.matrix(configs[-1][-6:]).transpose()        
+    # retrieve the COM position for init and final state (equal for double support phases)    
+    phase_d.reference_configurations.append(np.matrix(pinnochioQuaternion(configs[-1][:-6]))) 
+    if init_guess_for_phase:
+        # generate init state : 
+        init_state = [0]*9
+        init_state[0:3] = c_init_guess(t_init_guess[1]).transpose().tolist()[0]
+        init_state[3:6] = dc_init_guess(t_init_guess[1]).transpose().tolist()[0]
+        init_state[6:9] = ddc_init_guess(t_init_guess[1]).transpose().tolist()[0] 
+        init_state = np.matrix(init_state).transpose()
+        # generate final state : 
+        final_state = [0]*9        
+        final_state[0:3] = c_init_guess(t_init_guess[2]).transpose().tolist()[0]
+        final_state[3:6] = dc_init_guess(t_init_guess[2]).transpose().tolist()[0]
+        final_state[6:9] = ddc_init_guess(t_init_guess[2]).transpose().tolist()[0] 
+        final_state = np.matrix(final_state).transpose()
+        # set timing :         
+        phase_d.time_trajectory.append(t_init_guess[2])
+        time = np.linspace(t_init_guess[0]+t_init_guess[1],t_init_guess[2],num=NUM_NODES_FINAL,endpoint=True)  
+        for t in time:
+            state = [0]*9
+            state[0:3] = c_init_guess(t).transpose().tolist()[0]
+            state[3:6] = dc_init_guess(t).transpose().tolist()[0]
+            state[6:9] = ddc_init_guess(t).transpose().tolist()[0]
+            u = [0]*6
+            u [0:3] = state[6:9]            
+            phase_d.control_trajectory.append(np.matrix(u).transpose())
+            phase_d.state_trajectory.append(np.matrix(state).transpose()) 
+    else :
+        init_state = phase_d.init_state
+        init_state[0:3] = np.matrix(fb.getCenterOfMass()).transpose()
+        init_state[3:9] = np.matrix(configs[-1][-6:]).transpose()
+        final_state = init_state.copy()
+        phase_d.time_trajectory.append(0.)
     phase_d.init_state=init_state
-    phase_d.final_state=init_state
-    phase_d.reference_configurations.append(np.matrix(pinnochioQuaternion(configs[-1][:-6])))  
-    phase_d.time_trajectory.append(0.)
-    
+    phase_d.final_state=final_state   
+    #print "done for last state"
     if DISPLAY_CONTACTS and viewer:
         displayContactsFromPhase(phase_d,viewer)
         
