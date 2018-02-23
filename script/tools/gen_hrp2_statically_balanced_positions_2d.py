@@ -2,8 +2,8 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
-
-from hpp.corbaserver.rbprm.tools.cwc_trajectory import *
+import numpy as np
+#from hpp.corbaserver.rbprm.tools.cwc_trajectory import *
 
 from hpp import Error as hpperr
 from numpy import array, matrix
@@ -21,52 +21,44 @@ srdfSuffix = ""
 fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz", [-0.135,2, -1, 1, 0, 2.2])
+fullBody.setJointBounds ("base_joint_xyz", [-1.5,1.5, -1, 1, 0.45, 0.8])
 
 
 ps = ProblemSolver( fullBody )
 r = Viewer (ps)
 
-#~ AFTER loading obstacles
-rLegId = '0rLeg'
+
+rLegId = 'hrp2_rleg_rom'
+lLegId = 'hrp2_lleg_rom'
+rarmId = 'hrp2_rarm_rom'
+larmId = 'hrp2_larm_rom'
 rLeg = 'RLEG_JOINT0'
-rLegOffset = [0,-0.105,0,]
-rLegNormal = [0,1,0]
+rLegOffset = [0,0,-0.105]
+rLegLimbOffset=[0,0,-0.035]#0.035
+rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 10000, "manipulability", 0.1)
+#fullBody.addLimbDatabase("./db/hrp2_rleg_db.db",rLegId,"forward")
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "manipulability", 0.01,"_6_DOF",limbOffset=rLegLimbOffset)
+fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
+#fullBody.saveLimbDatabase(rLegId, "./db/hrp2_rleg_db.db")
 
-lLegId = '1lLeg'
 lLeg = 'LLEG_JOINT0'
-lLegOffset = [0,-0.105,0]
-lLegNormal = [0,1,0]
+lLegOffset = [0,0,-0.105]
+lLegLimbOffset=[0,0,0.035]
+lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.1)
+#fullBody.addLimbDatabase("./db/hrp2_lleg_db.db",lLegId,"forward")
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "manipulability", 0.01,"_6_DOF",limbOffset=lLegLimbOffset)
+fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
+#fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
+q_ref =[0., 0., 0.648702, 1.0, 0.0 , 0.0, 0.0,0.0, 0.0, 0.0, 0.0,0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17,0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17,0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0]
+fullBody.setReferenceConfig (q_ref)
 
-rarmId = '3Rarm'
-rarm = 'RARM_JOINT0'
-rHand = 'RARM_JOINT5'
-rArmOffset = [0,0,-0.1]
-rArmNormal = [0,0,1]
-rArmOffset = [-0.045,-0.01,-0.085]
-rArmNormal = [1,0,0]
-rArmx = 0.015; rArmy = 0.02
-#disabling collision for hook
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.05, "_6_DOF", True)
-
-#~ AFTER loading obstacles
-larmId = '4Larm'
-larm = 'LARM_JOINT0'
-lHand = 'LARM_JOINT5'
-#~ lArmOffset = [-0.05,-0.050,-0.050]
-lArmOffset = [-0.045,0.01,-0.085]
-lArmNormal = [1,0,0]
-lArmx = 0.015; lArmy = 0.02
-fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.05, "_6_DOF", True)
 
 limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},  
 						lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}, 
-						larmId : {'file': "hrp2/LA_com.ineq", 'effector' : lHand}, 
-						rarmId : {'file': "hrp2/RA_com.ineq", 'effector' : rHand} }
+						larmId : {'file': "hrp2/LA_com.ineq", 'effector' : 'LARM_JOINT5'}, 
+						rarmId : {'file': "hrp2/RA_com.ineq", 'effector' : 'RARM_JOINT5'} }
 #~ limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},  
 						#~ lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}, 
 						#~ rarmId : {'file': "hrp2/RA_com.ineq", 'effector' : rHand} }
@@ -234,16 +226,17 @@ def gen(limbs, num_samples = 1000, coplanar = True):
 	fname += "configs"
 	if(coplanar):
 		fname += "_coplanar"
-	from pickle import dump
+	from cPickle import dump
 	#~ f1=open("configs_feet_on_ground_static_eq", 'w+')
 	f1=open(fname, 'w+')
 	dump(states, f1)
+	print "export to file : "+fname
 	f1.close()
 
 j=0
 
 q_init =  [
-        0.1, -0.82, 0.648702, 1.0, 0.0 , 0.0, 0.0,                         	 # Free flyer 0-6
+        0., 0., 0.648702, 1.0, 0.0 , 0.0, 0.0,                         	 # Free flyer 0-6
         0.0, 0.0, 0.0, 0.0,                                                  # CHEST HEAD 7-10
         0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # LARM       11-17
         0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # RARM       18-24
@@ -251,13 +244,18 @@ q_init =  [
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # RLEG       31-36
         ]; r (q_init)
         
-limbs = [[lLegId,rLegId],[lLegId,rLegId, rarmId], [lLegId,rLegId, larmId], [lLegId,rLegId, rarmId, larmId] ]
+limbs = [[lLegId,rLegId]]
 #~ limbs = [[lLegId,rLegId, rarmId]]
 #~ limbs = [[larmId, rarmId]]
 
 #~ gen(limbs[0], 10)
+
+"""
 for ls in limbs:
 	gen(ls, 1000, False)
 gen(limbs[0], 1000)
-	
+"""
+
+gen(limbs[0], 1000,False)
+
 i = 0
