@@ -2,9 +2,17 @@ from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
 from disp_bezier import * 
 max_acc = 1
 pointsPerPhase=4
+ROUND = 1000.
+
+global curves_initGuess
+global timings_initGuess 
+
+curves_initGuess = []
+timings_initGuess = []
 
 
-def compute_time_array(t_qp):
+
+def compute_time_array(t_qp,t_c):
     t_discretized = []
     t_per_phase=[]
     t = 0
@@ -13,6 +21,8 @@ def compute_time_array(t_qp):
         t_for_phase = []
         for i in range(pointsPerPhase):
             t += dt
+            t = round(t*ROUND)/ROUND
+            t = min(t,t_c)
             t_discretized.append(t)
             t_for_phase.append(t)
         t_per_phase.append(t_for_phase)
@@ -68,6 +78,8 @@ def check_projection_path(s0,s1,c,dc,ddc,t_qp,t_per_phase):
         return False    
     print "test for phase 1 :"
     for t in t_per_phase[1]:
+        #if t == t_per_phase[0][-1]:
+         #   t -= EPS  
         if not check_projection(smid,c,dc,ddc,t):
             return False
     print "test for phase 2"
@@ -86,6 +98,9 @@ def check_projection_path(s0,s1,c,dc,ddc,t_qp,t_per_phase):
         
 
 def check_one_transition(ps,fullBody,s0,s1,r=None,pp=None):
+    global curves_initGuess
+    global timings_initGuess 
+    
     pid = fullBody.isDynamicallyReachableFromState(s0.sId,s1.sId,True)
     if len(pid)==0:
         print "unable to compute trajectory"
@@ -97,12 +112,14 @@ def check_one_transition(ps,fullBody,s0,s1,r=None,pp=None):
     ddc_qp = dc_qp.compute_derivate(1)
     valid = True
     t_qp = [ps.pathLength(int(pid[1])), ps.pathLength(int(pid[2])), ps.pathLength(int(pid[3]))]  
-    t_discretized,t_per_phase = compute_time_array(t_qp)
+    t_discretized,t_per_phase = compute_time_array(t_qp,c_qp.max())
     print "### test acceleration bounds ###"
     valid = valid and check_acceleration_bounds(ddc_qp,t_discretized)
     print "### test kinematic projection ###"
     valid = valid and check_projection_path(s0,s1,c_qp,dc_qp,ddc_qp,t_qp,t_per_phase)
     
+    curves_initGuess.append(c_qp)
+    timings_initGuess.append(t_qp)
     return valid
   
         
@@ -111,7 +128,7 @@ def check_one_transition(ps,fullBody,s0,s1,r=None,pp=None):
 def check_contact_plan(ps,r,pp,fullBody,idBegin,idEnd):
     fullBody.client.basic.robot.setExtraConfigSpaceBounds([-0,0,-0,0,-0,0,0,0,0,0,0,0])
     fullBody.setStaticStability(False)
-    valid = True
+    validPlan = True
     for id_state in range(idBegin,idEnd-1):
         print "#### check for transition between state "+str(id_state) +" and "+str(id_state+1)
         s0 = State(fullBody, sId = id_state)
@@ -119,9 +136,14 @@ def check_contact_plan(ps,r,pp,fullBody,idBegin,idEnd):
         # make a copy of each state because they are modified by the projection
         s0_ = State(fullBody,q = s0.q(),limbsIncontact=s0.getLimbsInContact())
         s1_ = State(fullBody,q = s1.q(),limbsIncontact=s1.getLimbsInContact())
-        valid = valid and check_one_transition(ps,fullBody,s0_,s1_,r,pp)        
-    
-    return valid
+        
+        valid = check_one_transition(ps,fullBody,s0_,s1_,r,pp)        
+        validPlan = validPlan and valid 
+        
+        global curves_initGuess
+        global timings_initGuess 
+        
+    return validPlan, curves_initGuess,timings_initGuess
 
 
 
