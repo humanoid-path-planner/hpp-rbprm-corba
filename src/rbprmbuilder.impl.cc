@@ -3171,7 +3171,7 @@ assert(s2 == s1 +1);
 
 
 
-    CORBA::Short RbprmBuilder::isDynamicallyReachableFromState(unsigned short stateFrom, unsigned short stateTo, const hpp::floatSeq &timings, unsigned short numPointPerPhase )throw (hpp::Error){
+    hpp::floatSeq* RbprmBuilder::isDynamicallyReachableFromState(unsigned short stateFrom, unsigned short stateTo,bool addPathPerPhase, const hpp::floatSeq &timings, unsigned short numPointPerPhase )throw (hpp::Error){
         if(!fullBodyLoaded_){
           throw std::runtime_error ("fullBody not loaded");
         }
@@ -3190,11 +3190,27 @@ assert(s2 == s1 +1);
             res = reachability::isReachableDynamic(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo],false);
         }
         if (res.success()){
-            core::PathVectorPtr_t pathVector = core::PathVector::create(res.path_->outputSize(),res.path_->outputDerivativeSize());
-            pathVector->appendPath(res.path_);
-            return problemSolver()->addPath(pathVector);
+            std::vector<int> ids;
+            core::PathVectorPtr_t pathVector_full = core::PathVector::create(res.path_->outputSize(),res.path_->outputDerivativeSize());
+            pathVector_full->appendPath(res.path_);
+            ids.push_back(problemSolver()->addPath(pathVector_full));
+            if(addPathPerPhase){
+                for(size_t i = 0 ; i < res.timings_.size() ; ++i){
+                    core::PathVectorPtr_t pathVector = core::PathVector::create(res.path_->outputSize(),res.path_->outputDerivativeSize());
+                    pathVector->appendPath(res.pathPerPhases_[i]);
+                    ids.push_back(problemSolver()->addPath(pathVector));
+                }
+            }
+            // convert vector of int to floatSeq :
+            hpp::floatSeq* dofArray = new hpp::floatSeq();
+            dofArray->length(ids.size());
+            for(std::size_t i=0; i< ids.size(); ++i)
+            {
+              (*dofArray)[(_CORBA_ULong)i] = ids[i];
+            }
+            return dofArray;
         }else
-            return 0;
+            return new hpp::floatSeq();
     }
 
 
