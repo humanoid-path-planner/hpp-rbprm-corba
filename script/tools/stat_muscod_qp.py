@@ -22,18 +22,18 @@ from generate_contact_sequence import *
 
 def callMuscodBetweenTwoState(fullBody,s0,s1,c_qp = [], t_qp = []):
     configs = [s0.q() , s1.q()]
-    cs = generateContactSequence(fullBody,configs,s0.sId, s1.sId)
+    cs = generateContactSequence(fullBody,configs,s0.sId, s1.sId,curves_initGuess=c_qp,timings_initGuess=t_qp)
+    #cs = generateContactSequence(fullBody,configs,s0.sId, s1.sId,curves_initGuess=c_qp,timings_initGuess=t_qp)
     filename_xml = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
     cs.saveAsXML(filename_xml, "ContactSequence")   
     mp.generate_muscod_problem(filename_xml,True)
-
     return ssh.call_muscod()
     
 
 
 
 
-states = genStateWithOneStep(fullBody,limbs[0], 100,False)
+states = genStateWithOneStep(fullBody,limbs[0], 20,False)
 
 name = "/local/fernbac/bench_iros18/muscod_qp/one_step"
 file_exist = True
@@ -66,7 +66,7 @@ for [s0,s1] in states:
         t_qp = [ps.pathLength(int(pid[1])), ps.pathLength(int(pid[2])), ps.pathLength(int(pid[3]))]
         success_muscod, ssh_ok = callMuscodBetweenTwoState(fullBody,s0,s1,[c_qp],[t_qp])
     success_muscod, ssh_ok = callMuscodBetweenTwoState(fullBody,s0,s1)
-    f.write("Try for pair "+str(i)+"\n")
+    f.write("Try for pair "+str(i)+" ------- \n")
     f.write("q0 = "+str(s0.q())+"\n")
     f.write("q1 = "+str(s1.q())+"\n")
             
@@ -115,14 +115,22 @@ print "same result, unreachable : "+str(same_negatif) + "   ; "+str((float(same_
 print "same result, reachable : "+str(same_positif) + "   ; "+str((float(same_positif)/num_states)*100.)+" % "
 print "false positive : "+str(false_positif) + "   ; "+str((float(false_positif)/num_states)*100.)+" %"
 print "false negative : "+str(false_negatif) + "   ; "+str((float(false_negatif)/num_states)*100.)+" %"
-f = open(filename+"C","w")
-f.close()
-f.write( "for : "+str(num_states)+" states.")
-f.write(  "same result, unreachable : "+str(same_negatif) + "   ; "+str((float(same_negatif)/num_states)*100.)+" % ")
-f.write(  "same result, reachable : "+str(same_positif) + "   ; "+str((float(same_positif)/num_states)*100.)+" % ")
-f.write(  "false positive : "+str(false_positif) + "   ; "+str((float(false_positif)/num_states)*100.)+" %")
-f.write(  "false negative : "+str(false_negatif) + "   ; "+str((float(false_negatif)/num_states)*100.)+" %")
 
+
+f = open(filename+"C","w")
+f.write( "for : "+str(num_states)+" states.\n")
+f.write(  "same result, unreachable : "+str(same_negatif) + "   ; "+str((float(same_negatif)/num_states)*100.)+" % \n")
+f.write(  "same result, reachable : "+str(same_positif) + "   ; "+str((float(same_positif)/num_states)*100.)+" % \n")
+f.write(  "false positive : "+str(false_positif) + "   ; "+str((float(false_positif)/num_states)*100.)+" %\n")
+f.write(  "false negative : "+str(false_negatif) + "   ; "+str((float(false_negatif)/num_states)*100.)+" %\n")
+f.write("##### Excluding unreachable states : \n")
+num_states -= same_negatif
+f.write( "for : "+str(num_states)+" states.\n")
+f.write(  "same result, reachable : "+str(same_positif) + "   ; "+str((float(same_positif)/num_states)*100.)+" % \n")
+f.write(  "false positive : "+str(false_positif) + "   ; "+str((float(false_positif)/num_states)*100.)+" %\n")
+f.write(  "false negative : "+str(false_negatif) + "   ; "+str((float(false_negatif)/num_states)*100.)+" %\n")
+
+f.close()
 
 from constraint_to_dae import *
 from display_tools import *
@@ -134,20 +142,20 @@ def showPath(pid):
     if len(pid)==1:
         pp.displayPath(int(pid[0]),color=r.color.blue)
         r.client.gui.setVisibility('path_'+str(int(pid[0]))+'_root','ALWAYS_ON_TOP')
-    elif len(pid)==3:
-        pp.displayPath(int(pid[0]),color=r.color.green)
-        r.client.gui.setVisibility('path_'+str(int(pid[0]))+'_root','ALWAYS_ON_TOP')  
-        pp.displayPath(int(pid[1]),color=r.color.blue)
+    elif len(pid)==4:
+        pp.displayPath(int(pid[1]),color=r.color.green)
         r.client.gui.setVisibility('path_'+str(int(pid[1]))+'_root','ALWAYS_ON_TOP')  
-        pp.displayPath(int(pid[2]),color=r.color.yellow)
-        r.client.gui.setVisibility('path_'+str(int(pid[2]))+'_root','ALWAYS_ON_TOP')
-    elif len(pid) == 2:
+        pp.displayPath(int(pid[2]),color=r.color.blue)
+        r.client.gui.setVisibility('path_'+str(int(pid[2]))+'_root','ALWAYS_ON_TOP')  
+        pp.displayPath(int(pid[3]),color=r.color.yellow)
+        r.client.gui.setVisibility('path_'+str(int(pid[3]))+'_root','ALWAYS_ON_TOP')
+    elif len(pid) == 3:
         print "only two phases, not implemented yet."
     else:
         print "no path, test failed."
 
   
-[s0,s2] = states[25]
+[s0,s2] = states[8]
 r(s0.q())
 r(s2.q())
 
@@ -158,3 +166,19 @@ success
 
 pid = fullBody.isDynamicallyReachableFromState(s0.sId,s2.sId,True)
 showPath(pid)
+
+
+c_qp = fullBody.getPathAsBezier(int(pid[0]))
+t_qp = [ps.pathLength(int(pid[1])), ps.pathLength(int(pid[2])), ps.pathLength(int(pid[3]))]
+#cs = generateContactSequence(fullBody,[s0.q(),s2.q()],s0.sId, s2.sId,curves_initGuess=[c_qp],timings_initGuess=[t_qp])
+callMuscodBetweenTwoState(fullBody,s0,s2,c_qp=[c_qp],t_qp=[t_qp])
+
+q0 = [-0.17608794810800854, 0.2910028141264251, 0.6331113268445426, 0.9762318767074574, -0.03329845286589081, 0.053793887560739634, 0.20728905807609832, 0.0, 0.0, 0.0, 0.0, 0.261799388, 0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 0.4250133737512345, -0.11156388170456344, -1.242181321203497, 1.4133331985634723, -0.13083383642865257, 0.349066, -0.3703957634008732, -0.060915884410948806, -0.6488106973944403, 1.3115039520511262, -0.6125539084426079, -0.349066, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+q1 = [-0.29494066983225786, 0.09282560478561819, 0.5712900482217269, 0.988259554853585, 0.0, 0.0, 0.15278433244477005, 0.0, 0.0, 0.0, 0.0, 0.261799388, 0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 0.5287973121214414, 0.026253043235683338, -1.2852663946582035, 0.8948519765377176, 0.556791558819234, 0.220496212563994, -0.2549772760822048, 0.27430957553464475, -0.6637644091040604, 1.7965782911949775, -1.055964350187135, -0.2978706786815243, 0.0, 0.0, 0.0, 0., 0.,0.]
+
+s0 = State(fullBody,q= q0,limbsIncontact=limbs[0])
+s2 = State(fullBody,q= q1,limbsIncontact=limbs[0])
+
+s1,success = StateHelper.removeContact(s0,lLegId)
+
+

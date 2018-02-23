@@ -303,14 +303,14 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None, curves_initGue
             init_state = np.matrix(init_state).transpose()            
             # generate final state : 
             final_state = [0]*9
-            final_state[0:3] = c_init_guess(t_init_guess[1]).transpose().tolist()[0]
-            final_state[3:6] = dc_init_guess(t_init_guess[1]).transpose().tolist()[0]
-            final_state[6:9] = ddc_init_guess(t_init_guess[1]).transpose().tolist()[0]
+            final_state[0:3] = c_init_guess(t_init_guess[1]+t_init_guess[0]).transpose().tolist()[0]
+            final_state[3:6] = dc_init_guess(t_init_guess[1]+t_init_guess[0]).transpose().tolist()[0]
+            final_state[6:9] = ddc_init_guess(t_init_guess[1]+t_init_guess[0]).transpose().tolist()[0]
             final_state = np.matrix(final_state).transpose()            
             
             # set timing : 
             phase_s.time_trajectory.append(t_init_guess[1]) 
-            time = np.linspace(t_init_guess[0],t_init_guess[1],num=NUM_NODES_SS,endpoint=False)  
+            time = np.linspace(t_init_guess[0],t_init_guess[1]+t_init_guess[0],num=NUM_NODES_SS,endpoint=False)  
             for t in time:
                 state = [0]*9
                 state[0:3] = c_init_guess(t).transpose().tolist()[0]
@@ -319,7 +319,7 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None, curves_initGue
                 u = [0]*6
                 u [0:3] = state[6:9]                
                 phase_s.control_trajectory.append(np.matrix(u).transpose())
-                phase_s.state_trajectory.append(np.matrix(state).transpose())        
+                phase_s.state_trajectory.append(np.matrix(state).transpose()) 
         else :
             init_state = phase_d.init_state.copy()
             final_state = phase_d.final_state.copy()
@@ -327,8 +327,8 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None, curves_initGue
             final_state[0:3] = np.matrix(fb.getCenterOfMass()).transpose()
             final_state[3:9] = np.matrix(configs[config_id+1][-6:]).transpose()              
             phase_s.time_trajectory.append((fb.getDurationForState(stateId))*(1-DURATION_n_CONTACTS)/SPEED) 
-        phase_s.init_state=init_state
-        phase_s.final_state=final_state
+        phase_s.init_state=init_state.copy()
+        phase_s.final_state=final_state.copy()
         #print "done for single support"
         if DISPLAY_CONTACTS and viewer:
             displayContactsFromPhase(phase_s,viewer)        
@@ -396,19 +396,19 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None, curves_initGue
     if init_guess_for_phase:
         # generate init state : 
         init_state = [0]*9
-        init_state[0:3] = c_init_guess(t_init_guess[1]).transpose().tolist()[0]
-        init_state[3:6] = dc_init_guess(t_init_guess[1]).transpose().tolist()[0]
-        init_state[6:9] = ddc_init_guess(t_init_guess[1]).transpose().tolist()[0] 
+        init_state[0:3] = c_init_guess(t_init_guess[1]+t_init_guess[0]).transpose().tolist()[0]
+        init_state[3:6] = dc_init_guess(t_init_guess[1]+t_init_guess[0]).transpose().tolist()[0]
+        init_state[6:9] = ddc_init_guess(t_init_guess[1]+t_init_guess[0]).transpose().tolist()[0] 
         init_state = np.matrix(init_state).transpose()
         # generate final state : 
         final_state = [0]*9        
-        final_state[0:3] = c_init_guess(t_init_guess[2]).transpose().tolist()[0]
-        final_state[3:6] = dc_init_guess(t_init_guess[2]).transpose().tolist()[0]
-        final_state[6:9] = ddc_init_guess(t_init_guess[2]).transpose().tolist()[0] 
+        final_state[0:3] = c_init_guess(t_init_guess[1]+t_init_guess[0]+t_init_guess[2]).transpose().tolist()[0]
+        final_state[3:6] = dc_init_guess(t_init_guess[1]+t_init_guess[0]+t_init_guess[2]).transpose().tolist()[0]
+        final_state[6:9] = ddc_init_guess(t_init_guess[1]+t_init_guess[0]+t_init_guess[2]).transpose().tolist()[0] 
         final_state = np.matrix(final_state).transpose()
         # set timing :         
         phase_d.time_trajectory.append(t_init_guess[2])
-        time = np.linspace(t_init_guess[0]+t_init_guess[1],t_init_guess[2],num=NUM_NODES_FINAL,endpoint=True)  
+        time = np.linspace(t_init_guess[0]+t_init_guess[1],t_init_guess[2]+t_init_guess[1]+t_init_guess[0],num=NUM_NODES_FINAL,endpoint=True)  
         for t in time:
             state = [0]*9
             state[0:3] = c_init_guess(t).transpose().tolist()[0]
