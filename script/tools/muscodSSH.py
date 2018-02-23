@@ -12,14 +12,19 @@ cmd = "ssh"+d+"iwaki 'cd "+MUSCOD_DIR+" ; source /local/pfernbac/config.sh ; mus
 
 def call_muscod():
   success = True
+  ssh_ok = True
   print "calling muscod for file : "+DAT_NAME
   try :
     subprocess.check_output(cmd,shell=True)
     print "close PGPLOT server to continue ..."
-  except subprocess.CalledProcessError:
+  except subprocess.CalledProcessError as e :
     success = False
-    print "above error 'Error in `muscod_release'' is normal, only red ERROR message are an issue"
+    #print "above error 'Error in `muscod_release'' is normal, only red ERROR message are an issue"
+    print "Error in call to muscod : "+str(e.returncode)
+    if e.returncode == 255:
+      ssh_ok = False
+  
 
   print "muscod complete. file generated : "+CONTACT_SEQUENCE_WHOLEBODY_FILE
-  return success
+  return success,ssh_ok
 
