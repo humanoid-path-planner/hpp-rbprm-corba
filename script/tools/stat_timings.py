@@ -3,7 +3,7 @@ import plotly.graph_objs as go
 import plotly
 import numpy as np
 
-f = open("/home/pfernbac/Documents/com_ineq_test/timings_hyq_flat_v02.txt","r")
+f = open("/home/pfernbac/Documents/com_ineq_test/timings_hyq_planches_v02.txt","r")
 results={}
 quasiStaticResults={}
 OnlyDynamicResults={}
