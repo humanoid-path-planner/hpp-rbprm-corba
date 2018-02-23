@@ -126,20 +126,24 @@ def __getTimes(fullBody, configs, i, time_scale):
 
 def __getTimes(fullBody, configs, i, time_scale,use_window=0):
 		t = fullBody.getTimeAtState(i+1) - fullBody.getTimeAtState(i)
-		dt = 0.01
+                dt = 0.02
 		print "t = ",t
 		t = time_scale*t
 		print "after scale, t = ",t
 		trunk_distance =  np.linalg.norm(np.array(configs[i+1][0:3]) - np.array(configs[i][0:3]))
 		distance = max(fullBody.getEffectorDistance(i,i+1), trunk_distance)
 		# TODO : si t = 0, hardcoded ...
+                """
 		if t <= dt*6.:
 				print "WARNING : in getTime, t=0"
 				t = dt*6.
 				use_window = 2
-		times = [dt*2. , 0] #FIXME : hardcoded value depend on interpolation step choosen (not available here)
+                """
+                times = [dt*5. , 0] #FIXME : hardcoded value depend on interpolation step choosen (not available here)
+                """
 		if t > dt*14.:
 			times = [dt*4. , 0]
+                """
 		times[1] = t - 2*times[0]
 		times[1] = float((int)(math.floor(times[1]*100.))) / 100.
 		print "times : ",times

@@ -28,7 +28,7 @@ class Player (object):
 						    self.larmId : {'file': "hyq/"+self.larmId+"_com.ineq", 'effector' : self.lHand} }
 
 
-    def act(self,i, numOptim = 0, use_window = 1, friction = 0.5, optim_effectors = True, time_scale = 1,  verbose = True, draw = False, trackedEffectors = []):
+    def act(self,i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True, time_scale = 1.,  verbose = True, draw = False, trackedEffectors = []):
 	    return step(self.fullBody, self.configs, i, numOptim, self.pp, self.limbsCOMConstraints, friction, optim_effectors = optim_effectors, time_scale = time_scale, useCOMConstraints = True, use_window = use_window,
 	    verbose = verbose, draw = draw, trackedEffectors = trackedEffectors,use_velocity=self.use_velocity, pathId = self.pathId)
 
