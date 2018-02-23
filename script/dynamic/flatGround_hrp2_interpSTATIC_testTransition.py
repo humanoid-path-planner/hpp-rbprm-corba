@@ -50,7 +50,7 @@ rLegLimbOffset=[0,0,-0.035]#0.035
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 #fullBody.addLimbDatabase("./db/hrp2_rleg_db.db",rLegId,"forward")
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "fixedStep06", 0.01,"_6_DOF",limbOffset=rLegLimbOffset)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "fixedStep1", 0.01,"_6_DOF",limbOffset=rLegLimbOffset)
 fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/hrp2_rleg_db.db")
 
@@ -60,7 +60,7 @@ lLegLimbOffset=[0,0,0.035]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
 #fullBody.addLimbDatabase("./db/hrp2_lleg_db.db",lLegId,"forward")
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fixedStep06", 0.01,"_6_DOF",limbOffset=lLegLimbOffset)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fixedStep1", 0.01,"_6_DOF",limbOffset=lLegLimbOffset)
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
 fullBody.setReferenceConfig (q_ref)
@@ -164,9 +164,30 @@ tInterpolateConfigs = time.time() - tStart
 print "number of configs :", len(configsFull)
 
 
+
 import check_qp
 
-check_qp.check_contact_plan(ps,r,pp,fullBody,0,len(configsFull)-1)
+
+planValid,curves_initGuess,timings_initGuess = check_qp.check_contact_plan(ps,r,pp,fullBody,0,len(configsFull)-1)
+
+print "Contact plan valid : "+str(planValid)
+
+
+
+from planning.config import *
+from generate_contact_sequence import *
+
+beginState = 0
+endState = len(configsFull)-2
+configs=configsFull[beginState:endState+1]
+cs = generateContactSequence(fullBody,configs,beginState, endState,r,curves_initGuess =curves_initGuess , timings_initGuess =timings_initGuess)
+#player.displayContactPlan()
+
+
+filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
+cs.saveAsXML(filename, "ContactSequence")
+print "save contact sequence : ",filename
+
 
 
 """

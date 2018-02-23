@@ -116,7 +116,7 @@ tPlanning = time.time() -tStart
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp.dt=0.03
-pp.displayVelocityPath(0)
+#pp.displayVelocityPath(0)
 r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
 
 

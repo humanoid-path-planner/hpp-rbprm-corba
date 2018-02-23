@@ -76,6 +76,8 @@ def displayContactsFromPhase(phase,viewer):
     viewer.client.gui.refresh()                    
         
 
+
+
 def generateContactSequence(fb,configs,beginId,endId,viewer=None, curves_initGuess = [], timings_initGuess = []):
     print "generate contact sequence from planning : "
     global i_sphere
@@ -434,3 +436,19 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None, curves_initGue
     return cs
 
 
+def generateContactSequenceWithInitGuess(fb,configs,beginId,endId,viewer=None):
+    curves_initGuess = []
+    timings_initGuess = []
+    for id_state in range(beginId,endId-1):
+        pid = fb.isDynamicallyReachableFromState(id_state,id_state+1,True)
+        if len(pid) != 4:
+            print "Cannot compute qp initial guess for state "+str(id_state)
+            return generateContactSequence(fb,configs,beginId,endId,viewer)
+        c_qp = fb.getPathAsBezier(int(pid[0]))
+        t_qp = [ps.pathLength(int(pid[1])), ps.pathLength(int(pid[2])), ps.pathLength(int(pid[3]))]
+        curves_initGuess.append(c_qp)
+        timings_initGuess.append(t_qp)
+    
+    return generateContactSequence(fb,configs,beginId,endId,viewer, curves_initGuess, timings_initGuess)
+    
+    
