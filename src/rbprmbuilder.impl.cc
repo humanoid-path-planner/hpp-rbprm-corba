@@ -722,11 +722,14 @@ namespace hpp {
             {
                 hppDout(notice,"Projection for state "<<stateId<<" failed, try to randomly sample other initial point : ");
                 Configuration_t head = s.configuration_.head<7>();
+                size_t ecs_size = fullBody()->device_->extraConfigSpace().dimension ();
+                Configuration_t ecs = s.configuration_.tail(ecs_size);
                 BasicConfigurationShooterPtr_t shooter = BasicConfigurationShooter::create(fullBody()->device_);
                 for(std::size_t i =0; !rep.success_ && i< maxNumeSamples; ++i)
                 {
                     s.configuration_ = *shooter->shoot();
                     s.configuration_.head<7>() = head;
+                    s.configuration_.tail(ecs_size) = ecs;
                     //c = rbprm::interpolation::projectOnCom(fullBody(), problemSolver()->problem(),s,com_target,succes);
                     rep = rbprm::projection::projectToComPosition(fullBody(),com_target,s);
                     if(!rep.success_){

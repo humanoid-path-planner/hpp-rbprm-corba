@@ -135,14 +135,17 @@ class State (object):
             self.H_h =  array(rawdata)
         return self.H_h[:,:-1], self.H_h[:, -1]
         
-    def projectToCOM(self, targetCom, toNewState=False):
+    def projectToCOM(self, targetCom, maxNumSample = 0, toNewState=False):
         if toNewState:
             return self.fullBody.projectToCom(self.sId, targetCom)
         else:
-            return self.fullBody.projectStateToCOM(self.sId, targetCom)     > 0
+            return self.fullBody.projectStateToCOM(self.sId, targetCom,maxNumSample)     > 0
         
     def getComConstraint(self, limbsCOMConstraints, exceptList = []):
         return get_com_constraint(self.fullBody, self.sId, self.cl.getConfigAtState(self.sId), limbsCOMConstraints, interm = self.isIntermediate, exceptList = exceptList)
+
+    def contactsVariations(self,state):
+        return self.fullBody.getContactsVariations(self.sId,state.sId)
 
 
 
