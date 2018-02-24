@@ -34,7 +34,7 @@ r.client.gui.captureTransformOnRefresh(False)
 
 
 nodes = ["hrp2_14"]
-r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2018/yaml/platform.yaml",nodes)
+r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2018/yaml/stairs_fail.yaml",nodes)
 r(q_init)
 r.client.gui.captureTransform()
 r.client.gui.captureTransformOnRefresh(True)

@@ -1,6 +1,6 @@
 import subprocess
 import os
-DIR = "/home/pfernbac/Documents/com_ineq_test/"
+DIR = "/local/fernbac/bench_iros18/constraints_obj/"
 STAB_NAME = "stability"
 CONS_NAME = "constraints"
 KIN_NAME = "kinematics"
