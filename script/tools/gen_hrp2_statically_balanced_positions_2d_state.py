@@ -21,7 +21,7 @@ srdfSuffix = ""
 fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz", [-0.3,0.3, -0.3, 0.3, 0.5, 0.75])
+fullBody.setJointBounds ("base_joint_xyz", [-0.3,0.3, -0.3, 0.3, 0.6, 0.7])
 fullBody.setJointBounds ("CHEST_JOINT0", [0.,0.])
 fullBody.setJointBounds ("CHEST_JOINT1", [0.,0.])
 fullBody.setJointBounds ("HEAD_JOINT0", [0.,0.])
@@ -217,7 +217,8 @@ def _boundSO3(q, num_limbs):
 def _genbalance(limbs):
 	for i in range(10000):
 		q = fullBody.client.basic.robot.shootRandomConfig()
-		q = _boundSO3(q, len(limbs))
+		q[3:7] = [1,0,0,0]
+		#q = _boundSO3(q, len(limbs))
 		if fullBody.isConfigValid(q)[0] and fullBody.isConfigBalanced(q, limbs, 5) and __loosely_z_aligned(limbs[0], q) and __loosely_z_aligned(limbs[1], q):
 		#~ if fullBody.isConfigValid(q)[0] and  __loosely_z_aligned(limbs[0], q) and __loosely_z_aligned(limbs[1], q):
 			return q
@@ -239,13 +240,15 @@ def genStates(fullbody,limbs, num_samples = 1000, coplanar = True):
 		states.append(s)
 	return states
 
-def genStateWithOneStep(fullbody,limbs, num_samples = 1000, coplanar = True):
+def genStateWithOneStep(fullbody,limbs, num_samples = 100, coplanar = True):
 	q_0 = fullBody.getCurrentConfig(); 
 	#~ fullBody.getSampleConfig()
 	qs=[] 
 	states = []
 	assert(len(limbs) == 2 and "only implemented for 2 limbs in contact for now")
-	for i in range(num_samples):
+	it = 0
+	while len(states) < num_samples and it < 5000:
+		i = len(states)
 		if(coplanar):
 			q0 = fullBody.generateGroundContact(limbs)
 		else:
@@ -273,6 +276,7 @@ def genStateWithOneStep(fullbody,limbs, num_samples = 1000, coplanar = True):
 			print "Step "+str(i)+" done."
 		else :
 			print "cannot make the step."
+		it +=1
 	print "Done generating pairs of states, found : "+str(len(states))+" pairs."
 	return states
 

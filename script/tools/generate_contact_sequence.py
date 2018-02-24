@@ -412,6 +412,7 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None, curves_initGue
         phase_d.time_trajectory.append(t_init_guess[2])
         time = np.linspace(t_init_guess[0]+t_init_guess[1],t_init_guess[2]+t_init_guess[1]+t_init_guess[0],num=NUM_NODES_FINAL,endpoint=True)  
         for t in time:
+            t = min(t,c_init_guess.max())
             state = [0]*9
             state[0:3] = c_init_guess(t).transpose().tolist()[0]
             state[3:6] = dc_init_guess(t).transpose().tolist()[0]
