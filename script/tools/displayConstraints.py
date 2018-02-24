@@ -1,6 +1,6 @@
 
-id = 2
-leg = rhLegId
+id = 5
+leg = lLegId
 
 from disp_bezier import *
 from constraint_to_dae import *
