@@ -1,7 +1,7 @@
 
-nodes = ["hyq"]
+nodes = ["hyq","sphere_CoM"]
 nodes = ["hyq","Vec_Acceleration","Vec_Velocity"]
-r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2017/yaml/detour_ctc_geom.yaml",nodes)
+r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2018/yaml/hyq_side_fail.yaml",nodes)
 r(q_init)
 r.client.gui.captureTransformOnRefresh(True)
 player.displayContactPlan(1)
