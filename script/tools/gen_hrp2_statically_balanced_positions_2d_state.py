@@ -213,13 +213,28 @@ def _boundSO3(q, num_limbs):
 	q[3:7] = __eulerToQuat(0, 0, rot_z)
 	return q
 	
+def _feet_far_enough(fullBody,q):
+	fullBody.setCurrentConfig(q)
+	c = fullBody.getCenterOfMass()
+	rf = fullBody.getJointPosition('RLEG_JOINT5')
+	lf = fullBody.getJointPosition('LLEG_JOINT5')
+	rd = 0
+	ld = 0
+	for i in range(3):
+		rd += (c[i]-rf[i])*(c[i]-rf[i])
+		ld += (c[i]-lf[i])*(c[i]-lf[i])
+	if rd < 0.2 or ld < 0.2:
+		return False
+	else:
+		return True
+	
 
 def _genbalance(limbs):
 	for i in range(10000):
 		q = fullBody.client.basic.robot.shootRandomConfig()
 		q[3:7] = [1,0,0,0]
 		#q = _boundSO3(q, len(limbs))
-		if fullBody.isConfigValid(q)[0] and fullBody.isConfigBalanced(q, limbs, 5) and __loosely_z_aligned(limbs[0], q) and __loosely_z_aligned(limbs[1], q):
+		if fullBody.isConfigValid(q)[0] and fullBody.isConfigBalanced(q, limbs, 5) and __loosely_z_aligned(limbs[0], q) and __loosely_z_aligned(limbs[1], q) and _feet_far_enough(fullBody,q):
 		#~ if fullBody.isConfigValid(q)[0] and  __loosely_z_aligned(limbs[0], q) and __loosely_z_aligned(limbs[1], q):
 			return q
 	print "can't generate equilibrium config"
