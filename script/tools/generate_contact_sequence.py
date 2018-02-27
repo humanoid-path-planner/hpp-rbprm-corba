@@ -73,7 +73,8 @@ def displayContactsFromPhase(phase,viewer):
         addContactLandmark(phase.LH_patch.placement*MLhand_display,viewer.color.yellow ,viewer)
     if phase.RH_patch.active:
         addContactLandmark(phase.RH_patch.placement*MRhand_display,viewer.color.blue ,viewer)                 
-    viewer.client.gui.refresh()                    
+    viewer.client.gui.refresh() 
+    
         
 
 

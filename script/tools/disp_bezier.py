@@ -31,14 +31,14 @@ def displayBezierWaypoints(r,wp,step=0.001,color=[0.85, 0.75, 0.15, 1.0],name=No
 
 def showPath(r,pp,pid):
     if len(pid)==1:
-        pp.displayPath(int(pid[0]),color=r.color.blue)
+        pp.displayPath(int(pid[0]),color=r.color.red)
         r.client.gui.setVisibility('path_'+str(int(pid[0]))+'_root','ALWAYS_ON_TOP')
     elif len(pid)==4:
-        pp.displayPath(int(pid[1]),color=r.color.brown)
+        pp.displayPath(int(pid[1]),color=r.color.blue)
         r.client.gui.setVisibility('path_'+str(int(pid[1]))+'_root','ALWAYS_ON_TOP')  
         pp.displayPath(int(pid[2]),color=r.color.red)
         r.client.gui.setVisibility('path_'+str(int(pid[2]))+'_root','ALWAYS_ON_TOP')  
-        pp.displayPath(int(pid[3]),color=r.color.yellow)
+        pp.displayPath(int(pid[3]),color=r.color.blue)
         r.client.gui.setVisibility('path_'+str(int(pid[3]))+'_root','ALWAYS_ON_TOP')
     elif len(pid) == 3:
         print "only two phases, not implemented yet."

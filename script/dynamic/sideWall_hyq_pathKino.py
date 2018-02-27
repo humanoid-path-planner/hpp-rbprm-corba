@@ -48,7 +48,7 @@ afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.6, 0.03, 0.00005])
 afftool.loadObstacleModel (packageName, "sideWall", "planning",r)
 #r.loadObstacleModel (packageName, "ground", "planning")
-afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
+#afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 #r.addLandmark(r.sceneName,1)
 
 # Setting initial and goal configurations
@@ -78,7 +78,7 @@ ps.selectPathPlanner("DynamicPlanner")
 #ps.client.problem.prepareSolveStepByStep()
 
 q_far = q_init[::]
-q_far[2] = -3
+q_far[2] = 10
 r(q_far)
 
 #r.solveAndDisplay("rm",1,0.01)
@@ -101,7 +101,7 @@ from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp.dt=0.03
 
-pp.displayVelocityPath(0)
+#pp.displayVelocityPath(0)
 
 
 """

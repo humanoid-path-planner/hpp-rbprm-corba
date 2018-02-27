@@ -86,7 +86,7 @@ rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 q_goal = q_init [::]
 
 
-q_goal [0:3] = [1.49, -0.2, 1.25]; r (q_goal)
+q_goal [0:3] = [1.42, -0.2, 1.2]; r (q_goal)
 #~ q_goal [0:3] = [1.2, -0.65, 1.1]; r (q_goal)
 
 

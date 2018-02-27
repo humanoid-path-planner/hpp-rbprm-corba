@@ -1,7 +1,7 @@
 
 nodes = ["hyq","sphere_CoM"]
 nodes = ["hyq","Vec_Acceleration","Vec_Velocity"]
-r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2018/yaml/hyq_side_fail.yaml",nodes)
+r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2018/yaml/hyq_side_contact_plan.yaml",nodes)
 r(q_init)
 r.client.gui.captureTransformOnRefresh(True)
 player.displayContactPlan(1)
@@ -32,9 +32,9 @@ r.client.gui.captureTransformOnRefresh(False)
 
 
 
-
+nodes = ["hrp2_14",'s']
 nodes = ["hrp2_14"]
-r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2018/yaml/stairs_fail.yaml",nodes)
+r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2018/yaml/stairs_wholeBody.yaml",nodes)
 r(q_init)
 r.client.gui.captureTransform()
 r.client.gui.captureTransformOnRefresh(True)
@@ -44,7 +44,7 @@ r.client.gui.captureTransformOnRefresh(False)
 
 
 nodes = ['world/pinocchio']
-gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2018/yaml/platform.yaml",nodes)
+gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2018/yaml/stairs_wholeBody.yaml",nodes)
 #gui.captureTransform()
 gui.captureTransformOnRefresh(True)
 gui.captureTransformOnRefresh(False)

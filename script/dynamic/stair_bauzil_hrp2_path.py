@@ -62,7 +62,7 @@ ps.client.problem.setParameter("vMax",omniORB.any.to_any(vMax))
 ps.client.problem.setParameter("sizeFootX",omniORB.any.to_any(0.24))
 ps.client.problem.setParameter("sizeFootY",omniORB.any.to_any(0.14))
 r = Viewer (ps,displayArrows=True)
-r.addLandmark(r.sceneName,1)
+#r.addLandmark(r.sceneName,1)
 
 
 
@@ -72,7 +72,7 @@ from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
 afftool.loadObstacleModel (packageName, "stair_bauzil", "planning", r,reduceSizes=[0.1,0])
-afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
+#afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 
 
 q_init = rbprmBuilder.getCurrentConfig ();
@@ -86,7 +86,7 @@ rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 q_goal = q_init [::]
 q_goal [3:7] =  [ 0.98877108,  0.        ,  0.14943813,  0.        ]
 q_goal[8] = 0
-q_goal [0:3] = [1.49, -0.82, 1.25]; r (q_goal)
+q_goal [0:3] = [1.40, -0.82, 1.18]; r (q_goal)
 #~ q_goal [0:3] = [1.2, -0.65, 1.1]; r (q_goal)
 
 
@@ -104,13 +104,13 @@ ps.selectDistance("KinodynamicDistance")
 ps.selectPathPlanner("DynamicPlanner")
 
 
-#ps.client.problem.prepareSolveStepByStep()
+ps.client.problem.prepareSolveStepByStep()
 
-#ps.client.problem.finishSolveStepByStep()
+ps.client.problem.finishSolveStepByStep()
 
 #r.solveAndDisplay("rm",1,0.01)
 
-ps.solve()
+#ps.solve()
 
 # was 5.5
 
@@ -119,13 +119,13 @@ ps.solve()
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 #r.client.gui.removeFromGroup("rm",r.sceneName)
-pp.displayVelocityPath(0)
+#pp.displayVelocityPath(0)
 pp.speed=0.3
 #pp(0)
 
 
 
 q_far = q_init[::]
-q_far[2] = -3
+q_far[2] = +10
 r(q_far)
 

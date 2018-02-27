@@ -179,24 +179,30 @@ player = Player(fullBody,pp,tp,configs,draw=False,optim_effector=False,use_veloc
 
 
 
-player.displayContactPlan()
+#player.displayContactPlan()
 
 
 
 from planning.config import *
 from generate_contact_sequence import *
 
-beginState = 0
-endState = len(configs)-1
-
+beginState = 5
+endState = 14
+configs=configs[beginState:endState+1]
 cs = generateContactSequence(fullBody,configs,beginState, endState,r)
 
-
+"""
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")
 print "save contact sequence : ",filename
 
 
+import planning.generate_muscod_problem as mp
+filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
+mp.generate_muscod_problem(filename,True)
+
+
+"""
 
 """
 
@@ -243,3 +249,12 @@ print "####################################"
 
 """
 
+
+"""
+from generate_contact_sequence import *
+
+configs=configs[5:7]
+cs = generateContactSequence(fullBody,configs,5, 6,r)
+configs=configs[6:8]
+cs = generateContactSequence(fullBody,configs,6, 7,r)
+"""

@@ -56,6 +56,11 @@ r.stopCapture ()
 
 
 
+gui.startCapture (1,"capture/capture","png")
+
+gui.stopCapture (1)
+
+
 
 tp.r.startCapture ("capture/capture","png")
 time.sleep(1)
@@ -68,7 +73,7 @@ tp.r.stopCapture ()
 """
 
 ## avconv (bash) commands
-avconv -i capture_1_%d.png  -r 25 -vcodec mpeg4 -filter:v "setpts=2.*PTS" -qscale 1 -mbd rd -flags +mv4+aic -trellis 2 -cmp 2 -subcmp 2 -g 300 -y pg_justin_straightLine.mp4
+avconv -i capture_1_%d.png  -r 25 -vcodec mpeg4 -filter:v "setpts=2.*PTS" -qscale 1 -mbd rd -flags +mv4+aic -trellis 2 -cmp 2 -subcmp 2 -g 300 -y wholeBody_stairs.mp4
 
 avconv -i capture_0_%d.png -r 30 -vcodec mpeg4 -qscale 1 -mbd rd -flags +mv4+aic -trellis 2 -cmp 2 -subcmp 2 -g 300 -pass 2  hyq_darpa.mp4
 

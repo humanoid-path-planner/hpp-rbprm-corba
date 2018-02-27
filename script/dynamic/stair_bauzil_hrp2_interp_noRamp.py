@@ -44,7 +44,8 @@ lLeg = 'LLEG_JOINT0'
 lLegOffset = [0,0,-0.105]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,lLegNormal, lLegx, lLegy, 50000, "forward", 0.01,"_6_DOF")
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,lLegNormal, lLegx, lLegy, 50000, "manipulability", 0.01,"_6_DOF")
+
 
 """
 rarmId = 'hrp2_rarm_rom'
@@ -55,6 +56,7 @@ rArmNormal = [0,0,1]
 rArmx = 0.024; rArmy = 0.024
 #disabling collision for hook
 fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 100000, "manipulability", 0.01, "_6_DOF", True)
+
 """
 
 rLegId = 'hrp2_rleg_rom'
@@ -62,7 +64,7 @@ rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,0,-0.105]
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "forward", 0.01,"_6_DOF")
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "manipulability", 0.01,"_6_DOF")
 
 
 """
@@ -164,19 +166,19 @@ pp.dt=0.001
 configs = fullBody.interpolate(0.05,pathId=0,robustnessTreshold = 0, filterStates = True)
 print "number of configs :", len(configs)
 r(configs[-1])
-from check_qp import *
 
 
 
-"""
+
+
 f = open("/home/pfernbac/Documents/com_ineq_test/log_success.log","a")
 f.write("num states : "+str(len(configs))+" \n")
 f.close()
+
+
+
+
 """
-
-
-
-
 
 from fullBodyPlayerHrp2 import Player
 player = Player(fullBody,pp,tp,configs,draw=False,optim_effector=False,use_velocity=False,pathId = 0)
@@ -184,8 +186,11 @@ player = Player(fullBody,pp,tp,configs,draw=False,optim_effector=False,use_veloc
 
 
 player.displayContactPlan()
+"""
 
 
+"""
+from check_qp import *
 check_one_transition(ps,fullBody,s0,s2)
 check_contact_planps,r,pp,fullBody,0,len(configs)-1)
 
@@ -202,7 +207,7 @@ filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")
 print "save contact sequence : ",filename
 
-
+"""
 
 """
 

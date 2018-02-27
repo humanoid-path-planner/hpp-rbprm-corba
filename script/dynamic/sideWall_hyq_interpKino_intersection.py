@@ -38,10 +38,10 @@ fullBody.setJointBounds("base_joint_xyz", [0.8,5.6, -0.5, 0.5, 0.4, 1.2])
 dynamic=True
 
 ps = tp.ProblemSolver(fullBody)
-r = tp.Viewer (ps,viewerClient=tp.r.client, displayCoM = True)
+r = tp.Viewer (ps,viewerClient=tp.r.client)
 
 #  Setting a number of sample configurations used
-nbSamples = 50000
+nbSamples = 20000
 rootName = 'base_joint_xyz'
 #  Creating limbs
 # cType is "_3_DOF": positional constraint, but no rotation (contacts are punctual)
@@ -123,7 +123,7 @@ r(q_init)
 # computing the contact sequence
 
 #~ configs = fullBody.interpolate(0.08,pathId=1,robustnessTreshold = 2, filterStates = True)
-configs = fullBody.interpolate(0.05,pathId=0,robustnessTreshold = 1, filterStates = True)
+configs = fullBody.interpolate(0.001,pathId=0,robustnessTreshold = 1, filterStates = True)
 r(configs[-1])
 
 
@@ -203,6 +203,13 @@ r([1.46,0,0.851192,1,0,0,0,-0.32001,1.18232,-1.5504,-0.305161,-0.139056,1.37011,
 
 
 
+import generate_contact_sequence_hyq
+
+id = 6
+leg = rhLegId
+
+configs=configs[6:8]
+cs = generate_contact_sequence_hyq.generateContactSequence(fullBody,configs,6, 7,r)
 
 
 
