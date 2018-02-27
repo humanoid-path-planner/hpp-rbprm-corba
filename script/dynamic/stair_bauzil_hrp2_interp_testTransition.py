@@ -189,7 +189,8 @@ from generate_contact_sequence import *
 beginState = 5
 endState = 14
 configs=configs[beginState:endState+1]
-cs = generateContactSequence(fullBody,configs,beginState, endState,r)
+#cs = generateContactSequence(fullBody,configs,beginState, endState,r)
+cs = generateContactSequenceWithInitGuess(ps,fullBody,configs,beginState, endState,r)
 
 """
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE

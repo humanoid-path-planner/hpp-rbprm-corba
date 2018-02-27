@@ -15,6 +15,8 @@ pp.dt = 0.0001
 showPath(r,pp,pid)
 
 displayBezierConstraints(r)
+x = [0.781019, 0.243753, 0.788639]
+
 createSphere('s',r)
 moveSphere('s',r,x)
 
