@@ -3,7 +3,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
-
+import time
 from display_tools import *
 from constraint_to_dae import *
 
@@ -122,10 +122,11 @@ pp.dt = 0.001
 r(q_init)
 # computing the contact sequence
 
+tStart = time.time()
 #~ configs = fullBody.interpolate(0.08,pathId=1,robustnessTreshold = 2, filterStates = True)
 configs = fullBody.interpolate(0.001,pathId=0,robustnessTreshold = 1, filterStates = True)
 r(configs[-1])
-
+tInterpolateConfigs = time.time() - tStart
 
 
 
@@ -142,6 +143,7 @@ from fullBodyPlayer import Player
 player = Player(fullBody,pp,tp,configs,draw=True,optim_effector=False,use_velocity=dynamic,pathId = 1)
 
 player.displayContactPlan()
+
 
 
 """

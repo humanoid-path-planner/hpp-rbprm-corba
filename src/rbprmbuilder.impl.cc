@@ -448,8 +448,7 @@ namespace hpp {
             config [iDof] = (double)dofArray[(_CORBA_ULong)iDof];
         }
         // fill the vector by zero
-        hppDout (info, "config dimension: " <<configDim
-           <<",  deviceDim "<<deviceDim);
+        //hppDout (info, "config dimension: " <<configDim <<",  deviceDim "<<deviceDim);
         if(configDim != deviceDim){
             throw hpp::Error ("dofVector Does not match");
         }
@@ -3036,6 +3035,7 @@ assert(s2 == s1 +1);
     {
         try
         {
+            hppDout(notice,"Add new contact : ");
             if(lastStatesComputed_.size() <= stateId)
                 throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
             State ns = lastStatesComputed_[stateId];
@@ -3046,6 +3046,8 @@ assert(s2 == s1 +1);
             fcl::Vec3f n; for(int i =0; i<3; ++i) n[i] = config[i];
 
             projection::ProjectionReport rep = projection::projectStateToObstacle(fullBody(),limb, fullBody()->GetLimbs().at(limb), ns, n,p);
+            hppDout(notice,"Projection State to obstacle success : "<<rep.success_);
+            hppDout(notice,"report status : "<<rep.status_);
             ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
             CollisionValidationPtr_t val = fullBody()->GetCollisionValidation();
             rep.success_ =  rep.success_ &&  val->validate(rep.result_.configuration_,rport);
