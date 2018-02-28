@@ -35,6 +35,7 @@ def parseBenchmark(tPlanningTab):
   dic.append(["REACHABLE_STACK:",0.,0])
   dic.append(["REACHABLE_CALL_CENTROIDAL:",0.,0])
   dic.append(["IS_REACHABLE_DYNAMIC:",0.,0])
+  dic.append(["SOLVE_TRANSITION_ONE_STEP:",0.,0])
 
   import subprocess
   process = subprocess.Popen("pidof hpp-rbprm-server".split(),stdout=subprocess.PIPE)
@@ -101,6 +102,7 @@ def parseBenchmark(tPlanningTab):
     print "% kinematic constraints : called "+str(dic[18][2])+" times, average of "+str(dic[18][1]/dic[18][2])+" ms." 
     print "% stack matrices        : called "+str(dic[19][2])+" times, average of "+str(dic[19][1]/dic[19][2])+" ms." 
     print "# Is Reachable Dynamic  : called "+str(dic[20][2])+" times, average of "+str(dic[20][1]/dic[20][2])+" ms." 
+    print "# Qp transition         : called "+str(dic[21][2])+" times, average of "+str(dic[21][1]/dic[21][2])+" ms." 
 
 
 
