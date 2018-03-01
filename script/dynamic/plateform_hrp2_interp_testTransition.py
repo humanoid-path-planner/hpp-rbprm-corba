@@ -170,7 +170,20 @@ sf2 = State(fullBody,q=q_goal,limbsIncontact=[lLegId,rLegId])
 
 pid = fullBody.isDynamicallyReachableFromState(smid.sId,smid2.sId,True)
 import disp_bezier
+pp.dt = 0.00001
 disp_bezier.showPath(r,pp,pid)
+
+x = [0.776624, 0.219798, 0.846351]
+
+
+moveSphere('s',r,x)
+displayBezierConstraints(r)
+
+path = "/local/dev_hpp/screenBlender/iros2018/polytopes/platform/path"
+for i in range(1,4):
+  r.client.gui.writeNodeFile('path_'+str(int(pid[i]))+'_root',path+str(i-1)+'.obj')
+
+r.client.gui.writeNodeFile('s',path+'_S.stl')
 
 """
 com = fullBody.getCenterOfMass()
