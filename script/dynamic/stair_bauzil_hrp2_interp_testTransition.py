@@ -159,9 +159,31 @@ from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 pp.dt=0.001
 
-configs = fullBody.interpolate(0.005,pathId=0,robustnessTreshold = 0, filterStates = True)
+configs = fullBody.interpolate(0.001,pathId=0,robustnessTreshold = 1, filterStates = True)
 print "number of configs :", len(configs)
 r(configs[-1])
+
+
+noCOQP = 0
+
+for i in range(len(configs)-2):
+  pid = fullBody.isDynamicallyReachableFromState(i,i+1)
+  if len(pid)==0:
+    noCOQP +=1
+
+
+
+
+f = open("/local/fernbac/bench_iros18/success/log_successStairs.log","a")
+f.write("num states : "+str(len(configs))+"\n")
+if noCOQP>0:
+  f.write("fail, with infeasibles transitions "+str(noCOQP)+"\n")
+else:
+  f.write("all transition feasibles\n")
+f.close()
+
+
+
 
 
 """
@@ -172,7 +194,7 @@ f.close()
 
 
 
-
+"""
 
 from fullBodyPlayerHrp2 import Player
 player = Player(fullBody,pp,tp,configs,draw=False,optim_effector=False,use_velocity=False,pathId = 0)
@@ -191,7 +213,7 @@ endState = 14
 configs=configs[beginState:endState+1]
 #cs = generateContactSequence(fullBody,configs,beginState, endState,r)
 cs = generateContactSequenceWithInitGuess(ps,fullBody,configs,beginState, endState,r)
-
+"""
 """
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")

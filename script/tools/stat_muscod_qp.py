@@ -33,7 +33,7 @@ def callMuscodBetweenTwoState(fullBody,s0,s1,c_qp = [], t_qp = []):
 
 
 
-states = genStateWithOneStep(fullBody,limbs[0], 500,False)
+states = genStateWithOneStep(fullBody,limbs[0], 100,False)
 
 name = "/local/fernbac/bench_iros18/muscod_qp/one_step"
 file_exist = True

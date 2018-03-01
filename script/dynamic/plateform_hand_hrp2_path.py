@@ -30,7 +30,7 @@ urdfNameRom =  ['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
 vMax = omniORB.any.to_any(0.3);
-aMax = omniORB.any.to_any(0.2);
+aMax = omniORB.any.to_any(1);
 #aMax = omniORB.any.to_any(0.3);
 extraDof = 6
 mu=omniORB.any.to_any(MU)
@@ -40,7 +40,7 @@ rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, pa
 #rbprmBuilder.setJointBounds ("base_joint_xyz", [-1.25,2, -0.5, 5.5, 0.6, 1.8])
 rbprmBuilder.setJointBounds ("base_joint_xyz", [-1,2, -0.5, 0.5, 0.5, 0.8])
 rbprmBuilder.setJointBounds('CHEST_JOINT0',[0,0])
-rbprmBuilder.setJointBounds('CHEST_JOINT1',[-0.35,0.1])
+rbprmBuilder.setJointBounds('CHEST_JOINT1',[-0.55,0.85])
 rbprmBuilder.setJointBounds('HEAD_JOINT0',[0,0])
 rbprmBuilder.setJointBounds('HEAD_JOINT1',[0,0])
 
@@ -79,7 +79,7 @@ afftool.visualiseAffordances('Support', r, r.color.lightBrown)
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init[3:7] = [1,0,0,0]
 q_init [0:3] = [0.3, 0, 0.58]; r (q_init)
-
+q_init[8] = 0.8
 #q_init[3:7] = [0.7071,0,0,0.7071]
 #q_init [0:3] = [1, 1, 0.65]
 
@@ -89,7 +89,7 @@ q_goal = q_init [::]
 
 q_goal[3:7] = [1,0,0,0]
 q_goal [0:3] = [1.28, 0, 0.58]; r (q_goal)
-
+q_goal[8] = 0
 r (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
 
@@ -119,8 +119,8 @@ tPlanning = time.time() -tStart
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 pp.dt=0.03
-#pp.displayVelocityPath(0)
-#r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
+pp.displayVelocityPath(0)
+r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
 
 
 """

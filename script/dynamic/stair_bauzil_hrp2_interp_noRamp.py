@@ -169,11 +169,23 @@ r(configs[-1])
 
 
 
+noCOQP = 0
+
+for i in range(len(configs)-1):
+  pid = fullBody.isDynamicallyReachableFromState(i,i+1)
+  if len(pid)==0:
+    noCOQP +=1
 
 
-f = open("/home/pfernbac/Documents/com_ineq_test/log_success.log","a")
-f.write("num states : "+str(len(configs))+" \n")
+
+
+f = open("/local/fernbac/bench_iros18/success/log_successStairsNoRamp.log","a")
+if noCOQP>0:
+  f.write("fail, with "+str(noCOQP)+" infeasibles transitions\n")
+else:
+  f.write("all transition feasibles\n")
 f.close()
+
 
 
 

@@ -149,7 +149,8 @@ createSphere('s',r)
 n = [0,0,1]
 p = [0,0.1,0]
 
-
+q_init[-6:-3] = [0.2,0,0]
+q_goal[-6:-3] = [0.1,0,0]
 sf = State(fullBody,q=q_goal,limbsIncontact=[lLegId,rLegId])
 si = State(fullBody,q=q_init,limbsIncontact=[lLegId,rLegId])
 
@@ -164,11 +165,18 @@ assert(success)
 r(smid.q())
 
 sf2 = State(fullBody,q=q_goal,limbsIncontact=[lLegId,rLegId])
+
+
+
+pid = fullBody.isDynamicallyReachableFromState(smid.sId,smid2.sId,True)
+import disp_bezier
+disp_bezier.showPath(r,pp,pid)
+
 """
 com = fullBody.getCenterOfMass()
 com[1] = 0
 """
-
+"""
 pids = []
 pids += [fullBody.isDynamicallyReachableFromState(si.sId,smid.sId)]
 pids += [fullBody.isDynamicallyReachableFromState(smid.sId,smid2.sId)]
@@ -181,7 +189,7 @@ for pid in pids :
     #r.client.gui.setVisibility('path_'+str(pid)+'_root','ALWAYS_ON_TOP')
   else:
     print "fail."
-
+"""
 """
 
 n = [0,0,1]

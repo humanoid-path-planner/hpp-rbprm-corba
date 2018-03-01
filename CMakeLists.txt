@@ -288,6 +288,7 @@ install(FILES
     data/meshes/siggraph_asia/stairs_lower.stl
   data/meshes/flat_hole.stl
   data/meshes/cross_gap.stl
+  data/meshes/cross_gap2.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
   )
 

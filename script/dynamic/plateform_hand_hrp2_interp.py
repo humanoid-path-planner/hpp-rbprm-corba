@@ -126,8 +126,8 @@ r(q_goal)
 r(q_init)
 
 
-#fullBody.setStartState(q_init,[lLegId,rLegId])
-#fullBody.setEndState(q_goal,[lLegId,rLegId])
+fullBody.setStartState(q_init,[lLegId,rLegId])
+fullBody.setEndState(q_goal,[lLegId,rLegId])
 
 
 #p = fullBody.computeContactPointsAtState(init_sid)
@@ -146,13 +146,13 @@ pp = PathPlayer (fullBody.client.basic, r)
 
 import fullBodyPlayerHrp2
 
-"""
+
 tStart = time.time()
-configsFull = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = 1, filterStates = False)
+configsFull = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = 0, filterStates = False)
 tInterpolateConfigs = time.time() - tStart
 print "number of configs :", len(configsFull)
-"""
 
+"""
 q_init[0] += 0.05
 createSphere('s',r)
 
@@ -189,7 +189,7 @@ r(smid2.q())
 sf2,success = StateHelper.removeContact(smid2,larmId)
 sf2.projectToCOM([1.3,0,0.82])
 
-
+"""
 
 """
 com = fullBody.getCenterOfMass()

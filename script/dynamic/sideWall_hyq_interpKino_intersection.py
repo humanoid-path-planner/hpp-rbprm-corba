@@ -128,11 +128,28 @@ configs = fullBody.interpolate(0.001,pathId=0,robustnessTreshold = 1, filterStat
 r(configs[-1])
 tInterpolateConfigs = time.time() - tStart
 
+noCOQP = 0
+
+for i in range(len(configs)-2):
+  pid = fullBody.isDynamicallyReachableFromState(i,i+1)
+  if len(pid)==0:
+    noCOQP +=1
 
 
 
 
+f = open("/local/fernbac/bench_iros18/success/log_successSideWall.log","a")
+f.write("num states : "+str(len(configs))+"\n")
+if noCOQP>0:
+  f.write("fail, with infeasibles transitions "+str(noCOQP)+"\n")
+else:
+  f.write("all transition feasibles\n")
+f.close()
 
+
+
+
+"""
 print "number of configs =", len(configs)
 r(configs[-1])
 
@@ -143,6 +160,8 @@ from fullBodyPlayer import Player
 player = Player(fullBody,pp,tp,configs,draw=True,optim_effector=False,use_velocity=dynamic,pathId = 1)
 
 player.displayContactPlan()
+"""
+
 
 
 
@@ -196,7 +215,7 @@ camera = [0.5681925415992737,
 r.client.gui.setCameraTransform(0,camera)
 
 """
-
+"""
 # infeasible : 
 r([1.46,0,0.851192,1,0,0,0,-0.32001,1.18232,-1.5504,-0.305161,-0.139056,1.37011,-0.36127,1.20462,-1.55472,-0.361812,0.407251,0.775043,0.2,0,0.000953452,0,0,0.000381381,])
 
@@ -212,6 +231,6 @@ leg = rhLegId
 
 configs=configs[6:8]
 cs = generate_contact_sequence_hyq.generateContactSequence(fullBody,configs,6, 7,r)
-
+"""
 
 
