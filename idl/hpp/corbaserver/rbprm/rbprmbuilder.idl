@@ -260,7 +260,8 @@ module hpp
     void addLimb(in string id, in string limb, in string effector, in floatSeq offset, in floatSeq normal,
                  in double x, in double y, in unsigned long samples, in string heuristicName,
                  in double resolution, in string contactType,  in double disableEffectorCollision,
-                 in double grasp,in floatSeq limbOffset) raises (Error);
+                 in double grasp,in floatSeq limbOffset,
+                 in string kinematicConstraintsPath, in double kinematicConstraintsMin) raises (Error);
 
     /// Add a limb not used for contact generation
     /// \param id user given name of the new limb

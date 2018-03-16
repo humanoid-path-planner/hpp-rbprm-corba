@@ -176,14 +176,17 @@ class FullBody (object):
      # This can be problematic in terms of performance. The default value is 3 cm.
      # \param contactType whether the contact is punctual ("_3_DOF") or surfacic ("_6_DOF")
      # \param disableEffectorCollision: whether collision detection should be disabled for end effector bones
-     def addLimb(self, limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution, contactType="_6_DOF",disableEffectorCollision = False, grasp =False,limbOffset=[0,0,0]):
+     # \param kinematicConstraintsPath : path that point to the .obj file containing the kinematic constraints of the limb,
+     # if not set the default is "package://hpp-rbprm-corba/com_inequalities/"+name+"_com_constraints.obj"
+     # \param kinematicConstraintsMin : add an additionnal inequalities on the kinematicConstraints, of normal (0,0,1) and origin (0,0,kinematicConstraintsMin)
+     def addLimb(self, limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution, contactType="_6_DOF",disableEffectorCollision = False, grasp =False,limbOffset=[0,0,0],kinematicConstraintsPath = "", kinematicConstraintsMin = 0.):
           boolValEff = 0.
           if(disableEffectorCollision):
                 boolValEff = 1.
           graspv = 0.
           if(grasp):
                 graspv = 1.
-          self.client.rbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution,contactType, boolValEff,graspv,limbOffset)
+          self.client.rbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution,contactType, boolValEff,graspv,limbOffset,kinematicConstraintsPath,kinematicConstraintsMin)
           self.limbNames += [limbId]
 
      ## Returns the configuration of a limb described by a sample
