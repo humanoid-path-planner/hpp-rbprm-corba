@@ -1237,7 +1237,16 @@ namespace hpp {
         try
         {
             std::vector<std::string> names = stringConversion(contactLimbs);
-            SetPositionAndNormal(startState_,fullBody(), configuration, names);
+            core::ValidationReportPtr_t validationReport;
+            bool validity = problemSolver()->problem ()->configValidations()->validate(dofArrayToConfig (fullBody()->device_, configuration), validationReport);
+            if(validity){
+                SetPositionAndNormal(startState_,fullBody(), configuration, names);
+            }
+            else{
+                std::ostringstream oss;
+                oss << "Start configuration is not valid :  "<<*validationReport;
+                throw std::runtime_error (oss.str());
+            }
         }
         catch(std::runtime_error& e)
         {
@@ -1281,7 +1290,16 @@ namespace hpp {
         try
         {
             std::vector<std::string> names = stringConversion(contactLimbs);
-            SetPositionAndNormal(endState_,fullBody(), configuration, names);
+            core::ValidationReportPtr_t validationReport;
+            bool validity = problemSolver()->problem ()->configValidations()->validate(dofArrayToConfig (fullBody()->device_, configuration), validationReport);
+            if(validity){
+                SetPositionAndNormal(endState_,fullBody(), configuration, names);
+            }
+            else{
+                std::ostringstream oss;
+                oss << "End configuration is not valid :  "<<*validationReport;
+                throw std::runtime_error (oss.str());
+            }
         }
         catch(std::runtime_error& e)
         {
