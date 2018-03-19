@@ -161,7 +161,7 @@ module hpp
     /// \param sampleId id of the desired samples
     /// \return dofArray Array of degrees of freedom corresponding to the current configuration of the robot
     /// , to which the desired limb configuration has been assigned.
-    floatSeq getSampleConfig(in string sampleName, in unsigned short sampleId) raises (Error);
+    floatSeq getSampleConfig(in string sampleName, in unsigned long sampleId) raises (Error);
 
 
     /// Get the end effector position of a given limb configuration
@@ -169,7 +169,7 @@ module hpp
     /// \param sampleId id of the desired samples
     /// \return world position of the limb end effector given the current robot configuration and the
     /// and the selected sample
-    floatSeq getSamplePosition(in string sampleName, in unsigned short sampleId) raises (Error);
+    floatSeq getSamplePosition(in string sampleName, in unsigned long sampleId) raises (Error);
 
     /// Get the end effector position for a given configuration, assuming z normal
     /// \param limbName name of the limb from which to retrieve a sample
@@ -193,7 +193,7 @@ module hpp
     /// \param valueName name of the analytic measure desired
     /// \param sampleId id of the considered sample
     /// \return the value computed for the given sample and analytics
-    double getSampleValue(in string limbName, in string valueName, in unsigned short sampleId) raises (Error);
+    double getSampleValue(in string limbName, in string valueName, in unsigned long sampleId) raises (Error);
 
     /// compute the distance between all effectors replaced between two states
     /// does not account for contact not present in both states

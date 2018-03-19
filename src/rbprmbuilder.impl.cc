@@ -217,7 +217,7 @@ namespace hpp {
         analysisFactory_ = new sampling::AnalysisFactory(fullBody());
     }
 
-    hpp::floatSeq* RbprmBuilder::getSampleConfig(const char* limb, unsigned short sampleId) throw (hpp::Error)
+    hpp::floatSeq* RbprmBuilder::getSampleConfig(const char* limb, unsigned int sampleId) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
@@ -246,7 +246,7 @@ namespace hpp {
     }
 
 
-    hpp::floatSeq* RbprmBuilder::getSamplePosition(const char* limb, unsigned short sampleId) throw (hpp::Error)
+    hpp::floatSeq* RbprmBuilder::getSamplePosition(const char* limb, unsigned int sampleId) throw (hpp::Error)
     {
         if(!fullBodyLoaded_)
             throw Error ("No full body robot was loaded");
@@ -553,7 +553,7 @@ namespace hpp {
         return dofArray;
     }
 
-    double RbprmBuilder::getSampleValue(const char* limb, const char* valueName, unsigned short sampleId) throw (hpp::Error)
+    double RbprmBuilder::getSampleValue(const char* limb, const char* valueName, unsigned int sampleId) throw (hpp::Error)
     {
         const T_Limb& limbs = fullBody()->GetLimbs();
         T_Limb::const_iterator lit = limbs.find(std::string(limb));

@@ -213,12 +213,12 @@ namespace hpp {
         virtual void boundSO3(const hpp::floatSeq& limitszyx) throw (hpp::Error);
 
 
-        virtual hpp::floatSeq* getSampleConfig(const char* limb, unsigned short sampleId) throw (hpp::Error);
-        virtual hpp::floatSeq* getSamplePosition(const char* limb, unsigned short sampleId) throw (hpp::Error);
+        virtual hpp::floatSeq* getSampleConfig(const char* limb, unsigned int sampleId) throw (hpp::Error);
+        virtual hpp::floatSeq* getSamplePosition(const char* limb, unsigned int sampleId) throw (hpp::Error);
         virtual hpp::floatSeqSeq* getEffectorPosition(const char* limb, const hpp::floatSeq& configuration) throw (hpp::Error);
         virtual CORBA::UShort getNumSamples(const char* limb) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeNodeIds(const char* limb) throw (hpp::Error);
-        virtual double getSampleValue(const char* limb, const char* valueName, unsigned short sampleId) throw (hpp::Error);
+        virtual double getSampleValue(const char* limb, const char* valueName, unsigned int sampleId) throw (hpp::Error);
         virtual double getEffectorDistance(unsigned short  state1, unsigned short  state2) throw (hpp::Error);
 
         rbprm::State generateContacts_internal(const hpp::floatSeq& configuration,
