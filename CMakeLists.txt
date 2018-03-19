@@ -355,6 +355,10 @@ install(FILES
 	data/com_inequalities/rh_haa_joint_com_constraints.obj
 	data/com_inequalities/lf_haa_joint_com_constraints.obj
 	data/com_inequalities/lh_haa_joint_com_constraints.obj
+  data/com_inequalities/arm_left_1_joint_com_constraints.obj
+  data/com_inequalities/arm_right_1_joint_com_constraints.obj
+  data/com_inequalities/leg_left_1_joint_com_constraints.obj
+  data/com_inequalities/leg_right_1_joint_com_constraints.obj
   data/com_inequalities/LLEG_JOINT0_com_constraints.dae
 	data/com_inequalities/RLEG_JOINT0_com_constraints.dae
 	data/com_inequalities/LLEG_LINK5_Kinematics.dae
