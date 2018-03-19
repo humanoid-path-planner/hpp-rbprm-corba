@@ -249,8 +249,8 @@ module hpp
     /// \param offset contact point of the effector, expressed as an offset from the joint root
     /// \param normal normal vector to consider for contact creation. For instance for a foot, typically
     /// normal is aligned with the -z vertical axis, to create a contact with the plant of the robot
-    /// \param x width of the rectangle surface contact of the effector
-    /// \param y length of the rectangle surface contact of the effector
+    /// \param x half width of the rectangle surface contact of the effector
+    /// \param y half length of the rectangle surface contact of the effector
     /// \param samples number of samples to generate for the limb (a typical value is 10000)
     /// \param heuristicName heuristic used to bias sample selection
     /// \param resolution resolution of the octree used to store the samples (a typical value is 0.01 meters)
