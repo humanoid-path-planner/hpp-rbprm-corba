@@ -45,13 +45,13 @@ rbprmBuilder.loadModel(urdfName, urdfNameRoms, rootJointType, meshPackageName, p
 
 # The following lines set constraint on the valid configurations:
 # a configuration is valid only if all limbs can create a contact ...
-rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
+rbprmBuilder.setFilter([])
 #rbprmBuilder.setAffordanceFilter('hrp2_rarm_rom', ['Lean'])
 #rbprmBuilder.setAffordanceFilter('hrp2_larm_rom', ['Lean'])
 rbprmBuilder.setAffordanceFilter('hrp2_lleg_rom', ['Support'])
 rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
-vMax = 0.3;
-aMax = 0.5;
+vMax = 0.2;
+aMax = 0.1;
 extraDof = 6
 
 rbprmBuilder.setJointBounds ("base_joint_xyz", [-1.2,1.5,-0.1 ,0.1, 0.55, 0.85])
@@ -82,7 +82,7 @@ r = Viewer (ps,displayArrows = True)
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.005])
-afftool.loadObstacleModel (packageName, ENV_NAME, ENV_PREFIX, r,reduceSizes=[0.1,0])
+afftool.loadObstacleModel (packageName, ENV_NAME, ENV_PREFIX, r,reduceSizes=[0.14,0])
 #r.loadObstacleModel (packageName, "ground", "planning")
 afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 r.addLandmark(r.sceneName,1)
@@ -102,8 +102,17 @@ r (q_goal)
 
 
 # Choosing a path optimizer
-ps.setInitialConfig (q_init)
-ps.addGoalConfig (q_goal)
+#ps.setInitialConfig (q_init)
+#ps.addGoalConfig (q_goal)
+
+
+q1=q_init[::]
+q1[0:3] = [-0.45, 0, 0.8]
+q2=q_goal[::]
+q2[0:3] = [0.9, 0, 0.8]
+ps.setInitialConfig (q1)
+ps.addGoalConfig (q2)
+
 # Choosing RBPRM shooter and path validation methods.
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.01)
@@ -124,7 +133,7 @@ r(q_init)
 
 ps.client.problem.prepareSolveStepByStep()
 
-
+"""
 q1=q_init[::]
 q1[0:3] = [-0.45, 0, 0.75]
 q2=q_goal[::]
@@ -143,9 +152,9 @@ pbCl.directPath(q2,q_goal,False)
 pbCl.addEdgeToRoadmap (q_init, q1, 0, False)
 pbCl.addEdgeToRoadmap (q1, q2, 1, False)
 pbCl.addEdgeToRoadmap (q2, q_goal, 2, False)
-
+"""
 ps.client.problem.finishSolveStepByStep()
-ps.optimizePath(3)
+
 
 
 

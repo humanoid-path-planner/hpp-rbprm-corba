@@ -47,7 +47,7 @@ rLegLimbOffset=[0,0,-0.035]#0.035
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 #fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "forward", 0.1,"_6_DOF")
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "dynamicWalk", 0.01,"_6_DOF",limbOffset=rLegLimbOffset)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "fixedStep06", 0.01,"_6_DOF",limbOffset=rLegLimbOffset)
 fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/hrp2_rleg_db.db")
 
@@ -57,7 +57,7 @@ lLegLimbOffset=[0,0,0.035]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
 #fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "forward", 0.1,"_6_DOF")
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "dynamicWalk", 0.01,"_6_DOF",limbOffset=lLegLimbOffset)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fixedStep06", 0.01,"_6_DOF",limbOffset=lLegLimbOffset)
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
 
@@ -91,7 +91,7 @@ acc_init = tp.ps.configAtParam(pId,0)[tp.indexECS+3:tp.indexECS+6]
 dir_goal = tp.ps.configAtParam(pId,tp.ps.pathLength(pId)-eps)[tp.indexECS:tp.indexECS+3]
 acc_goal = [0,0,0]
 
-robTreshold = 3
+robTreshold = 1
 # copy extraconfig for start and init configurations
 q_init[configSize:configSize+3] = dir_init[::]
 q_init[configSize+3:configSize+6] = acc_init[::]
@@ -143,14 +143,16 @@ player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=
 # remove the last config (= user defined q_goal, not consitent with the previous state)
 
 #r(configs[0])
-player.displayContactPlan()
-
-configs=configs[:-1]
+#player.displayContactPlan()
 
 
-from planning.config import *
+
+
+from planning.configs.darpa import *
 from generate_contact_sequence import *
-cs = generateContactSequence(fullBody,configs,r)
+beginState = 0
+endState = len(configs)-1
+cs = generateContactSequence(fullBody,configs,beginState, endState,r)
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")
 print "save contact sequence : ",filename
