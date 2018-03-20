@@ -128,13 +128,36 @@ configs = fullBody.interpolate(0.001,pathId=0,robustnessTreshold = 1, filterStat
 r(configs[-1])
 tInterpolateConfigs = time.time() - tStart
 
+
+
+
+pid = fullBody.isDynamicallyReachableFromState(17,18,True)
+import disp_bezier
+pp.dt = 0.0001
+disp_bezier.showPath(r,pp,pid)
+
+x = [ 2.47985, -0.25492, 0.962874]
+
+createSphere('s',r)
+moveSphere('s',r,x)
+displayBezierConstraints(r)
+
+path = "/local/dev_hpp/screenBlender/iros2018/polytopes/hyq/path"
+for i in range(1,4):
+  r.client.gui.writeNodeFile('path_'+str(int(pid[i]))+'_root',path+str(i-1)+'.obj')
+
+r.client.gui.writeNodeFile('s',path+'_S.stl')
+
+
+
+
+
 noCOQP = 0
 
 for i in range(len(configs)-2):
   pid = fullBody.isDynamicallyReachableFromState(i,i+1)
   if len(pid)==0:
     noCOQP +=1
-
 
 
 

@@ -167,8 +167,12 @@ r(smid.q())
 sf2 = State(fullBody,q=q_goal,limbsIncontact=[lLegId,rLegId])
 
 
+"""
+fullBody.isDynamicallyReachableFromState(smid.sId,smid2.sId,True)
+fullBody.isDynamicallyReachableFromState(smid.sId,smid2.sId,timings=[0.4,0.2,0.4])
+fullBody.isDynamicallyReachableFromState(si.sId,smid.sId,timings=[0.8,0.6,0.8])
+fullBody.isDynamicallyReachableFromState(smid2.sId,sf.sId,timings=[0.8,0.6,0.8])
 
-pid = fullBody.isDynamicallyReachableFromState(smid.sId,smid2.sId,True)
 import disp_bezier
 pp.dt = 0.00001
 disp_bezier.showPath(r,pp,pid)
@@ -184,6 +188,8 @@ for i in range(1,4):
   r.client.gui.writeNodeFile('path_'+str(int(pid[i]))+'_root',path+str(i-1)+'.obj')
 
 r.client.gui.writeNodeFile('s',path+'_S.stl')
+
+"""
 
 """
 com = fullBody.getCenterOfMass()

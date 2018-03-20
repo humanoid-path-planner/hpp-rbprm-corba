@@ -50,7 +50,7 @@ rLegLimbOffset=[0,0,-0.035]#0.035
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 #fullBody.addLimbDatabase("./db/hrp2_rleg_db.db",rLegId,"forward")
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "fixedStep1", 0.01,"_6_DOF",limbOffset=rLegLimbOffset)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "fixedStep1", 0.01,"_6_DOF",limbOffset=rLegLimbOffset,kinematicConstraintsMin=0.3)
 fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/hrp2_rleg_db.db")
 
@@ -60,7 +60,7 @@ lLegLimbOffset=[0,0,0.035]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
 #fullBody.addLimbDatabase("./db/hrp2_lleg_db.db",lLegId,"forward")
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fixedStep1", 0.01,"_6_DOF",limbOffset=lLegLimbOffset)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fixedStep1", 0.01,"_6_DOF",limbOffset=lLegLimbOffset,kinematicConstraintsMin=0.3)
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
 fullBody.setReferenceConfig (q_ref)
@@ -240,3 +240,85 @@ displayOneStepConstraints(r)
 #player.interpolate(2,len(configs)-1)
 
 """
+
+""" # tests front line
+s0 = State(fullBody,q=q_init,limbsIncontact = [rLegId,lLegId])
+s02,success = StateHelper.addNewContact(s0,rLegId,[0.2,0-0.1,0.01],[0,0,1])
+assert(success)
+fullBody.isReachableFromState(s0.sId,s02.sId)
+s04,success = StateHelper.addNewContact(s0,rLegId,[0.4,0-0.1,0.01],[0,0,1])
+assert(success)
+fullBody.isReachableFromState(s0.sId,s04.sId)
+s06,success = StateHelper.addNewContact(s0,rLegId,[0.6,0-0.1,0.01],[0,0,1])
+assert(success)
+fullBody.isReachableFromState(s0.sId,s06.sId)
+s07,success = StateHelper.addNewContact(s0,rLegId,[0.7,0-0.1,0.01],[0,0,1])
+assert(success)
+fullBody.isReachableFromState(s0.sId,s07.sId)
+s075,success = StateHelper.addNewContact(s0,rLegId,[0.75,0-0.1,0.01],[0,0,1])
+assert(success)
+fullBody.isReachableFromState(s0.sId,s07.sId)
+s08,success = StateHelper.addNewContact(s0,rLegId,[0.8,0-0.1,0.01],[0,0,1])
+assert(success)
+fullBody.isReachableFromState(s0.sId,s08.sId)
+
+s085,success = StateHelper.addNewContact(s0,rLegId,[0.85,0-0.1,0.01],[0,0,1])
+assert(success)
+fullBody.isReachableFromState(s0.sId,s09.sId)
+"""
+
+
+
+"""#test backline
+
+s0 = State(fullBody,q=q_init,limbsIncontact = [rLegId,lLegId])
+s02,success = StateHelper.addNewContact(s0,rLegId,[-0.2,0-0.1,0.01],[0,0,1])
+assert(success)
+fullBody.isReachableFromState(s0.sId,s02.sId)
+s04,success = StateHelper.addNewContact(s0,rLegId,[-0.4,0-0.1,0.01],[0,0,1])
+assert(success)
+fullBody.isReachableFromState(s0.sId,s04.sId)
+s06,success = StateHelper.addNewContact(s0,rLegId,[-0.6,0-0.1,0.01],[0,0,1])
+assert(success)
+fullBody.isReachableFromState(s0.sId,s06.sId)
+s07,success = StateHelper.addNewContact(s0,rLegId,[-0.7,0-0.1,0.01],[0,0,1])
+assert(success)
+fullBody.isReachableFromState(s0.sId,s07.sId)
+s07i,success = StateHelper.removeContact(s0,rLegId)
+fullBody.isReachableFromState(s0.sId,s07i.sId)
+fullBody.isReachableFromState(s07i.sId,s07.sId)
+
+s075,success = StateHelper.addNewContact(s0,rLegId,[-0.75,0-0.1,0.01],[0,0,1])
+assert(success)
+fullBody.isReachableFromState(s0.sId,s075.sId)
+s075i,success = StateHelper.removeContact(s0,rLegId)
+fullBody.isReachableFromState(s0.sId,s075i.sId)
+fullBody.isReachableFromState(s075i.sId,s075.sId)
+
+s08,success = StateHelper.addNewContact(s0,rLegId,[-0.8,0-0.1,0.01],[0,0,1])
+assert(success)
+fullBody.isReachableFromState(s0.sId,s08.sId)
+
+s085,success = StateHelper.addNewContact(s0,rLegId,[-0.85,0-0.1,0.01],[0,0,1])
+assert(success)
+fullBody.isReachableFromState(s0.sId,s09.sId)
+"""
+
+
+# test right / diag
+
+s0 = State(fullBody,q=q_init,limbsIncontact = [rLegId,lLegId])
+s02,success = StateHelper.addNewContact(s0,rLegId,[0.2,0-0.1,0.01],[0,0,1])
+assert(success)
+fullBody.isReachableFromState(s0.sId,s02.sId)
+s04,success = StateHelper.addNewContact(s0,rLegId,[0.4,0-0.1,0.01],[0,0,1])
+assert(success)
+fullBody.isReachableFromState(s0.sId,s04.sId)
+s06,success = StateHelper.addNewContact(s0,rLegId,[0.6,0-0.1,0.01],[0,0,1])
+assert(success)
+fullBody.isReachableFromState(s0.sId,s06.sId)
+s07,success = StateHelper.addNewContact(s0,rLegId,[0.7,0-0.1,0.01],[0,0,1])
+assert(success)
+
+
+
