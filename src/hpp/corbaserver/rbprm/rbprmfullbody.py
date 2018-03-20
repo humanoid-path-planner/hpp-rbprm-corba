@@ -176,6 +176,7 @@ class FullBody (object):
      # This can be problematic in terms of performance. The default value is 3 cm.
      # \param contactType whether the contact is punctual ("_3_DOF") or surfacic ("_6_DOF")
      # \param disableEffectorCollision: whether collision detection should be disabled for end effector bones
+     # \param limbOffset the offset between the limb joint and it's link
      # \param kinematicConstraintsPath : path that point to the .obj file containing the kinematic constraints of the limb,
      # if not set the default is "package://hpp-rbprm-corba/com_inequalities/"+name+"_com_constraints.obj"
      # \param kinematicConstraintsMin : add an additionnal inequalities on the kinematicConstraints, of normal (0,0,1) and origin (0,0,kinematicConstraintsMin)
