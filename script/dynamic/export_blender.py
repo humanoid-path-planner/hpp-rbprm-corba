@@ -1,7 +1,8 @@
 
 nodes = ["hyq","sphere_CoM"]
 nodes = ["hyq","Vec_Acceleration","Vec_Velocity"]
-r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2018/yaml/hyq_side_contact_plan.yaml",nodes)
+nodes = ["hyq"]
+r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2018/yaml/hyq_side_poly.yaml",nodes)
 r(q_init)
 r.client.gui.captureTransformOnRefresh(True)
 player.displayContactPlan(1)
@@ -34,7 +35,7 @@ r.client.gui.captureTransformOnRefresh(False)
 
 nodes = ["hrp2_14",'s']
 nodes = ["hrp2_14"]
-r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2018/yaml/platform_contactSequence.yaml",nodes)
+r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2018/yaml/darpa_contactSequence.yaml",nodes)
 r(q_init)
 r.client.gui.captureTransform()
 r.client.gui.captureTransformOnRefresh(True)
@@ -44,13 +45,20 @@ r.client.gui.captureTransformOnRefresh(False)
 
 
 nodes = ['world/pinocchio']
-gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2018/yaml/platform_wholeBody.yaml",nodes)
+gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2018/yaml/darpa_wholeBody.yaml",nodes)
 #gui.captureTransform()
 gui.captureTransformOnRefresh(True)
 gui.captureTransformOnRefresh(False)
 
 
 
+nodes = ['talos']
+r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/talos/yaml/half_sitting0.yaml",nodes)
+#r.client.gui.captureTransform()
+r.client.gui.captureTransformOnRefresh(True)
+r.client.gui.captureTransformOnRefresh(False)
+
+r.client.gui.writeBlenderScript("/local/dev_hpp/screenBlender/talos/models/pyrene.py", ['talos'])
 
 nodes = ["hrp2_14","Vec_Acceleration","Vec_Velocity"]
 r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2017/yaml/slope_interp_3.yaml",nodes)
