@@ -1402,7 +1402,7 @@ namespace hpp {
         return res;
     }
 
-    floatSeqSeq* RbprmBuilder::interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold, unsigned short filterStates) throw (hpp::Error)
+    floatSeqSeq* RbprmBuilder::interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic) throw (hpp::Error)
     {
         try
         {
@@ -1421,7 +1421,7 @@ namespace hpp {
             {
                 throw hpp::Error ("No affordances found. Unable to interpolate.");
             }
-            hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = rbprm::interpolation::RbPrmInterpolation::create(fullBody(),startState_,endState_);
+            hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = rbprm::interpolation::RbPrmInterpolation::create(fullBody(),startState_,endState_,core::PathVectorConstPtr_t(),testReachability,quasiStatic);
             lastStatesComputedTime_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,configurations,robustnessTreshold, filterStates != 0);
             lastStatesComputed_ = TimeStatesToStates(lastStatesComputedTime_);
             hpp::floatSeqSeq *res;
@@ -2093,7 +2093,7 @@ namespace hpp {
     }
 
 
-    floatSeqSeq* RbprmBuilder::interpolate(double timestep, double path, double robustnessTreshold, unsigned short filterStates) throw (hpp::Error)
+    floatSeqSeq* RbprmBuilder::interpolate(double timestep, double path, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic) throw (hpp::Error)
     {
         hppDout(notice,"### Begin interpolate");
         try
@@ -2120,7 +2120,7 @@ namespace hpp {
         }
 
         hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = 
-                    rbprm::interpolation::RbPrmInterpolation::create(fullBody(),startState_,endState_,problemSolver()->paths()[pathId]);
+                    rbprm::interpolation::RbPrmInterpolation::create(fullBody(),startState_,endState_,problemSolver()->paths()[pathId],testReachability,quasiStatic);
         lastStatesComputedTime_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
                     timestep,robustnessTreshold, filterStates != 0);
 		lastStatesComputed_ = TimeStatesToStates(lastStatesComputedTime_);

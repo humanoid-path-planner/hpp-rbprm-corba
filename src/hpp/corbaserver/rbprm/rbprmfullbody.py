@@ -354,12 +354,14 @@ class FullBody (object):
      # \param pathId Id of the path to compute from
      # \param robustnessTreshold minimum value of the static equilibrium robustness criterion required to accept the configuration (0 by default).
      # \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
-     def interpolate(self, stepsize, pathId = 1, robustnessTreshold = 0, filterStates = False):
+     # \param testReachability : if true, check each contact transition with our reachability criterion
+     # \param quasiStatic : if True, use our reachability criterion with the quasiStatic constraint
+     def interpolate(self, stepsize, pathId = 1, robustnessTreshold = 0, filterStates = False,testReachability = True, quasiStatic = False):
           if(filterStates):
                 filt = 1
           else:
                 filt = 0
-          return self.client.rbprm.rbprm.interpolate(stepsize, pathId, robustnessTreshold, filt)
+          return self.client.rbprm.rbprm.interpolate(stepsize, pathId, robustnessTreshold, filt,testReachability, quasiStatic)
      
      ## Provided a discrete contact sequence has already been computed, computes
      # all the contact positions and normals for a given state, the next one, and the intermediate between them.
@@ -426,12 +428,14 @@ class FullBody (object):
      # \param pathId Id of the path to compute from
      # \param robustnessTreshold minimum value of the static equilibrium robustness criterion required to accept the configuration (0 by default).
      # \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
-     def interpolateConfigs(self, configs, robustnessTreshold = 0, filterStates = False):
+     # \param testReachability : if true, check each contact transition with our reachability criterion
+     # \param quasiStatic : if True, use our reachability criterion with the quasiStatic constraint
+     def interpolateConfigs(self, configs, robustnessTreshold = 0, filterStates = False, testReachability = True, quasiStatic = False):
           if(filterStates):
                 filt = 1
           else:
                 filt = 0
-          return self.client.rbprm.rbprm.interpolateConfigs(configs, robustnessTreshold, filt)
+          return self.client.rbprm.rbprm.interpolateConfigs(configs, robustnessTreshold, filt,testReachability, quasiStatic)
           
      ##
      # 
