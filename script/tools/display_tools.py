@@ -1,3 +1,5 @@
+import time
+
 
 def createSphere(name,r,size=0.01,color=[0,0,0,1]):
   r.client.gui.addSphere(name,size,color)
@@ -10,3 +12,7 @@ def moveSphere(name,r,pos):
   r.client.gui.applyConfiguration(name,q)
   r.client.gui.refresh()
 
+def displayContactSequence(r,configs,pause=1.):
+  for i in range(0,len(configs)-1):
+    r(configs[i])
+    time.sleep(pause)	
