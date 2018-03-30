@@ -7,18 +7,13 @@ from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
 #from display_tools import *
 import talos.flatGround_pyrene_pathKino as tp
 import time
+from planning.robot_config.talos import *
 
 tPlanning = tp.tPlanning
 
-
-packageName = "talos_description"
-meshPackageName = "talos_description"
-rootJointType = "freeflyer"
 ##
 #  Information to retrieve urdf and srdf files.
-urdfName = "talos"
-urdfSuffix = "_full_v2"
-srdfSuffix = ""
+
 pId = tp.ps.numberPaths() -1
 fullBody = FullBody ()
 
@@ -33,20 +28,18 @@ r = tp.Viewer (ps,viewerClient=tp.r.client, displayCoM = True)
 
 
 q_ref = [
-        0,0,1.0192720229567027,1,0,0,0, # root_joint
-        0.0, 0.0, -0.411354, 0.859395, -0.448041, -0.001708, # leg_left
-        0.0, 0.0, -0.411354, 0.859395, -0.448041, -0.001708, # leg_right
-        0, 0.006761, # torso
-        0.25847, 0.173046, -0.0002, -0.525366, 0, 0, 0.1, # arm_left
-        0, 0, 0, 0, 0, 0, 0, # gripper_left
-        -0.25847, -0.173046, 0.0002, -0.525366, 0, 0, 0.1, # arm_right
-        0, 0, 0, 0, 0, 0, 0, # gripper_right
-        0, 0, # head
+        0.0, 0.0,  1.0232773,  1 ,  0.0, 0.0, 0.0,                   #Free flyer
+        0.0,  0.0, -0.411354,  0.859395, -0.448041, -0.001708,          #Left Leg
+        0.0,  0.0, -0.411354,  0.859395, -0.448041, -0.001708,          #Right Leg
+        0.0 ,  0.006761,                                                #Chest
+        0.25847 ,  0.173046, -0.0002, -0.525366, 0.0, -0.0,  0.1,-0.005,  #Left Arm
+        -0.25847 , -0.173046, 0.0002  , -0.525366, 0.0,  0.0,  0.1,-0.005,#Right Arm
+        0.,  0.  ,                                                       #Head
         0,0,0,0,0,0]; r (q_ref)
 
 q_init = q_ref[::]
 
-#fullBody.setReferenceConfig(q_ref)
+fullBody.setReferenceConfig(q_ref)
 """
 #test correspondance with reduced : 
 q_init[19] = -0.5
@@ -59,38 +52,33 @@ qfar=q_ref[::]
 qfar[2] = -5
 
 tStart = time.time()
+# generate databases : 
+
 nbSamples = 50000
-rLegId = 'rleg'
-rLeg = 'leg_right_1_joint'
-rfoot = 'leg_right_sole_fix_joint'
-rLegOffset = [0,0,0]
+rLegOffset = MRsole_offset.translation.transpose().tolist()[0]
+rLegOffset[2] += 0.006
 rLegNormal = [0,0,1]
 rLegx = 0.1; rLegy = 0.06
-fullBody.addLimb(rLegId,rLeg,rfoot,rLegOffset,rLegNormal, rLegx, rLegy, nbSamples, "forward", 0.01)
-#fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
+fullBody.addLimb(rLegId,rleg,rfoot,rLegOffset,rLegNormal, rLegx, rLegy, nbSamples, "fixedStep06", 0.01)
+fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
+#fullBody.saveLimbDatabase(rLegId, "./db/talos_rLeg_walk.db")
 
-lLegId = 'lleg'
-lLeg = 'leg_left_1_joint'
-lfoot = 'leg_left_sole_fix_joint'
-lLegOffset = [0,0,0]
+lLegOffset = MLsole_offset.translation.transpose().tolist()[0]
+lLegOffset[2] += 0.006
 lLegNormal = [0,0,1]
 lLegx = 0.1; lLegy = 0.06
-fullBody.addLimb(lLegId,lLeg,lfoot,lLegOffset,rLegNormal, lLegx, lLegy, nbSamples, "forward", 0.01)
-#fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
+fullBody.addLimb(lLegId,lleg,lfoot,lLegOffset,rLegNormal, lLegx, lLegy, nbSamples, "fixedStep06", 0.01)
+fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
+#fullBody.saveLimbDatabase(rLegId, "./db/talos_lLeg_walk.db")
+
 
 """
-rarmId = 'rarm'
-rarm = 'arm_right_1_joint'
-rHand = 'gripper_right_inner_single_joint'
 rArmOffset = [0,0,0.1]
 rArmNormal = [0,0,1]
 rArmx = 0.02; rArmy = 0.02
 fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, nbSamples, "EFORT", 0.01)
 fullBody.runLimbSampleAnalysis(rarmId, "ReferenceConfiguration", True)
 
-larmId = 'larm'
-larm = 'arm_left_1_joint'
-lHand = 'gripper_left_inner_single_joint'
 lArmOffset = [0,0,-0.1]
 lArmNormal = [0,0,1]
 lArmx = 0.02; lArmy = 0.02
@@ -98,6 +86,11 @@ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, nbSample
 fullBody.runLimbSampleAnalysis(larmId, "ReferenceConfiguration", True)
 """
 
+"""
+# load databases from files : 
+fullBody.addLimbDatabase("./db/talos_rLeg_walk.db",rLegId,"fixedStep06")
+fullBody.addLimbDatabase("./db/talos_lLeg_walk.db",lLegId,"fixedStep06")
+"""
 
 
 tGenerate =  time.time() - tStart
@@ -106,8 +99,6 @@ print "generate databases in : "+str(tGenerate)+" s"
 
 q_0 = fullBody.getCurrentConfig(); 
 #~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
-
-
 
 
 configSize = fullBody.getConfigSize() -fullBody.client.basic.robot.getDimensionExtraConfigSpace()
@@ -126,8 +117,10 @@ q_init[configSize+3:configSize+6] = acc_init[::]
 q_goal[configSize:configSize+3] = dir_goal[::]
 q_goal[configSize+3:configSize+6] = [0,0,0]
 
-q_init[2] = q_ref[2]+0.01
-q_goal[2] = q_ref[2]+0.01
+
+q_init[2] = q_ref[2]
+q_goal[2] = q_ref[2]
+
 
 fullBody.setStaticStability(True)
 # Randomly generating a contact configuration at q_init
@@ -153,23 +146,23 @@ fullBody.setEndState(q_goal,[rLegId,lLegId])
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
-import fullBodyPlayerHrp2
 
 tStart = time.time()
-configsFull = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = 2, filterStates = False)
+configsFull = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = False)
 tInterpolateConfigs = time.time() - tStart
 print "number of configs :", len(configsFull)
 
 
 
 
-from planning.config import *
+
+from planning.configs.talos_flatGround import *
 from generate_contact_sequence import *
 
 beginState = 0
 endState = len(configsFull)-2
 configs=configsFull[beginState:endState+1]
-cs = generateContactSequence(fullBody,configs,beginState, endState,r,curves_initGuess =curves_initGuess , timings_initGuess =timings_initGuess)
+cs = generateContactSequence(fullBody,configs,beginState, endState,r)
 #player.displayContactPlan()
 
 

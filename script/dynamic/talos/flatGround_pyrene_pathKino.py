@@ -29,7 +29,7 @@ urdfName = 'talos_trunk'
 urdfNameRom =  ['talos_larm_rom','talos_rarm_rom','talos_lleg_rom','talos_rleg_rom']
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = omniORB.any.to_any(0.2);
+vMax = omniORB.any.to_any(0.3);
 aMax = omniORB.any.to_any(0.1);
 #aMax = omniORB.any.to_any(0.3);
 extraDof = 6
@@ -72,7 +72,7 @@ afftool.loadObstacleModel (ENV_PACKAGE_NAME, ENV_NAME, ENV_PREFIX, r)
 # Setting initial and goal configurations
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init[3:7] = [1,0,0,0]
-q_init [0:3] = [0, 0, 0.98]; r (q_init)
+q_init [0:3] = [0, 0, 1.]; r (q_init)
 
 """
 # test correspondance with fullBody : 
