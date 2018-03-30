@@ -148,6 +148,14 @@ class State (object):
         return self.fullBody.getContactsVariations(self.sId,state.sId)
 
 
+    def isValid(self):
+        return self.fullBody.isConfigValid(self.cl.getConfigAtState(self.sId))
+
+    def isBalanced(self,robustness = 0):
+        return self.fullBody.isStateBalanced(self.sId,robustness)
+
+    def robustness(self):
+        return self.fullBody.client.rbprm.rbprm.isStateBalanced(self.sId)
 
 
 class StateHelper(object):
