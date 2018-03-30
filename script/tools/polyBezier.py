@@ -44,6 +44,9 @@ class PolyBezier:
     
     def length(self):
         return self.times[-1]
+
+    def max(self):
+        return self.length()
     
     def lengthNonZero(self):
         length = 0
