@@ -98,10 +98,11 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None, curves_initGue
         MLF = SE3.Identity()
         MRF.translation = np.matrix(q_rl[0:3])
         MLF.translation = np.matrix(q_ll[0:3])
-        rot_rl = Quaternion(q_rl[3],q_rl[4],q_rl[5],q_rl[6])
-        rot_ll = Quaternion(q_ll[3],q_ll[4],q_ll[5],q_ll[6])
-        MRF.rotation = rot_rl.matrix()
-        MLF.rotation = rot_ll.matrix()
+        if not FORCE_STRAIGHT_LINE : 
+            rot_rl = Quaternion(q_rl[3],q_rl[4],q_rl[5],q_rl[6])
+            rot_ll = Quaternion(q_ll[3],q_ll[4],q_ll[5],q_ll[6])
+            MRF.rotation = rot_rl.matrix()
+            MLF.rotation = rot_ll.matrix()
         
         # apply the transform ankle -> center of contact
         MRF *= MRsole_offset
@@ -319,10 +320,11 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None, curves_initGue
     MLF = SE3.Identity()
     MRF.translation = np.matrix(q_rl[0:3])
     MLF.translation = np.matrix(q_ll[0:3])
-    rot_rl = Quaternion(q_rl[3],q_rl[4],q_rl[5],q_rl[6])
-    rot_ll = Quaternion(q_ll[3],q_ll[4],q_ll[5],q_ll[6])
-    MRF.rotation = rot_rl.matrix()
-    MLF.rotation = rot_ll.matrix()
+    if not FORCE_STRAIGHT_LINE :  
+        rot_rl = Quaternion(q_rl[3],q_rl[4],q_rl[5],q_rl[6])
+        rot_ll = Quaternion(q_ll[3],q_ll[4],q_ll[5],q_ll[6])
+        MRF.rotation = rot_rl.matrix()
+        MLF.rotation = rot_ll.matrix()
     # apply the transform ankle -> center of contact
     MRF *= MRsole_offset
     MLF *= MLsole_offset
