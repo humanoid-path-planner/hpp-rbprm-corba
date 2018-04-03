@@ -53,10 +53,13 @@ gui.captureTransformOnRefresh(False)
 
 
 nodes = ['talos']
-r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/talos/yaml/half_sitting0.yaml",nodes)
+r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/talos/yaml/airbus_stairs.yaml",nodes)
 #r.client.gui.captureTransform()
+r(configsFull[0])
 r.client.gui.captureTransformOnRefresh(True)
+displayContactSequence(r,configsFull,0.1)
 r.client.gui.captureTransformOnRefresh(False)
+
 
 r.client.gui.writeBlenderScript("/local/dev_hpp/screenBlender/talos/models/pyrene.py", ['talos'])
 
