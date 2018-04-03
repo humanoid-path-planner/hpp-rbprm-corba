@@ -37,6 +37,7 @@ q_ref = [
         -0.25847 , -0.173046, 0.0002  , -0.525366, 0.0,  0.0,  0.1,-0.005,#Right Arm
         0.,  0.  ,                                                       #Head
         0,0,0,0,0,0]; r (q_ref)
+
 """
 # with arms in front
 q_ref = [
@@ -49,9 +50,16 @@ q_ref = [
         0.,  0.  ,                                                       #Head
         0,0,0,0,0,0]; r (q_ref)
 """
+"""
+# with legs on side
+q_ref = [0.0, 0.0, 0.9832773, 1, 0.0, 0.0, 0.0, 1.57, 0.0, -0.611354, 1.059395, -0.448041,-0.001708, -1.57, 0.0, -0.611354, 1.059395, -0.448041, -0.001708, 0.0, 0.006761, -0.5,0.173046, -0.0002, -0.525366, 0.0, -0.0, 0.1, -0.005, 0.5, -0.173046, 0.0002, -0.525366, 0.0, 0.0, 0.1, -0.005, 0.0, 0.0, 0, 0, 0, 0, 0, 0]
+r (q_ref)
+"""
 q_init = q_ref[::]
 
 fullBody.setReferenceConfig(q_ref)
+
+
 """
 #test correspondance with reduced : 
 q_init[19] = -0.5
@@ -71,7 +79,7 @@ rLegOffset = MRsole_offset.translation.transpose().tolist()[0]
 rLegOffset[2] += 0.006
 rLegNormal = [0,0,1]
 rLegx = 0.1; rLegy = 0.06
-fullBody.addLimb(rLegId,rleg,rfoot,rLegOffset,rLegNormal, rLegx, rLegy, nbSamples, "fixedStep06", 0.01)
+fullBody.addLimb(rLegId,rleg,rfoot,rLegOffset,rLegNormal, rLegx, rLegy, nbSamples, "static", 0.01,kinematicConstraintsMin=0.4)
 fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/talos_rLeg_walk.db")
 
@@ -79,7 +87,7 @@ lLegOffset = MLsole_offset.translation.transpose().tolist()[0]
 lLegOffset[2] += 0.006
 lLegNormal = [0,0,1]
 lLegx = 0.1; lLegy = 0.06
-fullBody.addLimb(lLegId,lleg,lfoot,lLegOffset,rLegNormal, lLegx, lLegy, nbSamples, "fixedStep06", 0.01)
+fullBody.addLimb(lLegId,lleg,lfoot,lLegOffset,rLegNormal, lLegx, lLegy, nbSamples, "static", 0.01,kinematicConstraintsMin=0.4)
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/talos_lLeg_walk.db")
 
@@ -88,13 +96,13 @@ fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 rArmOffset = [0.055,-0.04,-0.13]
 rArmNormal = [0,0,1]
 rArmx = 0.005; rArmy = 0.005
-fullBody.addLimb(rArmId,rarm,rhand,rArmOffset,rArmNormal, rArmx, rArmy, nbSamples, "manipulability", 0.01,"_6_DOF", False)
+fullBody.addLimb(rArmId,rarm,rhand,rArmOffset,rArmNormal, rArmx, rArmy, nbSamples, "EFORT", 0.01,"_6_DOF", False,grasp=True)
 fullBody.runLimbSampleAnalysis(rArmId, "ReferenceConfiguration", True)
 
 lArmOffset = [0.055,0.04,-0.13]
 lArmNormal = [0,0,1]
 lArmx = 0.005; lArmy = 0.005
-fullBody.addLimb(lArmId,larm,lhand,lArmOffset,lArmNormal, lArmx, lArmy, nbSamples, "manipulability", 0.01,"_6_DOF", False)
+fullBody.addLimb(lArmId,larm,lhand,lArmOffset,lArmNormal, lArmx, lArmy, nbSamples, "EFORT", 0.01,"_6_DOF", False,grasp=True)
 fullBody.runLimbSampleAnalysis(lArmId, "ReferenceConfiguration", True)
 
 
@@ -132,9 +140,10 @@ q_goal[configSize+3:configSize+6] = [0,0,0]
 
 #q_init[2] = q_ref[2]
 #q_goal[2] = q_ref[2]
-q_init[2] = -1.57
+q_init[2] = q_ref[2] - 2.59
+q_goal[2] = q_ref[2] - 1.73
 
-fullBody.setStaticStability(False)
+fullBody.setStaticStability(True)
 # Randomly generating a contact configuration at q_init
 fullBody.setCurrentConfig (q_init)
 r(q_init)
@@ -143,7 +152,7 @@ r(q_init)
 
 # Randomly generating a contact configuration at q_end
 fullBody.setCurrentConfig (q_goal)
-q_goal = fullBody.generateContacts(q_goal, dir_goal,acc_goal,robTreshold)
+#q_goal = fullBody.generateContacts(q_goal, dir_goal,acc_goal,robTreshold)
 r(q_goal)
 
 # specifying the full body configurations as start and goal state of the problem
@@ -160,13 +169,14 @@ pp = PathPlayer (fullBody.client.basic, r)
 
 
 tStart = time.time()
-configsFull = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 0, filterStates = True,testReachability=False)
+configsFull = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = True,testReachability=True)
 tInterpolateConfigs = time.time() - tStart
 print "number of configs :", len(configsFull)
 
 
-
 displayContactSequence(r,configsFull)
+
+
 
 """
 
@@ -185,6 +195,8 @@ cs.saveAsXML(filename, "ContactSequence")
 print "save contact sequence : ",filename
 
 """
+
+
 createSphere('s',r,color=r.color.red)
 
 q_init[2] = -1.57
@@ -218,6 +230,12 @@ p = [-12.5, -3.65, -2.39] # l foot first step
 s4,success = StateHelper.addNewContact(s3,lLegId,p,[0,0,1],10000)
 r(s4.q())
 
+p = [-12.5, -3.85, -2.39] # r foot first step
+s5,success = StateHelper.addNewContact(s4,rLegId,p,[0,0,1],10000)
+r(s5.q())
+
+s5.projectToCOM(s0.getCenterOfMass(),10000)
+r(s5.q())
 
 
 

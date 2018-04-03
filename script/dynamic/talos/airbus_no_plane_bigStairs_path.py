@@ -62,7 +62,7 @@ ps.client.problem.setParameter("aMaxZ",aMaxZ)
 ps.client.problem.setParameter("vMax",vMax)
 ps.client.problem.setParameter("sizeFootX",omniORB.any.to_any(0.2))
 ps.client.problem.setParameter("sizeFootY",omniORB.any.to_any(0.12))
-ps.client.problem.setParameter("friction",omniORB.any.to_any(3.))
+ps.client.problem.setParameter("friction",mu)
 
 
 # set parameter for approximation of contact points : 
@@ -98,7 +98,7 @@ r.addLandmark(r.sceneName,1)
 # Setting initial and goal configurations
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init[3:7] = [1,0,0,0]
-q_init[0:3] = [-12.72,-3.8,-1.6]; r (q_init)
+q_init[0:3] = [-12.72,-3.8,-1.59]; r (q_init)
 
 
 rbprmBuilder.setCurrentConfig (q_init)
@@ -106,7 +106,7 @@ q_goal = q_init [::]
 
 
 #q_goal[0:3] = [-10.85,-3.8,0.4]; r (q_goal) #upstair
-q_goal[0:3] = [-11.95,-3.8,-0.7]; r (q_goal) #mid
+q_goal[0:3] = [-11.88,-3.8,-0.73]; r (q_goal) #mid
 r (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
 
