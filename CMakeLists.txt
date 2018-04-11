@@ -134,6 +134,8 @@ install(FILES
 	data/urdf/downSlope_easy20.urdf
 	data/urdf/slalom.urdf
 	data/urdf/bauzil_stairs.urdf
+	data/urdf/bauzil_stairs_10cm.urdf
+	data/urdf/bauzil_stairs_collision.urdf
 	data/urdf/flat_step.urdf
 	data/urdf/flat_hole.urdf
 	data/urdf/cross_gap.urdf
@@ -208,6 +210,8 @@ install(FILES
 	data/srdf/downSlope_easy20.srdf
 	data/srdf/slalom.srdf
 	data/srdf/bauzil_stairs.srdf
+	data/srdf/bauzil_stairs_10cm.srdf
+	data/srdf/bauzil_stairs_collision.srdf
 	data/srdf/flat_step.srdf
 	data/srdf/flat_hole.srdf
 	data/srdf/cross_gap.srdf
@@ -271,6 +275,8 @@ install(FILES
 	data/meshes/downSlope2.stl
 	data/meshes/slalom.stl
 	data/meshes/bauzil_stairs.stl
+	data/meshes/bauzil_stairs_10cm.stl
+	data/meshes/bauzil_stairs_noRamp.stl
 	data/meshes/bauzil_walk_stairs.stl
 	data/meshes/flat_step.stl
 	data/meshes/polaris.stl
