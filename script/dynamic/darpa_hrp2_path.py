@@ -6,7 +6,8 @@ from hpp.gepetto import Viewer
 import time
 import math
 import omniORB.any
-from planning.configs.darpa import *
+
+
 
 from hpp.corbaserver import Client
 from hpp.corbaserver.robot import Robot as Parent
@@ -27,7 +28,7 @@ class Robot (Parent):
 		self.load = load
 		
 
-
+MU=0.5
 rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
 meshPackageName = 'hpp-rbprm-corba'
@@ -82,7 +83,7 @@ r = Viewer (ps,displayArrows = True)
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.005])
-afftool.loadObstacleModel (packageName, ENV_NAME, ENV_PREFIX, r,reduceSizes=[0.14,0])
+afftool.loadObstacleModel (packageName, "darpa_no_mid", "planning", r,reduceSizes=[0.14,0])
 #r.loadObstacleModel (packageName, "ground", "planning")
 afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 r.addLandmark(r.sceneName,1)
