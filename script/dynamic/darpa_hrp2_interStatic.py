@@ -21,7 +21,7 @@ fullBody = FullBody ()
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 fullBody.setJointBounds ("base_joint_xyz",  [-1.2,1.5,-0.05 ,0.05, 0.55, 0.85])
 fullBody.client.basic.robot.setDimensionExtraConfigSpace(tp.extraDof)
-
+fullBody.client.basic.robot.setExtraConfigSpaceBounds([-0,0,-0,0,-0,0,0,0,0,0,0,0])
 ps = tp.ProblemSolver( fullBody )
 ps.client.problem.setParameter("aMax",omniORB.any.to_any(tp.aMax))
 ps.client.problem.setParameter("vMax",omniORB.any.to_any(tp.vMax))
@@ -47,7 +47,7 @@ rLegLimbOffset=[0,0,-0.035]#0.035
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 #fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "forward", 0.1,"_6_DOF")
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "fixedStep06", 0.01,"_6_DOF",limbOffset=rLegLimbOffset)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "fixedStep06", 0.01,"_6_DOF",limbOffset=rLegLimbOffset,kinematicConstraintsMin=0.3)
 fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/hrp2_rleg_db.db")
 
@@ -57,7 +57,7 @@ lLegLimbOffset=[0,0,0.035]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
 #fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "forward", 0.1,"_6_DOF")
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fixedStep06", 0.01,"_6_DOF",limbOffset=lLegLimbOffset)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fixedStep06", 0.01,"_6_DOF",limbOffset=lLegLimbOffset,kinematicConstraintsMin=0.3)
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
 
@@ -131,7 +131,7 @@ pp = PathPlayer (fullBody.client.basic, r)
 import fullBodyPlayerHrp2
 
 tStart = time.time()
-configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = robTreshold, filterStates = False)
+configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = robTreshold, filterStates = True)
 tInterpolate = time.time()-tStart
 print "number of configs : ", len(configs)
 print "generated in "+str(tInterpolate)+" s"
@@ -143,20 +143,23 @@ player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=
 # remove the last config (= user defined q_goal, not consitent with the previous state)
 
 #r(configs[0])
-#player.displayContactPlan()
+player.displayContactPlan()
 
 
 
-
+"""
 from planning.configs.darpa import *
 from generate_contact_sequence import *
 beginState = 0
 endState = len(configs)-1
 cs = generateContactSequence(fullBody,configs,beginState, endState,r)
+"""
+
+"""
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")
 print "save contact sequence : ",filename
-
+"""
 
 """
 r(q_init)
@@ -179,7 +182,7 @@ addVector(r,fullBody,r.color.red,vlb)
 """
 
 
-wid = r.client.gui.getWindowID("window_hpp_")
+#wid = r.client.gui.getWindowID("window_hpp_")
 #r.client.gui.attachCameraToNode( 'hrp2_14/BODY_0',wid)
 
 

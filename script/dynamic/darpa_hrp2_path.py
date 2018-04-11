@@ -90,13 +90,13 @@ r.addLandmark(r.sceneName,1)
 # Setting initial and goal configurations
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init[3:7] = [1,0,0,0]
-q_init [0:3] = [-0.8, 0, 0.58]; r (q_init)
+q_init [0:3] = [-0.8, 0, 0.53]; r (q_init)
 #q_init [0:3] = [-0.5, 0, 0.75]; r (q_init)
 
 rbprmBuilder.setCurrentConfig (q_init)
 q_goal = q_init [::]
 
-q_goal [0:3] = [1.2, 0, 0.58]; r(q_goal)
+q_goal [0:3] = [1.2, 0, 0.53]; r(q_goal)
 #q_goal [0:3] = [1, 0, 0.75]; r(q_goal)
 r (q_goal)
 
@@ -107,9 +107,9 @@ r (q_goal)
 
 
 q1=q_init[::]
-q1[0:3] = [-0.45, 0, 0.8]
+q1[0:3] = [-0.3, 0, 0.77]
 q2=q_goal[::]
-q2[0:3] = [0.9, 0, 0.8]
+q2[0:3] = [0.8, 0, 0.77]
 ps.setInitialConfig (q1)
 ps.addGoalConfig (q2)
 
