@@ -2309,8 +2309,13 @@ assert(s2 == s1 +1);
             State s1Bis(state1);
             hppDout(notice,"state1 = "<<model::displayConfig(state1.configuration_));
             hppDout(notice,"proj to CoM position : "<<paths[cT1]->end().head<3>());
-            s1Bis.configuration_ = project_or_throw(fullBody(),s1Bis,paths[cT1]->end().head<3>(),true);
-            hppDout(notice,"state1 after projection= "<<model::displayConfig(s1Bis.configuration_));
+            bool successProjS1 = (projectStateToCOMEigen(s1Bis,paths[cT1]->end().head<3>(),100) > 0.5 );
+            if(!successProjS1)
+            {
+                hppDout(notice,"could not project state S1Bis on COM constraint");
+                throw std::runtime_error("could not project state S1Bis on COM constraint");
+            }
+            hppDout(notice,"state1 bis after projection= "<<model::displayConfig(s1Bis.configuration_));
 
             for(std::map<std::string,bool>::const_iterator cit = s1Bis.contacts_.begin();cit!=s1Bis.contacts_.end(); ++ cit)
             {
@@ -2320,56 +2325,26 @@ assert(s2 == s1 +1);
             State s2Bis(state2);
             hppDout(notice,"state2 = "<<model::displayConfig(state2.configuration_));
             hppDout(notice,"proj to CoM position : "<<paths[cT2]->end().head<3>());
-            s2Bis.configuration_ = project_or_throw(fullBody(), s2Bis,paths[cT2]->end().head<3>(), true);
-            hppDout(notice,"state2 after projection= "<<model::displayConfig(s2Bis.configuration_));
+            bool successProjS2 = (projectStateToCOMEigen(s2Bis,paths[cT2]->end().head<3>(),100) > 0.5 );
+            if(!successProjS2)
+            {
+                hppDout(notice,"could not project state S2Bis on COM constraint");
+                throw std::runtime_error("could not project state S2Bis on COM constraint");
+            }
+            hppDout(notice,"state2 bis after projection= "<<model::displayConfig(s2Bis.configuration_));
+
 
             for(std::map<std::string,bool>::const_iterator cit = s2Bis.contacts_.begin();cit!=s2Bis.contacts_.end(); ++ cit)
             {
               hppDout(notice,"contact : "<<cit->first<<" = "<<cit->second);
             }
 
-            ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
-            BasicConfigurationShooterPtr_t shooter = BasicConfigurationShooter::create(fullBody()->device_);
-            bool found = false;
-            for (int i = 0; i< 100 && !found;  ++i)
-            {
-                fullBody()->device_->currentConfiguration(s1Bis.configuration_);
-                found =problemSolver()->problem()->configValidations()->validate(s1Bis.configuration_, rport);
-                if(!found)
-                {
-	                std::cout << "could not project s1Bis without collision at state " << s1  << std::endl;
-                    std::cout << "collission " << *rport << std::endl;
-                    s1Bis.configuration_ = *shooter->shoot();
-                    s1Bis.configuration_ = project_or_throw(fullBody(), s1Bis,paths[cT1]->end().head<3>());
-                    std::cout << "projection succeedded " << paths[cT1]->end().head<3>() << std::endl;
-                }
-            }
-            if(found)
-                std::cout << "got out ! " << std::endl;
-            bool found2 = false;
-            for (int i = 0; i< 100 && found && !found2; ++i)
-            {
-                fullBody()->device_->currentConfiguration(s2Bis.configuration_);
-                found2 =problemSolver()->problem()->configValidations()->validate(s2Bis.configuration_, rport);
-                if(!found2)
-                {
-					std::cout << "could not project s2Bis without collision at state " << s1  << std::endl;
-                    std::cout << "collission " << *rport << std::endl;
-                    s2Bis.configuration_ = *shooter->shoot();
-                    s2Bis.configuration_ = project_or_throw(fullBody(), s2Bis,paths[cT2]->end().head<3>());
-                    std::cout << "projection succeedded " << paths[cT2]->end().head<3>() << std::endl;
-                }
-            }
-            if(!found || !found2)
-            {
-                std::cout << "could not project without collision at state " << s1  << std::endl;
-                throw std::runtime_error ("could not project without collision at state " + s1 );
-            }
-
             core::PathVectorPtr_t resPath = core::PathVector::create(fullBody()->device_->configSize(), fullBody()->device_->numberDof());
             hppDout(notice,"ComRRT : projections done. begin rrt");
             try{
-                hppDout(notice,"begin comRRT states 1 and 1bis");
+                hppDout(notice,"begin comRRT states 1 and 1bis");         
+                hppDout(notice,"state1     = r(["<<model::displayConfig(state1.configuration_)<<"])");
+                hppDout(notice,"state1 bis = r(["<<model::displayConfig(s1Bis.configuration_)<<"])");
                 core::PathPtr_t p1 = interpolation::comRRT(fullBody(),problemSolver()->problem(), paths[cT1],
                         state1,s1Bis, numOptimizations,true);
                 hppDout(notice,"end comRRT");
