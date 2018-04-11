@@ -675,6 +675,30 @@ class FullBody (object):
           return self.client.rbprm.rbprm.effectorRRTFromPath(state1, refPathId, path_start, path_to, comPos1, comPos2, comPos3, numOptim, trackedEffectors)
 
 
+    ## Provided a path has already been computed and interpolated, generate a continuous path
+    # between two indicated states. The states need to be consecutive with no contact variation between them
+    # (the free limbs can move, but there should be no contact creation/break)
+    # \param state1 index of the first state
+    # \param state2 index of the second state
+    # \param comPos com position to track
+    # \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
+     def effectorRRTOnePhase(self,state1,state2,comPos,numOptim=10):
+         return self.client.rbprm.rbprm.effectorRRTOnePhase(state1,state2,comPos,numOptim)
+
+
+
+
+    ## Provided a path has already been computed and interpolated, generate a continuous path
+    # between two indicated states. The states need to be consecutive with no contact variation between them
+    # (the free limbs can move, but there should be no contact creation/break)
+    # \param state1 index of the first state
+    # \param state2 index of the second state
+    # \param comPos com position to track
+    # \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
+     def comRRTOnePhase(self,state1,state2,comPos,numOptim=10):
+         return self.client.rbprm.rbprm.comRRTOnePhase(state1,state2,comPos,numOptim)
+
+
     # compute and add a trajectory for the end effector between the 2 states
     # represented as a bezier curve.
     # Do not check the kinematic feasability of this trajectory

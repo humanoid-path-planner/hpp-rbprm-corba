@@ -2523,6 +2523,69 @@ assert(s2 == s1 +1);
         }
     }
 
+    hpp::floatSeq* RbprmBuilder::rrtOnePhase(t_rrt functor,double state1,double state2,
+                                       unsigned short comTraj,
+                                       unsigned short numOptimizations) throw (hpp::Error)
+    {
+        hppDout(notice,"########## begin rrtOnePhase for state "<<state1<<" and "<<state2<<" ###########");
+        if(lastStatesComputed_.size () < state1 || lastStatesComputed_.size () < state2 )
+        {
+            throw std::runtime_error ("did not find a states at indicated indices");
+        }
+        const core::PathVectors_t& paths = problemSolver()->paths();
+        if(paths.size() -1 < comTraj)
+        {
+            throw std::runtime_error("in effectorRRTOnePhase, com trajectory is not present in problem solver");
+        }
+
+
+        unsigned int seed =  (unsigned int) (time(NULL)) ;
+        std::cout<<"seed effectorRRT = "<<seed<<std::endl;
+        hppDout(notice,"seed effectorRRT = "<<seed);
+        srand (seed);
+
+        State s1 = lastStatesComputed_[size_t(state1)];
+        State s2 = lastStatesComputed_[size_t(state2)];
+        hppDout(notice,"state1 = r(["<<model::displayConfig(s1.configuration_)<<")]");
+        hppDout(notice,"state2 = r(["<<model::displayConfig(s2.configuration_)<<")]");
+        core::PathVectorPtr_t resPath = core::PathVector::create(fullBody()->device_->configSize(), fullBody()->device_->numberDof());
+        std::vector<CORBA::Short> pathsIds;
+
+        core::PathPtr_t p1 = (*functor)(fullBody(),problemSolver(), paths[comTraj],
+                                s1,s2, numOptimizations,true);
+        hppDout(notice,"effectorRRT done.");
+        // reduce path to remove extradof
+        core::SizeInterval_t interval(0, p1->initial().rows()-1);
+        core::SizeIntervals_t intervals;
+        intervals.push_back(interval);
+        PathPtr_t reducedPath = core::SubchainPath::create(p1,intervals);
+        resPath->appendPath(reducedPath);
+        pathsIds.push_back(problemSolver()->addPath(resPath));
+
+        hpp::floatSeq* dofArray = new hpp::floatSeq();
+        dofArray->length(pathsIds.size());
+        for(std::size_t i=0; i< pathsIds.size(); ++i)
+        {
+          (*dofArray)[(_CORBA_ULong)i] = pathsIds[i];
+        }
+        return dofArray;
+
+    }
+
+    hpp::floatSeq* RbprmBuilder::effectorRRTOnePhase(double state1,double state2,
+                                       unsigned short comTraj,
+                                       unsigned short numOptimizations) throw (hpp::Error)
+    {
+        return rrtOnePhase(&interpolation::effectorRRT,state1,state2,comTraj,numOptimizations);
+    }
+
+    hpp::floatSeq* RbprmBuilder::comRRTOnePhase(double state1,double state2,
+                                       unsigned short comTraj,
+                                       unsigned short numOptimizations) throw (hpp::Error)
+    {
+        return rrtOnePhase(&interpolation::comRRT,state1,state2,comTraj,numOptimizations);
+    }
+
     CORBA::Short RbprmBuilder::generateEndEffectorBezier(double state1, double state2,
     unsigned short cT)throw (hpp::Error){
         try
