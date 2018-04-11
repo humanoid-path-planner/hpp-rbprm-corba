@@ -692,34 +692,43 @@ namespace hpp {
         return res;
     }
 
-    double RbprmBuilder::projectStateToCOMEigen(unsigned short stateId, const model::Configuration_t& com_target, unsigned short maxNumeSamples) throw (hpp::Error)
+    double RbprmBuilder::projectStateToCOMEigen(unsigned short stateId, const model::Configuration_t& com_target, unsigned short maxNumeSamples) throw (hpp::Error){
+        if(lastStatesComputed_.size() <= stateId)
+        {
+            throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
+        }
+        State s = lastStatesComputed_[stateId];
+        double success =  projectStateToCOMEigen(s,com_target,maxNumeSamples);
+        lastStatesComputed_[stateId] = s;
+        lastStatesComputedTime_[stateId].second = s;
+        return success;
+    }
+
+    double RbprmBuilder::projectStateToCOMEigen(State& s, const model::Configuration_t& com_target, unsigned short maxNumeSamples) throw (hpp::Error)
     {
         try
         {
-            if(lastStatesComputed_.size() <= stateId)
-            {
-                throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
-            }
-            State s = lastStatesComputed_[stateId];
 //            /hpp::model::Configuration_t c = rbprm::interpolation::projectOnCom(fullBody(), problemSolver()->problem(),s,com_target,succes);
             rbprm::projection::ProjectionReport rep = rbprm::projection::projectToComPosition(fullBody(),com_target,s);
             hpp::model::Configuration_t& c = rep.result_.configuration_;
             ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
             CollisionValidationPtr_t val = fullBody()->GetCollisionValidation();
             if(!rep.success_){
-                hppDout(notice,"Projection failed for state "<<stateId<<" , config = "<<model::displayConfig(c));
+                hppDout(notice,"Projection failed for state with config = "<<model::displayConfig(c));
             }
             if(rep.success_){
-                hppDout(notice,"Projection successfull for state "<<stateId<<" without collision check.");
+                hppDout(notice,"Projection successfull for state without collision check.");
                 rep.success_ =  rep.success_ &&  val->validate(rep.result_.configuration_,rport);
                 if(!rep.success_){
-                    hppDout(notice,"Projection failed after collision check for state "<<stateId<<" , config = "<<model::displayConfig(c));
+                    hppDout(notice,"Projection failed after collision check for state with config = "<<model::displayConfig(c));
                     hppDout(notice,"report : "<<*rport);
+                }else{
+                    hppDout(notice,"Success after collision check");
                 }
             }
             if (! rep.success_ && maxNumeSamples>0)
             {
-                hppDout(notice,"Projection for state "<<stateId<<" failed, try to randomly sample other initial point : ");
+                hppDout(notice,"Projection for state failed, try to randomly sample other initial point : ");
                 Configuration_t head = s.configuration_.head<7>();
                 size_t ecs_size = fullBody()->device_->extraConfigSpace().dimension ();
                 Configuration_t ecs = s.configuration_.tail(ecs_size);
@@ -730,16 +739,20 @@ namespace hpp {
                     s.configuration_.head<7>() = head;
                     s.configuration_.tail(ecs_size) = ecs;
                     //c = rbprm::interpolation::projectOnCom(fullBody(), problemSolver()->problem(),s,com_target,succes);
+                    hppDout(notice,"Sample before prjection : r(["<<model::displayConfig(s.configuration_)<<"])");
                     rep = rbprm::projection::projectToComPosition(fullBody(),com_target,s);
+                    hppDout(notice,"Sample after prjection : r(["<<model::displayConfig(rep.result_.configuration_)<<"])");
                     if(!rep.success_){
-                        hppDout(notice,"Projection failed on iter "<<i<<" for state "<<stateId<<" , config = "<<model::displayConfig(c));
+                        hppDout(notice,"Projection failed on iter "<<i);
                     }
                     if(rep.success_){
-                        hppDout(notice,"Projection successfull on iter "<<i<<" for state "<<stateId<<" without collision check.");
+                        hppDout(notice,"Projection successfull on iter "<<i<<" without collision check.");
                         rep.success_ =  rep.success_ &&  val->validate(rep.result_.configuration_,rport);
                         if(!rep.success_){
-                            hppDout(notice,"Projection failed on iter "<<i<<" after collision check for state "<<stateId<<" , config = "<<model::displayConfig(c));
+                            hppDout(notice,"Projection failed on iter "<<i<<" after collision check");
                             hppDout(notice,"report : "<<*rport);
+                        }else{
+                            hppDout(notice,"Success after collision check");
                         }
                     }
                     c = rep.result_.configuration_;
@@ -747,6 +760,7 @@ namespace hpp {
             }
             if(rep.success_)
             {
+                hppDout(notice,"Valid configuration found after projection : r(["<<model::displayConfig(c)<<"])");
                 hpp::model::Configuration_t trySave = c;
                 rbprm::T_Limb fLimbs = GetFreeLimbs(fullBody(), s);
                 for(rbprm::CIT_Limb cit = fLimbs.begin(); cit != fLimbs.end() && rep.success_; ++cit)
@@ -767,10 +781,12 @@ namespace hpp {
                         std::cout << "ow" << std::endl;
                     }
                 }
-                lastStatesComputed_[stateId].configuration_ = trySave;
-                lastStatesComputedTime_[stateId].second.configuration_ = trySave;
+                s.configuration_ = trySave;
+                hppDout(notice,"ProjectoToComEigen success");
                 return 1.;
             }
+            hppDout(notice,"No valid configurations can be found after projection : r(["<<model::displayConfig(c)<<"])");
+            hppDout(notice,"ProjectoToComEigen failure");
             return 0;
         }
         catch(std::runtime_error& e)
@@ -806,10 +822,11 @@ namespace hpp {
     }
 
     double RbprmBuilder::projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com, unsigned short max_num_sample) throw (hpp::Error)
-    {        
+    {
         model::Configuration_t com_target = dofArrayToConfig (3, com);
         return projectStateToCOMEigen(stateId, com_target, max_num_sample);
     }
+
 
     rbprm::State RbprmBuilder::generateContacts_internal(const hpp::floatSeq& configuration,
       const hpp::floatSeq& direction,const hpp::floatSeq& acceleration, const double robustnessThreshold ) throw (hpp::Error)
