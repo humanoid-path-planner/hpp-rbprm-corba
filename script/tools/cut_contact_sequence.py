@@ -9,7 +9,7 @@ import planning.generate_muscod_problem as mp
 import muscodSSH as ssh
 from planning.config import *
 
-statesPerStep=5 # number of double support configs from the planning per call to muscod
+statesPerStep=4 # number of double support configs from the planning per call to muscod
 stepSize=statesPerStep*2 - 1 # contact_sequence contain double support AND simple support states
 
 def solveMuscodProblem(configsFull,cs):

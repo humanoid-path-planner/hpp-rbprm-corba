@@ -45,7 +45,7 @@ r.client.gui.captureTransformOnRefresh(False)
 
 
 nodes = ['world/pinocchio']
-gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2018/yaml/darpa_wholeBody.yaml",nodes)
+gui.setCaptureTransform("/local/dev_hpp/screenBlender/locomote/yaml/stairs10_NO_effectorRRT.yaml",nodes)
 #gui.captureTransform()
 gui.captureTransformOnRefresh(True)
 gui.captureTransformOnRefresh(False)
@@ -62,6 +62,8 @@ r.client.gui.captureTransformOnRefresh(False)
 
 
 r.client.gui.writeBlenderScript("/local/dev_hpp/screenBlender/talos/models/pyrene.py", ['talos'])
+
+r.client.gui.writeBlenderScript("/local/dev_hpp/screenBlender/talos/stairs.py", ['world'])
 
 nodes = ["hrp2_14","Vec_Acceleration","Vec_Velocity"]
 r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2017/yaml/slope_interp_3.yaml",nodes)

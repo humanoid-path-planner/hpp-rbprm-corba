@@ -6,7 +6,7 @@ from numpy.linalg import norm
 
 
 
-def displayBezierCurve(r,curve,step=0.001,color=[0.85, 0.75, 0.15, 1.0],name=None):
+def displayBezierCurve(r,curve,step=0.001,color=[0.85, 0.75, 0.15, 1.0],name=None,offset = None):
     if name==None:
         name="bezier_curve"
         list = r.client.gui.getNodeList()
@@ -17,7 +17,12 @@ def displayBezierCurve(r,curve,step=0.001,color=[0.85, 0.75, 0.15, 1.0],name=Non
     current=0
     path=[]
     while current<= curve.max():
-        path+=[curve(current).transpose().tolist()[0]]
+        p = curve(current).transpose().tolist()[0]
+        if offset:
+            assert(len(offset) == len(p))
+            for i in range(len(p)):
+                p[i] += offset[i]
+        path+=[p]
         current +=step
     r.client.gui.addCurve(name,path,color)
     r.client.gui.addToGroup(name,r.sceneName)    
