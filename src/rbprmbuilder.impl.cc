@@ -2578,6 +2578,80 @@ assert(s2 == s1 +1);
         return rrtOnePhase(&interpolation::comRRT,state1,state2,comTraj,numOptimizations);
     }
 
+    hpp::floatSeqSeq* RbprmBuilder::generateEffectorBezierArray(double state1,double state2,
+                                       unsigned short comTraj,
+                                       unsigned short numOptimizations) throw (hpp::Error)
+    {
+        hppDout(notice,"########## begin GenerateEffectorBezierArray for state "<<state1<<" and "<<state2<<" ###########");
+        if(lastStatesComputed_.size () < state1 || lastStatesComputed_.size () < state2 )
+        {
+            throw std::runtime_error ("did not find a states at indicated indices");
+        }
+        const core::PathVectors_t& paths = problemSolver()->paths();
+        if(paths.size() -1 < comTraj)
+        {
+            throw std::runtime_error("in effectorRRTOnePhase, com trajectory is not present in problem solver");
+        }
+
+        unsigned int seed =  (unsigned int) (time(NULL)) ;
+        hppDout(notice,"seed generateEffectorBezierArray = "<<seed);
+        srand (seed);
+
+        State s1 = lastStatesComputed_[size_t(state1)];
+        State s2 = lastStatesComputed_[size_t(state2)];
+        hppDout(notice,"state1 = r(["<<model::displayConfig(s1.configuration_)<<")]");
+        hppDout(notice,"state2 = r(["<<model::displayConfig(s2.configuration_)<<")]");
+        bool success_comrrt = false;
+        core::PathPtr_t fullBodyComPath;
+        while( !success_comrrt){
+            try{
+                hppDout(notice,"In generateEffectorBezierArray : begin com-rrt.");
+                fullBodyComPath = interpolation::comRRT(fullBody(), problemSolver(), paths[comTraj], s1, s2, numOptimizations, true);
+                hppDout(notice,"In generateEffectorBezierArray : end com-rrt.");
+                success_comrrt = true;
+                PathVectorPtr_t pv = PathVector::create(fullBodyComPath->outputSize(),fullBodyComPath->outputDerivativeSize());
+                pv->appendPath(fullBodyComPath);
+                size_t id = problemSolver()->addPath(pv);
+                hppDout(notice,"Add com-rrt path at index : "<<id);
+            }catch(std::runtime_error e){
+                hppDout(notice,"In generateEffectorBezierArray : comRRT failed. ");
+                hppDout(notice,"Error = "<<e.what());
+             }
+        }
+        std::string effectorVar = s2.contactCreations(s1).front();
+        JointPtr_t effector =  fullBody()->device_->getJointByName(fullBody()->GetLimbs().at(effectorVar)->effector_->name());
+        std::vector<PathVectorPtr_t> listBeziers =  interpolation::fitBeziersToPath(fullBody(),effector,paths[comTraj]->length(),fullBodyComPath,s1,s2);
+
+        hpp::floatSeqSeq *res;
+        res = new hpp::floatSeqSeq ();
+        res->length ((_CORBA_ULong)listBeziers.size());
+
+        // for each pathVector : add each path and store the ID in an floatSeq
+        size_t id_traj = 0;
+        for(std::vector<PathVectorPtr_t>::const_iterator it_pv = listBeziers.begin() ; it_pv != listBeziers.end() ; ++it_pv){
+            std::vector<CORBA::Short> pathIds;
+            for(size_t id_path = 0 ; id_path < (*it_pv)->numberPaths() ; ++id_path){
+                PathPtr_t path = (*it_pv)->pathAtRank(id_path);
+                PathVectorPtr_t pv = PathVector::create(path->outputSize(),path->outputDerivativeSize());
+                pv->appendPath(path);
+                pathIds.push_back(problemSolver()->addPath(pv));
+            }
+            // convert pathIds to floatSeq :
+            hpp::floatSeq* dofArray = new hpp::floatSeq();
+            dofArray->length(pathIds.size());
+            for(std::size_t i=0; i< pathIds.size(); ++i)
+            {
+              (*dofArray)[(_CORBA_ULong)i] = pathIds[i];
+            }
+            (*res) [(_CORBA_ULong)id_traj] = *dofArray;
+            id_traj++;
+        }
+
+        return res;
+    }
+
+
+
     CORBA::Short RbprmBuilder::generateEndEffectorBezier(double state1, double state2,
     unsigned short cT)throw (hpp::Error){
         try

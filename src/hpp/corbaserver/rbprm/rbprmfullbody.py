@@ -685,6 +685,17 @@ class FullBody (object):
      def effectorRRTOnePhase(self,state1,state2,comPos,numOptim=10):
          return self.client.rbprm.rbprm.effectorRRTOnePhase(state1,state2,comPos,numOptim)
 
+    ## Provided a path has already been computed and interpolated, generate an array of bezier curves,
+    ## with varying weightRRT (see effector-rrt.cc::fitBezier)
+    # (the free limbs can move, but there should be no contact creation/break)
+    # \param state1 index of the first state
+    # \param state2 index of the second state
+    # \param comPos com position to track
+    # \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
+    # \return array of pathIds : first index is the trajectorie, second index is the curve inside this trajectory
+    # (there should be 3 curves per trajectories : takeoff / mid / landing)
+     def generateEffectorBezierArray(self,state1,state2,comPos,numOptim=10):
+         return self.client.rbprm.rbprm.generateEffectorBezierArray(state1,state2,comPos,numOptim)
 
 
 

@@ -554,6 +554,16 @@ module hpp
                         in  unsigned short comTraj,
                         in unsigned short numOptimizations) raises (Error);
 
+    /// Provided a path has already been computed and interpolated, generate an array of bezier curves,
+    /// with varying weightRRT (see effector-rrt.cc::fitBezier)
+    /// \param state1 index of the first state
+    /// \param state2 index of the second state
+    /// \param rootPositions1 com positions to track
+    /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
+    /// \return id of the root path computed
+    floatSeqSeq generateEffectorBezierArray(in double state1, in double state2,
+                        in  unsigned short comTraj,
+                        in unsigned short numOptimizations) raises (Error);
 
 
     /// Provided a path has already been computed and interpolated, generate a continuous path

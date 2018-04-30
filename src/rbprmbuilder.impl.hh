@@ -323,6 +323,9 @@ namespace hpp {
         virtual hpp::floatSeq* comRRTOnePhase(double state1,double state2,
                                            unsigned short comTraj,
                                            unsigned short numOptimizations) throw (hpp::Error);
+        virtual hpp::floatSeqSeq* generateEffectorBezierArray(double state1,double state2,
+                                           unsigned short comTraj,
+                                           unsigned short numOptimizations) throw (hpp::Error);
 
         virtual CORBA::Short generateEndEffectorBezier(double state1, double state2,
         unsigned short cT) throw (hpp::Error);
