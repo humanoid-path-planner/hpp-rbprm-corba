@@ -21,15 +21,15 @@ def addContactLandmark(M,color,viewer):
     gui = viewer.client.gui
     name = 's'+str(i_sphere)
     i_sphere += 1    
-    gui.addSphere(name,0.02,color)
-    gui.setVisibility(name,"ALWAYS_ON_TOP")
+    gui.addSphere(name,0.01,color)
+    #gui.setVisibility(name,"ALWAYS_ON_TOP")
     gui.addToGroup(name,viewer.sceneName)
     p = M.translation.transpose().tolist()[0]
     rot = Quaternion(M.rotation)
     p +=  [rot.w]
     p += rot.coeffs().transpose().tolist()[0][0:3]
     gui.applyConfiguration(name,p)
-    gui.addLandmark(name,0.1) 
+    gui.addLandmark(name,0.03) 
     #print "contact altitude : "+str(p[2])
     
     
@@ -119,31 +119,33 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None, curves_initGue
         MLH.rotation = rot_lh.matrix()   
         
         MRH *= MRhand_offset
-        MLH *= MLhand_offset      
+        MLH *= MLhand_offset    
+        
+        phase_d.RF_patch.placement = MRF
+        phase_d.LF_patch.placement = MLF
+        phase_d.RH_patch.placement = MRH
+        phase_d.LH_patch.placement = MLH
+        
         
         # initial state : Set all new contacts patch (either with placement computed below or unused)
         if stateId==beginId:
             # FIXME : for loop ? how ?
             if fb.isLimbInContact(rLegId,stateId):
-                phase_d.RF_patch.placement = MRF
                 phase_d.RF_patch.active = True
             else:
-                phase_d.RF_patch = unusedPatch.copy()
+                phase_d.RF_patch.active = False
             if fb.isLimbInContact(lLegId,stateId):
-                phase_d.LF_patch.placement = MLF
                 phase_d.LF_patch.active = True
             else:
-                phase_d.LF_patch = unusedPatch.copy()
+                phase_d.LF_patch.active = False
             if fb.isLimbInContact(rArmId,stateId):
-                phase_d.RH_patch.placement = MRH
                 phase_d.RH_patch.active = True
             else:
-                phase_d.RH_patch = unusedPatch.copy()
+                phase_d.RH_patch.active = False
             if fb.isLimbInContact(lArmId,stateId):
-                phase_d.LH_patch.placement = MLH
                 phase_d.LH_patch.active = True
             else:
-                phase_d.LH_patch = unusedPatch.copy()
+                phase_d.LH_patch.active = False
         else:   
             # we need to copy the unchanged patch from the last simple support phase (and not create a new one with the same placement)
             phase_d.RF_patch = phase_s.RF_patch
