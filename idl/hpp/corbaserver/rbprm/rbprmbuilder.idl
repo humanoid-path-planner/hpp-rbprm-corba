@@ -681,8 +681,9 @@ module hpp
     /// \param config configuration tested on the robot
     /// \param contacts name of the limbs in contact
     /// \param robustnessTreshold robustness treshold used
+    /// \param CoM optional, if specified use this CoM position instead of the one computed from the configuration
     /// \return whether the configuration is quasi-statically balanced
-    short isConfigBalanced(in floatSeq config, in Names_t contacts,  in double robustnessTreshold) raises (Error);
+    short isConfigBalanced(in floatSeq config, in Names_t contacts,  in double robustnessTreshold,in floatSeq CoM) raises (Error);
 
     /// run and store an analysis on all limb databases
     /// \param analysis name of the analysis existing if analysis ="all",

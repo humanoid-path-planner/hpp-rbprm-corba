@@ -3007,12 +3007,13 @@ assert(s2 == s1 +1);
         }
     }
 
-    CORBA::Short RbprmBuilder::isConfigBalanced(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs, double robustnessTreshold) throw (hpp::Error)
+    CORBA::Short RbprmBuilder::isConfigBalanced(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs, double robustnessTreshold, const hpp::floatSeq &CoM) throw (hpp::Error)
     {
         try{
         rbprm::State testedState;
         model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
         model::Configuration_t save = fullBody()->device_->currentConfiguration();
+        fcl::Vec3f comFCL((double)CoM[(_CORBA_ULong)0],(double)CoM[(_CORBA_ULong)1],(double)CoM[(_CORBA_ULong)2]);
         std::vector<std::string> names = stringConversion(contactLimbs);
         fullBody()->device_->currentConfiguration(config);
         fullBody()->device_->computeForwardKinematics();
@@ -3030,7 +3031,7 @@ assert(s2 == s1 +1);
         }
         fullBody()->device_->currentConfiguration(save);
         fullBody()->device_->computeForwardKinematics();
-        if (stability::IsStable(fullBody(), testedState) >= robustnessTreshold)
+        if (stability::IsStable(fullBody(), testedState,fcl::Vec3f(0,0,0),comFCL) >= robustnessTreshold)
         {
             return (CORBA::Short)(1);
         }

@@ -757,8 +757,8 @@ class FullBody (object):
      #
      # \param stepSize discretization step
      # \param pathId Id of the path to compute from
-     def isConfigBalanced(self, config, names, robustness = 0):
-          if (self.client.rbprm.rbprm.isConfigBalanced(config, names, robustness) == 1):
+     def isConfigBalanced(self, config, names, robustness = 0,CoM = [0,0,0]):
+          if (self.client.rbprm.rbprm.isConfigBalanced(config, names, robustness,CoM) == 1):
                 return True
           else:
                 return False
