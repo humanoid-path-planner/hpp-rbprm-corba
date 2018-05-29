@@ -3363,7 +3363,7 @@ assert(s2 == s1 +1);
 
 
 
-    hpp::floatSeq* RbprmBuilder::isDynamicallyReachableFromState(unsigned short stateFrom, unsigned short stateTo,bool addPathPerPhase, const hpp::floatSeq &timings, unsigned short numPointPerPhase )throw (hpp::Error){
+    hpp::floatSeq* RbprmBuilder::isDynamicallyReachableFromState(unsigned short stateFrom, unsigned short stateTo,bool addPathPerPhase, const hpp::floatSeq &timings, short numPointPerPhase )throw (hpp::Error){
         if(!fullBodyLoaded_){
           throw std::runtime_error ("fullBody not loaded");
         }
@@ -3379,7 +3379,7 @@ assert(s2 == s1 +1);
                 Ts.push_back(t_config[i]);
             res = reachability::isReachableDynamic(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo],false,Ts,numPointPerPhase);
         }else{
-            res = reachability::isReachableDynamic(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo],false);
+            res = reachability::isReachableDynamic(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo],false,std::vector<double>(),numPointPerPhase);
         }
         if (res.success()){
             std::vector<int> ids;
