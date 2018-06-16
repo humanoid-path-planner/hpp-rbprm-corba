@@ -7,7 +7,7 @@ from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
 #from display_tools import *
 import talos.flatGround_pyrene_pathKino as tp
 import time
-from planning.robot_config.talos import *
+from robot_config.talos import *
 
 tPlanning = tp.tPlanning
 
@@ -156,7 +156,7 @@ print "number of configs :", len(configsFull)
 
 
 
-from planning.configs.talos_flatGround import *
+from configs.talos_flatGround import *
 from generate_contact_sequence import *
 
 beginState = 0

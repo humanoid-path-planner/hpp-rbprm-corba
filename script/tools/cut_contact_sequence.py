@@ -5,11 +5,11 @@ from pinocchio.utils import *
 
 import locomote
 from locomote import WrenchCone,SOC6,ControlType,IntegratorType,ContactPatch, ContactPhaseHumanoid, ContactSequenceHumanoid
-import planning.generate_muscod_problem as mp
+import generate_muscod_problem as mp
 import muscodSSH as ssh
-from planning.config import *
+from config import *
 
-statesPerStep=4 # number of double support configs from the planning per call to muscod
+statesPerStep=5 # number of double support configs from the planning per call to muscod
 stepSize=statesPerStep*2 - 1 # contact_sequence contain double support AND simple support states
 
 def solveMuscodProblem(configsFull,cs):

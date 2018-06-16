@@ -2593,9 +2593,7 @@ assert(s2 == s1 +1);
             throw std::runtime_error("in effectorRRTOnePhase, com trajectory is not present in problem solver");
         }
 
-        unsigned int seed =  (unsigned int) (time(NULL)) ;
-        hppDout(notice,"seed generateEffectorBezierArray = "<<seed);
-        srand (seed);
+
 
         State s1 = lastStatesComputed_[size_t(state1)];
         State s2 = lastStatesComputed_[size_t(state2)];
@@ -2605,6 +2603,9 @@ assert(s2 == s1 +1);
         core::PathPtr_t fullBodyComPath;
         while( !success_comrrt){
             try{
+                unsigned int seed =  (unsigned int) (clock()) ;
+                hppDout(notice,"seed generateEffectorBezierArray = "<<seed);
+                srand (seed);
                 hppDout(notice,"In generateEffectorBezierArray : begin com-rrt.");
                 fullBodyComPath = interpolation::comRRT(fullBody(), problemSolver(), paths[comTraj], s1, s2, numOptimizations, true);
                 hppDout(notice,"In generateEffectorBezierArray : end com-rrt.");
@@ -3351,7 +3352,7 @@ assert(s2 == s1 +1);
     }
 
 
-    bool RbprmBuilder::isReachableFromState(unsigned short stateFrom,unsigned short stateTo)throw (hpp::Error){
+    hpp::floatSeq* RbprmBuilder::isReachableFromState(unsigned short stateFrom,unsigned short stateTo)throw (hpp::Error){
         if(!fullBodyLoaded_){
           throw std::runtime_error ("fullBody not loaded");
         }
@@ -3359,7 +3360,33 @@ assert(s2 == s1 +1);
             throw std::runtime_error ("Unexisting state ID");
         }
         reachability::Result res = reachability::isReachable(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo]);
-        return (res.success());
+
+        // convert vector of int to floatSeq :
+        _CORBA_ULong size;
+        if(res.xBreak_.isZero() || res.xCreate_.isZero())
+            size = 4;
+        else
+            size = 7;
+
+        hpp::floatSeq* dofArray = new hpp::floatSeq();
+        dofArray->length(size);
+        (*dofArray)[(_CORBA_ULong)0] = res.success() ? 1. : 0.;
+        if(res.xBreak_.isZero() || res.xCreate_.isZero()){
+            for(std::size_t i=0; i< 3; ++i)
+            {
+              (*dofArray)[(_CORBA_ULong)i+1] = res.x[i];
+            }
+        }else{
+            for(std::size_t i=0; i< 3; ++i)
+            {
+              (*dofArray)[(_CORBA_ULong)i+1] = res.xBreak_[i];
+            }
+            for(std::size_t i=0; i< 3; ++i)
+            {
+              (*dofArray)[(_CORBA_ULong)i+4] = res.xCreate_[i];
+            }
+        }
+        return dofArray;
     }
 
 

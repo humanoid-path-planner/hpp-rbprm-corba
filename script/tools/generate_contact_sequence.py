@@ -1,7 +1,7 @@
 import pinocchio as se3
 from pinocchio import SE3, Quaternion
 from pinocchio.utils import *
-from planning.config import *
+from config import *
 from spline import bezier
 import inspect
 
@@ -182,9 +182,9 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None, curves_initGue
                 timings_prev = timings_initGuess[config_id-1]
                 # generate init state : 
                 init_state = [0]*9
-                init_state[0:3] = c_prev(timings_prev[1]).transpose().tolist()[0]
-                init_state[3:6] = dc_prev(timings_prev[1]).transpose().tolist()[0]
-                init_state[6:9] = ddc_prev(timings_prev[1]).transpose().tolist()[0]   
+                init_state[0:3] = c_prev(timings_prev[0] + timings_prev[1]).transpose().tolist()[0]
+                init_state[3:6] = dc_prev(timings_prev[0] + timings_prev[1]).transpose().tolist()[0]
+                init_state[6:9] = ddc_prev(timings_prev[0] + timings_prev[1]).transpose().tolist()[0]   
                 init_state = np.matrix(init_state).transpose()   
             else : # first traj
                 # generate init state : 
@@ -202,7 +202,7 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None, curves_initGue
             # set timing :
             t_tot = t_init_guess[0]
             if stateId != beginId:
-                t_prev = (timings_prev[2] - timings_prev[1]) 
+                t_prev = (timings_prev[2]) 
                 t_tot += t_prev
             phase_d.time_trajectory.append(t_tot)
             # generate init guess traj for state and control from bezier curve and it's derivative : 
@@ -220,9 +220,9 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None, curves_initGue
                     state[6:9] = ddc_init_guess(t).transpose().tolist()[0]
                 else:
                     if t < t_prev : 
-                        state[0:3] = c_prev(timings_prev[1]+t).transpose().tolist()[0]
-                        state[3:6] = dc_prev(timings_prev[1]+t).transpose().tolist()[0]
-                        state[6:9] = ddc_prev(timings_prev[1]+t).transpose().tolist()[0]  
+                        state[0:3] = c_prev(timings_prev[0]+timings_prev[1]+t).transpose().tolist()[0]
+                        state[3:6] = dc_prev(timings_prev[0]+timings_prev[1]+t).transpose().tolist()[0]
+                        state[6:9] = ddc_prev(timings_prev[0]+timings_prev[1]+t).transpose().tolist()[0]  
                     else : 
                         state[0:3] = c_init_guess(t-t_prev).transpose().tolist()[0]
                         state[3:6] = dc_init_guess(t-t_prev).transpose().tolist()[0]
@@ -408,6 +408,36 @@ def generateContactSequence(fb,configs,beginId,endId,viewer=None, curves_initGue
         displayContactsFromPhase(phase_d,viewer)
         
         
+        
+        
+    # assign contact models :
+    MContactAction = MRsole_offset.copy()
+    t = MContactAction.translation
+    t[:2] = 0.
+    MContactAction.translation = t  
+    for k,phase in enumerate(cs.contact_phases):
+        RF_patch = phase.RF_patch
+        cm = RF_patch.contactModel
+        cm.mu = MU_FOOT
+        cm.ZMP_radius = ZMP_RADIUS
+        RF_patch.contactModelPlacement = MContactAction
+        LF_patch = phase.LF_patch
+        cm = LF_patch.contactModel
+        cm.mu = MU_FOOT
+        cm.ZMP_radius = ZMP_RADIUS
+        LF_patch.contactModelPlacement = MContactAction
+        LH_patch = phase.LH_patch
+        cm = LH_patch.contactModel
+        cm.mu = MU_HAND
+        cm.ZMP_radius = ZMP_RADIUS
+        LH_patch.contactModelPlacement = MContactAction
+        RH_patch = phase.RH_patch            
+        cm = RH_patch.contactModel
+        cm.mu = MU_HAND
+        cm.ZMP_radius = ZMP_RADIUS
+        RH_patch.contactModelPlacement = MContactAction
+                
+        
     return cs
 
 
@@ -415,7 +445,8 @@ def generateContactSequenceWithInitGuess(ps,fb,configs,beginId,endId,viewer=None
     curves_initGuess = []
     timings_initGuess = []
     for id_state in range(beginId,endId):
-        pid = fb.isDynamicallyReachableFromState(id_state,id_state+1,True)
+        print "id_state = ",str(id_state)
+        pid = fb.isDynamicallyReachableFromState(id_state,id_state+1,True,numPointsPerPhases=0)
         if len(pid) != 4:
             print "Cannot compute qp initial guess for state "+str(id_state)
             return generateContactSequence(fb,configs,beginId,endId,viewer)

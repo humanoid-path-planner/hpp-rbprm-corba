@@ -139,6 +139,8 @@ install(FILES
 	data/urdf/flat_step.urdf
 	data/urdf/flat_hole.urdf
 	data/urdf/cross_gap.urdf
+  data/urdf/floor_bauzil.urdf
+  data/urdf/floor_bauzil_obstacles.urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
   )
 install(FILES
@@ -215,6 +217,8 @@ install(FILES
 	data/srdf/flat_step.srdf
 	data/srdf/flat_hole.srdf
 	data/srdf/cross_gap.srdf
+  data/srdf/floor_bauzil.srdf
+  data/srdf/floor_bauzil_obstacles.srdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
   )
 install(FILES
@@ -295,6 +299,8 @@ install(FILES
   data/meshes/flat_hole.stl
   data/meshes/cross_gap.stl
   data/meshes/cross_gap2.stl
+  data/meshes/floor_bauzil.stl
+  data/meshes/floor_bauzil_obstacles.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
   )
 

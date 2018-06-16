@@ -1155,8 +1155,17 @@ class FullBody (object):
      def areKinematicsConstraintsVerifiedForState(self,stateFrom, point):
          return self.client.rbprm.rbprm.areKinematicsConstraintsVerifiedForState(stateFrom,point)
 
-     def isReachableFromState(self,stateFrom,stateTo):
-          return self.client.rbprm.rbprm.isReachableFromState(stateFrom,stateTo)
+     def isReachableFromState(self,stateFrom,stateTo,computePoint=False):
+          raw =  self.client.rbprm.rbprm.isReachableFromState(stateFrom,stateTo)
+          if computePoint :
+                res = []
+                res += [raw[0]>0.]
+                res += [[raw[1],raw[2],raw[3]]]
+                if len(raw) > 4:
+                    res += [[raw[4],raw[5],raw[6]]]
+                return res
+          else :
+                return raw[0] > 0.
 
      def isDynamicallyReachableFromState(self,stateFrom,stateTo,addPathPerPhase = False,timings=[],numPointsPerPhases=5):
           return self.client.rbprm.rbprm.isDynamicallyReachableFromState(stateFrom,stateTo,addPathPerPhase,timings,numPointsPerPhases)

@@ -4,7 +4,7 @@ from hpp.corbaserver import Client
 from hpp.corbaserver.robot import Robot as Parent
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 import omniORB.any
-from planning.configs.straight_walk_config import *
+from configs.talos_flatGround import *
 import time
 
 class Robot (Parent):

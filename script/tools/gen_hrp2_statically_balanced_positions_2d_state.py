@@ -4,7 +4,6 @@ from hpp.gepetto import Viewer
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 import numpy as np
 #from hpp.corbaserver.rbprm.tools.cwc_trajectory import *
-
 from hpp import Error as hpperr
 from numpy import array, matrix
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
@@ -21,7 +20,7 @@ srdfSuffix = ""
 fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz", [-0.3,0.3, -0.3, 0.3, 0.6, 0.7])
+fullBody.setJointBounds ("base_joint_xyz", [-0.7,0.7, -0.7, 0.7, 0.6, 0.7])
 fullBody.setJointBounds ("CHEST_JOINT0", [0.,0.])
 fullBody.setJointBounds ("CHEST_JOINT1", [0.,0.])
 fullBody.setJointBounds ("HEAD_JOINT0", [0.,0.])
@@ -61,7 +60,8 @@ rLegLimbOffset=[0,0,-0.035]#0.035
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 #fullBody.addLimbDatabase("./db/hrp2_rleg_db.db",rLegId,"forward")
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "manipulability", 0.01,"_6_DOF",limbOffset=rLegLimbOffset)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "manipulability", 0.01,"_6_DOF",kinematicConstraintsPath = "package://hpp-rbprm-corba/com_inequalities/fullSize/RLEG_JOINT0_com_constraints.obj",limbOffset=rLegLimbOffset,kinematicConstraintsMin=0.2)
+#fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "manipulability", 0.01,"_6_DOF",kinematicConstraintsPath = "package://hpp-rbprm-corba/com_inequalities/empty_com_constraints.obj",limbOffset=rLegLimbOffset,kinematicConstraintsMin=0.2)
 fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/hrp2_rleg_db.db")
 
@@ -71,11 +71,14 @@ lLegLimbOffset=[0,0,0.035]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
 #fullBody.addLimbDatabase("./db/hrp2_lleg_db.db",lLegId,"forward")
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "manipulability", 0.01,"_6_DOF",limbOffset=lLegLimbOffset)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "manipulability", 0.01,"_6_DOF",kinematicConstraintsPath = "package://hpp-rbprm-corba/com_inequalities/fullSize/LLEG_JOINT0_com_constraints.obj",limbOffset=lLegLimbOffset,kinematicConstraintsMin=0.2)
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
 
-
+rleg = 'RLEG_JOINT0'
+rfoot = "RLEG_JOINT5"
+lleg = 'LLEG_JOINT0'
+lfoot = "LLEG_JOINT5"
 
 limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},  
 						lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}, 
@@ -223,21 +226,35 @@ def _feet_far_enough(fullBody,q):
 	for i in range(3):
 		rd += (c[i]-rf[i])*(c[i]-rf[i])
 		ld += (c[i]-lf[i])*(c[i]-lf[i])
-	if rd < 0.2 or ld < 0.2:
+	if rd < 0.35 or ld < 0.35:
 		return False
 	else:
 		return True
 	
+def projectMidFeet(fullBody,q,limbs):
+	fullBody.setCurrentConfig(q)
+	s = State(fullBody,q=q,limbsIncontact=limbs)
+	com = np.array(fullBody.getJointPosition(rfoot)[0:3])
+	com += np.array(fullBody.getJointPosition(lfoot)[0:3])
+	com /= 2.			
+	com[2] = fullBody.getCenterOfMass()[2]
+	successProj = s.projectToCOM(com.tolist())
+	if successProj and fullBody.isConfigValid(s.q())[0]  and fullBody.isConfigBalanced(s.q(), limbs, 5) :
+    		return s
+  	else :
+    		return None
 
-def _genbalance(limbs):
+def _genbalance(fullBody,limbs):
 	for i in range(10000):
 		q = fullBody.client.basic.robot.shootRandomConfig()
 		q[3:7] = [1,0,0,0]
 		#q = _boundSO3(q, len(limbs))
-		if fullBody.isConfigValid(q)[0] and fullBody.isConfigBalanced(q, limbs, 5) and __loosely_z_aligned(limbs[0], q) and __loosely_z_aligned(limbs[1], q) and _feet_far_enough(fullBody,q):
-		#~ if fullBody.isConfigValid(q)[0] and  __loosely_z_aligned(limbs[0], q) and __loosely_z_aligned(limbs[1], q):
-			return q
+		fullBody.setCurrentConfig(q)
+		#r(q)
+		if __loosely_z_aligned(limbs[0], q) and __loosely_z_aligned(limbs[1], q) and _feet_far_enough(fullBody,q) and fullBody.isConfigValid(q)[0]  and fullBody.isConfigBalanced(q, limbs, 5):
+		  return q
 	print "can't generate equilibrium config"
+	return []
 
 all_qs = []
 def genStates(fullbody,limbs, num_samples = 1000, coplanar = True):
@@ -249,10 +266,11 @@ def genStates(fullbody,limbs, num_samples = 1000, coplanar = True):
 		if(coplanar):
 			q = fullBody.generateGroundContact(limbs)
 		else:
-			q = _genbalance(limbs)
-		qs.append(q)
-		s = State(fullbody,q=q,limbsIncontact=limbs)
-		states.append(s)
+			q = _genbalance(fullBody,limbs)
+		if len(q)>1 :
+			qs.append(q)
+			s = State(fullbody,q=q,limbsIncontact=limbs)
+			states.append(s)
 	return states
 
 def genStateWithOneStep(fullbody,limbs, num_samples = 100, coplanar = True):
@@ -262,35 +280,50 @@ def genStateWithOneStep(fullbody,limbs, num_samples = 100, coplanar = True):
 	states = []
 	assert(len(limbs) == 2 and "only implemented for 2 limbs in contact for now")
 	it = 0
-	while len(states) < num_samples and it < 5000:
+	while len(states) < num_samples and it < 10000:
 		i = len(states)
 		if(coplanar):
 			q0 = fullBody.generateGroundContact(limbs)
 		else:
-			q0 = _genbalance(limbs)
-		s0 = State(fullbody,q=q0,limbsIncontact=limbs)
-		success = False
-		iter = 0
-		# try to make a step
-		while not success and iter < 100 :
-			if(coplanar):
-				q2 = fullBody.generateGroundContact(limbs)
-			else:
-				q2 = _genbalance(limbs)
-			s2 = State(fullbody,q=q2,limbsIncontact=limbs)
-			moving_limb = limbs[i%2]
-			[p,n]= s2.getCenterOfContactForLimb(moving_limb) # get position of the moving limb in the next state
-			s1,success = StateHelper.addNewContact(s0,moving_limb,p,n) # try to move the limb for s0 to it's position in s2
-			if success:
-				success = fullBody.isConfigValid(s1.q())[0] and fullBody.isConfigBalanced(s1.q(), limbs, 5) and __loosely_z_aligned(limbs[0], s1.q()) and __loosely_z_aligned(limbs[1], s1.q())
-			iter += 1
-		if success:
-			# recreate the states to assure the continuity of the index in fullBody : 
-			state0 = State(fullBody,q=s0.q(),limbsIncontact=limbs)
-			states += [[s1,state0]]
-			print "Step "+str(i)+" done."
-		else :
-			print "cannot make the step."
+			q0 = _genbalance(fullBody,limbs)
+		if len(q0)> 1 :  
+			s0 = projectMidFeet(fullBody,q0,limbs)
+      			if s0 is not None: 
+				success = False
+				iter = 0
+				# try to make a step
+				while not success and iter < 100 :
+					if(coplanar):
+						q2 = fullBody.generateGroundContact(limbs)
+					else:
+						q2 = _genbalance(fullBody,limbs)
+					if len(q2) > 1 : 
+						s2 = State(fullbody,q=q2,limbsIncontact=limbs)
+						moving_limb = limbs[i%2]
+						[p,n]= s2.getCenterOfContactForLimb(moving_limb) # get position of the moving limb in the next state
+						s1,success = StateHelper.addNewContact(s0,moving_limb,p,n) # try to move the limb for s0 to it's position in s2
+						if success and __loosely_z_aligned(limbs[0], s1.q()) and __loosely_z_aligned(limbs[1], s1.q()):
+							fullBody.setCurrentConfig(s1.q())
+							com = np.array(fullBody.getJointPosition(rfoot)[0:3])
+							com += np.array(fullBody.getJointPosition(lfoot)[0:3])
+							com /= 2.
+							com[2] = fullBody.getCenterOfMass()[2]
+							successProj = s1.projectToCOM(com.tolist())
+							success = successProj and fullBody.isConfigValid(s1.q())[0]  and fullBody.isConfigBalanced(s1.q(), limbs, 5)
+					else : 
+						success = False
+					iter += 1
+				if success:
+					# recreate the states to assure the continuity of the index in fullBody : 
+					state0 = State(fullBody,q=s0.q(),limbsIncontact=limbs)
+					states += [[s1,state0]]
+					print "Step "+str(i)+" done."
+				else :
+					print "cannot make the step."
+      			else :
+        			print "cannot project between feet"
+		else : 
+			print "unable to generate first configuration."
 		it +=1
 	print "Done generating pairs of states, found : "+str(len(states))+" pairs."
 	return states
