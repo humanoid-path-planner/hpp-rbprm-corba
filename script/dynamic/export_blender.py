@@ -35,7 +35,7 @@ r.client.gui.captureTransformOnRefresh(False)
 
 nodes = ["hrp2_14",'s']
 nodes = ["hrp2_14"]
-r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/iros2018/yaml/darpa_contactSequence.yaml",nodes)
+r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/tro/yaml/darpa/success_cs.yaml",nodes)
 r(q_init)
 r.client.gui.captureTransform()
 r.client.gui.captureTransformOnRefresh(True)
@@ -44,11 +44,11 @@ r(q_goal)
 r.client.gui.captureTransformOnRefresh(False)
 
 
-nodes = ['world/pinocchio']
-gui.setCaptureTransform("/local/dev_hpp/screenBlender/locomote/yaml/stairs10_NO_effectorRRT.yaml",nodes)
+nodes = ['world/pinocchio/visuals']
+r.client.gui.setCaptureTransform("/local/dev_hpp/screenBlender/tro/yaml/darpa/motion2.yaml",nodes)
 #gui.captureTransform()
-gui.captureTransformOnRefresh(True)
-gui.captureTransformOnRefresh(False)
+r.client.gui.captureTransformOnRefresh(True)
+r.client.gui.captureTransformOnRefresh(False)
 
 
 
@@ -73,6 +73,40 @@ r.client.gui.captureTransformOnRefresh(False)
 
 
 r.client.gui.writeNodeFile("path_0_root","/local/dev_hpp/screenBlender/iros2017/meshs/path_detour_geom_CTC.obj")
+
+
+"""
+l = end_effector_bezier_list['hrp2_lleg_rom'][3]
+
+for i in range(len(l)):
+  displayBezierCurve(r,l[i],offset = dict_offset['hrp2_lleg_rom'].translation.transpose().tolist()[0])
+  
+dir = "/local/dev_hpp/screenBlender/tro/curve/"
+r.client.gui.writeNodeFile('path_73_LLEG_JOINT5',dir+"rrt.obj")
+r.client.gui.writeNodeFile('bezier_curve_6',dir+"b0.obj")
+r.client.gui.writeNodeFile('bezier_curve_7',dir+"b02.obj")
+r.client.gui.writeNodeFile('bezier_curve_8',dir+"b04.obj")
+r.client.gui.writeNodeFile('bezier_curve_9',dir+"b06.obj")
+r.client.gui.writeNodeFile('bezier_curve_10',dir+"b08.obj")
+r.client.gui.writeNodeFile('bezier_curve_11',dir+"b09.obj")
+r.client.gui.writeNodeFile('bezier_curve_12',dir+"b1.obj")
+"""
+
+for i in range(6,10):
+  r.client.gui.writeNodeFile("bezier_curve_"+str(i),dir+"b"+str(i)+".obj")
+
+dir = "/local/dev_hpp/screenBlender/tro/curve/bar_xwp/"
+for i in range(29):
+  r.client.gui.writeNodeFile("path_"+str(i)+"_root",dir+"c_"+str(i)+".obj")
+
+for i in range(23):
+  r.client.gui.writeNodeFile("s"+str(i),dir+"s_"+str(i)+".stl")
+
+
+dir = "/local/dev_hpp/screenBlender/tro/meshs/stones/darpa/fail2/"
+for i in range(29):
+  r.client.gui.writeNodeFile('stone_'+str(i),dir+'stone_'+str(i)+".stl")
+
 
 
 

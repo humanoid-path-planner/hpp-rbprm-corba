@@ -7,7 +7,7 @@ from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
 from display_tools import *
 import flatGround_hrp2_pathKino as tp
 import time
-
+import numpy as np
 tPlanning = tp.tPlanning
 
 
@@ -50,7 +50,7 @@ rLegLimbOffset=[0,0,-0.035]#0.035
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 #fullBody.addLimbDatabase("./db/hrp2_rleg_db.db",rLegId,"forward")
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "fixedStep1", 0.01,"_6_DOF",limbOffset=rLegLimbOffset,kinematicConstraintsMin=0.3)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "forward", 0.01,"_6_DOF",limbOffset=rLegLimbOffset,kinematicConstraintsPath = "package://hpp-rbprm-corba/com_inequalities/fullSize/RLEG_JOINT0_com_constraints.obj",kinematicConstraintsMin=0.3)
 fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/hrp2_rleg_db.db")
 
@@ -60,13 +60,14 @@ lLegLimbOffset=[0,0,0.035]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
 #fullBody.addLimbDatabase("./db/hrp2_lleg_db.db",lLegId,"forward")
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fixedStep1", 0.01,"_6_DOF",limbOffset=lLegLimbOffset,kinematicConstraintsMin=0.3)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "forward", 0.01,"_6_DOF",kinematicConstraintsPath = "package://hpp-rbprm-corba/com_inequalities/fullSize/LLEG_JOINT0_com_constraints.obj",limbOffset=lLegLimbOffset,kinematicConstraintsMin=0.3)
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
 fullBody.setReferenceConfig (q_ref)
 ## Add arms (not used for contact) : 
 
 
+"""
 rarmId = 'hrp2_rarm_rom'
 rarm = 'RARM_JOINT0'
 rHand = 'RARM_JOINT5'
@@ -77,6 +78,23 @@ larm = 'LARM_JOINT0'
 lHand = 'LARM_JOINT5'
 fullBody.addNonContactingLimb(larmId,larm,lHand, 10000)
 fullBody.runLimbSampleAnalysis(larmId, "ReferenceConfiguration", True)
+"""
+
+"""
+rarmId = 'hrp2_rarm_rom'
+rarm = 'RARM_JOINT0'
+rHand = 'RARM_JOINT5'
+fullBody.addLimb(rarmId,rarm,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fixedStep1", 0.01,"_6_DOF",limbOffset=lLegLimbOffset,kinematicConstraintsMin=0.3)
+
+fullBody.runLimbSampleAnalysis(rarmId, "ReferenceConfiguration", True)
+larmId = 'hrp2_larm_rom'
+larm = 'LARM_JOINT0'
+lHand = 'LARM_JOINT5'
+fullBody.addLimb(larmId,larm,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fixedStep1", 0.01,"_6_DOF",limbOffset=lLegLimbOffset,kinematicConstraintsMin=0.3)
+
+fullBody.runLimbSampleAnalysis(larmId, "ReferenceConfiguration", True)
+"""
+
 
 
 tGenerate =  time.time() - tStart
@@ -153,34 +171,34 @@ q = fullBody.generateContacts(q,dir_init,acc_init,robTreshold)
 mid_sid = fullBody.addState(q,[lLegId,rLegId])
 """
 
+
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
 import fullBodyPlayerHrp2
 
 tStart = time.time()
-configsFull = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = 2, filterStates = False)
+configsFull = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 0, filterStates = True,testReachability=False,quasiStatic=False)
 tInterpolateConfigs = time.time() - tStart
 print "number of configs :", len(configsFull)
+r(configsFull[-1])
 
-
-
+"""
 import check_qp
-
-
-planValid,curves_initGuess,timings_initGuess = check_qp.check_contact_plan(ps,r,pp,fullBody,0,len(configsFull)-1)
-
+planValid,curves_initGuess,timings_initGuess = check_qp.check_contact_plan(ps,r,pp,fullBody,0,len(configsFull))
 print "Contact plan valid : "+str(planValid)
+"""
 
 
 
-from planning.config import *
+from configs.straight_walk_dynamic_planning_config import *
 from generate_contact_sequence import *
 
 beginState = 0
-endState = len(configsFull)-2
+endState = len(configsFull)-1
 configs=configsFull[beginState:endState+1]
-cs = generateContactSequence(fullBody,configs,beginState, endState,r,curves_initGuess =curves_initGuess , timings_initGuess =timings_initGuess)
+#cs = generateContactSequence(fullBody,configs,beginState, endState,r,curves_initGuess =curves_initGuess , timings_initGuess =timings_initGuess)
+cs = generateContactSequence(fullBody,configs,beginState, endState,r)
 #player.displayContactPlan()
 
 
@@ -243,10 +261,19 @@ displayOneStepConstraints(r)
 
 """ # tests front line
 s0 = State(fullBody,q=q_init,limbsIncontact = [rLegId,lLegId])
-s02,success = StateHelper.addNewContact(s0,rLegId,[0.2,0-0.1,0.01],[0,0,1])
+smid = State(fullBody,q=q_init,limbsIncontact = [lLegId])
+sright = State(fullBody,q=q_init,limbsIncontact = [rLegId])
+s02,success = StateHelper.addNewContact(s0,rLegId,[0.2,0-0.1,0.0],[0,0,1])
 assert(success)
 fullBody.isReachableFromState(s0.sId,s02.sId)
+pIds = fullBody.isDynamicallyReachableFromState(s0.sId,s02.sId,True)
+pIds = fullBody.isDynamicallyReachableFromState(s0.sId,s02.sId,numPointsPerPhases=0)
+
+
+
 s04,success = StateHelper.addNewContact(s0,rLegId,[0.4,0-0.1,0.01],[0,0,1])
+assert(success)
+s05,success = StateHelper.addNewContact(s0,rLegId,[0.5,0-0.1,0.01],[0,0,1])
 assert(success)
 fullBody.isReachableFromState(s0.sId,s04.sId)
 s06,success = StateHelper.addNewContact(s0,rLegId,[0.6,0-0.1,0.01],[0,0,1])
@@ -265,6 +292,29 @@ fullBody.isReachableFromState(s0.sId,s08.sId)
 s085,success = StateHelper.addNewContact(s0,rLegId,[0.85,0-0.1,0.01],[0,0,1])
 assert(success)
 fullBody.isReachableFromState(s0.sId,s09.sId)
+
+for i in range(1000):
+  pIds = fullBody.isDynamicallyReachableFromState(s0.sId,s04.sId,numPointsPerPhases = 15)
+
+for [s0,s1] in states:
+  fullBody.isDynamicallyReachableFromState(s0.sId,s1.sId,numPointsPerPhases = 0)
+
+
+
+for i in range(10000):
+  q = fullBody.shootRandomConfig()
+  s0 = State(fullBody,q=q,limbsIncontact = [lLegId])
+  fullBody.isReachableFromState(s0.sId,s0.sId)
+
+
+
+from parse_bench import *
+parseBenchmark([])
+
+from check_qp import check_traj_valid 
+check_traj_valid(ps,fullBody,s0,s02,pIds)
+
+
 """
 
 
@@ -306,7 +356,7 @@ fullBody.isReachableFromState(s0.sId,s09.sId)
 
 
 # test right / diag
-
+"""
 s0 = State(fullBody,q=q_init,limbsIncontact = [rLegId,lLegId])
 s02,success = StateHelper.addNewContact(s0,rLegId,[0.2,0-0.1,0.01],[0,0,1])
 assert(success)
@@ -319,6 +369,6 @@ assert(success)
 fullBody.isReachableFromState(s0.sId,s06.sId)
 s07,success = StateHelper.addNewContact(s0,rLegId,[0.7,0-0.1,0.01],[0,0,1])
 assert(success)
-
+"""
 
 

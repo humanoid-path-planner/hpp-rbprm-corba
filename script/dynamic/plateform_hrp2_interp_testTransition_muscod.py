@@ -30,7 +30,7 @@ ps = tp.ProblemSolver( fullBody )
 ps.client.problem.setParameter("aMax",tp.aMax)
 ps.client.problem.setParameter("vMax",tp.vMax)
 
-r = tp.Viewer (ps,viewerClient=tp.r.client,displayArrows = True, displayCoM = True)
+r = tp.Viewer (ps,viewerClient=tp.r.client)
 
 
 q_init =[0., 0., 0.648702, 1.0, 0.0 , 0.0, 0.0,0.0, 0.0, 0.0, 0.0,0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17,0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17,0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,0,0,0,0,0,0]; r (q_init)
@@ -46,7 +46,7 @@ tStart = time.time()
 
 
 rLeg = 'RLEG_JOINT0'
-rLegOffset = [0,0,-0.0955]
+rLegOffset = [0,0,-0.105]
 rLegLimbOffset=[0,0,-0.035]#0.035
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
@@ -56,7 +56,7 @@ fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/hrp2_rleg_db.db")
 
 lLeg = 'LLEG_JOINT0'
-lLegOffset = [0,0,-0.0955]
+lLegOffset = [0,0,-0.105]
 lLegLimbOffset=[0,0,0.035]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
@@ -96,8 +96,8 @@ q_goal[configSize+3:configSize+6] = [0,0,0]
 
 
 # FIXME : test
-q_init[2] = q_ref[2]+0.011
-q_goal[2] = q_ref[2]+0.011
+q_init[2] = q_ref[2]+0.01
+q_goal[2] = q_ref[2]+0.01
 
 fullBody.setStaticStability(True)
 # Randomly generating a contact configuration at q_init
@@ -112,7 +112,7 @@ fullBody.setCurrentConfig (q_goal)
 r(q_goal)
 
 # specifying the full body configurations as start and goal state of the problem
-r.addLandmark('hrp2_14/BODY',0.3)
+#r.addLandmark('hrp2_14/BODY',0.3)
 r(q_init)
 
 
@@ -149,77 +149,71 @@ createSphere('s',r)
 n = [0,0,1]
 p = [0,0.1,0]
 
-q_init[-6:-3] = [0.2,0,0]
-q_goal[-6:-3] = [0.1,0,0]
+
 sf = State(fullBody,q=q_goal,limbsIncontact=[lLegId,rLegId])
 si = State(fullBody,q=q_init,limbsIncontact=[lLegId,rLegId])
 
 
 n = [0.0, -0.42261828000211843, 0.9063077785212101]
-p = [0.775, 0.22, -0.019]
+p = [0.775, 0.23, -0.02]
 moveSphere('s',r,p)
-smid,success = StateHelper.addNewContact(si,lLegId,p,n,100)
+smid,success = StateHelper.addNewContact(si,lLegId,p,n)
 assert(success)
-smid2,success = StateHelper.addNewContact(sf,lLegId,p,n,100)
+smid2,success = StateHelper.addNewContact(sf,lLegId,p,n)
 assert(success)
 r(smid.q())
 
 sf2 = State(fullBody,q=q_goal,limbsIncontact=[lLegId,rLegId])
-
-
-"""
-fullBody.isDynamicallyReachableFromState(smid.sId,smid2.sId,True)
-fullBody.isDynamicallyReachableFromState(smid.sId,smid2.sId,timings=[0.4,0.2,0.4])
-fullBody.isDynamicallyReachableFromState(si.sId,smid.sId,timings=[0.8,0.6,0.8])
-fullBody.isDynamicallyReachableFromState(smid2.sId,sf.sId,timings=[0.8,0.6,0.8])
-
-import disp_bezier
-pp.dt = 0.00001
-disp_bezier.showPath(r,pp,pid)
-
-x = [0.776624, 0.219798, 0.846351]
-
-
-moveSphere('s',r,x)
-displayBezierConstraints(r)
-
-path = "/local/dev_hpp/screenBlender/iros2018/polytopes/platform/path"
-for i in range(1,4):
-  r.client.gui.writeNodeFile('path_'+str(int(pid[i]))+'_root',path+str(i-1)+'.obj')
-
-r.client.gui.writeNodeFile('s',path+'_S.stl')
-
-"""
-
 """
 com = fullBody.getCenterOfMass()
 com[1] = 0
 """
-"""
+import disp_bezier
+pp.dt = 0.0001
 pids = []
-pids += [fullBody.isDynamicallyReachableFromState(si.sId,smid.sId)]
-pids += [fullBody.isDynamicallyReachableFromState(smid.sId,smid2.sId)]
-pids += [fullBody.isDynamicallyReachableFromState(smid2.sId,sf2.sId)]
+curves = []
+timings = []
+pid = fullBody.isDynamicallyReachableFromState(si.sId,smid.sId,True)
+#assert (len(pid)>0)
+disp_bezier.showPath(r,pp,pid)
+curves += [fullBody.getPathAsBezier(int(pid[0]))]
+timings += [[ps.pathLength(int(pid[1])), ps.pathLength(int(pid[2])), ps.pathLength(int(pid[3]))]]
+pids += pid
+pid = fullBody.isDynamicallyReachableFromState(smid.sId,smid2.sId,True)
+#assert (len(pid)>0)
+disp_bezier.showPath(r,pp,pid)
+curves += [fullBody.getPathAsBezier(int(pid[0]))]
+timings += [[ps.pathLength(int(pid[1])), ps.pathLength(int(pid[2])), ps.pathLength(int(pid[3]))]]
+pids += pid
+pid = fullBody.isDynamicallyReachableFromState(smid2.sId,sf2.sId,True)
+#assert (len(pid)>0)
+curves += [fullBody.getPathAsBezier(int(pid[0]))]
+timings += [[ps.pathLength(int(pid[1])), ps.pathLength(int(pid[2])), ps.pathLength(int(pid[3]))]]
+pids += pid
+disp_bezier.showPath(r,pp,pid)
 
-for pid in pids :
-  if pid > 0:
-    print "success"
-    #pp.displayPath(pid,color=r.color.blue)
-    #r.client.gui.setVisibility('path_'+str(pid)+'_root','ALWAYS_ON_TOP')
-  else:
-    print "fail."
-"""
+
 """
 
 n = [0,0,1]
-p = [1.15,0.1,0]
+p = [1.2,0.1,0]
 moveSphere('s',r,p)
 
-sE,success = StateHelper.addNewContact(si,lLegId,p,n)
+sE,success = StateHelper.addNewContact(sE,lLegId,p,n)
 assert(success)
 p = [1.15,-0.1,0] 
 sfe, success = StateHelper.addNewContact(sE,rLegId,p,n)
 assert(success)
+
+
+
+n = [0.0, -0.42261828000211843, 0.9063077785212101]
+p = [0.775, 0.23, -0.02]
+moveSphere('s',r,p)
+
+sE,success = StateHelper.addNewContact(sE,lLegId,p,n)
+assert(success)
+
 
 pids = []
 pids += [fullBody.isDynamicallyReachableFromState(si.sId,sE.sId)]
@@ -245,15 +239,26 @@ configs += [sf2.q()]
 from planning.config import *
 from generate_contact_sequence import *
 
+
+
+
 beginState = si.sId
 endState = sf2.sId
-cs = generateContactSequence(fullBody,configs,beginState, endState,r)
-
+#cs = generateContactSequence(fullBody,configs,beginState, endState,r,curves,timings)
+cs = generateContactSequence(fullBody,configs,beginState, endState)
+#cs = generateContactSequence(fullBody,configs,smid.sId, smid2.sId,r)
 
 
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")
 print "save contact sequence : ",filename
+
+
+
+import planning.generate_muscod_problem as mp
+mp.generate_muscod_problem(filename,True)
+
+
 
 
 

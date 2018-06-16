@@ -8,7 +8,7 @@ import math
 import omniORB.any
 
 
-
+from configs.darpa import * 
 from hpp.corbaserver import Client
 from hpp.corbaserver.robot import Robot as Parent
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
@@ -28,7 +28,7 @@ class Robot (Parent):
 		self.load = load
 		
 
-MU=0.5
+
 rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
 meshPackageName = 'hpp-rbprm-corba'
@@ -91,7 +91,7 @@ r.addLandmark(r.sceneName,1)
 # Setting initial and goal configurations
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init[3:7] = [1,0,0,0]
-q_init [0:3] = [-0.8, 0, 0.53]; r (q_init)
+q_init [0:3] = [-0.95, 0, 0.53]; r (q_init)
 #q_init [0:3] = [-0.5, 0, 0.75]; r (q_init)
 
 rbprmBuilder.setCurrentConfig (q_init)

@@ -5,7 +5,9 @@ from tools import *
 import darpa_hrp2_path as tp
 import time
 import omniORB.any
-
+import numpy as np
+from numpy import linalg as LA
+from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
 
 packageName = "hrp2_14_description"
 meshPackageName = "hrp2_14_description"
@@ -47,7 +49,7 @@ rLegLimbOffset=[0,0,-0.035]#0.035
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 #fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "forward", 0.1,"_6_DOF")
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "fixedStep06", 0.01,"_6_DOF",limbOffset=rLegLimbOffset,kinematicConstraintsMin=0.5)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "fixedStep08", 0.01,"_6_DOF",limbOffset=rLegLimbOffset,kinematicConstraintsPath = "package://hpp-rbprm-corba/com_inequalities/empty_com_constraints.obj")
 fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/hrp2_rleg_db.db")
 
@@ -57,7 +59,7 @@ lLegLimbOffset=[0,0,0.035]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
 #fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "forward", 0.1,"_6_DOF")
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fixedStep06", 0.01,"_6_DOF",limbOffset=lLegLimbOffset,kinematicConstraintsMin=0.5)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fixedStep08", 0.01,"_6_DOF",limbOffset=lLegLimbOffset,kinematicConstraintsPath = "package://hpp-rbprm-corba/com_inequalities/empty_com_constraints.obj")
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
 
@@ -131,59 +133,137 @@ pp = PathPlayer (fullBody.client.basic, r)
 import fullBodyPlayerHrp2
 
 tStart = time.time()
-configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = robTreshold, filterStates = True)
+configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = robTreshold, filterStates = True, testReachability=True, quasiStatic=True)
 tInterpolate = time.time()-tStart
 print "number of configs : ", len(configs)
 print "generated in "+str(tInterpolate)+" s"
 r(configs[len(configs)-2])
 
 
-player = fullBodyPlayerHrp2.Player(fullBody,pp,tp,configs,draw=False,use_window=1,optim_effector=True,use_velocity=False,pathId = pId)
-
-# remove the last config (= user defined q_goal, not consitent with the previous state)
-
-#r(configs[0])
-player.displayContactPlan()
 
 
+f = open("/local/fernbac/bench_iros18/kin_constraint_tog/without_kin_constraints.log","a")
 
-"""
-from planning.configs.darpa import *
-from generate_contact_sequence import *
-beginState = 0
-endState = len(configs)-1
-cs = generateContactSequence(fullBody,configs,beginState, endState,r)
-"""
-
-"""
-filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
-cs.saveAsXML(filename, "ContactSequence")
-print "save contact sequence : ",filename
-"""
-
-"""
-r(q_init)
-pos=fullBody.getJointPosition('RLEG_JOINT0')
-addSphere(r,r.color.blue,pos)
+global num_transition
+global valid_transition
+global length_traj
+global valid_length
+global dt
+num_transition = 0.
+valid_transition = 0.
+dt = 0.001
+valid_length = 0.
+length_traj = 0.
 
 
-dir = fullBody.getCurrentConfig()[37:40]
-fullBody.client.rbprm.rbprm.evaluateConfig(fullBody.getCurrentConfig(),dir)
+def check_traj(s,c0,c1,reverse=False):
+  global length_traj
+  global valid_length
+  global dt  
+  dist =  LA.norm(c1-c0)
+  if dist < dt :
+    return True
+  length_traj += dist
+  current_dist = 0.
+  dtu = dt/dist  
+  successProj_total = True
+  if not reverse :
+    u = 0.
+    while u < 1.:
+      c = c0*(1.-u) + c1*u
+      successProj = s.projectToCOM(c.transpose().tolist(),20) 
+      current_dist += dt
+      if successProj :
+        valid_length += dt
+      else :
+        print "projection failed."
+        successProj_total = False
+      u += dtu
+      
+    successProj = s.projectToCOM(c1.transpose().tolist(),20) 
+    if successProj :
+      valid_length += dist - current_dist
+    else :
+      print "projection failed."
+      successProj_total = False  
+  else :
+    u = 1.
+    while u > 0.:
+      c = c0*(1.-u) + c1*u
+      successProj = s.projectToCOM(c.transpose().tolist(),20) 
+      current_dist += dt
+      if successProj :
+        valid_length += dt
+      else :
+        print "projection failed."
+        successProj_total = False
+      u -= dtu
+      
+    successProj = s.projectToCOM(c0.transpose().tolist(),20) 
+    if successProj :
+      valid_length += dist - current_dist
+    else :
+      print "projection failed."
+      successProj_total = False 
+  
+  return successProj_total
 
-vd[0:3] = fullBody.getCurrentConfig()[0:3]
-addVector(r,fullBody,r.color.black,vd)
+def check_kin_feasibility(s0Id,s1Id):
+  res = fullBody.isReachableFromState(s0Id,s1Id,True)
+  if not res[0]:
+    print "Error : isReachable returned False !"
+    raise Exception('Error : isReachable returned False !') 
+  r(configs[s0Id])
+  c0 = np.array(fullBody.getCenterOfMass())
+  c1 = np.array(res[1])
+  c2 = np.array(res[2])
+  r(configs[s1Id])
+  c3 = np.array(fullBody.getCenterOfMass())
+  s0 = State(fullBody,sId = s0Id)
+  s1 = State(fullBody,sId = s1Id)  
+  s0_orig = State(s0.fullBody,q=s0.q(),limbsIncontact=s0.getLimbsInContact())
+  s1_orig = State(s1.fullBody,q=s1.q(),limbsIncontact=s1.getLimbsInContact())  
+  moving_limb = s0.contactsVariations(s1)
+  smid,successMid = StateHelper.removeContact(s0_orig,moving_limb[0])
+  if not successMid :
+    return False
+  
+  successFeasible = True
+  print "check first part"
+  successFeasible = successFeasible and check_traj(s0_orig,c0,c1)
+  print "check mid part"
+  successFeasible = successFeasible and check_traj(smid,c1,c2)
+  print "check last part"
+  successFeasible = successFeasible and check_traj(s1_orig,c2,c3,True)
+  return successFeasible
+  
 
-vl[0:3] = fullBody.getCurrentConfig()[0:3]
-addVector(r,fullBody,r.color.blue,vl)
+for i in range(len(configs)-2):
+  print "check traj between state "+str(i)+" and "+str(i+1)
+  success = check_kin_feasibility(i,i+1)
+  num_transition +=1.
+  if success :
+    valid_transition +=1.
+  
 
-vlb[0:3] = fullBody.getCurrentConfig()[0:3]
-addVector(r,fullBody,r.color.red,vlb)
 
-"""
+f.write("num_transition           "+str(num_transition)+"\n")
+f.write("valid_transition         "+str(valid_transition)+"\n")
+if num_transition > 0:
+  f.write("valid_transition_percent "+str(float(valid_transition/num_transition)*100.)+" %\n")
+f.write("traj_length              "+str(length_traj)+"\n")
+f.write("valid_length             "+str(valid_length)+"\n")
+if length_traj > 0 :
+  f.write("valid_traj_percent       "+str(float(valid_length/length_traj)*100.)+" %\n")
+
+f.close()
+
 
 
 #wid = r.client.gui.getWindowID("window_hpp_")
 #r.client.gui.attachCameraToNode( 'hrp2_14/BODY_0',wid)
+
+
 
 
 

@@ -13,7 +13,7 @@ rootJointType = "freeflyer"
 ##
 #  Information to retrieve urdf and srdf files.
 urdfName = "hrp2_14"
-urdfSuffix = "_reduced"
+urdfSuffix = "_reduced_safe"
 srdfSuffix = ""
 
 fullBody = FullBody ()
@@ -29,68 +29,51 @@ ps.client.problem.setParameter("aMax",omniORB.any.to_any(tp.aMax))
 ps.client.problem.setParameter("vMax",omniORB.any.to_any(tp.vMax))
 ps.client.problem.setParameter("friction",tp.mu)
 
-r = tp.Viewer (ps,viewerClient=tp.r.client)
+r = tp.Viewer (ps,viewerClient=tp.r.client, displayCoM = True)
+tStart = time.time()
+#~ AFTER loading obstacles
+
 
 #~ AFTER loading obstacles
 rLegId = 'hrp2_rleg_rom'
+lLegId = 'hrp2_lleg_rom'
+tStart = time.time()
+
+
 rLeg = 'RLEG_JOINT0'
-rLegOffset = [0,0,-0.105]
+rLegOffset = [0,0,-0.0955]
+rLegLimbOffset=[0,0,-0.035]#0.035
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 50000, "manipulability", 0.01,"_6_DOF")
 
-lLegId = 'hrp2_lleg_rom'
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "fixedStep1", 0.01,"_6_DOF",limbOffset=rLegLimbOffset,kinematicConstraintsPath = "package://hpp-rbprm-corba/com_inequalities/fullSize/RLEG_JOINT0_com_constraints.obj",kinematicConstraintsMin=0.)
+fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
+#fullBody.saveLimbDatabase(rLegId, "./db/hrp2_rleg_db.db")
+
 lLeg = 'LLEG_JOINT0'
-lLegOffset = [0,0,-0.105]
+lLegOffset = [0,0,-0.0955]
+lLegLimbOffset=[0,0,0.035]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "manipulability", 0.01,"_6_DOF")
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fixedStep1", 0.01,"_6_DOF",limbOffset=lLegLimbOffset,kinematicConstraintsPath = "package://hpp-rbprm-corba/com_inequalities/fullSize/LLEG_JOINT0_com_constraints.obj",kinematicConstraintsMin=0.)
+fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
+#fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
+
 
 rarmId = 'hrp2_rarm_rom'
 rarm = 'RARM_JOINT0'
 rHand = 'RARM_JOINT5'
-rArmOffset = [0,0,-0.1]
-rArmNormal = [0,0,1]
+rArmOffset = [0,0,0.1]
+rArmNormal = [0,0,-1]
 rArmx = 0.024; rArmy = 0.024
 #disabling collision for hook
 fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 100000, "manipulability", 0.01, "_6_DOF", True)
 
-"""
-
-#~ AFTER loading obstacles
-larmId = '4Larm'
-larm = 'LARM_JOINT0'
-lHand = 'LARM_JOINT5'
-lArmOffset = [-0.05,-0.050,-0.050]
-lArmNormal = [1,0,0]
-lArmx = 0.024; lArmy = 0.024
-#~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, 0.05)
-
-rKneeId = '0RKnee'
-rLeg = 'RLEG_JOINT0'
-rKnee = 'RLEG_JOINT3'
-rLegOffset = [0.105,0.055,0.017]
-rLegNormal = [-1,0,0]
-rLegx = 0.05; rLegy = 0.05
-#~ fullBody.addLimb(rKneeId, rLeg,rKnee,rLegOffset,rLegNormal, rLegx, rLegy, 10000, 0.01)
-#~ 
-lKneeId = '1LKnee'
-lLeg = 'LLEG_JOINT0'
-lKnee = 'LLEG_JOINT3'
-lLegOffset = [0.105,0.055,0.017]
-lLegNormal = [-1,0,0]
-lLegx = 0.05; lLegy = 0.05
-#~ fullBody.addLimb(lKneeId,lLeg,lKnee,lLegOffset,lLegNormal, lLegx, lLegy, 10000, 0.01)
- #~ 
-
-#~ fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
-#~ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
-
-#~ fullBody.client.basic.robot.setJointConfig('LARM_JOINT0',[1])
-#~ fullBody.client.basic.robot.setJointConfig('RARM_JOINT0',[-1])
 
 
-"""
+tGenerate =  time.time() - tStart
+print "generate databases in : "+str(tGenerate)+" s"
+
 
 
 q_0 = fullBody.getCurrentConfig(); 
@@ -104,8 +87,8 @@ fullBody.setReferenceConfig (q_ref)
 
 configSize = fullBody.getConfigSize() -fullBody.client.basic.robot.getDimensionExtraConfigSpace()
 
-q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.ps.configAtParam(0,0.01)[0:7] # use this to get the correct orientation
-q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.ps.configAtParam(0,tp.ps.pathLength(0))[0:7]
+q_init = fullBody.getCurrentConfig(); q_init[0:3] = tp.ps.configAtParam(0,0.01)[0:3] # use this to get the correct orientation
+q_goal = fullBody.getCurrentConfig(); q_goal[0:3] = tp.ps.configAtParam(0,tp.ps.pathLength(0))[0:3]
 dir_init = tp.ps.configAtParam(0,0.01)[tp.indexECS:tp.indexECS+3]
 acc_init = tp.ps.configAtParam(0,0.01)[tp.indexECS+3:tp.indexECS+6]
 dir_goal = tp.ps.configAtParam(0,tp.ps.pathLength(0))[tp.indexECS:tp.indexECS+3]
@@ -118,18 +101,22 @@ fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 
 
 # FIXME : test
-q_init[2] = q_init[2]+0.02
-q_goal[2] = q_goal[2]+0.02
+#q_init[2] = q_init[2]+0.0
+#q_goal[2] = q_goal[2]+0.02
+q_init[2] = q_ref[2] + 0.01
+q_goal[2] = 1.25
 
-q_init[0:3]=[0.28994563306701016,-0.82,0.6191688248477717]
+
 
 
 fullBody.setStaticStability(True)
+"""
 # Randomly generating a contact configuration at q_init
 fullBody.setCurrentConfig (q_init)
 r(q_init)
 q_init = fullBody.generateContacts(q_init,dir_init,acc_init)
 r(q_init)
+"""
 
 # Randomly generating a contact configuration at q_end
 fullBody.setCurrentConfig (q_goal)
@@ -146,11 +133,12 @@ r(q_init)
 
 
 fullBody.setStartState(q_init,[rLegId,lLegId])
-fullBody.setEndState(q_goal,[rLegId,lLegId])
+fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId])
 
 
-
-configs = fullBody.interpolate(0.03,pathId=0,robustnessTreshold = 2, filterStates = True)
+tStart = time.time()
+configs = fullBody.interpolate(0.01,pathId=0,robustnessTreshold = 0, filterStates = True,testReachability=False,quasiStatic=False)
+tInterpolateConfigs = time.time()-tStart
 print "number of configs :", len(configs)
 r(configs[-1])
 
@@ -166,26 +154,16 @@ player = Player(fullBody,pp,tp,configs,draw=False,optim_effector=False,use_veloc
 player.displayContactPlan()
 
 
+beginState=0
+endState=len(configs)-1
 
 
-print "####################################"
-print "#            SOLVING P2 :          #"
-print "#               DONE               #"
-print "####################################"
-print "# Writing contact sequence file :  #"
-print "####################################"
-
-from planning.configs.stairs_config import *
+from configs.stairs_config import *
 from generate_contact_sequence import *
-cs = generateContactSequence(fullBody,configs[:5],r)
+cs = generateContactSequence(fullBody,configs,beginState,endState,r)
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
-cs.saveAsXML(filename, CONTACT_SEQUENCE_XML_TAG)
+cs.saveAsXML(filename, "ContactSequence")
 print "save contact sequence : ",filename
-print "####################################"
-print "# Writing contact sequence file :  #"
-print "#               DONE               #"
-print "####################################"
-
 
 
 

@@ -6,7 +6,7 @@ from hpp.gepetto import Viewer
 import time
 import math
 import omniORB.any
-from planning.config import *
+from configs.darpa import *
 
 from hpp.corbaserver import Client
 from hpp.corbaserver.robot import Robot as Parent
@@ -50,11 +50,11 @@ rbprmBuilder.setFilter(['hrp2_lleg_rom','hrp2_rleg_rom'])
 #rbprmBuilder.setAffordanceFilter('hrp2_larm_rom', ['Lean'])
 #rbprmBuilder.setAffordanceFilter('hrp2_lleg_rom', ['Support'])
 #rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
-vMax = 0.2;
-aMax = 0.1;
+vMax = 0.1;
+aMax = 0.05;
 extraDof = 6
 
-rbprmBuilder.setJointBounds ("base_joint_xyz", [-1.2,1.5,-0.1 ,0.1, 0.55, 0.85])
+rbprmBuilder.setJointBounds ("base_joint_xyz", [-1.2,1.5,-0.1 ,0.1, 0.55, 1.])
 rbprmBuilder.setJointBounds('CHEST_JOINT0',[-0.05,0.05])
 rbprmBuilder.setJointBounds('CHEST_JOINT1',[-0.05,0.05])
 # We also bound the rotations of the torso. (z, y, x)
@@ -76,7 +76,7 @@ ps.client.problem.setParameter("sizeFootX",omniORB.any.to_any(0.24))
 ps.client.problem.setParameter("sizeFootY",omniORB.any.to_any(0.14))
 
 
-r = Viewer (ps,displayArrows = True)
+r = Viewer (ps,displayArrows = False,displayCoM=True)
 
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
@@ -85,19 +85,21 @@ afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.005])
 afftool.loadObstacleModel (packageName, ENV_NAME, ENV_PREFIX, r,reduceSizes=[0.14,0])
 #r.loadObstacleModel (packageName, "ground", "planning")
 afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
-r.addLandmark(r.sceneName,1)
+#r.addLandmark(r.sceneName,1)
 
 # Setting initial and goal configurations
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init[3:7] = [1,0,0,0]
-q_init [0:3] =[-0.37, 0, 0.74]; r (q_init)
-#q_init [0:3] = [-0.5, 0, 0.75]; r (q_init)
+#q_init [0:3] =[-0.37, 0, 0.74]; r (q_init)
+q_init [0:3] =[-0.71, -0.03, 0.76]; r (q_init)
+
 
 rbprmBuilder.setCurrentConfig (q_init)
 q_goal = q_init [::]
 
-q_goal [0:3] =[0.85, 0, 0.74]; r(q_goal)
-#q_goal [0:3] = [1, 0, 0.75]; r(q_goal)
+q_goal [0:3] =[1.12, -0.03, 0.76]; r(q_goal)
+#q_goal [0:3] =[0.85, 0, 0.74]; r(q_goal)
+
 r (q_goal)
 
 
