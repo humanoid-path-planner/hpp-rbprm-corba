@@ -51,6 +51,7 @@ vMax = 0.2;
 aMax = 0.1;
 extraDof = 6
 
+#rbprmBuilder.setJointBounds ("base_joint_xyz", [-1,2.5,0.5 ,3, 0.6, 0.6])
 rbprmBuilder.setJointBounds ("base_joint_xyz", [-1,2.5,0.5 ,3, 0.6, 0.6])
 rbprmBuilder.setJointBounds('CHEST_JOINT0',[-0.05,0.05])
 rbprmBuilder.setJointBounds('CHEST_JOINT1',[-0.05,0.05])
@@ -86,10 +87,10 @@ r.addLandmark(r.sceneName,1)
 # Setting initial and goal configurations
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init[3:7] = [1,0,0,0]
-#q_init [0:3] = [-0.9, 1, 0.6]; r (q_init)
-q_init [0:3] = [0.5, 2.5, 0.6]; r (q_init)
+q_init [0:3] = [-0.9, 1, 0.6]; r (q_init)
+#q_init [0:3] = [0.5, 2.5, 0.6]; r (q_init)
 q_init[-6:-3] = [0.05,0,0]
-#q_init [0:3] = [0.05, 0.86, 0.59]; r (q_init)
+
 
 rbprmBuilder.setCurrentConfig (q_init)
 q_goal = q_init [::]

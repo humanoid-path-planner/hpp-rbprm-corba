@@ -7,7 +7,7 @@ import time
 import omniORB.any
 from constraint_to_dae import *
 from display_tools import *
-from configs.stairs10_bauzil_stairs import *
+from configs.slalom_bauzil import *
 from disp_bezier import *
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
 
@@ -24,7 +24,7 @@ fullBody = FullBody ()
 tPlanning = 0.
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz",  [-1,2.5,0.5 ,3, 0.5, 0.7])
+fullBody.setJointBounds ("base_joint_xyz",  [-1,2.5,0.5 ,3, 0.4, 0.8])
 fullBody.setJointBounds ("LLEG_JOINT3",  [0.35,2.61799])
 fullBody.setJointBounds ("RLEG_JOINT3", [0.35,2.61799])
 
@@ -55,7 +55,7 @@ rLegLimbOffset=[0,0,-0.035]#0.035
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 #fullBody.addLimbDatabase("./db/hrp2_rleg_db.db",rLegId,"forward")
-fullBody.addLimb(rLegId,rleg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "fixedStep06", 0.01,"_6_DOF",kinematicConstraintsPath = "package://hpp-rbprm-corba/com_inequalities/fullsize/RLEG_JOINT0_com_constraints.obj",limbOffset=rLegLimbOffset,kinematicConstraintsMin=0.6)
+fullBody.addLimb(rLegId,rleg,'',rLegOffset,rLegNormal, rLegx, rLegy, 100000, "fixedStep06", 0.01,"_6_DOF",kinematicConstraintsPath = "package://hpp-rbprm-corba/com_inequalities/fullSize/RLEG_JOINT0_com_constraints.obj",limbOffset=rLegLimbOffset,kinematicConstraintsMin=0.4)
 fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/hrp2_rleg_db.db")
 
@@ -65,7 +65,7 @@ lLegLimbOffset=[0,0,0.035]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
 #fullBody.addLimbDatabase("./db/hrp2_lleg_db.db",lLegId,"forward")
-fullBody.addLimb(lLegId,lleg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fixedStep06", 0.01,"_6_DOF",kinematicConstraintsPath = "package://hpp-rbprm-corba/com_inequalities/fullsize/LLEG_JOINT0_com_constraints.obj",limbOffset=lLegLimbOffset,kinematicConstraintsMin=0.6)
+fullBody.addLimb(lLegId,lleg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fixedStep06", 0.01,"_6_DOF",kinematicConstraintsPath = "package://hpp-rbprm-corba/com_inequalities/fullSize/LLEG_JOINT0_com_constraints.obj",limbOffset=lLegLimbOffset,kinematicConstraintsMin=0.4)
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
 
@@ -99,7 +99,7 @@ acc_init = [0,0,0]
 dir_goal = tp.ps.configAtParam(pId,eps)[tp.indexECS:tp.indexECS+3]
 acc_goal = [0,0,0]
 
-robTreshold = 3
+robTreshold = 1
 # copy extraconfig for start and init configurations
 q_init[configSize:configSize+3] = dir_init[::]
 q_init[configSize+3:configSize+6] = acc_init[::]
@@ -169,7 +169,7 @@ import check_qp
 #cs = generateContactSequence(fullBody,configs,beginState, endState,curves_initGuess =curves_initGuess , timings_initGuess =timings_initGuess)
 
 
-#displayContactSequence(r,configsFull)
+displayContactSequence(r,configsFull)
 
 
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
