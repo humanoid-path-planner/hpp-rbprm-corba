@@ -378,9 +378,9 @@ install(FILES
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/com_inequalities
   )
   
-install(DIRECTORY data/hyq_description
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/../
-  )
+#~ install(DIRECTORY data/hyq_description
+  #~ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/../
+  #~ )
   
 SETUP_PROJECT_FINALIZE()
 
