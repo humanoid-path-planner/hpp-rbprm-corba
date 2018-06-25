@@ -8,7 +8,7 @@ import math
 import omniORB.any
 
 
-from configs.darpa import * 
+
 from hpp.corbaserver import Client
 from hpp.corbaserver.robot import Robot as Parent
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
@@ -54,6 +54,7 @@ rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
 vMax = 0.2;
 aMax = 0.1;
 extraDof = 6
+MU = 0.5
 
 rbprmBuilder.setJointBounds ("base_joint_xyz", [-1.2,1.5,-0.1 ,0.1, 0.55, 0.85])
 rbprmBuilder.setJointBounds('CHEST_JOINT0',[-0.05,0.05])
