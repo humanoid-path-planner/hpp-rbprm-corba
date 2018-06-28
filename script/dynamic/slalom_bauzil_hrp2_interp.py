@@ -14,7 +14,8 @@ rootJointType = "freeflyer"
 ##
 #  Information to retrieve urdf and srdf files.
 urdfName = "hrp2_14"
-urdfSuffix = "_reduced_safe"
+#~ urdfSuffix = "_reduced_safe"
+urdfSuffix = "_reduced"
 srdfSuffix = ""
 pId = tp.ps.numberPaths() -1
 fullBody = FullBody ()
