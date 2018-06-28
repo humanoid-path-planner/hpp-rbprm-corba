@@ -74,8 +74,29 @@ fullBody.runLimbSampleAnalysis(larmId, "jointLimitsDistance", True)
 
 #~ q_init = hyq_ref[:]; q_init[0:7] = tp.q_init[0:7]; 
 #~ q_goal = hyq_ref[:]; q_goal[0:7] = tp.q_goal[0:7]; 
-q_init = hyq_ref[:]; q_init[0:7] = tp.q_init[0:7]; q_init[2]=hyq_ref[2]+0.02
-q_goal = hyq_ref[:]; q_goal[0:7] = tp.q_goal[0:7]; q_init[2]=hyq_ref[2]+0.02
+q_init = hyq_ref[:]; q_init[0:7] = tp.q_init[0:7]; q_init[2]=hyq_ref[2]
+q_goal = hyq_ref[:]; q_goal[0:7] = tp.q_goal[0:7]; q_goal[2]=hyq_ref[2]+0.02
+
+q_init = [-2.0,
+ 0.0,
+ 0.6638277139631803,
+ 1.0,
+ 0.0,
+ 0.0,
+ 0.0,
+ 0.14279812395541294,
+ 0.934392553166556,
+ -0.9968239786882757,
+ -0.06521258938340457,
+ -0.8831796268418511,
+ 1.150049183494211,
+ -0.06927610020154493,
+ 0.9507443168724581,
+ -0.8739975339028809,
+ 0.03995660287873871,
+ -0.9577096766517215,
+ 0.9384602821326071]
+
 
 # Randomly generating a contact configuration at q_init
 #~ fullBody.setCurrentConfig (q_init)
@@ -153,7 +174,7 @@ def genPlan(stepsize=0.06):
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	global configs
 	start = time.clock() 
-	configs = fullBody.interpolate(stepsize, 5, 5, True)
+	configs = fullBody.interpolate(stepsize, 5, 5, filterStates = True, testReachability=False, quasiStatic=False)
 	end = time.clock() 
 	print "Contact plan generated in " + str(end-start) + "seconds"
 	
@@ -190,4 +211,4 @@ def e(step = 0.5):
 print "Root path generated in " + str(tp.t) + " ms."
 
 #~ d();e()
-d(0.004);e(0.01)
+d(0.04);e(0.01)
