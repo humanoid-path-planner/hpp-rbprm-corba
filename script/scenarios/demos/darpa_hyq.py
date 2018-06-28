@@ -50,27 +50,27 @@ legx = 0.02; legy = 0.02
 def addLimbDb(limbId, heuristicName, loadValues = True, disableEffectorCollision = False):
 	fullBody.addLimbDatabase(str(db_dir+limbId+'.db'), limbId, heuristicName,loadValues, disableEffectorCollision)
 
-fullBody.addLimb(rLegId,rLeg,rfoot,offset,normal, legx, legy, nbSamples, "jointlimits", 0.1, cType)
+fullBody.addLimb(rLegId,rLeg,rfoot,offset,normal, legx, legy, nbSamples, "random", 0.1, cType)
 
 lLegId = 'lhleg'
 lLeg = 'lh_haa_joint'
 lfoot = 'lh_foot_joint'
-fullBody.addLimb(lLegId,lLeg,lfoot,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
+fullBody.addLimb(lLegId,lLeg,lfoot,offset,normal, legx, legy, nbSamples, "random", 0.05, cType)
 #~ 
 rarmId = 'rhleg'
 rarm = 'rh_haa_joint'
 rHand = 'rh_foot_joint'
-fullBody.addLimb(rarmId,rarm,rHand,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
+fullBody.addLimb(rarmId,rarm,rHand,offset,normal, legx, legy, nbSamples, "random", 0.05, cType)
 
 larmId = 'lfleg'
 larm = 'lf_haa_joint'
 lHand = 'lf_foot_joint'
-fullBody.addLimb(larmId,larm,lHand,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
+fullBody.addLimb(larmId,larm,lHand,offset,normal, legx, legy, nbSamples, "random", 0.05, cType)
 
-fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
-fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
-fullBody.runLimbSampleAnalysis(rarmId, "jointLimitsDistance", True)
-fullBody.runLimbSampleAnalysis(larmId, "jointLimitsDistance", True)
+#~ fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
+#~ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
+#~ fullBody.runLimbSampleAnalysis(rarmId, "jointLimitsDistance", True)
+#~ fullBody.runLimbSampleAnalysis(larmId, "jointLimitsDistance", True)
 
 #~ q_init = hyq_ref[:]; q_init[0:7] = tp.q_init[0:7]; 
 #~ q_goal = hyq_ref[:]; q_goal[0:7] = tp.q_goal[0:7]; 
@@ -174,7 +174,7 @@ def genPlan(stepsize=0.06):
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	global configs
 	start = time.clock() 
-	configs = fullBody.interpolate(stepsize, 5, 5, filterStates = True, testReachability=False, quasiStatic=False)
+	configs = fullBody.interpolate(stepsize, 5, 20, filterStates = True, testReachability=False, quasiStatic=True)
 	end = time.clock() 
 	print "Contact plan generated in " + str(end-start) + "seconds"
 	
@@ -211,4 +211,4 @@ def e(step = 0.5):
 print "Root path generated in " + str(tp.t) + " ms."
 
 #~ d();e()
-d(0.04);e(0.01)
+d(0.004);e(0.01)
