@@ -493,7 +493,7 @@ namespace hpp {
             const fcl::Vec3f position = limb->effector_->currentTransformation().translation();
             state.contactPositions_[limbName] = position;
             state.contactNormals_[limbName] = fcl::Vec3f(0,0,1);
-            state.contactRotation_[limbName] = limb->effector_->currentTransformation().translation();
+            state.contactRotation_[limbName] = limb->effector_->currentTransformation().rotation();
             std::vector<fcl::Vec3f> poss = (computeRectangleContact(fullBody(), state));
 
             hpp::floatSeqSeq *res;
@@ -918,10 +918,11 @@ namespace hpp {
                         // rotation matrix around z
                         value_type theta = 2*(value_type(rand()) / value_type(RAND_MAX) - 0.5) * M_PI;
                         fcl::Matrix3f r = tools::GetZRotMatrix(theta);
-                        fcl::Matrix3f rotation = r * limb->effector_->initialPosition ().getRotation();
+                        // TODO not assume identity matrix for effector frame
+                        fcl::Matrix3f rotation = r;// * limb->effector_->initialPosition ().getRotation();
                         proj->add(core::NumericalConstraint::create (constraints::Orientation::create("",fullBody()->device_,
                                                                                                       limb->effector_,
-                                                                                                      pinocchio::Transform3f(rotation),
+                                                                                                      pinocchio::Transform3f(rotation,fcl::Vec3f::Zero()),
                                                                                                       rotConstraints)));
                     }
                 }
@@ -3020,7 +3021,7 @@ assert(s2 == s1 +1);
             const hpp::rbprm::RbPrmLimbPtr_t limb =fullBody()->GetLimbs().at(std::string(*cit));
             testedState.contacts_[*cit] = true;
             testedState.contactPositions_[*cit] = limb->effector_->currentTransformation().translation();
-            testedState.contactRotation_[*cit] = limb->effector_->currentTransformation().translation();
+            testedState.contactRotation_ [*cit] = limb->effector_->currentTransformation().rotation();
             // normal given by effector normal
             const fcl::Vec3f normal = limb->effector_->currentTransformation().rotation() * limb->normal_;
             testedState.contactNormals_[*cit] = normal;
