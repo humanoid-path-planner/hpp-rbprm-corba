@@ -31,18 +31,16 @@
 #include "hpp/rbprm/contact_generation/algorithm.hh"
 #include "hpp/rbprm/stability/stability.hh"
 #include "hpp/rbprm/sampling/sample-db.hh"
-#include "hpp/model/urdf/util.hh"
 #include "hpp/core/straight-path.hh"
-#include "hpp/model/joint.hh"
 #include "hpp/core/config-validations.hh"
 #include "hpp/core/collision-validation-report.hh"
 #include <hpp/core/subchain-path.hh>
 #include <hpp/core/basic-configuration-shooter.hh>
 #include <hpp/core/collision-validation.hh>
+#include <hpp/core/problem-solver.hh>
 #include <fstream>
 #include <hpp/rbprm/planner/dynamic-planner.hh>
 #include <hpp/rbprm/planner/rbprm-steering-kinodynamic.hh>
-#include <hpp/model/configuration.hh>
 #include <algorithm>    // std::random_shuffle
 #include <hpp/rbprm/interpolation/time-constraint-helper.hh>
 #include "spline/bezier_curve.h"
@@ -51,6 +49,7 @@
 #include <hpp/rbprm/planner/oriented-path-optimizer.hh>
 #include <hpp/rbprm/sampling/heuristic-tools.hh>
 #include <hpp/rbprm/contact_generation/reachability.hh>
+#include <hpp/pinocchio/urdf/util.hh>
 #ifdef PROFILE
     #include "hpp/rbprm/rbprm-profiler.hh"
 #endif
@@ -94,14 +93,14 @@ namespace hpp {
     {
         try
         {
-            hpp::model::DevicePtr_t romDevice = model::Device::create (robotName);
+            hpp::pinocchio::DevicePtr_t romDevice = pinocchio::Device::create (robotName);
             romDevices_.insert(std::make_pair(robotName, romDevice));
-            hpp::model::urdf::loadRobotModel (romDevice,
-                    std::string (rootJointType),
-                    std::string (packageName),
-                    std::string (modelName),
-                    std::string (urdfSuffix),
-                    std::string (srdfSuffix));
+            hpp::pinocchio::urdf::loadRobotModel (romDevice,
+                              std::string (rootJointType),
+                              std::string (packageName),
+                              std::string (modelName),
+                              std::string (urdfSuffix),
+                              std::string (srdfSuffix));
         }
         catch (const std::exception& exc)
         {
@@ -126,8 +125,8 @@ namespace hpp {
         }
         try
         {
-            hpp::model::RbPrmDevicePtr_t device = hpp::model::RbPrmDevice::create (robotName, romDevices_);
-            hpp::model::urdf::loadRobotModel (device,
+            hpp::pinocchio::RbPrmDevicePtr_t device = hpp::pinocchio::RbPrmDevice::create (robotName, romDevices_);
+            hpp::pinocchio::urdf::loadRobotModel (device,
                     std::string (rootJointType),
                     std::string (packageName),
                     std::string (modelName),
@@ -136,7 +135,7 @@ namespace hpp {
             // Add device to the planner
             problemSolver()->robot (device);
             problemSolver()->robot ()->controlComputation
-            (model::Device::JOINT_POSITION);
+            (pinocchio::Device::JOINT_POSITION);
         }
         catch (const std::exception& exc)
         {
@@ -155,8 +154,8 @@ namespace hpp {
     {
         try
         {
-            model::DevicePtr_t device = model::Device::create (robotName);
-            hpp::model::urdf::loadRobotModel (device,
+            hpp::pinocchio::DevicePtr_t device = pinocchio::Device::create (robotName);
+            hpp::pinocchio::urdf::loadRobotModel (device,
                     std::string (rootJointType),
                     std::string (packageName),
                     std::string (modelName),
@@ -169,8 +168,8 @@ namespace hpp {
             if(problemSolver()){
                 if(problemSolver()->problem()){
                     try {
-                      boost::any value = problemSolver()->problem()->get<boost::any> (std::string("friction"));
-                      fullBody()->setFriction(boost::any_cast<double>(value));
+                      double mu = problemSolver()->problem()->getParameter ("friction").floatValue();
+                      fullBody()->setFriction(mu);
                       hppDout(notice,"fullbody : mu define in python : "<<fullBody()->getFriction());
                     } catch (const std::exception& e) {
                       hppDout(notice,"fullbody : mu not defined, take : "<<fullBody()->getFriction()<<" as default.");
@@ -185,7 +184,7 @@ namespace hpp {
             problemSolver()->robot (fullBody()->device_);
             problemSolver()->resetProblem();
             problemSolver()->robot ()->controlComputation
-            (model::Device::JOINT_POSITION);
+            (pinocchio::Device::JOINT_POSITION);
             refPose_ = fullBody()->device_->currentConfiguration();
         }
         catch (const std::exception& exc)
@@ -206,7 +205,7 @@ namespace hpp {
             problemSolver()->robot (fullBody()->device_);
             problemSolver()->resetProblem();
             problemSolver()->robot ()->controlComputation
-            (model::Device::JOINT_POSITION);
+            (pinocchio::Device::JOINT_POSITION);
         }
         catch (const std::exception& exc)
         {
@@ -296,9 +295,9 @@ namespace hpp {
                 const fcl::Vec3f& position = cit->second;
                 limb = limbs.at(name);
                 const fcl::Vec3f& normal = state.contactNormals_.at(name);
-                const fcl::Vec3f z = limb->effector_->currentTransformation().getRotation() * limb->normal_;
+                const fcl::Vec3f z = limb->effector_->currentTransformation().rotation() * limb->normal_;
                 const fcl::Matrix3f alignRotation = tools::GetRotationMatrix(z,normal);
-                const fcl::Matrix3f rotation = alignRotation * limb->effector_->currentTransformation().getRotation();
+                const fcl::Matrix3f rotation = alignRotation * limb->effector_->currentTransformation().rotation();
                 const fcl::Vec3f offset = rotation * limb->offset_;
                 const double& lx = limb->x_, ly = limb->y_;
                 p << lx,  ly, 0,
@@ -372,9 +371,9 @@ namespace hpp {
                 const fcl::Vec3f& position = cit->second;
                 limb = limbs.at(name);
                 const fcl::Vec3f& normal = state.contactNormals_.at(name);
-                const fcl::Vec3f z = limb->effector_->currentTransformation().getRotation() * limb->normal_;
+                const fcl::Vec3f z = limb->effector_->currentTransformation().rotation() * limb->normal_;
                 const fcl::Matrix3f alignRotation = tools::GetRotationMatrix(z,normal);
-                const fcl::Matrix3f rotation = alignRotation * limb->effector_->currentTransformation().getRotation();
+                const fcl::Matrix3f rotation = alignRotation * limb->effector_->currentTransformation().rotation();
                 const fcl::Vec3f offset = rotation * limb->offset_;
                 const double& lx = limb->x_, ly = limb->y_;
                 p << lx,  ly, 0,
@@ -438,12 +437,12 @@ namespace hpp {
         return res;
     }
 
-    model::Configuration_t dofArrayToConfig (const std::size_t& deviceDim,
+    pinocchio::Configuration_t dofArrayToConfig (const std::size_t& deviceDim,
       const hpp::floatSeq& dofArray)
     {
         std::size_t configDim = (std::size_t)dofArray.length();
         // Fill dof vector with dof array.
-        model::Configuration_t config; config.resize (configDim);
+        pinocchio::Configuration_t config; config.resize (configDim);
         for (std::size_t iDof = 0; iDof < configDim; iDof++) {
             config [iDof] = (double)dofArray[(_CORBA_ULong)iDof];
         }
@@ -455,7 +454,7 @@ namespace hpp {
         return config;
     }
 
-    model::Configuration_t dofArrayToConfig (const model::DevicePtr_t& robot,
+    pinocchio::Configuration_t dofArrayToConfig (const pinocchio::DevicePtr_t& robot,
       const hpp::floatSeq& dofArray)
     {
         return dofArrayToConfig(robot->configSize(), dofArray);
@@ -473,7 +472,7 @@ namespace hpp {
         return res;
     }
 
-    T_Configuration doubleDofArrayToConfig (const model::DevicePtr_t& robot,
+    T_Configuration doubleDofArrayToConfig (const pinocchio::DevicePtr_t& robot,
       const hpp::floatSeqSeq& doubleDofArray)
     {
         return doubleDofArrayToConfig(robot->configSize(), doubleDofArray);
@@ -485,16 +484,16 @@ namespace hpp {
         {
             const std::string limbName(lb);
             const RbPrmLimbPtr_t limb = fullBody()->GetLimbs().at(limbName);
-            model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+            pinocchio::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
             fullBody()->device_->currentConfiguration(config);
             fullBody()->device_->computeForwardKinematics();
             State state;
             state.configuration_ = config;
             state.contacts_[limbName] = true;
-            const fcl::Vec3f position = limb->effector_->currentTransformation().getTranslation();
+            const fcl::Vec3f position = limb->effector_->currentTransformation().translation();
             state.contactPositions_[limbName] = position;
             state.contactNormals_[limbName] = fcl::Vec3f(0,0,1);
-            state.contactRotation_[limbName] = limb->effector_->currentTransformation().getRotation();
+            state.contactRotation_[limbName] = limb->effector_->currentTransformation().translation();
             std::vector<fcl::Vec3f> poss = (computeRectangleContact(fullBody(), state));
 
             hpp::floatSeqSeq *res;
@@ -692,7 +691,7 @@ namespace hpp {
         return res;
     }
 
-    double RbprmBuilder::projectStateToCOMEigen(unsigned short stateId, const model::Configuration_t& com_target, unsigned short maxNumeSamples) throw (hpp::Error){
+    double RbprmBuilder::projectStateToCOMEigen(unsigned short stateId, const pinocchio::Configuration_t& com_target, unsigned short maxNumeSamples) throw (hpp::Error){
         if(lastStatesComputed_.size() <= stateId)
         {
             throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
@@ -704,23 +703,23 @@ namespace hpp {
         return success;
     }
 
-    double RbprmBuilder::projectStateToCOMEigen(State& s, const model::Configuration_t& com_target, unsigned short maxNumeSamples) throw (hpp::Error)
+    double RbprmBuilder::projectStateToCOMEigen(State& s, const pinocchio::Configuration_t& com_target, unsigned short maxNumeSamples) throw (hpp::Error)
     {
         try
         {
-//            /hpp::model::Configuration_t c = rbprm::interpolation::projectOnCom(fullBody(), problemSolver()->problem(),s,com_target,succes);
+//            /hpp::pinocchio::Configuration_t c = rbprm::interpolation::projectOnCom(fullBody(), problemSolver()->problem(),s,com_target,succes);
             rbprm::projection::ProjectionReport rep = rbprm::projection::projectToComPosition(fullBody(),com_target,s);
-            hpp::model::Configuration_t& c = rep.result_.configuration_;
+            hpp::pinocchio::Configuration_t& c = rep.result_.configuration_;
             ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
             CollisionValidationPtr_t val = fullBody()->GetCollisionValidation();
             if(!rep.success_){
-                hppDout(notice,"Projection failed for state with config = "<<model::displayConfig(c));
+                hppDout(notice,"Projection failed for state with config = "<<pinocchio::displayConfig(c));
             }
             if(rep.success_){
                 hppDout(notice,"Projection successfull for state without collision check.");
                 rep.success_ =  rep.success_ &&  val->validate(rep.result_.configuration_,rport);
                 if(!rep.success_){
-                    hppDout(notice,"Projection failed after collision check for state with config = "<<model::displayConfig(c));
+                    hppDout(notice,"Projection failed after collision check for state with config = "<<pinocchio::displayConfig(c));
                     hppDout(notice,"report : "<<*rport);
                 }else{
                     hppDout(notice,"Success after collision check");
@@ -739,9 +738,9 @@ namespace hpp {
                     s.configuration_.head<7>() = head;
                     s.configuration_.tail(ecs_size) = ecs;
                     //c = rbprm::interpolation::projectOnCom(fullBody(), problemSolver()->problem(),s,com_target,succes);
-                    hppDout(notice,"Sample before prjection : r(["<<model::displayConfig(s.configuration_)<<"])");
+                    hppDout(notice,"Sample before prjection : r(["<<pinocchio::displayConfig(s.configuration_)<<"])");
                     rep = rbprm::projection::projectToComPosition(fullBody(),com_target,s);
-                    hppDout(notice,"Sample after prjection : r(["<<model::displayConfig(rep.result_.configuration_)<<"])");
+                    hppDout(notice,"Sample after prjection : r(["<<pinocchio::displayConfig(rep.result_.configuration_)<<"])");
                     if(!rep.success_){
                         hppDout(notice,"Projection failed on iter "<<i);
                     }
@@ -760,8 +759,8 @@ namespace hpp {
             }
             if(rep.success_)
             {
-                hppDout(notice,"Valid configuration found after projection : r(["<<model::displayConfig(c)<<"])");
-                hpp::model::Configuration_t trySave = c;
+                hppDout(notice,"Valid configuration found after projection : r(["<<pinocchio::displayConfig(c)<<"])");
+                hpp::pinocchio::Configuration_t trySave = c;
                 rbprm::T_Limb fLimbs = GetFreeLimbs(fullBody(), s);
                 for(rbprm::CIT_Limb cit = fLimbs.begin(); cit != fLimbs.end() && rep.success_; ++cit)
                 {
@@ -773,19 +772,18 @@ namespace hpp {
                     rep.success_ = rep.success_ && val->validate(rep.result_.configuration_,rport);
                     if(rep.success_)
                     {
-                        std::cout << "yay " << std::endl;
                         trySave = rep.result_.configuration_;
                     }
                     else
                     {
-                        std::cout << "ow" << std::endl;
+                        //
                     }
                 }
                 s.configuration_ = trySave;
                 hppDout(notice,"ProjectoToComEigen success");
                 return 1.;
             }
-            hppDout(notice,"No valid configurations can be found after projection : r(["<<model::displayConfig(c)<<"])");
+            hppDout(notice,"No valid configurations can be found after projection : r(["<<pinocchio::displayConfig(c)<<"])");
             hppDout(notice,"ProjectoToComEigen failure");
             return 0;
         }
@@ -798,7 +796,7 @@ namespace hpp {
 
     CORBA::Short RbprmBuilder::createState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error)
     {
-        model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+        pinocchio::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
         fullBody()->device_->currentConfiguration(config);
         fullBody()->device_->computeForwardKinematics();
         State state;
@@ -809,10 +807,10 @@ namespace hpp {
             rbprm::RbPrmLimbPtr_t limb = fullBody()->GetLimbs().at(*cit);
             const std::string& limbName = *cit;
             state.contacts_[limbName] = true;
-            const fcl::Vec3f position = limb->effector_->currentTransformation().getTranslation();
+            const fcl::Vec3f position = limb->effector_->currentTransformation().translation();
             state.contactPositions_[limbName] = position;
-            state.contactNormals_[limbName] = limb->effector_->currentTransformation().getRotation() * limb->normal_;
-            state.contactRotation_[limbName] = limb->effector_->currentTransformation().getRotation();
+            state.contactNormals_[limbName] = limb->effector_->currentTransformation().rotation() * limb->normal_;
+            state.contactRotation_[limbName] = limb->effector_->currentTransformation().rotation();
             state.contactOrder_.push(limbName);
         }
         state.nbContacts = state.contactNormals_.size();
@@ -823,7 +821,7 @@ namespace hpp {
 
     double RbprmBuilder::projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com, unsigned short max_num_sample) throw (hpp::Error)
     {
-        model::Configuration_t com_target = dofArrayToConfig (3, com);
+        pinocchio::Configuration_t com_target = dofArrayToConfig (3, com);
         return projectStateToCOMEigen(stateId, com_target, max_num_sample);
     }
 
@@ -841,13 +839,13 @@ namespace hpp {
                 dir[i] = direction[(_CORBA_ULong)i];
                 acc[i] = acceleration[(_CORBA_ULong)i];
             }
-            dir = dir.normalize();
+            dir.normalize();
 
-            const affMap_t &affMap = problemSolver()->map<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
-		        if (affMap.empty ()) {
+            const affMap_t &affMap = problemSolver()->affordanceObjects;
+                if (affMap.map.empty ()) {
     	        throw hpp::Error ("No affordances found. Unable to generate Contacts.");
               }
-            model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+            pinocchio::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
             rbprm::State state = rbprm::contact::ComputeContacts(fullBody(),config,
               affMap, bindShooter_.affFilter_, dir,robustnessThreshold,acc);
             return state;
@@ -904,8 +902,8 @@ namespace hpp {
                 for(std::vector<std::string>::const_iterator cit = names.begin(); cit !=names.end(); ++cit)
                 {
                     rbprm::RbPrmLimbPtr_t limb = fullBody()->GetLimbs().at(*cit);
-                    fcl::Transform3f localFrame, globalFrame;
-                    localFrame.setTranslation(-limb->offset_);
+                    pinocchio::Transform3f localFrame, globalFrame;
+                    localFrame.translation(-limb->offset_);
                     std::vector<bool> posConstraints;
                     std::vector<bool> rotConstraints;
                     posConstraints.push_back(false);posConstraints.push_back(false);posConstraints.push_back(true);
@@ -923,7 +921,7 @@ namespace hpp {
                         fcl::Matrix3f rotation = r * limb->effector_->initialPosition ().getRotation();
                         proj->add(core::NumericalConstraint::create (constraints::Orientation::create("",fullBody()->device_,
                                                                                                       limb->effector_,
-                                                                                                      fcl::Transform3f(rotation),
+                                                                                                      pinocchio::Transform3f(rotation),
                                                                                                       rotConstraints)));
                     }
                 }
@@ -939,8 +937,8 @@ namespace hpp {
                             std::string limbId = *cit;
                             rbprm::RbPrmLimbPtr_t limb = fullBody()->GetLimbs().at(*cit);
                             tmp.contacts_[limbId] = true;
-                            tmp.contactPositions_[limbId] = limb->effector_->currentTransformation().getTranslation();
-                            tmp.contactRotation_[limbId] = limb->effector_->currentTransformation().getRotation();
+                            tmp.contactPositions_[limbId] = limb->effector_->currentTransformation().translation();
+                            tmp.contactRotation_[limbId] = limb->effector_->currentTransformation().rotation();
                             tmp.contactNormals_[limbId] = z;
                             tmp.configuration_ = config;
                             ++tmp.nbContacts;
@@ -979,8 +977,8 @@ namespace hpp {
             {
                 dir[i] = direction[(_CORBA_ULong)i];
             }
-            model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
-            model::Configuration_t save = fullBody()->device_->currentConfiguration();
+            pinocchio::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+            pinocchio::Configuration_t save = fullBody()->device_->currentConfiguration();
             fullBody()->device_->currentConfiguration(config);
 
             sampling::T_OctreeReport finalSet;
@@ -991,12 +989,13 @@ namespace hpp {
                                           + std::string(limbname) + " to robot; limb not defined.");
             }
             const RbPrmLimbPtr_t& limb = lit->second;
-            fcl::Transform3f transform = limb->limb_->robot()->rootJoint()->childJoint(0)->currentTransformation (); // get root transform from configuration
+            pinocchio::Transform3f transformPin = limb->limb_->robot()->rootJoint()->childJoint(0)->currentTransformation (); // get root transform from configuration
+            fcl::Transform3f transform(transformPin.rotation(), transformPin.translation());
                         // TODO fix as in rbprm-fullbody.cc!!
             std::vector<sampling::T_OctreeReport> reports(problemSolver()->collisionObstacles().size());
             std::size_t i (0);
             //#pragma omp parallel for
-            for(model::ObjectVector_t::const_iterator oit = problemSolver()->collisionObstacles().begin();
+            for(core::ObjectStdVector_t::const_iterator oit = problemSolver()->collisionObstacles().begin();
                 oit != problemSolver()->collisionObstacles().end(); ++oit, ++i)
             {
                 sampling::GetCandidates(limb->sampleContainer_, transform, *oit, dir, reports[i], sampling::HeuristicParam());
@@ -1034,7 +1033,7 @@ namespace hpp {
             {
                 dir[i] = direction[(_CORBA_ULong)i];
             }
-            model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+            pinocchio::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
             fullBody()->device_->currentConfiguration(config);
 
             sampling::T_OctreeReport finalSet;
@@ -1045,21 +1044,21 @@ namespace hpp {
                                           + std::string(limbname) + " to robot; limb not defined.");
             }
             const RbPrmLimbPtr_t& limb = lit->second;
-            fcl::Transform3f transform = limb->octreeRoot(); // get root transform from configuration
+            pinocchio::Transform3f transformPino = limb->octreeRoot(); // get root transform from configuration
+            fcl::Transform3f transform(transformPino.rotation(),transformPino.translation());
                         // TODO fix as in rbprm-fullbody.cc!!
-            const affMap_t &affMap = problemSolver()->map
-                        <std::vector<boost::shared_ptr<model::CollisionObject> > > ();
-            if (affMap.empty ())
+            const affMap_t &affMap = problemSolver()->affordanceObjects;
+            if (affMap.map.empty ())
             {
                 throw hpp::Error ("No affordances found. Unable to interpolate.");
             }
-            const model::ObjectVector_t objects = contact::getAffObjectsForLimb(std::string(limbname), affMap,
+            const std::vector<pinocchio::CollisionObjectPtr_t> objects = contact::getAffObjectsForLimb(std::string(limbname), affMap,
                                                                        bindShooter_.affFilter_);
 
             std::vector<sampling::T_OctreeReport> reports(objects.size());
             std::size_t i (0);
             //#pragma omp parallel for
-            for(model::ObjectVector_t::const_iterator oit = objects.begin();
+            for(std::vector<pinocchio::CollisionObjectPtr_t>::const_iterator oit = objects.begin();
                 oit != objects.end(); ++oit, ++i)
             {
                 sampling::GetCandidates(limb->sampleContainer_, transform, *oit, dir, reports[i], sampling::HeuristicParam());
@@ -1073,8 +1072,8 @@ namespace hpp {
             std::random_shuffle(reports.begin(), reports.end());
             unsigned short num_samples_ok (0);
             bool success(false);
-            model::Configuration_t sampleConfig = config;
-            std::vector<model::Configuration_t> results;
+            pinocchio::Configuration_t sampleConfig = config;
+            std::vector<pinocchio::Configuration_t> results;
             sampling::T_OctreeReport::const_iterator candCit = finalSet.begin();
             for(std::size_t i=0; i< _CORBA_ULong(finalSet.size()) && num_samples_ok < numSamples; ++i, ++candCit)
             {
@@ -1096,7 +1095,7 @@ namespace hpp {
             res->length ((_CORBA_ULong)results.size ());
             i=0;
             std::size_t id = 0;
-            for(std::vector<model::Configuration_t>::const_iterator cit = results.begin();
+            for(std::vector<pinocchio::Configuration_t>::const_iterator cit = results.begin();
                         cit != results.end(); ++cit, ++id)
             {
                 /*std::cout << "ID " << id;
@@ -1106,7 +1105,7 @@ namespace hpp {
                 double* dofArray = hpp::floatSeq::allocbuf(size);
                 hpp::floatSeq floats (size, size, dofArray, true);
                 //convert the config in dofseq
-                for (model::size_type j=0 ; j < config.size() ; ++j) {
+                for (pinocchio::size_type j=0 ; j < config.size() ; ++j) {
                   dofArray[j] = config [j];
                 }
                 (*res) [(_CORBA_ULong)i] = floats;
@@ -1221,7 +1220,7 @@ namespace hpp {
             std::vector<std::string>& names)
     {
         core::Configuration_t old = fullBody->device_->currentConfiguration();
-        model::Configuration_t config = dofArrayToConfig (fullBody->device_, configuration);
+        pinocchio::Configuration_t config = dofArrayToConfig (fullBody->device_, configuration);
         fullBody->device_->currentConfiguration(config);
         fullBody->device_->computeForwardKinematics();
         for(std::vector<std::string>::const_iterator cit = names.begin(); cit != names.end();++cit)
@@ -1233,11 +1232,11 @@ namespace hpp {
                                           + (*cit) + " to robot; limb not defined");
             }
             const core::JointPtr_t joint = fullBody->device_->getJointByName(lit->second->effector_->name());
-            const fcl::Transform3f& transform =  joint->currentTransformation ();
-            const fcl::Matrix3f& rot = transform.getRotation();
-            state.contactPositions_[*cit] = transform.getTranslation();
+            const pinocchio::Transform3f& transform =  joint->currentTransformation ();
+            const fcl::Matrix3f& rot = transform.rotation();
+            state.contactPositions_[*cit] = transform.translation();
             state.contactRotation_[*cit] = rot;
-            const fcl::Vec3f z = transform.getRotation() * lit->second->normal_;
+            const fcl::Vec3f z = transform.rotation() * lit->second->normal_;
             state.contactNormals_[*cit] = z;
             state.contacts_[*cit] = true;
             state.contactOrder_.push(*cit);
@@ -1289,7 +1288,7 @@ namespace hpp {
             {
                 for(std::size_t k =0; k<3; ++k)
                 {
-                    model::size_type j (h*3 + k);
+                    pinocchio::size_type j (h*3 + k);
                     (*dofArray)[(_CORBA_ULong)j] = positions[h][k];
                 }
             }
@@ -1432,9 +1431,8 @@ namespace hpp {
                 throw std::runtime_error ("End state not initialized, can not interpolate ");
             }
             T_Configuration configurations = doubleDofArrayToConfig(fullBody()->device_, configs);
-            const affMap_t &affMap = problemSolver()->map
-                        <std::vector<boost::shared_ptr<model::CollisionObject> > > ();
-            if (affMap.empty ())
+            const affMap_t &affMap = problemSolver()->affordanceObjects;
+            if (affMap.map.empty ())
             {
                 throw hpp::Error ("No affordances found. Unable to interpolate.");
             }
@@ -1456,7 +1454,7 @@ namespace hpp {
                 double* dofArray = hpp::floatSeq::allocbuf(size);
                 hpp::floatSeq floats (size, size, dofArray, true);
                 //convert the config in dofseq
-                for (model::size_type j=0 ; j < config.size() ; ++j) {
+                for (pinocchio::size_type j=0 ; j < config.size() ; ++j) {
                   dofArray[j] = config [j];
                 }
                 (*res) [(_CORBA_ULong)i] = floats;
@@ -1671,33 +1669,33 @@ namespace hpp {
 
     core::PathPtr_t makePath(DevicePtr_t device,
                              const ProblemPtr_t& problem,
-                             model::ConfigurationIn_t q1,
-                             model::ConfigurationIn_t q2)
+                             pinocchio::ConfigurationIn_t q1,
+                             pinocchio::ConfigurationIn_t q2)
     {
         // TODO DT
         return problem->steeringMethod()->operator ()(q1,q2);
     }
 
-    model::Configuration_t addRotation(CIT_Configuration& pit, const model::value_type& u,
-                              model::ConfigurationIn_t q1, model::ConfigurationIn_t q2,
-                              model::ConfigurationIn_t ref)
+    pinocchio::Configuration_t addRotation(CIT_Configuration& pit, const pinocchio::value_type& u,
+                              pinocchio::ConfigurationIn_t q1, pinocchio::ConfigurationIn_t q2,
+                              pinocchio::ConfigurationIn_t ref)
     {
-        model::Configuration_t res = ref;
+        pinocchio::Configuration_t res = ref;
         res.head(3) = *pit;
         res.segment<4>(3) = tools::interpolate(q1, q2, u);
         return res;
     }
 
     core::PathVectorPtr_t addRotations(const T_Configuration& positions,
-                                       model::ConfigurationIn_t q1, model::ConfigurationIn_t q2,
-                                       model::ConfigurationIn_t ref, DevicePtr_t device,
+                                       pinocchio::ConfigurationIn_t q1, pinocchio::ConfigurationIn_t q2,
+                                       pinocchio::ConfigurationIn_t ref, DevicePtr_t device,
                                        const ProblemPtr_t& problem)
     {
         core::PathVectorPtr_t res = core::PathVector::create(device->configSize(), device->numberDof());
-        model::value_type size_step = 1 /(model::value_type)(positions.size());
-        model::value_type u = 0.;
+        pinocchio::value_type size_step = 1 /(pinocchio::value_type)(positions.size());
+        pinocchio::value_type u = 0.;
         CIT_Configuration pit = positions.begin();
-        model::Configuration_t previous = addRotation(pit, 0., q1, q2, ref), current;
+        pinocchio::Configuration_t previous = addRotation(pit, 0., q1, q2, ref), current;
         ++pit;
         for(;pit != positions.end()-1; ++pit, u+=size_step)
         {
@@ -1712,7 +1710,7 @@ namespace hpp {
     }
 
    core::PathVectorPtr_t generateTrunkPath(RbPrmFullBodyPtr_t fullBody, core::ProblemSolverPtr_t problemSolver, const hpp::floatSeqSeq& rootPositions,
-                          const model::Configuration_t q1, const model::Configuration_t q2) throw (hpp::Error)
+                          const pinocchio::Configuration_t q1, const pinocchio::Configuration_t q2) throw (hpp::Error)
     {
         try
         {
@@ -1736,7 +1734,7 @@ namespace hpp {
     {
         try
         {
-            model::Configuration_t q1 = dofArrayToConfig(4, q1Seq), q2 = dofArrayToConfig(4, q2Seq);
+            pinocchio::Configuration_t q1 = dofArrayToConfig(4, q1Seq), q2 = dofArrayToConfig(4, q2Seq);
             return problemSolver()->addPath(generateTrunkPath(fullBody(), problemSolver(), rootPositions, q1, q2));
         }
         catch(std::runtime_error& e)
@@ -1757,10 +1755,10 @@ namespace hpp {
              core::PathVectorPtr_t res = core::PathVector::create(3, 3);
              CIT_Configuration cit = c.begin(); ++cit;
              int i = 0;
-             model::vector3_t zero (0.,0.,0.);
+             pinocchio::vector3_t zero (0.,0.,0.);
              for(;cit != c.end(); ++cit, ++i)
              {
-                 model::vector3_t speed = (*cit) -  *(cit-1);
+                 pinocchio::vector3_t speed = (*cit) -  *(cit-1);
                  res->appendPath(interpolation::ComTrajectory::create(*(cit-1),*cit,speed,zero,1.));
              }
              return problemSolver()->addPath(res);
@@ -1794,7 +1792,7 @@ namespace hpp {
      {
          try
          {
-             model::Configuration_t config = dofArrayToConfig ((std::size_t)partitions.length(), partitions);
+             pinocchio::Configuration_t config = dofArrayToConfig ((std::size_t)partitions.length(), partitions);
              T_Configuration c = doubleDofArrayToConfig(3, positions);
              bezier* curve = new bezier(c.begin(), c.end());
              hpp::rbprm::interpolation::PolynomPtr_t curvePtr (curve);
@@ -1898,7 +1896,7 @@ namespace hpp {
             {
                 for(std::size_t k =0; k<3; ++k)
                 {
-                    model::size_type j (h*3 + k);
+                    pinocchio::size_type j (h*3 + k);
                     dofArray[j] = positions[h][k];
                 }
             }
@@ -1944,7 +1942,7 @@ namespace hpp {
             {
                 for(std::size_t k =0; k<3; ++k)
                 {
-                    model::size_type j (h*3 + k);
+                    pinocchio::size_type j (h*3 + k);
                     dofArray[j] = positions[h][k];
                 }
             }
@@ -2000,7 +1998,7 @@ namespace hpp {
             {
                 for(std::size_t k =0; k<3; ++k)
                 {
-                    model::size_type j (h*3 + k);
+                    pinocchio::size_type j (h*3 + k);
                     dofArray[j] = positions[h][k];
                 }
             }
@@ -2048,7 +2046,7 @@ namespace hpp {
             {
                 for(std::size_t k =0; k<3; ++k)
                 {
-                    model::size_type j (h*3 + k);
+                    pinocchio::size_type j (h*3 + k);
                     dofArray[j] = positions[h][k];
                 }
             }
@@ -2129,9 +2127,8 @@ namespace hpp {
         {
             throw std::runtime_error ("No path computed, cannot interpolate ");
         }
-        const affMap_t &affMap = problemSolver()->map
-					<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
-        if (affMap.empty ())
+        const affMap_t &affMap = problemSolver()->affordanceObjects;
+        if (affMap.map.empty ())
         {
             throw hpp::Error ("No affordances found. Unable to interpolate.");
         }
@@ -2158,7 +2155,7 @@ namespace hpp {
             double* dofArray = hpp::floatSeq::allocbuf(size);
             hpp::floatSeq floats (size, size, dofArray, true);
             //convert the config in dofseq
-            for (model::size_type j=0 ; j < config.size() ; ++j) {
+            for (pinocchio::size_type j=0 ; j < config.size() ; ++j) {
               dofArray[j] = config [j];
             }
             (*res) [(_CORBA_ULong)i] = floats;
@@ -2307,7 +2304,7 @@ assert(s2 == s1 +1);
             hppDout(notice,"start comRRTFromPos");
 
             State s1Bis(state1);
-            hppDout(notice,"state1 = "<<model::displayConfig(state1.configuration_));
+            hppDout(notice,"state1 = "<<pinocchio::displayConfig(state1.configuration_));
             hppDout(notice,"proj to CoM position : "<<paths[cT1]->end().head<3>());
             bool successProjS1 = (projectStateToCOMEigen(s1Bis,paths[cT1]->end().head<3>(),100) > 0.5 );
             if(!successProjS1)
@@ -2315,7 +2312,7 @@ assert(s2 == s1 +1);
                 hppDout(notice,"could not project state S1Bis on COM constraint");
                 throw std::runtime_error("could not project state S1Bis on COM constraint");
             }
-            hppDout(notice,"state1 bis after projection= "<<model::displayConfig(s1Bis.configuration_));
+            hppDout(notice,"state1 bis after projection= "<<pinocchio::displayConfig(s1Bis.configuration_));
 
             for(std::map<std::string,bool>::const_iterator cit = s1Bis.contacts_.begin();cit!=s1Bis.contacts_.end(); ++ cit)
             {
@@ -2323,7 +2320,7 @@ assert(s2 == s1 +1);
             }
 
             State s2Bis(state2);
-            hppDout(notice,"state2 = "<<model::displayConfig(state2.configuration_));
+            hppDout(notice,"state2 = "<<pinocchio::displayConfig(state2.configuration_));
             hppDout(notice,"proj to CoM position : "<<paths[cT2]->end().head<3>());
             bool successProjS2 = (projectStateToCOMEigen(s2Bis,paths[cT2]->end().head<3>(),100) > 0.5 );
             if(!successProjS2)
@@ -2331,7 +2328,7 @@ assert(s2 == s1 +1);
                 hppDout(notice,"could not project state S2Bis on COM constraint");
                 throw std::runtime_error("could not project state S2Bis on COM constraint");
             }
-            hppDout(notice,"state2 bis after projection= "<<model::displayConfig(s2Bis.configuration_));
+            hppDout(notice,"state2 bis after projection= "<<pinocchio::displayConfig(s2Bis.configuration_));
 
 
             for(std::map<std::string,bool>::const_iterator cit = s2Bis.contacts_.begin();cit!=s2Bis.contacts_.end(); ++ cit)
@@ -2343,14 +2340,14 @@ assert(s2 == s1 +1);
             hppDout(notice,"ComRRT : projections done. begin rrt");
             try{
                 hppDout(notice,"begin comRRT states 1 and 1bis");         
-                hppDout(notice,"state1     = r(["<<model::displayConfig(state1.configuration_)<<"])");
-                hppDout(notice,"state1 bis = r(["<<model::displayConfig(s1Bis.configuration_)<<"])");
+                hppDout(notice,"state1     = r(["<<pinocchio::displayConfig(state1.configuration_)<<"])");
+                hppDout(notice,"state1 bis = r(["<<pinocchio::displayConfig(s1Bis.configuration_)<<"])");
                 core::PathPtr_t p1 = interpolation::comRRT(fullBody(),problemSolver()->problem(), paths[cT1],
                         state1,s1Bis, numOptimizations,true);
                 hppDout(notice,"end comRRT");
                 // reduce path to remove extradof
-                core::SizeInterval_t interval(0, p1->initial().rows()-1);
-                core::SizeIntervals_t intervals;
+                core::segment_t interval(0, p1->initial().rows()-1);
+                core::segments_t intervals;
                 intervals.push_back(interval);
                 PathPtr_t reducedPath = core::SubchainPath::create(p1,intervals);
                 resPath->appendPath(reducedPath);
@@ -2371,8 +2368,8 @@ assert(s2 == s1 +1);
                 hppDout(notice,"end comRRT");
                 pathsIds.push_back(AddPath(p2,problemSolver()));
                 // reduce path to remove extradof
-                core::SizeInterval_t interval(0, p2->initial().rows()-1);
-                core::SizeIntervals_t intervals;
+                core::segment_t interval(0, p2->initial().rows()-1);
+                core::segments_t intervals;
                 intervals.push_back(interval);
                 PathPtr_t reducedPath = core::SubchainPath::create(p2,intervals);
                 resPath->appendPath(reducedPath);
@@ -2389,13 +2386,12 @@ assert(s2 == s1 +1);
                         s2Bis,state2, numOptimizations,true);
                 hppDout(notice,"end comRRT");
                 // reduce path to remove extradof
-                core::SizeInterval_t interval(0, p3->initial().rows()-1);
-                core::SizeIntervals_t intervals;
+                core::segment_t interval(0, p3->initial().rows()-1);
+                core::segments_t intervals;
                 intervals.push_back(interval);
                 PathPtr_t reducedPath = core::SubchainPath::create(p3,intervals);
                 resPath->appendPath(reducedPath);
                 pathsIds.push_back(AddPath(p3,problemSolver()));
-                std::cout << "PATH 3 OK " << std::endl;
             }
             catch(std::runtime_error& e)
             {
@@ -2493,8 +2489,8 @@ assert(s2 == s1 +1);
             pathsIds.push_back(AddPath(p2,problemSolver()));
 
             // reduce path to remove extradof
-            core::SizeInterval_t interval(0, p2->initial().rows()-1);
-            core::SizeIntervals_t intervals;
+            core::segment_t interval(0, p2->initial().rows()-1);
+            core::segments_t intervals;
             intervals.push_back(interval);
             PathPtr_t reducedPath = core::SubchainPath::create(p2,intervals);
             core::PathVectorPtr_t resPath = core::PathVector::create(fullBody()->device_->configSize(), fullBody()->device_->numberDof());
@@ -2538,8 +2534,8 @@ assert(s2 == s1 +1);
 
         State s1 = lastStatesComputed_[size_t(state1)];
         State s2 = lastStatesComputed_[size_t(state2)];
-        hppDout(notice,"state1 = r(["<<model::displayConfig(s1.configuration_)<<")]");
-        hppDout(notice,"state2 = r(["<<model::displayConfig(s2.configuration_)<<")]");
+        hppDout(notice,"state1 = r(["<<pinocchio::displayConfig(s1.configuration_)<<")]");
+        hppDout(notice,"state2 = r(["<<pinocchio::displayConfig(s2.configuration_)<<")]");
         core::PathVectorPtr_t resPath = core::PathVector::create(fullBody()->device_->configSize(), fullBody()->device_->numberDof());
         std::vector<CORBA::Short> pathsIds;
 
@@ -2547,8 +2543,8 @@ assert(s2 == s1 +1);
                                 s1,s2, numOptimizations,true);
         hppDout(notice,"effectorRRT done.");
         // reduce path to remove extradof
-        core::SizeInterval_t interval(0, p1->initial().rows()-1);
-        core::SizeIntervals_t intervals;
+        core::segment_t interval(0, p1->initial().rows()-1);
+        core::segments_t intervals;
         intervals.push_back(interval);
         PathPtr_t reducedPath = core::SubchainPath::create(p1,intervals);
         resPath->appendPath(reducedPath);
@@ -2597,8 +2593,8 @@ assert(s2 == s1 +1);
 
         State s1 = lastStatesComputed_[size_t(state1)];
         State s2 = lastStatesComputed_[size_t(state2)];
-        hppDout(notice,"state1 = r(["<<model::displayConfig(s1.configuration_)<<")]");
-        hppDout(notice,"state2 = r(["<<model::displayConfig(s2.configuration_)<<")]");
+        hppDout(notice,"state1 = r(["<<pinocchio::displayConfig(s1.configuration_)<<")]");
+        hppDout(notice,"state2 = r(["<<pinocchio::displayConfig(s2.configuration_)<<")]");
         bool success_comrrt = false;
         core::PathPtr_t fullBodyComPath;
         while( !success_comrrt){
@@ -2688,9 +2684,9 @@ assert(s2 == s1 +1);
             {
                 throw std::runtime_error ("did not find a states at indicated index: " + std::string(""+(std::size_t)(state)));
             }
-            model::Configuration_t config = dofArrayToConfig (std::size_t(3), targetCom);
+            pinocchio::Configuration_t config = dofArrayToConfig (std::size_t(3), targetCom);
             fcl::Vec3f comTarget; for(int i =0; i<3; ++i) comTarget[i] = config[i];
-            model::Configuration_t  res = project_or_throw(fullBody(), lastStatesComputed_[state],comTarget);
+            pinocchio::Configuration_t  res = project_or_throw(fullBody(), lastStatesComputed_[state],comTarget);
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(res.rows());
             for(std::size_t i=0; i< res.rows(); ++i)
@@ -2714,7 +2710,7 @@ assert(s2 == s1 +1);
             {
                 throw std::runtime_error ("did not find a states at indicated index: " + std::string(""+(std::size_t)(state)));
             }
-            model::Configuration_t res = dofArrayToConfig (fullBody()->device_, q);
+            pinocchio::Configuration_t res = dofArrayToConfig (fullBody()->device_, q);
             if(lastStatesComputed_.size() <= state)
             {
                 throw std::runtime_error ("Unexisting state in setConfigAtstate");
@@ -2741,7 +2737,7 @@ assert(s2 == s1 +1);
             {
                 throw std::runtime_error ("did not find a state at indicated index: " + std::string(""+(std::size_t)(state)));
             }
-            model::Configuration_t res = lastStatesComputed_[state].configuration_;
+            pinocchio::Configuration_t res = lastStatesComputed_[state].configuration_;
             hpp::floatSeq* dofArray = new hpp::floatSeq();
             dofArray->length(res.rows());
             for(std::size_t i=0; i< res.rows(); ++i)
@@ -2806,8 +2802,8 @@ assert(s2 == s1 +1);
     {
         try
         {
-        model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
-        model::Configuration_t save = fullBody()->device_->currentConfiguration();
+        pinocchio::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+        pinocchio::Configuration_t save = fullBody()->device_->currentConfiguration();
         fullBody()->device_->currentConfiguration(config);
         fullBody()->device_->computeForwardKinematics();
         const std::map<std::size_t, fcl::CollisionObject*>& boxes =
@@ -2825,7 +2821,7 @@ assert(s2 == s1 +1);
             double* dofArray = hpp::floatSeq::allocbuf(size);
             hpp::floatSeq floats (size, size, dofArray, true);
             //convert the config in dofseq
-            for (model::size_type j=0 ; j < 3 ; ++j) {
+            for (pinocchio::size_type j=0 ; j < 3 ; ++j) {
                 dofArray[j] = position[j];
             }
             dofArray[3] = resolution;
@@ -2954,12 +2950,13 @@ assert(s2 == s1 +1);
     hpp::floatSeq* RbprmBuilder::getOctreeTransform(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error)
     {
         try{
-        model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
-        model::Configuration_t save = fullBody()->device_->currentConfiguration();
+        pinocchio::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+        pinocchio::Configuration_t save = fullBody()->device_->currentConfiguration();
         fullBody()->device_->currentConfiguration(config);
         fullBody()->device_->computeForwardKinematics();
         const hpp::rbprm::RbPrmLimbPtr_t limb =fullBody()->GetLimbs().at(std::string(limbName));
-        const fcl::Transform3f transform = limb->octreeRoot();
+        const pinocchio::Transform3f transformPino = limb->octreeRoot();
+        const fcl::Transform3f transform(transformPino.rotation(), transformPino.translation());
         const fcl::Quaternion3f& quat = transform.getQuatRotation();
         const fcl::Vec3f& position = transform.getTranslation();
         hpp::floatSeq *dofArray;
@@ -2968,7 +2965,7 @@ assert(s2 == s1 +1);
         for(std::size_t i=0; i< 3; i++)
           (*dofArray)[(_CORBA_ULong)i] = position [i];
         for(std::size_t i=0; i< 4; i++)
-          (*dofArray)[(_CORBA_ULong)i+3] = quat [i];
+          (*dofArray)[(_CORBA_ULong)i+3] = quat.coeffs() [i];
         fullBody()->device_->currentConfiguration(save);
         fullBody()->device_->computeForwardKinematics();
         return dofArray;
@@ -2983,8 +2980,8 @@ assert(s2 == s1 +1);
                                                         const hpp::floatSeq& p_a, const hpp::floatSeq& n_a) throw (hpp::Error)
     {
         try{
-        model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
-        model::Configuration_t vec_conf = dofArrayToConfig (std::size_t(3), p_a);
+        pinocchio::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+        pinocchio::Configuration_t vec_conf = dofArrayToConfig (std::size_t(3), p_a);
         fcl::Vec3f p; for(int i =0; i<3; ++i) p[i] = vec_conf[i];
         vec_conf = dofArrayToConfig (std::size_t(3), n_a);
         fcl::Vec3f n; for(int i =0; i<3; ++i) n[i] = vec_conf[i];
@@ -2999,7 +2996,7 @@ assert(s2 == s1 +1);
         for(std::size_t i=0; i< 3; i++)
           (*dofArray)[(_CORBA_ULong)i] = position [i];
         for(std::size_t i=0; i< 4; i++)
-          (*dofArray)[(_CORBA_ULong)i+3] = quat [i];
+          (*dofArray)[(_CORBA_ULong)i+3] = quat.coeffs() [i];
         return dofArray;
         }
         catch(std::runtime_error& e)
@@ -3012,8 +3009,8 @@ assert(s2 == s1 +1);
     {
         try{
         rbprm::State testedState;
-        model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
-        model::Configuration_t save = fullBody()->device_->currentConfiguration();
+        pinocchio::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+        pinocchio::Configuration_t save = fullBody()->device_->currentConfiguration();
         fcl::Vec3f comFCL((double)CoM[(_CORBA_ULong)0],(double)CoM[(_CORBA_ULong)1],(double)CoM[(_CORBA_ULong)2]);
         std::vector<std::string> names = stringConversion(contactLimbs);
         fullBody()->device_->currentConfiguration(config);
@@ -3022,10 +3019,10 @@ assert(s2 == s1 +1);
         {
             const hpp::rbprm::RbPrmLimbPtr_t limb =fullBody()->GetLimbs().at(std::string(*cit));
             testedState.contacts_[*cit] = true;
-            testedState.contactPositions_[*cit] = limb->effector_->currentTransformation().getTranslation();
-            testedState.contactRotation_[*cit] = limb->effector_->currentTransformation().getRotation();
+            testedState.contactPositions_[*cit] = limb->effector_->currentTransformation().translation();
+            testedState.contactRotation_[*cit] = limb->effector_->currentTransformation().translation();
             // normal given by effector normal
-            const fcl::Vec3f normal = limb->effector_->currentTransformation().getRotation() * limb->normal_;
+            const fcl::Vec3f normal = limb->effector_->currentTransformation().rotation() * limb->normal_;
             testedState.contactNormals_[*cit] = normal;
             testedState.configuration_ = config;
             ++testedState.nbContacts;
@@ -3158,13 +3155,13 @@ assert(s2 == s1 +1);
       {
           dir[i] = direction[(_CORBA_ULong)i];
       }
-      dir = dir.normalize();
+      dir.normalize();
 
 
       hpp::floatSeq* dofArray = new hpp::floatSeq();
       dofArray->length(fullBody()->GetLimbs().size());
       size_t id = 0;
-      model::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
+      pinocchio::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
       for(T_Limb::const_iterator lit = fullBody()->GetLimbs().begin() ; lit != fullBody()->GetLimbs().end() ; ++lit){
         sampling::Sample sample(lit->second->limb_, lit->second->effector_, config,  lit->second->offset_,lit->second->limbOffset_, 0);
         (*dofArray)[(_CORBA_ULong)id] = lit->second->evaluate_(sample,dir,lit->second->normal_,sampling::HeuristicParam());
@@ -3189,7 +3186,7 @@ assert(s2 == s1 +1);
                 throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
             State ns = lastStatesComputed_[stateId];
             const std::string limb(limbName);
-            model::Configuration_t config = dofArrayToConfig (std::size_t(3), position);
+            pinocchio::Configuration_t config = dofArrayToConfig (std::size_t(3), position);
             fcl::Vec3f p; for(int i =0; i<3; ++i) p[i] = config[i];
             config = dofArrayToConfig (std::size_t(3), normal);
             fcl::Vec3f n; for(int i =0; i<3; ++i) n[i] = config[i];
@@ -3286,16 +3283,16 @@ assert(s2 == s1 +1);
 
         // add rbprmshooter
         bindShooter_.problemSolver_ = problemSolver();
-        problemSolver()->add<core::ConfigurationShooterBuilder_t>("RbprmShooter",
+        problemSolver()->configurationShooters.add("RbprmShooter",
                                                    boost::bind(&BindShooter::create, boost::ref(bindShooter_), _1));
-        problemSolver()->add<core::PathValidationBuilder_t>("RbprmPathValidation",
+        problemSolver()->pathValidations.add("RbprmPathValidation",
                                                    boost::bind(&BindShooter::createPathValidation, boost::ref(bindShooter_), _1, _2));
-        problemSolver()->add<core::PathValidationBuilder_t>("RbprmDynamicPathValidation",
+        problemSolver()->pathValidations.add("RbprmDynamicPathValidation",
                                                    boost::bind(&BindShooter::createDynamicPathValidation, boost::ref(bindShooter_), _1, _2));
-        problemSolver()->add<core::PathPlannerBuilder_t>("DynamicPlanner",DynamicPlanner::createWithRoadmap);
-        problemSolver()->add <core::SteeringMethodBuilder_t> ("RBPRMKinodynamic", SteeringMethodKinodynamic::create);
-        problemSolver()->add <core::PathOptimizerBuilder_t> ("RandomShortcutDynamic", RandomShortcutDynamic::create);
-        problemSolver()->add <core::PathOptimizerBuilder_t> ("OrientedPathOptimizer", OrientedPathOptimizer::create);
+        problemSolver()->pathPlanners.add("DynamicPlanner",DynamicPlanner::createWithRoadmap);
+        problemSolver()->steeringMethods.add("RBPRMKinodynamic", SteeringMethodKinodynamic::create);
+        problemSolver()->pathOptimizers.add("RandomShortcutDynamic", RandomShortcutDynamic::create);
+        problemSolver()->pathOptimizers.add("OrientedPathOptimizer", OrientedPathOptimizer::create);
 
     }
 

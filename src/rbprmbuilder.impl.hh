@@ -30,6 +30,7 @@
 # include <hpp/core/problem-solver.hh>
 # include <hpp/core/discretized-collision-checking.hh>
 # include <hpp/core/straight-path.hh>
+# include <hpp/core/problem.hh>
 #include <hpp/corbaserver/affordance/server.hh>
 # include <hpp/corbaserver/problem-solver-map.hh>
 # include <hpp/rbprm/rbprm-path-validation.hh>
@@ -42,7 +43,8 @@ namespace hpp {
   namespace rbprm {
     namespace impl {
       using CORBA::Short;
-			typedef std::map<std::string, std::vector<boost::shared_ptr<model::CollisionObject> > > affMap_t;
+
+    typedef hpp::core::Container <hpp::core::AffordanceObjects_t> affMap_t;
 
     struct BindShooter
     {
@@ -51,10 +53,10 @@ namespace hpp {
             : shootLimit_(shootLimit)
             , displacementLimit_(displacementLimit) {}
 
-        hpp::rbprm::RbPrmShooterPtr_t create (const hpp::model::DevicePtr_t& robot)
+        hpp::rbprm::RbPrmShooterPtr_t create (/*const hpp::pinocchio::DevicePtr_t& robot,*/ const hpp::core::Problem& problem)
         {
-            hpp::model::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::model::RbPrmDevice>(robot);
-		        if (affMap_.empty ()) {
+            hpp::pinocchio::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::pinocchio::RbPrmDevice>(problem.robot());
+                if (affMap_.map.empty ()) {
     	        throw hpp::Error ("No affordances found. Unable to create shooter object.");
       		  }
             rbprm::RbPrmShooterPtr_t shooter = hpp::rbprm::RbPrmShooter::create
@@ -65,12 +67,11 @@ namespace hpp {
             return shooter;
         }
 
-        hpp::core::PathValidationPtr_t createPathValidation (const hpp::model::DevicePtr_t& robot, const hpp::model::value_type& val)
+        hpp::core::PathValidationPtr_t createPathValidation (const hpp::pinocchio::DevicePtr_t& robot, const hpp::pinocchio::value_type& val)
         {
-            hpp::model::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::model::RbPrmDevice>(robot);
-                        affMap_ = problemSolver_->map
-							<std::vector<boost::shared_ptr<model::CollisionObject> > > ();
-		        if (affMap_.empty ()) {
+            hpp::pinocchio::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::pinocchio::RbPrmDevice>(robot);
+                        affMap_ = problemSolver_->affordanceObjects;
+                if (affMap_.map.empty ()) {
     	        throw hpp::Error ("No affordances found. Unable to create Path Validaton object.");
       		  }
             hpp::rbprm::RbPrmValidationPtr_t validation
@@ -82,12 +83,11 @@ namespace hpp {
             return collisionChecking;
         }
 
-        hpp::core::PathValidationPtr_t createDynamicPathValidation (const hpp::model::DevicePtr_t& robot, const hpp::model::value_type& val)
+        hpp::core::PathValidationPtr_t createDynamicPathValidation (const hpp::pinocchio::DevicePtr_t& robot, const hpp::pinocchio::value_type& val)
         {
-          hpp::model::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::model::RbPrmDevice>(robot);
-          affMap_ = problemSolver_->map
-            <std::vector<boost::shared_ptr<model::CollisionObject> > > ();
-          if (affMap_.empty ()) {
+          hpp::pinocchio::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::pinocchio::RbPrmDevice>(robot);
+          affMap_ = problemSolver_->affordanceObjects;
+          if (affMap_.map.empty ()) {
             throw hpp::Error ("No affordances found. Unable to create Path Validaton object.");
           }
           hpp::rbprm::RbPrmValidationPtr_t validation
@@ -100,25 +100,22 @@ namespace hpp {
           double sizeFootX,sizeFootY,mass,mu;
           bool rectangularContact;
           try {
-            boost::any value_x = problemSolver_->problem()->get<boost::any> (std::string("sizeFootX"));
-            boost::any value_y = problemSolver_->problem()->get<boost::any> (std::string("sizeFootY"));
-            sizeFootX = boost::any_cast<double>(value_x)/2.;
-            sizeFootY = boost::any_cast<double>(value_y)/2.;
-            rectangularContact = 1;
+              sizeFootX = problemSolver_->problem()->getParameter ("sizeFootX").floatValue()/2.;
+              sizeFootY = problemSolver_->problem()->getParameter ("sizeFootY").floatValue()/2.;
+              rectangularContact = 1;
           } catch (const std::exception& e) {
             hppDout(warning,"Warning : size of foot not definied, use 0 (contact point)");
-            sizeFootX =0;
-            sizeFootY =0;
+            sizeFootX = 0;
+            sizeFootY = 0;
             rectangularContact = 0;
           }
           mass = robot->mass();
           try {
-            boost::any value = problemSolver_->problem()->get<boost::any> (std::string("friction"));
-            mu = boost::any_cast<double>(value);
-            hppDout(notice,"dynamic val : mu define in python : "<<mu);
+            mu = problemSolver_->problem()->getParameter ("friction").floatValue();
+            hppDout(notice,"mu define in python : "<<mu);
           } catch (const std::exception& e) {
             mu= 0.5;
-            hppDout(notice,"dynamic val : mu not defined, take : "<<mu<<" as default.");
+            hppDout(notice,"mu not defined, take : "<<mu<<" as default.");
           }
           DynamicValidationPtr_t dynamicVal = DynamicValidation::create(rectangularContact,sizeFootX,sizeFootY,mass,mu);
           collisionChecking->addDynamicValidator(dynamicVal);
@@ -132,7 +129,7 @@ namespace hpp {
         std::size_t shootLimit_;
         std::size_t displacementLimit_;
         std::vector<double> so3Bounds_;
-				affMap_t affMap_;
+        affMap_t affMap_;
     };
 
     class FullBodyMap {
@@ -334,8 +331,8 @@ namespace hpp {
         virtual CORBA::Short createState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);
         virtual hpp::floatSeq* getConfigAtState(unsigned short stateId) throw (hpp::Error);
         virtual double setConfigAtState(unsigned short stateId, const hpp::floatSeq& config) throw (hpp::Error);
-        double projectStateToCOMEigen(State& s, const model::Configuration_t& com_target, unsigned short maxNumeSamples)throw (hpp::Error);
-        double projectStateToCOMEigen(unsigned short stateId, const model::Configuration_t& com_target, unsigned short maxNumeSamples)throw (hpp::Error);
+        double projectStateToCOMEigen(State& s, const pinocchio::Configuration_t& com_target, unsigned short maxNumeSamples)throw (hpp::Error);
+        double projectStateToCOMEigen(unsigned short stateId, const pinocchio::Configuration_t& com_target, unsigned short maxNumeSamples)throw (hpp::Error);
 
         virtual double projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com, unsigned short max_num_sample) throw (hpp::Error);
         virtual void saveComputedStates(const char* filepath) throw (hpp::Error);
@@ -399,7 +396,7 @@ namespace hpp {
         }
 
         private:
-        model::T_Rom romDevices_;
+        pinocchio::T_Rom romDevices_;
         //rbprm::RbPrmFullBodyPtr_t fullBody_;
         bool romLoaded_;
         bool fullBodyLoaded_;
@@ -409,7 +406,7 @@ namespace hpp {
         std::vector<rbprm::State> lastStatesComputed_;
         rbprm::T_StateFrame lastStatesComputedTime_;
         sampling::AnalysisFactory* analysisFactory_;
-        model::Configuration_t refPose_;
+        pinocchio::Configuration_t refPose_;
       }; // class RobotBuilder
     } // namespace impl
   } // namespace manipulation

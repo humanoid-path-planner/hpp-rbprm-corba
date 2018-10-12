@@ -53,6 +53,22 @@ ADD_REQUIRED_DEPENDENCY("hpp-model-urdf >= 3")
 ADD_REQUIRED_DEPENDENCY("hpp-affordance-corba")
 ADD_REQUIRED_DEPENDENCY("hpp-util >= 3")
 
+add_required_dependency("octomap >= 1.8")
+if (OCTOMAP_INCLUDE_DIRS AND OCTOMAP_LIBRARY_DIRS)
+        include_directories(${OCTOMAP_INCLUDE_DIRS})
+        link_directories(${OCTOMAP_LIBRARY_DIRS})
+  string(REPLACE "." ";" VERSION_LIST ${OCTOMAP_VERSION})
+  list(GET VERSION_LIST 0 OCTOMAP_MAJOR_VERSION)
+  list(GET VERSION_LIST 1 OCTOMAP_MINOR_VERSION)
+  list(GET VERSION_LIST 2 OCTOMAP_PATCH_VERSION)
+  add_definitions (-DOCTOMAP_MAJOR_VERSION=${OCTOMAP_MAJOR_VERSION}
+                   -DOCTOMAP_MINOR_VERSION=${OCTOMAP_MINOR_VERSION}
+                   -DOCTOMAP_PATCH_VERSION=${OCTOMAP_PATCH_VERSION})
+        message(STATUS "FCL uses Octomap" ${OCTOMAP_MINOR_VERSION})
+else()
+        message(STATUS "FCL does not use Octomap")
+endif()
+
 PKG_CONFIG_APPEND_LIBS(${PROJECT_NAME})
 ADD_SUBDIRECTORY(src)
 
