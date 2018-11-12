@@ -26,7 +26,7 @@ rbprmBuilder.setAffordanceFilter('hyq_rfleg_rom', ['Support',])
 rbprmBuilder.setAffordanceFilter('hyq_lhleg_rom', ['Support'])
 rbprmBuilder.setAffordanceFilter('hyq_lfleg_rom', ['Support',])
 # We also bound the rotations of the torso.
-#~ rbprmBuilder.boundSO3([-0.4,0.4,-3,3,-3,3])
+rbprmBuilder.boundSO3([-0.4,0.4,-0.3,0.3,-0.3,0.3])
 
 # Creating an instance of HPP problem solver and the viewer
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
@@ -37,8 +37,8 @@ r = Viewer (ps)
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init [0:3] = [-2, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 q_goal = q_init [::]
-#~ q_goal [0:3] = [3, 0, 0.63]; r (q_goal)
-q_goal [0:3] = [-1, 0, 0.75]; r (q_goal)
+q_goal [0:3] = [3, 0, 0.63]; r (q_goal)
+#~ q_goal [0:3] = [-1, 0, 0.75]; r (q_goal)
 
 # Choosing a path optimizer
 ps.addPathOptimizer("RandomShortcut")
@@ -66,7 +66,7 @@ print "computation time for root path ", t
 
 # Playing the computed path
 from hpp.gepetto import PathPlayer
-pp = PathPlayer (rbprmBuilder.client.basic, r)
+pp = PathPlayer (r)
 
 q_far = q_init [::]
 q_far [0:3] = [-2, -3, 0.63]; 
@@ -74,6 +74,8 @@ r(q_far)
 
 for i in range(1,10):
 	rbprmBuilder.client.basic.problem.optimizePath(i)
+        
+#~ pp(9)
 	
 
 from hpp.corbaserver import Client
@@ -99,7 +101,7 @@ cl.problem.selectProblem("rbprm_path")
 rbprmBuilder2 = Robot ("toto")
 ps2 = ProblemSolver( rbprmBuilder2 )
 cl.problem.selectProblem("default")
-cl.problem.movePathToProblem(3,"rbprm_path",rbprmBuilder.getAllJointNames())
+cl.problem.movePathToProblem(8,"rbprm_path",rbprmBuilder.getAllJointNames())
 r2 = Viewer (ps2, viewerClient=r.client)
 r2(q_far)
 

@@ -32,7 +32,7 @@ fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName
 fullBody.setJointBounds ("root_joint", [-2,5, -1, 1, 0.3, 4])
 
 #  Setting a number of sample configurations used
-nbSamples = 20000
+nbSamples = 10000
 
 ps = tp.ProblemSolver(fullBody)
 r = tp.Viewer (ps, viewerClient=tp.r.client)
@@ -174,7 +174,7 @@ def genPlan(stepsize=0.06):
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	global configs
 	start = time.clock() 
-	configs = fullBody.interpolate(stepsize, 5, 20, filterStates = True, testReachability=False, quasiStatic=True)
+	configs = fullBody.interpolate(stepsize, 8, 0, filterStates = True, testReachability=False, quasiStatic=True)
 	end = time.clock() 
 	print "Contact plan generated in " + str(end-start) + "seconds"
 	
@@ -228,7 +228,7 @@ def f(step = 0.5):
 print "Root path generated in " + str(tp.t) + " ms."
 
 #~ d();e()
-d(0.1);e(0.01)
+d(0.01);e(0.01)
 #~ d(0.004);e(0.01)
 
 from hpp.corbaserver.rbprm.rbprmstate import *
