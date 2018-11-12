@@ -17,7 +17,7 @@ srdfSuffix = ""
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-rbprmBuilder.setJointBounds ("base_joint_xyz", [-2,5, -1, 1, 0.3, 4])
+rbprmBuilder.setJointBounds ("root_joint", [-2,5, -1, 1, 0.3, 4])
 # The following lines set constraint on the valid configurations:
 # a configuration is valid only if all limbs can create a contact ...
 rbprmBuilder.setFilter(['hyq_rhleg_rom', 'hyq_lfleg_rom', 'hyq_rfleg_rom','hyq_lhleg_rom'])
@@ -26,7 +26,7 @@ rbprmBuilder.setAffordanceFilter('hyq_rfleg_rom', ['Support',])
 rbprmBuilder.setAffordanceFilter('hyq_lhleg_rom', ['Support'])
 rbprmBuilder.setAffordanceFilter('hyq_lfleg_rom', ['Support',])
 # We also bound the rotations of the torso.
-rbprmBuilder.boundSO3([-0.4,0.4,-3,3,-3,3])
+#~ rbprmBuilder.boundSO3([-0.4,0.4,-3,3,-3,3])
 
 # Creating an instance of HPP problem solver and the viewer
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
@@ -37,7 +37,8 @@ r = Viewer (ps)
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init [0:3] = [-2, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 q_goal = q_init [::]
-q_goal [0:3] = [3, 0, 0.63]; r (q_goal)
+#~ q_goal [0:3] = [3, 0, 0.63]; r (q_goal)
+q_goal [0:3] = [-1, 0, 0.75]; r (q_goal)
 
 # Choosing a path optimizer
 ps.addPathOptimizer("RandomShortcut")
@@ -46,18 +47,22 @@ ps.addGoalConfig (q_goal)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
-afftool.loadObstacleModel (packageName, "darpa", "planning", r, reduceSizes=[0.05,0.,0.])
-#~ afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
+#~ afftool.loadObstacleModel (packageName, "darpa", "planning", r, reduceSizes=[0.05,0.,0.])
+afftool.loadObstacleModel (packageName, "darpa", "planning", r)
+afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 
 # Choosing RBPRM shooter and path validation methods.
 # Note that the standard RRT algorithm is used.
-ps.client.problem.selectConFigurationShooter("RbprmShooter")
+ps.client.problem.selectConfigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 
 # Solve the problem
 t = ps.solve ()
+#~ t = 0.
 if isinstance(t, list):
 	t = t[0]* 3600000 + t[1] * 60000 + t[2] * 1000 + t[3]	
+
+print "computation time for root path ", t
 
 # Playing the computed path
 from hpp.gepetto import PathPlayer

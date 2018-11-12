@@ -941,6 +941,8 @@ class FullBody (object):
      def getLinkName (self, jointName):
           return self.client.basic.robot.getLinkName (jointName)
      ## \}
+     def getLinkNames (self, jointName):
+          return self.client.basic.robot.getLinkNames (jointName)
 
      ## \name Access to current configuration
      #\{

@@ -29,7 +29,7 @@ srdfSuffix = ""
 #  This time we load the full body model of HyQ
 fullBody = FullBody () 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz", [-2,5, -1, 1, 0.3, 4])
+fullBody.setJointBounds ("root_joint", [-2,5, -1, 1, 0.3, 4])
 
 #  Setting a number of sample configurations used
 nbSamples = 20000
@@ -79,11 +79,11 @@ q_goal = hyq_ref[:]; q_goal[0:7] = tp.q_goal[0:7]; q_goal[2]=hyq_ref[2]+0.02
 
 q_init = [-2.0,
  0.0,
- 0.6638277139631803,
+ 0.6838277139631803,
+ 0.0,
+ 0.0,
+ 0.0,
  1.0,
- 0.0,
- 0.0,
- 0.0,
  0.14279812395541294,
  0.934392553166556,
  -0.9968239786882757,
@@ -185,6 +185,19 @@ def contactPlan(step = 0.5):
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	for i in range(0,len(configs)):
 		r(configs[i]);
+		time.sleep(step)
+                		
+def contactPlanDontMove(step = 0.5):
+	r.client.gui.setVisibility("hyq", "ON")
+	tp.cl.problem.selectProblem("default")
+	tp.r.client.gui.setVisibility("toto", "OFF")
+	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
+	for i in range(0,len(configs)):
+                a = configs[i]
+                a[:6] = [0 for _ in range(6)]
+                a[6] = 1 
+		#~ r(configs[i]);
+		r(a);
 		time.sleep(step)		
 		
 		
@@ -208,7 +221,56 @@ def e(step = 0.5):
 	print "displaying contact plan"
 	contactPlan(step)
 	
+def f(step = 0.5):
+	print "displaying static contact plan"
+	contactPlanDontMove(step)
+	
 print "Root path generated in " + str(tp.t) + " ms."
 
 #~ d();e()
-d(0.004);e(0.01)
+d(0.1);e(0.01)
+#~ d(0.004);e(0.01)
+
+from hpp.corbaserver.rbprm.rbprmstate import *
+
+com = fullBody.client.basic.robot.getCenterOfMass
+s = None
+def d1():
+        global s
+        s = State(fullBody,q = q_init, limbsIncontact = [larmId])
+
+        a = s.q()
+        a[2]=a[2]+0.01
+        s.setQ(a)
+        return s.projectToCOM([0.01,0.,0.], maxNumSample = 0)
+        
+def d2():
+        global s
+        s = State(fullBody,q = q_init, limbsIncontact = [larmId, rarmId])
+
+        a = s.q()
+        a[2]=a[2]+0.05
+        a[0]=a[0]+0.05
+        s.setQ(a)
+        return s.projectToCOM([0.01,0.,0.], maxNumSample = 0)
+        
+def d3():
+        global s
+        s = State(fullBody,q = q_init, limbsIncontact = [rarmId])
+
+        a = s.q()
+        a[2]=a[2]+0.01
+        s.setQ(a)
+        return s.projectToCOM([0.01,0.,0.], maxNumSample = 0)
+def d4():
+        global s
+        s = State(fullBody,q = q_init, limbsIncontact = [rarmId])
+
+        a = s.q()
+        a[2]=a[2]-0.01
+        s.setQ(a)
+        print s.projectToCOM([0.01,0.,0.], maxNumSample = 0)
+        s = State(fullBody,q = s.q(), limbsIncontact = [larmId])
+        return s.projectToCOM([0.01,0.,0.], maxNumSample = 0)
+
+

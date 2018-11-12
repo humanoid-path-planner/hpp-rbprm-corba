@@ -62,6 +62,9 @@ namespace hpp {
   typedef spline::bezier_curve<> bezier;
     namespace impl {
 
+    const pinocchio::Device::Computation_t flag = static_cast <pinocchio::Device::Computation_t>
+  (pinocchio::Device::JOINT_POSITION | pinocchio::Device::JACOBIAN | pinocchio::Device::COM);
+
     RbprmBuilder::RbprmBuilder ()
     : POA_hpp::corbaserver::rbprm::RbprmBuilder()
     , romLoaded_(false)
@@ -135,7 +138,7 @@ namespace hpp {
             // Add device to the planner
             problemSolver()->robot (device);
             problemSolver()->robot ()->controlComputation
-            (pinocchio::Device::JOINT_POSITION);
+            (flag);
         }
         catch (const std::exception& exc)
         {
@@ -184,7 +187,7 @@ namespace hpp {
             problemSolver()->robot (fullBody()->device_);
             problemSolver()->resetProblem();
             problemSolver()->robot ()->controlComputation
-            (pinocchio::Device::JOINT_POSITION);
+            (flag);
             refPose_ = fullBody()->device_->currentConfiguration();
         }
         catch (const std::exception& exc)
@@ -205,7 +208,7 @@ namespace hpp {
             problemSolver()->robot (fullBody()->device_);
             problemSolver()->resetProblem();
             problemSolver()->robot ()->controlComputation
-            (pinocchio::Device::JOINT_POSITION);
+            (flag);
         }
         catch (const std::exception& exc)
         {
@@ -295,9 +298,9 @@ namespace hpp {
                 const fcl::Vec3f& position = cit->second;
                 limb = limbs.at(name);
                 const fcl::Vec3f& normal = state.contactNormals_.at(name);
-                const fcl::Vec3f z = limb->effector_->currentTransformation().rotation() * limb->normal_;
+                const fcl::Vec3f z = limb->effector_.currentTransformation().rotation() * limb->normal_;
                 const fcl::Matrix3f alignRotation = tools::GetRotationMatrix(z,normal);
-                const fcl::Matrix3f rotation = alignRotation * limb->effector_->currentTransformation().rotation();
+                const fcl::Matrix3f rotation = alignRotation * limb->effector_.currentTransformation().rotation();
                 const fcl::Vec3f offset = rotation * limb->offset_;
                 const double& lx = limb->x_, ly = limb->y_;
                 p << lx,  ly, 0,
@@ -371,9 +374,9 @@ namespace hpp {
                 const fcl::Vec3f& position = cit->second;
                 limb = limbs.at(name);
                 const fcl::Vec3f& normal = state.contactNormals_.at(name);
-                const fcl::Vec3f z = limb->effector_->currentTransformation().rotation() * limb->normal_;
+                const fcl::Vec3f z = limb->effector_.currentTransformation().rotation() * limb->normal_;
                 const fcl::Matrix3f alignRotation = tools::GetRotationMatrix(z,normal);
-                const fcl::Matrix3f rotation = alignRotation * limb->effector_->currentTransformation().rotation();
+                const fcl::Matrix3f rotation = alignRotation * limb->effector_.currentTransformation().rotation();
                 const fcl::Vec3f offset = rotation * limb->offset_;
                 const double& lx = limb->x_, ly = limb->y_;
                 p << lx,  ly, 0,
@@ -490,10 +493,10 @@ namespace hpp {
             State state;
             state.configuration_ = config;
             state.contacts_[limbName] = true;
-            const fcl::Vec3f position = limb->effector_->currentTransformation().translation();
+            const fcl::Vec3f position = limb->effector_.currentTransformation().translation();
             state.contactPositions_[limbName] = position;
             state.contactNormals_[limbName] = fcl::Vec3f(0,0,1);
-            state.contactRotation_[limbName] = limb->effector_->currentTransformation().rotation();
+            state.contactRotation_[limbName] = limb->effector_.currentTransformation().rotation();
             std::vector<fcl::Vec3f> poss = (computeRectangleContact(fullBody(), state));
 
             hpp::floatSeqSeq *res;
@@ -807,10 +810,10 @@ namespace hpp {
             rbprm::RbPrmLimbPtr_t limb = fullBody()->GetLimbs().at(*cit);
             const std::string& limbName = *cit;
             state.contacts_[limbName] = true;
-            const fcl::Vec3f position = limb->effector_->currentTransformation().translation();
+            const fcl::Vec3f position = limb->effector_.currentTransformation().translation();
             state.contactPositions_[limbName] = position;
-            state.contactNormals_[limbName] = limb->effector_->currentTransformation().rotation() * limb->normal_;
-            state.contactRotation_[limbName] = limb->effector_->currentTransformation().rotation();
+            state.contactNormals_[limbName] = limb->effector_.currentTransformation().rotation() * limb->normal_;
+            state.contactRotation_[limbName] = limb->effector_.currentTransformation().rotation();
             state.contactOrder_.push(limbName);
         }
         state.nbContacts = state.contactNormals_.size();
@@ -902,15 +905,17 @@ namespace hpp {
                 for(std::vector<std::string>::const_iterator cit = names.begin(); cit !=names.end(); ++cit)
                 {
                     rbprm::RbPrmLimbPtr_t limb = fullBody()->GetLimbs().at(*cit);
-                    pinocchio::Transform3f localFrame, globalFrame;
+                    pinocchio::Transform3f localFrame(1), globalFrame(1);
                     localFrame.translation(-limb->offset_);
                     std::vector<bool> posConstraints;
                     std::vector<bool> rotConstraints;
                     posConstraints.push_back(false);posConstraints.push_back(false);posConstraints.push_back(true);
                     rotConstraints.push_back(true);rotConstraints.push_back(true);rotConstraints.push_back(true);
+                    pinocchio::Frame effectorFrame = device->getFrameByName(limb->effector_.name());
+                    pinocchio::JointPtr_t effectorJoint(new pinocchio::Joint(limb->effector_.joint()));
                     proj->add(core::NumericalConstraint::create (constraints::Position::create("",fullBody()->device_,
-                                                                                               limb->effector_,
-                                                                                               globalFrame,
+                                                                                               effectorJoint,
+                                                                                               effectorFrame.positionInParentFrame() * globalFrame,
                                                                                                localFrame,
                                                                                                posConstraints)));
                     if(limb->contactType_ == hpp::rbprm::_6_DOF)
@@ -919,9 +924,9 @@ namespace hpp {
                         value_type theta = 2*(value_type(rand()) / value_type(RAND_MAX) - 0.5) * M_PI;
                         fcl::Matrix3f r = tools::GetZRotMatrix(theta);
                         // TODO not assume identity matrix for effector frame
-                        fcl::Matrix3f rotation = r;// * limb->effector_->initialPosition ().getRotation();
+                        fcl::Matrix3f rotation = effectorFrame.currentTransformation().rotation() * r;// * limb->effector_->initialPosition ().getRotation();
                         proj->add(core::NumericalConstraint::create (constraints::Orientation::create("",fullBody()->device_,
-                                                                                                      limb->effector_,
+                                                                                                      effectorJoint,
                                                                                                       pinocchio::Transform3f(rotation,fcl::Vec3f::Zero()),
                                                                                                       rotConstraints)));
                     }
@@ -938,8 +943,8 @@ namespace hpp {
                             std::string limbId = *cit;
                             rbprm::RbPrmLimbPtr_t limb = fullBody()->GetLimbs().at(*cit);
                             tmp.contacts_[limbId] = true;
-                            tmp.contactPositions_[limbId] = limb->effector_->currentTransformation().translation();
-                            tmp.contactRotation_[limbId] = limb->effector_->currentTransformation().rotation();
+                            tmp.contactPositions_[limbId] = limb->effector_.currentTransformation().translation();
+                            tmp.contactRotation_[limbId] = limb->effector_.currentTransformation().rotation();
                             tmp.contactNormals_[limbId] = z;
                             tmp.configuration_ = config;
                             ++tmp.nbContacts;
@@ -1232,8 +1237,8 @@ namespace hpp {
                 throw std::runtime_error ("Impossible to find limb for joint "
                                           + (*cit) + " to robot; limb not defined");
             }
-            const core::JointPtr_t joint = fullBody->device_->getJointByName(lit->second->effector_->name());
-            const pinocchio::Transform3f& transform =  joint->currentTransformation ();
+            const pinocchio::Frame frame = fullBody->device_->getFrameByName(lit->second->effector_.name());
+            const pinocchio::Transform3f& transform =  frame.currentTransformation ();
             const fcl::Matrix3f& rot = transform.rotation();
             state.contactPositions_[*cit] = transform.translation();
             state.contactRotation_[*cit] = rot;
@@ -2617,7 +2622,7 @@ assert(s2 == s1 +1);
              }
         }
         std::string effectorVar = s2.contactCreations(s1).front();
-        JointPtr_t effector =  fullBody()->device_->getJointByName(fullBody()->GetLimbs().at(effectorVar)->effector_->name());
+        pinocchio::Frame effector =  fullBody()->device_->getFrameByName(fullBody()->GetLimbs().at(effectorVar)->effector_.name());
         std::vector<PathVectorPtr_t> listBeziers =  interpolation::fitBeziersToPath(fullBody(),effector,paths[comTraj]->length(),fullBodyComPath,s1,s2);
 
         hpp::floatSeqSeq *res;
@@ -3020,10 +3025,10 @@ assert(s2 == s1 +1);
         {
             const hpp::rbprm::RbPrmLimbPtr_t limb =fullBody()->GetLimbs().at(std::string(*cit));
             testedState.contacts_[*cit] = true;
-            testedState.contactPositions_[*cit] = limb->effector_->currentTransformation().translation();
-            testedState.contactRotation_ [*cit] = limb->effector_->currentTransformation().rotation();
+            testedState.contactPositions_[*cit] = limb->effector_.currentTransformation().translation();
+            testedState.contactRotation_ [*cit] = limb->effector_.currentTransformation().rotation();
             // normal given by effector normal
-            const fcl::Vec3f normal = limb->effector_->currentTransformation().rotation() * limb->normal_;
+            const fcl::Vec3f normal = limb->effector_.currentTransformation().rotation() * limb->normal_;
             testedState.contactNormals_[*cit] = normal;
             testedState.configuration_ = config;
             ++testedState.nbContacts;
@@ -3329,7 +3334,7 @@ assert(s2 == s1 +1);
             if(lit->second->kinematicConstraints_.first.size()==0){
                 hppDout(notice,"Kinematics constraints not initialized");
             }else{
-                successLimb = rbprm::reachability::verifyKinematicConstraints(lit->second->kinematicConstraints_,lit->second->effector_->currentTransformation(),pt);
+                successLimb = rbprm::reachability::verifyKinematicConstraints(lit->second->kinematicConstraints_,lit->second->effector_.currentTransformation(),pt);
                 hppDout(notice,"kinematic constraints verified : "<<successLimb);
                 success = success && successLimb;
             }
