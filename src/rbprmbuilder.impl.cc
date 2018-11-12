@@ -911,11 +911,11 @@ namespace hpp {
                     std::vector<bool> rotConstraints;
                     posConstraints.push_back(false);posConstraints.push_back(false);posConstraints.push_back(true);
                     rotConstraints.push_back(true);rotConstraints.push_back(true);rotConstraints.push_back(true);
-                    pinocchio::Frame effectorFrame = device->getFrameByName(limb->effector_.name());
+                    const pinocchio::Frame effectorFrame = device->getFrameByName(limb->effector_.name());
                     pinocchio::JointPtr_t effectorJoint(new pinocchio::Joint(limb->effector_.joint()));
                     proj->add(core::NumericalConstraint::create (constraints::Position::create("",fullBody()->device_,
                                                                                                effectorJoint,
-                                                                                               effectorFrame.positionInParentFrame() * globalFrame,
+                                                                                               effectorFrame.pinocchio().placement * globalFrame,
                                                                                                localFrame,
                                                                                                posConstraints)));
                     if(limb->contactType_ == hpp::rbprm::_6_DOF)
@@ -924,7 +924,7 @@ namespace hpp {
                         value_type theta = 2*(value_type(rand()) / value_type(RAND_MAX) - 0.5) * M_PI;
                         fcl::Matrix3f r = tools::GetZRotMatrix(theta);
                         // TODO not assume identity matrix for effector frame
-                        fcl::Matrix3f rotation = effectorFrame.currentTransformation().rotation() * r;// * limb->effector_->initialPosition ().getRotation();
+                        fcl::Matrix3f rotation = r * effectorFrame.pinocchio().placement.rotation().transpose();// * limb->effector_->initialPosition ().getRotation();
                         proj->add(core::NumericalConstraint::create (constraints::Orientation::create("",fullBody()->device_,
                                                                                                       effectorJoint,
                                                                                                       pinocchio::Transform3f(rotation,fcl::Vec3f::Zero()),
