@@ -19,7 +19,7 @@ srdfSuffix = ""
 fullBody = FullBody ()
 
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-fullBody.setJointBounds ("base_joint_xyz", [-0.135,2, -1, 1, 0, 2.2])
+fullBody.setJointBounds ("root_joint", [-0.135,2, -1, 1, 0, 2.2])
 
 
 ps = tp.ProblemSolver( fullBody )
@@ -28,15 +28,17 @@ r = tp.Viewer (ps, viewerClient=tp.r.client)
 #~ AFTER loading obstacles
 rLegId = '0rLeg'
 rLeg = 'RLEG_JOINT0'
-rLegOffset = [0,-0.105,0,]
-rLegNormal = [0,1,0]
+rLegOffset = [0,0,-0.105]
+#~ rLegNormal = [0,1,0]
+rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 10000, "manipulability", 0.1)
 
 lLegId = '1lLeg'
 lLeg = 'LLEG_JOINT0'
-lLegOffset = [0,-0.105,0]
-lLegNormal = [0,1,0]
+lLegOffset = [0,0,-0.105]
+#~ lLegNormal = [0,1,0]
+lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
 fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.1)
 
@@ -57,7 +59,7 @@ lHand = 'LARM_JOINT5'
 lArmOffset = [-0.05,-0.050,-0.050]
 lArmNormal = [1,0,0]
 lArmx = 0.024; lArmy = 0.024
-fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.05, "_6_DOF", True)
+#~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.05, "_6_DOF", True)
 
 rKneeId = '0RKnee'
 rLeg = 'RLEG_JOINT0'
@@ -87,30 +89,36 @@ q_0 = fullBody.getCurrentConfig();
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.q_init[0:7]
 q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.q_goal[0:7]
 
-
-fullBody.setCurrentConfig (q_init)
-q_init =  [
-        0.1, -0.82, 0.648702, 1.0, 0.0 , 0.0, 0.0,                         	 # Free flyer 0-6
-        0.0, 0.0, 0.0, 0.0,                                                  # CHEST HEAD 7-10
+q_init[:3] = [0.1, -0.82, 0.648702]
+q_init[7:] = [ 0.0, 0.0, 0.0, 0.0,                                                  # CHEST HEAD 7-10
         0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # LARM       11-17
         0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # RARM       18-24
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # LLEG       25-30
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # RLEG       31-36
-        ]; r (q_init)
+        ];
+
+r (q_init)
+
+fullBody.setCurrentConfig (q_init)
+#~ q_init =  [
+        #~ 0.1, -0.82, 0.648702, 1.0, 0.0 , 0.0, 0.0,                         	 # Free flyer 0-6
+        #~ 0.0, 0.0, 0.0, 0.0,                                                  # CHEST HEAD 7-10
+        #~ 0.261799388,  0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # LARM       11-17
+        #~ 0.261799388, -0.174532925, 0.0, -0.523598776, 0.0, 0.0, 0.17, 		 # RARM       18-24
+        #~ 0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # LLEG       25-30
+        #~ 0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # RLEG       31-36
+        #~ ]; r (q_init)
 
 fullBody.setCurrentConfig (q_goal)
 #~ r(q_goal)
-q_goal = fullBody.generateContacts(q_goal, [0,0,1])
-#~ r(q_goal)
+q_goal = fullBody.generateContacts(q_goal, [0,0,1], robustnessThreshold = 0.)
+r(q_goal)
 
 fullBody.setStartState(q_init,[rLegId,lLegId]) #,rarmId,larmId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
-#~ 
-#~ configs = fullBody.interpolate(0.1)
-configs = fullBody.interpolate(0.1)
-#~ configs = fullBody.interpolate(0.15)
-i = 0;
-fullBody.draw(configs[i],r); i=i+1; i-1
+configs = fullBody.interpolate(0.1) #TODO DEBUG
+#~ i = 0;
+#~ fullBody.draw(configs[i],r); i=i+1; i-1
 
 r.loadObstacleModel ('hpp-rbprm-corba', "stair_bauzil", "contact")
 #~ fullBody.exportAll(r, configs, 'stair_bauzil_hrp2_robust_2');
@@ -203,11 +211,6 @@ def d():
 		
 def e():
 	contactPlan()
-		
-limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},  
-						lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'},
-						rarmId : {'file': "hrp2/RA_com.ineq", 'effector' : rHand} }
-						#~ larmId : {'file': "hrp2/LA_com.ineq", 'effector' : lHand} }
 
 #~ fullBody.limbRRTFromRootPath(0,len(configs)-1,0,2)
 from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import step, clean,stats, saveAllData, play_traj
@@ -225,5 +228,70 @@ def saveAll(name):
 	saveAllData(fullBody, r, name)
 print "Root path generated in " + str(tp.t) + " ms."
 	
+print "go" 
+#~ genPlan()
 
-genPlan()
+from hpp.corbaserver.rbprm.rbprmstate import *
+
+com = fullBody.client.basic.robot.getCenterOfMass
+s = None
+def d1():
+        global s
+        s = State(fullBody,q = q_init, limbsIncontact = [rLegId])
+
+        a = s.q()
+        a[2]=a[2]-0.1
+        s.setQ(a)
+        return s.projectToCOM([0.01,0.,0.], maxNumSample = 0)
+        
+def d2():
+        global s
+        s = State(fullBody,q = q_init, limbsIncontact = [rLegId, lLegId])
+
+        a = s.q()
+        a[2]=a[2]-0.1
+        #~ a[0]=a[0]+0.05
+        s.setQ(a)
+        return s.projectToCOM([0.01,0.,0.], maxNumSample = 0)
+        
+def d3():
+        global s
+        s = State(fullBody,q = q_init, limbsIncontact = [rarmId])
+
+        a = s.q()
+        a[2]=a[2]+0.01
+        s.setQ(a)
+        return s.projectToCOM([0.01,0.,0.], maxNumSample = 0)
+        
+from hpp.corbaserver.rbprm.state_alg  import addNewContact, isContactReachable, closestTransform, removeContact, addNewContactIfReachable, projectToFeasibleCom
+from geom import  *
+
+
+def dist(q0,q1):
+    #~ return norm(array(q0[7:]) - array(q1[7:]) )
+    return norm(array(q0[7:]) - array(q1[7:]) )
+
+def distq_ref(q0):
+    return lambda s: dist(s.q(),q0) 
+
+a = computeAffordanceCentroids(tp.afftool, ["Support"]) 
+def computeNext(state, limb, projectToCom = False, max_num_samples = 10, mu = 0.6):
+    global a
+    t1 = time.clock()
+    #~ candidates = [el for el in a if isContactReachable(state, limb, el[0], el[1], limbsCOMConstraints)[0] ]
+    #~ print "num candidates", len(candidates)
+    #~ t3 = time.clock()
+    results = [addNewContactIfReachable(state, limb, el[0], el[1], limbsCOMConstraints, projectToCom, max_num_samples, mu) for el in a]
+    t2 = time.clock()
+    #~ t4 = time.clock()
+    resultsFinal = [el[0] for el in results if el[1]]
+    print "time to filter", t2 - t1
+    #~ print "time to create", t4 - t3
+    print "num res", len(resultsFinal)
+    #sorting
+    sortedlist = sorted(resultsFinal, key=distq_ref(state.q()))
+    return sortedlist
+    
+d3()
+
+b = computeNext(s, rarmId, max_num_samples = 1)
