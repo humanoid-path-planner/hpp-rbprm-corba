@@ -25,6 +25,7 @@ fullBody.setJointBounds ("root_joint", [-0.135,2, -1, 1, 0, 2.2])
 ps = tp.ProblemSolver( fullBody )
 r = tp.Viewer (ps, viewerClient=tp.r.client)
 
+cType = "_6_DOF"
 #~ AFTER loading obstacles
 rLegId = '0rLeg'
 rLeg = 'RLEG_JOINT0'
@@ -32,7 +33,7 @@ rLegOffset = [0,0,-0.105]
 #~ rLegNormal = [0,1,0]
 rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 10000, "manipulability", 0.1)
+fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 10000, "manipulability", 0.2, cType)
 
 lLegId = '1lLeg'
 lLeg = 'LLEG_JOINT0'
@@ -40,7 +41,7 @@ lLegOffset = [0,0,-0.105]
 #~ lLegNormal = [0,1,0]
 lLegNormal = [0,0,1]
 lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.1)
+fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.2, cType)
 
 rarmId = '3Rarm'
 rarm = 'RARM_JOINT0'
@@ -49,7 +50,7 @@ rArmOffset = [0,0,-0.1]
 rArmNormal = [0,0,1]
 rArmx = 0.024; rArmy = 0.024
 #disabling collision for hook
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.05, "_6_DOF", True)
+fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF", True)
 
 
 #~ AFTER loading obstacles
@@ -116,7 +117,7 @@ r(q_goal)
 
 fullBody.setStartState(q_init,[rLegId,lLegId]) #,rarmId,larmId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
-configs = fullBody.interpolate(0.1) #TODO DEBUG
+configs = fullBody.interpolate(0.1, robustnessTreshold = 15) #TODO DEBUG
 #~ i = 0;
 #~ fullBody.draw(configs[i],r); i=i+1; i-1
 
@@ -292,6 +293,7 @@ def computeNext(state, limb, projectToCom = False, max_num_samples = 10, mu = 0.
     sortedlist = sorted(resultsFinal, key=distq_ref(state.q()))
     return sortedlist
     
-d3()
+#~ d3()
 
-b = computeNext(s, rarmId, max_num_samples = 1)
+#~ b = computeNext(s, rarmId, max_num_samples = 1)
+i=0

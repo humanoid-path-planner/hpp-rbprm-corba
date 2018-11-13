@@ -900,7 +900,7 @@ namespace hpp {
             {
                 core::DevicePtr_t device = fullBody()->device_->clone();
                 std::vector<std::string> names = stringConversion(contactLimbs);
-                core::ConfigProjectorPtr_t proj = core::ConfigProjector::create(device,"proj", 1e-4, 40);
+                core::ConfigProjectorPtr_t proj = core::ConfigProjector::create(device,"proj", 1e-4, 100);
                 //hpp::tools::LockJointRec(limb->limb_->name(), body->device_->rootJoint(), proj);
                 for(std::vector<std::string>::const_iterator cit = names.begin(); cit !=names.end(); ++cit)
                 {
