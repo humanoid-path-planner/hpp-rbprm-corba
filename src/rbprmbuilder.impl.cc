@@ -62,8 +62,8 @@ namespace hpp {
   typedef spline::bezier_curve<> bezier;
     namespace impl {
 
-    const pinocchio::Device::Computation_t flag = static_cast <pinocchio::Device::Computation_t>
-  (pinocchio::Device::JOINT_POSITION | pinocchio::Device::JACOBIAN | pinocchio::Device::COM);
+    const pinocchio::Computation_t flag = static_cast <pinocchio::Computation_t>
+  (pinocchio::JOINT_POSITION | pinocchio::JACOBIAN | pinocchio::COM);
 
     RbprmBuilder::RbprmBuilder ()
     : POA_hpp::corbaserver::rbprm::RbprmBuilder()
