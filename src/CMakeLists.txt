@@ -84,7 +84,6 @@ ADD_DEPENDENCIES (${LIBRARY_NAME} generate_idl_cpp)
 ADD_DEPENDENCIES (${LIBRARY_NAME} generate_idl_python)
 
 PKG_CONFIG_USE_DEPENDENCY(${LIBRARY_NAME} hpp-rbprm)
-PKG_CONFIG_USE_DEPENDENCY(${LIBRARY_NAME} hpp-model-urdf)
 PKG_CONFIG_USE_DEPENDENCY(${LIBRARY_NAME} hpp-corbaserver)
 PKG_CONFIG_USE_DEPENDENCY(${LIBRARY_NAME} omniORB4)
 PKG_CONFIG_USE_DEPENDENCY(${LIBRARY_NAME} hpp-affordance-corba)
@@ -124,6 +123,6 @@ INSTALL(
 # Stand alone corba server
 ADD_EXECUTABLE (hpp-rbprm-server hpp-rbprm-corba.cc)
 TARGET_LINK_LIBRARIES (hpp-rbprm-server ${LIBRARY_NAME} hpp-rbprm)
-PKG_CONFIG_USE_DEPENDENCY(hpp-rbprm-server hpp-model-urdf)
+
 
 INSTALL (TARGETS hpp-rbprm-server DESTINATION ${CMAKE_INSTALL_BINDIR})
