@@ -18,7 +18,7 @@
 
 from hpp.corbaserver.rbprm import Client as RbprmClient
 from hpp.corbaserver import Client as BasicClient
-from hpp.corbaserver.rbprm.tools.com_constraints import *
+#from hpp.corbaserver.rbprm.tools.com_constraints import *
 from numpy import array
 
 
