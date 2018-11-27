@@ -21,15 +21,6 @@ from hpp.corbaserver import Client as BasicClient
 import hpp.gepetto.blender.exportmotion as em
 from numpy import array, matrix
 from spline import bezier
-## Corba clients to the various servers
-#
-class CorbaClient:
-     """
-     Container for corba clients to various interfaces.
-     """
-     def __init__ (self):
-          self.basic = BasicClient ()
-          self.rbprm = RbprmClient ()
 
 ## Load and handle a RbprmFullbody robot for rbprm planning
 #
@@ -40,7 +31,8 @@ class FullBody (object):
      def __init__ (self, load = True):
           self.tf_root = "base_link"
           self.rootJointType = dict()
-          self.client = CorbaClient ()
+          self.client = BasicClient ()
+          self.clientRbprm = RbprmClient ()
           self.load = load
           self.limbNames = []
      
@@ -54,14 +46,14 @@ class FullBody (object):
      # \param urdfSuffix optional suffix for the urdf of the robot package
      # \param srdfSuffix optional suffix for the srdf of the robot package
      def loadFullBodyModel (self, urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix):
-          self.client.rbprm.rbprm.loadFullBodyRobot(urdfName, rootJointType, packageName, urdfName, urdfSuffix, srdfSuffix, self.client.basic.problem.getSelected("problem")[0])
+          self.clientRbprm.rbprm.loadFullBodyRobot(urdfName, rootJointType, packageName, urdfName, urdfSuffix, srdfSuffix, self.client.problem.getSelected("problem")[0])
           self.name = urdfName
           self.displayName = urdfName
           self.tf_root = "base_link"
           self.rootJointType = rootJointType
-          self.jointNames = self.client.basic.robot.getJointNames ()
-          self.allJointNames = self.client.basic.robot.getAllJointNames ()
-          self.client.basic.robot.meshPackageName = meshPackageName
+          self.jointNames = self.client.robot.getJointNames ()
+          self.allJointNames = self.client.robot.getAllJointNames ()
+          self.client.robot.meshPackageName = meshPackageName
           self.meshPackageName = meshPackageName
           self.rankInConfiguration = dict ()
           self.rankInVelocity = dict ()
@@ -73,21 +65,21 @@ class FullBody (object):
           rankInConfiguration = rankInVelocity = 0
           for j in self.jointNames:
                 self.rankInConfiguration [j] = rankInConfiguration
-                rankInConfiguration += self.client.basic.robot.getJointConfigSize (j)
+                rankInConfiguration += self.client.robot.getJointConfigSize (j)
                 self.rankInVelocity [j] = rankInVelocity
-                rankInVelocity += self.client.basic.robot.getJointNumberDof (j)
+                rankInVelocity += self.client.robot.getJointNumberDof (j)
      
      # Virtual function to load the fullBody robot model.
      #
      def loadFullBodyModelFromActiveRobot (self, urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix):
-          self.client.rbprm.rbprm.loadFullBodyRobotFromExistingRobot()
+          self.clientRbprm.rbprm.loadFullBodyRobotFromExistingRobot()
           self.name = urdfName
           self.displayName = urdfName
           self.tf_root = "base_link"
           self.rootJointType = rootJointType
-          self.jointNames = self.client.basic.robot.getJointNames ()
-          self.allJointNames = self.client.basic.robot.getAllJointNames ()
-          self.client.basic.robot.meshPackageName = meshPackageName
+          self.jointNames = self.client.robot.getJointNames ()
+          self.allJointNames = self.client.robot.getAllJointNames ()
+          self.client.robot.meshPackageName = meshPackageName
           self.meshPackageName = meshPackageName
           self.rankInConfiguration = dict ()
           self.rankInVelocity = dict ()
@@ -99,9 +91,9 @@ class FullBody (object):
           rankInConfiguration = rankInVelocity = 0
           for j in self.jointNames:
                 self.rankInConfiguration [j] = rankInConfiguration
-                rankInConfiguration += self.client.basic.robot.getJointConfigSize (j)
+                rankInConfiguration += self.client.robot.getJointConfigSize (j)
                 self.rankInVelocity [j] = rankInVelocity
-                rankInVelocity += self.client.basic.robot.getJointNumberDof (j)
+                rankInVelocity += self.client.robot.getJointNumberDof (j)
 
      ## Add a limb to the model
      #
@@ -121,7 +113,7 @@ class FullBody (object):
      # of the unit voxel of the octree. The larger they are, the more samples will be considered as candidates for contact.
      # This can be problematic in terms of performance. The default value is 3 cm.
      def addLimb(self, limbId, name, effectorname, offset, normal, x, y, samples):
-          self.client.rbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, "EFORT", 0.03)
+          self.clientRbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, "EFORT", 0.03)
           self.limbNames += [limbId]
 
      ## Add a limb no used for contact generation to the model
@@ -133,7 +125,7 @@ class FullBody (object):
      # \param collisionObjects objects to be considered for collisions with the limb. TODO remove
      # \param nbSamples number of samples to generate for the limb
      def addNonContactingLimb(self, limbId, name, effectorname, samples):
-          self.client.rbprm.rbprm.addNonContactingLimb(limbId, name, effectorname, samples)
+          self.clientRbprm.rbprm.addNonContactingLimb(limbId, name, effectorname, samples)
           self.limbNames += [limbId]
 
      ## Add a limb to the model
@@ -154,7 +146,7 @@ class FullBody (object):
                 boolValEff = 1.
           if(grasp):
                 graspv = 1.
-          self.client.rbprm.rbprm.addLimbDatabase(databasepath, limbId, heuristicName, boolVal,boolValEff,graspv)     
+          self.clientRbprm.rbprm.addLimbDatabase(databasepath, limbId, heuristicName, boolVal,boolValEff,graspv)
           self.limbNames += [limbId]     
 
      ## Add a limb to the model
@@ -187,7 +179,7 @@ class FullBody (object):
           graspv = 0.
           if(grasp):
                 graspv = 1.
-          self.client.rbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution,contactType, boolValEff,graspv,limbOffset,kinematicConstraintsPath,kinematicConstraintsMin)
+          self.clientRbprm.rbprm.addLimb(limbId, name, effectorname, offset, normal, x, y, samples, heuristicName, resolution,contactType, boolValEff,graspv,limbOffset,kinematicConstraintsPath,kinematicConstraintsMin)
           self.limbNames += [limbId]
 
      ## Returns the configuration of a limb described by a sample
@@ -195,7 +187,7 @@ class FullBody (object):
      # \param name name of the limb considered
      # \param idsample identifiant of the sample considered
      def getSample(self, name, idsample):
-          return self.client.rbprm.rbprm.getSampleConfig(name,idsample)
+          return self.clientRbprm.rbprm.getSampleConfig(name,idsample)
           
      ## Returns the end effector position of en effector,
      # given the current root configuration of the robot and a limb sample
@@ -203,7 +195,7 @@ class FullBody (object):
      # \param name name of the limb considered
      # \param idsample identifiant of the sample considered
      def getSamplePosition(self, name, idsample):
-          return self.client.rbprm.rbprm.getSamplePosition(name,idsample)
+          return self.clientRbprm.rbprm.getSamplePosition(name,idsample)
           
      ## Get the end effector position for a given configuration, assuming z normal
      # \param limbName name of the limb from which to retrieve a sample
@@ -211,7 +203,7 @@ class FullBody (object):
      # \return world position of the limb end effector given the current robot configuration.
      # array of size 4, where each entry is the position of a corner of the contact surface
      def getEffectorPosition(self, limbName, configuration):
-          return self.client.rbprm.rbprm.getEffectorPosition(limbName,configuration)
+          return self.clientRbprm.rbprm.getEffectorPosition(limbName,configuration)
           
      ##compute the distance between all effectors replaced between two states
      # does not account for contact not present in both states
@@ -219,7 +211,7 @@ class FullBody (object):
      # \param state2 destination state
      # \return the value computed for the given sample and analytics
      def getEffectorDistance(self, state1, state2):
-          return self.client.rbprm.rbprm.getEffectorDistance(state1,state2)          
+          return self.clientRbprm.rbprm.getEffectorDistance(state1,state2)
 
      ## Generates a balanced contact configuration, considering the
      #  given current configuration of the robot, and a direction of motion.
@@ -229,7 +221,7 @@ class FullBody (object):
      # \param direction a 3d vector specifying the desired direction of motion
      # \return the configuration in contact
      def generateContacts(self, configuration, direction,acceleration = [0,0,0], robustnessThreshold = 0):
-          return self.client.rbprm.rbprm.generateContacts(configuration, direction, acceleration, robustnessThreshold)
+          return self.clientRbprm.rbprm.generateContacts(configuration, direction, acceleration, robustnessThreshold)
 
      ## Generates a balanced contact configuration, considering the
      #  given current configuration of the robot, and a direction of motion.
@@ -239,21 +231,21 @@ class FullBody (object):
      # \param direction a 3d vector specifying the desired direction of motion
      # \return the Id of the new state
      def generateStateInContact(self, configuration, direction,acceleration = [0,0,0], robustnessThreshold = 0):
-          return self.client.rbprm.rbprm.generateStateInContact(configuration, direction, acceleration, robustnessThreshold)
+          return self.clientRbprm.rbprm.generateStateInContact(configuration, direction, acceleration, robustnessThreshold)
 
 
      ## Generate an autocollision free configuration with limbs in contact with the ground
      # \param contactLimbs name of the limbs to project in contact
      # \return a sampled contact configuration
      def generateGroundContact(self, contactLimbs):
-          return self.client.rbprm.rbprm.generateGroundContact(contactLimbs)
+          return self.clientRbprm.rbprm.generateGroundContact(contactLimbs)
           
      ## Create a state and push it to the state array
      # \param q configuration
      # \param names list of effectors in contact
      # \return stateId
      def createState(self, q, contactLimbs):
-          return self.client.rbprm.rbprm.createState(q, contactLimbs)
+          return self.clientRbprm.rbprm.createState(q, contactLimbs)
           
      ## Retrieves the contact candidates configurations given a configuration and a limb
      #
@@ -261,7 +253,7 @@ class FullBody (object):
      # \param configuration the considered robot configuration
      # \param direction a 3d vector specifying the desired direction of motion
      def getContactSamplesIds(self, name, configuration, direction):
-          return self.client.rbprm.rbprm.getContactSamplesIds(name, configuration, direction)
+          return self.clientRbprm.rbprm.getContactSamplesIds(name, configuration, direction)
           
      ## Retrieves the contact candidates configurations given a configuration and a limb
      #
@@ -269,7 +261,7 @@ class FullBody (object):
      # \param configuration the considered robot configuration
      # \param direction a 3d vector specifying the desired direction of motion
      def getContactSamplesProjected(self, name, configuration, direction, numSamples = 10):
-          return self.client.rbprm.rbprm.getContactSamplesProjected(name, configuration, direction, numSamples)
+          return self.clientRbprm.rbprm.getContactSamplesProjected(name, configuration, direction, numSamples)
           
      ## Retrieves the samples IDs In a given octree cell
      #
@@ -277,19 +269,19 @@ class FullBody (object):
      # \param configuration the considered robot configuration
      # \param direction a 3d vector specifying the desired direction of motion
      def getSamplesIdsInOctreeNode(self, limbName, octreeNodeId):
-          return self.client.rbprm.rbprm.getSamplesIdsInOctreeNode(limbName, octreeNodeId)
+          return self.clientRbprm.rbprm.getSamplesIdsInOctreeNode(limbName, octreeNodeId)
           
      ## Get the number of samples generated for a limb
      #
      # \param limbName name of the limb from which to retrieve a sample
      def getNumSamples(self, limbName):
-          return self.client.rbprm.rbprm.getNumSamples(limbName)
+          return self.clientRbprm.rbprm.getNumSamples(limbName)
           
      ## Get the number of octreeNodes
      #
      # \param limbName name of the limb from which to retrieve a sample
      def getOctreeNodeIds(self, limbName):
-          return self.client.rbprm.rbprm.getOctreeNodeIds(limbName)
+          return self.clientRbprm.rbprm.getOctreeNodeIds(limbName)
           
      ## Get the sample value for a given analysis
      #
@@ -297,7 +289,7 @@ class FullBody (object):
      # \param valueName name of the analytic measure desired
      # \param sampleId id of the considered sample
      def getSampleValue(self, limbName, valueName, sampleId):
-          return self.client.rbprm.rbprm.getSampleValue(limbName, valueName, sampleId)
+          return self.clientRbprm.rbprm.getSampleValue(limbName, valueName, sampleId)
           
      ## Initialize the first configuration of the path interpolation
      # with a balanced configuration for the interpolation problem;
@@ -305,17 +297,17 @@ class FullBody (object):
      # \param configuration the desired start configuration
      # \param contacts the array of limbs in contact
      def setStartState(self, configuration, contacts):
-          return self.client.rbprm.rbprm.setStartState(configuration, contacts)
+          return self.clientRbprm.rbprm.setStartState(configuration, contacts)
 
      ## Initialize the first state of the path interpolation
      # \param stateId the Id of the desired start state in fullBody
      def setStartStateId(self,stateId):
-          return self.client.rbprm.rbprm.setStartStateId(stateId)
+          return self.clientRbprm.rbprm.setStartStateId(stateId)
 
      ## Initialize the goal state of the path interpolation
      # \param stateId the Id of the desired start state in fullBody
      def setEndStateId(self,stateId):
-          return self.client.rbprm.rbprm.setEndStateId(stateId)
+          return self.clientRbprm.rbprm.setEndStateId(stateId)
 
 
      ## Create a state given a configuration and contacts
@@ -324,7 +316,7 @@ class FullBody (object):
      # \param contacts the array of limbs in contact
      # \return id of created state
      def createState(self, configuration, contacts):
-          return self.client.rbprm.rbprm.createState(configuration, contacts)
+          return self.clientRbprm.rbprm.createState(configuration, contacts)
                 
      ## Initialize the last configuration of the path discretization 
      # with a balanced configuration for the interpolation problem;
@@ -332,20 +324,20 @@ class FullBody (object):
      # \param configuration the desired end configuration
      # \param contacts the array of limbs in contact          
      def setEndState(self, configuration, contacts):
-          return self.client.rbprm.rbprm.setEndState(configuration, contacts)
+          return self.clientRbprm.rbprm.setEndState(configuration, contacts)
      
      ## Saves a computed contact sequence in a given filename
      #
      # \param The file where the configuration must be saved
      def saveComputedStates(self, filename):
-          return self.client.rbprm.rbprm.saveComputedStates(filename)
+          return self.clientRbprm.rbprm.saveComputedStates(filename)
      
      ## Saves a limb database
      #
      # \param limb name of the limb for which the DB must be saved
      # \param The file where the configuration must be saved
      def saveLimbDatabase(self, limbName, filename):
-          return self.client.rbprm.rbprm.saveLimbDatabase(limbName, filename)
+          return self.clientRbprm.rbprm.saveLimbDatabase(limbName, filename)
      
      ## Discretizes a path return by a motion planner into a discrete
      # sequence of balanced, contact configurations and returns
@@ -362,7 +354,7 @@ class FullBody (object):
                 filt = 1
           else:
                 filt = 0
-          return self.client.rbprm.rbprm.interpolate(stepsize, pathId, robustnessTreshold, filt,testReachability, quasiStatic)
+          return self.clientRbprm.rbprm.interpolate(stepsize, pathId, robustnessTreshold, filt,testReachability, quasiStatic)
      
      ## Provided a discrete contact sequence has already been computed, computes
      # all the contact positions and normals for a given state, the next one, and the intermediate between them.
@@ -370,7 +362,7 @@ class FullBody (object):
      # \param stateId normalized step for generation along the path (ie the path has a length of 1).
      # \return list of 2 or 3 lists of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
      def computeContactPoints(self, stateId):
-          rawdata = self.client.rbprm.rbprm.computeContactPoints(stateId)
+          rawdata = self.clientRbprm.rbprm.computeContactPoints(stateId)
           return [[b[i:i+3] for i in range(0, len(b), 6)] for b in rawdata], [[b[i+3:i+6] for i in range(0, len(b), 6)] for b in rawdata]
      
      ### Provided a discrete contact sequence has already been computed, computes
@@ -379,7 +371,7 @@ class FullBody (object):
      # \param isIntermediate whether the intermediate state should be considerred rather than this one
      # \return list of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
      def computeContactPointsAtState(self, stateId,isIntermediate=False):
-          rawdata =  self.client.rbprm.rbprm.computeContactPointsAtState(stateId,isIntermediate)
+          rawdata =  self.clientRbprm.rbprm.computeContactPointsAtState(stateId,isIntermediate)
           return [[b[i:i+6] for i in range(0, len(b), 6)] for b in rawdata][0]
 
      ## Provided a discrete contact sequence has already been computed, computes
@@ -388,7 +380,7 @@ class FullBody (object):
      # \param stateId normalized step for generation along the path (ie the path has a length of 1).
      # \return list of 2 or 3 lists of 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
      def computeContactPointsForLimb(self, stateId, limb):
-          rawdata = self.client.rbprm.rbprm.computeContactPointsForLimb(stateId, limb)
+          rawdata = self.clientRbprm.rbprm.computeContactPointsForLimb(stateId, limb)
           return [[b[i:i+3] for i in range(0, len(b), 6)] for b in rawdata], [[b[i+3:i+6] for i in range(0, len(b), 6)] for b in rawdata]
      
      ## Compute effector contact points and normals for a given configuration
@@ -398,7 +390,7 @@ class FullBody (object):
      # \param limbName ids of the limb in contact
      # \return list 6d vectors [pox, poy, posz, nprmalx, normaly, normalz]
      def computeContactForConfig(self, q, limbName):
-          rawdata = self.client.rbprm.rbprm.computeContactForConfig(q, limbName)
+          rawdata = self.clientRbprm.rbprm.computeContactForConfig(q, limbName)
           return [rawdata[i:i+3] for i in range(0, len(rawdata), 6)], [rawdata[i+3:i+6] for i in range(0, len(rawdata), 6)]
 
      ## Provided a discrete contact sequence has already been computed, computes
@@ -436,7 +428,7 @@ class FullBody (object):
                 filt = 1
           else:
                 filt = 0
-          return self.client.rbprm.rbprm.interpolateConfigs(configs, robustnessTreshold, filt,testReachability, quasiStatic)
+          return self.clientRbprm.rbprm.interpolateConfigs(configs, robustnessTreshold, filt,testReachability, quasiStatic)
           
      ##
      # 
@@ -444,7 +436,7 @@ class FullBody (object):
      # \param limb name of the limb for which the request aplies
      # \return whether the limb is in contact at this state
      def isLimbInContact(self, limbname, state1):
-          return self.client.rbprm.rbprm.isLimbInContact(limbname, state1) >0
+          return self.clientRbprm.rbprm.isLimbInContact(limbname, state1) >0
           
      ##
      # 
@@ -452,7 +444,7 @@ class FullBody (object):
      # \param limb name of the limb for which the request aplies
      # \return whether the limb is in contact at this state
      def isLimbInContactIntermediary(self, limbname, state1):
-          return self.client.rbprm.rbprm.isLimbInContactIntermediary(limbname, state1) >0
+          return self.clientRbprm.rbprm.isLimbInContactIntermediary(limbname, state1) >0
           
      ##
      # 
@@ -475,7 +467,7 @@ class FullBody (object):
      # \param stateId The considered state
      # \return H matrix and h column, such that H w <= h
      def getContactCone(self, stateId, friction = 0.5):
-          H_h =  array(self.client.rbprm.rbprm.getContactCone(stateId, friction))
+          H_h =  array(self.clientRbprm.rbprm.getContactCone(stateId, friction))
           #~ print "H_h", H_h.shape 
           #~ print "norm h", ( H_h[:, -1] != 0).any()
           # now decompose cone 
@@ -486,7 +478,7 @@ class FullBody (object):
      # \param stateId The first considered state
      # \return H matrix and h column, such that H w <= h
      def getContactIntermediateCone(self, stateId, friction = 0.5):
-          H_h =  array(self.client.rbprm.rbprm.getContactIntermediateCone(stateId, friction))
+          H_h =  array(self.clientRbprm.rbprm.getContactIntermediateCone(stateId, friction))
           #~ print "H_h", H_h.shape 
           #~ print "norm h", ( H_h[:, -1] != 0).any()
           # now decompose cone 
@@ -503,7 +495,7 @@ class FullBody (object):
      #  \param quat_1 quaternion of 1st rotation
      #  \param quat_2 quaternion of 2nd rotation
      def generateRootPath(self, positions, quat_1, quat_2):
-          return self.client.rbprm.rbprm.generateRootPath(positions, quat_1, quat_2)
+          return self.clientRbprm.rbprm.generateRootPath(positions, quat_1, quat_2)
      
      ## Create a com trajectory given list of positions, velocities and accelerations
      # accelerations list contains one less element because it does not have an initial state.
@@ -515,7 +507,7 @@ class FullBody (object):
      # \param positions array of positions
      # \return id of the root path computed
      def straightPath(self, positions):
-          return self.client.rbprm.rbprm.straightPath(positions)
+          return self.clientRbprm.rbprm.straightPath(positions)
           
      ## Create a com trajectory given a polynomial trajectory.
      # The path is composed of n+1 integrations
@@ -525,7 +517,7 @@ class FullBody (object):
      # \param positions array of positions
      # \return id of the root path computed
      def generateCurveTraj(self, positions):
-          return self.client.rbprm.rbprm.generateCurveTraj(positions)
+          return self.clientRbprm.rbprm.generateCurveTraj(positions)
           
      ## Create a com trajectory given a polynomial trajectory.
      # The path is composed of n+1 integrations
@@ -536,7 +528,7 @@ class FullBody (object):
      # \param partition array of times [0,1.] that describe the beginning or end of each phase
      # \return id of the complete path computed
      def generateCurveTrajParts(self, positions, partition):
-          return self.client.rbprm.rbprm.generateCurveTrajParts(positions, partition)
+          return self.clientRbprm.rbprm.generateCurveTrajParts(positions, partition)
                 
      ## Create a com trajectory given list of positions, velocities and accelerations
      # accelerations list contains one less element because it does not have an initial state.
@@ -551,7 +543,7 @@ class FullBody (object):
      # \param dt time between two points
      # \return id of the root path computed
      def generateComTraj(self, positions, velocities, accelerations, dt):
-          return self.client.rbprm.rbprm.generateComTraj(positions, velocities, accelerations, dt)
+          return self.clientRbprm.rbprm.generateComTraj(positions, velocities, accelerations, dt)
           
      ## Create a path for the root given
      #  a set of 3d key points
@@ -566,7 +558,7 @@ class FullBody (object):
      #  \param configState2 configuration of 2nd rotation
      #  \return id of the resulting path
      def generateRootPathStates(self, positions, configState1, configState2):
-          return self.client.rbprm.rbprm.generateRootPath(positions, configState1[3:7], configState2[3:7])
+          return self.clientRbprm.rbprm.generateRootPath(positions, configState1[3:7], configState2[3:7])
           
      ## Given start and goal states
      #  Provided a path has already been computed and interpolated, generate a continuous path
@@ -577,7 +569,7 @@ class FullBody (object):
      # \param numOptim Number of iterations of the shortcut algorithm to apply between each states
      #  \return id of the resulting path
      def limbRRT(self, state1, state2, numOptim = 10):
-          return self.client.rbprm.rbprm.limbRRT(state1, state2, numOptim)
+          return self.clientRbprm.rbprm.limbRRT(state1, state2, numOptim)
           
      ## Provided a path has already been computed and interpolated, generate a continuous path                                
      # between two indicated states. The states do not need to be consecutive, but increasing in Id.                      
@@ -591,7 +583,7 @@ class FullBody (object):
      # \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states 
      #  \return id of the resulting path
      def limbRRTFromRootPath(self, state1, state2, path, numOptim = 10):
-          return self.client.rbprm.rbprm.limbRRTFromRootPath(state1, state2, path, numOptim)          
+          return self.clientRbprm.rbprm.limbRRTFromRootPath(state1, state2, path, numOptim)
           
           
      ## Provided a center of mass trajectory has already been computed and interpolated, generate a continuous full body path                                
@@ -606,7 +598,7 @@ class FullBody (object):
      # \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states 
      #  \return id of the resulting path
      def comRRT(self, state1, state2, path, numOptim = 10):
-          return self.client.rbprm.rbprm.comRRT(state1, state2, path, numOptim)          
+          return self.clientRbprm.rbprm.comRRT(state1, state2, path, numOptim)
           
                 
      ## Provided a path has already been computed and interpolated, generate a continuous path
@@ -622,7 +614,7 @@ class FullBody (object):
      # \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
      # \return id of the root path computed
      def comRRTFromPos(self, state1, comPos1, comPos2, comPos3, numOptim = 10):
-          return self.client.rbprm.rbprm.comRRTFromPos(state1, comPos1, comPos2, comPos3, numOptim)
+          return self.clientRbprm.rbprm.comRRTFromPos(state1, comPos1, comPos2, comPos3, numOptim)
           
      ## Provided a path has already been computed and interpolated, generate a continuous path
      # between two indicated states. The states do not need to be consecutive, but increasing in Id.
@@ -637,10 +629,10 @@ class FullBody (object):
      # \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
      # \return id of the root path computed
      def effectorRRTFromPosBetweenState(self, state1, state2, comPos1, comPos2, comPos3, numOptim = 10):
-          return self.client.rbprm.rbprm.effectorRRTFromPosBetweenState(state1, state2, comPos1, comPos2, comPos3, numOptim)
+          return self.clientRbprm.rbprm.effectorRRTFromPosBetweenState(state1, state2, comPos1, comPos2, comPos3, numOptim)
           
      def comRRTFromPosBetweenState(self, state1, state2, comPos1, comPos2, comPos3, numOptim = 10):
-          return self.client.rbprm.rbprm.comRRTFromPosBetweenState(state1, state2, comPos1, comPos2, comPos3, numOptim)
+          return self.clientRbprm.rbprm.comRRTFromPosBetweenState(state1, state2, comPos1, comPos2, comPos3, numOptim)
           
                 
      ## Provided a path has already been computed and interpolated, generate a continuous path
@@ -656,7 +648,7 @@ class FullBody (object):
      # \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
      # \return id of the root path computed
      def effectorRRT(self, state1, comPos1, comPos2, comPos3, numOptim = 10):
-          return self.client.rbprm.rbprm.effectorRRT(state1, comPos1, comPos2, comPos3, numOptim)
+          return self.clientRbprm.rbprm.effectorRRT(state1, comPos1, comPos2, comPos3, numOptim)
           
                           
      ## Provided a path has already been computed and interpolated, generate a continuous path
@@ -672,7 +664,7 @@ class FullBody (object):
      # \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
      # \return id of the root path computed
      def effectorRRTFromPath(self, state1, refPathId, path_start, path_to, comPos1, comPos2, comPos3, numOptim = 10, trackedEffectors = []):
-          return self.client.rbprm.rbprm.effectorRRTFromPath(state1, refPathId, path_start, path_to, comPos1, comPos2, comPos3, numOptim, trackedEffectors)
+          return self.clientRbprm.rbprm.effectorRRTFromPath(state1, refPathId, path_start, path_to, comPos1, comPos2, comPos3, numOptim, trackedEffectors)
 
 
     ## Provided a path has already been computed and interpolated, generate a continuous path
@@ -683,7 +675,7 @@ class FullBody (object):
     # \param comPos com position to track
     # \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
      def effectorRRTOnePhase(self,state1,state2,comPos,numOptim=10):
-         return self.client.rbprm.rbprm.effectorRRTOnePhase(state1,state2,comPos,numOptim)
+         return self.clientRbprm.rbprm.effectorRRTOnePhase(state1,state2,comPos,numOptim)
 
     ## Provided a path has already been computed and interpolated, generate an array of bezier curves,
     ## with varying weightRRT (see effector-rrt.cc::fitBezier)
@@ -695,7 +687,7 @@ class FullBody (object):
     # \return array of pathIds : first index is the trajectorie, second index is the curve inside this trajectory
     # (there should be 3 curves per trajectories : takeoff / mid / landing)
      def generateEffectorBezierArray(self,state1,state2,comPos,numOptim=10):
-         return self.client.rbprm.rbprm.generateEffectorBezierArray(state1,state2,comPos,numOptim)
+         return self.clientRbprm.rbprm.generateEffectorBezierArray(state1,state2,comPos,numOptim)
 
 
 
@@ -707,7 +699,7 @@ class FullBody (object):
     # \param comPos com position to track
     # \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
      def comRRTOnePhase(self,state1,state2,comPos,numOptim=10):
-         return self.client.rbprm.rbprm.comRRTOnePhase(state1,state2,comPos,numOptim)
+         return self.clientRbprm.rbprm.comRRTOnePhase(state1,state2,comPos,numOptim)
 
 
     # compute and add a trajectory for the end effector between the 2 states
@@ -717,7 +709,7 @@ class FullBody (object):
     # \param state2 index of end state.
     # \param rootPositions com positions to track
      def generateEndEffectorBezier(self, state1, state2, comPos):
-          return self.client.rbprm.rbprm.generateEndEffectorBezier(state1, state2, comPos)
+          return self.clientRbprm.rbprm.generateEndEffectorBezier(state1, state2, comPos)
 
           
      ## Project a given state into a given COM position
@@ -727,14 +719,14 @@ class FullBody (object):
      # \param targetCom 3D vector for the com position
      # \return projected configuration
      def projectToCom(self, state, targetCom, maxNumSample = 0):
-          return self.client.rbprm.rbprm.projectToCom(state, targetCom, maxNumSample)     
+          return self.clientRbprm.rbprm.projectToCom(state, targetCom, maxNumSample)
           
      ## Returns the configuration at a given state
      # Will fail if the index of the state does not exist.
      # \param state index of state.
      # \return state configuration
      def getConfigAtState(self, state):
-          return self.client.rbprm.rbprm.getConfigAtState(state)          
+          return self.clientRbprm.rbprm.getConfigAtState(state)
           
      ## Project a given state into a given COM position
      # and update the state configuration.
@@ -742,7 +734,7 @@ class FullBody (object):
      # \param targetCom 3D vector for the com position
      # \return whether the projection was successful
      def projectStateToCOM(self, state, targetCom, maxNumSample = 0):
-          return self.client.rbprm.rbprm.projectStateToCOM(state, targetCom, maxNumSample)     > 0
+          return self.clientRbprm.rbprm.projectStateToCOM(state, targetCom, maxNumSample)     > 0
           
      ## Project a given state into a given COM position
      # and update the state configuration.
@@ -750,7 +742,7 @@ class FullBody (object):
      # \param targetCom 3D vector for the com position
      # \return whether the projection was successful
      def setConfigAtState(self, state, targetCom):
-          return self.client.rbprm.rbprm.setConfigAtState(state, targetCom)     > 0
+          return self.clientRbprm.rbprm.setConfigAtState(state, targetCom)     > 0
 
      ## Given start and goal states
      #  generate a contact sequence over a list of configurations
@@ -758,7 +750,7 @@ class FullBody (object):
      # \param stepSize discretization step
      # \param pathId Id of the path to compute from
      def isConfigBalanced(self, config, names, robustness = 0,CoM = [0,0,0]):
-          if (self.client.rbprm.rbprm.isConfigBalanced(config, names, robustness,CoM) == 1):
+          if (self.clientRbprm.rbprm.isConfigBalanced(config, names, robustness,CoM) == 1):
                 return True
           else:
                 return False
@@ -766,7 +758,7 @@ class FullBody (object):
      ## Check if the state at the given index is balanced for a given robustness
      #
      def isStateBalanced(self, stateId, robustnessThreshold = 0, robustnessFound = 0):
-          robustnessFound = self.client.rbprm.rbprm.isStateBalanced(stateId)
+          robustnessFound = self.clientRbprm.rbprm.isStateBalanced(stateId)
           return robustnessFound > robustnessThreshold
 
      ## Updates limb databases with a user chosen computation
@@ -777,7 +769,7 @@ class FullBody (object):
           isStatic = 0.
           if(isstatic):
                 isStatic = 1.
-          self.client.rbprm.rbprm.runSampleAnalysis(analysis,isStatic)
+          self.clientRbprm.rbprm.runSampleAnalysis(analysis,isStatic)
           
      ## Updates a limb database with a user chosen computation
      #
@@ -788,13 +780,13 @@ class FullBody (object):
           isStatic = 0.
           if(isstatic):
                 isStatic = 1.
-          return self.client.rbprm.rbprm.runLimbSampleAnalysis(limbname, analysis,isStatic)
+          return self.clientRbprm.rbprm.runLimbSampleAnalysis(limbname, analysis,isStatic)
           
      ## if the preprocessor variable PROFILE is active
      # dump the profiling data into a logFile
      # \param logFile name of the file where to dump the profiling data
      def dumpProfile(self, logFile="log.txt"):
-          return self.client.rbprm.rbprm.dumpProfile(logFile)
+          return self.clientRbprm.rbprm.dumpProfile(logFile)
 
      ## Create octree nodes representation for a given limb
      #
@@ -804,7 +796,7 @@ class FullBody (object):
      # \param config initial configuration of the robot, used when created octree
      # \param color of the octree boxes
      def createOctreeBoxes(self, gui, winId, limbName, config, color = [1,1,1,0.3]):
-          boxes = self.client.rbprm.rbprm.getOctreeBoxes(limbName, config)
+          boxes = self.clientRbprm.rbprm.getOctreeBoxes(limbName, config)
           scene = "oct"+limbName
           gui.createScene(scene)
           resolution = boxes[0][3]
@@ -823,7 +815,7 @@ class FullBody (object):
      # \param limbName name of the limb considered
      # \param ocId of the octree box
      def getOctreeBox(self, limbName, ocId):
-          return self.client.rbprm.rbprm.getOctreeBox(limbName, ocId)
+          return self.clientRbprm.rbprm.getOctreeBox(limbName, ocId)
      
      ## Draws robot configuration, along with octrees associated
      #
@@ -831,7 +823,7 @@ class FullBody (object):
      def draw(self, configuration, viewer):
           viewer(configuration)
           for limb, groupid in self.octrees.iteritems():
-                transform = self.client.rbprm.rbprm.getOctreeTransform(limb, configuration)
+                transform = self.clientRbprm.rbprm.getOctreeTransform(limb, configuration)
                 viewer.client.gui.applyConfiguration(groupid,transform)
           viewer.client.gui.refresh()
           
@@ -844,7 +836,7 @@ class FullBody (object):
     # \param n target normal
     # \return 7D Transform of effector in contact (position + quaternion)
      def computeTargetTransform(self, limbName, configuration, p, n):         
-          return self.client.rbprm.rbprm.computeTargetTransform(limbName, configuration, p, n)
+          return self.clientRbprm.rbprm.computeTargetTransform(limbName, configuration, p, n)
 
      ## Export motion to a format readable by the blender
      # importFromGepetto script
@@ -852,7 +844,7 @@ class FullBody (object):
      # \param configurations list of configurations to save
      # \param filename outputfile where to export the motion
      def exportMotion(self, viewer, configurations, filename):
-          em.exportStates(viewer, self.client.basic.robot, configurations, filename)
+          em.exportStates(viewer, self.client.robot, configurations, filename)
           
      ## Export motion to a format readable by the blender
      # importFromGepetto script
@@ -872,12 +864,12 @@ class FullBody (object):
      ## Get size of configuration
      # \return size of configuration
      def getConfigSize (self):
-          return self.client.basic.robot.getConfigSize ()
+          return self.client.robot.getConfigSize ()
 
      # Get size of velocity
      # \return size of velocity
      def getNumberDof (self):
-          return self.client.basic.robot.getNumberDof ()
+          return self.client.robot.getNumberDof ()
      ## \}
 
      ## \name Joints
@@ -885,41 +877,41 @@ class FullBody (object):
 
      ## Get joint names in the same order as in the configuration.
      def getJointNames (self):
-          return self.client.basic.robot.getJointNames ()
+          return self.client.robot.getJointNames ()
 
      ## Get joint names in the same order as in the configuration.
      def getAllJointNames (self):
-          return self.client.basic.robot.getAllJointNames ()
+          return self.client.robot.getAllJointNames ()
 
      ## Get joint position.
      def getJointPosition (self, jointName):
-          return self.client.basic.robot.getJointPosition (jointName)
+          return self.client.robot.getJointPosition (jointName)
 
      ## Set static position of joint in its parent frame
      def setJointPosition (self, jointName, position):
-          return self.client.basic.robot.setJointPosition (jointName, position)
+          return self.client.robot.setJointPosition (jointName, position)
 
      ## Get joint number degrees of freedom.
      def getJointNumberDof (self, jointName):
-          return self.client.basic.robot.getJointNumberDof (jointName)
+          return self.client.robot.getJointNumberDof (jointName)
 
      ## Get joint number config size.
      def getJointConfigSize (self, jointName):
-          return self.client.basic.robot.getJointConfigSize (jointName)
+          return self.client.robot.getJointConfigSize (jointName)
 
      ## set bounds for the joint
      def setJointBounds (self, jointName, inJointBound):
-          return self.client.basic.robot.setJointBounds (jointName, inJointBound)
+          return self.client.robot.setJointBounds (jointName, inJointBound)
 
      ## Set bounds on the translation part of the freeflyer joint.
      #
      #  Valid only if the robot has a freeflyer joint.
      def setTranslationBounds (self, xmin, xmax, ymin, ymax, zmin, zmax):
-          self.client.basic.robot.setJointBounds \
+          self.client.robot.setJointBounds \
                 (self.displayName + "base_joint_x", [xmin, xmax])
-          self.client.basic.robot.setJointBounds \
+          self.client.robot.setJointBounds \
                 (self.displayName + "base_joint_y", [ymin, ymax])
-          self.client.basic.robot.setJointBounds \
+          self.client.robot.setJointBounds \
                 (self.displayName + "base_joint_z", [zmin, zmax])
 
      ## Get link position in joint frame
@@ -932,17 +924,17 @@ class FullBody (object):
      # \param jointName name of the joint
      # \return position of the link in world frame.
      def getLinkPosition (self, jointName):
-          return self.client.basic.robot.getLinkPosition (jointName)
+          return self.client.robot.getLinkPosition (jointName)
 
      ## Get link name
      #
      # \param jointName name of the joint,
      # \return name of the link.
      def getLinkName (self, jointName):
-          return self.client.basic.robot.getLinkName (jointName)
+          return self.client.robot.getLinkName (jointName)
      ## \}
      def getLinkNames (self, jointName):
-          return self.client.basic.robot.getLinkNames (jointName)
+          return self.client.robot.getLinkNames (jointName)
 
      ## \name Access to current configuration
      #\{
@@ -951,18 +943,18 @@ class FullBody (object):
      #
      #  \param q configuration of the composite robot
      def setCurrentConfig (self, q):
-          self.client.basic.robot.setCurrentConfig (q)
+          self.client.robot.setCurrentConfig (q)
 
      ## Get current configuration of composite robot
      #
      #  \return configuration of the composite robot
      def getCurrentConfig (self):
-          return self.client.basic.robot.getCurrentConfig ()
+          return self.client.robot.getCurrentConfig ()
 
      ## Shoot random configuration
      #  \return dofArray Array of degrees of freedom.
      def shootRandomConfig(self):
-          return self.client.basic.robot.shootRandomConfig ()
+          return self.client.robot.shootRandomConfig ()
 
      ## \}
 
@@ -973,20 +965,20 @@ class FullBody (object):
      #  \param inJointName name of the joint.
      #  \return list of names of CollisionObject attached to the body.
      def getJointInnerObjects (self, jointName):
-          return self.client.basic.robot.getJointInnerObjects (jointName)
+          return self.client.robot.getJointInnerObjects (jointName)
 
 
      ##  Get list of collision objects tested with the body attached to a joint
      #  \param inJointName name of the joint.
      #  \return list of names of CollisionObject
      def getJointOuterObjects (self, jointName):
-          return self.client.basic.robot.getJointOuterObjects (jointName)
+          return self.client.robot.getJointOuterObjects (jointName)
 
      ## Get position of robot object
      #  \param objectName name of the object.
      #  \return transformation as a hpp.Transform object
      def getObjectPosition (self, objectName):
-          return Transform (self.client.basic.robot.getObjectPosition
+          return Transform (self.client.robot.getObjectPosition
                                   (objectName))
 
      ## \brief Remove an obstacle from outer objects of a joint body
@@ -997,7 +989,7 @@ class FullBody (object):
      #  \param distance whether distance to object should be computed.
      def removeObstacleFromJoint (self, objectName, jointName, collision,
                                             distance):
-          return self.client.basic.obstacle.removeObstacleFromJoint \
+          return self.client.obstacle.removeObstacleFromJoint \
                 (objectName, jointName, collision, distance)
 
 
@@ -1014,7 +1006,7 @@ class FullBody (object):
      # \note Deprecated. Use isConfigValid instead.
      def collisionTest (self):
           print "Deprecated. Use isConfigValid instead"
-          return self.client.basic.robot.collisionTest ()
+          return self.client.robot.collisionTest ()
 
      ## Check the validity of a configuration.
      #
@@ -1022,7 +1014,7 @@ class FullBody (object):
      # \param cfg a configuration
      # \return whether configuration is valid
      def isConfigValid (self, cfg):
-          return self.client.basic.robot.isConfigValid (cfg)
+          return self.client.robot.isConfigValid (cfg)
 
      ## Compute distances between bodies and obstacles
      #
@@ -1034,7 +1026,7 @@ class FullBody (object):
      # \note outer objects for a body can also be inner objects of another
      # body.
      def distancesToCollision (self):
-          return self.client.basic.robot.distancesToCollision ()
+          return self.client.robot.distancesToCollision ()
      ## \}
 
      ## \}
@@ -1043,18 +1035,18 @@ class FullBody (object):
 
      ## Get mass of robot
      def getMass (self):
-          return self.client.basic.robot.getMass ()
+          return self.client.robot.getMass ()
 
      ## Get position of center of mass
      def getCenterOfMass (self):
-          return self.client.basic.robot.getCenterOfMass ()
+          return self.client.robot.getCenterOfMass ()
      ## Get Jacobian of the center of mass
      def getJacobianCenterOfMass (self):
-          return self.client.basic.robot.getJacobianCenterOfMass ()
+          return self.client.robot.getJacobianCenterOfMass ()
      ##\}
      ## Get the dimension of the extra configuration space
      def getDimensionExtraConfigSpace(self):
-          return self.client.basic.robot.getDimensionExtraConfigSpace()
+          return self.client.robot.getDimensionExtraConfigSpace()
 
 
       ## set a boolean in rbprmFullBody
@@ -1062,23 +1054,23 @@ class FullBody (object):
       #
         # \param staticStability boolean
      def setStaticStability(self,staticStability):
-          return self.client.rbprm.rbprm.setStaticStability(staticStability)
+          return self.clientRbprm.rbprm.setStaticStability(staticStability)
 
      ## set a reference configuration in FullBody
      # \param referenceConfig dofArray
      def setReferenceConfig(self,referenceConfig):
-          return self.client.rbprm.rbprm.setReferenceConfig(referenceConfig)
+          return self.clientRbprm.rbprm.setReferenceConfig(referenceConfig)
 
 
       ## Convert a direction vector to a quaternion (use Eigen::Quaterniond::FromTwoVectors with Z vector)
       # \param u the vector director
      def quaternionFromVector(self,vector):
-          return self.client.basic.robot.quaternionFromVector(vector)
+          return self.client.robot.quaternionFromVector(vector)
 
       ## return the time at the given state index (in the path computed during the first phase)
       # \param stateId : index of the state
      def getTimeAtState(self,stateId):
-          return self.client.rbprm.rbprm.getTimeAtState(stateId)
+          return self.clientRbprm.rbprm.getTimeAtState(stateId)
 
       ## return the duration for the given state index
       # note : it depend on the implementation of interpolate : which state do we add to the list : the first one or the last or one in the middle
@@ -1086,16 +1078,16 @@ class FullBody (object):
       # \param stateId : index of the state
      def getDurationForState(self,stateId):
           if stateId == 0:
-               return self.client.rbprm.rbprm.getTimeAtState(stateId)
+               return self.clientRbprm.rbprm.getTimeAtState(stateId)
           else:
-               return (self.client.rbprm.rbprm.getTimeAtState(stateId) - self.client.rbprm.rbprm.getTimeAtState(stateId-1))
+               return (self.clientRbprm.rbprm.getTimeAtState(stateId) - self.clientRbprm.rbprm.getTimeAtState(stateId-1))
 
 
      ## Return the names of all the effector for which a trajectory have been computed for a given path index.
      #  \param pathId : index of the path, the same index as the wholeBody path stored in problem-solver
      #  \return the list of all the end-effector (joint names) for which a trajectory have been defined
      def getEffectorsTrajectoriesNames(self, pathId):
-         return self.client.rbprm.rbprm.getEffectorsTrajectoriesNames(pathId)
+         return self.clientRbprm.rbprm.getEffectorsTrajectoriesNames(pathId)
 
      ## Return the waypoints of the bezier curve for a given pathIndex and effector name
      #  \param pathId : index of the path, the same index as the wholeBody path stored in problem-solver
@@ -1103,7 +1095,7 @@ class FullBody (object):
      #  \return the waypoints of the bezier curve followed by this end effector
      #  Throw an error if there is no trajectory computed for the given id/name
      def getEffectorTrajectoryWaypoints(self,pathId,effectorName):
-         return self.client.rbprm.rbprm.getEffectorTrajectoryWaypoints(pathId,effectorName)
+         return self.clientRbprm.rbprm.getEffectorTrajectoryWaypoints(pathId,effectorName)
 
 
      ## Return the bezier curve for a given pathIndex and effector name
@@ -1112,7 +1104,7 @@ class FullBody (object):
      #  \return a list of bezier curve (from spline library) followed by the end effector.
      #  Throw an error if there is no trajectory computed for the given id/name
      def getEffectorTrajectory(self,pathId,effectorName):
-         curvesWp =  self.client.rbprm.rbprm.getEffectorTrajectoryWaypoints(pathId,effectorName)
+         curvesWp =  self.clientRbprm.rbprm.getEffectorTrajectoryWaypoints(pathId,effectorName)
          res=[]
          for cid in range(len(curvesWp)):
              wp=curvesWp[cid]
@@ -1127,7 +1119,7 @@ class FullBody (object):
 
     ## Return the bezier curve corresponding to a given path index
      def getPathAsBezier(self,pathId):
-         l = self.client.rbprm.rbprm.getPathAsBezier(pathId)
+         l = self.clientRbprm.rbprm.getPathAsBezier(pathId)
          t = l[0][0]
          wps = matrix(l[1:]).transpose()
          curve = bezier(wps,t)
@@ -1138,11 +1130,11 @@ class FullBody (object):
       # \param stateIdFrom : index of the first state
       # \param stateIdTo : index of the second state
      def getContactsVariations(self,stateIdFrom,stateIdTo):
-          return self.client.rbprm.rbprm.getContactsVariations(stateIdFrom,stateIdTo)
+          return self.clientRbprm.rbprm.getContactsVariations(stateIdFrom,stateIdTo)
 
       ## return a list of all the limbs names
      def getAllLimbsNames(self):
-          return self.client.rbprm.rbprm.getAllLimbsNames()
+          return self.clientRbprm.rbprm.getAllLimbsNames()
 
       ## return a list of all the limbs in contact
       # \param stateId : index of the state
@@ -1152,13 +1144,13 @@ class FullBody (object):
      ## check the kinematics constraints for the given point, assuming all contact are established
      # \param point : test if the point is inside the kinematics constraints for the current configuration
      def areKinematicsConstraintsVerified(self,point):
-          return self.client.rbprm.rbprm.areKinematicsConstraintsVerified(point)
+          return self.clientRbprm.rbprm.areKinematicsConstraintsVerified(point)
 
      def areKinematicsConstraintsVerifiedForState(self,stateFrom, point):
-         return self.client.rbprm.rbprm.areKinematicsConstraintsVerifiedForState(stateFrom,point)
+         return self.clientRbprm.rbprm.areKinematicsConstraintsVerifiedForState(stateFrom,point)
 
      def isReachableFromState(self,stateFrom,stateTo,computePoint=False):
-          raw =  self.client.rbprm.rbprm.isReachableFromState(stateFrom,stateTo)
+          raw =  self.clientRbprm.rbprm.isReachableFromState(stateFrom,stateTo)
           if computePoint :
                 res = []
                 res += [raw[0]>0.]
@@ -1170,5 +1162,5 @@ class FullBody (object):
                 return raw[0] > 0.
 
      def isDynamicallyReachableFromState(self,stateFrom,stateTo,addPathPerPhase = False,timings=[],numPointsPerPhases=5):
-          return self.client.rbprm.rbprm.isDynamicallyReachableFromState(stateFrom,stateTo,addPathPerPhase,timings,numPointsPerPhases)
+          return self.clientRbprm.rbprm.isDynamicallyReachableFromState(stateFrom,stateTo,addPathPerPhase,timings,numPointsPerPhases)
 
