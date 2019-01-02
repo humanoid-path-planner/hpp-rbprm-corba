@@ -711,6 +711,7 @@ namespace hpp {
         try
         {
 //            /hpp::pinocchio::Configuration_t c = rbprm::interpolation::projectOnCom(fullBody(), problemSolver()->problem(),s,com_target,succes);
+            hppDout(notice,"ProjectStateToComEigen, init config in state : "<<pinocchio::displayConfig(s.configuration_));
             rbprm::projection::ProjectionReport rep = rbprm::projection::projectToComPosition(fullBody(),com_target,s);
             hpp::pinocchio::Configuration_t& c = rep.result_.configuration_;
             ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
@@ -3171,7 +3172,7 @@ assert(s2 == s1 +1);
       for(T_Limb::const_iterator lit = fullBody()->GetLimbs().begin() ; lit != fullBody()->GetLimbs().end() ; ++lit){
         sampling::Sample sample(lit->second->limb_, lit->second->effector_, config,  lit->second->offset_,lit->second->limbOffset_, 0);
         (*dofArray)[(_CORBA_ULong)id] = lit->second->evaluate_(sample,dir,lit->second->normal_,sampling::HeuristicParam());
-        hppDout(notice,"Evaluate for limb : "<<lit->second->effector_->name()<<" = "<<(*dofArray)[(_CORBA_ULong)id]);
+        hppDout(notice,"Evaluate for limb : "<<lit->second->effector_.name()<<" = "<<(*dofArray)[(_CORBA_ULong)id]);
         hppDout(notice,"eff position = "<<sample.effectorPosition_);
         hppDout(notice,"limb frame   = "<<sample.effectorPositionInLimbFrame_);
         hppDout(notice,"direction    = "<<dir);
