@@ -35,7 +35,7 @@
 #include "hpp/core/config-validations.hh"
 #include "hpp/core/collision-validation-report.hh"
 #include <hpp/core/subchain-path.hh>
-#include <hpp/core/basic-configuration-shooter.hh>
+#include <hpp/core/configuration-shooter/uniform.hh>
 #include <hpp/core/collision-validation.hh>
 #include <hpp/core/problem-solver.hh>
 #include <fstream>
@@ -735,7 +735,7 @@ namespace hpp {
                 Configuration_t head = s.configuration_.head<7>();
                 size_t ecs_size = fullBody()->device_->extraConfigSpace().dimension ();
                 Configuration_t ecs = s.configuration_.tail(ecs_size);
-                BasicConfigurationShooterPtr_t shooter = BasicConfigurationShooter::create(fullBody()->device_);
+                core::configurationShooter::UniformPtr_t shooter = core::configurationShooter::Uniform::create(fullBody()->device_);
                 for(std::size_t i =0; !rep.success_ && i< maxNumeSamples; ++i)
                 {
                     s.configuration_ = *shooter->shoot();
@@ -896,7 +896,7 @@ namespace hpp {
         {
             fcl::Vec3f z(0,0,1);
             ValidationReportPtr_t report = ValidationReportPtr_t(new CollisionValidationReport);
-            core::BasicConfigurationShooterPtr_t  shooter = core::BasicConfigurationShooter::create(fullBody()->device_);
+            core::configurationShooter::UniformPtr_t  shooter = core::configurationShooter::Uniform::create(fullBody()->device_);
             for(int i =0; i< 1000; ++i)
             {
                 core::DevicePtr_t device = fullBody()->device_->clone();
@@ -3208,7 +3208,7 @@ assert(s2 == s1 +1);
             Configuration_t extraDof = ns.configuration_.tail(extraDofSize);
             if (!rep.success_ && max_num_sample > 0)
             {
-                BasicConfigurationShooterPtr_t shooter = BasicConfigurationShooter::create(fullBody()->device_);
+                core::configurationShooter::UniformPtr_t shooter = core::configurationShooter::Uniform::create(fullBody()->device_);
                 Configuration_t head = ns.configuration_.head<7>();
                 for(std::size_t i =0; !rep.success_ && i< max_num_sample; ++i)
                 {
