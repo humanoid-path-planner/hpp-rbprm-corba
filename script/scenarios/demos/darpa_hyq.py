@@ -1,7 +1,6 @@
 #Importing helper class for RBPRM
-from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
-from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
+from hpp.corbaserver.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
 #reference pose for hyq
 from hyq_ref_pose import hyq_ref
@@ -10,7 +9,7 @@ from hyq_ref_pose import hyq_ref
 import darpa_hyq_path as tp
 
 from os import environ
-ins_dir = environ['DEVEL_DIR']
+ins_dir = environ['DEVEL_HPP_DIR']
 db_dir = ins_dir+"/install/share/hyq-rbprm/database/hyq_"
 
 
@@ -116,26 +115,8 @@ configs = []
 
 
 from hpp.gepetto import PathPlayer
-pp = PathPlayer (fullBody.client.basic, r)
+pp = PathPlayer (fullBody.client, r)
 
-
-from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import step, clean,stats, saveAllData, play_traj
-
-	
-	
-limbsCOMConstraints = { rLegId : {'file': "hyq/"+rLegId+"_com.ineq", 'effector' : rfoot},  
-						lLegId : {'file': "hyq/"+lLegId+"_com.ineq", 'effector' : lfoot},  
-						rarmId : {'file': "hyq/"+rarmId+"_com.ineq", 'effector' : rHand},  
-						larmId : {'file': "hyq/"+larmId+"_com.ineq", 'effector' : lHand} }
-
-
-def act(i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True, verbose = False, draw = False):
-	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, 0.4, optim_effectors = optim_effectors, time_scale = 20., useCOMConstraints = False, use_window = use_window,
-	verbose = verbose, draw = draw)
-
-def play(frame_rate = 1./24.):
-	play_traj(fullBody,pp,frame_rate)
-	
 
 import time
 
@@ -233,7 +214,7 @@ d(0.01);e(0.01)
 
 from hpp.corbaserver.rbprm.rbprmstate import *
 
-com = fullBody.client.basic.robot.getCenterOfMass
+com = fullBody.getCenterOfMass()
 s = None
 def d1():
         global s
