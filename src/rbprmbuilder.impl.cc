@@ -364,7 +364,7 @@ namespace hpp {
         std::vector<fcl::Vec3f> res;
         const rbprm::T_Limb& limbs = device->GetLimbs();
         rbprm::RbPrmLimbPtr_t limb;
-        Matrix43 p; Eigen::Matrix3d R = Eigen::Matrix3d::Identity(); Eigen::Matrix3d cFrame = Eigen::Matrix3d::Identity();
+        Matrix43 p; Eigen::Matrix3d cFrame = Eigen::Matrix3d::Identity();
         for(std::map<std::string, fcl::Vec3f>::const_iterator cit = state.contactPositions_.begin();
             cit != state.contactPositions_.end(); ++cit)
         {
@@ -820,7 +820,7 @@ namespace hpp {
         state.nbContacts = state.contactNormals_.size();
         lastStatesComputed_.push_back(state);
         lastStatesComputedTime_.push_back(std::make_pair(-1., state));
-        return lastStatesComputed_.size()-1;
+        return (CORBA::Short)(lastStatesComputed_.size()-1);
     }
 
     double RbprmBuilder::projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com, unsigned short max_num_sample) throw (hpp::Error)
@@ -882,7 +882,7 @@ namespace hpp {
             rbprm::State state = generateContacts_internal(configuration,direction,acceleration,robustnessThreshold);
             lastStatesComputed_.push_back(state);
             lastStatesComputedTime_.push_back(std::make_pair(-1., state));
-            return lastStatesComputed_.size()-1;
+            return (CORBA::Short)(lastStatesComputed_.size()-1);
         } catch (const std::exception& exc) {
         throw hpp::Error (exc.what ());
         }
@@ -956,7 +956,7 @@ namespace hpp {
                             config[1]=0;
                             hpp::floatSeq* dofArray = new hpp::floatSeq();
                             dofArray->length(_CORBA_ULong(config.rows()));
-                            for(std::size_t j=0; j< config.rows(); j++)
+                            for(size_type j=0; j< config.rows(); j++)
                             {
                               (*dofArray)[(_CORBA_ULong)j] = config [j];
                             }
@@ -1078,14 +1078,12 @@ namespace hpp {
             // randomize samples
             std::random_shuffle(reports.begin(), reports.end());
             unsigned short num_samples_ok (0);
-            bool success(false);
             pinocchio::Configuration_t sampleConfig = config;
             std::vector<pinocchio::Configuration_t> results;
             sampling::T_OctreeReport::const_iterator candCit = finalSet.begin();
             for(std::size_t i=0; i< _CORBA_ULong(finalSet.size()) && num_samples_ok < numSamples; ++i, ++candCit)
             {
                 const sampling::OctreeReport& report = *candCit;
-                success = false;
                 State state;
                 state.configuration_ = config;
                 hpp::rbprm::projection::ProjectionReport rep =
@@ -1539,7 +1537,7 @@ namespace hpp {
     {
         try
         {
-            if(lastStatesComputed_.size() <= stateId+1)
+            if(lastStatesComputed_.size() <= (std::size_t)(stateId+1))
             {
                 throw std::runtime_error ("Unexisting state " + std::string(""+(stateId+1)));
             }
@@ -1674,7 +1672,7 @@ namespace hpp {
 
 
 
-    core::PathPtr_t makePath(DevicePtr_t device,
+    core::PathPtr_t makePath(DevicePtr_t /*device*/,
                              const ProblemPtr_t& problem,
                              pinocchio::ConfigurationIn_t q1,
                              pinocchio::ConfigurationIn_t q2)
@@ -1742,7 +1740,7 @@ namespace hpp {
         try
         {
             pinocchio::Configuration_t q1 = dofArrayToConfig(4, q1Seq), q2 = dofArrayToConfig(4, q2Seq);
-            return problemSolver()->addPath(generateTrunkPath(fullBody(), problemSolver(), rootPositions, q1, q2));
+            return (CORBA::Short)problemSolver()->addPath(generateTrunkPath(fullBody(), problemSolver(), rootPositions, q1, q2));
         }
         catch(std::runtime_error& e)
         {
@@ -1768,7 +1766,7 @@ namespace hpp {
                  pinocchio::vector3_t speed = (*cit) -  *(cit-1);
                  res->appendPath(interpolation::ComTrajectory::create(*(cit-1),*cit,speed,zero,1.));
              }
-             return problemSolver()->addPath(res);
+             return (CORBA::Short)problemSolver()->addPath(res);
          }
          catch(std::runtime_error& e)
          {
@@ -1787,7 +1785,7 @@ namespace hpp {
              hpp::rbprm::interpolation::PolynomTrajectoryPtr_t path = hpp::rbprm::interpolation::PolynomTrajectory::create(curvePtr);
              core::PathVectorPtr_t res = core::PathVector::create(3, 3);
              res->appendPath(path);
-             return problemSolver()->addPath(res);
+             return (CORBA::Short)problemSolver()->addPath(res);
          }
          catch(std::runtime_error& e)
          {
@@ -1814,7 +1812,7 @@ namespace hpp {
                 res->appendPath(cutPath);
                 problemSolver()->addPath(res);
              }
-             return returned_pathId;
+             return (CORBA::Short)returned_pathId;
          }
          catch(std::runtime_error& e)
          {
@@ -1849,7 +1847,7 @@ namespace hpp {
              {
                  res->appendPath(interpolation::ComTrajectory::create(*(cit-1),*cit,*cdit,*cddit,dt));
              }
-             return problemSolver()->addPath(res);
+             return (CORBA::Short)problemSolver()->addPath(res);
          }
          catch(std::runtime_error& e)
          {
@@ -1860,7 +1858,7 @@ namespace hpp {
 
     floatSeqSeq* RbprmBuilder::computeContactPoints(unsigned short cId) throw (hpp::Error)
     {
-        if(lastStatesComputed_.size() <= cId + 1)
+        if(lastStatesComputed_.size() <= (std::size_t)(cId + 1))
         {
             throw std::runtime_error ("Unexisting state " + std::string(""+(cId+1)));
         }
@@ -1961,7 +1959,7 @@ namespace hpp {
 
     floatSeqSeq* RbprmBuilder::computeContactPointsForLimb(unsigned short cId, const char *limbName) throw (hpp::Error)
     {
-        if(lastStatesComputed_.size() <= cId + 1)
+        if(lastStatesComputed_.size() <= (std::size_t)(cId + 1))
         {
             throw std::runtime_error ("Unexisting state " + std::string(""+(cId+1)));
         }
@@ -2180,7 +2178,7 @@ namespace hpp {
     {
         core::PathVectorPtr_t resPath = core::PathVector::create(path->outputSize(), path->outputDerivativeSize());
         resPath->appendPath(path);
-        return ps->addPath(resPath);
+        return (CORBA::Short)ps->addPath(resPath);
     }
 
     CORBA::Short RbprmBuilder::limbRRT(unsigned short s1, unsigned short s2, unsigned short numOptimizations) throw (hpp::Error)
@@ -2422,7 +2420,7 @@ namespace hpp {
                                                unsigned short cT3,
                                                unsigned short numOptimizations) throw (hpp::Error)
     {
-        return rrt(&interpolation::comRRT, state1,state1+1, cT1, cT2, cT3, numOptimizations);
+        return rrt(&interpolation::comRRT, state1,(unsigned short)(state1+1), cT1, cT2, cT3, numOptimizations);
 
     }
 
@@ -2452,7 +2450,7 @@ namespace hpp {
                                              unsigned short cT3,
                                              unsigned short numOptimizations) throw (hpp::Error)
     {
-        return rrt(&interpolation::effectorRRT, state1, state1+1, cT1, cT2, cT3, numOptimizations);
+        return rrt(&interpolation::effectorRRT, state1, (unsigned short)(state1+1), cT1, cT2, cT3, numOptimizations);
     }
 
     hpp::floatSeq* RbprmBuilder::effectorRRTFromPath(unsigned short s1,
@@ -2638,7 +2636,7 @@ namespace hpp {
             }
             // convert pathIds to floatSeq :
             hpp::floatSeq* dofArray = new hpp::floatSeq();
-            dofArray->length(pathIds.size());
+            dofArray->length((_CORBA_ULong)pathIds.size());
             for(std::size_t i=0; i< pathIds.size(); ++i)
             {
               (*dofArray)[(_CORBA_ULong)i] = pathIds[i];
@@ -2690,8 +2688,8 @@ namespace hpp {
             fcl::Vec3f comTarget; for(int i =0; i<3; ++i) comTarget[i] = config[i];
             pinocchio::Configuration_t  res = project_or_throw(fullBody(), lastStatesComputed_[state],comTarget);
             hpp::floatSeq* dofArray = new hpp::floatSeq();
-            dofArray->length(res.rows());
-            for(std::size_t i=0; i< res.rows(); ++i)
+            dofArray->length((_CORBA_ULong)res.rows());
+            for(size_type i=0; i< res.rows(); ++i)
             {
               (*dofArray)[(_CORBA_ULong)i] = res[i];
             }
@@ -2741,8 +2739,8 @@ namespace hpp {
             }
             pinocchio::Configuration_t res = lastStatesComputed_[state].configuration_;
             hpp::floatSeq* dofArray = new hpp::floatSeq();
-            dofArray->length(res.rows());
-            for(std::size_t i=0; i< res.rows(); ++i)
+            dofArray->length((_CORBA_ULong)res.rows());
+            for(size_type i=0; i< res.rows(); ++i)
             {
               (*dofArray)[(_CORBA_ULong)i] = res[i];
             }
@@ -2903,7 +2901,7 @@ namespace hpp {
     {
         try
         {
-            if(lastStatesComputed_.size () < s+1)
+            if(lastStatesComputed_.size () < (std::size_t)(s+1))
             {
                 throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s));
             }
@@ -2927,20 +2925,18 @@ namespace hpp {
     CORBA::Short  RbprmBuilder::computeIntermediary(unsigned short stateFrom, unsigned short stateTo) throw (hpp::Error)
     try
     {
-        std::size_t s((std::size_t)stateFrom);
-        std::size_t s2((std::size_t)stateTo);
-        if(lastStatesComputed_.size () < s+1 || lastStatesComputed_.size () < s2+1)
+        if(lastStatesComputed_.size () < (std::size_t)(stateFrom+1) || lastStatesComputed_.size () < (std::size_t)(stateTo+1))
         {
-            throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+s));
+            throw std::runtime_error ("did not find a states at indicated indices: " + std::string(""+stateFrom));
         }
-        const State& state1 = lastStatesComputed_[s];
-        const State& state2 = lastStatesComputed_[s2];
+        const State& state1 = lastStatesComputed_[stateFrom];
+        const State& state2 = lastStatesComputed_[stateTo];
         bool unused;
-        short unsigned cId = s;
+        short unsigned cId = stateFrom;
         const State state = intermediary(state1, state2,cId,unused);
         lastStatesComputed_.push_back(state);
         lastStatesComputedTime_.push_back(std::make_pair(-1., state));
-        return lastStatesComputed_.size() -1;
+        return (CORBA::Short)(lastStatesComputed_.size() -1);
     }
     catch(std::runtime_error& e)
     {
@@ -3159,7 +3155,7 @@ namespace hpp {
 
 
       hpp::floatSeq* dofArray = new hpp::floatSeq();
-      dofArray->length(fullBody()->GetLimbs().size());
+      dofArray->length((_CORBA_ULong)fullBody()->GetLimbs().size());
       size_t id = 0;
       pinocchio::Configuration_t config = dofArrayToConfig (fullBody()->device_, configuration);
       for(T_Limb::const_iterator lit = fullBody()->GetLimbs().begin() ; lit != fullBody()->GetLimbs().end() ; ++lit){
@@ -3217,7 +3213,7 @@ namespace hpp {
                 rep.result_.nbContacts= rep.result_.contactNormals_.size();
                 lastStatesComputed_.push_back(rep.result_);
                 lastStatesComputedTime_.push_back(std::make_pair(-1., rep.result_));
-                return lastStatesComputed_.size() -1;
+                return (CORBA::Short)(lastStatesComputed_.size() -1);
             }
             else
                 return -1;
@@ -3240,7 +3236,7 @@ namespace hpp {
             ns.RemoveContact(limb);
             lastStatesComputed_.push_back(ns);
             lastStatesComputedTime_.push_back(std::make_pair(-1., ns));
-            return lastStatesComputed_.size() -1;
+            return (CORBA::Short)(lastStatesComputed_.size() -1);
         }
         catch(std::runtime_error& e)
         {
@@ -3261,6 +3257,7 @@ namespace hpp {
                 watch.report_all_and_count(2,*fp);
                 fout.close();
             #else
+                (void)logFile; // used to silent unused variable warning
                 throw(std::runtime_error("PROFILE PREPOC variable undefined, cannot dump profile"));
             #endif
         }
@@ -3407,12 +3404,12 @@ namespace hpp {
             res = reachability::isReachableDynamic(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo],false,std::vector<double>(),numPointPerPhase);
         }
         if (res.success()){
-            std::vector<int> ids;
+            std::vector<std::size_t> ids;
             core::PathVectorPtr_t pathVector_full = core::PathVector::create(res.path_->outputSize(),res.path_->outputDerivativeSize());
             pathVector_full->appendPath(res.path_);
             ids.push_back(problemSolver()->addPath(pathVector_full));
             if(addPathPerPhase){
-                for(size_t i = 0 ; i < res.timings_.size() ; ++i){
+                for(size_type i = 0 ; i < res.timings_.size() ; ++i){
                     core::PathVectorPtr_t pathVector = core::PathVector::create(res.path_->outputSize(),res.path_->outputDerivativeSize());
                     pathVector->appendPath(res.pathPerPhases_[i]);
                     ids.push_back(problemSolver()->addPath(pathVector));
@@ -3420,10 +3417,10 @@ namespace hpp {
             }
             // convert vector of int to floatSeq :
             hpp::floatSeq* dofArray = new hpp::floatSeq();
-            dofArray->length(ids.size());
+            dofArray->length((_CORBA_ULong)ids.size());
             for(std::size_t i=0; i< ids.size(); ++i)
             {
-              (*dofArray)[(_CORBA_ULong)i] = ids[i];
+              (*dofArray)[(_CORBA_ULong)i] = (CORBA::Double)ids[i];
             }
             return dofArray;
         }else
