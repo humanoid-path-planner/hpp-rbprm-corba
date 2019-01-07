@@ -100,24 +100,15 @@ namespace hpp {
           // build the dynamicValidation :
           double sizeFootX,sizeFootY,mass,mu;
           bool rectangularContact;
-          try {
-              sizeFootX = problemSolver_->problem()->getParameter ("sizeFootX").floatValue()/2.;
-              sizeFootY = problemSolver_->problem()->getParameter ("sizeFootY").floatValue()/2.;
-              rectangularContact = 1;
-          } catch (const std::exception& e) {
-            hppDout(warning,"Warning : size of foot not definied, use 0 (contact point)");
-            sizeFootX = 0;
-            sizeFootY = 0;
+          sizeFootX = problemSolver_->problem()->getParameter (std::string("DynamicPlanner/sizeFootX")).floatValue()/2.;
+          sizeFootY = problemSolver_->problem()->getParameter (std::string("DynamicPlanner/sizeFootY")).floatValue()/2.;
+          if(sizeFootX > 0. && sizeFootY > 0.)
+            rectangularContact = 1;
+          else
             rectangularContact = 0;
-          }
           mass = robot->mass();
-          try {
-            mu = problemSolver_->problem()->getParameter ("friction").floatValue();
-            hppDout(notice,"mu define in python : "<<mu);
-          } catch (const std::exception& e) {
-            mu= 0.5;
-            hppDout(notice,"mu not defined, take : "<<mu<<" as default.");
-          }
+          mu = problemSolver_->problem()->getParameter (std::string("DynamicPlanner/friction")).floatValue();
+          hppDout(notice,"mu define in python : "<<mu);
           DynamicValidationPtr_t dynamicVal = DynamicValidation::create(rectangularContact,sizeFootX,sizeFootY,mass,mu);
           collisionChecking->addDynamicValidator(dynamicVal);
 
