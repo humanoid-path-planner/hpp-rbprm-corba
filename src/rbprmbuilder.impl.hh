@@ -109,7 +109,7 @@ namespace hpp {
           mass = robot->mass();
           mu = problemSolver_->problem()->getParameter (std::string("DynamicPlanner/friction")).floatValue();
           hppDout(notice,"mu define in python : "<<mu);
-          DynamicValidationPtr_t dynamicVal = DynamicValidation::create(rectangularContact,sizeFootX,sizeFootY,mass,mu);
+          DynamicValidationPtr_t dynamicVal = DynamicValidation::create(rectangularContact,sizeFootX,sizeFootY,mass,mu,robot);
           collisionChecking->addDynamicValidator(dynamicVal);
 
           return collisionChecking;
