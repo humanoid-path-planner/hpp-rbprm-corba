@@ -43,6 +43,7 @@ cType = "_3_DOF"
 rLegId = 'rfleg'
 rLeg = 'rf_haa_joint'
 rfoot = 'rf_foot_joint'
+#~ offset = [0.,-0.021,0.]
 offset = [0.,-0.021,0.]
 normal = [0,1,0]
 legx = 0.02; legy = 0.02
@@ -174,7 +175,7 @@ def genPlan(stepsize=0.06):
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	global configs
 	start = time.clock() 
-	configs = fullBody.interpolate(stepsize, 8, 0, filterStates = True, testReachability=False, quasiStatic=True)
+	configs = fullBody.interpolate(stepsize, 8, 0, filterStates = False, testReachability=False, quasiStatic=True)
 	end = time.clock() 
 	print "Contact plan generated in " + str(end-start) + "seconds"
 	

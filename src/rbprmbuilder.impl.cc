@@ -62,8 +62,8 @@ namespace hpp {
   typedef spline::bezier_curve<> bezier;
     namespace impl {
 
-    const pinocchio::Device::Computation_t flag = static_cast <pinocchio::Device::Computation_t>
-  (pinocchio::Device::JOINT_POSITION | pinocchio::Device::JACOBIAN | pinocchio::Device::COM);
+    const pinocchio::Computation_t flag = static_cast <pinocchio::Computation_t>
+  (pinocchio::JOINT_POSITION | pinocchio::JACOBIAN | pinocchio::COM);
 
     RbprmBuilder::RbprmBuilder ()
     : POA_hpp::corbaserver::rbprm::RbprmBuilder()
@@ -912,7 +912,7 @@ namespace hpp {
                     posConstraints.push_back(false);posConstraints.push_back(false);posConstraints.push_back(true);
                     rotConstraints.push_back(true);rotConstraints.push_back(true);rotConstraints.push_back(true);
                     const pinocchio::Frame effectorFrame = device->getFrameByName(limb->effector_.name());
-                    pinocchio::JointPtr_t effectorJoint(new pinocchio::Joint(limb->effector_.joint()));
+                    pinocchio::JointPtr_t effectorJoint= limb->effector_.joint();
                     proj->add(core::NumericalConstraint::create (constraints::Position::create("",fullBody()->device_,
                                                                                                effectorJoint,
                                                                                                effectorFrame.pinocchio().placement * globalFrame,

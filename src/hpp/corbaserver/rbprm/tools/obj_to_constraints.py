@@ -39,7 +39,7 @@ def load_obj(filename) :
 		if j!=1:
 			face[i][j] = int(face[i][j]) - 1
    F.append(face)
-
+ fh.close()
  return ObjectData(V, T, N, F)
  
 def inequality(v, n): 
