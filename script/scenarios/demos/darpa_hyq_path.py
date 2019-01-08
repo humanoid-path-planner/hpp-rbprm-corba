@@ -38,7 +38,7 @@ q_init = rbprmBuilder.getCurrentConfig ();
 q_init [0:3] = [-2, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
 q_goal = q_init [::]
 q_goal [0:3] = [3, 0, 0.63]; r (q_goal)
-#~ q_goal [0:3] = [-1, 0, 0.75]; r (q_goal)
+#~ q_goal [0:3] = [-1.5, 0, 0.75]; r (q_goal)
 
 # Choosing a path optimizer
 ps.addPathOptimizer("RandomShortcut")
@@ -101,7 +101,7 @@ cl.problem.selectProblem("rbprm_path")
 rbprmBuilder2 = Robot ("toto")
 ps2 = ProblemSolver( rbprmBuilder2 )
 cl.problem.selectProblem("default")
-cl.problem.movePathToProblem(8,"rbprm_path",rbprmBuilder.getAllJointNames())
+cl.problem.movePathToProblem(8,"rbprm_path",rbprmBuilder.getAllJointNames()[1:])
 r2 = Viewer (ps2, viewerClient=r.client)
 r2(q_far)
 

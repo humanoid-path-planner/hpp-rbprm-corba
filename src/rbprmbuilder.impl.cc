@@ -912,7 +912,7 @@ namespace hpp {
                     posConstraints.push_back(false);posConstraints.push_back(false);posConstraints.push_back(true);
                     rotConstraints.push_back(true);rotConstraints.push_back(true);rotConstraints.push_back(true);
                     const pinocchio::Frame effectorFrame = device->getFrameByName(limb->effector_.name());
-                    pinocchio::JointPtr_t effectorJoint(new pinocchio::Joint(limb->effector_.joint()));
+                    pinocchio::JointPtr_t effectorJoint= limb->effector_.joint();
                     proj->add(core::NumericalConstraint::create (constraints::Position::create("",fullBody()->device_,
                                                                                                effectorJoint,
                                                                                                effectorFrame.pinocchio().placement * globalFrame,
