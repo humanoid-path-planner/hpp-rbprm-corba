@@ -270,40 +270,40 @@ namespace hpp {
         virtual CORBA::Short generateCurveTrajParts(const hpp::floatSeqSeq& positions, const hpp::floatSeq& partitions) throw (hpp::Error);
         virtual CORBA::Short generateRootPath(const hpp::floatSeqSeq& rootPositions,
                                       const hpp::floatSeq& q1, const hpp::floatSeq& q2) throw (hpp::Error);
-        virtual CORBA::Short limbRRT(double state1, double state2, unsigned short numOptimizations) throw (hpp::Error);
-        virtual CORBA::Short limbRRTFromRootPath(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error);
+        virtual CORBA::Short limbRRT(unsigned short state1, unsigned short state2, unsigned short numOptimizations) throw (hpp::Error);
+        virtual CORBA::Short limbRRTFromRootPath(unsigned short state1, unsigned short state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error);
         virtual CORBA::Short configToPath(const hpp::floatSeqSeq& configs) throw (hpp::Error);
-        virtual CORBA::Short comRRT(double state1, double state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error);
+        virtual CORBA::Short comRRT(unsigned short state1, unsigned short state2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error);
 
         typedef core::PathPtr_t (*t_rrt)
             (RbPrmFullBodyPtr_t, core::ProblemSolverPtr_t, const core::PathPtr_t,
              const  State &, const State &, const  std::size_t, const bool);
 
-        hpp::floatSeq* rrt(t_rrt functor ,double state1,double state2,
+        hpp::floatSeq* rrt(t_rrt functor ,unsigned short state1,unsigned short state2,
                            unsigned short comTraj1, unsigned short comTraj2, unsigned short comTraj3,
                            unsigned short numOptimizations) throw (hpp::Error);
 
-        virtual hpp::floatSeq* comRRTFromPos(double state1,
+        virtual hpp::floatSeq* comRRTFromPos(unsigned short state1,
                                            unsigned short comTraj1,
                                            unsigned short comTraj2,
                                            unsigned short comTraj3,
                                            unsigned short numOptimizations) throw (hpp::Error);
-        virtual hpp::floatSeq* comRRTFromPosBetweenState(double state1,double state2,
+        virtual hpp::floatSeq* comRRTFromPosBetweenState(unsigned short state1,unsigned short state2,
                                            unsigned short comTraj1,
                                            unsigned short comTraj2,
                                            unsigned short comTraj3,
                                            unsigned short numOptimizations) throw (hpp::Error);
-        virtual hpp::floatSeq* effectorRRTFromPosBetweenState(double state1,double state2,
+        virtual hpp::floatSeq* effectorRRTFromPosBetweenState(unsigned short state1,unsigned short state2,
                                            unsigned short comTraj1,
                                            unsigned short comTraj2,
                                            unsigned short comTraj3,
                                            unsigned short numOptimizations) throw (hpp::Error);
-        virtual hpp::floatSeq* effectorRRT(double state1,
+        virtual hpp::floatSeq* effectorRRT(unsigned short state1,
                                            unsigned short comTraj1,
                                            unsigned short comTraj2,
                                            unsigned short comTraj3,
                                            unsigned short numOptimizations) throw (hpp::Error);
-        virtual hpp::floatSeq* effectorRRTFromPath(double state1,
+        virtual hpp::floatSeq* effectorRRTFromPath(unsigned short state1,
                                            unsigned short path,
                                            double path_from,
                                            double path_to,
@@ -312,23 +312,23 @@ namespace hpp {
                                            unsigned short comTraj3,
                                            unsigned short numOptimizations,
                                            const hpp::Names_t& trackedEffectors) throw (hpp::Error);
-        virtual hpp::floatSeq* rrtOnePhase(t_rrt functor,double state1,double state2,
+        virtual hpp::floatSeq* rrtOnePhase(t_rrt functor,unsigned short state1,unsigned short state2,
                                            unsigned short comTraj,
                                            unsigned short numOptimizations) throw (hpp::Error);
-        virtual hpp::floatSeq* effectorRRTOnePhase(double state1,double state2,
+        virtual hpp::floatSeq* effectorRRTOnePhase(unsigned short state1,unsigned short state2,
                                            unsigned short comTraj,
                                            unsigned short numOptimizations) throw (hpp::Error);
-        virtual hpp::floatSeq* comRRTOnePhase(double state1,double state2,
+        virtual hpp::floatSeq* comRRTOnePhase(unsigned short state1, unsigned short state2,
                                            unsigned short comTraj,
                                            unsigned short numOptimizations) throw (hpp::Error);
-        virtual hpp::floatSeqSeq* generateEffectorBezierArray(double state1,double state2,
+        virtual hpp::floatSeqSeq* generateEffectorBezierArray(unsigned short state1,unsigned short state2,
                                            unsigned short comTraj,
                                            unsigned short numOptimizations) throw (hpp::Error);
 
-        virtual CORBA::Short generateEndEffectorBezier(double state1, double state2,
+        virtual CORBA::Short generateEndEffectorBezier(unsigned short state1, unsigned short state2,
         unsigned short cT) throw (hpp::Error);
 
-        virtual hpp::floatSeq* projectToCom(double state, const hpp::floatSeq& targetCom, unsigned short max_num_sample) throw (hpp::Error);
+        virtual hpp::floatSeq* projectToCom(unsigned short state, const hpp::floatSeq& targetCom, unsigned short max_num_sample) throw (hpp::Error);
         virtual CORBA::Short createState(const hpp::floatSeq& configuration, const hpp::Names_t& contactLimbs) throw (hpp::Error);
         virtual hpp::floatSeq* getConfigAtState(unsigned short stateId) throw (hpp::Error);
         virtual double setConfigAtState(unsigned short stateId, const hpp::floatSeq& config) throw (hpp::Error);
@@ -339,8 +339,8 @@ namespace hpp {
         virtual void saveComputedStates(const char* filepath) throw (hpp::Error);
         virtual void saveLimbDatabase(const char* limbname,const char* filepath) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeBox(const char* limbName, double sampleId) throw (hpp::Error);
-        virtual CORBA::Short  isLimbInContact(const char* limbName, double state) throw (hpp::Error);
-        virtual CORBA::Short  isLimbInContactIntermediary(const char* limbName, double state) throw (hpp::Error);
+        virtual CORBA::Short  isLimbInContact(const char* limbName, unsigned short state) throw (hpp::Error);
+        virtual CORBA::Short  isLimbInContactIntermediary(const char* limbName, unsigned short state) throw (hpp::Error);
         virtual CORBA::Short  computeIntermediary(unsigned short state1, unsigned short state2) throw (hpp::Error);
         virtual hpp::floatSeqSeq* getOctreeBoxes(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeTransform(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);

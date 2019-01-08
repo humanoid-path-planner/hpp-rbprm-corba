@@ -431,7 +431,7 @@ module hpp
     /// \param state2 index of second state.
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
     /// \return id of the root path computed
-    short limbRRT(in double state1, in double state2, in unsigned short numOptimizations) raises (Error);
+    short limbRRT(in unsigned short state1, in unsigned short state2, in unsigned short numOptimizations) raises (Error);
 
     /// Provided a path has already been computed and interpolated, generate a continuous path
     /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
@@ -444,7 +444,7 @@ module hpp
     /// \param path index of the path considered for the generation
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
     /// \return id of the root path computed
-    short limbRRTFromRootPath(in double state1, in double state2,  in  unsigned short path, in unsigned short numOptimizations) raises (Error);
+    short limbRRTFromRootPath(in unsigned short state1, in unsigned short state2,  in  unsigned short path, in unsigned short numOptimizations) raises (Error);
 
 		/// Linear interpolation of many configurations into a path
 		/// \param configs list of configurations
@@ -462,7 +462,7 @@ module hpp
     /// \param comPath index of the path considered of the com path
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
     /// \return id of the root path computed
-    short comRRT(in double state1, in double state2,  in  unsigned short comPath, in unsigned short numOptimizations) raises (Error);
+    short comRRT(in unsigned short state1, in unsigned short state2,  in  unsigned short comPath, in unsigned short numOptimizations) raises (Error);
 
     /// Provided a path has already been computed and interpolated, generate a continuous path
     /// between two indicated states. The states do need to be consecutive.
@@ -476,7 +476,7 @@ module hpp
     /// \param rootPositions1 com positions to track for 3rd phase
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
     /// \return id of the root path computed
-    floatSeq comRRTFromPos(in double state1,
+    floatSeq comRRTFromPos(in unsigned short state1,
                         in  unsigned short comTraj1,
                         in  unsigned short comTraj2,
                         in  unsigned short comTraj3,
@@ -496,7 +496,7 @@ module hpp
     /// \param rootPositions1 com positions to track for 3rd phase
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
     /// \return id of the root path computed
-    floatSeq comRRTFromPosBetweenState(in double state1,in double state2,
+    floatSeq comRRTFromPosBetweenState(in unsigned short state1,in unsigned short state2,
                         in  unsigned short comTraj1,
                         in  unsigned short comTraj2,
                         in  unsigned short comTraj3,
@@ -516,7 +516,7 @@ module hpp
     /// \param rootPositions1 com positions to track for 3rd phase
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
     /// \return id of the root path computed
-    floatSeq effectorRRTFromPosBetweenState(in double state1,in double state2,
+    floatSeq effectorRRTFromPosBetweenState(in unsigned short state1,in unsigned short state2,
                         in  unsigned short comTraj1,
                         in  unsigned short comTraj2,
                         in  unsigned short comTraj3,
@@ -535,7 +535,7 @@ module hpp
     /// \param rootPositions1 com positions to track for 3rd phase
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
     /// \return id of the root path computed
-    floatSeq effectorRRT(in double state1,
+    floatSeq effectorRRT(in unsigned short state1,
                         in  unsigned short comTraj1,
                         in  unsigned short comTraj2,
                         in  unsigned short comTraj3,
@@ -550,7 +550,7 @@ module hpp
     /// \param rootPositions1 com positions to track
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
     /// \return id of the root path computed
-    floatSeq effectorRRTOnePhase(in double state1, in double state2,
+    floatSeq effectorRRTOnePhase(in unsigned short state1, in unsigned short state2,
                         in  unsigned short comTraj,
                         in unsigned short numOptimizations) raises (Error);
 
@@ -561,7 +561,7 @@ module hpp
     /// \param rootPositions1 com positions to track
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
     /// \return id of the root path computed
-    floatSeqSeq generateEffectorBezierArray(in double state1, in double state2,
+    floatSeqSeq generateEffectorBezierArray(in unsigned short state1, in unsigned short state2,
                         in  unsigned short comTraj,
                         in unsigned short numOptimizations) raises (Error);
 
@@ -574,7 +574,7 @@ module hpp
     /// \param rootPositions1 com positions to track
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
     /// \return id of the root path computed
-    floatSeq comRRTOnePhase(in double state1, in double state2,
+    floatSeq comRRTOnePhase(in unsigned short state1, in unsigned short state2,
                         in  unsigned short comTraj,
                         in unsigned short numOptimizations) raises (Error);
 
@@ -592,7 +592,7 @@ module hpp
     /// \param rootPositions1 com positions to track for 3rd phase
     /// \param numOptimizations Number of iterations of the shortcut algorithm to apply between each states
     /// \return id of the root path computed
-    floatSeq effectorRRTFromPath(in double state1, in  unsigned short refPath,
+    floatSeq effectorRRTFromPath(in unsigned short state1, in  unsigned short refPath,
                                     in double path_from, in double path_to,
                                     in  unsigned short comTraj1,
                                     in  unsigned short comTraj2,
@@ -608,7 +608,7 @@ module hpp
     /// \param state1 index of first state.
     /// \param state2 index of end state.
     /// \param rootPositions com positions to track
-    short generateEndEffectorBezier(in double state1,in double state2,
+    short generateEndEffectorBezier(in unsigned short state1,in unsigned short state2,
                         in  unsigned short comTraj) raises (Error);
 
     /// Project a given state into a given COM position
@@ -618,7 +618,7 @@ module hpp
     /// \param targetCom 3D vector for the com position
     /// \param max_num_sample number of samples that can be used at worst before failing
     /// \return projected configuration
-    floatSeq projectToCom(in double state, in floatSeq targetCom, in  unsigned short max_num_sample) raises (Error);
+    floatSeq projectToCom(in unsigned short state, in floatSeq targetCom, in  unsigned short max_num_sample) raises (Error);
 
     /// Retrieve the configuration at a given state
     /// between two indicated states. The states do not need to be consecutive, but increasing in Id.
@@ -630,13 +630,13 @@ module hpp
     /// \param limb name of the limb for which the request aplies
     /// \param state1 current state considered
     /// \return whether the limb is in contact at this state
-    short isLimbInContact(in string limbname, in double state1) raises (Error);
+    short isLimbInContact(in string limbname, in unsigned short state1) raises (Error);
 
     /// Is limb in contact during the motion from the current state to the next one
     /// \param limb name of the limb for which the request aplies
     /// \param state1 current state considered
     /// \return whether the limb is in contact at this state
-    short isLimbInContactIntermediary(in string limbname, in double state1) raises (Error);
+    short isLimbInContactIntermediary(in string limbname, in unsigned short state1) raises (Error);
 
     /// Generate intermediary state
     /// \param state1 initial state considered
