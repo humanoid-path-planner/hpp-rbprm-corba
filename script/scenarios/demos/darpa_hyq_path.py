@@ -29,7 +29,7 @@ rbprmBuilder.setAffordanceFilter('hyq_lfleg_rom', ['Support',])
 rbprmBuilder.boundSO3([-0.4,0.4,-0.3,0.3,-0.3,0.3])
 
 # Creating an instance of HPP problem solver and the viewer
-from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
+from hpp.corbaserver.problem_solver import ProblemSolver
 ps = ProblemSolver( rbprmBuilder )
 r = Viewer (ps)
 
@@ -73,7 +73,7 @@ q_far [0:3] = [-2, -3, 0.63];
 r(q_far)
 
 for i in range(1,10):
-	rbprmBuilder.client.basic.problem.optimizePath(i)
+	rbprmBuilder.client.problem.optimizePath(i)
         
 #~ pp(9)
 	
@@ -92,7 +92,7 @@ class Robot (Parent):
 	def __init__ (self, robotName, load = True):
 		Parent.__init__ (self, robotName, self.rootJointType, load)
 		self.tf_root = "base_footprint"
-		self.client.basic = Client ()
+		self.client = Client ()
 		self.load = load
 		
  #DEMO code to play root path and final contact plan

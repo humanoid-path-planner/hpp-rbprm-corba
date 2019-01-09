@@ -18,7 +18,7 @@
 
 from hpp.corbaserver.rbprm import Client as RbprmClient
 from hpp.corbaserver import Client as BasicClient
-from hpp.corbaserver.rbprm.tools.com_constraints import *
+#from hpp.corbaserver.rbprm.tools.com_constraints import *
 from numpy import array
 
 
@@ -30,7 +30,7 @@ class State (object):
     ## Constructor
     def __init__ (self, fullBody, sId=-1, isIntermediate = False, q = None, limbsIncontact = []):
         assert ((sId > -1 and len(limbsIncontact) == 0) or sId == -1), "state created from existing id can't specify limbs in contact"
-        self.cl = fullBody.client.rbprm.rbprm
+        self.cl = fullBody.clientRbprm.rbprm
         if(sId == -1):
             self.sId = self.cl.createState(q, limbsIncontact)
             self.isIntermediate = False    
@@ -113,10 +113,10 @@ class State (object):
     
     ## Get position of center of mass
     def getCenterOfMass (self):
-        q0 = self.fullBody.client.basic.robot.getCurrentConfig()
-        self.fullBody.client.basic.robot.setCurrentConfig(self.q())
-        c = self.fullBody.client.basic.robot.getComPosition()
-        self.fullBody.client.basic.robot.setCurrentConfig(q0)
+        q0 = self.fullBody.client.robot.getCurrentConfig()
+        self.fullBody.client.robot.setCurrentConfig(self.q())
+        c = self.fullBody.client.robot.getCenterOfMass()
+        self.fullBody.client.robot.setCurrentConfig(q0)
         return c
     
     
@@ -155,7 +155,7 @@ class State (object):
         return self.fullBody.isStateBalanced(self.sId,robustness)
 
     def robustness(self):
-        return self.fullBody.client.rbprm.rbprm.isStateBalanced(self.sId)
+        return self.fullBody.clientRbprm.rbprm.isStateBalanced(self.sId)
 
 
 class StateHelper(object):
