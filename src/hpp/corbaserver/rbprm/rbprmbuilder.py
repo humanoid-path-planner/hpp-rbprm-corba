@@ -42,6 +42,7 @@ class Builder (Robot):
   # \param urdfSuffix optional suffix for the urdf of the robot package
   # \param srdfSuffix optional suffix for the srdf of the robot package
   def loadModel (self, urdfName, urdfNameroms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix):
+    Robot.__init__(self,urdfName,rootJointType, False)
     if(isinstance(urdfNameroms, list)):
       for urdfNamerom in urdfNameroms:
         self.clientRbprm.rbprm.loadRobotRomModel(urdfNamerom, rootJointType, packageName, urdfNamerom, urdfSuffix, srdfSuffix)
@@ -49,7 +50,6 @@ class Builder (Robot):
       self.clientRbprm.rbprm.loadRobotRomModel(urdfNameroms, rootJointType, packageName, urdfNameroms, urdfSuffix, srdfSuffix)
     self.clientRbprm.rbprm.initNewProblemSolver()
     self.clientRbprm.rbprm.loadRobotCompleteModel(urdfName, rootJointType, packageName, urdfName, urdfSuffix, srdfSuffix)
-    Robot.__init__(self,urdfName,rootJointType, False)
     self.client.robot.meshPackageName = meshPackageName
     self.meshPackageName = meshPackageName
     self.packageName = packageName

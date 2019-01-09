@@ -44,8 +44,8 @@ class FullBody (Robot):
      # \param urdfSuffix optional suffix for the urdf of the robot package
      # \param srdfSuffix optional suffix for the srdf of the robot package
      def loadFullBodyModel (self, urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix):
-          self.clientRbprm.rbprm.loadFullBodyRobot(urdfName, rootJointType, packageName, urdfName, urdfSuffix, srdfSuffix, self.client.problem.getSelected("problem")[0])
           Robot.__init__(self,urdfName,rootJointType, False)
+          self.clientRbprm.rbprm.loadFullBodyRobot(urdfName, rootJointType, packageName, urdfName, urdfSuffix, srdfSuffix, self.client.problem.getSelected("problem")[0])
           self.client.robot.meshPackageName = meshPackageName
           self.meshPackageName = meshPackageName
           self.packageName = packageName
@@ -57,8 +57,8 @@ class FullBody (Robot):
      # Virtual function to load the fullBody robot model.
      #
      def loadFullBodyModelFromActiveRobot (self, urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix):
-          self.clientRbprm.rbprm.loadFullBodyRobotFromExistingRobot()
           Robot.__init__(self,urdfName,rootJointType, False)
+          self.clientRbprm.rbprm.loadFullBodyRobotFromExistingRobot()
           self.client.robot.meshPackageName = meshPackageName
           self.meshPackageName = meshPackageName
           self.packageName = packageName
