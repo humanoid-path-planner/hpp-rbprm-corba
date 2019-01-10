@@ -65,6 +65,7 @@ namespace hpp {
 										romFilter_,affFilter_,shootLimit_,displacementLimit_);
             if(!so3Bounds_.empty())
                 shooter->BoundSO3(so3Bounds_);
+            shooter->sampleExtraDOF(problem.getParameter("ConfigurationShooter/sampleExtraDOF").boolValue());
             return shooter;
         }
 
