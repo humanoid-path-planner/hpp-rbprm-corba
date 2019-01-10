@@ -94,3 +94,7 @@ v.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
 pp(0)
 
 
+q_far = q_init[::]
+q_far[2] = -2
+v(q_far)
+
