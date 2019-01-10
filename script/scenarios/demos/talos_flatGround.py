@@ -1,4 +1,3 @@
-from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 from display_tools import *
@@ -64,8 +63,6 @@ q_init = q_ref[::]
 fullBody.setReferenceConfig(q_ref)
 
 fullBody.setCurrentConfig (q_init)
-qfar=q_ref[::]
-qfar[2] = -5
 
 print "Generate limb DB ..."
 tStart = time.time()
