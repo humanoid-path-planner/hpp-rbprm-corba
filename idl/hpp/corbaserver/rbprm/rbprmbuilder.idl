@@ -106,6 +106,10 @@ module hpp
     void setReferenceConfig(in floatSeq referenceConfig)
       raises (Error);
 
+    /// set a reference position of the end effector for the given ROM
+    void setReferenceEndEffector(in string romName, in floatSeq ref)
+      raises (Error);
+
     /// Set Rom constraints for the configuration shooter
     /// a configuration will only be valid if all roms indicated
     /// are colliding with the environment.

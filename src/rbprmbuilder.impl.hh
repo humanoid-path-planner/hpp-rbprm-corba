@@ -196,7 +196,7 @@ namespace hpp {
         void setStaticStability(const bool staticStability) throw (hpp::Error);
 
         void setReferenceConfig(const hpp::floatSeq &referenceConfig) throw (hpp::Error);
-
+        void setReferenceEndEffector(const char* romName, const hpp::floatSeq &ref) throw(hpp::Error);
 
         virtual void setFilter(const hpp::Names_t& roms) throw (hpp::Error);
 				virtual void setAffordanceFilter(const char* romName, const hpp::Names_t& affordances) throw (hpp::Error);
