@@ -21,7 +21,7 @@ mu=0.5
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Builder ()
 rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-root_bounds = [-1.5,3,0.,3.3, 0.98, 0.98]
+root_bounds = [-2.3,4.6,-1.5,3.3, 0.98, 0.98]
 rbprmBuilder.setJointBounds ("root_joint", root_bounds)
 rbprmBuilder.setJointBounds ('torso_1_joint', [0,0])
 rbprmBuilder.setJointBounds ('torso_2_joint', [0,0])
@@ -49,6 +49,7 @@ ps.setParameter("DynamicPlanner/friction",mu)
 ps.setParameter("ConfigurationShooter/sampleExtraDOF",False)
 ps.setParameter("PathOptimization/RandomShortcut/NumberOfLoops",100)
 
+
 p_lLeg = [-0.008846952891378526, 0.0848172440888579,-1.019272022956703]
 p_lLeg[0]=0. # assure symetry of dynamic constraints on flat ground
 p_rLeg = [-0.008846952891378526,-0.0848172440888579,-1.019272022956703]
@@ -57,6 +58,7 @@ p_lArm = [0.13028765672452458, 0.44360498616312666,-0.2881211563246389]
 p_rArm = [0.13028765672452458,- 0.44360498616312666,-0.2881211563246389]
 rbprmBuilder.setReferenceEndEffector('talos_lleg_rom',p_lLeg)
 rbprmBuilder.setReferenceEndEffector('talos_rleg_rom',p_rLeg)
+
 
 from hpp.gepetto import ViewerFactory
 vf = ViewerFactory (ps)
@@ -71,15 +73,13 @@ v.addLandmark(v.sceneName,1)
 
 # Setting initial configuration
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init [0:3] = [-0.9,1.5,0.98]
-q_init[-6:-3] = [0.07,0,0]
+q_init [0:3] = [-0.7,2,0.98]
 v (q_init)
 
 # set goal config
 rbprmBuilder.setCurrentConfig (q_init)
 q_goal = q_init [::]
-q_goal[0:3] = [2,2.6,0.98]
-q_goal[-6:-3] = [0.1,0,0]
+q_goal[0:3] = [0.,-1.,0.98]
 v(q_goal)
 
 ps.setInitialConfig (q_init)

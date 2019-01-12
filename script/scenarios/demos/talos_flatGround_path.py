@@ -45,6 +45,14 @@ ps.setParameter("DynamicPlanner/sizeFootY",0.12)
 ps.setParameter("DynamicPlanner/friction",0.5)
 ps.setParameter("ConfigurationShooter/sampleExtraDOF",False)
 
+p_lLeg = [-0.008846952891378526, 0.0848172440888579,-1.019272022956703]
+p_lLeg[0]=0. # assure symetry of dynamic constraints on flat ground
+p_rLeg = [-0.008846952891378526,-0.0848172440888579,-1.019272022956703]
+p_rLeg[0] = 0.
+p_lArm = [0.13028765672452458, 0.44360498616312666,-0.2881211563246389]
+p_rArm = [0.13028765672452458,- 0.44360498616312666,-0.2881211563246389]
+rbprmBuilder.setReferenceEndEffector('talos_lleg_rom',p_lLeg)
+rbprmBuilder.setReferenceEndEffector('talos_rleg_rom',p_rLeg)
 
 from hpp.gepetto import ViewerFactory
 vf = ViewerFactory (ps)
