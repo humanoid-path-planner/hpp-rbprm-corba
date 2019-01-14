@@ -95,3 +95,11 @@ class Builder (Robot):
   # \param filename name of the output file where to save the output
   def exportPath (self, viewer, problem, pathId, stepsize, filename):
     em.exportPath(viewer, self.client.robot, problem, pathId, stepsize, filename)
+
+  ## set a reference position of the end effector for the given ROM
+  # This reference will be used in the heuristic that choose the "best" contact surface
+  # and approximate the contact points in the kinodynamic planner
+  # \param romName the name of the rom
+  # \param ref the 3D reference position of the end effector, expressed in the root frame
+  def setReferenceEndEffector(self,romName,ref):
+    return self.clientRbprm.rbprm.setReferenceEndEffector(romName,ref)

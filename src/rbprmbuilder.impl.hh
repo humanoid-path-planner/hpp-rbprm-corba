@@ -65,6 +65,7 @@ namespace hpp {
 										romFilter_,affFilter_,shootLimit_,displacementLimit_);
             if(!so3Bounds_.empty())
                 shooter->BoundSO3(so3Bounds_);
+            shooter->sampleExtraDOF(problem.getParameter("ConfigurationShooter/sampleExtraDOF").boolValue());
             return shooter;
         }
 
@@ -100,25 +101,16 @@ namespace hpp {
           // build the dynamicValidation :
           double sizeFootX,sizeFootY,mass,mu;
           bool rectangularContact;
-          try {
-              sizeFootX = problemSolver_->problem()->getParameter ("sizeFootX").floatValue()/2.;
-              sizeFootY = problemSolver_->problem()->getParameter ("sizeFootY").floatValue()/2.;
-              rectangularContact = 1;
-          } catch (const std::exception& e) {
-            hppDout(warning,"Warning : size of foot not definied, use 0 (contact point)");
-            sizeFootX = 0;
-            sizeFootY = 0;
+          sizeFootX = problemSolver_->problem()->getParameter (std::string("DynamicPlanner/sizeFootX")).floatValue()/2.;
+          sizeFootY = problemSolver_->problem()->getParameter (std::string("DynamicPlanner/sizeFootY")).floatValue()/2.;
+          if(sizeFootX > 0. && sizeFootY > 0.)
+            rectangularContact = 1;
+          else
             rectangularContact = 0;
-          }
           mass = robot->mass();
-          try {
-            mu = problemSolver_->problem()->getParameter ("friction").floatValue();
-            hppDout(notice,"mu define in python : "<<mu);
-          } catch (const std::exception& e) {
-            mu= 0.5;
-            hppDout(notice,"mu not defined, take : "<<mu<<" as default.");
-          }
-          DynamicValidationPtr_t dynamicVal = DynamicValidation::create(rectangularContact,sizeFootX,sizeFootY,mass,mu);
+          mu = problemSolver_->problem()->getParameter (std::string("DynamicPlanner/friction")).floatValue();
+          hppDout(notice,"mu define in python : "<<mu);
+          DynamicValidationPtr_t dynamicVal = DynamicValidation::create(rectangularContact,sizeFootX,sizeFootY,mass,mu,robot);
           collisionChecking->addDynamicValidator(dynamicVal);
 
           return collisionChecking;
@@ -204,7 +196,7 @@ namespace hpp {
         void setStaticStability(const bool staticStability) throw (hpp::Error);
 
         void setReferenceConfig(const hpp::floatSeq &referenceConfig) throw (hpp::Error);
-
+        void setReferenceEndEffector(const char* romName, const hpp::floatSeq &ref) throw(hpp::Error);
 
         virtual void setFilter(const hpp::Names_t& roms) throw (hpp::Error);
 				virtual void setAffordanceFilter(const char* romName, const hpp::Names_t& affordances) throw (hpp::Error);

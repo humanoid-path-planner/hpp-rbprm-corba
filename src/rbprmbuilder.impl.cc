@@ -633,6 +633,17 @@ namespace hpp {
       fullBody()->referenceConfig(config);
     }
 
+    void RbprmBuilder::setReferenceEndEffector(const char* romName, const hpp::floatSeq &ref) throw(hpp::Error){
+      std::string name (romName);
+      hpp::pinocchio::RbPrmDevicePtr_t device = boost::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(problemSolver()->robot ());
+      if(!device)
+        throw Error ("No rbprmDevice in problemSolver");
+      if(device->robotRoms_.find(name) == device->robotRoms_.end())
+        throw Error("Device do not contain this rom ");
+      Configuration_t config(dofArrayToConfig (3, ref));
+      device->setEffectorReference(name,config);
+    }
+
 
 
     void RbprmBuilder::setFilter(const hpp::Names_t& roms) throw (hpp::Error)

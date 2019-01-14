@@ -316,6 +316,7 @@ install(FILES
   data/meshes/cross_gap2.stl
   data/meshes/floor_bauzil.stl
   data/meshes/floor_bauzil_obstacles.stl
+  data/meshes/bauzil_stairs_noRamp_simplified.stl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
   )
 
