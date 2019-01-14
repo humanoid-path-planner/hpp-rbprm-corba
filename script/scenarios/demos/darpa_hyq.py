@@ -9,7 +9,7 @@ from hyq_ref_pose import hyq_ref
 import darpa_hyq_path as tp
 
 from os import environ
-ins_dir = environ['DEVEL_HPP_DIR']
+ins_dir = environ['DEVEL_DIR']
 db_dir = ins_dir+"/install/share/hyq-rbprm/database/hyq_"
 
 

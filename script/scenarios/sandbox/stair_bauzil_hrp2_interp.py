@@ -117,7 +117,7 @@ r(q_goal)
 
 fullBody.setStartState(q_init,[rLegId,lLegId]) #,rarmId,larmId])
 fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
-configs = fullBody.interpolate(0.1, robustnessTreshold = 15) #TODO DEBUG
+configs = fullBody.interpolate(0.1, robustnessTreshold = 5) #TODO DEBUG
 #~ i = 0;
 #~ fullBody.draw(configs[i],r); i=i+1; i-1
 
@@ -148,7 +148,7 @@ limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG
 #~ fullBody.limbRRTFromRootPath(0,len(configs)-1,0,2)
 from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import step, clean,stats, saveAllData, play_traj
 from hpp.gepetto import PathPlayer
-pp = PathPlayer (fullBody.client.basic, r)
+pp = PathPlayer (fullBody.client, r)
 
 def act(i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True, verbose = False, draw = False):
 	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, 0.4, optim_effectors = optim_effectors, time_scale = 20., useCOMConstraints = True, use_window = use_window,
@@ -216,7 +216,7 @@ def e():
 #~ fullBody.limbRRTFromRootPath(0,len(configs)-1,0,2)
 from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import step, clean,stats, saveAllData, play_traj
 from hpp.gepetto import PathPlayer
-pp = PathPlayer (fullBody.client.basic, r)
+pp = PathPlayer (fullBody.client, r)
 
 def act(i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = False, verbose = False, draw = False, trackedEffectors = []):
 	return step(fullBody, configs, i, numOptim, pp, limbsCOMConstraints, 0.4, optim_effectors = optim_effectors, time_scale = 20., useCOMConstraints = False, use_window = use_window,
@@ -234,7 +234,7 @@ print "go"
 
 from hpp.corbaserver.rbprm.rbprmstate import *
 
-com = fullBody.client.basic.robot.getCenterOfMass
+#~ com = fullBody.client.basic.robot.getCenterOfMass
 s = None
 def d1():
         global s
