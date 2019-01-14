@@ -41,7 +41,7 @@ rbprmBuilder.setAffordanceFilter('1lLeg', ['Support'])
 rbprmBuilder.boundSO3([-0.,0,-1,1,-1,1])
 
 #~ from hpp.corbaserver.rbprm. import ProblemSolver
-from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
+from hpp.corbaserver.problem_solver import ProblemSolver
 ps = ProblemSolver( rbprmBuilder )
 r = Viewer (ps)
 
