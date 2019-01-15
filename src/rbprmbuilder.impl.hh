@@ -66,6 +66,7 @@ namespace hpp {
             if(!so3Bounds_.empty())
                 shooter->BoundSO3(so3Bounds_);
             shooter->sampleExtraDOF(problem.getParameter("ConfigurationShooter/sampleExtraDOF").boolValue());
+            shooter->ratioWeighted(problem.getParameter("RbprmShooter/ratioWeighted").floatValue ());
             return shooter;
         }
 
