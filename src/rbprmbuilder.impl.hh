@@ -28,7 +28,6 @@
 # include <hpp/rbprm/sampling/analysis.hh>
 # include <hpp/core/collision-path-validation-report.hh>
 # include <hpp/core/problem-solver.hh>
-# include <hpp/core/discretized-collision-checking.hh>
 # include <hpp/core/straight-path.hh>
 # include <hpp/core/problem.hh>
 #include <hpp/corbaserver/affordance/server.hh>
