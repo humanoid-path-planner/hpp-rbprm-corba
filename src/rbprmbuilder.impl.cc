@@ -2621,6 +2621,9 @@ namespace hpp {
                 PathVectorPtr_t pv = PathVector::create(fullBodyComPath->outputSize(),fullBodyComPath->outputDerivativeSize());
                 pv->appendPath(fullBodyComPath);
                 size_t id = problemSolver()->addPath(pv);
+                #ifndef HPP_DEBUG
+                (void)id;
+                #endif
                 hppDout(notice,"Add com-rrt path at index : "<<id);
             }catch(std::runtime_error e){
                 hppDout(notice,"In generateEffectorBezierArray : comRRT failed. ");
