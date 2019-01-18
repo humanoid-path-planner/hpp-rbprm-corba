@@ -1,22 +1,12 @@
 # Importing helper class for setting up a reachability planning problem
-from hpp.corbaserver.rbprm.rbprmbuilder import Builder
+from hpp.corbaserver.rbprm.hyq_abstract import Robot
 
 # Importing Gepetto viewer helper class
 from hpp.gepetto import Viewer
 
-rootJointType = 'freeflyer'
-packageName = 'hpp-rbprm-corba'
-meshPackageName = 'hpp-rbprm-corba'
-# URDF file describing the trunk of the robot HyQ
-urdfName = 'hyq_trunk_large'
-# URDF files describing the reachable workspace of each limb of HyQ
-urdfNameRom = ['hyq_lhleg_rom','hyq_lfleg_rom','hyq_rfleg_rom','hyq_rhleg_rom']
-urdfSuffix = ""
-srdfSuffix = ""
 
 # Creating an instance of the helper class, and loading the robot
-rbprmBuilder = Builder ()
-rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
+rbprmBuilder = Robot ()
 rbprmBuilder.setJointBounds ("root_joint", [-2,5, -1, 1, 0.3, 4])
 # The following lines set constraint on the valid configurations:
 # a configuration is valid only if all limbs can create a contact ...
@@ -48,7 +38,7 @@ ps.addGoalConfig (q_goal)
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 #~ afftool.loadObstacleModel (packageName, "darpa", "planning", r, reduceSizes=[0.05,0.,0.])
-afftool.loadObstacleModel (packageName, "darpa", "planning", r)
+afftool.loadObstacleModel ("hpp-rbprm-corba", "darpa", "planning", r)
 afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 
 # Choosing RBPRM shooter and path validation methods.
@@ -79,22 +69,6 @@ for i in range(1,10):
 	
 
 from hpp.corbaserver import Client
-from hpp.corbaserver.robot import Robot as Parent
-
-class Robot (Parent):
-	rootJointType = 'freeflyer'
-	packageName = 'hpp-rbprm-corba'
-	meshPackageName = 'hpp-rbprm-corba'
-	# URDF file describing the trunk of the robot HyQ
-	urdfName = 'hyq_trunk_large'
-	urdfSuffix = ""
-	srdfSuffix = ""
-	def __init__ (self, robotName, load = True):
-		Parent.__init__ (self, robotName, self.rootJointType, load)
-		self.tf_root = "base_footprint"
-		self.client = Client ()
-		self.load = load
-		
  #DEMO code to play root path and final contact plan
 cl = Client()
 cl.problem.selectProblem("rbprm_path")

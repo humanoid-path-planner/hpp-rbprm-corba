@@ -1,4 +1,4 @@
-from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
+from hpp.corbaserver.rbprm.talos import Robot
 from hpp.gepetto import Viewer
 from display_tools import *
 import time
@@ -8,37 +8,11 @@ import talos_navBauzil_path as tp
 print "Done."
 import time
 
-##
-#  Information to retrieve urdf and srdf files.
-packageName = "talos_data"
-meshPackageName = "talos_data"
-rootJointType = "freeflyer"    
-urdfName = "talos"
-urdfSuffix = "_reduced"
-srdfSuffix = ""
-
-
-rLegId = 'talos_rleg_rom'
-rleg = 'leg_right_1_joint'
-rfoot = 'leg_right_6_joint'
-
-lLegId = 'talos_lleg_rom'
-lleg = 'leg_left_1_joint'
-lfoot = 'leg_left_6_joint'
-
-rArmId = 'talos_rarm_rom'
-rarm = 'arm_right_1_joint'
-rhand = 'arm_right_7_joint'
-
-lArmId = 'talos_larm_rom'
-larm = 'arm_left_1_joint'
-lhand = 'arm_left_7_joint'
 
 
 pId = tp.ps.numberPaths() -1
-fullBody = FullBody ()
+fullBody = Robot ()
 
-fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 root_bounds = tp.root_bounds[::]
 root_bounds[0] -= 0.2
 root_bounds[1] += 0.2
@@ -55,18 +29,9 @@ ps.setParameter("Kinodynamic/accelerationBound",tp.aMax)
 v = tp.Viewer (ps,viewerClient=tp.v.client, displayCoM = True)
 
 
-q_ref = [
-        0.0, 0.0,  1.0232773,  0.0 ,  0.0, 0.0, 1.,                   #Free flyer
-        0.0,  0.0, -0.411354,  0.859395, -0.448041, -0.001708,          #Left Leg
-        0.0,  0.0, -0.411354,  0.859395, -0.448041, -0.001708,          #Right Leg
-        0.0 ,  0.006761,                                                #Chest
-        0.25847 ,  0.173046, -0.0002, -0.525366, 0.0, -0.0,  0.1,-0.005,  #Left Arm
-        -0.25847 , -0.173046, 0.0002  , -0.525366, 0.0,  0.0,  0.1,-0.005,#Right Arm
-        0.,  0.  ,                                                       #Head
-        0,0,0,0,0,0]; v (q_ref)
 
+q_ref = fullBody.referenceConfig[::]+[0,0,0,0,0,0]
 q_init = q_ref[::]
-
 fullBody.setReferenceConfig(q_ref)
 fullBody.setCurrentConfig (q_init)
 
@@ -76,20 +41,12 @@ tStart = time.time()
 # generate databases : 
 
 nbSamples = 10000
-rLegOffset = [0.,  -0.00018, -0.107]
-rLegOffset[2] += 0.006
-rLegNormal = [0,0,1]
-rLegx = 0.1; rLegy = 0.06
-fullBody.addLimb(rLegId,rleg,rfoot,rLegOffset,rLegNormal, rLegx, rLegy, nbSamples, "fixedStep08", 0.01)
-fullBody.runLimbSampleAnalysis(rLegId, "ReferenceConfiguration", True)
+fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep08", 0.01)
+fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/talos_rLeg_walk.db")
 
-lLegOffset = [0.,  -0.00018, -0.107]
-lLegOffset[2] += 0.006
-lLegNormal = [0,0,1]
-lLegx = 0.1; lLegy = 0.06
-fullBody.addLimb(lLegId,lleg,lfoot,lLegOffset,rLegNormal, lLegx, lLegy, nbSamples, "fixedStep08", 0.01)
-fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
+fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep08", 0.01)
+fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/talos_lLeg_walk.db")
 
 
@@ -132,8 +89,8 @@ v(q_goal)
 v.addLandmark('talos/base_link',0.3)
 v(q_init)
 
-fullBody.setStartState(q_init,[lLegId,rLegId])
-fullBody.setEndState(q_goal,[lLegId,rLegId])
+fullBody.setStartState(q_init,[fullBody.lLegId,fullBody.rLegId])
+fullBody.setEndState(q_goal,[fullBody.lLegId,fullBody.rLegId])
 
 
 from hpp.gepetto import PathPlayer
@@ -141,7 +98,7 @@ pp = PathPlayer ( v)
 
 print "Generate contact plan ..."
 tStart = time.time()
-configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = False)
+configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = True,testReachability=False)
 tInterpolateConfigs = time.time() - tStart
 print "Done."
 print "number of configs :", len(configs)

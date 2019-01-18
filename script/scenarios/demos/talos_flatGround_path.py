@@ -1,4 +1,4 @@
-from hpp.corbaserver.rbprm.rbprmbuilder import Builder
+from hpp.corbaserver.rbprm.talos_abstract import Robot
 from hpp.gepetto import Viewer
 from hpp.corbaserver import Client
 from hpp.corbaserver import ProblemSolver
@@ -6,21 +6,13 @@ import time
 
 
 
-
-rootJointType = 'freeflyer'
-packageName = 'talos-rbprm'
-meshPackageName = 'talos-rbprm'
-urdfName = 'talos_trunk'
-urdfNameRom =  ['talos_larm_rom','talos_rarm_rom','talos_lleg_rom','talos_rleg_rom']
-urdfSuffix = ""
-srdfSuffix = ""
 vMax = 0.3
 aMax = 0.1
 extraDof = 6
 mu=0.5
 # Creating an instance of the helper class, and loading the robot
-rbprmBuilder = Builder ()
-rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
+rbprmBuilder = Robot ()
+
 rbprmBuilder.setJointBounds ("root_joint", [-5,5, -1.5, 1.5, 0.95, 1.05])
 
 
@@ -45,14 +37,6 @@ ps.setParameter("DynamicPlanner/sizeFootY",0.12)
 ps.setParameter("DynamicPlanner/friction",0.5)
 ps.setParameter("ConfigurationShooter/sampleExtraDOF",False)
 
-p_lLeg = [-0.008846952891378526, 0.0848172440888579,-1.019272022956703]
-p_lLeg[0]=0. # assure symetry of dynamic constraints on flat ground
-p_rLeg = [-0.008846952891378526,-0.0848172440888579,-1.019272022956703]
-p_rLeg[0] = 0.
-p_lArm = [0.13028765672452458, 0.44360498616312666,-0.2881211563246389]
-p_rArm = [0.13028765672452458,- 0.44360498616312666,-0.2881211563246389]
-rbprmBuilder.setReferenceEndEffector('talos_lleg_rom',p_lLeg)
-rbprmBuilder.setReferenceEndEffector('talos_rleg_rom',p_rLeg)
 
 from hpp.gepetto import ViewerFactory
 vf = ViewerFactory (ps)
@@ -62,7 +46,7 @@ afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
 afftool.loadObstacleModel ("hpp-rbprm-corba", "ground", "planning", vf)
 v = vf.createViewer(displayArrows = True)
-afftool.visualiseAffordances('Support', v, v.color.lightBrown)
+#afftool.visualiseAffordances('Support', v, v.color.lightBrown)
 
 # Setting initial configuration
 q_init = rbprmBuilder.getCurrentConfig ();

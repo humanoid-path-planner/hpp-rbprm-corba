@@ -4,15 +4,25 @@ from display_tools import *
 import time
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
 print "Plan guide trajectory ..."
-import talos_flatGround_path as tp
+import talos_navBauzil_hard_path as tp
 print "Done."
 import time
+
+##
+#  Information to retrieve urdf and srdf files.
+
 
 pId = tp.ps.numberPaths() -1
 fullBody = Robot ()
 
-
-fullBody.setJointBounds ("root_joint",  [-5,5, -1.5, 1.5, 0.95, 1.05])
+root_bounds = tp.root_bounds[::]
+root_bounds[0] -= 0.2
+root_bounds[1] += 0.2
+root_bounds[2] -= 0.2
+root_bounds[3] += 0.2
+root_bounds[-1] = 1.2
+root_bounds[-2] = 0.8
+fullBody.setJointBounds ("root_joint",  root_bounds)
 fullBody.client.robot.setDimensionExtraConfigSpace(tp.extraDof)
 fullBody.client.robot.setExtraConfigSpaceBounds([-tp.vMax,tp.vMax,-tp.vMax,tp.vMax,0,0,-tp.aMax,tp.aMax,-tp.aMax,tp.aMax,0,0])
 ps = tp.ProblemSolver( fullBody )
@@ -20,25 +30,22 @@ ps.setParameter("Kinodynamic/velocityBound",tp.vMax)
 ps.setParameter("Kinodynamic/accelerationBound",tp.aMax)
 v = tp.Viewer (ps,viewerClient=tp.v.client, displayCoM = True)
 
-
-q_ref = fullBody.referenceConfig[::]+[0]*6
-
+q_ref = fullBody.referenceConfig[::] + [0]*6
 q_init = q_ref[::]
 
 fullBody.setReferenceConfig(q_ref)
-
 fullBody.setCurrentConfig (q_init)
+
 
 print "Generate limb DB ..."
 tStart = time.time()
 # generate databases : 
-
 nbSamples = 10000
-fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep06", 0.01)
+fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep08", 0.01)
 fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/talos_rLeg_walk.db")
 
-fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep06", 0.01)
+fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep08", 0.01)
 fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/talos_lLeg_walk.db")
 
@@ -82,8 +89,8 @@ v(q_goal)
 v.addLandmark('talos/base_link',0.3)
 v(q_init)
 
-fullBody.setStartState(q_init,[fullBody.rLegId,fullBody.lLegId])
-fullBody.setEndState(q_goal,[fullBody.rLegId,fullBody.lLegId])
+fullBody.setStartState(q_init,[fullBody.lLegId,fullBody.rLegId])
+fullBody.setEndState(q_goal,[fullBody.lLegId,fullBody.rLegId])
 
 
 from hpp.gepetto import PathPlayer
@@ -91,7 +98,7 @@ pp = PathPlayer ( v)
 
 print "Generate contact plan ..."
 tStart = time.time()
-configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = True,testReachability=False)
+configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = False)
 tInterpolateConfigs = time.time() - tStart
 print "Done."
 print "number of configs :", len(configs)
