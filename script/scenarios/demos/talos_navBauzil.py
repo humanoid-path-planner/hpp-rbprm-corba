@@ -1,6 +1,6 @@
 from hpp.corbaserver.rbprm.talos import Robot
 from hpp.gepetto import Viewer
-from display_tools import *
+from tools.display_tools import *
 import time
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
 print "Plan guide trajectory ..."
