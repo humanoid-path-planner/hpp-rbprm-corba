@@ -31,10 +31,10 @@ print "Generate limb DB ..."
 tStart = time.time()
 # generate databases : 
 
-nbSamples = 10000
-fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep06", 0.01)
+nbSamples = 50000
+fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep1", 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints)
 fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
-fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep06", 0.01)
+fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep1", 0.01,kinematicConstraintsPath=fullBody.lLegKinematicConstraints)
 fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
 
 
@@ -81,7 +81,7 @@ fullBody.setEndState(q_goal,[fullBody.rLegId,fullBody.lLegId])
 
 print "Generate contact plan ..."
 tStart = time.time()
-configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = True,testReachability=False)
+configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = True)
 tInterpolateConfigs = time.time() - tStart
 print "Done."
 print "number of configs :", len(configs)

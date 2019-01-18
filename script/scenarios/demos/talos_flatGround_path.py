@@ -87,7 +87,7 @@ pp = PathPlayer (v)
 pp.dt=0.03
 pp.displayVelocityPath(0)
 v.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
-pp(0)
+#pp(0)
 
 # move the robot out of the view before computing the contacts
 q_far = q_init[::]
