@@ -28,7 +28,6 @@
 # include <hpp/rbprm/sampling/analysis.hh>
 # include <hpp/core/collision-path-validation-report.hh>
 # include <hpp/core/problem-solver.hh>
-# include <hpp/core/discretized-collision-checking.hh>
 # include <hpp/core/straight-path.hh>
 # include <hpp/core/problem.hh>
 #include <hpp/corbaserver/affordance/server.hh>
@@ -66,6 +65,7 @@ namespace hpp {
             if(!so3Bounds_.empty())
                 shooter->BoundSO3(so3Bounds_);
             shooter->sampleExtraDOF(problem.getParameter("ConfigurationShooter/sampleExtraDOF").boolValue());
+            shooter->ratioWeighted(problem.getParameter("RbprmShooter/ratioWeighted").floatValue ());
             return shooter;
         }
 

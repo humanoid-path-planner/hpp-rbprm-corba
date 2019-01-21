@@ -13,6 +13,6 @@ def moveSphere(name,r,pos):
   r.client.gui.refresh()
 
 def displayContactSequence(r,configs,pause=1.):
-  for i in range(0,len(configs)-1):
+  for i in range(0,len(configs)):
     r(configs[i])
     time.sleep(pause)	

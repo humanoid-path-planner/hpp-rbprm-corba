@@ -1,24 +1,11 @@
-from hpp.corbaserver.rbprm.rbprmbuilder import Builder
-from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
+from hpp.corbaserver.rbprm.hrp2 import Robot
 from hpp.gepetto import Viewer
 
 import stair_bauzil_hrp2_path as tp
 import time
 
 
-
-packageName = "hrp2_14_description"
-meshPackageName = "hrp2_14_description"
-rootJointType = "freeflyer"
-##
-#  Information to retrieve urdf and srdf files.
-urdfName = "hrp2_14"
-urdfSuffix = "_reduced"
-srdfSuffix = ""
-
-fullBody = FullBody ()
-
-fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
+fullBody = Robot ()
 fullBody.setJointBounds ("root_joint", [-0.135,2, -1, 1, 0, 2.2])
 
 
@@ -27,39 +14,13 @@ r = tp.Viewer (ps, viewerClient=tp.r.client)
 
 cType = "_6_DOF"
 #~ AFTER loading obstacles
-rLegId = '0rLeg'
-rLeg = 'RLEG_JOINT0'
-rLegOffset = [0,0,-0.105]
-#~ rLegNormal = [0,1,0]
-rLegNormal = [0,0,1]
-rLegx = 0.09; rLegy = 0.05
-fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 10000, "manipulability", 0.2, cType)
 
-lLegId = '1lLeg'
-lLeg = 'LLEG_JOINT0'
-lLegOffset = [0,0,-0.105]
-#~ lLegNormal = [0,1,0]
-lLegNormal = [0,0,1]
-lLegx = 0.09; lLegy = 0.05
-fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.2, cType)
+fullBody.addLimb(fullBody.rLegId,fullBody.rLeg,'',fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, 10000, "manipulability", 0.2, cType)
 
-rarmId = '3Rarm'
-rarm = 'RARM_JOINT0'
-rHand = 'RARM_JOINT5'
-rArmOffset = [0,0,-0.1]
-rArmNormal = [0,0,1]
-rArmx = 0.024; rArmy = 0.024
-#disabling collision for hook
-fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF", True)
+fullBody.addLimb(fullBody.lLegId,fullBody.lLeg,'',fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, 10000, "manipulability", 0.2, cType)
 
+fullBody.addLimb(fullBody.rarmId,fullBody.rarm,fullBody.rHand,fullBody.rArmOffset,fullBody.rArmNormal, fullBody.rArmx, fullBody.rArmy, 10000, "manipulability", 0.1, "_6_DOF", True)
 
-#~ AFTER loading obstacles
-larmId = '4Larm'
-larm = 'LARM_JOINT0'
-lHand = 'LARM_JOINT5'
-lArmOffset = [-0.05,-0.050,-0.050]
-lArmNormal = [1,0,0]
-lArmx = 0.024; lArmy = 0.024
 #~ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "manipulability", 0.05, "_6_DOF", True)
 
 rKneeId = '0RKnee'

@@ -5,24 +5,24 @@ q2 = [[1.41929 , 0.56273 , 0.3167],[0.633238 , 0.498175 , 0.252145],[1.41049 , -
 
 
 
-color = r.color.black
+color = v.color.black
 for i in range(0,len(q)):
-  r.client.gui.addSphere("s"+str(i),0.03,color)
-  r.client.gui.applyConfiguration("s"+str(i),q[i]+[1,0,0,0])
-  r.client.gui.setVisibility("s"+str(i),"ALWAYS_ON_TOP")
-  r.client.gui.addToGroup("s"+str(i),r.sceneName)
+  v.client.gui.addSphere("s"+str(i),0.03,color)
+  v.client.gui.applyConfiguration("s"+str(i),q[i]+[1,0,0,0])
+  v.client.gui.setVisibility("s"+str(i),"ALWAYS_ON_TOP")
+  v.client.gui.addToGroup("s"+str(i),v.sceneName)
 
-r.client.gui.refresh()
+v.client.gui.refresh()
 
 
-color = r.color.red
+color = v.color.red
 for i in range(0,len(q2)):
-  r.client.gui.addSphere("sc"+str(i),0.01,color)
-  r.client.gui.applyConfiguration("sc"+str(i),q2[i]+[1,0,0,0])
-  r.client.gui.addToGroup("sc"+str(i),r.sceneName)
-  r.client.gui.setVisibility("sc"+str(i),"ALWAYS_ON_TOP")
+  v.client.gui.addSphere("sc"+str(i),0.01,color)
+  v.client.gui.applyConfiguration("sc"+str(i),q2[i]+[1,0,0,0])
+  v.client.gui.addToGroup("sc"+str(i),v.sceneName)
+  v.client.gui.setVisibility("sc"+str(i),"ALWAYS_ON_TOP")
 
-r.client.gui.refresh()
+v.client.gui.refresh()
 
 
 

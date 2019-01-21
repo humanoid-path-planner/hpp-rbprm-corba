@@ -1,9 +1,7 @@
 #Importing helper class for RBPRM
-from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
+from hpp.corbaserver.rbprm.hyq import Robot
 from hpp.corbaserver.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
-#reference pose for hyq
-from hyq_ref_pose import hyq_ref
 
 #calling script darpa_hyq_path to compute root path
 import darpa_hyq_path as tp
@@ -16,18 +14,9 @@ db_dir = ins_dir+"/install/share/hyq-rbprm/database/hyq_"
 from hpp.corbaserver import Client
 
 
-packageName = "hyq_description"
-meshPackageName = "hyq_description"
-rootJointType = "freeflyer"
-
-#  Information to retrieve urdf and srdf files.
-urdfName = "hyq"
-urdfSuffix = ""
-srdfSuffix = ""
 
 #  This time we load the full body model of HyQ
-fullBody = FullBody () 
-fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
+fullBody = Robot () 
 fullBody.setJointBounds ("root_joint", [-2,5, -1, 1, 0.3, 4])
 
 #  Setting a number of sample configurations used
@@ -37,40 +26,21 @@ ps = tp.ProblemSolver(fullBody)
 r = tp.Viewer (ps, viewerClient=tp.r.client)
 
 rootName = 'base_joint_xyz'
-
 cType = "_3_DOF"
-rLegId = 'rfleg'
-rLeg = 'rf_haa_joint'
-rfoot = 'rf_foot_joint'
-offset = [0.,-0.021,0.]
-normal = [0,1,0]
-legx = 0.02; legy = 0.02
 
 def addLimbDb(limbId, heuristicName, loadValues = True, disableEffectorCollision = False):
 	fullBody.addLimbDatabase(str(db_dir+limbId+'.db'), limbId, heuristicName,loadValues, disableEffectorCollision)
 
-fullBody.addLimb(rLegId,rLeg,rfoot,offset,normal, legx, legy, nbSamples, "random", 0.1, cType)
-
-lLegId = 'lhleg'
-lLeg = 'lh_haa_joint'
-lfoot = 'lh_foot_joint'
-fullBody.addLimb(lLegId,lLeg,lfoot,offset,normal, legx, legy, nbSamples, "random", 0.05, cType)
-#~ 
-rarmId = 'rhleg'
-rarm = 'rh_haa_joint'
-rHand = 'rh_foot_joint'
-fullBody.addLimb(rarmId,rarm,rHand,offset,normal, legx, legy, nbSamples, "random", 0.05, cType)
-
-larmId = 'lfleg'
-larm = 'lf_haa_joint'
-lHand = 'lf_foot_joint'
-fullBody.addLimb(larmId,larm,lHand,offset,normal, legx, legy, nbSamples, "random", 0.05, cType)
+fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.offset,fullBody.normal, fullBody.legx, fullBody.legy, nbSamples, "random", 0.1, cType)
+fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.offset,fullBody.normal, fullBody.legx, fullBody.legy, nbSamples, "random", 0.05, cType)
+fullBody.addLimb(fullBody.rArmId,fullBody.rarm,fullBody.rHand,fullBody.offset,fullBody.normal, fullBody.legx, fullBody.legy, nbSamples, "random", 0.05, cType)
+fullBody.addLimb(fullBody.lArmId,fullBody.larm,fullBody.lHand,fullBody.offset,fullBody.normal, fullBody.legx, fullBody.legy, nbSamples, "random", 0.05, cType)
 
 #~ fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
 #~ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 #~ fullBody.runLimbSampleAnalysis(rarmId, "jointLimitsDistance", True)
 #~ fullBody.runLimbSampleAnalysis(larmId, "jointLimitsDistance", True)
-
+"""
 q_init = [-2.0,
  0.0,
  0.6838277139631803,
@@ -90,14 +60,15 @@ q_init = [-2.0,
  0.03995660287873871,
  -0.9577096766517215,
  0.9384602821326071]
- 
-q_goal = hyq_ref[:]; q_goal[0:7] = tp.q_goal[0:7]; q_goal[2]=hyq_ref[2]+0.02
+"""
+q_init=fullBody.referenceConfig[::]; q_init[0:7] = tp.q_init[0:7]; q_init[2]=fullBody.referenceConfig[2]+0.02
+q_goal = fullBody.referenceConfig[::]; q_goal[0:7] = tp.q_goal[0:7]; q_goal[2]=fullBody.referenceConfig[2]+0.02
 
 
 
 # specifying the full body configurations as start and goal state of the problem
-fullBody.setStartState(q_init,[rLegId,lLegId,rarmId,larmId])
-fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId,larmId])
+fullBody.setStartState(q_init,[fullBody.rLegId,fullBody.lLegId,fullBody.rArmId,fullBody.lArmId])
+fullBody.setEndState(q_goal,[fullBody.rLegId,fullBody.lLegId,fullBody.rArmId,fullBody.lArmId])
 
 
 r(q_init)

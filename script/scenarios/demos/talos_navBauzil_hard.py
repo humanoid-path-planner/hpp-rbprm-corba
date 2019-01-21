@@ -3,14 +3,14 @@ from hpp.gepetto import Viewer
 from tools.display_tools import *
 import time
 print "Plan guide trajectory ..."
-import talos_navBauzil_path as tp
+import talos_navBauzil_hard_path as tp
 print "Done."
 import time
 
 
-
 pId = tp.ps.numberPaths() -1
 fullBody = Robot ()
+
 # Set the bounds for the root, take slightly larger bounding box than during root planning
 root_bounds = tp.root_bounds[::]
 root_bounds[0] -= 0.2
@@ -30,7 +30,7 @@ ps.setParameter("Kinodynamic/accelerationBound",tp.aMax)
 v = tp.Viewer (ps,viewerClient=tp.v.client, displayCoM = True)
 
 # load a reference configuration
-q_ref = fullBody.referenceConfig[::]+[0,0,0,0,0,0]
+q_ref = fullBody.referenceConfig_legsApart[::] + [0]*6
 q_init = q_ref[::]
 fullBody.setReferenceConfig(q_ref)
 fullBody.setCurrentConfig (q_init)
@@ -39,18 +39,21 @@ fullBody.setCurrentConfig (q_init)
 print "Generate limb DB ..."
 tStart = time.time()
 # generate databases : 
-nbSamples = 10000
-fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep08", 0.01)
+nbSamples = 20000
+fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep06", 0.01)
 fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
-#fullBody.saveLimbDatabase(rLegId, "./db/talos_rLeg_walk.db")
-fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep08", 0.01)
+fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep06", 0.01)
 fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
-#fullBody.saveLimbDatabase(rLegId, "./db/talos_lLeg_walk.db")
+
+#In this scenario, the arms are not used to create contact, but they may move to avoid collision. 
+fullBody.addNonContactingLimb(fullBody.lArmId,fullBody.larm,fullBody.lhand,5000)
+fullBody.runLimbSampleAnalysis(fullBody.lArmId, "ReferenceConfiguration", True)
+fullBody.addNonContactingLimb(fullBody.rArmId,fullBody.rarm,fullBody.rhand,5000)
+fullBody.runLimbSampleAnalysis(fullBody.rArmId, "ReferenceConfiguration", True)
 
 tGenerate =  time.time() - tStart
 print "Done."
 print "Databases generated in : "+str(tGenerate)+" s"
-
 
 #define initial and final configurations : 
 configSize = fullBody.getConfigSize() -fullBody.client.robot.getDimensionExtraConfigSpace()
@@ -79,6 +82,7 @@ v(q_init)
 fullBody.setCurrentConfig (q_goal)
 v(q_goal)
 
+
 v.addLandmark('talos/base_link',0.3)
 v(q_init)
 
@@ -89,7 +93,7 @@ fullBody.setEndState(q_goal,[fullBody.lLegId,fullBody.rLegId])
 
 print "Generate contact plan ..."
 tStart = time.time()
-configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = True,testReachability=False)
+configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = True)
 tInterpolateConfigs = time.time() - tStart
 print "Done."
 print "number of configs :", len(configs)
