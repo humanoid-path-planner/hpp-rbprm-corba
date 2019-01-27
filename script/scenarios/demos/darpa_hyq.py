@@ -1,5 +1,5 @@
 #Importing helper class for RBPRM
-from hpp.corbaserver.rbprm.hyq import Robot
+from hpp.corbaserver.rbprm.hyq_contact6D import Robot
 from hpp.corbaserver.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
 
@@ -23,10 +23,10 @@ fullBody.setJointBounds ("root_joint", [-2,5, -1, 1, 0.3, 4])
 nbSamples = 10000
 
 ps = tp.ProblemSolver(fullBody)
-r = tp.Viewer (ps, viewerClient=tp.r.client)
+v = tp.Viewer (ps, viewerClient=tp.v.client)
 
 rootName = 'base_joint_xyz'
-cType = "_3_DOF"
+cType = "_6_DOF"
 
 def addLimbDb(limbId, heuristicName, loadValues = True, disableEffectorCollision = False):
 	fullBody.addLimbDatabase(str(db_dir+limbId+'.db'), limbId, heuristicName,loadValues, disableEffectorCollision)
@@ -61,8 +61,8 @@ q_init = [-2.0,
  -0.9577096766517215,
  0.9384602821326071]
 """
-q_init=fullBody.referenceConfig[::]; q_init[0:7] = tp.q_init[0:7]; q_init[2]=fullBody.referenceConfig[2]+0.02
-q_goal = fullBody.referenceConfig[::]; q_goal[0:7] = tp.q_goal[0:7]; q_goal[2]=fullBody.referenceConfig[2]+0.02
+q_init=fullBody.referenceConfig[::]; q_init[0:7] = tp.q_init[0:7]; q_init[2]=fullBody.referenceConfig[2]
+q_goal = fullBody.referenceConfig[::]; q_goal[0:7] = tp.q_goal[0:7]; q_goal[2]=fullBody.referenceConfig[2]
 
 
 q_init = fullBody.generateContacts(q_init, [0,0,1])
@@ -73,12 +73,12 @@ fullBody.setStartState(q_init,[fullBody.rLegId,fullBody.lArmId,fullBody.lLegId,f
 fullBody.setEndState(q_goal,[fullBody.rLegId,fullBody.lArmId,fullBody.lLegId,fullBody.rArmId])
 
 
-r(q_init)
+v(q_init)
 configs = []
 
 
 from hpp.gepetto import PathPlayer
-pp = PathPlayer (fullBody.client, r)
+pp = PathPlayer (fullBody.client, v)
 
 
 import time
@@ -86,36 +86,36 @@ import time
 #DEMO METHODS
 
 def initConfig():
-	r.client.gui.setVisibility("hyq", "ON")
+	v.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
-	tp.r.client.gui.setVisibility("toto", "OFF")
-	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
-	r(q_init)
+	tp.v.client.gui.setVisibility("toto", "OFF")
+	tp.v.client.gui.setVisibility("hyq_trunk_large", "OFF")
+	v(q_init)
 	
 def endConfig():
-	r.client.gui.setVisibility("hyq", "ON")
+	v.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
-	tp.r.client.gui.setVisibility("toto", "OFF")
-	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
-	r(q_goal)
+	tp.v.client.gui.setVisibility("toto", "OFF")
+	tp.v.client.gui.setVisibility("hyq_trunk_large", "OFF")
+	v(q_goal)
 	
 
 def rootPath():
-	r.client.gui.setVisibility("hyq", "OFF")
+	v.client.gui.setVisibility("hyq", "OFF")
 	tp.cl.problem.selectProblem("rbprm_path")
-	tp.r.client.gui.setVisibility("toto", "OFF")
-	r.client.gui.setVisibility("hyq", "OFF")
-	tp.r.client.gui.setVisibility("hyq_trunk_large", "ON")
+	tp.v.client.gui.setVisibility("toto", "OFF")
+	v.client.gui.setVisibility("hyq", "OFF")
+	tp.v.client.gui.setVisibility("hyq_trunk_large", "ON")
 	tp.pp(0)
-	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
-	r.client.gui.setVisibility("hyq", "ON")
+	tp.v.client.gui.setVisibility("hyq_trunk_large", "OFF")
+	v.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
 	
 def genPlan(stepsize=0.06):
 	tp.cl.problem.selectProblem("default")
-	r.client.gui.setVisibility("hyq", "ON")
-	tp.r.client.gui.setVisibility("toto", "OFF")
-	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
+	v.client.gui.setVisibility("hyq", "ON")
+	tp.v.client.gui.setVisibility("toto", "OFF")
+	tp.v.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	global configs
 	start = time.clock() 
 	configs = fullBody.interpolate(stepsize, 8, 0, filterStates = False, testReachability=False, quasiStatic=True)
@@ -123,12 +123,12 @@ def genPlan(stepsize=0.06):
 	print "Contact plan generated in " + str(end-start) + "seconds"
 	
 def contactPlan(step = 0.5):
-	r.client.gui.setVisibility("hyq", "ON")
+	v.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
-	tp.r.client.gui.setVisibility("toto", "OFF")
-	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
+	tp.v.client.gui.setVisibility("toto", "OFF")
+	tp.v.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	for i in range(0,len(configs)):
-		r(configs[i]);
+		v(configs[i]);
 		time.sleep(step)
                 		
 		
