@@ -3417,7 +3417,7 @@ namespace hpp {
         }else{
             res = reachability::isReachableDynamic(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo],false,std::vector<double>(),numPointPerPhase);
         }
-        if (res.success()){
+        if (res.success() && res.path_){
             std::vector<std::size_t> ids;
             core::PathVectorPtr_t pathVector_full = core::PathVector::create(res.path_->outputSize(),res.path_->outputDerivativeSize());
             pathVector_full->appendPath(res.path_);
