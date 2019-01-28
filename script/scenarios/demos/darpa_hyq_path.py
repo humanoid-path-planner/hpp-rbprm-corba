@@ -36,9 +36,9 @@ v = vf.createViewer()
 
 # Setting initial and goal configurations
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init [0:3] = [-2, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); v (q_init)
+q_init [0:3] = [-2, 0, 0.64]; rbprmBuilder.setCurrentConfig (q_init); v (q_init)
 q_goal = q_init [::]
-q_goal [0:3] = [3, 0, 0.63]; v (q_goal)
+q_goal [0:3] = [3, 0, 0.64]; v (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.75]; r (q_goal)
 
 # Choosing a path optimizer
@@ -64,7 +64,7 @@ from hpp.gepetto import PathPlayer
 pp = PathPlayer (v)
 
 q_far = q_init [::]
-q_far [0:3] = [-2, -3, 0.63]; 
+q_far [0:3] = [-2, -3, 0.6]; 
 v(q_far)
 
 for i in range(1,10):
