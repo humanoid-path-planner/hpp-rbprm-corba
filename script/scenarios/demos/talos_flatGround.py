@@ -32,9 +32,9 @@ tStart = time.time()
 # generate databases : 
 
 nbSamples = 50000
-fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep1", 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints)
+fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep08", 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints)
 fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
-fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep1", 0.01,kinematicConstraintsPath=fullBody.lLegKinematicConstraints)
+fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep08", 0.01,kinematicConstraintsPath=fullBody.lLegKinematicConstraints)
 fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
 
 
@@ -84,9 +84,10 @@ tStart = time.time()
 configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = True)
 tInterpolateConfigs = time.time() - tStart
 print "Done."
+print "Contact plan generated in : "+str(tInterpolateConfigs)+" s"
 print "number of configs :", len(configs)
-raw_input("Press Enter to display the contact sequence ...")
-displayContactSequence(v,configs)
+#raw_input("Press Enter to display the contact sequence ...")
+#displayContactSequence(v,configs)
 
 
 
