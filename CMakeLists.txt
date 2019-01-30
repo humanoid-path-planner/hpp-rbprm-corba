@@ -24,9 +24,10 @@ INCLUDE(cmake/base.cmake)
 INCLUDE(cmake/idl.cmake)
 INCLUDE(cmake/python.cmake)
 
+SET(PROJECT_ORG humanoid-path-planner)
 SET(PROJECT_NAME hpp-rbprm-corba)
 SET(PROJECT_DESCRIPTION "Corba server for reachability based planning")
-SET(PROJECT_URL "")
+SET(PROJECT_URL "https://github.com/${PROJECT_ORG}/${PROJECT_NAME}")
 
 # Set to 1 for profiling
 #add_definitions(-DPROFILE)
@@ -45,9 +46,9 @@ IF (HPP_DEBUG)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHPP_DEBUG")
 ENDIF()
 
-ADD_DOC_DEPENDENCY("hpp-core >= 4.2")
-ADD_REQUIRED_DEPENDENCY("hpp-corbaserver >= 4.2")
-ADD_REQUIRED_DEPENDENCY("hpp-rbprm")
+ADD_DOC_DEPENDENCY("hpp-core >= 4.3")
+ADD_REQUIRED_DEPENDENCY("hpp-corbaserver >= 4.3")
+ADD_REQUIRED_DEPENDENCY("hpp-rbprm >= 4.3")
 ADD_REQUIRED_DEPENDENCY("omniORB4 >= 4.1.4")
 ADD_REQUIRED_DEPENDENCY("hpp-affordance-corba")
 ADD_REQUIRED_DEPENDENCY("hpp-util >= 3")
@@ -101,6 +102,5 @@ install(DIRECTORY
 #~ install(DIRECTORY data/hyq_description
   #~ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/../
   #~ )
-  
-SETUP_PROJECT_FINALIZE()
 
+SETUP_PROJECT_FINALIZE()

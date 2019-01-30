@@ -43,8 +43,8 @@
 #include <hpp/rbprm/planner/rbprm-steering-kinodynamic.hh>
 #include <algorithm>    // std::random_shuffle
 #include <hpp/rbprm/interpolation/time-constraint-helper.hh>
-#include "spline/bezier_curve.h"
-#include "hpp/rbprm/interpolation/polynom-trajectory.hh"
+#include <hpp/spline/bezier_curve.h>
+#include <hpp/rbprm/interpolation/polynom-trajectory.hh>
 #include <hpp/rbprm/planner/random-shortcut-dynamic.hh>
 #include <hpp/rbprm/planner/oriented-path-optimizer.hh>
 #include <hpp/rbprm/sampling/heuristic-tools.hh>
@@ -1256,7 +1256,7 @@ namespace hpp {
             state.contactNormals_[*cit] = z;
             state.contacts_[*cit] = true;
             state.contactOrder_.push(*cit);
-        }        
+        }
         state.nbContacts = state.contactNormals_.size() ;
         state.configuration_ = config;
         state.robustness =  stability::IsStable(fullBody,state);
@@ -2149,7 +2149,7 @@ namespace hpp {
             throw hpp::Error ("No affordances found. Unable to interpolate.");
         }
 
-        hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = 
+        hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator =
                     rbprm::interpolation::RbPrmInterpolation::create(fullBody(),startState_,endState_,problemSolver()->paths()[pathId],testReachability,quasiStatic);
         lastStatesComputedTime_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
                     timestep,robustnessTreshold, filterStates != 0);
@@ -2251,7 +2251,7 @@ namespace hpp {
     CORBA::Short RbprmBuilder::comRRT(unsigned short s1, unsigned short s2, unsigned short path, unsigned short numOptimizations) throw (hpp::Error)
     {
         try
-        {          
+        {
             // temp
             assert(s2 == s1 +1);
             if(lastStatesComputed_.size () < s1 || lastStatesComputed_.size () < s2 )
@@ -2351,7 +2351,7 @@ namespace hpp {
             core::PathVectorPtr_t resPath = core::PathVector::create(fullBody()->device_->configSize(), fullBody()->device_->numberDof());
             hppDout(notice,"ComRRT : projections done. begin rrt");
             try{
-                hppDout(notice,"begin comRRT states 1 and 1bis");         
+                hppDout(notice,"begin comRRT states 1 and 1bis");
                 hppDout(notice,"state1     = r(["<<pinocchio::displayConfig(state1.configuration_)<<"])");
                 hppDout(notice,"state1 bis = r(["<<pinocchio::displayConfig(s1Bis.configuration_)<<"])");
                 core::PathPtr_t p1 = interpolation::comRRT(fullBody(),problemSolver()->problem(), paths[cT1],
