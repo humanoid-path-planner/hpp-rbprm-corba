@@ -53,6 +53,9 @@ ADD_REQUIRED_DEPENDENCY("omniORB4 >= 4.1.4")
 ADD_REQUIRED_DEPENDENCY("hpp-affordance-corba")
 ADD_REQUIRED_DEPENDENCY("hpp-util >= 3")
 
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake2")
+find_package(CDD REQUIRED)
+
 add_required_dependency("octomap >= 1.8")
 if (OCTOMAP_INCLUDE_DIRS AND OCTOMAP_LIBRARY_DIRS)
         include_directories(${OCTOMAP_INCLUDE_DIRS})
