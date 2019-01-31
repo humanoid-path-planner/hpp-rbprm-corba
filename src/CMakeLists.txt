@@ -95,7 +95,7 @@ INSTALL(TARGETS ${LIBRARY_NAME} DESTINATION lib)
 
 INSTALL(
   FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/__init__.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/corba.py
   DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm
   )
 INSTALL(
