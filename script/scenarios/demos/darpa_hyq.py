@@ -33,8 +33,8 @@ def addLimbDb(limbId, heuristicName, loadValues = True, disableEffectorCollision
 
 fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.offset,fullBody.normal, fullBody.legx, fullBody.legy, nbSamples, "random", 0.1, cType)
 fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.offset,fullBody.normal, fullBody.legx, fullBody.legy, nbSamples, "random", 0.05, cType)
-fullBody.addLimb(fullBody.rArmId,fullBody.rarm,fullBody.rHand,fullBody.offset,fullBody.normal, fullBody.legx, fullBody.legy, nbSamples, "random", 0.05, cType)
-fullBody.addLimb(fullBody.lArmId,fullBody.larm,fullBody.lHand,fullBody.offset,fullBody.normal, fullBody.legx, fullBody.legy, nbSamples, "random", 0.05, cType)
+fullBody.addLimb(fullBody.rArmId,fullBody.rarm,fullBody.rhand,fullBody.offset,fullBody.normal, fullBody.legx, fullBody.legy, nbSamples, "random", 0.05, cType)
+fullBody.addLimb(fullBody.lArmId,fullBody.larm,fullBody.lhand,fullBody.offset,fullBody.normal, fullBody.legx, fullBody.legy, nbSamples, "random", 0.05, cType)
 
 #~ fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
 #~ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
@@ -65,10 +65,12 @@ q_init=fullBody.referenceConfig[::]; q_init[0:7] = tp.q_init[0:7]; q_init[2]=ful
 q_goal = fullBody.referenceConfig[::]; q_goal[0:7] = tp.q_goal[0:7]; q_goal[2]=fullBody.referenceConfig[2]+0.02
 
 
+q_init = fullBody.generateContacts(q_init, [0,0,1])
+q_goal = fullBody.generateContacts(q_goal, [0,0,1])
 
 # specifying the full body configurations as start and goal state of the problem
-fullBody.setStartState(q_init,[fullBody.rLegId,fullBody.lLegId,fullBody.rArmId,fullBody.lArmId])
-fullBody.setEndState(q_goal,[fullBody.rLegId,fullBody.lLegId,fullBody.rArmId,fullBody.lArmId])
+fullBody.setStartState(q_init,[fullBody.rLegId,fullBody.lArmId,fullBody.lLegId,fullBody.rArmId])
+fullBody.setEndState(q_goal,[fullBody.rLegId,fullBody.lArmId,fullBody.lLegId,fullBody.rArmId])
 
 
 r(q_init)
