@@ -20,7 +20,7 @@ from hpp.corbaserver.rbprm import Client as RbprmClient
 from hpp.corbaserver.robot import Robot
 import hpp.gepetto.blender.exportmotion as em
 from numpy import array, matrix
-from spline import bezier
+from hpp_spline import bezier
 
 ## Load and handle a RbprmFullbody robot for rbprm planning
 #
