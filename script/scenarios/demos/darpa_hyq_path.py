@@ -28,7 +28,7 @@ vf = ViewerFactory (ps)
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 #~ afftool.loadObstacleModel (packageName, "darpa", "planning", r, reduceSizes=[0.05,0.,0.])
-afftool.loadObstacleModel ("hpp-rbprm-corba", "darpa", "planning", vf,reduceSizes=[0.1,0,0])
+afftool.loadObstacleModel("hpp_environments", "multicontact/darpa", "planning", vf,reduceSizes=[0.1,0,0])
 v = vf.createViewer()
 #afftool.visualiseAffordances('Support', v, [0.25, 0.5, 0.5])
 
