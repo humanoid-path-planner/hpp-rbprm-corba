@@ -1,9 +1,9 @@
-from hpp.corbaserver.rbprm.talos import Robot
+from hpp.corbaserver.rbprm.hyq_contact6D import Robot
 from hpp.gepetto import Viewer
 from tools.display_tools import *
 import time
 print "Plan guide trajectory ..."
-import talos_flatGround_path as tp
+import hyq_slalom_debris_path as tp
 print "Done."
 import time
 
@@ -11,7 +11,10 @@ pId = tp.ps.numberPaths() -1
 fullBody = Robot ()
 
 # Set the bounds for the root
-fullBody.setJointBounds ("root_joint",  [-5,5, -1.5, 1.5, 0.95, 1.05])
+root_bounds = tp.root_bounds
+root_bounds[4] -= 0.05
+root_bounds[5] += 0.05
+fullBody.setJointBounds ("root_joint",  root_bounds)
 # add the 6 extraDof for velocity and acceleration (see *_path.py script)
 fullBody.client.robot.setDimensionExtraConfigSpace(tp.extraDof)
 fullBody.client.robot.setExtraConfigSpaceBounds([-tp.vMax,tp.vMax,-tp.vMax,tp.vMax,0,0,-tp.aMax,tp.aMax,-tp.aMax,tp.aMax,0,0])
@@ -31,11 +34,15 @@ print "Generate limb DB ..."
 tStart = time.time()
 # generate databases : 
 
-nbSamples = 50000
-fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep08", 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints)
-fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
-fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep08", 0.01,kinematicConstraintsPath=fullBody.lLegKinematicConstraints)
-fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
+nbSamples = 10000
+
+fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.offset,fullBody.normal, fullBody.legx, fullBody.legy, nbSamples, "fixedStep06", 0.01)
+fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.offset,fullBody.normal, fullBody.legx, fullBody.legy, nbSamples, "fixedStep06", 0.01)
+fullBody.addLimb(fullBody.rArmId,fullBody.rarm,fullBody.rhand,fullBody.offset,fullBody.normal, fullBody.legx, fullBody.legy, nbSamples, "fixedStep06", 0.01)
+fullBody.addLimb(fullBody.lArmId,fullBody.larm,fullBody.lhand,fullBody.offset,fullBody.normal, fullBody.legx, fullBody.legy, nbSamples, "fixedStep06", 0.01)
+
+for limbId in fullBody.limbNames :
+    fullBody.runLimbSampleAnalysis(limbId, "ReferenceConfiguration", True)
 
 
 tGenerate =  time.time() - tStart
@@ -60,28 +67,28 @@ q_goal[configSize:configSize+3] = dir_goal[::]
 q_goal[configSize+3:configSize+6] = [0,0,0]
 
 
-q_init[2] = q_ref[2]
-q_goal[2] = q_ref[2]
-
-
 fullBody.setStaticStability(True)
 fullBody.setCurrentConfig (q_init)
-v(q_init)
 
 fullBody.setCurrentConfig (q_goal)
-v(q_goal)
 
-v.addLandmark('talos/base_link',0.3)
+v.addLandmark('hyq/base_link',0.3)
+
+
+q_init[2] = fullBody.referenceConfig[2]
+q_goal[2] = fullBody.referenceConfig[2]
 v(q_init)
+#q_init = fullBody.generateContacts(q_init, [0,0,1])
+#q_goal = fullBody.generateContacts(q_goal, [0,0,1])
 
 # specify the full body configurations as start and goal state of the problem
-fullBody.setStartState(q_init,[fullBody.rLegId,fullBody.lLegId])
-fullBody.setEndState(q_goal,[fullBody.rLegId,fullBody.lLegId])
+fullBody.setStartState(q_init,[fullBody.rLegId,fullBody.lArmId,fullBody.rArmId,fullBody.lLegId])
+fullBody.setEndState(q_goal,[fullBody.rLegId,fullBody.lArmId,fullBody.rArmId,fullBody.lLegId])
 
 
 print "Generate contact plan ..."
 tStart = time.time()
-configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = True)
+configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = True,testReachability = False)
 tInterpolateConfigs = time.time() - tStart
 print "Done."
 print "Contact plan generated in : "+str(tInterpolateConfigs)+" s"
