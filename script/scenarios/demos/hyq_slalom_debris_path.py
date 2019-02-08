@@ -52,7 +52,7 @@ vf = ViewerFactory (ps)
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
-afftool.loadObstacleModel ("hpp-rbprm-corba", "slalom_debris", "planning", vf,reduceSizes=[0.05,0,0])
+afftool.loadObstacleModel ("hpp_environments", "multicontact/slalom_debris", "planning", vf,reduceSizes=[0.05,0,0])
 v = vf.createViewer(displayArrows = True)
 #afftool.visualiseAffordances('Support', v, v.color.lightBrown)
 
