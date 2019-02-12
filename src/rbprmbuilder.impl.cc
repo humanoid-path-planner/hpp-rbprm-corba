@@ -2361,7 +2361,8 @@ namespace hpp {
                 core::segment_t interval(0, p1->initial().rows()-1);
                 core::segments_t intervals;
                 intervals.push_back(interval);
-                PathPtr_t reducedPath = core::SubchainPath::create(p1,intervals);
+                core::segments_t velIntervals (1, core::segment_t (0, fullBody()->device_->numberDof()));
+                PathPtr_t reducedPath = core::SubchainPath::create(p1,intervals, velIntervals);
                 resPath->appendPath(reducedPath);
                 pathsIds.push_back(AddPath(p1,problemSolver()));
             }
@@ -2383,7 +2384,8 @@ namespace hpp {
                 core::segment_t interval(0, p2->initial().rows()-1);
                 core::segments_t intervals;
                 intervals.push_back(interval);
-                PathPtr_t reducedPath = core::SubchainPath::create(p2,intervals);
+                core::segments_t velIntervals (1, core::segment_t (0, fullBody()->device_->numberDof()));
+                PathPtr_t reducedPath = core::SubchainPath::create(p2,intervals,velIntervals);
                 resPath->appendPath(reducedPath);
             }
             catch(std::runtime_error& e)
@@ -2401,7 +2403,8 @@ namespace hpp {
                 core::segment_t interval(0, p3->initial().rows()-1);
                 core::segments_t intervals;
                 intervals.push_back(interval);
-                PathPtr_t reducedPath = core::SubchainPath::create(p3,intervals);
+                core::segments_t velIntervals (1, core::segment_t (0, fullBody()->device_->numberDof()));
+                PathPtr_t reducedPath = core::SubchainPath::create(p3,intervals,velIntervals);
                 resPath->appendPath(reducedPath);
                 pathsIds.push_back(AddPath(p3,problemSolver()));
             }
@@ -2504,7 +2507,8 @@ namespace hpp {
             core::segment_t interval(0, p2->initial().rows()-1);
             core::segments_t intervals;
             intervals.push_back(interval);
-            PathPtr_t reducedPath = core::SubchainPath::create(p2,intervals);
+            core::segments_t velIntervals (1, core::segment_t (0, fullBody()->device_->numberDof()));
+            PathPtr_t reducedPath = core::SubchainPath::create(p2,intervals,velIntervals);
             core::PathVectorPtr_t resPath = core::PathVector::create(fullBody()->device_->configSize(), fullBody()->device_->numberDof());
             resPath->appendPath(reducedPath);
 
@@ -2558,7 +2562,8 @@ namespace hpp {
         core::segment_t interval(0, p1->initial().rows()-1);
         core::segments_t intervals;
         intervals.push_back(interval);
-        PathPtr_t reducedPath = core::SubchainPath::create(p1,intervals);
+        core::segments_t velIntervals (1, core::segment_t (0, fullBody()->device_->numberDof()));
+        PathPtr_t reducedPath = core::SubchainPath::create(p1,intervals, velIntervals);
         resPath->appendPath(reducedPath);
         pathsIds.push_back((CORBA::Short)problemSolver()->addPath(resPath));
 
