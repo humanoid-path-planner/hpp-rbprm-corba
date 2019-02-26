@@ -23,18 +23,17 @@ SET(CXX_DISABLE_WERROR true)
 INCLUDE(cmake/base.cmake)
 INCLUDE(cmake/idl.cmake)
 INCLUDE(cmake/python.cmake)
+INCLUDE(cmake/hpp.cmake)
 
-SET(PROJECT_ORG humanoid-path-planner)
 SET(PROJECT_NAME hpp-rbprm-corba)
 SET(PROJECT_DESCRIPTION "Corba server for reachability based planning")
-SET(PROJECT_URL "https://github.com/${PROJECT_ORG}/${PROJECT_NAME}")
 
 # Set to 1 for profiling
 #add_definitions(-DPROFILE)
 
 SET(CUSTOM_HEADER_DIR hpp/corbaserver/rbprm)
 
-SETUP_PROJECT ()
+SETUP_HPP_PROJECT ()
 
 SET(${PROJECT_NAME}_HEADERS
   include/hpp/corbaserver/rbprm/server.hh
@@ -53,7 +52,7 @@ ADD_REQUIRED_DEPENDENCY("omniORB4 >= 4.1.4")
 ADD_REQUIRED_DEPENDENCY("hpp-affordance-corba")
 ADD_REQUIRED_DEPENDENCY("hpp-util >= 3")
 
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake2")
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/find-external/CDD")
 find_package(CDD REQUIRED)
 
 add_required_dependency("octomap >= 1.8")
@@ -77,4 +76,4 @@ ADD_SUBDIRECTORY(src)
 
 CONFIG_FILES (include/hpp/corbaserver/rbprm/doc.hh)
 
-SETUP_PROJECT_FINALIZE()
+SETUP_HPP_PROJECT_FINALIZE()
