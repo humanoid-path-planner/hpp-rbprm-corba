@@ -2552,20 +2552,21 @@ namespace hpp {
         State s2 = lastStatesComputed_[size_t(state2)];
         hppDout(notice,"state1 = r(["<<pinocchio::displayConfig(s1.configuration_)<<")]");
         hppDout(notice,"state2 = r(["<<pinocchio::displayConfig(s2.configuration_)<<")]");
-        core::PathVectorPtr_t resPath = core::PathVector::create(fullBody()->device_->configSize(), fullBody()->device_->numberDof());
+        //core::PathVectorPtr_t resPath = core::PathVector::create(fullBody()->device_->configSize(), fullBody()->device_->numberDof());
         std::vector<CORBA::Short> pathsIds;
 
         core::PathPtr_t p1 = (*functor)(fullBody(),problemSolver(), paths[comTraj],
-                                s1,s2, numOptimizations,true);
+                                s1,s2, numOptimizations,false);
         hppDout(notice,"effectorRRT done.");
         // reduce path to remove extradof
-        core::segment_t interval(0, p1->initial().rows()-1);
+        /*core::segment_t interval(0, p1->initial().rows()-1);
         core::segments_t intervals;
         intervals.push_back(interval);
         core::segments_t velIntervals (1, core::segment_t (0, fullBody()->device_->numberDof()));
         PathPtr_t reducedPath = core::SubchainPath::create(p1,intervals, velIntervals);
         resPath->appendPath(reducedPath);
-        pathsIds.push_back((CORBA::Short)problemSolver()->addPath(resPath));
+        */
+        pathsIds.push_back((CORBA::Short)AddPath(p1,problemSolver()));
 
         hpp::floatSeq* dofArray = new hpp::floatSeq();
         dofArray->length((_CORBA_ULong)pathsIds.size());
