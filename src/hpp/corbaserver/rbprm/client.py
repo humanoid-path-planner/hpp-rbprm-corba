@@ -17,51 +17,29 @@
 # hpp-manipulation-corba.  If not, see
 # <http://www.gnu.org/licenses/>.
 
-from omniORB import CORBA
-import CosNaming
+from hpp.corbaserver.client import Client as _Parent
+from hpp_idl.hpp.corbaserver.rbprm import RbprmBuilder
 
-from hpp.corbaserver.rbprm import RbprmBuilder
-
-class CorbaError(Exception):
-    """
-    Raised when a CORBA error occurs.
-    """
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-
-class Client:
+class Client (_Parent):
   """
   Connect and create clients for hpp-rbprm library.
   """
-  def __init__(self):
+
+  defaultClients = {
+          'rbprmbuilder'  : RbprmBuilder,
+          }
+
+  def __init__(self, url = None, context = "corbaserver"):
     """
     Initialize CORBA and create default clients.
+    :param url: URL in the IOR, corbaloc, corbalocs, and corbanames formats.
+                For a remote corba server, use
+                url = "corbaloc:iiop:<host>:<port>/NameService"
     """
-    import sys
-    self.orb = CORBA.ORB_init (sys.argv, CORBA.ORB_ID)
-    obj = self.orb.resolve_initial_references("NameService")
-    self.rootContext = obj._narrow(CosNaming.NamingContext)
-    if self.rootContext is None:
-        raise CorbaError ('failed to narrow the root context')
+    self._initOrb (url)
+    self._makeClients ("rbprm", self.defaultClients, context)
 
-    # client of Rbprm interface
-    name = [CosNaming.NameComponent ("hpp", "corbaserver"),
-            CosNaming.NameComponent ("rbprm", "rbprmbuilder")]
-
-    try:
-        obj = self.rootContext.resolve (name)
-    except CosNaming.NamingContext.NotFound, ex:
-        raise CorbaError ('failed to find rbprm service.')
-    try:
-        client = obj._narrow (RbprmBuilder)
-    except KeyError:
-        raise CorbaError ('invalid service name rbprm')
-
-    if client is None:
-      # This happens when stubs from client and server are not synchronized.
-        raise CorbaError (
-            'failed to narrow client for service rbprm')
-    self.rbprm = client
-
+    # self.rbprmbuilder is created by self._makeClients
+    # The old code stored the object as self.rbprm
+    # Make it backward compatible.
+    self.rbprm = self.rbprmbuilder

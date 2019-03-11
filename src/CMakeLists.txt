@@ -20,10 +20,6 @@ SET(IDL_SOURCES
 	rbprmbuilder
 )
 
-SET(HPP_CORBASERVER_IDL_SOURCES
-  common
-)
-
 OMNIIDL_INCLUDE_DIRECTORIES(
   ${HPP_CORBASERVER_DATAROOTDIR}/idl ${CMAKE_SOURCE_DIR}/idl
   )
@@ -33,46 +29,33 @@ FINDPYTHON(2.7 EXACT REQUIRED)
 
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/src)
 FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/hpp/corbaserver/rbprm)
-FOREACH(IDL ${IDL_SOURCES})
-  GENERATE_IDL_CPP (${IDL}
-    ${CMAKE_SOURCE_DIR}/idl/hpp/corbaserver/rbprm
-		)
-  GENERATE_IDL_PYTHON (${IDL}
-	    ${CMAKE_SOURCE_DIR}/idl/hpp/corbaserver/rbprm
-		)
-ENDFOREACH()
 
 FOREACH(IDL ${IDL_SOURCES})
   GENERATE_IDL_CPP (hpp/corbaserver/rbprm/${IDL}
-    ${CMAKE_SOURCE_DIR}/idl/hpp/corbaserver/rbprm)
-  GENERATE_IDL_PYTHON (hpp/corbaserver/rbprm/${IDL}
-    ${CMAKE_SOURCE_DIR}/idl/hpp/corbaserver/rbprm)
-
-  INSTALL(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/hpp/corbaserver/rbprm/${IDL}.hh
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/hpp/corbaserver/rbprm)
-  INSTALL(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/hpp/corbaserver/rbprm/${IDL}_idl.py
-    DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm)
-ENDFOREACH()
-
-FOREACH(IDL ${HPP_CORBASERVER_IDL_SOURCES})
-  GENERATE_IDL_CPP (${IDL}
-    ${HPP_CORBASERVER_DATAROOTDIR}/idl/hpp/corbaserver
-    )
+    ${CMAKE_SOURCE_DIR}/idl/hpp/corbaserver/rbprm
+    HEADER_SUFFIX -idl.hh)
   GENERATE_IDL_PYTHON (${IDL}
-    ${HPP_CORBASERVER_DATAROOTDIR}/idl/hpp/corbaserver
+    ${CMAKE_SOURCE_DIR}/idl/hpp/corbaserver/rbprm
+    ENABLE_DOCSTRING
+    STUBS hpp_stubs.rbprm
+    ARGUMENTS
+    -Wbmodules=hpp_idl
+    -Wbextern=common:hpp_stubs
     )
-  INSTALL(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/${IDL}_idl.py
-    DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm)
+
+  INSTALL(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/hpp/corbaserver/rbprm/${IDL}-idl.hh
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/hpp/corbaserver/rbprm)
 ENDFOREACH()
+INSTALL(
+  DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/hpp_idl/hpp/corbaserver/rbprm
+  DESTINATION ${PYTHON_SITELIB}/hpp_idl/hpp/corbaserver)
+INSTALL(
+  DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/hpp_stubs/rbprm
+  DESTINATION ${PYTHON_SITELIB}/hpp_stubs)
 
 ADD_LIBRARY(${LIBRARY_NAME} SHARED
-  common.hh
-  commonSK.cc
-  ${CMAKE_CURRENT_BINARY_DIR}/hpp/corbaserver/rbprm/rbprmbuilder.hh
-  ${CMAKE_CURRENT_BINARY_DIR}/hpp/corbaserver/rbprm/rbprmbuilderSK.cc
+  ${ALL_IDL_CPP_STUBS}
   rbprmbuilder.impl.cc
   rbprmbuilder.impl.hh
   server.cc
