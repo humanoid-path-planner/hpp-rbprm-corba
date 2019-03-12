@@ -20,7 +20,7 @@
 
 # include <hpp/core/problem-solver.hh>
 # include <hpp/core/path.hh>
-# include "rbprmbuilder.hh"
+# include "hpp/corbaserver/rbprm/rbprmbuilder-idl.hh"
 # include <hpp/rbprm/rbprm-device.hh>
 # include <hpp/rbprm/rbprm-fullbody.hh>
 # include <hpp/rbprm/rbprm-shooter.hh>
