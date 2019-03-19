@@ -18,7 +18,7 @@
 #ifndef HPP_RBPRM_CORBA_BUILDER_IDL
 # define HPP_RBPRM_CORBA_BUILDER_IDL
 
-# include <hpp/corbaserver/common.idl>
+# include <hpp/common.idl>
 
 module hpp
 {
