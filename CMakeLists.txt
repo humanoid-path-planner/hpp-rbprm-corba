@@ -51,6 +51,7 @@ ADD_REQUIRED_DEPENDENCY("hpp-rbprm >= 4.3")
 ADD_REQUIRED_DEPENDENCY("omniORB4 >= 4.1.4")
 ADD_REQUIRED_DEPENDENCY("hpp-affordance-corba")
 ADD_REQUIRED_DEPENDENCY("hpp-util >= 3")
+ADD_REQUIRED_DEPENDENCY("hpp-pinocchio >= 4.3")
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/find-external/CDD")
 find_package(CDD REQUIRED)
