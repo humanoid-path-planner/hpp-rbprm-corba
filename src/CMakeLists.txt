@@ -106,5 +106,6 @@ INSTALL(
 # Stand alone corba server
 ADD_EXECUTABLE (hpp-rbprm-server hpp-rbprm-corba.cc)
 TARGET_LINK_LIBRARIES (hpp-rbprm-server ${LIBRARY_NAME} hpp-rbprm)
+PKG_CONFIG_USE_DEPENDENCY(hpp-rbprm-server hpp-pinocchio)
 
 INSTALL (TARGETS hpp-rbprm-server DESTINATION ${CMAKE_INSTALL_BINDIR})
