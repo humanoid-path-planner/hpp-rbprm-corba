@@ -1,6 +1,5 @@
 from hpp.corbaserver.rbprm.talos_abstract import Robot
 from hpp.gepetto import Viewer
-from hpp.corbaserver import Client
 from hpp.corbaserver import ProblemSolver
 import time
 
@@ -48,7 +47,7 @@ vf = ViewerFactory (ps)
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
-afftool.loadObstacleModel ("hpp-rbprm-corba", "ground", "planning", vf)
+afftool.loadObstacleModel ("hpp_environments", "multicontact/ground", "planning", vf)
 v = vf.createViewer(displayArrows = True)
 #afftool.visualiseAffordances('Support', v, v.color.lightBrown)
 
@@ -84,9 +83,10 @@ print "Guide planning time : ",t
 # display solution : 
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (v)
-pp.dt=0.03
-pp.displayVelocityPath(0)
+pp.dt=0.1
+#pp.displayVelocityPath(0)
 v.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
+pp.dt=0.01
 #pp(0)
 
 # move the robot out of the view before computing the contacts

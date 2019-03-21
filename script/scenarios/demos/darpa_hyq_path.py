@@ -21,25 +21,30 @@ rbprmBuilder.boundSO3([-0.4,0.4,-0.3,0.3,-0.3,0.3])
 # Creating an instance of HPP problem solver and the viewer
 from hpp.corbaserver.problem_solver import ProblemSolver
 ps = ProblemSolver( rbprmBuilder )
-r = Viewer (ps)
+from hpp.gepetto import ViewerFactory
+vf = ViewerFactory (ps)
+
+
+from hpp.corbaserver.affordance.affordance import AffordanceTool
+afftool = AffordanceTool ()
+#~ afftool.loadObstacleModel (packageName, "darpa", "planning", r, reduceSizes=[0.05,0.,0.])
+afftool.loadObstacleModel("hpp_environments", "multicontact/darpa", "planning", vf,reduceSizes=[0.1,0,0])
+v = vf.createViewer()
+#afftool.visualiseAffordances('Support', v, [0.25, 0.5, 0.5])
+
+
 
 # Setting initial and goal configurations
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init [0:3] = [-2, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
+q_init [0:3] = [-2, 0, 0.64]; rbprmBuilder.setCurrentConfig (q_init); v (q_init)
 q_goal = q_init [::]
-q_goal [0:3] = [3, 0, 0.63]; r (q_goal)
+q_goal [0:3] = [3, 0, 0.64]; v (q_goal)
 #~ q_goal [0:3] = [-1.5, 0, 0.75]; r (q_goal)
 
 # Choosing a path optimizer
 ps.addPathOptimizer("RandomShortcut")
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
-
-from hpp.corbaserver.affordance.affordance import AffordanceTool
-afftool = AffordanceTool ()
-#~ afftool.loadObstacleModel (packageName, "darpa", "planning", r, reduceSizes=[0.05,0.,0.])
-afftool.loadObstacleModel ("hpp-rbprm-corba", "darpa", "planning", r)
-afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
 
 # Choosing RBPRM shooter and path validation methods.
 # Note that the standard RRT algorithm is used.
@@ -56,11 +61,11 @@ print "computation time for root path ", t
 
 # Playing the computed path
 from hpp.gepetto import PathPlayer
-pp = PathPlayer (r)
+pp = PathPlayer (v)
 
 q_far = q_init [::]
-q_far [0:3] = [-2, -3, 0.63]; 
-r(q_far)
+q_far [0:3] = [-2, -3, 0.6]; 
+v(q_far)
 
 for i in range(1,10):
 	rbprmBuilder.client.problem.optimizePath(i)
@@ -76,6 +81,6 @@ rbprmBuilder2 = Robot ("toto")
 ps2 = ProblemSolver( rbprmBuilder2 )
 cl.problem.selectProblem("default")
 cl.problem.movePathToProblem(8,"rbprm_path",rbprmBuilder.getAllJointNames()[1:])
-r2 = Viewer (ps2, viewerClient=r.client)
+r2 = Viewer (ps2, viewerClient=v.client)
 r2(q_far)
 

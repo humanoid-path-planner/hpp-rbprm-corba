@@ -23,18 +23,17 @@ SET(CXX_DISABLE_WERROR true)
 INCLUDE(cmake/base.cmake)
 INCLUDE(cmake/idl.cmake)
 INCLUDE(cmake/python.cmake)
+INCLUDE(cmake/hpp.cmake)
 
-SET(PROJECT_ORG humanoid-path-planner)
 SET(PROJECT_NAME hpp-rbprm-corba)
 SET(PROJECT_DESCRIPTION "Corba server for reachability based planning")
-SET(PROJECT_URL "https://github.com/${PROJECT_ORG}/${PROJECT_NAME}")
 
 # Set to 1 for profiling
 #add_definitions(-DPROFILE)
 
 SET(CUSTOM_HEADER_DIR hpp/corbaserver/rbprm)
 
-SETUP_PROJECT ()
+SETUP_HPP_PROJECT ()
 
 SET(${PROJECT_NAME}_HEADERS
   include/hpp/corbaserver/rbprm/server.hh
@@ -53,7 +52,7 @@ ADD_REQUIRED_DEPENDENCY("omniORB4 >= 4.1.4")
 ADD_REQUIRED_DEPENDENCY("hpp-affordance-corba")
 ADD_REQUIRED_DEPENDENCY("hpp-util >= 3")
 
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake2")
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/find-external/CDD")
 find_package(CDD REQUIRED)
 
 add_required_dependency("octomap >= 1.8")
@@ -66,7 +65,7 @@ if (OCTOMAP_INCLUDE_DIRS AND OCTOMAP_LIBRARY_DIRS)
   list(GET VERSION_LIST 2 OCTOMAP_PATCH_VERSION)
   add_definitions (-DOCTOMAP_MAJOR_VERSION=${OCTOMAP_MAJOR_VERSION}
                    -DOCTOMAP_MINOR_VERSION=${OCTOMAP_MINOR_VERSION}
-                   -DOCTOMAP_PATCH_VERSION=${OCTOMAP_PATCH_VERSION})
+                   -DOCTOMAP_PATCH_VERSION=${OCTOMAP_PATCH_VERSION}  -DHPP_FCL_HAVE_OCTOMAP=1)
         message(STATUS "FCL uses Octomap" ${OCTOMAP_MINOR_VERSION})
 else()
         message(STATUS "FCL does not use Octomap")
@@ -77,33 +76,4 @@ ADD_SUBDIRECTORY(src)
 
 CONFIG_FILES (include/hpp/corbaserver/rbprm/doc.hh)
 
-SET(CATKIN_PACKAGE_SHARE_DESTINATION
-  ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME})
-
-install(FILES
-  data/package.xml
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  )
-install(DIRECTORY
-  data/urdf/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
-  )
-install(DIRECTORY
-  data/srdf/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srdf
-  )
-install(DIRECTORY
-  data/meshes/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
-  )
-
-install(DIRECTORY
-  data/spiderman/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes/spiderman
-  )
-
-#~ install(DIRECTORY data/hyq_description
-  #~ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/../
-  #~ )
-
-SETUP_PROJECT_FINALIZE()
+SETUP_HPP_PROJECT_FINALIZE()
