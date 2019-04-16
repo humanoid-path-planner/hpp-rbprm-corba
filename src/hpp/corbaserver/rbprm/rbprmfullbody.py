@@ -843,6 +843,11 @@ class FullBody (Robot):
      def setReferenceConfig(self,referenceConfig):
           return self.clientRbprm.rbprm.setReferenceConfig(referenceConfig)
 
+     ## set the weights used when computing a postural task
+     # \param postureWeights dofArray, must be of same size as device->numberDof
+     def setPostureWeights(self,postureWeights):
+          return self.clientRbprm.rbprm.setPostureWeights(postureWeights)
+
       ## return the time at the given state index (in the path computed during the first phase)
       # \param stateId : index of the state
      def getTimeAtState(self,stateId):

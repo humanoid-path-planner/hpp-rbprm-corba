@@ -633,6 +633,13 @@ namespace hpp {
       fullBody()->referenceConfig(config);
     }
 
+    void RbprmBuilder::setPostureWeights(const hpp::floatSeq& postureWeights) throw (hpp::Error){
+      if(!fullBodyLoaded_)
+        throw Error ("No full body robot was loaded");
+      Configuration_t config(dofArrayToConfig (fullBody()->device_->numberDof(), postureWeights));
+      fullBody()->postureWeights(config);
+    }
+
     void RbprmBuilder::setReferenceEndEffector(const char* romName, const hpp::floatSeq &ref) throw(hpp::Error){
       std::string name (romName);
       hpp::pinocchio::RbPrmDevicePtr_t device = boost::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(problemSolver()->robot ());
