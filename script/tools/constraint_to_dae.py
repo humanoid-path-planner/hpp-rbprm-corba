@@ -1,6 +1,6 @@
 import subprocess
 import os
-DIR = "/local/fernbac/bench_iros18/constraints_obj/"
+DIR = "/local/fernbach/qhull/constraints_obj/"
 STAB_NAME = "stability"
 CONS_NAME = "constraints"
 KIN_NAME = "kinematics"
@@ -10,8 +10,9 @@ BEZIER_NAME = "bezier_wp"
 def generate_off_file(name):
     os.remove(DIR+name+"_.off") if os.path.isfile(DIR+name+"_.off") else None
     os.remove(DIR+name+".off") if os.path.isfile(DIR+name+".off") else None
-    
-    cmd = "cat "+DIR+name+".txt | qhalf Fp | qconvex o >> "+DIR+name+"_.off"
+
+    #cmd = "cat "+DIR+name+".txt | qhalf Fp | qconvex o >> "+DIR+name+"_.off"
+    cmd = "cat "+DIR+name+".txt | qhalf FP | qconvex Ft  >> "+DIR+name+"_.off"
     try :
         subprocess.check_output(cmd,shell=True)
         print "qHull OK for file : "+name+".txt"
