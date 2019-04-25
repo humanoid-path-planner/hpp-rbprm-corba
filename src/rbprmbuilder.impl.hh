@@ -20,7 +20,7 @@
 
 # include <hpp/core/problem-solver.hh>
 # include <hpp/core/path.hh>
-# include "rbprmbuilder.hh"
+# include "hpp/corbaserver/rbprm/rbprmbuilder-idl.hh"
 # include <hpp/rbprm/rbprm-device.hh>
 # include <hpp/rbprm/rbprm-fullbody.hh>
 # include <hpp/rbprm/rbprm-shooter.hh>
@@ -196,6 +196,7 @@ namespace hpp {
         void setStaticStability(const bool staticStability) throw (hpp::Error);
 
         void setReferenceConfig(const hpp::floatSeq &referenceConfig) throw (hpp::Error);
+        void setPostureWeights(const hpp::floatSeq &postureWeights) throw (hpp::Error);
         void setReferenceEndEffector(const char* romName, const hpp::floatSeq &ref) throw(hpp::Error);
 
         virtual void setFilter(const hpp::Names_t& roms) throw (hpp::Error);

@@ -17,7 +17,7 @@
 
 //#include <hpp/fcl/math/transform.h>
 #include <hpp/util/debug.hh>
-#include <hpp/corbaserver/rbprm/rbprmbuilder.hh>
+#include <hpp/corbaserver/rbprm/rbprmbuilder-idl.hh>
 #include "rbprmbuilder.impl.hh"
 #include "hpp/rbprm/rbprm-device.hh"
 #include "hpp/rbprm/rbprm-validation.hh"
@@ -631,6 +631,13 @@ namespace hpp {
       Configuration_t config(dofArrayToConfig (fullBody()->device_, referenceConfig));
       refPose_ = config;
       fullBody()->referenceConfig(config);
+    }
+
+    void RbprmBuilder::setPostureWeights(const hpp::floatSeq& postureWeights) throw (hpp::Error){
+      if(!fullBodyLoaded_)
+        throw Error ("No full body robot was loaded");
+      Configuration_t config(dofArrayToConfig (fullBody()->device_->numberDof(), postureWeights));
+      fullBody()->postureWeights(config);
     }
 
     void RbprmBuilder::setReferenceEndEffector(const char* romName, const hpp::floatSeq &ref) throw(hpp::Error){
@@ -2552,20 +2559,21 @@ namespace hpp {
         State s2 = lastStatesComputed_[size_t(state2)];
         hppDout(notice,"state1 = r(["<<pinocchio::displayConfig(s1.configuration_)<<")]");
         hppDout(notice,"state2 = r(["<<pinocchio::displayConfig(s2.configuration_)<<")]");
-        core::PathVectorPtr_t resPath = core::PathVector::create(fullBody()->device_->configSize(), fullBody()->device_->numberDof());
+        //core::PathVectorPtr_t resPath = core::PathVector::create(fullBody()->device_->configSize(), fullBody()->device_->numberDof());
         std::vector<CORBA::Short> pathsIds;
 
         core::PathPtr_t p1 = (*functor)(fullBody(),problemSolver(), paths[comTraj],
-                                s1,s2, numOptimizations,true);
+                                s1,s2, numOptimizations,false);
         hppDout(notice,"effectorRRT done.");
         // reduce path to remove extradof
-        core::segment_t interval(0, p1->initial().rows()-1);
+        /*core::segment_t interval(0, p1->initial().rows()-1);
         core::segments_t intervals;
         intervals.push_back(interval);
         core::segments_t velIntervals (1, core::segment_t (0, fullBody()->device_->numberDof()));
         PathPtr_t reducedPath = core::SubchainPath::create(p1,intervals, velIntervals);
         resPath->appendPath(reducedPath);
-        pathsIds.push_back((CORBA::Short)problemSolver()->addPath(resPath));
+        */
+        pathsIds.push_back((CORBA::Short)AddPath(p1,problemSolver()));
 
         hpp::floatSeq* dofArray = new hpp::floatSeq();
         dofArray->length((_CORBA_ULong)pathsIds.size());

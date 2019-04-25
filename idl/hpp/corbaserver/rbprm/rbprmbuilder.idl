@@ -18,7 +18,7 @@
 #ifndef HPP_RBPRM_CORBA_BUILDER_IDL
 # define HPP_RBPRM_CORBA_BUILDER_IDL
 
-# include <hpp/corbaserver/common.idl>
+# include <hpp/common.idl>
 
 module hpp
 {
@@ -104,6 +104,10 @@ module hpp
 
     /// set a reference configuration in fullBody
     void setReferenceConfig(in floatSeq referenceConfig)
+      raises (Error);
+
+    /// set the weights used when computing a postural task
+    void setPostureWeights(in floatSeq postureWeights)
       raises (Error);
 
     /// set a reference position of the end effector for the given ROM

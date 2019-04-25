@@ -18,7 +18,6 @@
 
 from hpp.corbaserver.rbprm import Client as RbprmClient
 from hpp.corbaserver.robot import Robot
-import hpp.gepetto.blender.exportmotion as em
 from numpy import array, matrix
 from hpp_spline import bezier
 
@@ -817,6 +816,7 @@ class FullBody (Robot):
      # \param configurations list of configurations to save
      # \param filename outputfile where to export the motion
      def exportMotion(self, viewer, configurations, filename):
+          import hpp.gepetto.blender.exportmotion as em
           em.exportStates(viewer, self.client.robot, configurations, filename)
           
      ## Export motion to a format readable by the blender
@@ -842,6 +842,11 @@ class FullBody (Robot):
      # \param referenceConfig dofArray
      def setReferenceConfig(self,referenceConfig):
           return self.clientRbprm.rbprm.setReferenceConfig(referenceConfig)
+
+     ## set the weights used when computing a postural task
+     # \param postureWeights dofArray, must be of same size as device->numberDof
+     def setPostureWeights(self,postureWeights):
+          return self.clientRbprm.rbprm.setPostureWeights(postureWeights)
 
       ## return the time at the given state index (in the path computed during the first phase)
       # \param stateId : index of the state
