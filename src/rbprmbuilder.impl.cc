@@ -651,7 +651,11 @@ namespace hpp {
       device->setEffectorReference(name,config);
     }
 
-
+    void RbprmBuilder::usePosturalTaskContactCreation(const bool usePosturalTaskContactCreation) throw (hpp::Error){
+      if(!fullBodyLoaded_)
+        throw Error ("No full body robot was loaded");
+      fullBody()->usePosturalTaskContactCreation(usePosturalTaskContactCreation);
+    }
 
     void RbprmBuilder::setFilter(const hpp::Names_t& roms) throw (hpp::Error)
     {

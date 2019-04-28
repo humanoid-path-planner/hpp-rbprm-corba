@@ -875,6 +875,11 @@ class FullBody (Robot):
      def setPostureWeights(self,postureWeights):
           return self.clientRbprm.rbprm.setPostureWeights(postureWeights)
 
+     ## If true, optimize the orientation of all the newly created contact using a postural task
+     # \param use bool
+     def usePosturalTaskContactCreation(self,use):
+          return self.clientRbprm.rbprm.usePosturalTaskContactCreation(use)
+
       ## return the time at the given state index (in the path computed during the first phase)
       # \param stateId : index of the state
      def getTimeAtState(self,stateId):

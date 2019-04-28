@@ -110,6 +110,10 @@ module hpp
     void setPostureWeights(in floatSeq postureWeights)
       raises (Error);
 
+    /// If true, optimize the orientation of all the newly created contact using a postural task
+    void usePosturalTaskContactCreation(in boolean use)
+      raises (Error);
+
     /// set a reference position of the end effector for the given ROM
     void setReferenceEndEffector(in string romName, in floatSeq ref)
       raises (Error);
