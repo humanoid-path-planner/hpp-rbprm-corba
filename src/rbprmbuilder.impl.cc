@@ -851,6 +851,28 @@ namespace hpp {
         return projectStateToCOMEigen(stateId, com_target, max_num_sample);
     }
 
+    double RbprmBuilder::projectStateToRoot(unsigned short stateId, const hpp::floatSeq& root) throw (hpp::Error)
+    {
+        pinocchio::Configuration_t root_target = dofArrayToConfig (7, root);
+        if(lastStatesComputed_.size() <= stateId)
+        {
+            throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
+        }
+        State s = lastStatesComputed_[stateId];
+        projection::ProjectionReport rep = projection::projectToRootConfiguration(fullBody(),root_target,s);
+        double success = 0.;
+        if(rep.success_){
+          ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
+          CollisionValidationPtr_t val = fullBody()->GetCollisionValidation();
+          if(val->validate(rep.result_.configuration_,rport)){
+            lastStatesComputed_[stateId] = rep.result_;
+            lastStatesComputedTime_[stateId].second = rep.result_;
+            success = 1.;
+          }
+        }
+        return success;
+    }
+
 
     rbprm::State RbprmBuilder::generateContacts_internal(const hpp::floatSeq& configuration,
       const hpp::floatSeq& direction,const hpp::floatSeq& acceleration, const double robustnessThreshold ) throw (hpp::Error)

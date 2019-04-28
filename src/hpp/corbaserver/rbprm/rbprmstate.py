@@ -140,6 +140,9 @@ class State (object):
             return self.fullBody.projectToCom(self.sId, targetCom)
         else:
             return self.fullBody.projectStateToCOM(self.sId, targetCom,maxNumSample)     > 0
+
+    def projectToRoot(self,targetRoot):
+        return self.fullBody.projectStateToRoot(self.sId,targetRoot) > 0
         
     def getComConstraint(self, limbsCOMConstraints, exceptList = []):
         return get_com_constraint(self.fullBody, self.sId, self.cl.getConfigAtState(self.sId), limbsCOMConstraints, interm = self.isIntermediate, exceptList = exceptList)
@@ -168,10 +171,13 @@ class StateHelper(object):
     # \param limbName name of the considered limb to create contact with
     # \param p 3d position of the point
     # \param n 3d normal of the contact location center
+    # \param max_num_sample number of times it will try to randomly sample a configuration before failing
+    # \param lockOtherJoints : if True, the values of all the joints exepct the ones of 'limbName' are constrained to be constant.
+    #                This only affect the first projection, if max_num_sample > 0 and the first projection was unsuccessfull, the parameter is ignored
     # \return (State, success) whether the creation was successful, as well as the new state
     @staticmethod
-    def addNewContact(state, limbName, p, n, num_max_sample = 0):
-        sId = state.cl.addNewContact(state.sId, limbName, p, n, num_max_sample)
+    def addNewContact(state, limbName, p, n, num_max_sample = 0, lockOtherJoints= False):
+        sId = state.cl.addNewContact(state.sId, limbName, p, n, num_max_sample,lockOtherJoints)
         if(sId != -1):
             return State(state.fullBody, sId = sId), True
         return state, False

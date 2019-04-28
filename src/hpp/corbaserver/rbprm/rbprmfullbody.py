@@ -734,6 +734,14 @@ class FullBody (Robot):
      # \return whether the projection was successful
      def projectStateToCOM(self, state, targetCom, maxNumSample = 0):
           return self.clientRbprm.rbprm.projectStateToCOM(state, targetCom, maxNumSample)     > 0
+
+     ## Project a given state into a given root position
+     # and update the state configuration.
+     # \param state index of first state.
+     # \param root : root configuration (size 7)
+     # \return whether the projection was successful
+     def projectStateToRoot(self, state, root):
+          return self.clientRbprm.rbprm.projectStateToRoot(state, root)     > 0
           
      ## Project a given state into a given COM position
      # and update the state configuration.
