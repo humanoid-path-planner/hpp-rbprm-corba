@@ -60,7 +60,7 @@ q_ref = fullBody.referenceConfig[::]+[0]*6
 #q_ref = fullBody.referenceConfig_legsApart[::]+[0]*6
 q_init = q_ref[::]
 fullBody.setReferenceConfig(q_ref)
-
+fullBody.usePosturalTaskContactCreation(True)
 
 if abs(tp.q_goal[1]) <= abs(tp.q_goal[0]) : 
   fullBody.setPostureWeights(fullBody.postureWeights[::]+[0]*6)
