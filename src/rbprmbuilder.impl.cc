@@ -3230,7 +3230,7 @@ namespace hpp {
 
 
     CORBA::Short RbprmBuilder::addNewContact(unsigned short stateId, const char* limbName,
-                                        const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample) throw (hpp::Error)
+                                        const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample, bool lockOtherJoints) throw (hpp::Error)
     {
         try
         {
@@ -3244,7 +3244,7 @@ namespace hpp {
             config = dofArrayToConfig (std::size_t(3), normal);
             fcl::Vec3f n; for(int i =0; i<3; ++i) n[i] = config[i];
 
-            projection::ProjectionReport rep = projection::projectStateToObstacle(fullBody(),limb, fullBody()->GetLimbs().at(limb), ns, n,p);
+            projection::ProjectionReport rep = projection::projectStateToObstacle(fullBody(),limb, fullBody()->GetLimbs().at(limb), ns, n,p,lockOtherJoints);
             hppDout(notice,"Projection State to obstacle success : "<<rep.success_);
             hppDout(notice,"report status : "<<rep.status_);
             ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
