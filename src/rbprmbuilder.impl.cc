@@ -922,9 +922,8 @@ namespace hpp {
             Configuration_t config;
             for(int i =0; i< 1000; ++i)
             {
-                core::DevicePtr_t device = fullBody()->device_->clone();
                 std::vector<std::string> names = stringConversion(contactLimbs);
-                core::ConfigProjectorPtr_t proj = core::ConfigProjector::create(device,"proj", 1e-4, 100);
+                core::ConfigProjectorPtr_t proj = core::ConfigProjector::create(fullBody()->device_,"proj", 1e-4, 100);
                 //hpp::tools::LockJointRec(limb->limb_->name(), body->device_->rootJoint(), proj);
                 for(std::vector<std::string>::const_iterator cit = names.begin(); cit !=names.end(); ++cit)
                 {
@@ -935,7 +934,7 @@ namespace hpp {
                     std::vector<bool> rotConstraints;
                     posConstraints.push_back(false);posConstraints.push_back(false);posConstraints.push_back(true);
                     rotConstraints.push_back(true);rotConstraints.push_back(true);rotConstraints.push_back(true);
-                    const pinocchio::Frame effectorFrame = device->getFrameByName(limb->effector_.name());
+                    const pinocchio::Frame effectorFrame = fullBody()->device_->getFrameByName(limb->effector_.name());
                     pinocchio::JointPtr_t effectorJoint= limb->effector_.joint();
                     proj->add(core::NumericalConstraint::create (constraints::Position::create("",fullBody()->device_,
                                                                                                effectorJoint,
