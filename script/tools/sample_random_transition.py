@@ -5,8 +5,8 @@ import numpy as np
 from pinocchio import SE3,se3ToXYZQUATtuple, Quaternion
 import sys
 
-eff_x_range = [-0.3,0.3]
-eff_y_range=[-0.3,0.3]
+eff_x_range = [-0.4,0.4]
+eff_y_range=[-0.4,0.4]
 
 limb_ids = {'talos_rleg_rom':range(13,19), 'talos_lleg_rom':range(7,13)}
 
@@ -49,25 +49,30 @@ def sampleRotationAlongZ(placement):
     placement.rotation = rot    
     return placement
 
-def sampleRandomStateFlatFloor(fullBody,limbsInContact,z):
-    success = False
-    it = 0
+# create a state with legs config and root orientation along z axis random, the rest is equal to the referenceConfig
+def createRandomState(fullBody,limbsInContact):
     extraDof = int(fullBody.client.robot.getDimensionExtraConfigSpace())
     q0 = fullBody.referenceConfig[::]
     if extraDof > 0:
-        q0 += [0]*extraDof
+        q0 += [0]*extraDof    
+    qr = fullBody.shootRandomConfig()
+    root = SE3.Identity()
+    root.translation=np.matrix(qr[0:3]).T
+    # sample random orientation along z : 
+    root = sampleRotationAlongZ(root)
+    q0[0:7] = se3ToXYZQUATtuple(root)
+    # apply random config to legs (FIXME : ID hardcoded for Talos)
+    q0[7:19] = qr[7:19]
+    fullBody.setCurrentConfig(q0)
+    s0 = State(fullBody,q=q0,limbsIncontact=limbsInContact)
+    return s0
+
+def sampleRandomStateFlatFloor(fullBody,limbsInContact,z):
+    success = False
+    it = 0
     while not success and it < 10000:
         it +=1
-        qr = fullBody.shootRandomConfig()
-        root = SE3.Identity()
-        root.translation=np.matrix(qr[0:3]).T
-        # sample random orientation along z : 
-        root = sampleRotationAlongZ(root)
-        q0[0:7] = se3ToXYZQUATtuple(root)
-        # apply random config to legs (FIXME : ID hardcoded for Talos)
-        q0[7:19] = qr[7:19]
-        fullBody.setCurrentConfig(q0)
-        s0 = State(fullBody,q=q0,limbsIncontact=limbsInContact)
+        s0 = createRandomState(fullBody,limbsInContact)
         # try to project feet in contact (N = [0,0,1] and p[2] = z)
         n = [0,0,1]
         for limb in limbsInContact:
@@ -83,55 +88,103 @@ def sampleRandomStateFlatFloor(fullBody,limbsInContact,z):
         print "Timeout for generation of static configuration with ground contact"
         sys.exit(1)
     return s0
+
+# all limb have a contact at z choosen randomly between values in zInterval,
+# exepct movingLimb which have a contact at z = z_moving
+def sampleRandomStateStairs(fullBody,limbsInContact,zInterval,movingLimb,z_moving):
+    success = False
+    it = 0
+    while not success and it < 10000:
+        it +=1
+        s0 = createRandomState(fullBody,limbsInContact)        
+        # try to project feet in contact (N = [0,0,1] and p[2] = z)
+        n = [0,0,1]
+        for limb in limbsInContact:
+            p = fullBody.getJointPosition(fullBody.dict_limb_joint[limb])[0:3]
+            if limb == movingLimb:
+                p[2] = z_moving
+            else:
+                p[2] = zInterval[random.randint(0,len(zInterval)-1)]
+            s0, success = StateHelper.addNewContact(s0,limb,p,n,lockOtherJoints=True)
+            if not success:
+                break
+        if success : 
+            # check stability
+            success = fullBody.isStateBalanced(s0.sId,5)
+    if not success :
+        print "Timeout for generation of static configuration with ground contact"
+        sys.exit(1)
+    return s0
+
+def sampleRandomTranstionFromState(fullBody,s0,limbsInContact,movingLimb,z):
+    it = 0 
+    success = False
+    n = [0,0,1]
+    vz = np.matrix(n).T  
+    while not success and it < 10000:
+        it += 1 
+        # sample a random position for movingLimb and try to project s0 to this position
+        qr = fullBody.shootRandomConfig()
+        q1 = s0.q()[::]
+        q1[limb_ids[movingLimb][0]:limb_ids[movingLimb][1]] = qr[limb_ids[movingLimb][0]:limb_ids[movingLimb][1]]
+        s1 = State(fullBody,q=q1,limbsIncontact=limbsInContact)
+        fullBody.setCurrentConfig(s1.q())
+        p = fullBody.getJointPosition(fullBody.dict_limb_joint[movingLimb])[0:3]
+        p[0] +=random.uniform(eff_x_range[0],eff_x_range[1])
+        p[1] +=random.uniform(eff_y_range[0],eff_y_range[1])
+        p[2] = z
+        s1,success = StateHelper.addNewContact(s1,movingLimb,p,n)
+        # force root orientation : (align current z axis with vertical)
+        if success :
+            quat_1 = Quaternion(s1.q()[6],s1.q()[3],s1.q()[4],s1.q()[5])
+            v_1 = quat_1.matrix() * vz
+            align = Quaternion.FromTwoVectors(v_1,vz)
+            rot = align * quat_1
+            q_root = s1.q()[0:7]
+            q_root[3:7] = rot.coeffs().T.tolist()[0]
+            success = s1.projectToRoot(q_root)
+        # check if new state is in static equilibrium
+        if success : 
+            # check stability
+            success = fullBody.isStateBalanced(s1.sId,3)            
+        # check if transition is feasible according to CROC
+        if success :
+            #success = fullBody.isReachableFromState(s0.sId,s1.sId) or (len(fullBody.isDynamicallyReachableFromState(s0.sId,s1.sId, numPointsPerPhases=0)) > 0)
+            success = fullBody.isReachableFromState(s0.sId,s1.sId)
+    return success,s1
             
 ## return two states (with adjacent ID in fullBody) 
 ## LimbsInContact must contains the feet limbs, they are all in contact for both states 
 ## the only contact difference between both states is for movingLimbs
-def sampleRandomTransitionFlatFloor(fullBody,limbsInContact,movingLimb, zInterval =0):
+def sampleRandomTransitionFlatFloor(fullBody,limbsInContact,movingLimb, z=0):
     random.seed()    
-    if type(zInterval) is list :
-        # choose a z value inside the interval : 
-        z = random.uniform(zInterval[0],zInterval[1])
-    else :
-        z = zInterval
-    
     success = False
-    it_tot = 0
-    n = [0,0,1]
-    vz = np.matrix(n).T    
+    it_tot = 0  
     while not success and it_tot < 1000:
         it_tot += 1
-        it_trans = 0
         s0 = sampleRandomStateFlatFloor(fullBody,limbsInContact,z)
-        while not success and it_trans < 10000:
-            # sample a random position for movingLimb and try to project s0 to this position
-            qr = fullBody.shootRandomConfig()
-            q1 = s0.q()[::]
-            q1[limb_ids[movingLimb][0]:limb_ids[movingLimb][1]] = qr[limb_ids[movingLimb][0]:limb_ids[movingLimb][1]]
-            s1 = State(fullBody,q=q1,limbsIncontact=limbsInContact)
-            fullBody.setCurrentConfig(s1.q())
-            p = fullBody.getJointPosition(fullBody.dict_limb_joint[movingLimb])[0:3]
-            p[0] +=random.uniform(eff_x_range[0],eff_x_range[1])
-            p[1] +=random.uniform(eff_y_range[0],eff_y_range[1])
-            p[2] = z
-            s1,success = StateHelper.addNewContact(s1,movingLimb,p,n)
-            # force root orientation : (align current z axis with vertical)
-            if success :
-                quat_1 = Quaternion(s1.q()[6],s1.q()[3],s1.q()[4],s1.q()[5])
-                v_1 = quat_1.matrix() * vz
-                align = Quaternion.FromTwoVectors(v_1,vz)
-                rot = align * quat_1
-                q_root = s1.q()[0:7]
-                q_root[3:7] = rot.coeffs().T.tolist()[0]
-                success = s1.projectToRoot(q_root)
-            # check if new state is in static equilibrium
-            if success : 
-                # check stability
-                success = fullBody.isStateBalanced(s1.sId,3)            
-            # check if transition is feasible according to CROC
-            if success :
-                success = fullBody.isReachableFromState(s0.sId,s1.sId) or (len(fullBody.isDynamicallyReachableFromState(s0.sId,s1.sId, numPointsPerPhases=0)) > 0)
+        success,s1 = sampleRandomTranstionFromState(fullBody,s0,limbsInContact,movingLimb,z)
+    if not success :
+        print "Timeout for generation of feasible transition"
+        sys.exit(1)    
+    # recreate the states to assure the continuity of the index in fullBody :     
+    state0 = State(fullBody,q=s0.q(),limbsIncontact=s0.getLimbsInContact())
+    state1 = State(fullBody,q=s1.q(),limbsIncontact=s1.getLimbsInContact())
+    return state0,state1
 
+## return two states (with adjacent ID in fullBody) 
+## LimbsInContact must contains the feet limbs, they are all in contact for both states 
+## the only contact difference between both states is for movingLimbs
+## the limbs have a contact z choosen randomly in zInterval,
+## exept for moving limb which go from zInterval_moving[0] to zInterval_moving[1]
+def sampleRandomTransitionStairs(fullBody,limbsInContact,zInterval,movingLimb,zInterval_moving):
+    random.seed()    
+    success = False
+    it_tot = 0  
+    while not success and it_tot < 1000:
+        it_tot += 1
+        s0 = sampleRandomStateStairs(fullBody,limbsInContact,zInterval,movingLimb,zInterval_moving[0])
+        success,s1 = sampleRandomTranstionFromState(fullBody,s0,limbsInContact,movingLimb,zInterval_moving[1])
     if not success :
         print "Timeout for generation of feasible transition"
         sys.exit(1)    
