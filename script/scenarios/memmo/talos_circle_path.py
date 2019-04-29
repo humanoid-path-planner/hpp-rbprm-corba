@@ -83,8 +83,8 @@ ps.addGoalConfig (q_goal)
 
 # write problem in files : 
 f = open(statusFilename,"w")
-f.write("q_init= "+str(q_init[0:3])+"\n")
-f.write("q_goal= "+str(q_goal[0:3])+"\n")
+f.write("q_init= "+str(q_init)+"\n")
+f.write("q_goal= "+str(q_goal)+"\n")
 f.close()
 
 
