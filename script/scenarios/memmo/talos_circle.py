@@ -60,13 +60,14 @@ q_ref = fullBody.referenceConfig[::]+[0]*6
 #q_ref = fullBody.referenceConfig_legsApart[::]+[0]*6
 q_init = q_ref[::]
 fullBody.setReferenceConfig(q_ref)
-fullBody.usePosturalTaskContactCreation(True)
+
 
 if abs(tp.q_goal[1]) <= abs(tp.q_goal[0]) : 
   fullBody.setPostureWeights(fullBody.postureWeights[::]+[0]*6)
   heuristicR = "fixedStep08"
   heuristicL = "fixedStep08"
   print "Use weight for straight walk"
+  fullBody.usePosturalTaskContactCreation(True)
 else :
   fullBody.setPostureWeights(fullBody.postureWeights_straff[::]+[0]*6)
   print "Use weight for straff walk"
@@ -142,7 +143,7 @@ else :
 
 print "Generate contact plan ..."
 tStart = time.time()
-configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 1, filterStates = True,quasiStatic=True)
+configs = fullBody.interpolate(0.005,pathId=pId,robustnessTreshold = 3, filterStates = True,quasiStatic=True)
 tInterpolateConfigs = time.time() - tStart
 print "Done."
 print "Contact plan generated in : "+str(tInterpolateConfigs)+" s"
