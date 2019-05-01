@@ -114,8 +114,15 @@ ps.selectDistance("Kinodynamic")
 ps.selectPathPlanner("DynamicPlanner")
 
 # Solve the planning problem :
-t = ps.solve ()
-print "Guide planning time : ",t
+success = ps.client.problem.prepareSolveStepByStep()
+
+if not success:
+  print "planning failed."
+  import sys
+  sys.exit(1)
+
+ps.client.problem.finishSolveStepByStep()
+
 
 try :
     # display solution : 
