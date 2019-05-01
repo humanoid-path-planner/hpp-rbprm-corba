@@ -80,10 +80,12 @@ tStart = time.time()
 
 nbSamples = 100000
 fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, heuristicR, 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints,kinematicConstraintsMin = 0.85)
-fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
 fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, heuristicL, 0.01,kinematicConstraintsPath=fullBody.lLegKinematicConstraints,kinematicConstraintsMin = 0.85)
-fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
 
+
+if not(tp.alpha <0.8*np.pi and tp.alpha > 0.2*np.pi) : # not close to straight line
+    fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
+    fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
 
 tGenerate =  time.time() - tStart
 print "Done."
