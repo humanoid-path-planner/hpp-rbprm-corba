@@ -80,10 +80,6 @@ def sampleRandomStateFlatFloor(fullBody,limbsInContact,z):
             s0, success = StateHelper.addNewContact(s0,limb,p,n,lockOtherJoints=True)
             if not success:
                 break
-        if success :
-            sProj = projectMidFeet(fullBody,s0)
-            if sProj is not None:
-                s0 = sProj
         if success : 
             # check stability
             success = fullBody.isStateBalanced(s0.sId,5)
@@ -111,10 +107,6 @@ def sampleRandomStateStairs(fullBody,limbsInContact,zInterval,movingLimb,z_movin
             s0, success = StateHelper.addNewContact(s0,limb,p,n,lockOtherJoints=True)
             if not success:
                 break
-        if success :
-            sProj = projectMidFeet(fullBody,s0)
-            if sProj is not None:
-                s0 = sProj
         if success : 
             # check stability
             success = fullBody.isStateBalanced(s0.sId,5)
