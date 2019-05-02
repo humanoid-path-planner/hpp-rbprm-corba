@@ -12,7 +12,7 @@ statusFilename = "infos.log"
 
 fullBody = Robot ()
 # Set the bounds for the root
-fullBody.setJointBounds ("root_joint", [-0.3,0.3, -0.3, 0.3, 0.9, 1.05])
+fullBody.setJointBounds ("root_joint", [-0.3,0.3, -0.3, 0.3, 1.01, 1.03])
 ## reduce bounds on joints along x, to put conservative condition on the contact generation for sideway steps
 joint6L_bounds_prev=fullBody.getJointBounds('leg_left_6_joint')
 joint2L_bounds_prev=fullBody.getJointBounds('leg_left_2_joint')
@@ -108,7 +108,9 @@ else:
     print "Contact generation failed."
 
 
-f = open(statusFilename,"a")
+f = open(statusFilename,"w")
+f.write("q_init= "+str(s0.q())+"\n")
+f.write("q_goal= "+str(s1.q())+"\n")
 f.write("cg_success: "+str(cg_success)+"\n")
 f.write("cg_reach_goal: "+str(cg_reach_goal)+"\n")
 f.close()
