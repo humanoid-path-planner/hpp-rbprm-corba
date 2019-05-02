@@ -23,18 +23,17 @@ def __loosely_z_aligned(limb, config):
     return N_world.dot(array([0,0,1])) > 0.7
 
 
-def projectMidFeet(fullBody,q,limbs):
-    fullBody.setCurrentConfig(q)
-    s = State(fullBody,q=q,limbsIncontact=limbs)
+def projectMidFeet(fullBody,s):
+    fullBody.setCurrentConfig(s.q())
     com = np.zeros(3)
     num = 0.
-    for limb in limbs:
+    for limb in s.getLimbsInContact():
         com += np.array(fullBody.getJointPosition(fullBody.dict_limb_joint[limb])[0:3])
         num += 1. 
     com /= num			
     com[2] = fullBody.getCenterOfMass()[2]
-    successProj = s.projectToCOM(com.tolist(),10)
-    if successProj and fullBody.isConfigValid(s.q())[0]  and fullBody.isConfigBalanced(s.q(), limbs, 2) :
+    successProj = s.projectToCOM(com.tolist(),0)
+    if successProj:
         return s
     else :
         return None
@@ -81,6 +80,10 @@ def sampleRandomStateFlatFloor(fullBody,limbsInContact,z):
             s0, success = StateHelper.addNewContact(s0,limb,p,n,lockOtherJoints=True)
             if not success:
                 break
+        if success :
+            sProj = projectMidFeet(fullBody,s0)
+            if sProj is not None:
+                s0 = sProj
         if success : 
             # check stability
             success = fullBody.isStateBalanced(s0.sId,5)
@@ -108,6 +111,10 @@ def sampleRandomStateStairs(fullBody,limbsInContact,zInterval,movingLimb,z_movin
             s0, success = StateHelper.addNewContact(s0,limb,p,n,lockOtherJoints=True)
             if not success:
                 break
+        if success :
+            sProj = projectMidFeet(fullBody,s0)
+            if sProj is not None:
+                s0 = sProj
         if success : 
             # check stability
             success = fullBody.isStateBalanced(s0.sId,5)
