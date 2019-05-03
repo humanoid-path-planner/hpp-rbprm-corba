@@ -4,36 +4,29 @@ Copyright 2015 LAAS-CNRS
 
 Author: Steve Tonneau
 
-##Description
+## Description
 hpp-rbprm-corba implements python bindings for hpp-rbprm, and presents a few example files.
-Please refer to this [link](https://github.com/stonneau/hpp-rbprm) for information on hpp-rbprm.
+Please refer to this [link](https://github.com/humanoid-path-planner/hpp-rbprm) for information on hpp-rbprm.
 
-##Installation on ubuntu-14.04 64 bit with ros-indigo
+## Installation from binary package repository
 
-To install hpp-rbprm-corba:
-
-  1. Install HPP-RBPRM and its dependencies
-	- see https://github.com/stonneau/hpp-rbprm
-
-  2. Install HPP-AFFORDANCE-CORBA along with its dependencies
-  - see https://github.com/anna-seppala/hpp-affordance-corba
-
-  3. Use CMake to install the library. For instance:
-
-			mkdir $HPP_RBPRM_CORBA_DIR/build
-			cd $HPP_RBPRM_CORBA_DIR/build
-			cd cmake ..	
-			make install
-	
+1. Add robotpkg to your apt configuration: http://robotpkg.openrobots.org/debian.html
+2. `sudo apt update && sudo apt install robotpkg-hpp-rbprm-corba`
 
 
-##Documentation
+## Installation From source on ubuntu-16.04 64 bit with ros-kinetic
+
+1. Follow this instructions : http://humanoid-path-planner.github.io/hpp-doc/download.html (select 'Devellopement" in the list)
+2. Once this installation is complete, run `make rbprm`
+
+
+## Documentation
 
   Open $DEVEL_DIR/install/share/doc/hpp-rbprm-corba/doxygen-html/index.html in a web brower and you
   will have access to the code documentation. If you are using ipython, the documentation of the methods implemented
   is also directly available in a python console.
 
-##Example
+## Example
 
   To see the planner in action, two examples from our IJRR submission with HyQ are available. Examples with HRP-2 are also provided,
   though they can only be executed if you have access to HRP-2 model.
