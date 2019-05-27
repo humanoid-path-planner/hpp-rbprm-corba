@@ -27,12 +27,16 @@ fullBody = Robot ()
 # Set the bounds for the root
 fullBody.setJointBounds ("root_joint",  [-2,2, -2, 2, 0.9, 1.05])
 ## reduce bounds on joints along x, to put conservative condition on the contact generation for sideway steps
+joint1L_bounds_prev=fullBody.getJointBounds('leg_left_1_joint')
 joint6L_bounds_prev=fullBody.getJointBounds('leg_left_6_joint')
 joint2L_bounds_prev=fullBody.getJointBounds('leg_left_2_joint')
+joint1R_bounds_prev=fullBody.getJointBounds('leg_right_1_joint')
 joint6R_bounds_prev=fullBody.getJointBounds('leg_right_6_joint')
 joint2R_bounds_prev=fullBody.getJointBounds('leg_right_2_joint')
+fullBody.setJointBounds('leg_left_1_joint',[-0.34,1.4])
 fullBody.setJointBounds('leg_left_6_joint',[-0.25,0.25])
 fullBody.setJointBounds('leg_left_2_joint',[-0.25,0.25])
+fullBody.setJointBounds('leg_right_1_joint',[-1.4,0.34])
 fullBody.setJointBounds('leg_right_6_joint',[-0.25,0.25])
 fullBody.setJointBounds('leg_right_2_joint',[-0.25,0.25])
 # add the 6 extraDof for velocity and acceleration (see *_path.py script)
@@ -177,8 +181,10 @@ if (not cg_success) or cg_too_many_states:
   sys.exit(1)
 
 # put back original bounds for wholebody methods
+fullBody.setJointBounds('leg_left_1_joint',joint1L_bounds_prev)
 fullBody.setJointBounds('leg_left_6_joint',joint6L_bounds_prev)
 fullBody.setJointBounds('leg_left_2_joint',joint2L_bounds_prev)
+fullBody.setJointBounds('leg_right_1_joint',joint1R_bounds_prev)
 fullBody.setJointBounds('leg_right_6_joint',joint6R_bounds_prev)
 fullBody.setJointBounds('leg_right_2_joint',joint2R_bounds_prev)
 
