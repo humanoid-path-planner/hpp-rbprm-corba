@@ -756,7 +756,7 @@ namespace hpp {
                 core::configurationShooter::UniformPtr_t shooter = core::configurationShooter::Uniform::create(fullBody()->device_);
                 for(std::size_t i =0; !rep.success_ && i< maxNumeSamples; ++i)
                 {
-                    s.configuration_ = *shooter->shoot();
+                    shooter->shoot(s.configuration_);
                     s.configuration_.head<7>() = head;
                     s.configuration_.tail(ecs_size) = ecs;
                     //c = rbprm::interpolation::projectOnCom(fullBody(), problemSolver()->problem(),s,com_target,succes);
@@ -915,6 +915,7 @@ namespace hpp {
             fcl::Vec3f z(0,0,1);
             ValidationReportPtr_t report = ValidationReportPtr_t(new CollisionValidationReport);
             core::configurationShooter::UniformPtr_t  shooter = core::configurationShooter::Uniform::create(fullBody()->device_);
+            Configuration_t config;
             for(int i =0; i< 1000; ++i)
             {
                 core::DevicePtr_t device = fullBody()->device_->clone();
@@ -950,8 +951,7 @@ namespace hpp {
                                                                                                       rotConstraints)));
                     }
                 }
-                ConfigurationPtr_t configptr = shooter->shoot();
-                Configuration_t config = *configptr;
+                shooter->shoot (config);
                 if(proj->apply(config) && config[2]> 0.3)
                 {
                     if(problemSolver()->problem()->configValidations()->validate(config,report))
@@ -3228,7 +3228,7 @@ namespace hpp {
                 Configuration_t head = ns.configuration_.head<7>();
                 for(std::size_t i =0; !rep.success_ && i< max_num_sample; ++i)
                 {
-                    ns.configuration_ = *shooter->shoot();
+                    shooter->shoot(ns.configuration_);
                     ns.configuration_.head<7>() = head;
                     rep = projection::projectStateToObstacle(fullBody(),limb, fullBody()->GetLimbs().at(limb), ns, n,p);
                     rep.success_ = rep.success_ && val->validate(rep.result_.configuration_,rport);
