@@ -18,8 +18,8 @@ from hpp.corbaserver import Client
 #  This time we load the full body model of HyQ
 fullBody = Robot () 
 fullBody.setJointBounds ("root_joint", [-2,5, -1, 1, 0.3, 4])
-fullBody.client.robot.setDimensionExtraConfigSpace(6)
-fullBody.client.robot.setExtraConfigSpaceBounds([0,0,0,0,0,0,0,0,0,0,0,0])
+#~ fullBody.client.robot.setDimensionExtraConfigSpace(6)
+#~ fullBody.client.robot.setExtraConfigSpaceBounds([0,0,0,0,0,0,0,0,0,0,0,0])
 
 #  Setting a number of sample configurations used
 nbSamples = 10000
@@ -43,10 +43,8 @@ fullBody.addLimb(fullBody.lArmId,fullBody.larm,fullBody.lhand,fullBody.offset,fu
 #~ fullBody.runLimbSampleAnalysis(rarmId, "jointLimitsDistance", True)
 #~ fullBody.runLimbSampleAnalysis(larmId, "jointLimitsDistance", True)
 
-q_init=fullBody.referenceConfig[::] + [0]*6; q_init[0:7] = tp.q_init[0:7]; 
-#q_init[2]=fullBody.referenceConfig[2]
-q_goal = fullBody.referenceConfig[::]+ [0]*6; q_goal[0:7] = tp.q_goal[0:7]; 
-#q_goal[2]=fullBody.referenceConfig[2]
+q_init=fullBody.referenceConfig[::] ; q_init[0:7] = tp.q_init[0:7]; 
+q_goal = fullBody.referenceConfig[::]; q_goal[0:7] = tp.q_goal[0:7]; 
 
 
 q_init = fullBody.generateContacts(q_init, [0,0,1])
