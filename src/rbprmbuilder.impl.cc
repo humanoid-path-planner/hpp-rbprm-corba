@@ -1254,6 +1254,11 @@ namespace hpp {
                 throw std::runtime_error ("Impossible to find limb for joint "
                                           + (*cit) + " to robot; limb not defined");
             }
+            if(lit->second->contactType_ == _3_DOF)
+            {
+                throw std::runtime_error ("Can't set contact normal to a limb with 3D contact: "
+                                          + (*cit) + ". The normal must be provided using method setStartState / setEndState (self, configuration, contacts, normals)");
+            }
             const pinocchio::Frame frame = fullBody->device_->getFrameByName(lit->second->effector_.name());
             const pinocchio::Transform3f& transform =  frame.currentTransformation ();
             const fcl::Matrix3f& rot = transform.rotation();
