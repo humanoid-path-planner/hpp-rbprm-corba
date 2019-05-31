@@ -59,14 +59,14 @@ v = vf.createViewer(displayArrows = True)
 
 # Setting initial configuration
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init [0:3] = [0,0,0.444]
+q_init [0:3] = [0,0,0.465]
 q_init[-6:-3] = [0,0,0]
 v (q_init)
 ps.setInitialConfig (q_init)
 # set goal config
 rbprmBuilder.setCurrentConfig (q_init)
 q_goal = q_init [::]
-q_goal[0:3] = [1.5,0,0.444]
+q_goal[0:3] = [1.,0,0.465]
 q_goal[-6:-3] = [0,0,0]
 v(q_goal)
 
@@ -91,7 +91,7 @@ print "Guide planning time : ",t
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (v)
 pp.dt=0.1
-#pp.displayVelocityPath(1)
+pp.displayVelocityPath(1)
 #v.client.gui.setVisibility("path_1_root","ALWAYS_ON_TOP")
 pp.dt = 0.01
 #pp(1)
