@@ -3403,14 +3403,14 @@ namespace hpp {
     }
 
 
-    hpp::floatSeq* RbprmBuilder::isReachableFromState(unsigned short stateFrom,unsigned short stateTo)throw (hpp::Error){
+    hpp::floatSeq* RbprmBuilder::isReachableFromState(unsigned short stateFrom, unsigned short stateTo , const bool useIntermediateState)throw (hpp::Error){
         if(!fullBodyLoaded_){
           throw std::runtime_error ("fullBody not loaded");
         }
         if(stateTo >= lastStatesComputed_.size() || stateFrom >= lastStatesComputed_.size()){
             throw std::runtime_error ("Unexisting state ID");
         }
-        reachability::Result res = reachability::isReachable(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo]);
+        reachability::Result res = reachability::isReachable(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo], fcl::Vec3f::Zero(),useIntermediateState);
 
         // convert vector of int to floatSeq :
         _CORBA_ULong size;

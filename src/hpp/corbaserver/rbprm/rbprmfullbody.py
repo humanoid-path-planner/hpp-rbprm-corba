@@ -970,8 +970,8 @@ class FullBody (Robot):
      def areKinematicsConstraintsVerifiedForState(self,stateFrom, point):
          return self.clientRbprm.rbprm.areKinematicsConstraintsVerifiedForState(stateFrom,point)
 
-     def isReachableFromState(self,stateFrom,stateTo,computePoint=False):
-          raw =  self.clientRbprm.rbprm.isReachableFromState(stateFrom,stateTo)
+     def isReachableFromState(self,stateFrom,stateTo,computePoint=False,useIntermediateState=True):
+          raw =  self.clientRbprm.rbprm.isReachableFromState(stateFrom,stateTo,useIntermediateState)
           if computePoint :
                 res = []
                 res += [raw[0]>0.]

@@ -359,7 +359,7 @@ namespace hpp {
 
         virtual bool areKinematicsConstraintsVerified(const hpp::floatSeq &point)throw (hpp::Error);
         virtual bool areKinematicsConstraintsVerifiedForState(unsigned short stateId,const hpp::floatSeq &point)throw (hpp::Error);
-        virtual hpp::floatSeq *isReachableFromState(unsigned short stateFrom,unsigned short stateTo)throw (hpp::Error);
+        virtual hpp::floatSeq *isReachableFromState(unsigned short stateFrom,unsigned short stateTo,const bool useIntermediateState)throw (hpp::Error);
         virtual hpp::floatSeq* isDynamicallyReachableFromState(unsigned short stateFrom, unsigned short stateTo, bool addPathPerPhase, const hpp::floatSeq &timings, short numPointPerPhase )throw (hpp::Error);
 
 
