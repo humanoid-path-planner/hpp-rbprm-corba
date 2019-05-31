@@ -25,18 +25,19 @@ v = tp.Viewer (ps,viewerClient=tp.v.client, displayCoM = True)
 q_ref = fullBody.referenceConfig[::]+[0]*6
 q_init = q_ref[::]
 fullBody.setReferenceConfig(q_ref)
-fullBody.setPostureWeights(fullBody.postureWeights[::]+[0]*6)
 fullBody.setCurrentConfig (q_init)
+fullBody.setPostureWeights(fullBody.postureWeights[::]+[0]*6)
+fullBody.usePosturalTaskContactCreation(True)
 
 print "Generate limb DB ..."
 tStart = time.time()
 # generate databases : 
 
 nbSamples = 100000
-fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep08", 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints,kinematicConstraintsMin = 0.75)
-fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
-fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep08", 0.01,kinematicConstraintsPath=fullBody.lLegKinematicConstraints,kinematicConstraintsMin = 0.75)
-fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
+fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep06", 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints,kinematicConstraintsMin = 0.75)
+#fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
+fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep06", 0.01,kinematicConstraintsPath=fullBody.lLegKinematicConstraints,kinematicConstraintsMin = 0.75)
+#fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
 
 
 tGenerate =  time.time() - tStart
@@ -82,7 +83,7 @@ fullBody.setEndState(q_goal,[fullBody.rLegId,fullBody.lLegId])
 
 print "Generate contact plan ..."
 tStart = time.time()
-configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = True,quasiStatic=True)
+configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = True)
 tInterpolateConfigs = time.time() - tStart
 print "Done."
 print "Contact plan generated in : "+str(tInterpolateConfigs)+" s"
