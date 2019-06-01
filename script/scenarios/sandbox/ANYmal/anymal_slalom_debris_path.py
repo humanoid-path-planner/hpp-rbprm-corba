@@ -4,6 +4,7 @@ from hpp.corbaserver import Client
 from hpp.corbaserver import ProblemSolver
 import time
 
+Robot.urdfName+="_large"
 
 
 vMax = 0.2# linear velocity bound for the root
@@ -13,7 +14,7 @@ mu=0.5# coefficient of friction
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Robot()
 # Define bounds for the root : bounding box of the scenario
-root_bounds = [-1.7,2.5, -0.2, 2, 0.444, 0.444]
+root_bounds = [-1.7,2.5, -0.2, 2, 0.465, 0.465]
 rbprmBuilder.setJointBounds ("root_joint", root_bounds)
 
 # The following lines set constraint on the valid configurations:
@@ -52,21 +53,21 @@ vf = ViewerFactory (ps)
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
-afftool.loadObstacleModel ("hpp_environments", "multicontact/slalom_debris", "planning", vf,reduceSizes=[0.05,0,0])
+afftool.loadObstacleModel ("hpp_environments", "multicontact/slalom_debris", "planning", vf,reduceSizes=[0.1,0,0])
 v = vf.createViewer(displayArrows = True)
 #afftool.visualiseAffordances('Support', v, v.color.lightBrown)
 #v.addLandmark(v.sceneName,1)
 
 # Setting initial configuration
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init [0:3] = [-1.5,0,0.444]
+q_init [0:3] = [-1.5,0,0.465]
 q_init[-6:-3] = [0.05,0,0]
 v (q_init)
 ps.setInitialConfig (q_init)
 # set goal config
 rbprmBuilder.setCurrentConfig (q_init)
 q_goal = q_init [::]
-q_goal[0:3] = [2.2,0,0.444]
+q_goal[0:3] = [2.2,0,0.465]
 q_goal[-6:-3] = [0.05,0,0]
 v(q_goal)
 
@@ -92,7 +93,7 @@ print "Guide planning time : ",t
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (v)
 pp.dt=0.1
-#pp.displayVelocityPath(1)
+pp.displayVelocityPath(1)
 #v.client.gui.setVisibility("path_1_root","ALWAYS_ON_TOP")
 pp.dt = 0.01
 #v.startCapture("capture_root/capture","png")
