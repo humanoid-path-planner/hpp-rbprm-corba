@@ -213,11 +213,19 @@ class FullBody (Robot):
           return self.clientRbprm.rbprm.generateGroundContact(contactLimbs)
           
      ## Create a state and push it to the state array
-     # \param q configuration
-     # \param names list of effectors in contact
+     # \param configuration configuration
+     # \param contacts list of effectors in contact
      # \return stateId
-     def createState(self, q, contactLimbs):
-          return self.clientRbprm.rbprm.createState(q, contactLimbs)
+     def createState(self, configuration, contacts, normals = None):
+          if normals is None:
+               return self.clientRbprm.rbprm.createState(configuration, contacts)
+          cl = self.clientRbprm.rbprm
+          sId = cl.createState(configuration, contacts)
+          num_max_sample = 1
+          for (limbName, normal) in  zip(contacts, normals):
+               p = cl.getEffectorPosition(limbName,configuration)[0]
+               cl.addNewContact(sId, limbName, p, normal, num_max_sample)
+          return sId
           
      ## Retrieves the contact candidates configurations given a configuration and a limb
      #
@@ -262,14 +270,41 @@ class FullBody (Robot):
      # \param sampleId id of the considered sample
      def getSampleValue(self, limbName, valueName, sampleId):
           return self.clientRbprm.rbprm.getSampleValue(limbName, valueName, sampleId)
-          
+                    
      ## Initialize the first configuration of the path interpolation
      # with a balanced configuration for the interpolation problem;
      #
      # \param configuration the desired start configuration
      # \param contacts the array of limbs in contact
-     def setStartState(self, configuration, contacts):
-          return self.clientRbprm.rbprm.setStartState(configuration, contacts)
+     # \param normals  the array describing one normal direction for each limb in contact
+     def setStartState(self, configuration, contacts, normals = None):
+          if normals is None:
+               return self.clientRbprm.rbprm.setStartState(configuration, contacts)
+          cl = self.clientRbprm.rbprm
+          sId = cl.createState(configuration, contacts)
+          num_max_sample = 1
+          for (limbName, normal) in  zip(contacts, normals):
+               p = cl.getEffectorPosition(limbName,configuration)[0]
+               cl.addNewContact(sId, limbName, p, normal, num_max_sample)
+          return cl.setStartStateId(sId)
+          
+          
+     ## Initialize the goal configuration of the path interpolation
+     # with a balanced configuration for the interpolation problem;
+     #
+     # \param configuration the desired goal configuration
+     # \param contacts the array of limbs in contact
+     # \param normals  the array describing one normal direction for each limb in contact
+     def setEndState(self, configuration, contacts, normals = None):
+          if normals is None:
+               return self.clientRbprm.rbprm.setEndState(configuration, contacts)
+          cl = self.clientRbprm.rbprm
+          sId = cl.createState(configuration, contacts)
+          num_max_sample = 1
+          for (limbName, normal) in  zip(contacts, normals):
+               p = cl.getEffectorPosition(limbName,configuration)[0]
+               cl.addNewContact(sId, limbName, p, normal, num_max_sample)
+          return cl.setEndStateId(sId)
 
      ## Initialize the first state of the path interpolation
      # \param stateId the Id of the desired start state in fullBody
@@ -289,15 +324,7 @@ class FullBody (Robot):
      # \return id of created state
      def createState(self, configuration, contacts):
           return self.clientRbprm.rbprm.createState(configuration, contacts)
-                
-     ## Initialize the last configuration of the path discretization 
-     # with a balanced configuration for the interpolation problem;
-     #
-     # \param configuration the desired end configuration
-     # \param contacts the array of limbs in contact          
-     def setEndState(self, configuration, contacts):
-          return self.clientRbprm.rbprm.setEndState(configuration, contacts)
-     
+                     
      ## Saves a computed contact sequence in a given filename
      #
      # \param The file where the configuration must be saved
