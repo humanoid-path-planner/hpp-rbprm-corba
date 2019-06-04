@@ -213,11 +213,19 @@ class FullBody (Robot):
           return self.clientRbprm.rbprm.generateGroundContact(contactLimbs)
           
      ## Create a state and push it to the state array
-     # \param q configuration
-     # \param names list of effectors in contact
+     # \param configuration configuration
+     # \param contacts list of effectors in contact
      # \return stateId
-     def createState(self, q, contactLimbs):
-          return self.clientRbprm.rbprm.createState(q, contactLimbs)
+     def createState(self, configuration, contacts, normals = None):
+          if normals is None:
+               return self.clientRbprm.rbprm.createState(configuration, contacts)
+          cl = self.clientRbprm.rbprm
+          sId = cl.createState(configuration, contacts)
+          num_max_sample = 1
+          for (limbName, normal) in  zip(contacts, normals):
+               p = cl.getEffectorPosition(limbName,configuration)[0]
+               cl.addNewContact(sId, limbName, p, normal, num_max_sample)
+          return sId
           
      ## Retrieves the contact candidates configurations given a configuration and a limb
      #
