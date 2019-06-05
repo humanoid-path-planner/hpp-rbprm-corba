@@ -2134,9 +2134,8 @@ namespace hpp {
 
 
         res->length ((_CORBA_ULong)2);
-
-        fcl::Vec3f& position = state.contactPositions_.at(limbName);
-        position += fullBody()->GetLimb(limb)->offset_;
+        fcl::Transform3f jointT( state.contactRotation_.at(limbName), state.contactPositions_.at(limbName));
+        fcl::Vec3f position =  jointT.transform(fullBody()->GetLimb(limb)->offset_);
         _CORBA_ULong size = (_CORBA_ULong) 3;
         double* dofArray = hpp::floatSeq::allocbuf(size);
         hpp::floatSeq floats (size, size, dofArray, true);
