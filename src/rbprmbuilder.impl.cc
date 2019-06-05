@@ -1445,7 +1445,7 @@ namespace hpp {
           }
           State stateFrom = lastStatesComputed_[stateIdFrom];
           State stateTo = lastStatesComputed_[stateIdTo];
-          std::vector<std::string> variations_s = stateTo.allVariations(stateFrom,rbprm::interpolation::extractEffectorsName(fullBody()->GetLimbs()));
+          std::vector<std::string> variations_s = stateTo.contactVariations(stateFrom);
           CORBA::ULong size = (CORBA::ULong) variations_s.size ();
           char** nameList = Names_t::allocbuf(size);
           Names_t *variations = new Names_t (size,size,nameList);
