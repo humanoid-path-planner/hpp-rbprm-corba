@@ -15,7 +15,7 @@ ps = ProblemSolver( fullBody )
 
 from hpp.gepetto import ViewerFactory
 vf = ViewerFactory (ps)
-#vf.loadObstacleModel ("hpp_environments", "multicontact/table_140_70_73", "planning")
+vf.loadObstacleModel ("hpp_environments", "multicontact/table_140_70_73", "planning")
 
 
 
@@ -35,7 +35,7 @@ fullBody.setReferenceConfig(q_ref)
 
 tStart = time.time()
 # generate databases : 
-nbSamples = 10000
+nbSamples = 1
 fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "EFORT", 0.01)
 fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/talos_rLeg_walk.db")
@@ -63,9 +63,34 @@ moveSphere('target',v,[0,0,0.5])
 
 # create contact : 
 fullBody.setStartState(q_init,[fullBody.lLegId,fullBody.rLegId])
+n = [0,0,1]
 
 s0 = State(fullBody,q=q_init,limbsIncontact=[fullBody.lLegId,fullBody.rLegId])
 
+###  move left foot of 30cm in front
+pLLeg = s0.getCenterOfContactForLimb(fullBody.lLegId)[0]
+pLLeg[0] += 0.3
+pLLeg[2] -= 0.001 # required because this delta is added in rbprm ... 
+s1,success = StateHelper.addNewContact(s0,fullBody.lLegId,pLLeg,n,lockOtherJoints=False)
+assert success, "Unable to project contact position for left foot"
+
+###  move hand to the handle 
+
+pHand  = [0.1,0.5,0.75]
+createSphere('s',v)
+moveSphere('s',v,pHand)
+s2,success = StateHelper.addNewContact(s1,fullBody.rArmId,pHand,n,lockOtherJoints=False)
+assert success, "Unable to project contact position for right hand"
+"""
+v(s2.q())
+com = fullBody.getCenterOfMass()
+com[0] += 0.05
+com[1] -= 0.1
+com[2] -= 0.02
+q3 = s2.projectToCOM(com,toNewState=True)
+v(q3)
+"""
+"""
 q1 = [-0.4179830939427893,
  0.8347627837183168,
  0.9946218381742752,
@@ -177,9 +202,9 @@ s3 = State(fullBody,q=s2.q(),limbsIncontact=[fullBody.lLegId,fullBody.rLegId,ful
 s3.projectToCOM(com,10000)
 v(s3.q())
 
-
-#configs = [s0.q(), s1.q(),s2.q()]
-configs = [s0.q(),s2.q()]
+"""
+configs = [s0.q(), s1.q(),s2.q()]
+#configs = [s0.q(),s2.q()]
 
 v(configs[-1])
 
