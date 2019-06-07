@@ -28,7 +28,7 @@ for rom in rbprmBuilder.urdfNameRom :
 rbprmBuilder.boundSO3([-0.1,0.1,-0.5,0.5,-0.1,0.1])
 # Add 6 extraDOF to the problem, used to store the linear velocity and acceleration of the root
 rbprmBuilder.client.robot.setDimensionExtraConfigSpace(extraDof)
-# We set the bounds of this extraDof with velocity and acceleration bounds (expect on z axis)
+c# We set the bounds of this extraDof with velocity and acceleration bounds (expect on z axis)
 rbprmBuilder.client.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax,-vMax,vMax,-aMax,aMax,-aMax,aMax,-aMaxZ,aMaxZ])
 indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.robot.getDimensionExtraConfigSpace()
 
@@ -62,15 +62,15 @@ v.addLandmark(v.sceneName,1)
 
 # Setting initial configuration
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init [0:3] = [-1.7,0,0.444]
-q_init[-6:-3] = [0.02,0,0]
+q_init [0:3] = [-1.7,0,0.465]
+q_init[-6:-3] = [0.,0,0]
 v (q_init)
 ps.setInitialConfig (q_init)
 # set goal config
 rbprmBuilder.setCurrentConfig (q_init)
 q_goal = q_init [::]
-q_goal[0:3] = [1.7,0,0.444]
-q_goal[-6:-3] = [0.02,0,0]
+q_goal[0:3] = [1.7,0,0.465]
+q_goal[-6:-3] = [0.,0,0]
 v(q_goal)
 
 

@@ -91,7 +91,7 @@ print "Guide planning time : ",t
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (v)
 pp.dt=0.1
-pp.displayVelocityPath(1)
+#pp.displayVelocityPath(1)
 #v.client.gui.setVisibility("path_1_root","ALWAYS_ON_TOP")
 pp.dt = 0.01
 #pp(1)
