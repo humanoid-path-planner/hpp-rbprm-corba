@@ -61,6 +61,7 @@ v.addLandmark(v.sceneName,1)
 
 # Setting initial configuration
 q_init = rbprmBuilder.getCurrentConfig ();
+q_init[8] = 0.006761 # torso 2 position in reference config
 q_init [0:3] = [-0.9,1.5,0.98]
 q_init[-6:-3] = [0.07,0,0]
 v (q_init)

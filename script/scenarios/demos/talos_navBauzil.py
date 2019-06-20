@@ -6,7 +6,7 @@ print "Plan guide trajectory ..."
 import talos_navBauzil_path as tp
 print "Done."
 import time
-
+Robot.urdfSuffix += "_safeFeet"
 
 
 pId = tp.ps.numberPaths() -1
@@ -34,17 +34,18 @@ q_ref = fullBody.referenceConfig[::]+[0,0,0,0,0,0]
 q_init = q_ref[::]
 fullBody.setReferenceConfig(q_ref)
 fullBody.setCurrentConfig (q_init)
-
+fullBody.setPostureWeights(fullBody.postureWeights[::]+[0]*6)
+fullBody.usePosturalTaskContactCreation(True)
 
 print "Generate limb DB ..."
 tStart = time.time()
 # generate databases : 
 nbSamples = 10000
-fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep08", 0.01)
-fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
+fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep06", 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints,kinematicConstraintsMin = 0.85)
+#fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/talos_rLeg_walk.db")
-fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep08", 0.01)
-fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
+fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep06", 0.01,kinematicConstraintsPath=fullBody.lLegKinematicConstraints,kinematicConstraintsMin = 0.85)
+#fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/talos_lLeg_walk.db")
 
 tGenerate =  time.time() - tStart
@@ -89,7 +90,7 @@ fullBody.setEndState(q_goal,[fullBody.lLegId,fullBody.rLegId])
 
 print "Generate contact plan ..."
 tStart = time.time()
-configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = True,testReachability=False)
+configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = True,testReachability=True,quasiStatic=True)
 tInterpolateConfigs = time.time() - tStart
 print "Done."
 print "number of configs :", len(configs)

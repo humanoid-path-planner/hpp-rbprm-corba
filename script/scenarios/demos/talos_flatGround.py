@@ -33,7 +33,7 @@ print "Generate limb DB ..."
 tStart = time.time()
 # generate databases : 
 
-nbSamples = 100000
+nbSamples = 50000
 fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep06", 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints,kinematicConstraintsMin = 0.75)
 #fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
 fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep06", 0.01,kinematicConstraintsPath=fullBody.lLegKinematicConstraints,kinematicConstraintsMin = 0.75)
@@ -83,7 +83,7 @@ fullBody.setEndState(q_goal,[fullBody.rLegId,fullBody.lLegId])
 
 print "Generate contact plan ..."
 tStart = time.time()
-configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = True)
+configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = True,quasiStatic=True)
 tInterpolateConfigs = time.time() - tStart
 print "Done."
 print "Contact plan generated in : "+str(tInterpolateConfigs)+" s"
