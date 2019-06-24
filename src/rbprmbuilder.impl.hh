@@ -198,6 +198,7 @@ namespace hpp {
         void setReferenceConfig(const hpp::floatSeq &referenceConfig) throw (hpp::Error);
         void setPostureWeights(const hpp::floatSeq &postureWeights) throw (hpp::Error);
         void setReferenceEndEffector(const char* romName, const hpp::floatSeq &ref) throw(hpp::Error);
+        void usePosturalTaskContactCreation(const bool usePosturalTaskContactCreation) throw (hpp::Error);
 
         virtual void setFilter(const hpp::Names_t& roms) throw (hpp::Error);
 				virtual void setAffordanceFilter(const char* romName, const hpp::Names_t& affordances) throw (hpp::Error);
@@ -329,6 +330,7 @@ namespace hpp {
         double projectStateToCOMEigen(unsigned short stateId, const pinocchio::Configuration_t& com_target, unsigned short maxNumeSamples)throw (hpp::Error);
 
         virtual double projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com, unsigned short max_num_sample) throw (hpp::Error);
+        virtual double projectStateToRoot(unsigned short stateId, const hpp::floatSeq& root) throw (hpp::Error);
         virtual void saveComputedStates(const char* filepath) throw (hpp::Error);
         virtual void saveLimbDatabase(const char* limbname,const char* filepath) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeBox(const char* limbName, double sampleId) throw (hpp::Error);
@@ -347,7 +349,7 @@ namespace hpp {
         virtual Names_t* getContactsVariations(unsigned short stateIdFrom,unsigned short stateIdTo )throw (hpp::Error);
         virtual Names_t* getAllLimbsNames()throw (hpp::Error);
         virtual CORBA::Short addNewContact(unsigned short stateId, const char* limbName,
-                                            const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample) throw (hpp::Error);
+                                            const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample, bool lockOtherJoints) throw (hpp::Error);
         virtual CORBA::Short removeContact(unsigned short stateId, const char* limbName) throw (hpp::Error);
         virtual hpp::floatSeq* computeTargetTransform(const char* limbName, const hpp::floatSeq& configuration, const hpp::floatSeq& p, const hpp::floatSeq& n) throw (hpp::Error);
         virtual Names_t* getEffectorsTrajectoriesNames(unsigned short pathId)throw (hpp::Error);
@@ -357,7 +359,7 @@ namespace hpp {
 
         virtual bool areKinematicsConstraintsVerified(const hpp::floatSeq &point)throw (hpp::Error);
         virtual bool areKinematicsConstraintsVerifiedForState(unsigned short stateId,const hpp::floatSeq &point)throw (hpp::Error);
-        virtual hpp::floatSeq *isReachableFromState(unsigned short stateFrom,unsigned short stateTo)throw (hpp::Error);
+        virtual hpp::floatSeq *isReachableFromState(unsigned short stateFrom,unsigned short stateTo,const bool useIntermediateState)throw (hpp::Error);
         virtual hpp::floatSeq* isDynamicallyReachableFromState(unsigned short stateFrom, unsigned short stateTo, bool addPathPerPhase, const hpp::floatSeq &timings, short numPointPerPhase )throw (hpp::Error);
 
 

@@ -110,6 +110,10 @@ module hpp
     void setPostureWeights(in floatSeq postureWeights)
       raises (Error);
 
+    /// If true, optimize the orientation of all the newly created contact using a postural task
+    void usePosturalTaskContactCreation(in boolean use)
+      raises (Error);
+
     /// set a reference position of the end effector for the given ROM
     void setReferenceEndEffector(in string romName, in floatSeq ref)
       raises (Error);
@@ -144,25 +148,32 @@ module hpp
     /// [z_inf, z_sup, y_inf, y_sup, x_inf, x_sup]
     void boundSO3(in floatSeq limitszyx) raises (Error);
 
-		/// Project a state into a COM
-		///
-		/// \param stateId target state
-		/// \param com target com
-                double projectStateToCOM(in unsigned short stateId,  in floatSeq com, in  unsigned short max_num_sample) raises (Error);
+    /// Project a state into a COM
+    ///
+    /// \param stateId target state
+    /// \param com target com
+    double projectStateToCOM(in unsigned short stateId,  in floatSeq com, in  unsigned short max_num_sample) raises (Error);
 
-                /// Project a state into a COM
-                ///
-                /// \param stateId target state
-                /// \param com target com
-                double setConfigAtState(in unsigned short stateId,  in floatSeq config) raises (Error);
+    /// Project a state into a given root position and orientation
+    ///
+    /// \param stateId target state
+    /// \param root the root configuration (size 7)
+    double projectStateToRoot(in unsigned short stateId,  in floatSeq root) raises (Error);
 
 
-		/// Create a state and push it to the state array
-		///
-		/// \param q configuration
-		/// \param names list of effectors in contact
-		/// \return stateId
-		short createState(in floatSeq configuration, in Names_t contactLimbs) raises (Error);
+    /// Project a state into a COM
+    ///
+    /// \param stateId target state
+    /// \param com target com
+    double setConfigAtState(in unsigned short stateId,  in floatSeq config) raises (Error);
+
+
+    /// Create a state and push it to the state array
+    ///
+    /// \param q configuration
+    /// \param names list of effectors in contact
+    /// \return stateId
+    short createState(in floatSeq configuration, in Names_t contactLimbs) raises (Error);
 
     /// Get Sample configuration by its id
     /// \param sampleName name of the limb from which to retrieve a sample
@@ -736,8 +747,10 @@ module hpp
     /// \param p 3d position of the point
     /// \param n 3d normal of the contact location center
     /// \param max_num_sample number of times it will try to randomly sample a configuration before failing
+    /// \param lockOtherJoints : if True, the values of all the joints exepct the ones of 'limbName' are constrained to be constant.
+    ///                           This only affect the first projection, if max_num_sample > 0 and the first projection was unsuccessfull, the parameter is ignored
     /// \return (success,NState) whether the creation was successful, as well as the new state
-    short addNewContact(in unsigned short stateId, in string limbName, in floatSeq position, in floatSeq normal, in unsigned short max_num_sample) raises (Error);
+    short addNewContact(in unsigned short stateId, in string limbName, in floatSeq position, in floatSeq normal, in unsigned short max_num_sample, in boolean lockOtherJoints) raises (Error);
 
     /// removes a contact from the state
     /// if the limb is not already in contact, does nothing
@@ -779,7 +792,7 @@ module hpp
 
     boolean areKinematicsConstraintsVerifiedForState(in unsigned short stateFrom,in floatSeq point)raises (Error);
 
-    floatSeq isReachableFromState(in unsigned short stateFrom, in unsigned short stateTo)raises (Error);
+    floatSeq isReachableFromState(in unsigned short stateFrom, in unsigned short stateTo, in boolean useIntermediateState)raises (Error);
 
     floatSeq isDynamicallyReachableFromState(in unsigned short stateFrom, in unsigned short stateTo,in boolean addPathPerPhase, in floatSeq timings,in short numPointsPerPhase)raises (Error);
 

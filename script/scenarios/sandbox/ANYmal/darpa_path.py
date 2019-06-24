@@ -1,4 +1,4 @@
-from hpp.corbaserver.rbprm.talos_abstract import Robot
+from hpp.corbaserver.rbprm.anymal_abstract import Robot
 from hpp.gepetto import Viewer
 from hpp.corbaserver import Client
 from hpp.corbaserver import ProblemSolver
@@ -7,29 +7,28 @@ import time
 
 
 vMax = 0.3# linear velocity bound for the root
-aMax = 0.1 # linear acceleration bound for the root
+aMax = 1. # linear acceleration bound for the root
+aMaxZ=5.
 extraDof = 6
 mu=0.5# coefficient of friction
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Robot()
 # Define bounds for the root : bounding box of the scenario
-root_bounds = [-1.5,3,0.,3.3, 0.98, 0.98]
+root_bounds = [-1.5,2.,-0.01,0.01, 0.4, 1.]
 rbprmBuilder.setJointBounds ("root_joint", root_bounds)
-# As this scenario only consider walking, we fix the DOF of the torso :
-rbprmBuilder.setJointBounds ('torso_1_joint', [0,0])
-rbprmBuilder.setJointBounds ('torso_2_joint', [0.006761,0.006761])
 
 # The following lines set constraint on the valid configurations:
 # a configuration is valid only if all limbs can create a contact with the corresponding afforcances type
-rbprmBuilder.setFilter(['talos_lleg_rom','talos_rleg_rom'])
-rbprmBuilder.setAffordanceFilter('talos_lleg_rom', ['Support',])
-rbprmBuilder.setAffordanceFilter('talos_rleg_rom', ['Support'])
+rbprmBuilder.setFilter(rbprmBuilder.urdfNameRom)
+for rom in rbprmBuilder.urdfNameRom :
+    rbprmBuilder.setAffordanceFilter(rom, ['Support'])
+
 # We also bound the rotations of the torso. (z, y, x)
-rbprmBuilder.boundSO3([-4.,4.,-0.1,0.1,-0.1,0.1])
+rbprmBuilder.boundSO3([-0.01,0.01,-0.3,0.3,-0.01,0.01])
 # Add 6 extraDOF to the problem, used to store the linear velocity and acceleration of the root
 rbprmBuilder.client.robot.setDimensionExtraConfigSpace(extraDof)
 # We set the bounds of this extraDof with velocity and acceleration bounds (expect on z axis)
-rbprmBuilder.client.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax,0,0,-aMax,aMax,-aMax,aMax,0,0])
+rbprmBuilder.client.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax,-vMax,vMax,-aMax,aMax,-aMax,aMax,-aMaxZ,aMaxZ])
 indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.robot.getDimensionExtraConfigSpace()
 
 # Creating an instance of HPP problem solver
@@ -37,10 +36,11 @@ ps = ProblemSolver( rbprmBuilder )
 # define parameters used by various methods : 
 ps.setParameter("Kinodynamic/velocityBound",vMax)
 ps.setParameter("Kinodynamic/accelerationBound",aMax)
+ps.setParameter("Kinodynamic/verticalAccelerationBound",aMaxZ)
 # force the orientation of the trunk to match the direction of the motion
-ps.setParameter("Kinodynamic/forceOrientation",True)
-ps.setParameter("DynamicPlanner/sizeFootX",0.2)
-ps.setParameter("DynamicPlanner/sizeFootY",0.12)
+ps.setParameter("Kinodynamic/forceOrientation",False)
+ps.setParameter("DynamicPlanner/sizeFootX",0.01)
+ps.setParameter("DynamicPlanner/sizeFootY",0.01)
 ps.setParameter("DynamicPlanner/friction",mu)
 # sample only configuration with null velocity and acceleration :
 ps.setParameter("ConfigurationShooter/sampleExtraDOF",False)
@@ -54,23 +54,22 @@ vf = ViewerFactory (ps)
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
-afftool.loadObstacleModel ("hpp_environments", "multicontact/floor_bauzil", "planning", vf)
+afftool.loadObstacleModel ("hpp_environments", "multicontact/darpa", "planning", vf,reduceSizes=[0.08,0,0])
 v = vf.createViewer(displayArrows = True)
 #afftool.visualiseAffordances('Support', v, v.color.lightBrown)
-v.addLandmark(v.sceneName,1)
+#v.addLandmark(1550243518,1)
 
 # Setting initial configuration
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init[8] = 0.006761 # torso 2 position in reference config
-q_init [0:3] = [-0.9,1.5,0.98]
-q_init[-6:-3] = [0.07,0,0]
+q_init [0:3] = [-1.2,0,0.444]
+q_init[-6:-3] = [0.02,0,0]
 v (q_init)
 ps.setInitialConfig (q_init)
 # set goal config
 rbprmBuilder.setCurrentConfig (q_init)
 q_goal = q_init [::]
-q_goal[0:3] = [2,2.6,0.98]
-q_goal[-6:-3] = [0.1,0,0]
+q_goal[0:3] = [1.7,0,0.444]
+q_goal[-6:-3] = [0.02,0,0]
 v(q_goal)
 
 
@@ -88,6 +87,8 @@ ps.selectPathPlanner("DynamicPlanner")
 # Solve the planning problem :
 t = ps.solve ()
 print "Guide planning time : ",t
+#v.solveAndDisplay('rm',2,radiusSphere=0.01)
+
 
 
 # display solution : 

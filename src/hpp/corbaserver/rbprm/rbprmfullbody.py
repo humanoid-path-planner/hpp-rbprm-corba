@@ -734,6 +734,14 @@ class FullBody (Robot):
      # \return whether the projection was successful
      def projectStateToCOM(self, state, targetCom, maxNumSample = 0):
           return self.clientRbprm.rbprm.projectStateToCOM(state, targetCom, maxNumSample)     > 0
+
+     ## Project a given state into a given root position
+     # and update the state configuration.
+     # \param state index of first state.
+     # \param root : root configuration (size 7)
+     # \return whether the projection was successful
+     def projectStateToRoot(self, state, root):
+          return self.clientRbprm.rbprm.projectStateToRoot(state, root)     > 0
           
      ## Project a given state into a given COM position
      # and update the state configuration.
@@ -875,6 +883,11 @@ class FullBody (Robot):
      def setPostureWeights(self,postureWeights):
           return self.clientRbprm.rbprm.setPostureWeights(postureWeights)
 
+     ## If true, optimize the orientation of all the newly created contact using a postural task
+     # \param use bool
+     def usePosturalTaskContactCreation(self,use):
+          return self.clientRbprm.rbprm.usePosturalTaskContactCreation(use)
+
       ## return the time at the given state index (in the path computed during the first phase)
       # \param stateId : index of the state
      def getTimeAtState(self,stateId):
@@ -957,8 +970,8 @@ class FullBody (Robot):
      def areKinematicsConstraintsVerifiedForState(self,stateFrom, point):
          return self.clientRbprm.rbprm.areKinematicsConstraintsVerifiedForState(stateFrom,point)
 
-     def isReachableFromState(self,stateFrom,stateTo,computePoint=False):
-          raw =  self.clientRbprm.rbprm.isReachableFromState(stateFrom,stateTo)
+     def isReachableFromState(self,stateFrom,stateTo,computePoint=False,useIntermediateState=True):
+          raw =  self.clientRbprm.rbprm.isReachableFromState(stateFrom,stateTo,useIntermediateState)
           if computePoint :
                 res = []
                 res += [raw[0]>0.]

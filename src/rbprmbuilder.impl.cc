@@ -651,7 +651,11 @@ namespace hpp {
       device->setEffectorReference(name,config);
     }
 
-
+    void RbprmBuilder::usePosturalTaskContactCreation(const bool usePosturalTaskContactCreation) throw (hpp::Error){
+      if(!fullBodyLoaded_)
+        throw Error ("No full body robot was loaded");
+      fullBody()->usePosturalTaskContactCreation(usePosturalTaskContactCreation);
+    }
 
     void RbprmBuilder::setFilter(const hpp::Names_t& roms) throw (hpp::Error)
     {
@@ -847,6 +851,28 @@ namespace hpp {
         return projectStateToCOMEigen(stateId, com_target, max_num_sample);
     }
 
+    double RbprmBuilder::projectStateToRoot(unsigned short stateId, const hpp::floatSeq& root) throw (hpp::Error)
+    {
+        pinocchio::Configuration_t root_target = dofArrayToConfig (7, root);
+        if(lastStatesComputed_.size() <= stateId)
+        {
+            throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
+        }
+        State s = lastStatesComputed_[stateId];
+        projection::ProjectionReport rep = projection::projectToRootConfiguration(fullBody(),root_target,s);
+        double success = 0.;
+        if(rep.success_){
+          ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
+          CollisionValidationPtr_t val = fullBody()->GetCollisionValidation();
+          if(val->validate(rep.result_.configuration_,rport)){
+            lastStatesComputed_[stateId] = rep.result_;
+            lastStatesComputedTime_[stateId].second = rep.result_;
+            success = 1.;
+          }
+        }
+        return success;
+    }
+
 
     rbprm::State RbprmBuilder::generateContacts_internal(const hpp::floatSeq& configuration,
       const hpp::floatSeq& direction,const hpp::floatSeq& acceleration, const double robustnessThreshold ) throw (hpp::Error)
@@ -918,9 +944,8 @@ namespace hpp {
             Configuration_t config;
             for(int i =0; i< 1000; ++i)
             {
-                core::DevicePtr_t device = fullBody()->device_->clone();
                 std::vector<std::string> names = stringConversion(contactLimbs);
-                core::ConfigProjectorPtr_t proj = core::ConfigProjector::create(device,"proj", 1e-4, 100);
+                core::ConfigProjectorPtr_t proj = core::ConfigProjector::create(fullBody()->device_,"proj", 1e-4, 100);
                 //hpp::tools::LockJointRec(limb->limb_->name(), body->device_->rootJoint(), proj);
                 for(std::vector<std::string>::const_iterator cit = names.begin(); cit !=names.end(); ++cit)
                 {
@@ -931,7 +956,7 @@ namespace hpp {
                     std::vector<bool> rotConstraints;
                     posConstraints.push_back(false);posConstraints.push_back(false);posConstraints.push_back(true);
                     rotConstraints.push_back(true);rotConstraints.push_back(true);rotConstraints.push_back(true);
-                    const pinocchio::Frame effectorFrame = device->getFrameByName(limb->effector_.name());
+                    const pinocchio::Frame effectorFrame = fullBody()->device_->getFrameByName(limb->effector_.name());
                     pinocchio::JointPtr_t effectorJoint= limb->effector_.joint();
                     proj->add(core::NumericalConstraint::create (constraints::Position::create("",fullBody()->device_,
                                                                                                effectorJoint,
@@ -1420,7 +1445,7 @@ namespace hpp {
           }
           State stateFrom = lastStatesComputed_[stateIdFrom];
           State stateTo = lastStatesComputed_[stateIdTo];
-          std::vector<std::string> variations_s = stateTo.allVariations(stateFrom,rbprm::interpolation::extractEffectorsName(fullBody()->GetLimbs()));
+          std::vector<std::string> variations_s = stateTo.contactVariations(stateFrom);
           CORBA::ULong size = (CORBA::ULong) variations_s.size ();
           char** nameList = Names_t::allocbuf(size);
           Names_t *variations = new Names_t (size,size,nameList);
@@ -2109,9 +2134,8 @@ namespace hpp {
 
 
         res->length ((_CORBA_ULong)2);
-
-        fcl::Vec3f& position = state.contactPositions_.at(limbName);
-        position += fullBody()->GetLimb(limb)->offset_;
+        fcl::Transform3f jointT( state.contactRotation_.at(limbName), state.contactPositions_.at(limbName));
+        fcl::Vec3f position =  jointT.transform(fullBody()->GetLimb(limb)->offset_);
         _CORBA_ULong size = (_CORBA_ULong) 3;
         double* dofArray = hpp::floatSeq::allocbuf(size);
         hpp::floatSeq floats (size, size, dofArray, true);
@@ -3205,7 +3229,7 @@ namespace hpp {
 
 
     CORBA::Short RbprmBuilder::addNewContact(unsigned short stateId, const char* limbName,
-                                        const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample) throw (hpp::Error)
+                                        const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample, bool lockOtherJoints) throw (hpp::Error)
     {
         try
         {
@@ -3219,7 +3243,7 @@ namespace hpp {
             config = dofArrayToConfig (std::size_t(3), normal);
             fcl::Vec3f n; for(int i =0; i<3; ++i) n[i] = config[i];
 
-            projection::ProjectionReport rep = projection::projectStateToObstacle(fullBody(),limb, fullBody()->GetLimbs().at(limb), ns, n,p);
+            projection::ProjectionReport rep = projection::projectStateToObstacle(fullBody(),limb, fullBody()->GetLimbs().at(limb), ns, n,p,lockOtherJoints);
             hppDout(notice,"Projection State to obstacle success : "<<rep.success_);
             hppDout(notice,"report status : "<<rep.status_);
             ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
@@ -3378,14 +3402,14 @@ namespace hpp {
     }
 
 
-    hpp::floatSeq* RbprmBuilder::isReachableFromState(unsigned short stateFrom,unsigned short stateTo)throw (hpp::Error){
+    hpp::floatSeq* RbprmBuilder::isReachableFromState(unsigned short stateFrom, unsigned short stateTo , const bool useIntermediateState)throw (hpp::Error){
         if(!fullBodyLoaded_){
           throw std::runtime_error ("fullBody not loaded");
         }
         if(stateTo >= lastStatesComputed_.size() || stateFrom >= lastStatesComputed_.size()){
             throw std::runtime_error ("Unexisting state ID");
         }
-        reachability::Result res = reachability::isReachable(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo]);
+        reachability::Result res = reachability::isReachable(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo], fcl::Vec3f::Zero(),useIntermediateState);
 
         // convert vector of int to floatSeq :
         _CORBA_ULong size;
