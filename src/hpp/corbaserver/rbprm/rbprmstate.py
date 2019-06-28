@@ -202,3 +202,16 @@ class StateHelper(object):
         sId = fullBody.generateStateInContact(q,direction,acceleration)
         s = State(fullBody,sId=sId)
         return s
+        
+    @staticmethod
+    def moveAndContact(state,rootOffset,limbName):
+        s, success = StateHelper.removeContact(state, limbName)
+        assert success
+        success = s.projectToRoot((array(s.q()[:3]) + array(rootOffset)).tolist()+s.q()[3:7])
+        if not success:
+            return state, False
+        sId = s.fullBody.clientRbprm.rbprm.generateContactState(s.sId, limbName,rootOffset)
+        if sId < 0:
+            return state, False
+        s = State(s.fullBody,sId=sId)
+        return s, True

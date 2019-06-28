@@ -1065,6 +1065,83 @@ namespace hpp {
         }
     }
 
+    short RbprmBuilder::generateContactState(::CORBA::UShort  cId, const char*  name,  const ::hpp::floatSeq& direction)
+    throw (hpp::Error)
+    {
+        try
+        {
+        if(lastStatesComputed_.size() <= (std::size_t)(cId))
+        {
+            throw std::runtime_error ("Unexisting state " + std::string(""+(cId+1)));
+        }
+        State& state = lastStatesComputed_[cId];
+        std::string limbname(name);
+        fcl::Vec3f dir;
+        for(std::size_t i =0; i <3; ++i)
+        {
+            dir[i] = direction[(_CORBA_ULong)i];
+        }
+        pinocchio::Configuration_t config = state.configuration_;
+        fullBody()->device_->currentConfiguration(config);
+
+        sampling::T_OctreeReport finalSet;
+        rbprm::T_Limb::const_iterator lit = fullBody()->GetLimbs().find(limbname);
+        if(lit == fullBody()->GetLimbs().end())
+        {
+            throw std::runtime_error ("Impossible to find limb for joint "
+                                      + std::string(limbname) + " to robot; limb not defined.");
+        }
+        const RbPrmLimbPtr_t& limb = lit->second;
+        pinocchio::Transform3f transformPino = limb->octreeRoot(); // get root transform from configuration
+        fcl::Transform3f transform(transformPino.rotation(),transformPino.translation());
+                    // TODO fix as in rbprm-fullbody.cc!!
+        const affMap_t &affMap = problemSolver()->affordanceObjects;
+        if (affMap.map.empty ())
+        {
+            throw hpp::Error ("No affordances found. Unable to interpolate.");
+        }
+        const std::vector<pinocchio::CollisionObjectPtr_t> objects = contact::getAffObjectsForLimb(std::string(limbname), affMap,
+                                                                   bindShooter_.affFilter_);
+
+        std::vector<sampling::T_OctreeReport> reports(objects.size());
+        std::size_t i (0);
+        //#pragma omp parallel for
+        for(std::vector<pinocchio::CollisionObjectPtr_t>::const_iterator oit = objects.begin();
+            oit != objects.end(); ++oit, ++i)
+        {
+            sampling::GetCandidates(limb->sampleContainer_, transform, *oit, dir, reports[i], sampling::HeuristicParam());
+        }
+        for(std::vector<sampling::T_OctreeReport>::const_iterator cit = reports.begin();
+            cit != reports.end(); ++cit)
+        {
+            finalSet.insert(cit->begin(), cit->end());
+        }
+        // randomize samples
+        std::random_shuffle(reports.begin(), reports.end());
+        unsigned short num_samples_ok (0);
+        pinocchio::Configuration_t sampleConfig = config;
+        sampling::T_OctreeReport::const_iterator candCit = finalSet.begin();
+        for(std::size_t i=0; i< _CORBA_ULong(finalSet.size()) && num_samples_ok < 100; ++i, ++candCit)
+        {
+            const sampling::OctreeReport& report = *candCit;
+            State state;
+            state.configuration_ = config;
+            hpp::rbprm::projection::ProjectionReport rep =
+            hpp::rbprm::projection::projectSampleToObstacle(fullBody(),std::string(limbname), limb, report, fullBody()->GetCollisionValidation(), sampleConfig, state);
+            if(rep.success_)
+            {
+
+                lastStatesComputed_.push_back(rep.result_);
+                lastStatesComputedTime_.push_back(std::make_pair(-1.,  rep.result_));
+                return lastStatesComputed_.size() -1;
+            }
+        }
+        return -1;
+    } catch (const std::exception& exc) {
+    throw hpp::Error (exc.what ());
+    }
+    }
+
     hpp::floatSeqSeq* RbprmBuilder::getContactSamplesProjected(const char* limbname,
                                         const hpp::floatSeq& configuration,
                                         const hpp::floatSeq& direction,

@@ -237,6 +237,9 @@ namespace hpp {
                                                    const hpp::floatSeq& direction,
                                                    unsigned short numSamples) throw (hpp::Error);
 
+        virtual short generateContactState(::CORBA::UShort  currentState, const char*  name,  const ::hpp::floatSeq& direction)  throw (hpp::Error);
+
+
         virtual hpp::floatSeq* getSamplesIdsInOctreeNode(const char* limb,
                                                    double octreeNodeId) throw (hpp::Error);
 

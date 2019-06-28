@@ -224,7 +224,7 @@ class FullBody (Robot):
           num_max_sample = 1
           for (limbName, normal) in  zip(contacts, normals):
                p = cl.getEffectorPosition(limbName,configuration)[0]
-               cl.addNewContact(sId, limbName, p, normal, num_max_sample)
+               cl.addNewContact(sId, limbName, p, normal, num_max_sample, False)
           return sId
           
      ## Retrieves the contact candidates configurations given a configuration and a limb
@@ -285,7 +285,7 @@ class FullBody (Robot):
           num_max_sample = 1
           for (limbName, normal) in  zip(contacts, normals):
                p = cl.getEffectorPosition(limbName,configuration)[0]
-               cl.addNewContact(sId, limbName, p, normal, num_max_sample, True)
+               cl.addNewContact(sId, limbName, p, normal, num_max_sample, False)
           return cl.setStartStateId(sId)
           
           
@@ -303,7 +303,7 @@ class FullBody (Robot):
           num_max_sample = 1
           for (limbName, normal) in  zip(contacts, normals):
                p = cl.getEffectorPosition(limbName,configuration)[0]
-               cl.addNewContact(sId, limbName, p, normal, num_max_sample, True)
+               cl.addNewContact(sId, limbName, p, normal, num_max_sample, False)
           return cl.setEndStateId(sId)
 
      ## Initialize the first state of the path interpolation

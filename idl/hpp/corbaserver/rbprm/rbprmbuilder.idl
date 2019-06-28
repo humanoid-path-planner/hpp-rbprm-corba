@@ -255,6 +255,13 @@ module hpp
     floatSeqSeq getContactSamplesProjected(in string name, in floatSeq dofArray, in floatSeq direction,
     in unsigned short numSamples) raises (Error);
 
+    /// Given a contact state and a limb, tries to generate a new contact, and returns the id of the new State if successful
+    /// \param currentState Id of the considered state
+    /// \param name name of the limb used to create a contact
+    /// \param direction desired direction of motion for the robot
+    /// \return transformed configuration for which all possible contacts have been created
+    short generateContactState(in unsigned short currentState, in string name, in floatSeq direction) raises (Error);
+
     /// get Ids of limb in an octree cell
     /// \param name name of the considered limb
     /// \param octreeNodeId considered configuration of the robot
