@@ -290,7 +290,7 @@ class FullBody (Robot):
           num_max_sample = 1
           for (limbName, normal) in  zip(contacts, normals):
                p = cl.getEffectorPosition(limbName,configuration)[0]
-               cl.addNewContact(sId, limbName, p, normal, num_max_sample, True)
+               cl.addNewContact(sId, limbName, p, normal, num_max_sample, False)
           return cl.setStartStateId(sId)
           
           
@@ -308,7 +308,7 @@ class FullBody (Robot):
           num_max_sample = 1
           for (limbName, normal) in  zip(contacts, normals):
                p = cl.getEffectorPosition(limbName,configuration)[0]
-               cl.addNewContact(sId, limbName, p, normal, num_max_sample, True)
+               cl.addNewContact(sId, limbName, p, normal, num_max_sample, False)
           return cl.setEndStateId(sId)
 
      ## Initialize the first state of the path interpolation
@@ -835,7 +835,7 @@ class FullBody (Robot):
      # \param viewer gepetto viewer instance
      def draw(self, configuration, viewer):
           viewer(configuration)
-          for limb, groupid in self.octrees.items():
+          for limb, groupid in self.octrees.iteritems():
                 transform = self.clientRbprm.rbprm.getOctreeTransform(limb, configuration)
                 viewer.client.gui.applyConfiguration(groupid,transform)
           viewer.client.gui.refresh()
