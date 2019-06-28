@@ -37,7 +37,7 @@ ps = ProblemSolver( rbprmBuilder )
 ps.setParameter("Kinodynamic/velocityBound",vMax)
 ps.setParameter("Kinodynamic/accelerationBound",aMax)
 # force the orientation of the trunk to match the direction of the motion
-ps.setParameter("Kinodynamic/forceOrientation",True)
+ps.setParameter("Kinodynamic/forceYawOrientation",True)
 ps.setParameter("DynamicPlanner/sizeFootX",0.2)
 ps.setParameter("DynamicPlanner/sizeFootY",0.12)
 ps.setParameter("DynamicPlanner/friction",mu)
