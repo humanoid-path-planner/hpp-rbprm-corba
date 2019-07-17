@@ -28,7 +28,7 @@ for rom in rbprmBuilder.urdfNameRom :
 rbprmBuilder.boundSO3([-0.1,0.1,-0.5,0.5,-0.1,0.1])
 # Add 6 extraDOF to the problem, used to store the linear velocity and acceleration of the root
 rbprmBuilder.client.robot.setDimensionExtraConfigSpace(extraDof)
-c# We set the bounds of this extraDof with velocity and acceleration bounds (expect on z axis)
+# We set the bounds of this extraDof with velocity and acceleration bounds (expect on z axis)
 rbprmBuilder.client.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax,-vMax,vMax,-aMax,aMax,-aMax,aMax,-aMaxZ,aMaxZ])
 indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.robot.getDimensionExtraConfigSpace()
 
@@ -39,7 +39,7 @@ ps.setParameter("Kinodynamic/velocityBound",vMax)
 ps.setParameter("Kinodynamic/accelerationBound",aMax)
 ps.setParameter("Kinodynamic/verticalAccelerationBound",aMaxZ)
 # force the orientation of the trunk to match the direction of the motion
-ps.setParameter("Kinodynamic/forceOrientation",True)
+ps.setParameter("Kinodynamic/forceAllOrientation",True)
 ps.setParameter("DynamicPlanner/sizeFootX",0.1)
 ps.setParameter("DynamicPlanner/sizeFootY",0.1)
 ps.setParameter("DynamicPlanner/friction",mu)
