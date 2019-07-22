@@ -17,7 +17,7 @@ mu=0.5# coefficient of friction
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Robot ()
 # Define bounds for the root : bounding box of the scenario
-rootBounds = [0.2,3.9, 0.2, 2.2, 0.95, 1.05]
+rootBounds = [0.1,4., 0.2, 2.2, 0.95, 1.05]
 rbprmBuilder.setJointBounds ("root_joint", rootBounds)
 
 # The following lines set constraint on the valid configurations:
@@ -26,7 +26,7 @@ rbprmBuilder.setFilter([])#'talos_lleg_rom','talos_rleg_rom'])
 rbprmBuilder.setAffordanceFilter('talos_lleg_rom', ['Support',])
 rbprmBuilder.setAffordanceFilter('talos_rleg_rom', ['Support'])
 # We also bound the rotations of the torso. (z, y, x)
-rbprmBuilder.boundSO3([-1.7,1.7,-0.1,0.1,-0.1,0.1])
+rbprmBuilder.boundSO3([-3.14,3.14,-0.1,0.1,-0.1,0.1])
 # Add 6 extraDOF to the problem, used to store the linear velocity and acceleration of the root
 rbprmBuilder.client.robot.setDimensionExtraConfigSpace(extraDof)
 # We set the bounds of this extraDof with velocity and acceleration bounds (expect on z axis)
@@ -52,7 +52,7 @@ vf = ViewerFactory (ps)
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
-afftool.loadObstacleModel ("hpp_environments", "multicontact/plateforme_not_flat", "planning", vf, reduceSizes=[0.15,0,0])
+afftool.loadObstacleModel ("hpp_environments", "multicontact/plateforme_not_flat", "planning", vf, reduceSizes=[0.16,0,0])
 try :
     v = vf.createViewer(displayArrows = True)
 except Exception:
@@ -68,74 +68,53 @@ except Exception:
 
 v.addLandmark(v.sceneName,1)
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init[0:3] = [0.20,1.15,0.99]
-#q_init[0:3] = [0.20,1.15,1.0]
-q_init[3:7] = [0,0,0,1]
-print "q_init",q_init[1]
 
-# Q init => Set position and orientation
-# X will be between [groundMinX, groundMaxX]
-# Y will be between [groundMinY, groundMaxY]
-lengthPath = 0.9
-marginX = 1.7
-marginY = 0.8
-groundMinX = marginX
-groundMaxX = 4.0 - marginX
-groundMinY = marginY
-groundMaxY = 2.4 - marginY
+# Generate random init and goal position.
+# these position will be on the flat part of the environment, with an orientation such that they can be connected by a straight line, and an angle between +- 25 degree from the x axis
+Y_BOUNDS=[0.3,2.1]
+Z_VALUE = 0.98
+MAX_ANGLE = 0.4363323129985824 # 25 degree
 
-minAngleDegree = 80
-maxAngleDegree = 100
-
-positionIsRandomOnFlatGround = True
-
-# INIT
-radius = 0.01
 import random
 random.seed()
-alpha = 0.0
-if random.uniform(0.,1.) > 0.5:
-	alpha = random.uniform(minAngleDegree,maxAngleDegree)
-else:
-	alpha = random.uniform(minAngleDegree+180,maxAngleDegree+180)
-print "Test on a circle, alpha deg = ",alpha
-alpha = alpha*np.pi/180.0
-move_Y = random.uniform(-0.2,0.2)
 
-q_init_random= q_init[::]
-q_init_random [0:3] = [radius*np.sin(alpha), -radius*np.cos(alpha), 1.]
+# select randomly the initial and final plateform, they cannot be the same
+# end plateform is always after the init plateform on the x axis
+init_plateform_id = random.randint(0,3)
+end_plateform_id = random.randint(init_plateform_id+1,4)
+#if end_plateform_id >= init_plateform_id:
+#  end_plateform_id+=1
+
+# set x position from the plateform choosen : 
+x_init = 0.16 + 0.92*init_plateform_id
+x_goal = 0.16 + 0.92*end_plateform_id
+
+# uniformly sample y position
+y_init = random.uniform(Y_BOUNDS[0],Y_BOUNDS[1])
+q_init[0:3] = [x_init,y_init, Z_VALUE]
+
+# y_goal must be random inside Y_BOUNDS but such that the line between q_init and q_goal is between +- MAX_ANGLE radian from the x axis 
+y_bound_goal = Y_BOUNDS[::]
+y_angle_max = math.sin(MAX_ANGLE)*abs(x_init-x_goal) + y_init
+y_angle_min = math.sin(-MAX_ANGLE)*abs(x_init-x_goal) + y_init
+y_bound_goal[0] = max(y_angle_min,y_bound_goal[0])
+y_bound_goal[1] = min(y_angle_max,y_bound_goal[1])
+y_goal = random.uniform(y_bound_goal[0],y_bound_goal[1])
+
+
+
+# compute the orientation such that q_init face q_goal :
 # set final orientation to be along the circle : 
 vx = np.matrix([1,0,0]).T
-v_init = np.matrix([q_init_random[0],q_init_random[1],0]).T
+v_init = np.matrix([x_goal-x_init,y_goal-y_init,0]).T
 quat = Quaternion.FromTwoVectors(vx,v_init)
-q_init_random[3:7] = quat.coeffs().T.tolist()[0]
-# set initial velocity to fix the orientation
-q_init_random[-6] = vInit*np.sin(alpha)
-q_init_random[-5] = -vInit*np.cos(alpha)
-if positionIsRandomOnFlatGround :
-	# Set robot on flat ground
-	q_init_random[0] = 2.0
-	q_init_random[1] = 1.2 + move_Y
-else:
-	# Set robot at random position on platform
-	q_init_random[0] = random.uniform(groundMinX,groundMaxX)
-	q_init_random[1] = random.uniform(groundMinY,groundMaxY)
-v(q_init_random)
+q_init[3:7] = quat.coeffs().T.tolist()[0]
 
-# GOAL
-# Q goal => Set straight position in square of size (4,2)
-# 	    Orientation is the vector between position init and goal 
-q_goal_random = q_init_random[::]
-# Set robot goal at random position on platform
-q_goal_random[0] = q_init_random[0] + np.sin(alpha)*lengthPath
-q_goal_random[1] = q_init_random[1] - np.cos(alpha)*lengthPath
-v(q_goal_random)
-# Set new q_init and q_goal
-q_init = q_init_random[::]
-q_goal = q_goal_random[::]
+q_goal=q_init[::]
+q_goal[0:2] = [x_goal,y_goal]
 
-print "initial root position/velocity : ",q_init
-print "final root position/velocity : ",q_goal
+print "initial root position : ",q_init
+print "final root position : ",q_goal
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
