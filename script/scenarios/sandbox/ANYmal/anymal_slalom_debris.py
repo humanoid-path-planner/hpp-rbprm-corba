@@ -77,8 +77,8 @@ v.addLandmark('anymal/base',0.3)
 v(q_init)
 
 # specify the full body configurations as start and goal state of the problem
-fullBody.setStartState(q_init,fullBody.limbs_names)
-fullBody.setEndState(q_goal,fullBody.limbs_names)
+fullBody.setStartState(q_init,fullBody.limbs_names, [[0.,0.,1.] for _ in range(4)])
+fullBody.setEndState(q_goal,fullBody.limbs_names, [[0.,0.,1.] for _ in range(4)])
 
 
 print "Generate contact plan ..."
