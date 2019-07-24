@@ -12,7 +12,7 @@ vGoal = 0.01
 vMax = 0.5# linear velocity bound for the root
 aMax = 0.5# linear acceleration bound for the root
 extraDof = 6
-mu=0.5# coefficient of friction
+mu=0.3# coefficient of friction
 # Creating an instance of the helper class, and loading the robot
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Robot ()
@@ -40,7 +40,7 @@ ps.setParameter("Kinodynamic/velocityBound",vMax)
 ps.setParameter("Kinodynamic/accelerationBound",aMax)
 ps.setParameter("DynamicPlanner/sizeFootX",0.2)
 ps.setParameter("DynamicPlanner/sizeFootY",0.12)
-ps.setParameter("DynamicPlanner/friction",0.5)
+ps.setParameter("DynamicPlanner/friction",mu)
 # sample only configuration with null velocity and acceleration :
 ps.setParameter("ConfigurationShooter/sampleExtraDOF",False)
 
@@ -52,7 +52,7 @@ vf = ViewerFactory (ps)
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
-afftool.loadObstacleModel ("hpp_environments", "multicontact/plateforme_not_flat", "planning", vf, reduceSizes=[0.16,0,0])
+afftool.loadObstacleModel ("hpp_environments", "multicontact/plateforme_not_flat", "planning", vf, reduceSizes=[0.1,0,0])
 try :
     v = vf.createViewer(displayArrows = True)
 except Exception:
@@ -86,8 +86,8 @@ end_plateform_id = random.randint(init_plateform_id+1,4)
 #  end_plateform_id+=1
 
 # set x position from the plateform choosen : 
-x_init = 0.16 + 0.92*init_plateform_id
-x_goal = 0.16 + 0.92*end_plateform_id
+x_init = 0.16 + 0.925*init_plateform_id
+x_goal = 0.16 + 0.925*end_plateform_id
 
 # uniformly sample y position
 y_init = random.uniform(Y_BOUNDS[0],Y_BOUNDS[1])

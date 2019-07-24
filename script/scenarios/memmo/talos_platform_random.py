@@ -26,6 +26,7 @@ fullBody.client.robot.setExtraConfigSpaceBounds([-tp.vMax,tp.vMax,-tp.vMax,tp.vM
 ps = tp.ProblemSolver( fullBody )
 ps.setParameter("Kinodynamic/velocityBound",tp.vMax)
 ps.setParameter("Kinodynamic/accelerationBound",tp.aMax)
+ps.setParameter("FullBody/frictionCoefficient",tp.mu)
 #load the viewer
 try :
     v = tp.Viewer (ps,viewerClient=tp.v.client, displayCoM = True)
@@ -46,8 +47,8 @@ except Exception:
 q_ref = fullBody.referenceConfig_legsApart[::]+[0]*6
 q_init = q_ref[::]
 fullBody.setReferenceConfig(q_ref)
-
 fullBody.setPostureWeights(fullBody.postureWeights[::]+[0]*6)
+fullBody.usePosturalTaskContactCreation(True)
 
 fullBody.setCurrentConfig (q_init)
 
@@ -56,9 +57,9 @@ tStart = time.time()
 # generate databases : 
 
 nbSamples = 100000
-fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep06", 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints,kinematicConstraintsMin = 0.85)
+fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep08", 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints,kinematicConstraintsMin = 0.85)
 #fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
-fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep06", 0.01,kinematicConstraintsPath=fullBody.lLegKinematicConstraints,kinematicConstraintsMin = 0.85)
+fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep08", 0.01,kinematicConstraintsPath=fullBody.lLegKinematicConstraints,kinematicConstraintsMin = 0.85)
 #fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
 
 
@@ -83,19 +84,6 @@ q_init[configSize+3:configSize+6] = acc_init[::]
 q_goal[configSize:configSize+3] = vel_goal[::]
 q_goal[configSize+3:configSize+6] = [0,0,0]
 
-'''
-state_id = fullBody.generateStateInContact(q_init, vel_init,robustnessThreshold=5)
-assert fullBody.rLegId in fullBody.getAllLimbsInContact(state_id), "Right leg not in contact in initial state"
-assert fullBody.lLegId in fullBody.getAllLimbsInContact(state_id), "Left leg not in contact in initial state"
-q_init = fullBody.getConfigAtState(state_id)
-v(q_init)
-
-state_id = fullBody.generateStateInContact(q_goal, vel_goal,robustnessThreshold=5)
-assert fullBody.rLegId in fullBody.getAllLimbsInContact(state_id), "Right leg not in contact in final state"
-assert fullBody.lLegId in fullBody.getAllLimbsInContact(state_id), "Left leg not in contact in final state"
-q_goal = fullBody.getConfigAtState(state_id)
-v(q_goal)
-'''
 
 
 fullBody.setStaticStability(True)
@@ -106,7 +94,7 @@ q_init[2]=q_ref[2]
 q_goal[2]=q_ref[2]
 
 
-# define init gait according the direction of motion, try to move first the leg on the outside of the turn : 
+# define init gait according to the direction of motion, try to move first the leg on the outside of the turn : 
 if q_goal[0] > q_init[0] : #go toward x positif
   if q_goal[1] > q_init[1]: # turn left
     gait = [fullBody.rLegId,fullBody.lLegId]
@@ -118,11 +106,14 @@ else : # go toward x negatif
   else : # turn left
     gait = [fullBody.rLegId,fullBody.lLegId]
 
-fullBody.setStartState(q_init,gait)
-fullBody.setEndState(q_goal,gait)
 v(q_init)
+fullBody.setStartState(q_init,gait)
+v(q_goal)
+fullBody.setEndState(q_goal,gait)
+
 print "Generate contact plan ..."
 tStart = time.time()
+v(q_init)
 configs = fullBody.interpolate(0.005,pathId=pId,robustnessTreshold = 1, filterStates = True,testReachability=True,quasiStatic=True)
 tInterpolateConfigs = time.time() - tStart
 print "Done."
