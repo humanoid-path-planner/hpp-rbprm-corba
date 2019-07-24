@@ -1461,6 +1461,53 @@ namespace hpp {
       }
     }
 
+    Names_t* RbprmBuilder::getCollidingObstacleAtConfig(const ::hpp::floatSeq& configuration,const char* limbName)throw (hpp::Error){
+      try
+      {
+          std::vector<std::string> res;
+          std::string name (limbName);
+          //hpp::pinocchio::RbPrmDevicePtr_t rbprmDevice = boost::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(problemSolver()->robot ());
+          const hpp::pinocchio::DevicePtr_t romDevice = romDevices_[name];
+          pinocchio::Configuration_t q = dofArrayToConfig(romDevice, configuration);
+          romDevice->currentConfiguration(q);
+          hpp::pinocchio::RbPrmDevicePtr_t rbprmDevice = boost::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(romDevice);
+          RbPrmPathValidationPtr_t rbprmPathValidation_ (boost::dynamic_pointer_cast<hpp::rbprm::RbPrmPathValidation>(problemSolver()->problem()->pathValidation()));
+          rbprmPathValidation_->getValidator()->computeAllContacts(true);
+          core::ValidationReportPtr_t report;
+          problemSolver()->problem()->configValidations()->validate(q,report);
+          core::RbprmValidationReportPtr_t rbReport = boost::dynamic_pointer_cast<hpp::core::RbprmValidationReport> (report);
+          for(std::map<std::string,core::CollisionValidationReportPtr_t>::const_iterator it = rbReport->ROMReports.begin() ; it != rbReport->ROMReports.end() ; ++it){
+              if (name == it->first)
+              //if (true)
+              {
+                    core::AllCollisionsValidationReportPtr_t romReports = boost::dynamic_pointer_cast<core::AllCollisionsValidationReport>(it->second);
+                    if(!romReports){
+                      hppDout(warning,"For rom : "<<it->first<<" unable to cast in a AllCollisionsValidationReport, did you correctly call computeAllContacts(true) before generating the report ? ");
+                      //return;
+                        }
+                  if(romReports->collisionReports.size()> 1){
+
+                      for(std::vector<CollisionValidationReportPtr_t>::const_iterator itAff = romReports->collisionReports.begin() ; itAff != romReports->collisionReports.end() ; ++itAff){
+                         res.push_back((*itAff)->object2->name ());
+                      }
+                  }
+              }
+          }
+          CORBA::ULong size = (CORBA::ULong) res.size ();
+          char** nameList = Names_t::allocbuf(size);
+          Names_t *variations = new Names_t (size,size,nameList);
+          for (std::size_t i = 0 ; i < res.size() ; ++i){
+            nameList[i] = (char*) malloc (sizeof(char)*(res[i].length ()+1));
+            strcpy (nameList [i], res[i].c_str ());
+          }
+          return variations;
+        }
+      catch(std::runtime_error& e)
+      {
+          throw Error(e.what());
+      }
+    }
+
     std::vector<State> TimeStatesToStates(const T_StateFrame& ref)
     {
         std::vector<State> res;

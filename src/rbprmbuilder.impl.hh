@@ -346,7 +346,8 @@ namespace hpp {
         virtual hpp::floatSeq* evaluateConfig(const hpp::floatSeq& configuration, const hpp::floatSeq &direction) throw (hpp::Error);
         virtual void dumpProfile(const char* logFile) throw (hpp::Error);
         virtual double getTimeAtState(unsigned short stateId)throw (hpp::Error);
-        virtual Names_t* getContactsVariations(unsigned short stateIdFrom,unsigned short stateIdTo )throw (hpp::Error);
+        virtual Names_t* getContactsVariations(unsigned short stateIdFrom,unsigned short stateIdTo )throw (hpp::Error);        
+        virtual Names_t* getCollidingObstacleAtConfig(const ::hpp::floatSeq& configuration,const char* limbName)throw (hpp::Error);
         virtual Names_t* getAllLimbsNames()throw (hpp::Error);
         virtual CORBA::Short addNewContact(unsigned short stateId, const char* limbName,
                                             const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample, bool lockOtherJoints) throw (hpp::Error);
