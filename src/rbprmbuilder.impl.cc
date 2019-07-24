@@ -170,13 +170,9 @@ namespace hpp {
             fullBodyMap_.selected_ = name;
             if(problemSolver()){
                 if(problemSolver()->problem()){
-                    try {
-                      double mu = problemSolver()->problem()->getParameter ("friction").floatValue();
-                      fullBody()->setFriction(mu);
-                      hppDout(notice,"fullbody : mu define in python : "<<fullBody()->getFriction());
-                    } catch (const std::exception& e) {
-                      hppDout(notice,"fullbody : mu not defined, take : "<<fullBody()->getFriction()<<" as default.");
-                    }
+                    double mu = problemSolver()->problem()->getParameter ("FullBody/frictionCoefficient").floatValue();
+                    fullBody()->setFriction(mu);
+                    hppDout(notice,"fullbody : friction coefficient used  : "<<fullBody()->getFriction());
                 }else{
                     hppDout(warning,"No instance of problem while initializing fullBody");
                 }
@@ -3482,6 +3478,13 @@ namespace hpp {
         }else
             return new hpp::floatSeq();
     }
+
+    HPP_START_PARAMETER_DECLARATION(FullBody)
+      Problem::declareParameter(core::ParameterDescription (core::Parameter::FLOAT,
+            "FullBody/frictionCoefficient",
+            "The coefficient of friction used between the robot and the environment.",
+            core::Parameter(0.5)));
+      HPP_END_PARAMETER_DECLARATION(FullBody)
 
 
     } // namespace impl
