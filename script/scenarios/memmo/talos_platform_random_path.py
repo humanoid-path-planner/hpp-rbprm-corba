@@ -5,7 +5,8 @@ from pinocchio import Quaternion
 import numpy as np
 import time
 import math
-statusFilename = "infos.log"
+statusFilename = "/res/infos.log"
+
 
 vInit = 0.05# initial / final velocity to fix the direction
 vGoal = 0.01
@@ -119,12 +120,11 @@ ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
 # write problem in files : 
-"""
 f = open(statusFilename,"w")
 f.write("q_init= "+str(q_init)+"\n")
 f.write("q_goal= "+str(q_goal)+"\n")
 f.close()
-"""
+
 
 # Choosing RBPRM shooter and path validation methods.
 ps.selectConfigurationShooter("RbprmShooter")

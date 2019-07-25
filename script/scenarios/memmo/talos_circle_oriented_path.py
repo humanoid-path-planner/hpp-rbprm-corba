@@ -4,7 +4,7 @@ from hpp.corbaserver import ProblemSolver
 import numpy as np
 from pinocchio import Quaternion
 import time
-statusFilename = "infos.log"
+statusFilename = "/res/infos.log"
 
 
 vMax = 0.5# linear velocity bound for the root

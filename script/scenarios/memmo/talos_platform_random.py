@@ -5,8 +5,19 @@ import time
 print "Plan guide trajectory ..."
 import scenarios.memmo.talos_platform_random_path as tp
 #Robot.urdfSuffix += "_safeFeet"
+statusFilename = tp.statusFilename
 pId = 0
-
+f = open(statusFilename,"a")
+if tp.ps.numberPaths() > 0 :
+  print "Path planning OK."
+  f.write("Planning_success: True"+"\n")
+  f.close()
+else :
+  print "Error during path planning"
+  f.write("Planning_success: False"+"\n")
+  f.close()
+  import sys
+  sys.exit(1)
 
 fullBody = Robot ()
 
@@ -87,7 +98,7 @@ q_goal[configSize+3:configSize+6] = [0,0,0]
 
 
 fullBody.setStaticStability(True)
-v.addLandmark('talos/base_link',0.3)
+#v.addLandmark('talos/base_link',0.3)
 
 # FOR EASY SCENARIOS ?
 q_init[2]=q_ref[2]
@@ -122,7 +133,30 @@ print "number of configs :", len(configs)
 #raw_input("Press Enter to display the contact sequence ...")
 #displayContactSequence(v,configs)
 
+if len(configs) < 2 :
+  cg_success = False
+  print "Error during contact generation."
+else:
+  cg_success = True
+  print "Contact generation Done."
+if abs(configs[-1][0] - tp.q_goal[0]) < 0.01 and abs(configs[-1][1]- tp.q_goal[1]) < 0.01  and (len(fullBody.getContactsVariations(len(configs)-2,len(configs)-1))==1):
+  print "Contact generation successful."
+  cg_reach_goal = True
+else:
+  print "Contact generation failed to reach the goal."
+  cg_reach_goal = False
+
+f = open(statusFilename,"a")
+f.write("cg_success: "+str(cg_success)+"\n")
+f.write("cg_reach_goal: "+str(cg_reach_goal)+"\n")
+f.close()
+
+if (not cg_success):
+  import sys
+  sys.exit(1)
+
+
 
 # put back original bounds for wholebody methods
 fullBody.resetJointsBounds()
-displayContactSequence(v,configs)
+#displayContactSequence(v,configs)
