@@ -67,7 +67,7 @@ except Exception:
     
 #afftool.visualiseAffordances('Support', v, v.color.lightBrown)
 
-v.addLandmark(v.sceneName,1)
+#v.addLandmark(v.sceneName,1)
 q_init = rbprmBuilder.getCurrentConfig ();
 
 # Generate random init and goal position.
