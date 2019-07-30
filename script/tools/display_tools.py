@@ -37,4 +37,16 @@ def addVector(viewer,rbprmBuilder,color,v,name=None):
   gui.applyConfiguration(name,v)
   gui.refresh()
 
+def displaySurfaceFromPoints(viewer,p_list,color=[0,0,0,1],name=None):
+  gui = viewer.client.gui
+  if name==None:
+    i=0
+    name='surface_'+str(i)
+    while name in gui.getNodeList():
+      i=i+1
+      name='surface_'+str(i)
+  gui.addCurve(name,p_list,color)
+  gui.addToGroup(name,viewer.sceneName)
+  gui.refresh()  
+    
 
