@@ -737,10 +737,15 @@ module hpp
     Names_t getContactsVariations(in unsigned short stateIdFrom,in unsigned short stateIdTo) raises (Error);
 
 
-    /// For a given limb, returns all the contact surfaces in collision with the limb's reachable workspace
+    /// For a given limb, returns the names of all the contact surfaces in collisions with the limb's reachable workspace
     /// \param configuration : root configuration
     /// \param limbName : name of the considered limb
     Names_t getCollidingObstacleAtConfig(in floatSeq configuration,in string limbName) raises (Error);
+
+    /// For a given limb, return all the intersections between the limb reachable workspace and a contact surface
+    /// \param configuration : root configuration
+    /// \param limbName : name of the considered limb
+    floatSeqSeq getContactSurfacesAtConfig(in floatSeq configuration,in string limbName) raises (Error);
 
     /// return a list of all the limbs names
     Names_t getAllLimbsNames() raises (Error);

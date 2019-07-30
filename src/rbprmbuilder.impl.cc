@@ -50,6 +50,8 @@
 #include <hpp/rbprm/sampling/heuristic-tools.hh>
 #include <hpp/rbprm/contact_generation/reachability.hh>
 #include <hpp/pinocchio/urdf/util.hh>
+#include "hpp/rbprm/utils/algorithms.h"
+
 #ifdef PROFILE
     #include "hpp/rbprm/rbprm-profiler.hh"
 #endif
@@ -1502,6 +1504,78 @@ namespace hpp {
           }
           return variations;
         }
+      catch(std::runtime_error& e)
+      {
+          throw Error(e.what());
+      }
+    }
+
+      floatSeqSeq* RbprmBuilder::getContactSurfacesAtConfig(const ::hpp::floatSeq& configuration,const char* limbName)throw (hpp::Error){
+      try
+      {
+          hppDout(notice,"begin getContactSurfacesAtConfig");
+          std::string name (limbName);
+          //hpp::pinocchio::RbPrmDevicePtr_t rbprmDevice = boost::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(problemSolver()->robot ());
+          const hpp::pinocchio::DevicePtr_t romDevice = romDevices_[name];
+          pinocchio::Configuration_t q = dofArrayToConfig(romDevice, configuration);
+          romDevice->currentConfiguration(q);
+          RbPrmPathValidationPtr_t rbprmPathValidation_ (boost::dynamic_pointer_cast<hpp::rbprm::RbPrmPathValidation>(problemSolver()->problem()->pathValidation()));
+          rbprmPathValidation_->getValidator()->computeAllContacts(true);
+          core::ValidationReportPtr_t report;
+          hppDout(notice,"begin collision check");
+          problemSolver()->problem()->configValidations()->validate(q,report);
+          hppDout(notice,"done.");
+          core::RbprmValidationReportPtr_t rbReport = boost::dynamic_pointer_cast<hpp::core::RbprmValidationReport> (report);
+          hppDout(notice,"try to find rom name");
+          if(rbReport->ROMReports.find(name) == rbReport->ROMReports.end()){
+            throw std::runtime_error ("The given ROM name is not in collision in the given configuration.");
+          }
+          hppDout(notice,"try to cast report");
+          core::AllCollisionsValidationReportPtr_t romReports = boost::dynamic_pointer_cast<core::AllCollisionsValidationReport>(rbReport->ROMReports.at(name));
+          if(!romReports){
+            throw std::runtime_error ("Error while retrieving collision reports.");
+          }
+          hppDout(notice,"try deviceSync");
+          pinocchio::DeviceSync deviceSync (romDevice);
+          hppDout(notice,"done.");
+          hpp::floatSeqSeq *res;
+          res = new hpp::floatSeqSeq ();
+          res->length ((_CORBA_ULong)romReports->collisionReports.size());
+          std::size_t idSurface=0;
+          geom::Point pn;
+          hppDout(notice,"Number of collision reports for the rom : "<<romReports->collisionReports.size());
+          // for all collision report of the given ROM, compute the intersection surface between the affordance object and the rom :
+          for(std::vector<CollisionValidationReportPtr_t>::const_iterator itReport = romReports->collisionReports.begin() ; itReport != romReports->collisionReports.end() ; ++itReport){
+            // compute the intersection for itReport :
+            core::CollisionObjectConstPtr_t obj_rom = (*itReport)->object1;
+            core::CollisionObjectConstPtr_t obj_env = (*itReport)->object2;
+            // convert the two objects  :
+            geom::BVHModelOBConst_Ptr_t model_rom =  geom::GetModel(obj_rom,deviceSync.d());
+            geom::BVHModelOBConst_Ptr_t model_env =  geom::GetModel(obj_env,deviceSync.d());
+            geom::T_Point plane = geom::intersectPolygonePlane(model_rom,model_env,pn);
+            // plane contains a list of points : the intersections between model_rom and the infinite plane defined by model_env.
+            // but they may not be contained inside the shape defined by model_env
+            if(plane.size() > 0){
+              geom::T_Point inter = geom::compute3DIntersection(plane,geom::convertBVH(model_env)); // hull contain only points inside the model_env shape
+              if(inter.size() > 0){
+                hppDout(notice,"Number of points for the intersection rom/surface : "<<inter.size());
+                // add inter points to res list:
+                _CORBA_ULong size = (_CORBA_ULong) (inter.size()*3);
+                double* dofArray = hpp::floatSeq::allocbuf(size);
+                hpp::floatSeq floats (size, size, dofArray, true);
+                //convert the config in dofseq
+                for (pinocchio::size_type j=0 ; j < (pinocchio::size_type)inter.size() ; ++j) {
+                  dofArray[3*j] = inter[j][0];
+                  dofArray[3*j+1] = inter[j][1];
+                  dofArray[3*j+2] = inter[j][2];
+                }
+                (*res) [(_CORBA_ULong)idSurface] = floats;
+                ++idSurface;
+              }
+            }
+          }
+          return res;
+      }
       catch(std::runtime_error& e)
       {
           throw Error(e.what());
