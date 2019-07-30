@@ -1538,10 +1538,28 @@ namespace hpp {
           hppDout(notice,"try deviceSync");
           pinocchio::DeviceSync deviceSync (romDevice);
           hppDout(notice,"done.");
+          // Compute the referencePoint for the given configuration : heuristic used to select a 'best' contact surface:
+          hpp::pinocchio::RbPrmDevicePtr_t rbprmDevice = boost::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(problemSolver()->robot ());
+          fcl::Vec3f reference = rbprmDevice->getEffectorReference(name);
+          hppDout(notice,"Reference position for rom"<<name<<" = "<<reference);
+          //apply transform from currernt config :
+          fcl::Transform3f tRoot;
+          tRoot.setTranslation(fcl::Vec3f(q[0],q[1],q[2]));
+          fcl::Quaternion3f quat(q[6],q[3],q[4],q[5]);
+          tRoot.setRotation(quat.matrix());
+          reference = (tRoot*reference).getTranslation();
+          geom::Point refPoint(reference);
+          hppDout(notice,"Reference after root transform = "<<reference);
+          geom::Point normal,proj;
+          double minDistance = std::numeric_limits<double>::max();
+          double distance;
+          _CORBA_ULong bestSurface(0);
+
+          // init floatSeqSeq to store results
           hpp::floatSeqSeq *res;
           res = new hpp::floatSeqSeq ();
           res->length ((_CORBA_ULong)romReports->collisionReports.size());
-          std::size_t idSurface=0;
+          _CORBA_ULong idSurface(0);
           geom::Point pn;
           hppDout(notice,"Number of collision reports for the rom : "<<romReports->collisionReports.size());
           // for all collision report of the given ROM, compute the intersection surface between the affordance object and the rom :
@@ -1559,6 +1577,13 @@ namespace hpp {
               geom::T_Point inter = geom::compute3DIntersection(plane,geom::convertBVH(model_env)); // hull contain only points inside the model_env shape
               if(inter.size() > 0){
                 hppDout(notice,"Number of points for the intersection rom/surface : "<<inter.size());
+                // compute heuristic score :
+                distance = geom::projectPointInsidePlan(inter,refPoint,normal,inter.front(),proj);
+                hppDout(notice,"Distance found : "<<distance);
+                if(distance < minDistance){
+                    minDistance = distance;
+                    bestSurface = idSurface;
+                }
                 // add inter points to res list:
                 _CORBA_ULong size = (_CORBA_ULong) (inter.size()*3);
                 double* dofArray = hpp::floatSeq::allocbuf(size);
@@ -1569,10 +1594,16 @@ namespace hpp {
                   dofArray[3*j+1] = inter[j][1];
                   dofArray[3*j+2] = inter[j][2];
                 }
-                (*res) [(_CORBA_ULong)idSurface] = floats;
+                (*res) [idSurface] = floats;
                 ++idSurface;
               }
             }
+          }
+          // swap res[0] and res[bestSurface]:
+          if(bestSurface>0){
+            hpp::floatSeq tmp = (*res)[0];
+            (*res)[0] = (*res)[bestSurface];
+            (*res)[bestSurface] = tmp;
           }
           return res;
       }
