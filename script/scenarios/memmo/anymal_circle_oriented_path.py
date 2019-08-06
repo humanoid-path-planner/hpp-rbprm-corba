@@ -1,11 +1,10 @@
-from hpp.corbaserver.rbprm.talos_abstract import Robot
+from hpp.corbaserver.rbprm.anymal_abstract import Robot
 from hpp.gepetto import Viewer
 from hpp.corbaserver import ProblemSolver
 import numpy as np
-from pinocchio import Quaternion
 import time
 statusFilename = "/res/infos.log"
-
+from pinocchio import Quaternion
 
 vMax = 0.5# linear velocity bound for the root
 vInit = 0.05# initial / final velocity to fix the direction
@@ -17,13 +16,15 @@ mu=0.5# coefficient of friction
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Robot ()
 # Define bounds for the root : bounding box of the scenario
-rbprmBuilder.setJointBounds ("root_joint", [-2,2, -2, 2, 1., 1.])
+root_bounds =  [-2,2, -2, 2, 0.4, 0.5]
+rbprmBuilder.setJointBounds ("root_joint", root_bounds)
 
 # The following lines set constraint on the valid configurations:
 # a configuration is valid only if all limbs can create a contact with the corresponding afforcances type
-rbprmBuilder.setFilter(['talos_lleg_rom','talos_rleg_rom'])
-rbprmBuilder.setAffordanceFilter('talos_lleg_rom', ['Support',])
-rbprmBuilder.setAffordanceFilter('talos_rleg_rom', ['Support'])
+rbprmBuilder.setFilter(rbprmBuilder.urdfNameRom)
+for rom in rbprmBuilder.urdfNameRom :
+    rbprmBuilder.setAffordanceFilter(rom, ['Support'])
+
 # We also bound the rotations of the torso. (z, y, x)
 rbprmBuilder.boundSO3([-1.7,1.7,-0.1,0.1,-0.1,0.1])
 # Add 6 extraDOF to the problem, used to store the linear velocity and acceleration of the root
@@ -37,9 +38,9 @@ ps = ProblemSolver( rbprmBuilder )
 # define parameters used by various methods : 
 ps.setParameter("Kinodynamic/velocityBound",vMax)
 ps.setParameter("Kinodynamic/accelerationBound",aMax)
-ps.setParameter("DynamicPlanner/sizeFootX",0.2)
-ps.setParameter("DynamicPlanner/sizeFootY",0.12)
-ps.setParameter("DynamicPlanner/friction",0.5)
+ps.setParameter("DynamicPlanner/sizeFootX",0.01)
+ps.setParameter("DynamicPlanner/sizeFootY",0.01)
+ps.setParameter("DynamicPlanner/friction",mu)
 ps.setParameter("Kinodynamic/forceYawOrientation",True)
 # sample only configuration with null velocity and acceleration :
 ps.setParameter("ConfigurationShooter/sampleExtraDOF",False)
@@ -53,26 +54,24 @@ from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
 afftool.loadObstacleModel ("hpp_environments", "multicontact/ground", "planning", vf)
-#load the viewer
 try :
     v = vf.createViewer(displayArrows = True)
 except Exception:
     print "No viewer started !"
     class FakeViewer():
-        sceneName = ""
         def __init__(self):
             return
         def __call__(self,q):
             return
-        def addLandmark(self,a,b):
-            return
     v = FakeViewer()
-v.addLandmark(v.sceneName,0.5)
+    
 #afftool.visualiseAffordances('Support', v, v.color.lightBrown)
 
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init[0:3] = [0,0,1.]
+q_init[0:3] = [0,0,0.465]
 q_init[3:7] = [0,0,0,1]
+
+# sample random position on a circle of radius 2m
 q_init[-6] = vInit
 # sample random position on a circle of radius 2m
 
@@ -83,7 +82,7 @@ random.seed()
 alpha = random.uniform(0.,2.*np.pi)
 print "Test on a circle, alpha = ",alpha
 q_goal = q_init[::]
-q_goal [0:3] = [radius*np.sin(alpha), -radius*np.cos(alpha), 1.]
+q_goal [0:3] = [radius*np.sin(alpha), -radius*np.cos(alpha), 0.465]
 # set final orientation to be along the circle : 
 vx = np.matrix([1,0,0]).T
 v_goal = np.matrix([q_goal[0],q_goal[1],0]).T
@@ -113,6 +112,7 @@ ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("Kinodynamic")
 ps.selectPathPlanner("DynamicPlanner")
 
+
 # Solve the planning problem :
 success = ps.client.problem.prepareSolveStepByStep()
 
@@ -122,7 +122,6 @@ if not success:
   sys.exit(1)
 
 ps.client.problem.finishSolveStepByStep()
-
 
 try :
     # display solution : 

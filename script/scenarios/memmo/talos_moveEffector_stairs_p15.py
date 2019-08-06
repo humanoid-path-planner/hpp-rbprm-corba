@@ -6,7 +6,7 @@ from hpp.corbaserver import ProblemSolver
 import os
 import random
 import time
-statusFilename = "infos.log"
+statusFilename = "/res/infos.log"
 
 
 
