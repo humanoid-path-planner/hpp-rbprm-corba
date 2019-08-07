@@ -1544,7 +1544,7 @@ namespace hpp {
         return res;
     }
 
-    floatSeqSeq* RbprmBuilder::interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic) throw (hpp::Error)
+    floatSeqSeq* RbprmBuilder::interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic, bool erasePreviousStates) throw (hpp::Error)
     {
         try
         {
@@ -1563,15 +1563,16 @@ namespace hpp {
                 throw hpp::Error ("No affordances found. Unable to interpolate.");
             }
             hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = rbprm::interpolation::RbPrmInterpolation::create(fullBody(),startState_,endState_,core::PathVectorConstPtr_t(),testReachability,quasiStatic);
-            lastStatesComputedTime_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,configurations,robustnessTreshold, filterStates != 0);
-            lastStatesComputed_ = TimeStatesToStates(lastStatesComputedTime_);
+            rbprm::T_StateFrame newTimeStates =
+                    interpolator->Interpolate(affMap, bindShooter_.affFilter_,configurations,robustnessTreshold, filterStates != 0);
+            std::vector<rbprm::State> newStates =TimeStatesToStates(newTimeStates);
             hpp::floatSeqSeq *res;
             res = new hpp::floatSeqSeq ();
 
-            res->length ((_CORBA_ULong)lastStatesComputed_.size ());
+            res->length ((_CORBA_ULong)newStates.size ());
             std::size_t i=0;
             std::size_t id = 0;
-            for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin(); cit != lastStatesComputed_.end(); ++cit, ++id)
+            for(std::vector<State>::const_iterator cit = newStates.begin(); cit != newStates.end(); ++cit, ++id)
             {
                 std::cout << "ID " << id;
                 cit->print();
@@ -1585,6 +1586,16 @@ namespace hpp {
                 }
                 (*res) [(_CORBA_ULong)i] = floats;
                 ++i;
+            }
+            if(erasePreviousStates)
+            {
+                lastStatesComputedTime_ = newTimeStates;
+                lastStatesComputed_ = newStates;
+            }
+            else
+            {
+                lastStatesComputed_.insert(lastStatesComputed_.begin(), newStates.begin(), newStates.end());
+                lastStatesComputedTime_.insert(lastStatesComputedTime_.begin(), newTimeStates.begin(), newTimeStates.end());
             }
             return res;
         }
@@ -2233,7 +2244,7 @@ namespace hpp {
     }
 
 
-    floatSeqSeq* RbprmBuilder::interpolate(double timestep, double path, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic) throw (hpp::Error)
+    floatSeqSeq* RbprmBuilder::interpolate(double timestep, double path, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic, bool erasePreviousStates) throw (hpp::Error)
     {
         hppDout(notice,"### Begin interpolate");
         try
@@ -2260,18 +2271,19 @@ namespace hpp {
 
         hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator =
                     rbprm::interpolation::RbPrmInterpolation::create(fullBody(),startState_,endState_,problemSolver()->paths()[pathId],testReachability,quasiStatic);
-        lastStatesComputedTime_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
+
+        rbprm::T_StateFrame newTimeStates = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
                     timestep,robustnessTreshold, filterStates != 0);
-		lastStatesComputed_ = TimeStatesToStates(lastStatesComputedTime_);
+        std::vector<rbprm::State> newStates = TimeStatesToStates(newTimeStates);
 
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
 
-        res->length ((_CORBA_ULong)lastStatesComputed_.size ());
+        res->length ((_CORBA_ULong)newStates.size ());
         std::size_t i=0;
         std::size_t id = 0;
-        for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin();
-					cit != lastStatesComputed_.end(); ++cit, ++id)
+        for(std::vector<State>::const_iterator cit = newStates.begin();
+                    cit != newStates.end(); ++cit, ++id)
         {
             /*std::cout << "ID " << id;
             cit->print();*/
@@ -2285,6 +2297,16 @@ namespace hpp {
             }
             (*res) [(_CORBA_ULong)i] = floats;
             ++i;
+        }
+        if(erasePreviousStates)
+        {
+            lastStatesComputedTime_ = newTimeStates;
+            lastStatesComputed_ = newStates;
+        }
+        else
+        {
+            lastStatesComputed_.insert(lastStatesComputed_.begin(), newStates.begin(), newStates.end());
+            lastStatesComputedTime_.insert(lastStatesComputedTime_.begin(), newTimeStates.begin(), newTimeStates.end());
         }
         return res;
         }
@@ -3050,6 +3072,12 @@ namespace hpp {
         }
     }
 
+
+
+    CORBA::Short  RbprmBuilder::getNumStates() throw (hpp::Error)
+    {
+        return lastStatesComputed_.size();
+    }
 
     CORBA::Short  RbprmBuilder::computeIntermediary(unsigned short stateFrom, unsigned short stateTo) throw (hpp::Error)
     try

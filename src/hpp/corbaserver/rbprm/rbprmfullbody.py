@@ -257,6 +257,11 @@ class FullBody (Robot):
      def getNumSamples(self, limbName):
           return self.clientRbprm.rbprm.getNumSamples(limbName)
           
+     ## Get the number of existing states in the client 
+     #
+     def getNumStates(self, limbName):
+          return self.clientRbprm.rbprm.getNumStates()
+          
      ## Get the number of octreeNodes
      #
      # \param limbName name of the limb from which to retrieve a sample
@@ -348,12 +353,13 @@ class FullBody (Robot):
      # \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
      # \param testReachability : if true, check each contact transition with our reachability criterion
      # \param quasiStatic : if True, use our reachability criterion with the quasiStatic constraint
-     def interpolate(self, stepsize, pathId = 1, robustnessTreshold = 0, filterStates = False,testReachability = True, quasiStatic = False):
+     # \param erasePreviousStates : if True the list of previously computed states is erased
+     def interpolate(self, stepsize, pathId = 1, robustnessTreshold = 0, filterStates = False,testReachability = True, quasiStatic = False, erasePreviousStates = True):
           if(filterStates):
                 filt = 1
           else:
                 filt = 0
-          return self.clientRbprm.rbprm.interpolate(stepsize, pathId, robustnessTreshold, filt,testReachability, quasiStatic)
+          return self.clientRbprm.rbprm.interpolate(stepsize, pathId, robustnessTreshold, filt,testReachability, quasiStatic, erasePreviousStates)
      
      ## Provided a discrete contact sequence has already been computed, computes
      # all the contact positions and normals for a given state, the next one, and the intermediate between them.

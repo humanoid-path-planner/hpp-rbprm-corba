@@ -371,7 +371,7 @@ module hpp
     /// \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
     /// \param testReachability : if true, check each contact transition with our reachability criterion
     /// \param quasiStatic : if True, use our reachability criterion with the quasiStatic constraint
-    floatSeqSeq interpolate(in double timestep, in double path, in double robustnessTreshold, in unsigned short filterStates, in boolean testReachability, in boolean quasiStatic) raises (Error);
+    floatSeqSeq interpolate(in double timestep, in double path, in double robustnessTreshold, in unsigned short filterStates, in boolean testReachability, in boolean quasiStatic, in boolean erasePreviousStates) raises (Error);
 
     /// Provided a path has already been computed, interpolates it and generates the statically stable
     /// constact configurations along it. setStartState and setEndState must have been called prior
@@ -382,7 +382,7 @@ module hpp
     /// \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
     /// \param testReachability : if true, check each contact transition with our reachability criterion
     /// \param quasiStatic : if True, use our reachability criterion with the quasiStatic constraint
-    floatSeqSeq interpolateConfigs(in floatSeqSeq configs, in double robustnessTreshold, in unsigned short filterStates,in boolean testReachability, in boolean quasiStatic) raises (Error);
+    floatSeqSeq interpolateConfigs(in floatSeqSeq configs, in double robustnessTreshold, in unsigned short filterStates,in boolean testReachability, in boolean quasiStatic, in boolean erasePreviousStates) raises (Error);
 
 
     /// returns the CWC of the robot at a given state
@@ -669,6 +669,10 @@ module hpp
     /// \param state2 target state considered
     /// \return whether the limb is in contact at this state
     short computeIntermediary(in unsigned short state1, in unsigned short state2) raises (Error);
+
+    /// Compute the number of computed states
+    /// \return the number of computed states
+    short getNumStates() raises (Error);
 
     /// Saves the last computed states by the function interpolate in a filename.
     /// Raises an error if interpolate has not been called, or the file could not be opened.
