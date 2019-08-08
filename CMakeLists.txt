@@ -22,8 +22,8 @@ SET(CXX_DISABLE_WERROR true)
 
 INCLUDE(cmake/base.cmake)
 INCLUDE(cmake/idl.cmake)
-INCLUDE(cmake/python.cmake)
 INCLUDE(cmake/hpp.cmake)
+INCLUDE(cmake/hpp/python.cmake)
 
 SET(PROJECT_NAME hpp-rbprm-corba)
 SET(PROJECT_DESCRIPTION "Corba server for reachability based planning")
@@ -39,17 +39,7 @@ SET(${PROJECT_NAME}_HEADERS
   include/hpp/corbaserver/rbprm/server.hh
 )
 
-# Activate hpp-util logging if requested
-SET (HPP_DEBUG FALSE CACHE BOOL "trigger hpp-util debug output")
-IF (HPP_DEBUG)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHPP_DEBUG")
-ENDIF()
-
-# search for python
-IF(NOT DEFINED PYTHON_DESIRED_VERSION)
-  SET(PYTHON_DESIRED_VERSION 2.7)
-ENDIF()
-FINDPYTHON(${PYTHON_DESIRED_VERSION} EXACT)
+FINDPYTHON()
 
 ADD_DOC_DEPENDENCY("hpp-core >= 4.3")
 ADD_REQUIRED_DEPENDENCY("hpp-corbaserver >= 4.3")
