@@ -1,5 +1,8 @@
 #  Humanoid Path Planner - RBPRM-CORBA module
 
+[![Pipeline status](https://gepgitlab.laas.fr/humanoid-path-planner/hpp-rbprm-corba/badges/master/pipeline.svg)](https://gepgitlab.laas.fr/humanoid-path-planner/hpp-rbprm-corba/commits/master)
+[![Coverage report](https://gepgitlab.laas.fr/humanoid-path-planner/hpp-rbprm-corba/badges/master/coverage.svg?job=doc-coverage)](http://projects.laas.fr/gepetto/doc/humanoid-path-planner/hpp-rbprm-corba/master/coverage/)
+
 Copyright 2015 LAAS-CNRS
 
 Author: Steve Tonneau
@@ -63,9 +66,9 @@ If you are planning to use the visualization tools used by the Gepetto team, alo
 
 
    `wget https://raw.githubusercontent.com/humanoid-path-planner/hpp-rbprm-corba/master/script/scenarios/demos/darpa_hyq.py`
-                                                                             
+
 `wget https://raw.githubusercontent.com/humanoid-path-planner/hpp-rbprm-corba/master/script/scenarios/demos/darpa_hyq_path.py`
-                                                                             
+
 `wget https://raw.githubusercontent.com/humanoid-path-planner/hpp-rbprm-corba/devel/script/scenarios/demos/run.sh`
 
   -  Make the run.sh script executable:`chmod +x run.sh`
