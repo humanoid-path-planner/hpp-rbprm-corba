@@ -1,5 +1,6 @@
 __24fps = 1. / 24.
 __EPS = 0.00001
+from __future__ import print_function
 from numpy.linalg import norm
 
 def __linear_interpolation(p0,p1,dist_p0_p1, val):
@@ -29,7 +30,7 @@ def __find_q_t(robot, path_player, path_id, t):
 		q = pp.client.problem.configAtParam (path_id, u)
 		current_t = q[-1]
 		if(a >= b):
-			print "ERROR, a > b, t does not exist"
+			print("ERROR, a > b, t does not exist")
 		if abs(current_t - t) < __EPS:
 			#print "last config q = ",q[-1]
 			return q[:-1]
@@ -50,7 +51,7 @@ def linear_interpolate_path(robot, path_player, path_id, total_time, dt_framerat
 	
 def follow_trajectory_path(robot, path_player, path_id, total_time, dt_framerate=__24fps):
 	pp = path_player
-	print "total_times in follow path : ",total_time
+	print("total_times in follow path : ",total_time)
 	length = pp.client.problem.pathLength (path_id)
 	num_frames_required = total_time / dt_framerate
 	dt = float(length) / num_frames_required
@@ -60,12 +61,12 @@ def follow_trajectory_path(robot, path_player, path_id, total_time, dt_framerate
 	return[__find_q_t(robot, path_player, path_id, t) for t in dt_finals]
 	
 def gen_trajectory_to_play(robot, path_player, path_ids, total_time_per_paths, dt_framerate=__24fps):
-	print "gen_trajectory : dt = ",dt_framerate
+	print("gen_trajectory : dt = ",dt_framerate)
 	config_size = len(robot.getCurrentConfig())
 	res = []
 	pp = path_player
 	activeid = 0
-	print "path_ids = ", path_ids
+	print("path_ids = ", path_ids)
 	for i, path_id in enumerate(path_ids):
 		config_size_path = len(path_player.client.problem.configAtParam (int(path_id), 0))
 		if(config_size_path > config_size):

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import signal
 
 # Register an handler for the timeout
@@ -19,17 +20,17 @@ if __name__ == '__main__':
 	def loop(dt1, dt2):
 		import time
 		for i in range(dt1 + dt2):
-			print "sec"
+			print("sec")
 			time.sleep(1)
         
 	try:
 		run_time_out(loop, 3, 3, 2)
-	except Exception, exc: 
-		print exc
-		print "exception caught, ok"
+	except Exception as exc: 
+		print(exc)
+		print("exception caught, ok")
 		
 	try:
 		run_time_out(loop, 6, 3, 2)
-	except Exception, exc: 
-		print exc
-		print "exception should NOT becaught"
+	except Exception as exc: 
+		print(exc)
+		print("exception should NOT becaught")

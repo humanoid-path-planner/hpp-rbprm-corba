@@ -1,9 +1,10 @@
+from __future__ import print_function
 import matplotlib
 #~ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from cwc import cone_optimization
-from obj_to_constraints import ineq_from_file, rotate_inequalities
+from .obj_to_constraints import ineq_from_file, rotate_inequalities
 import numpy as np
 import math
 from numpy.linalg import norm
@@ -45,8 +46,8 @@ def get_com_constraint(fullBody, state, config, limbsCOMConstraints, interm = Fa
     As = [];    bs = []
     fullBody.setCurrentConfig(config)
     contacts = []
-    for i, v in limbsCOMConstraints.iteritems():
-        if not constraintsComLoaded.has_key(i):
+    for i, v in limbsCOMConstraints.items():
+        if i not in constraintsComLoaded:
             constraintsComLoaded[i] = ineq_from_file(ineqPath+v['file'])
         contact = (interm and fullBody.isLimbInContactIntermediary(i, state)) or (not interm and fullBody.isLimbInContact(i, state))
         if(contact):
@@ -65,12 +66,12 @@ def get_com_constraint(fullBody, state, config, limbsCOMConstraints, interm = Fa
     if(len(As) > 0):
         return [np.vstack(As), np.hstack(bs)]
     else:
-        print "Warning: no active contact in get_com_constraint"
+        print("Warning: no active contact in get_com_constraint")
         return [np.zeros([3,3]), np.zeros(3)]
     
 def get_com_constraint_at_transform(pos_quat, limb, limbsCOMConstraints):
     global constraintsLoaded
-    if not constraintsComLoaded.has_key(limb):
+    if limb not in constraintsComLoaded:
             constraintsComLoaded[limb] = ineq_from_file(ineqPath+limbsCOMConstraints[limb]['file'])
     tr = quaternion_matrix(pos_quat[3:7])            
     tr[:3,3] = np.array(pos_quat[0:3])

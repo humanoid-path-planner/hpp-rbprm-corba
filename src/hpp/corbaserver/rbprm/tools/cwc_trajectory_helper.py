@@ -1,4 +1,4 @@
-
+from __future__ import print_function
 from hpp.corbaserver.rbprm.tools.cwc_trajectory import *
 from hpp.corbaserver.rbprm.tools.path_to_trajectory import *
 from cwc import OptimError, cone_optimization
@@ -35,7 +35,7 @@ def displayComPath(pp, pathId,color=[0.,0.75,0.15,0.9]) :
 
 def genPandNperFrame(fullBody, stateid, limbsCOMConstraints, pp, path_ids, times, dt_framerate=1./24.):
 	p, N= fullBody.computeContactPointsPerLimb(stateid, limbsCOMConstraints.keys(), limbsCOMConstraints)
-	freeEffectors = [ [limbsCOMConstraints[limb]['effector'] for limb in limbsCOMConstraints.keys() if not p[i].has_key(limbsCOMConstraints[limb]['effector'])] for i in range(len(p))]
+	freeEffectors = [ [limbsCOMConstraints[limb]['effector'] for limb in limbsCOMConstraints.keys() if limbsCOMConstraints[limb]['effector'] not in p[i]] for i in range(len(p))]
 	config_size = len(fullBody.getCurrentConfig())
 	interpassed = False
 	pRes = []
@@ -127,9 +127,9 @@ def __getTimes(fullBody, configs, i, time_scale):
 def __getTimes(fullBody, configs, i, time_scale,use_window=0):
 		t = fullBody.getTimeAtState(i+1) - fullBody.getTimeAtState(i)
                 dt = 0.02
-		print "t = ",t
+		print("t = ",t)
 		t = time_scale*t
-		print "after scale, t = ",t
+		print("after scale, t = ",t)
 		trunk_distance =  np.linalg.norm(np.array(configs[i+1][0:3]) - np.array(configs[i][0:3]))
 		distance = max(fullBody.getEffectorDistance(i,i+1), trunk_distance)
 		# TODO : si t = 0, hardcoded ...
@@ -146,7 +146,7 @@ def __getTimes(fullBody, configs, i, time_scale,use_window=0):
                 """
 		times[1] = t - 2*times[0]
 		times[1] = float((int)(math.floor(times[1]*100.))) / 100.
-		print "times : ",times
+		print("times : ",times)
 		return times, dt, distance,use_window
 
 
@@ -154,30 +154,30 @@ from hpp import Error as hpperr
 import sys, time
 def step(fullBody, configs, i, optim, pp, limbsCOMConstraints,  friction = 0.5, optim_effectors = True, time_scale = 20., useCOMConstraints = False, use_window = 0, verbose = False, draw = False,
 trackedEffectors = [],use_velocity=False,pathId = 0):
-	print "##########################################"
+	print("##########################################")
 	global errorid
 	global stat_data	
 	fail = 0
 	#~ try:
-	print "Use window = ",use_window
+	print("Use window = ",use_window)
 	if(True):
 		times = [];
 		dt = 1000;
 		times, dt, distance,use_window = __getTimes(fullBody, configs, i, time_scale,use_window)
-		print "Use window = ",use_window
+		print("Use window = ",use_window)
 		if distance == 0:
 				use_window = use_window+1
 		use_window = max(0, min(use_window,  (len(configs) - 1) - (i + 2))) # can't use preview if last state is reached
 		w = 0
 		while w < (use_window+1):
 			times2, dt2, dist2,use_window = __getTimes(fullBody, configs, i+w, time_scale,use_window)
-			print "Use window = ",use_window
+			print("Use window = ",use_window)
 			times += times2
 			dt = min(dt, dt2)
 			w = w+1
 		time_per_path = [times[0]] + [times[1]] + [times [0]]
-		print 'time per path', times, time_per_path
-		print 'dt', dt
+		print('time per path', times, time_per_path)
+		print('dt', dt)
 		if(distance > 0.0001):		
 			stat_data["num_trials"] += 1
 			if(useCOMConstraints):
@@ -200,9 +200,9 @@ trackedEffectors = [],use_velocity=False,pathId = 0):
 			#~ if(len(trajec) > 0):
 				#~ frame_rate = 1./25.
 				#~ frame_rate_andrea = 1./1001.
-			print "first traj :"
+			print("first traj :")
 			new_traj = gen_trajectory_to_play(fullBody, pp, trajectory, time_per_path, frame_rate)
-			print "traj Andrea : "
+			print("traj Andrea : ")
 			new_traj_andrea = gen_trajectory_to_play(fullBody, pp, trajectory, time_per_path,frame_rate_andrea)
 			#~ new_contacts = gencontactsPerFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, times, frame_rate_andrea)	
 			Ps, Ns, freeEffectorsPerPhase = genPandNperFrame(fullBody, i, limbsCOMConstraints, pp, trajectory, time_per_path, frame_rate_andrea)
@@ -231,7 +231,7 @@ trackedEffectors = [],use_velocity=False,pathId = 0):
 			#assert(len(trajec_mil) == len(pos) and len(normals) == len(pos) and len(normals) == len(coms) and len(coms) == len(pEffs))
 			stat_data["num_success"] += 1
 		else:
-			print "TODO, NO CONTACT VARIATION, LINEAR INTERPOLATION REQUIRED"
+			print("TODO, NO CONTACT VARIATION, LINEAR INTERPOLATION REQUIRED")
 	#~ except hpperr as e:		
 		#~ print "hpperr failed at id " + str(i) , e.strerror
 		#~ if (use_window == 0 and (len(configs) - 1) - (i + 2) > 0):
@@ -335,27 +335,27 @@ def step_profile(fullBody, configs, i, optim, limbsCOMConstraints,  friction = 0
 			__update_cwc_time(timeelapsed)	
 			stat_data["num_success"] += 1
 		else:
-			print "TODO, NO CONTACT VARIATION, LINEAR INTERPOLATION REQUIRED"
+			print("TODO, NO CONTACT VARIATION, LINEAR INTERPOLATION REQUIRED")
 	except hpperr as e:
-		print "hpperr failed at id " + str(i) , e.strerror
+		print("hpperr failed at id " + str(i) , e.strerror)
 		stat_data["error_com_proj"] += 1
 		stat_data["num_errors"] += 1
 		errorid += [i]
 		fail+=1
 	except OptimError as e:
-		print "OptimError failed at id " + str(i) , e.strerror
+		print("OptimError failed at id " + str(i) , e.strerror)
 		stat_data["error_optim_fail"] += 1
 		stat_data["num_errors"] += 1
 		errorid += [i]
 		fail+=1
 	except ValueError as e:
-		print "ValueError failed at id " + str(i) , e
+		print("ValueError failed at id " + str(i) , e)
 		stat_data["error_unknown"] += 1
 		stat_data["num_errors"] += 1
 		errorid += [i]
 		fail+=1
 	except IndexError as e:
-		print "IndexError failed at id " + str(i) , e
+		print("IndexError failed at id " + str(i) , e)
 		stat_data["error_unknown"] += 1
 		stat_data["num_errors"] += 1
 		errorid += [i]
@@ -363,7 +363,7 @@ def step_profile(fullBody, configs, i, optim, limbsCOMConstraints,  friction = 0
 	except Exception as e:
 		stat_data["error_unknown"] += 1
 		stat_data["num_errors"] += 1
-		print e
+		print(e)
 		errorid += [i]
 		fail+=1
 	except:
@@ -472,7 +472,7 @@ def write_stats(filename):
 def profile(fullBody, configs, i_start, i_end, limbsCOMConstraints,  friction = 0.5, optim_effectors = False, time_scale = 20., useCOMConstraints = False, filename ="log.txt"):	
 	global stat_data		
 	if(i_end > len(configs)-1):
-		print "ERROR: i_end < len_configs ", i_end, len(configs)-1
+		print("ERROR: i_end < len_configs ", i_end, len(configs)-1)
 		return # no point in trying optim, path was not fully computed
 	for i in range(i_start, i_end):		
 		step_profile(fullBody, configs, i, 0, limbsCOMConstraints,  friction, optim_effectors, time_scale, useCOMConstraints)

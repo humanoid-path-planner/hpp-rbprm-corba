@@ -16,6 +16,7 @@
 # hpp-manipulation-corba.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
 from hpp.corbaserver.rbprm.rbprmstate import State
 from lp_find_point import find_valid_c_cwc, find_valid_c_cwc_qp, lp_ineq_4D
 from hpp.corbaserver.rbprm.tools.com_constraints import *
@@ -53,7 +54,7 @@ def isContactReachable(state, limbName, p, n, limbsCOMConstraints):
     res_ineq = [np.vstack([new_ineq[0],active_ineq[0]]), np.hstack([new_ineq[1],active_ineq[1]])]
     success, status_ok , res = lp_ineq_4D(res_ineq[0],-res_ineq[1])
     if not success:
-        print "In isContactReachable no stability, Lp failed (should not happen) ", status_ok
+        print("In isContactReachable no stability, Lp failed (should not happen) ", status_ok)
         return False, [-1,-1,-1]
     return (res[3] >= 0), res[0:3]
     
@@ -134,8 +135,8 @@ def projectToFeasibleCom(state,  ddc =[0.,0.,0.], max_num_samples = 10, friction
     ps = state.getContactPosAndNormals()
     p = ps[0][0]
     N = ps[1][0]
-    print "p", p
-    print "N", N
+    print("p", p)
+    print("N", N)
     #~ try:
     H = compute_CWC(p, N, state.fullBody.client.basic.robot.getMass(), mu = friction, simplify_cones = False)
     c_ref = state.getCenterOfMass()
@@ -150,12 +151,12 @@ def projectToFeasibleCom(state,  ddc =[0.,0.,0.], max_num_samples = 10, friction
         x[2] += 0.35
         for i in range(10):
             if state.fullBody.projectStateToCOM(state.sId ,x, max_num_samples):
-                print "success after " + str(i) + " trials"
+                print("success after " + str(i) + " trials")
                 return True
             else:
                 x[2]-=0.05
     else:
-        print "qp failed"
+        print("qp failed")
     return False;
     
 def isContactCreated(s1, s2):

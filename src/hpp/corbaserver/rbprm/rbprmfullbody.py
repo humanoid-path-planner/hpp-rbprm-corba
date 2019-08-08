@@ -407,7 +407,7 @@ class FullBody (Robot):
                           Ns.append({})
                      if(len(P[i]) > 0):
                           targetName = limb
-                          if(dicEffector.has_key(limb)):
+                          if(limb in dicEffector):
                                 targetName = dicEffector[limb]['effector']
                           Ps[i][targetName] = P[i]
                           Ns[i][targetName] = N[i]
@@ -829,7 +829,7 @@ class FullBody (Robot):
      # \param viewer gepetto viewer instance
      def draw(self, configuration, viewer):
           viewer(configuration)
-          for limb, groupid in self.octrees.iteritems():
+          for limb, groupid in self.octrees.items():
                 transform = self.clientRbprm.rbprm.getOctreeTransform(limb, configuration)
                 viewer.client.gui.applyConfiguration(groupid,transform)
           viewer.client.gui.refresh()
