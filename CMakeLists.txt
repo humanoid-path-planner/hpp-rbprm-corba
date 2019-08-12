@@ -39,7 +39,7 @@ SET(${PROJECT_NAME}_HEADERS
   include/hpp/corbaserver/rbprm/server.hh
 )
 
-FINDPYTHON()
+HPP_FINDPYTHON()
 
 ADD_DOC_DEPENDENCY("hpp-core >= 4.3")
 ADD_REQUIRED_DEPENDENCY("hpp-corbaserver >= 4.3")
