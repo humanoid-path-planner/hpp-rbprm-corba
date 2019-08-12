@@ -17,37 +17,44 @@
 // License along with hpp-manipulation-corba.  If not, see
 // <http://www.gnu.org/licenses/>.
 
+#include <hpp/corbaserver/rbprm/server.hh>
+
 #include <hpp/util/exception.hh>
 #include "rbprmbuilder.impl.hh"
-#include <hpp/corbaserver/rbprm/server.hh>
+#include <hpp/corbaserver/server.hh>
 
 namespace hpp {
   namespace rbprm {
-    Server::Server (int argc, const char *argv[], bool multiThread,
-            const std::string& poaName) :
-      rbprmBuilder_ (new corba::Server <impl::RbprmBuilder>
-          (argc, argv, multiThread, poaName)) {}
+    Server::Server (corbaServer::Server* server)
+      : corbaServer::ServerPlugin (server),
+      rbprmBuilder_ (NULL)
+    {}
 
     Server::~Server ()
     {
-      delete rbprmBuilder_;
+      if (rbprmBuilder_) delete rbprmBuilder_;
     }
 
-    void Server::setProblemSolverMap (hpp::corbaServer::ProblemSolverMapPtr_t psMap)
+    std::string Server::name () const
     {
-        rbprmBuilder_->implementation ().SetProblemSolverMap(psMap);
+      return "rbprm";
     }
 
     /// Start corba server
     void Server::startCorbaServer(const std::string& contextId,
-                  const std::string& contextKind,
-                  const std::string& objectId)
+                                  const std::string& contextKind)
     {
+      bool mThd = parent()->multiThread();
+      rbprmBuilder_ = new corba::Server <impl::RbprmBuilder> (0, NULL, mThd, "child");
+      rbprmBuilder_->implementation ().setServer (this);
+
       if (rbprmBuilder_->startCorbaServer(contextId, contextKind,
-                       objectId, "rbprmbuilder") != 0) {
-    HPP_THROW_EXCEPTION (hpp::Exception,
-                 "Failed to start corba rbprm server.");
+                                          "rbprm", "rbprmbuilder") != 0) {
+        HPP_THROW_EXCEPTION (hpp::Exception,
+            "Failed to start corba rbprm server.");
       }
     }
   } // namespace rbprm
 } // namespace hpp
+
+HPP_CORBASERVER_DEFINE_PLUGIN(hpp::rbprm::Server)

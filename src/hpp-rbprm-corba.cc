@@ -16,31 +16,18 @@
 // <http://www.gnu.org/licenses/>.
 
 #include <hpp/corbaserver/server.hh>
-#include <hpp/corbaserver/affordance/server.hh>
-#include <hpp/corbaserver/rbprm/server.hh>
 #include <hpp/core/problem-solver.hh>
 
-typedef hpp::rbprm::Server RbprmServer;
 typedef hpp::corbaServer::Server CorbaServer;
-typedef hpp::affordanceCorba::Server AffordanceServer;
 int main (int argc, char* argv [])
 {
     hpp::core::ProblemSolverPtr_t problemSolver (hpp::core::ProblemSolver::create());
 
-
     CorbaServer corbaServer (problemSolver, argc,
                const_cast<const char**> (argv), true);
-		AffordanceServer affordanceServer (argc, const_cast<const char**> (argv),
-																				true);
-        affordanceServer.setProblemSolverMap(corbaServer.problemSolverMap());
-
-		RbprmServer rbprmServer (argc, const_cast<const char**> (argv),
-															true, "rbprmChild");
-    rbprmServer.setProblemSolverMap (corbaServer.problemSolverMap());
 
     corbaServer.startCorbaServer ();
-		affordanceServer.startCorbaServer ("hpp", "corbaserver",
-																			"affordanceCorba", "affordance");
-    rbprmServer.startCorbaServer ("hpp", "corbaserver", "rbprm");
+    corbaServer.loadPlugin (corbaServer.mainContextId (), "rbprm-corba.so");
+    corbaServer.loadPlugin (corbaServer.mainContextId (), "affordance-corba.so");
     corbaServer.processRequest(true);
 }
