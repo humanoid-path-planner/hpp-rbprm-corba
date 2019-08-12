@@ -20,6 +20,8 @@ SET(IDL_SOURCES
 	rbprmbuilder
 )
 
+INCLUDE(${HPP_CORBASERVER_CMAKE_PLUGIN})
+
 OMNIIDL_INCLUDE_DIRECTORIES(
   ${HPP_CORBASERVER_DATAROOTDIR}/idl ${CMAKE_SOURCE_DIR}/idl
   )
@@ -51,27 +53,25 @@ INSTALL(
   DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/hpp_stubs/rbprm
   DESTINATION ${PYTHON_SITELIB}/hpp_stubs)
 
-ADD_LIBRARY(${LIBRARY_NAME} SHARED
+HPP_ADD_SERVER_PLUGIN(rbprm-corba
+  SOURCES
   ${ALL_IDL_CPP_STUBS}
   rbprmbuilder.impl.cc
   rbprmbuilder.impl.hh
   server.cc
-)
+
+  PKG_CONFIG_DEPENDENCIES
+  hpp-rbprm
+  hpp-corbaserver
+  omniORB4
+  hpp-util
+  hpp-rbprm)
 
 ADD_CUSTOM_TARGET(generate_idl_cpp DEPENDS ${ALL_IDL_CPP_STUBS})
 ADD_CUSTOM_TARGET(generate_idl_python DEPENDS ${ALL_IDL_PYTHON_STUBS})
-ADD_DEPENDENCIES (${LIBRARY_NAME} generate_idl_cpp)
-ADD_DEPENDENCIES (${LIBRARY_NAME} generate_idl_python)
-TARGET_INCLUDE_DIRECTORIES(${LIBRARY_NAME} PUBLIC ${CDD_INCLUDE_DIRS})
-
-PKG_CONFIG_USE_DEPENDENCY(${LIBRARY_NAME} hpp-rbprm)
-PKG_CONFIG_USE_DEPENDENCY(${LIBRARY_NAME} hpp-corbaserver)
-PKG_CONFIG_USE_DEPENDENCY(${LIBRARY_NAME} omniORB4)
-PKG_CONFIG_USE_DEPENDENCY(${LIBRARY_NAME} hpp-affordance-corba)
-PKG_CONFIG_USE_DEPENDENCY(${LIBRARY_NAME} hpp-util)
-PKG_CONFIG_USE_DEPENDENCY(${LIBRARY_NAME} hpp-rbprm)
-
-INSTALL(TARGETS ${LIBRARY_NAME} DESTINATION lib)
+ADD_DEPENDENCIES (rbprm-corba generate_idl_cpp)
+ADD_DEPENDENCIES (rbprm-corba generate_idl_python)
+TARGET_INCLUDE_DIRECTORIES(rbprm-corba PUBLIC ${CDD_INCLUDE_DIRS})
 
 INSTALL(
   FILES
@@ -102,7 +102,8 @@ INSTALL(
   )
 # Stand alone corba server
 ADD_EXECUTABLE (hpp-rbprm-server hpp-rbprm-corba.cc)
-TARGET_LINK_LIBRARIES (hpp-rbprm-server ${LIBRARY_NAME} hpp-rbprm)
+
+PKG_CONFIG_USE_DEPENDENCY(hpp-rbprm-server hpp-corbaserver)
 PKG_CONFIG_USE_DEPENDENCY(hpp-rbprm-server hpp-pinocchio)
 
 INSTALL (TARGETS hpp-rbprm-server DESTINATION ${CMAKE_INSTALL_BINDIR})

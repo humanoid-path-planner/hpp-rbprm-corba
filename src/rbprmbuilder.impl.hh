@@ -37,6 +37,7 @@
 # include <hpp/core/config-validations.hh>
 #include <hpp/rbprm/dynamic/dynamic-path-validation.hh>
 # include "hpp/corbaserver/fwd.hh"
+# include "hpp/corbaserver/rbprm/server.hh"
 
 namespace hpp {
   namespace rbprm {
@@ -167,6 +168,11 @@ namespace hpp {
       {
         public:
         RbprmBuilder ();
+
+        void setServer (Server* server)
+        {
+          server_ = server;
+        }
 
         virtual void loadRobotRomModel (const char* robotName,
                  const char* rootJointType,
@@ -377,12 +383,12 @@ namespace hpp {
         void initNewProblemSolver ();
 
         private:
-        /// \brief Pointer to hppPlanner object of hpp::corbaServer::Server.
-        corbaServer::ProblemSolverMapPtr_t psMap_;
         core::ProblemSolverPtr_t problemSolver()
         {
-            return psMap_->selected();
+            return server_->problemSolver();
         }
+
+        Server* server_;
         FullBodyMap fullBodyMap_;
         rbprm::RbPrmFullBodyPtr_t fullBody()
         {

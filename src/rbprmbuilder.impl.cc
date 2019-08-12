@@ -3319,13 +3319,6 @@ namespace hpp {
         }
     }
 
-    void RbprmBuilder::SetProblemSolverMap (hpp::corbaServer::ProblemSolverMapPtr_t psMap)
-    {
-        psMap_ = psMap;
-        //bind shooter creator to hide problem as a parameter and respect signature
-        //initNewProblemSolver();
-    }
-
     void RbprmBuilder::initNewProblemSolver()
     {
         //bind shooter creator to hide problem as a parameter and respect signature
