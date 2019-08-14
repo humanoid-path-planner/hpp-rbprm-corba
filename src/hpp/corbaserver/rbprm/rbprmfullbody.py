@@ -259,7 +259,7 @@ class FullBody (Robot):
           
      ## Get the number of existing states in the client 
      #
-     def getNumStates(self, limbName):
+     def getNumStates(self):
           return self.clientRbprm.rbprm.getNumStates()
           
      ## Get the number of octreeNodes
