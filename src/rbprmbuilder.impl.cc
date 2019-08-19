@@ -1574,8 +1574,8 @@ namespace hpp {
             std::size_t id = 0;
             for(std::vector<State>::const_iterator cit = newStates.begin(); cit != newStates.end(); ++cit, ++id)
             {
-                std::cout << "ID " << id;
-                cit->print();
+                /*std::cout << "ID " << id;
+                cit->print();*/
                 const core::Configuration_t config = cit->configuration_;
                 _CORBA_ULong size = (_CORBA_ULong) config.size ();
                 double* dofArray = hpp::floatSeq::allocbuf(size);

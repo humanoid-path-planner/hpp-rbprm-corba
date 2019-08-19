@@ -24,26 +24,38 @@ from numpy import array
 from hpp.corbaserver.rbprm import rbprmstate
 from hpp.corbaserver.rbprm.rbprmstate import State
 
-def interpolateState(fullBody, stepsize, pathId = 1, robustnessTreshold = 0, filterStates = False, testReachability = True, quasiStatic = False, erasePreviousStates = False):
+def _interpolateState(ps, fullBody, stepsize, pathId, robustnessTreshold = 0, filterStates = False, testReachability = True, quasiStatic = False, erasePreviousStates = True):
   if(filterStates):
         filt = 1
   else:
         filt = 0
-  configs = fullBody.clientRbprm.rbprm.interpolate(stepsize, pathId, robustnessTreshold, filt, testReachability, quasiStatic, erasePreviousStates)
+        
+  #discretize path
+  totalLength = ps.pathLength(pathId)
+  configsPlan = []; step = 0.
+  configSize = fullBody.getConfigSize() - len(ps.configAtParam(pathId,0.))
+  z = [0. for _ in range(configSize) ]
+  while step < totalLength:
+    configsPlan += [ps.configAtParam(pathId,step) + z[:]]
+    step += stepsize
+  configsPlan += [ps.configAtParam(pathId,totalLength)+ z[:]]
+    
+  configs = fullBody.clientRbprm.rbprm.interpolateConfigs(configsPlan, robustnessTreshold, filt, testReachability, quasiStatic, erasePreviousStates)
   firstStateId = fullBody.clientRbprm.rbprm.getNumStates() - len(configs)
-  return [ State(fullBody, i) for i in range(firstStateId, firstStateId + len(configs)) ]
+  return [ State(fullBody, i) for i in range(firstStateId, firstStateId + len(configs)) ], configs
           
 
-def guidePath(problemSolver, fromPos, toPos):
+def _guidePath(problemSolver, fromPos, toPos):
   ps = problemSolver
   ps.setInitialConfig (fromPos)
+  ps.resetGoalConfigs()
   ps.addGoalConfig(toPos)
   ps.solve ()
   return ps.numberPaths() - 1
   
 
 class FewStepPlanner(object):
-  def __init__ (self, client, problemSolver, rbprmBuilder, fullBody, planContext="rbprm_path", fullBodyContext="default", pathPlayer = None ):
+  def __init__ (self, client, problemSolver, rbprmBuilder, fullBody, planContext="rbprm_path", fullBodyContext="default", pathPlayer = None, viewer = None ):
     self.fullBody =  fullBody
     self.rbprmBuilder =  rbprmBuilder
     self.client   =  client
@@ -51,6 +63,7 @@ class FewStepPlanner(object):
     self.fullBodyContext   =  fullBodyContext
     self.problemSolver   =  problemSolver
     self.pathPlayer   =  pathPlayer
+    self.viewer   =  viewer
     
   def setPlanningContext(self):
     self.client.problem.selectProblem(self.planContext) 
@@ -71,13 +84,32 @@ class FewStepPlanner(object):
     self.setCurrentContext(oldContext)
     return res
     
-  def guidePath(self, fromPos, toPos):
-    pId =  self._actInContext(self.planContext,guidePath,self.problemSolver, fromPos, toPos)
+  def guidePath(self, fromPos, toPos, displayPath = False):
+    pId =  self._actInContext(self.planContext,_guidePath,self.problemSolver, fromPos, toPos)
     self.setPlanningContext()
     names =  self.rbprmBuilder.getAllJointNames()[1:]
-    self.pathPlayer(pId)
+    if displayPath:
+      if self.pathPlayer is None:
+        print "can't display path, no path player given"
+      else:
+        self.pathPlayer(pId)        
     self.client.problem.movePathToProblem(pId,self.fullBodyContext, names)
     self.setFullBodyContext()
     return pId
+    
+  def interpolateStates(self, stepsize, pathId = 1, robustnessTreshold = 0, filterStates = False, testReachability = True, quasiStatic = False, erasePreviousStates = True):
+    return _interpolateState(self.problemSolver, self.fullBody, stepsize, pathId, robustnessTreshold, filterStates, testReachability, quasiStatic, erasePreviousStates)
+    
+  def goToQuasiStatic(self, currentState, toPos, stepsize = 0.002, goalLimbsInContact = None, goalNormals = None, displayGuidePath = False):
+    pId = self.guidePath(currentState.q()[:7], toPos, displayPath = displayGuidePath)    
+    self.fullBody.setStartStateId(currentState.sId)
+    targetState = currentState.q()[:]; targetState[:7] = toPos
+    if goalLimbsInContact is None:
+      goalLimbsInContact = currentState.getLimbsInContact()
+    if goalNormals is None:
+      goalNormals = [[0.,0.,1.] for _ in range(len(goalLimbsInContact))]
+    self.fullBody.setEndState(targetState, goalLimbsInContact,goalNormals)
+    return self.interpolateStates(stepsize,pathId=pId,robustnessTreshold = 1, filterStates = True,quasiStatic=True, erasePreviousStates = False)
+    
        
               

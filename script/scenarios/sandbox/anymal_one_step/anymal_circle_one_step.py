@@ -188,35 +188,51 @@ if (not cg_success) or cg_too_many_states or (not cg_reach_goal):
 
 
 import hpp.corbaserver.rbprm.fewstepsplanner as sp
+import time
+def dispContactPlan(states, step = 0.5):
+	for s in states:
+		v(s.q());
+		time.sleep(step)
 
-states = sp.interpolateState(fullBody, 0.002,pathId=pId,robustnessTreshold = 1, filterStates = True,quasiStatic=True)
 
 fsp = sp.FewStepPlanner(tp.cl,tp.ps,tp.rbprmBuilder, fullBody, pathPlayer = tp.pp)
+print "contact start "
+states, cfgs = fsp.interpolateStates(0.002,pathId=pId,robustnessTreshold = 1, filterStates = True,quasiStatic=True)
+print "contact start "
 
 
 
 #~ print "names ", fsp.rbprmBuilder.getAllJointNames()
 #~ print "names ", tp.rbprmBuilder.getAllJointNames()
 
-n_goal = tp.q_goal[:7]
-n_goal[0] += 1
+n_goal = tp.q_goal[:7][:]
+n_goal[0] += 2
+n_goal[1] += 1
+n_goal[3:7] = [0.,0.,0.7071,0.7071]
 
 
 
-goal_state = states[-1].q()[:]
-goal_state[:7] = n_goal
-fullBody.setStartState(states[-1].q(),[fullBody.rArmId,fullBody.rLegId,fullBody.lArmId,fullBody.lLegId],normals)
-fullBody.setEndState(goal_state, [fullBody.rArmId,fullBody.rLegId,fullBody.lArmId,fullBody.lLegId],normals)
-
-pId= fsp.guidePath(tp.q_goal[:7],n_goal)
-states2 = sp.interpolateState(fullBody, 0.002,pathId=pId,robustnessTreshold = 1, filterStates = True,quasiStatic=True, erasePreviousStates = False)
-
-
-goal_state[6] = -1
-
-fullBody.setStartState(states[-1].q(),[fullBody.rArmId,fullBody.rLegId,fullBody.lArmId,fullBody.lLegId],normals)
-fullBody.setEndState(goal_state, [fullBody.rArmId,fullBody.rLegId,fullBody.lArmId,fullBody.lLegId],normals)
+n_goal_state = states[-1].q()[:]
+n_goal_state[:7] = n_goal[:]
+fullBody.setStartStateId(states[-1].sId)
+fullBody.setEndState(n_goal_state, [fullBody.rArmId,fullBody.rLegId,fullBody.lArmId,fullBody.lLegId],normals)
 
 pId= fsp.guidePath(tp.q_goal[:7],n_goal)
-states3 = sp.interpolateState(fullBody, 0.001,pathId=pId,robustnessTreshold = 1, filterStates = True,quasiStatic=True, erasePreviousStates = False)
+states2, cfgs2 = fsp.interpolateStates(0.002,pathId=pId,robustnessTreshold = 1, filterStates = True,quasiStatic=True, erasePreviousStates = False)
 
+#~ displayContactSequence(v,cfgs2,0.1)
+print "cplan"
+#~ dispContactPlan(states2,0.1)
+
+print "end cplan"
+
+pId= fsp.guidePath(n_goal, tp.q_goal[:7])
+fullBody.setStartState(n_goal_state,[fullBody.rArmId,fullBody.rLegId,fullBody.lArmId,fullBody.lLegId],normals)
+fullBody.setEndState(states[-1].q(), [fullBody.rArmId,fullBody.rLegId,fullBody.lArmId,fullBody.lLegId],normals)
+
+print "new state cplan"
+#~ dispContactPlan(states2,0.1)
+states3, cfgs3 = fsp.interpolateStates(0.002,pathId=pId,robustnessTreshold = 1, filterStates = True,quasiStatic=True, erasePreviousStates = False)
+
+n_goal[1] -= 3
+states4, cfgs4 = fsp.goToQuasiStatic(states3[-1],n_goal)
