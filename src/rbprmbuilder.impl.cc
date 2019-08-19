@@ -1594,8 +1594,8 @@ namespace hpp {
             }
             else
             {
-                lastStatesComputed_.insert(lastStatesComputed_.begin(), newStates.begin(), newStates.end());
-                lastStatesComputedTime_.insert(lastStatesComputedTime_.begin(), newTimeStates.begin(), newTimeStates.end());
+                lastStatesComputed_.insert(lastStatesComputed_.end(), newStates.begin(), newStates.end());
+                lastStatesComputedTime_.insert(lastStatesComputedTime_.end(), newTimeStates.begin(), newTimeStates.end());
             }
             return res;
         }
@@ -2305,8 +2305,8 @@ namespace hpp {
         }
         else
         {
-            lastStatesComputed_.insert(lastStatesComputed_.begin(), newStates.begin(), newStates.end());
-            lastStatesComputedTime_.insert(lastStatesComputedTime_.begin(), newTimeStates.begin(), newTimeStates.end());
+            lastStatesComputed_.insert(lastStatesComputed_.end(), newStates.begin(), newStates.end());
+            lastStatesComputedTime_.insert(lastStatesComputedTime_.end(), newTimeStates.begin(), newTimeStates.end());
         }
         return res;
         }
