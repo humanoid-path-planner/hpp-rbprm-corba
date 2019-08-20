@@ -339,7 +339,8 @@ namespace hpp {
         double projectStateToCOMEigen(unsigned short stateId, const pinocchio::Configuration_t& com_target, unsigned short maxNumeSamples)throw (hpp::Error);
 
         virtual double projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com, unsigned short max_num_sample) throw (hpp::Error);
-        virtual double projectStateToRoot(unsigned short stateId, const hpp::floatSeq& root) throw (hpp::Error);
+        virtual CORBA::Short cloneState(unsigned short stateId) throw (hpp::Error);
+        virtual double projectStateToRoot(unsigned short stateId, const hpp::floatSeq& root, const hpp::floatSeq& offset) throw (hpp::Error);
         virtual void saveComputedStates(const char* filepath) throw (hpp::Error);
         virtual void saveLimbDatabase(const char* limbname,const char* filepath) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeBox(const char* limbName, double sampleId) throw (hpp::Error);
@@ -366,7 +367,7 @@ namespace hpp {
         virtual hpp::floatSeqSeqSeq* getEffectorTrajectoryWaypoints(unsigned short pathId,const char* effectorName)throw (hpp::Error);
         virtual hpp::floatSeqSeq* getPathAsBezier(unsigned short pathId)throw (hpp::Error);
 
-
+        virtual bool toggleNonContactingLimb(const char* limbName)throw (hpp::Error);
         virtual bool areKinematicsConstraintsVerified(const hpp::floatSeq &point)throw (hpp::Error);
         virtual bool areKinematicsConstraintsVerifiedForState(unsigned short stateId,const hpp::floatSeq &point)throw (hpp::Error);
         virtual hpp::floatSeq *isReachableFromState(unsigned short stateFrom,unsigned short stateTo,const bool useIntermediateState)throw (hpp::Error);

@@ -841,21 +841,40 @@ namespace hpp {
         return (CORBA::Short)(lastStatesComputed_.size()-1);
     }
 
+    CORBA::Short RbprmBuilder::cloneState(unsigned short stateId) throw (hpp::Error)
+    {
+        try
+        {
+            if(lastStatesComputed_.size() <= stateId){
+              throw std::runtime_error ("Can't clone state: invalid state id : "+std::string(""+stateId)+" number of state = "+std::string(""+lastStatesComputed_.size()));
+            }
+            State newState = lastStatesComputed_[stateId];
+            lastStatesComputed_.push_back(newState);
+            lastStatesComputedTime_.push_back(std::make_pair(-1., newState));
+            return (CORBA::Short)(lastStatesComputed_.size()-1);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
     double RbprmBuilder::projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com, unsigned short max_num_sample) throw (hpp::Error)
     {
         pinocchio::Configuration_t com_target = dofArrayToConfig (3, com);
         return projectStateToCOMEigen(stateId, com_target, max_num_sample);
     }
 
-    double RbprmBuilder::projectStateToRoot(unsigned short stateId, const hpp::floatSeq& root) throw (hpp::Error)
+    double RbprmBuilder::projectStateToRoot(unsigned short stateId, const hpp::floatSeq& root, const hpp::floatSeq& offset) throw (hpp::Error)
     {
         pinocchio::Configuration_t root_target = dofArrayToConfig (7, root);
+        pinocchio::Configuration_t offset_target = dofArrayToConfig (3, offset);
         if(lastStatesComputed_.size() <= stateId)
         {
             throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
         }
         State s = lastStatesComputed_[stateId];
-        projection::ProjectionReport rep = projection::projectToRootConfiguration(fullBody(),root_target,s);
+        projection::ProjectionReport rep = projection::projectToRootConfiguration(fullBody(),root_target,s,offset_target);
         double success = 0.;
         if(rep.success_){
           ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
@@ -3459,6 +3478,15 @@ namespace hpp {
         strcpy (nameList [i], names[i].c_str ());
       }
       return limbsNames;
+    }
+
+    bool RbprmBuilder::toggleNonContactingLimb(const char* limbName)throw (hpp::Error)
+    {
+        if(!fullBodyLoaded_){
+          throw std::runtime_error ("fullBody not loaded");
+        }
+        const std::string limb (limbName);
+        return fullBody()->toggleNonContactingLimb(limb);
     }
 
     bool RbprmBuilder::areKinematicsConstraintsVerified(const hpp::floatSeq &point)throw (hpp::Error){

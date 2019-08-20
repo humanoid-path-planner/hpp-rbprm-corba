@@ -141,8 +141,14 @@ class State (object):
         else:
             return self.fullBody.projectStateToCOM(self.sId, targetCom,maxNumSample)     > 0
 
-    def projectToRoot(self,targetRoot):
-        return self.fullBody.projectStateToRoot(self.sId,targetRoot) > 0
+    ## Project a state into a given root position and orientation
+    #
+    # \param stateId target state
+    # \param root the root configuration (size 7)
+    # \param offset specific point to be projected in root frame. If different than 0 root orientation is ignored
+    # \return Whether the projection has been successful or not
+    def projectToRoot(self,targetRoot, offset = [0., 0., 0.]):
+        return self.fullBody.projectStateToRoot(self.sId,targetRoot, offset) > 0
         
     def getComConstraint(self, limbsCOMConstraints, exceptList = []):
         return get_com_constraint(self.fullBody, self.sId, self.cl.getConfigAtState(self.sId), limbsCOMConstraints, interm = self.isIntermediate, exceptList = exceptList)
@@ -178,6 +184,13 @@ class StateHelper(object):
     @staticmethod
     def addNewContact(state, limbName, p, n, num_max_sample = 0, lockOtherJoints= False):
         sId = state.cl.addNewContact(state.sId, limbName, p, n, num_max_sample,lockOtherJoints)
+        if(sId != -1):
+            return State(state.fullBody, sId = sId), True
+        return state, False
+        
+    @staticmethod
+    def cloneState(state):
+        sId = state.cl.cloneState(state.sId)
         if(sId != -1):
             return State(state.fullBody, sId = sId), True
         return state, False

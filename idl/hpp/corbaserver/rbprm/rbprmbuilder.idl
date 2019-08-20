@@ -154,11 +154,18 @@ module hpp
     /// \param com target com
     double projectStateToCOM(in unsigned short stateId,  in floatSeq com, in  unsigned short max_num_sample) raises (Error);
 
+    /// Project a state into a COM
+    ///
+    /// \param stateId target state
+    /// \param com target com
+    short cloneState(in unsigned short stateId) raises (Error);
+
     /// Project a state into a given root position and orientation
     ///
     /// \param stateId target state
     /// \param root the root configuration (size 7)
-    double projectStateToRoot(in unsigned short stateId,  in floatSeq root) raises (Error);
+    /// \param offset specific point to be projected in root frame. If different than 0 root orientation is ignored
+    double projectStateToRoot(in unsigned short stateId,  in floatSeq root, in floatSeq offset) raises (Error);
 
 
     /// Project a state into a COM
@@ -798,6 +805,8 @@ module hpp
     /// \return a list of lenght degree+ 2 : the first item is the time of the curve, the others are the waypoints
     floatSeqSeq getPathAsBezier(in unsigned short pathId)raises (Error);
 
+
+    boolean toggleNonContactingLimb(in string limbname)raises (Error);
 
     boolean areKinematicsConstraintsVerified(in floatSeq point)raises (Error);
 

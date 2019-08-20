@@ -27,6 +27,7 @@ rbprmBuilder.setJointBounds ("root_joint", root_bounds)
 rbprmBuilder.setFilter(rbprmBuilder.urdfNameRom)
 for rom in rbprmBuilder.urdfNameRom :
     rbprmBuilder.setAffordanceFilter(rom, ['Support'])
+#~ rbprmBuilder.setAffordanceFilter("front_prong", ['Support'])
 
 # We also bound the rotations of the torso. (z, y, x)
 #~ rbprmBuilder.boundSO3([-1.7,1.7,-0.1,0.1,-0.1,0.1])
@@ -103,7 +104,8 @@ pp = PathPlayer (v)
 
 ###### WHOLE BODY INIT
 
-from hpp.corbaserver.rbprm.anymal import Robot
+#~ from hpp.corbaserver.rbprm.anymal import Robot
+from hpp.corbaserver.rbprm.anymal_prong import Robot
 #~ from hpp.gepetto import Viewer
 from tools.display_tools import *
 import time
@@ -195,7 +197,7 @@ fullBody.setCurrentConfig (q_init)
 v(q_init)
 
 
-v.addLandmark('anymal/base_0',0.3)
+#~ v.addLandmark('anymal/base_0',0.3)
 v(q_init)
 #fullBody.setReferenceConfig(fullBody.referenceConfig_legsApart[::]+[0]*6)
 

@@ -290,7 +290,7 @@ class FullBody (Robot):
           num_max_sample = 1
           for (limbName, normal) in  zip(contacts, normals):
                p = cl.getEffectorPosition(limbName,configuration)[0]
-               cl.addNewContact(sId, limbName, p, normal, num_max_sample, True)
+               cl.addNewContact(sId, limbName, p, normal, num_max_sample, False)
           return cl.setStartStateId(sId)
           
           
@@ -308,7 +308,7 @@ class FullBody (Robot):
           num_max_sample = 1
           for (limbName, normal) in  zip(contacts, normals):
                p = cl.getEffectorPosition(limbName,configuration)[0]
-               cl.addNewContact(sId, limbName, p, normal, num_max_sample, True)
+               cl.addNewContact(sId, limbName, p, normal, num_max_sample, False)
           return cl.setEndStateId(sId)
 
      ## Initialize the first state of the path interpolation
@@ -745,9 +745,10 @@ class FullBody (Robot):
      # and update the state configuration.
      # \param state index of first state.
      # \param root : root configuration (size 7)
+     # \param offset specific point to be projected in root frame. If different than 0 root orientation is ignored
      # \return whether the projection was successful
-     def projectStateToRoot(self, state, root):
-          return self.clientRbprm.rbprm.projectStateToRoot(state, root)     > 0
+     def projectStateToRoot(self, state, root, offset = [0,0,0.]):
+          return self.clientRbprm.rbprm.projectStateToRoot(state, root, offset)     > 0
           
      ## Project a given state into a given COM position
      # and update the state configuration.
@@ -990,4 +991,7 @@ class FullBody (Robot):
 
      def isDynamicallyReachableFromState(self,stateFrom,stateTo,addPathPerPhase = False,timings=[],numPointsPerPhases=5):
           return self.clientRbprm.rbprm.isDynamicallyReachableFromState(stateFrom,stateTo,addPathPerPhase,timings,numPointsPerPhases)
+          
+     def toggleNonContactingLimb(self,limbName):
+          return self.clientRbprm.rbprm.toggleNonContactingLimb(limbName)
 
