@@ -224,7 +224,7 @@ class FullBody (Robot):
           num_max_sample = 1
           for (limbName, normal) in  zip(contacts, normals):
                p = cl.getEffectorPosition(limbName,configuration)[0]
-               cl.addNewContact(sId, limbName, p, normal, num_max_sample)
+               cl.addNewContact(sId, limbName, p, normal, num_max_sample, False)
           return sId
           
      ## Retrieves the contact candidates configurations given a configuration and a limb
@@ -257,6 +257,11 @@ class FullBody (Robot):
      def getNumSamples(self, limbName):
           return self.clientRbprm.rbprm.getNumSamples(limbName)
           
+     ## Get the number of existing states in the client 
+     #
+     def getNumStates(self):
+          return self.clientRbprm.rbprm.getNumStates()
+          
      ## Get the number of octreeNodes
      #
      # \param limbName name of the limb from which to retrieve a sample
@@ -285,7 +290,7 @@ class FullBody (Robot):
           num_max_sample = 1
           for (limbName, normal) in  zip(contacts, normals):
                p = cl.getEffectorPosition(limbName,configuration)[0]
-               cl.addNewContact(sId, limbName, p, normal, num_max_sample, True)
+               cl.addNewContact(sId, limbName, p, normal, num_max_sample, False)
           return cl.setStartStateId(sId)
           
           
@@ -303,7 +308,7 @@ class FullBody (Robot):
           num_max_sample = 1
           for (limbName, normal) in  zip(contacts, normals):
                p = cl.getEffectorPosition(limbName,configuration)[0]
-               cl.addNewContact(sId, limbName, p, normal, num_max_sample, True)
+               cl.addNewContact(sId, limbName, p, normal, num_max_sample, False)
           return cl.setEndStateId(sId)
 
      ## Initialize the first state of the path interpolation
@@ -348,12 +353,13 @@ class FullBody (Robot):
      # \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
      # \param testReachability : if true, check each contact transition with our reachability criterion
      # \param quasiStatic : if True, use our reachability criterion with the quasiStatic constraint
-     def interpolate(self, stepsize, pathId = 1, robustnessTreshold = 0, filterStates = False,testReachability = True, quasiStatic = False):
+     # \param erasePreviousStates : if True the list of previously computed states is erased
+     def interpolate(self, stepsize, pathId = 1, robustnessTreshold = 0, filterStates = False,testReachability = True, quasiStatic = False, erasePreviousStates = True):
           if(filterStates):
                 filt = 1
           else:
                 filt = 0
-          return self.clientRbprm.rbprm.interpolate(stepsize, pathId, robustnessTreshold, filt,testReachability, quasiStatic)
+          return self.clientRbprm.rbprm.interpolate(stepsize, pathId, robustnessTreshold, filt,testReachability, quasiStatic, erasePreviousStates)
      
      ## Provided a discrete contact sequence has already been computed, computes
      # all the contact positions and normals for a given state, the next one, and the intermediate between them.
@@ -739,9 +745,10 @@ class FullBody (Robot):
      # and update the state configuration.
      # \param state index of first state.
      # \param root : root configuration (size 7)
+     # \param offset specific point to be projected in root frame. If different than 0 root orientation is ignored
      # \return whether the projection was successful
-     def projectStateToRoot(self, state, root):
-          return self.clientRbprm.rbprm.projectStateToRoot(state, root)     > 0
+     def projectStateToRoot(self, state, root, offset = [0,0,0.]):
+          return self.clientRbprm.rbprm.projectStateToRoot(state, root, offset)     > 0
           
      ## Project a given state into a given COM position
      # and update the state configuration.
@@ -829,7 +836,7 @@ class FullBody (Robot):
      # \param viewer gepetto viewer instance
      def draw(self, configuration, viewer):
           viewer(configuration)
-          for limb, groupid in self.octrees.items():
+          for limb, groupid in self.octrees.iteritems():
                 transform = self.clientRbprm.rbprm.getOctreeTransform(limb, configuration)
                 viewer.client.gui.applyConfiguration(groupid,transform)
           viewer.client.gui.refresh()
@@ -984,4 +991,7 @@ class FullBody (Robot):
 
      def isDynamicallyReachableFromState(self,stateFrom,stateTo,addPathPerPhase = False,timings=[],numPointsPerPhases=5):
           return self.clientRbprm.rbprm.isDynamicallyReachableFromState(stateFrom,stateTo,addPathPerPhase,timings,numPointsPerPhases)
+          
+     def toggleNonContactingLimb(self,limbName):
+          return self.clientRbprm.rbprm.toggleNonContactingLimb(limbName)
 

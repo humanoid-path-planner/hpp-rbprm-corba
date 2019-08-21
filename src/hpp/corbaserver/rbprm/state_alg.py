@@ -18,9 +18,13 @@
 
 from __future__ import print_function
 from hpp.corbaserver.rbprm.rbprmstate import State
-from lp_find_point import find_valid_c_cwc, find_valid_c_cwc_qp, lp_ineq_4D
-from hpp.corbaserver.rbprm.tools.com_constraints import *
-from CWC_methods import compute_CWC, is_stable
+try:
+    from hpp.corbaserver.rbprm.tools.com_constraints import *
+    from CWC_methods import compute_CWC, is_stable
+    from lp_find_point import find_valid_c_cwc, find_valid_c_cwc_qp, lp_ineq_4D
+except:
+    print "WARNING: in state_alg, some optinal dependencies were not found"
+    pass
 
 ## algorithmic methods on state
    

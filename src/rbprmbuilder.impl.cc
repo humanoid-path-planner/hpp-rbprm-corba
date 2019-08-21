@@ -841,21 +841,40 @@ namespace hpp {
         return (CORBA::Short)(lastStatesComputed_.size()-1);
     }
 
+    CORBA::Short RbprmBuilder::cloneState(unsigned short stateId) throw (hpp::Error)
+    {
+        try
+        {
+            if(lastStatesComputed_.size() <= stateId){
+              throw std::runtime_error ("Can't clone state: invalid state id : "+std::string(""+stateId)+" number of state = "+std::string(""+lastStatesComputed_.size()));
+            }
+            State newState = lastStatesComputed_[stateId];
+            lastStatesComputed_.push_back(newState);
+            lastStatesComputedTime_.push_back(std::make_pair(-1., newState));
+            return (CORBA::Short)(lastStatesComputed_.size()-1);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
     double RbprmBuilder::projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com, unsigned short max_num_sample) throw (hpp::Error)
     {
         pinocchio::Configuration_t com_target = dofArrayToConfig (3, com);
         return projectStateToCOMEigen(stateId, com_target, max_num_sample);
     }
 
-    double RbprmBuilder::projectStateToRoot(unsigned short stateId, const hpp::floatSeq& root) throw (hpp::Error)
+    double RbprmBuilder::projectStateToRoot(unsigned short stateId, const hpp::floatSeq& root, const hpp::floatSeq& offset) throw (hpp::Error)
     {
         pinocchio::Configuration_t root_target = dofArrayToConfig (7, root);
+        pinocchio::Configuration_t offset_target = dofArrayToConfig (3, offset);
         if(lastStatesComputed_.size() <= stateId)
         {
             throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
         }
         State s = lastStatesComputed_[stateId];
-        projection::ProjectionReport rep = projection::projectToRootConfiguration(fullBody(),root_target,s);
+        projection::ProjectionReport rep = projection::projectToRootConfiguration(fullBody(),root_target,s,offset_target);
         double success = 0.;
         if(rep.success_){
           ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
@@ -1063,6 +1082,83 @@ namespace hpp {
         } catch (const std::exception& exc) {
         throw hpp::Error (exc.what ());
         }
+    }
+
+    short RbprmBuilder::generateContactState(::CORBA::UShort  cId, const char*  name,  const ::hpp::floatSeq& direction)
+    throw (hpp::Error)
+    {
+        try
+        {
+        if(lastStatesComputed_.size() <= (std::size_t)(cId))
+        {
+            throw std::runtime_error ("Unexisting state " + std::string(""+(cId+1)));
+        }
+        State& state = lastStatesComputed_[cId];
+        std::string limbname(name);
+        fcl::Vec3f dir;
+        for(std::size_t i =0; i <3; ++i)
+        {
+            dir[i] = direction[(_CORBA_ULong)i];
+        }
+        pinocchio::Configuration_t config = state.configuration_;
+        fullBody()->device_->currentConfiguration(config);
+
+        sampling::T_OctreeReport finalSet;
+        rbprm::T_Limb::const_iterator lit = fullBody()->GetLimbs().find(limbname);
+        if(lit == fullBody()->GetLimbs().end())
+        {
+            throw std::runtime_error ("Impossible to find limb for joint "
+                                      + std::string(limbname) + " to robot; limb not defined.");
+        }
+        const RbPrmLimbPtr_t& limb = lit->second;
+        pinocchio::Transform3f transformPino = limb->octreeRoot(); // get root transform from configuration
+        fcl::Transform3f transform(transformPino.rotation(),transformPino.translation());
+                    // TODO fix as in rbprm-fullbody.cc!!
+        const affMap_t &affMap = problemSolver()->affordanceObjects;
+        if (affMap.map.empty ())
+        {
+            throw hpp::Error ("No affordances found. Unable to interpolate.");
+        }
+        const std::vector<pinocchio::CollisionObjectPtr_t> objects = contact::getAffObjectsForLimb(std::string(limbname), affMap,
+                                                                   bindShooter_.affFilter_);
+
+        std::vector<sampling::T_OctreeReport> reports(objects.size());
+        std::size_t i (0);
+        //#pragma omp parallel for
+        for(std::vector<pinocchio::CollisionObjectPtr_t>::const_iterator oit = objects.begin();
+            oit != objects.end(); ++oit, ++i)
+        {
+            sampling::GetCandidates(limb->sampleContainer_, transform, *oit, dir, reports[i], sampling::HeuristicParam());
+        }
+        for(std::vector<sampling::T_OctreeReport>::const_iterator cit = reports.begin();
+            cit != reports.end(); ++cit)
+        {
+            finalSet.insert(cit->begin(), cit->end());
+        }
+        // randomize samples
+        std::random_shuffle(reports.begin(), reports.end());
+        unsigned short num_samples_ok (0);
+        pinocchio::Configuration_t sampleConfig = config;
+        sampling::T_OctreeReport::const_iterator candCit = finalSet.begin();
+        for(std::size_t i=0; i< _CORBA_ULong(finalSet.size()) && num_samples_ok < 100; ++i, ++candCit)
+        {
+            const sampling::OctreeReport& report = *candCit;
+            State state;
+            state.configuration_ = config;
+            hpp::rbprm::projection::ProjectionReport rep =
+            hpp::rbprm::projection::projectSampleToObstacle(fullBody(),std::string(limbname), limb, report, fullBody()->GetCollisionValidation(), sampleConfig, state);
+            if(rep.success_)
+            {
+
+                lastStatesComputed_.push_back(rep.result_);
+                lastStatesComputedTime_.push_back(std::make_pair(-1.,  rep.result_));
+                return lastStatesComputed_.size() -1;
+            }
+        }
+        return -1;
+    } catch (const std::exception& exc) {
+    throw hpp::Error (exc.what ());
+    }
     }
 
     hpp::floatSeqSeq* RbprmBuilder::getContactSamplesProjected(const char* limbname,
@@ -1467,7 +1563,7 @@ namespace hpp {
         return res;
     }
 
-    floatSeqSeq* RbprmBuilder::interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic) throw (hpp::Error)
+    floatSeqSeq* RbprmBuilder::interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic, bool erasePreviousStates) throw (hpp::Error)
     {
         try
         {
@@ -1486,18 +1582,19 @@ namespace hpp {
                 throw hpp::Error ("No affordances found. Unable to interpolate.");
             }
             hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = rbprm::interpolation::RbPrmInterpolation::create(fullBody(),startState_,endState_,core::PathVectorConstPtr_t(),testReachability,quasiStatic);
-            lastStatesComputedTime_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,configurations,robustnessTreshold, filterStates != 0);
-            lastStatesComputed_ = TimeStatesToStates(lastStatesComputedTime_);
+            rbprm::T_StateFrame newTimeStates =
+                    interpolator->Interpolate(affMap, bindShooter_.affFilter_,configurations,robustnessTreshold, filterStates != 0);
+            std::vector<rbprm::State> newStates =TimeStatesToStates(newTimeStates);
             hpp::floatSeqSeq *res;
             res = new hpp::floatSeqSeq ();
 
-            res->length ((_CORBA_ULong)lastStatesComputed_.size ());
+            res->length ((_CORBA_ULong)newStates.size ());
             std::size_t i=0;
             std::size_t id = 0;
-            for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin(); cit != lastStatesComputed_.end(); ++cit, ++id)
+            for(std::vector<State>::const_iterator cit = newStates.begin(); cit != newStates.end(); ++cit, ++id)
             {
-                std::cout << "ID " << id;
-                cit->print();
+                /*std::cout << "ID " << id;
+                cit->print();*/
                 const core::Configuration_t config = cit->configuration_;
                 _CORBA_ULong size = (_CORBA_ULong) config.size ();
                 double* dofArray = hpp::floatSeq::allocbuf(size);
@@ -1508,6 +1605,16 @@ namespace hpp {
                 }
                 (*res) [(_CORBA_ULong)i] = floats;
                 ++i;
+            }
+            if(erasePreviousStates)
+            {
+                lastStatesComputedTime_ = newTimeStates;
+                lastStatesComputed_ = newStates;
+            }
+            else
+            {
+                lastStatesComputed_.insert(lastStatesComputed_.end(), newStates.begin(), newStates.end());
+                lastStatesComputedTime_.insert(lastStatesComputedTime_.end(), newTimeStates.begin(), newTimeStates.end());
             }
             return res;
         }
@@ -2156,7 +2263,7 @@ namespace hpp {
     }
 
 
-    floatSeqSeq* RbprmBuilder::interpolate(double timestep, double path, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic) throw (hpp::Error)
+    floatSeqSeq* RbprmBuilder::interpolate(double timestep, double path, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic, bool erasePreviousStates) throw (hpp::Error)
     {
         hppDout(notice,"### Begin interpolate");
         try
@@ -2183,18 +2290,19 @@ namespace hpp {
 
         hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator =
                     rbprm::interpolation::RbPrmInterpolation::create(fullBody(),startState_,endState_,problemSolver()->paths()[pathId],testReachability,quasiStatic);
-        lastStatesComputedTime_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
+
+        rbprm::T_StateFrame newTimeStates = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
                     timestep,robustnessTreshold, filterStates != 0);
-		lastStatesComputed_ = TimeStatesToStates(lastStatesComputedTime_);
+        std::vector<rbprm::State> newStates = TimeStatesToStates(newTimeStates);
 
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
 
-        res->length ((_CORBA_ULong)lastStatesComputed_.size ());
+        res->length ((_CORBA_ULong)newStates.size ());
         std::size_t i=0;
         std::size_t id = 0;
-        for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin();
-					cit != lastStatesComputed_.end(); ++cit, ++id)
+        for(std::vector<State>::const_iterator cit = newStates.begin();
+                    cit != newStates.end(); ++cit, ++id)
         {
             /*std::cout << "ID " << id;
             cit->print();*/
@@ -2208,6 +2316,16 @@ namespace hpp {
             }
             (*res) [(_CORBA_ULong)i] = floats;
             ++i;
+        }
+        if(erasePreviousStates)
+        {
+            lastStatesComputedTime_ = newTimeStates;
+            lastStatesComputed_ = newStates;
+        }
+        else
+        {
+            lastStatesComputed_.insert(lastStatesComputed_.end(), newStates.begin(), newStates.end());
+            lastStatesComputedTime_.insert(lastStatesComputedTime_.end(), newTimeStates.begin(), newTimeStates.end());
         }
         return res;
         }
@@ -2974,6 +3092,12 @@ namespace hpp {
     }
 
 
+
+    CORBA::Short  RbprmBuilder::getNumStates() throw (hpp::Error)
+    {
+        return lastStatesComputed_.size();
+    }
+
     CORBA::Short  RbprmBuilder::computeIntermediary(unsigned short stateFrom, unsigned short stateTo) throw (hpp::Error)
     try
     {
@@ -3354,6 +3478,15 @@ namespace hpp {
         strcpy (nameList [i], names[i].c_str ());
       }
       return limbsNames;
+    }
+
+    bool RbprmBuilder::toggleNonContactingLimb(const char* limbName)throw (hpp::Error)
+    {
+        if(!fullBodyLoaded_){
+          throw std::runtime_error ("fullBody not loaded");
+        }
+        const std::string limb (limbName);
+        return fullBody()->toggleNonContactingLimb(limb);
     }
 
     bool RbprmBuilder::areKinematicsConstraintsVerified(const hpp::floatSeq &point)throw (hpp::Error){

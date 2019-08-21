@@ -237,6 +237,9 @@ namespace hpp {
                                                    const hpp::floatSeq& direction,
                                                    unsigned short numSamples) throw (hpp::Error);
 
+        virtual short generateContactState(::CORBA::UShort  currentState, const char*  name,  const ::hpp::floatSeq& direction)  throw (hpp::Error);
+
+
         virtual hpp::floatSeq* getSamplesIdsInOctreeNode(const char* limb,
                                                    double octreeNodeId) throw (hpp::Error);
 
@@ -258,8 +261,8 @@ namespace hpp {
         virtual hpp::floatSeqSeq* computeContactPointsForLimb(unsigned short cId, const char* limbName) throw (hpp::Error);
         virtual hpp::floatSeqSeq* computeContactPointsAtStateForLimb(unsigned short cId, unsigned short isIntermediate, const char* limbName) throw (hpp::Error);
         virtual hpp::floatSeqSeq* computeCenterOfContactAtStateForLimb(unsigned short cId, unsigned short isIntermediate, const char *limbName) throw (hpp::Error);
-        virtual hpp::floatSeqSeq* interpolate(double timestep, double path, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic) throw (hpp::Error);
-        virtual hpp::floatSeqSeq* interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic) throw (hpp::Error);
+        virtual hpp::floatSeqSeq* interpolate(double timestep, double path, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic, bool erasePreviousStates) throw (hpp::Error);
+        virtual hpp::floatSeqSeq* interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic, bool erasePreviousStates) throw (hpp::Error);
         virtual hpp::floatSeqSeq* getContactCone(unsigned short stateId, double friction) throw (hpp::Error);
         virtual hpp::floatSeqSeq* getContactIntermediateCone(unsigned short stateId, double friction) throw (hpp::Error);
         virtual CORBA::Short generateComTraj(const hpp::floatSeqSeq& positions, const hpp::floatSeqSeq& velocities,
@@ -336,13 +339,15 @@ namespace hpp {
         double projectStateToCOMEigen(unsigned short stateId, const pinocchio::Configuration_t& com_target, unsigned short maxNumeSamples)throw (hpp::Error);
 
         virtual double projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com, unsigned short max_num_sample) throw (hpp::Error);
-        virtual double projectStateToRoot(unsigned short stateId, const hpp::floatSeq& root) throw (hpp::Error);
+        virtual CORBA::Short cloneState(unsigned short stateId) throw (hpp::Error);
+        virtual double projectStateToRoot(unsigned short stateId, const hpp::floatSeq& root, const hpp::floatSeq& offset) throw (hpp::Error);
         virtual void saveComputedStates(const char* filepath) throw (hpp::Error);
         virtual void saveLimbDatabase(const char* limbname,const char* filepath) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeBox(const char* limbName, double sampleId) throw (hpp::Error);
         virtual CORBA::Short  isLimbInContact(const char* limbName, unsigned short state) throw (hpp::Error);
         virtual CORBA::Short  isLimbInContactIntermediary(const char* limbName, unsigned short state) throw (hpp::Error);
         virtual CORBA::Short  computeIntermediary(unsigned short state1, unsigned short state2) throw (hpp::Error);
+        virtual CORBA::Short  getNumStates() throw (hpp::Error);
         virtual hpp::floatSeqSeq* getOctreeBoxes(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeTransform(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
         virtual CORBA::Short isConfigBalanced(const hpp::floatSeq& config, const hpp::Names_t& contactLimbs, double robustnessTreshold,const hpp::floatSeq& CoM) throw (hpp::Error);
@@ -362,7 +367,7 @@ namespace hpp {
         virtual hpp::floatSeqSeqSeq* getEffectorTrajectoryWaypoints(unsigned short pathId,const char* effectorName)throw (hpp::Error);
         virtual hpp::floatSeqSeq* getPathAsBezier(unsigned short pathId)throw (hpp::Error);
 
-
+        virtual bool toggleNonContactingLimb(const char* limbName)throw (hpp::Error);
         virtual bool areKinematicsConstraintsVerified(const hpp::floatSeq &point)throw (hpp::Error);
         virtual bool areKinematicsConstraintsVerifiedForState(unsigned short stateId,const hpp::floatSeq &point)throw (hpp::Error);
         virtual hpp::floatSeq *isReachableFromState(unsigned short stateFrom,unsigned short stateTo,const bool useIntermediateState)throw (hpp::Error);

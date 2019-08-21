@@ -141,8 +141,14 @@ class State (object):
         else:
             return self.fullBody.projectStateToCOM(self.sId, targetCom,maxNumSample)     > 0
 
-    def projectToRoot(self,targetRoot):
-        return self.fullBody.projectStateToRoot(self.sId,targetRoot) > 0
+    ## Project a state into a given root position and orientation
+    #
+    # \param stateId target state
+    # \param root the root configuration (size 7)
+    # \param offset specific point to be projected in root frame. If different than 0 root orientation is ignored
+    # \return Whether the projection has been successful or not
+    def projectToRoot(self,targetRoot, offset = [0., 0., 0.]):
+        return self.fullBody.projectStateToRoot(self.sId,targetRoot, offset) > 0
         
     def getComConstraint(self, limbsCOMConstraints, exceptList = []):
         return get_com_constraint(self.fullBody, self.sId, self.cl.getConfigAtState(self.sId), limbsCOMConstraints, interm = self.isIntermediate, exceptList = exceptList)
@@ -181,6 +187,13 @@ class StateHelper(object):
         if(sId != -1):
             return State(state.fullBody, sId = sId), True
         return state, False
+        
+    @staticmethod
+    def cloneState(state):
+        sId = state.cl.cloneState(state.sId)
+        if(sId != -1):
+            return State(state.fullBody, sId = sId), True
+        return state, False
 
     ## tries to remove a new contact from a state
     ## if the limb is already in contact, replace the
@@ -202,3 +215,16 @@ class StateHelper(object):
         sId = fullBody.generateStateInContact(q,direction,acceleration)
         s = State(fullBody,sId=sId)
         return s
+        
+    @staticmethod
+    def moveAndContact(state,rootOffset,limbName):
+        s, success = StateHelper.removeContact(state, limbName)
+        assert success
+        success = s.projectToRoot((array(s.q()[:3]) + array(rootOffset)).tolist()+s.q()[3:7])
+        if not success:
+            return state, False
+        sId = s.fullBody.clientRbprm.rbprm.generateContactState(s.sId, limbName,rootOffset)
+        if sId < 0:
+            return state, False
+        s = State(s.fullBody,sId=sId)
+        return s, True

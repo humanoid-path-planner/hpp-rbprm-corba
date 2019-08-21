@@ -154,11 +154,18 @@ module hpp
     /// \param com target com
     double projectStateToCOM(in unsigned short stateId,  in floatSeq com, in  unsigned short max_num_sample) raises (Error);
 
+    /// Clone a state
+    ///
+    /// \param stateId target state
+    /// \return stateId of the cloned state
+    short cloneState(in unsigned short stateId) raises (Error);
+
     /// Project a state into a given root position and orientation
     ///
     /// \param stateId target state
     /// \param root the root configuration (size 7)
-    double projectStateToRoot(in unsigned short stateId,  in floatSeq root) raises (Error);
+    /// \param offset specific point to be projected in root frame. If different than 0 root orientation is ignored
+    double projectStateToRoot(in unsigned short stateId,  in floatSeq root, in floatSeq offset) raises (Error);
 
 
     /// Project a state into a COM
@@ -254,6 +261,13 @@ module hpp
     /// \return transformed configuration for which all possible contacts have been created
     floatSeqSeq getContactSamplesProjected(in string name, in floatSeq dofArray, in floatSeq direction,
     in unsigned short numSamples) raises (Error);
+
+    /// Given a contact state and a limb, tries to generate a new contact, and returns the id of the new State if successful
+    /// \param currentState Id of the considered state
+    /// \param name name of the limb used to create a contact
+    /// \param direction desired direction of motion for the robot
+    /// \return id of the new contact state if successful, -1 otherwise
+    short generateContactState(in unsigned short currentState, in string name, in floatSeq direction) raises (Error);
 
     /// get Ids of limb in an octree cell
     /// \param name name of the considered limb
@@ -364,7 +378,7 @@ module hpp
     /// \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
     /// \param testReachability : if true, check each contact transition with our reachability criterion
     /// \param quasiStatic : if True, use our reachability criterion with the quasiStatic constraint
-    floatSeqSeq interpolate(in double timestep, in double path, in double robustnessTreshold, in unsigned short filterStates, in boolean testReachability, in boolean quasiStatic) raises (Error);
+    floatSeqSeq interpolate(in double timestep, in double path, in double robustnessTreshold, in unsigned short filterStates, in boolean testReachability, in boolean quasiStatic, in boolean erasePreviousStates) raises (Error);
 
     /// Provided a path has already been computed, interpolates it and generates the statically stable
     /// constact configurations along it. setStartState and setEndState must have been called prior
@@ -375,7 +389,7 @@ module hpp
     /// \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
     /// \param testReachability : if true, check each contact transition with our reachability criterion
     /// \param quasiStatic : if True, use our reachability criterion with the quasiStatic constraint
-    floatSeqSeq interpolateConfigs(in floatSeqSeq configs, in double robustnessTreshold, in unsigned short filterStates,in boolean testReachability, in boolean quasiStatic) raises (Error);
+    floatSeqSeq interpolateConfigs(in floatSeqSeq configs, in double robustnessTreshold, in unsigned short filterStates,in boolean testReachability, in boolean quasiStatic, in boolean erasePreviousStates) raises (Error);
 
 
     /// returns the CWC of the robot at a given state
@@ -663,6 +677,10 @@ module hpp
     /// \return whether the limb is in contact at this state
     short computeIntermediary(in unsigned short state1, in unsigned short state2) raises (Error);
 
+    /// Compute the number of computed states
+    /// \return the number of computed states
+    short getNumStates() raises (Error);
+
     /// Saves the last computed states by the function interpolate in a filename.
     /// Raises an error if interpolate has not been called, or the file could not be opened.
     /// \param filename name of the file used to save the contacts.
@@ -787,6 +805,8 @@ module hpp
     /// \return a list of lenght degree+ 2 : the first item is the time of the curve, the others are the waypoints
     floatSeqSeq getPathAsBezier(in unsigned short pathId)raises (Error);
 
+
+    boolean toggleNonContactingLimb(in string limbname)raises (Error);
 
     boolean areKinematicsConstraintsVerified(in floatSeq point)raises (Error);
 

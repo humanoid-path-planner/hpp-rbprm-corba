@@ -1,0 +1,137 @@
+from hpp.corbaserver.rbprm.anymal_abstract import Robot
+from hpp.gepetto import Viewer
+from hpp.corbaserver import ProblemSolver
+import numpy as np
+import time
+#~ statusFilename = "/res/infos.log"
+statusFilename = "/tmp/infos.log"
+
+
+vMax = 0.3# linear velocity bound for the root
+aMax = 1.# linear acceleration bound for the root
+extraDof = 6
+mu=0.5# coefficient of friction
+# Creating an instance of the helper class, and loading the robot
+# Creating an instance of the helper class, and loading the robot
+rbprmBuilder = Robot ()
+# Define bounds for the root : bounding box of the scenario
+root_bounds =  [-2,2, -2, 2, 0.4, 0.5]
+rbprmBuilder.setJointBounds ("root_joint", root_bounds)
+
+# The following lines set constraint on the valid configurations:
+# a configuration is valid only if all limbs can create a contact with the corresponding afforcances type
+rbprmBuilder.setFilter(rbprmBuilder.urdfNameRom)
+for rom in rbprmBuilder.urdfNameRom :
+    rbprmBuilder.setAffordanceFilter(rom, ['Support'])
+
+# We also bound the rotations of the torso. (z, y, x)
+rbprmBuilder.boundSO3([-1.7,1.7,-0.1,0.1,-0.1,0.1])
+# Add 6 extraDOF to the problem, used to store the linear velocity and acceleration of the root
+rbprmBuilder.client.robot.setDimensionExtraConfigSpace(extraDof)
+# We set the bounds of this extraDof with velocity and acceleration bounds (expect on z axis)
+rbprmBuilder.client.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax,0,0,-aMax,aMax,-aMax,aMax,0,0])
+indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.robot.getDimensionExtraConfigSpace()
+
+# Creating an instance of HPP problem solver 
+ps = ProblemSolver( rbprmBuilder )
+# define parameters used by various methods : 
+ps.setParameter("Kinodynamic/velocityBound",vMax)
+ps.setParameter("Kinodynamic/accelerationBound",aMax)
+ps.setParameter("DynamicPlanner/sizeFootX",0.01)
+ps.setParameter("DynamicPlanner/sizeFootY",0.01)
+ps.setParameter("DynamicPlanner/friction",mu)
+# sample only configuration with null velocity and acceleration :
+ps.setParameter("ConfigurationShooter/sampleExtraDOF",False)
+
+# initialize the viewer :
+from hpp.gepetto import ViewerFactory
+vf = ViewerFactory (ps)
+
+# load the module to analyse the environnement and compute the possible contact surfaces
+from hpp.corbaserver.affordance.affordance import AffordanceTool
+afftool = AffordanceTool ()
+afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
+afftool.loadObstacleModel ("hpp_environments", "multicontact/ground", "planning", vf)
+try :
+    v = vf.createViewer(displayArrows = True)
+except Exception:
+    print "No viewer started !"
+    class FakeViewer():
+        def __init__(self):
+            return
+        def __call__(self,q):
+            return
+    v = FakeViewer()
+    
+#afftool.visualiseAffordances('Support', v, v.color.lightBrown)
+
+q_init = rbprmBuilder.getCurrentConfig ();
+q_init[0:3] = [0,0,0.465]
+q_init[3:7] = [0,0,0,1]
+
+# sample random position on a circle of radius 2m
+
+radius = 0.15
+import random 
+random.seed()
+alpha = random.uniform(0.,2.*np.pi)
+print "Test on a circle, alpha = ",alpha
+q_goal = q_init[::]
+q_goal [0:3] = [radius*np.sin(alpha), -radius*np.cos(alpha), 0.465]
+
+print "initial root position : ",q_init[0:3]
+print "final root position : ",q_goal[0:3]
+ps.setInitialConfig (q_init)
+ps.addGoalConfig (q_goal)
+
+# write problem in files : 
+f = open(statusFilename,"w")
+f.write("q_init= "+str(q_init)+"\n")
+f.write("q_goal= "+str(q_goal)+"\n")
+f.close()
+
+
+# Choosing RBPRM shooter and path validation methods.
+ps.selectConfigurationShooter("RbprmShooter")
+ps.selectPathValidation("RbprmPathValidation",0.05)
+# Choosing kinodynamic methods :
+ps.selectSteeringMethod("RBPRMKinodynamic")
+ps.selectDistance("Kinodynamic")
+ps.selectPathPlanner("DynamicPlanner")
+
+# Solve the planning problem :
+t = ps.solve ()
+print "Guide planning time : ",t
+
+try :
+    # display solution : 
+    from hpp.gepetto import PathPlayer
+    pp = PathPlayer (v)
+    pp.dt=0.1
+    pp.displayVelocityPath(0)
+    #v.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
+    pp.dt=0.01
+    #pp(0)
+except Exception:
+    pass
+
+
+# move the robot out of the view before computing the contacts
+q_far = q_init[::]
+q_far[2] = -2
+
+pId = ps.numberPaths() - 1
+
+from hpp.corbaserver import Client
+ #~ #DEMO code to play root path and final contact plan
+cl = Client()
+cl.problem.selectProblem("rbprm_path")
+rbprmBuilder2 = Robot ("toto")
+ps2 = ProblemSolver( rbprmBuilder2 )
+cl.problem.selectProblem("default")
+cl.problem.movePathToProblem(pId,"rbprm_path",rbprmBuilder.getAllJointNames()[1:])
+r2 = Viewer (ps2, viewerClient=v.client)
+r2(q_far)
+
+#~ v(q_far)
+

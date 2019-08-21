@@ -42,6 +42,35 @@ def load_obj(filename) :
  fh.close()
  return ObjectData(V, T, N, F)
  
+ 
+#find a point such that ax + by + cz = d that is the closest to the origin
+def find_point_on_plane(a,b,c,d):
+        #project 0 to the plane
+        m = np.zeros((4,4))
+        m[:3,:3] = np.identity(3)
+        m[:,3] = [-a, -b, -c, 0]
+        m[3,:3] = [a,b,c]
+        n = np.zeros(4); n[-1] = d
+        res = np.linalg.inv(m).dot(n)[:-1]
+        
+        
+        return res
+        
+        
+ 
+#Create an Inequalities object given the inequalities matrices A,b, s.t. Ax <=b
+def inequalities_to_Inequalities_object(A,b):
+        nrows = A.shape[0]
+	V = np.ones([nrows, 4])
+	N = np.empty([nrows, 3])
+        i = 0
+        for ai, bi in zip(A,b):
+                N[i,:]  = ai
+                V[i,:3] = find_point_on_plane(ai[0],ai[1],ai[2],bi)
+                i+=1
+	return Inequalities(A,b, N, V)
+        
+ 
 def inequality(v, n): 
 	#the plan has for equation ax + by + cz = d, with a b c coordinates of the normal
 	#inequality is then ax + by +cz -d <= 0 
@@ -112,9 +141,11 @@ def test_inequality():
 		print("test_inequality successful")
 
 def __gen_data():
-	obj = load_obj('./hrp2/RL_com._reduced.obj')
+        import os
+        filepath = os.environ['DEVEL_HPP_DIR'] + '/install/share/hrp2-rbprm/com_inequalities/RLEG_JOINT0_com_constraints.obj'
+	obj = load_obj(filepath)
 	ineq = as_inequalities(obj)
-	ok_points = [[0,0,0], [0.0813, 0.0974, 0.2326], [-0.3387, 0.1271, -0.5354]]
+	ok_points = [[0,0,0], [0.0813, 0.0974, 0.2326]]
 	not_ok_points = [[-0.3399, 0.2478, -0.722],[-0.1385,-0.4401,-0.1071]]
 	return obj, ineq, ok_points, not_ok_points
 
@@ -146,6 +177,26 @@ def test_rotate_inequalities():
 		assert (not is_inside(ineq, p)), "point " + str(p) + " should NOT be inside object"
 	print("test_rotate_inequalities successful")
 	
+def test_inequalities_to_Inequalities_object():
+        data = __gen_data()
+        ineq = data[1]
+	
+	tr = np.array([[ 1.        ,  0.        ,  0.        ,  0.        ],
+				   [ 0.        ,  0.98006658, -0.19866933,  2.        ],
+				   [ 0.        ,  0.19866933,  0.98006658,  0.        ],
+				   [ 0.        ,  0.        ,  0.        ,  1.        ]])
+	ok_points =  [tr.dot(np.array(el + [1]))[0:3] for el in data[2]]
+	not_ok_points = [tr.dot(np.array(el + [1]))[0:3] for el in data[3]]
+        
+        ineq2 = inequalities_to_Inequalities_object(ineq.A, ineq.b)
+	ineq2 = rotate_inequalities(ineq2, tr)
+	for p in ok_points:
+		assert (is_inside(ineq2, p)), "point " + str(p) + " should be inside object"
+	for p in not_ok_points:
+		assert (not is_inside(ineq2, p)), "point " + str(p) + " should NOT be inside object"
+	print("test_inequalities_to_Inequalities_object successful")
+        
+                
 
 def load_obj_and_save_ineq(in_name, out_name):
 	obj = load_obj(in_name)
@@ -156,3 +207,9 @@ def load_obj_and_save_ineq(in_name, out_name):
 #~ load_obj_and_save_ineq('./spiderman/RA_com_reduced.obj','./spiderman/RA_com.ineq')
 #~ load_obj_and_save_ineq('./spiderman/LL_com_reduced.obj','./spiderman/LL_com.ineq')
 #~ load_obj_and_save_ineq('./spiderman/RL_com_reduced.obj','./spiderman/RL_com.ineq')
+
+if __name__ == '__main__':
+        test_inequality()
+        test_belonging()
+        test_rotate_inequalities()
+        test_inequalities_to_Inequalities_object()
