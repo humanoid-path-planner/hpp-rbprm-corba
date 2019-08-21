@@ -58,6 +58,7 @@ def find_point_on_plane(a,b,c,d):
         
         
  
+#Create an Inequalities object given the inequalities matrices A,b, s.t. Ax <=b
 def inequalities_to_Inequalities_object(A,b):
         nrows = A.shape[0]
 	V = np.ones([nrows, 4])
