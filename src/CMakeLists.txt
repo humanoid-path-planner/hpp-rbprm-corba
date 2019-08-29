@@ -85,6 +85,7 @@ INSTALL(
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/rbprmfullbody.py
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/rbprmstate.py
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/state_alg.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/fewstepsplanner.py
   DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm
   )
 INSTALL(

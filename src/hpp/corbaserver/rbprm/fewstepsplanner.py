@@ -100,7 +100,7 @@ class FewStepPlanner(object):
   def interpolateStates(self, stepsize, pathId = 1, robustnessTreshold = 0, filterStates = False, testReachability = True, quasiStatic = False, erasePreviousStates = True):
     return _interpolateState(self.problemSolver, self.fullBody, stepsize, pathId, robustnessTreshold, filterStates, testReachability, quasiStatic, erasePreviousStates)
     
-  def goToQuasiStatic(self, currentState, toPos, stepsize = 0.002, goalLimbsInContact = None, goalNormals = None, displayGuidePath = False):
+  def goToQuasiStatic(self, currentState, toPos, stepsize = 0.002, goalLimbsInContact = None, goalNormals = None, displayGuidePath = False, erasePreviousStates = False):
     pId = self.guidePath(currentState.q()[:7], toPos, displayPath = displayGuidePath)    
     self.fullBody.setStartStateId(currentState.sId)
     targetState = currentState.q()[:]; targetState[:7] = toPos
@@ -109,7 +109,7 @@ class FewStepPlanner(object):
     if goalNormals is None:
       goalNormals = [[0.,0.,1.] for _ in range(len(goalLimbsInContact))]
     self.fullBody.setEndState(targetState, goalLimbsInContact,goalNormals)
-    return self.interpolateStates(stepsize,pathId=pId,robustnessTreshold = 1, filterStates = True,quasiStatic=True, erasePreviousStates = False)
+    return self.interpolateStates(stepsize,pathId=pId,robustnessTreshold = 1, filterStates = True,quasiStatic=True, erasePreviousStates = erasePreviousStates)
     
        
               
