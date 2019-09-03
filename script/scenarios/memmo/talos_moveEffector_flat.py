@@ -12,7 +12,7 @@ statusFilename = "/res/infos.log"
 
 fullBody = Robot ()
 # Set the bounds for the root
-fullBody.setJointBounds ("root_joint", [-0.3,0.3, -0.3, 0.3, 1.01, 1.03])
+fullBody.setJointBounds ("root_joint", [-0.3,0.3, -0.3, 0.3, 0.85, 1.05])
 ## reduce bounds on joints along x, to put conservative condition on the contact generation for sideway steps
 joint6L_bounds_prev=fullBody.getJointBounds('leg_left_6_joint')
 joint2L_bounds_prev=fullBody.getJointBounds('leg_left_2_joint')
@@ -90,7 +90,7 @@ movingId = random.randint(0,1)
 movingLimb = limbsInContact[movingId]
 print "Move limb : ",movingLimb
 #floor_Z = - fullBody.dict_offset['leg_left_6_joint'].translation[2,0]
-floor_Z = 0.
+floor_Z = -0.00099
 s0,s1 = sampleRandomTransitionFlatFloor(fullBody,limbsInContact,movingLimb,floor_Z)
 
 configs = [s0.q(),s1.q()]

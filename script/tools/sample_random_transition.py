@@ -2,15 +2,39 @@ from numpy.linalg import norm
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
 import random
 import numpy as np
+from numpy.linalg import norm
 from pinocchio import SE3,se3ToXYZQUATtuple, Quaternion
 import sys
 
 eff_x_range = [-0.4,0.4]
 eff_y_range=[-0.4,0.4]
+kin_distance_max = 0.85
 
 limb_ids = {'talos_rleg_rom':range(13,19), 'talos_lleg_rom':range(7,13)}
 
-
+def projectInKinConstraints(fullBody,state):
+    fullBody.setCurrentConfig(state.q())
+    pL = np.matrix(fullBody.getJointPosition('leg_left_sole_fix_joint')[0:3])
+    pR = np.matrix(fullBody.getJointPosition('leg_right_sole_fix_joint')[0:3])
+    com_l = fullBody.getCenterOfMass()
+    com = np.matrix(com_l)
+    distance = max(norm(pL-com),norm(pR-com))
+    successProj = True
+    maxIt = 10000
+    while distance > kin_distance_max and successProj and maxIt > 0:
+      com_l[2] -= 0.001
+      successProj = state.projectToCOM(com_l,0)
+      fullBody.setCurrentConfig(state.q())
+      pL = np.matrix(fullBody.getJointPosition('leg_left_sole_fix_joint')[0:3])
+      pR = np.matrix(fullBody.getJointPosition('leg_right_sole_fix_joint')[0:3])
+      com_l = fullBody.getCenterOfMass()
+      com = np.matrix(com_l)
+      distance = max(norm(pL-com),norm(pR-com))
+      maxIt -= 1
+    if maxIt == 0 :
+      successProj = False
+    return successProj
+      
 
 def __loosely_z_aligned(limb, config):
     fullBody.setCurrentConfig(config)
@@ -56,7 +80,7 @@ def createRandomState(fullBody,limbsInContact):
         q0 += [0]*extraDof    
     qr = fullBody.shootRandomConfig()
     root = SE3.Identity()
-    root.translation=np.matrix(qr[0:3]).T
+    root.translation=np.matrix([0,0,qr[2]]).T
     # sample random orientation along z : 
     root = sampleRotationAlongZ(root)
     q0[0:7] = se3ToXYZQUATtuple(root)
@@ -83,6 +107,8 @@ def sampleRandomStateFlatFloor(fullBody,limbsInContact,z):
         if success : 
             # check stability
             success = fullBody.isStateBalanced(s0.sId,5)
+        if success :
+            success = projectInKinConstraints(fullBody,s0)
     if not success :
         print "Timeout for generation of static configuration with ground contact"
         sys.exit(1)
@@ -129,23 +155,30 @@ def sampleRandomTranstionFromState(fullBody,s0,limbsInContact,movingLimb,z):
         s1 = State(fullBody,q=q1,limbsIncontact=limbsInContact)
         fullBody.setCurrentConfig(s1.q())
         p = fullBody.getJointPosition(fullBody.dict_limb_joint[movingLimb])[0:3]
-        p[0] +=random.uniform(eff_x_range[0],eff_x_range[1])
-        p[1] +=random.uniform(eff_y_range[0],eff_y_range[1])
+        p[0] =random.uniform(eff_x_range[0],eff_x_range[1])
+        p[1] =random.uniform(eff_y_range[0],eff_y_range[1])
         p[2] = z
         s1,success = StateHelper.addNewContact(s1,movingLimb,p,n)
-        # force root orientation : (align current z axis with vertical)
         if success :
+            """
+            # force root orientation : (align current z axis with vertical)
             quat_1 = Quaternion(s1.q()[6],s1.q()[3],s1.q()[4],s1.q()[5])
             v_1 = quat_1.matrix() * vz
             align = Quaternion.FromTwoVectors(v_1,vz)
             rot = align * quat_1
             q_root = s1.q()[0:7]
             q_root[3:7] = rot.coeffs().T.tolist()[0]
-            success = s1.projectToRoot(q_root)
+            """
+            root =SE3.Identity()
+            root.translation = np.matrix(s1.q()[0:3]).T
+            root = sampleRotationAlongZ(root)
+            success = s1.projectToRoot(se3ToXYZQUATtuple(root))
         # check if new state is in static equilibrium
         if success : 
             # check stability
-            success = fullBody.isStateBalanced(s1.sId,3)            
+            success = fullBody.isStateBalanced(s1.sId,3)
+        if success :
+            success = projectInKinConstraints(fullBody,s1)            
         # check if transition is feasible according to CROC
         if success :
             #success = fullBody.isReachableFromState(s0.sId,s1.sId) or (len(fullBody.isDynamicallyReachableFromState(s0.sId,s1.sId, numPointsPerPhases=0)) > 0)
