@@ -36,11 +36,11 @@ q_init = q_ref[::]
 fullBody.setReferenceConfig(q_ref)
 fullBody.setCurrentConfig (q_init)
 fullBody.setPostureWeights(fullBody.postureWeights[::]+[0]*6)
-fullBody.usePosturalTaskContactCreation(True)
+#fullBody.usePosturalTaskContactCreation(True)
 
 print "Generate limb DB ..."
 tStart = time.time()
-fullBody.loadAllLimbs("fixedStep04","ReferenceConfiguration")
+fullBody.loadAllLimbs("fixedStep04","ReferenceConfiguration",nbSamples=100000,disableEffectorCollision=False)
 tGenerate =  time.time() - tStart
 print "Done."
 print "Databases generated in : "+str(tGenerate)+" s"
@@ -51,12 +51,12 @@ configSize = fullBody.getConfigSize() -fullBody.client.robot.getDimensionExtraCo
 
 q_init[0:7] = tp.ps.configAtParam(pId,0.)[0:7] # use this to get the correct orientation
 q_goal = q_init[::]; q_goal[0:7] = tp.ps.configAtParam(pId,tp.ps.pathLength(pId))[0:7]
-dir_init = tp.ps.configAtParam(pId,0.)[tp.indexECS:tp.indexECS+3]
+dir_init = [0,0,0]
 acc_init = tp.ps.configAtParam(pId,0.)[tp.indexECS+3:tp.indexECS+6]
 dir_goal = tp.ps.configAtParam(pId,tp.ps.pathLength(pId))[tp.indexECS:tp.indexECS+3]
 acc_goal = [0,0,0]
 
-robTreshold = 2
+robTreshold = 5
 # copy extraconfig for start and init configurations
 q_init[configSize:configSize+3] = dir_init[::]
 q_init[configSize+3:configSize+6] = acc_init[::]
@@ -66,30 +66,30 @@ q_goal[configSize+3:configSize+6] = [0,0,0]
 q_init[2] = q_ref[2]
 q_goal[2] = q_ref[2]
 
+normals = [[0.,0.,1.] for _ in range(4)]
 fullBody.setStaticStability(True)
 fullBody.setCurrentConfig (q_init)
 v(q_init)
+fullBody.setStartState(q_init,Robot.limbs_names,normals)
+fullBody.setEndState(q_goal,Robot.limbs_names,normals)
 
 fullBody.setCurrentConfig (q_goal)
 v(q_goal)
 
+
 v.addLandmark('anymal/base',0.3)
-v(q_init)
-z = [0.,0.,1]
-# specify the full body configurations as start and goal state of the problem
-fullBody.setStartState(q_init,fullBody.limbs_names, [z for _ in range(4)])
-fullBody.setEndState(q_goal,fullBody.limbs_names, [z for _ in range(4)])
 
 
 print "Generate contact plan ..."
 tStart = time.time()
-configs = fullBody.interpolate(0.002,pathId=pId,robustnessTreshold = robTreshold, filterStates = True,testReachability=True,quasiStatic=True)
+configs = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = robTreshold, filterStates = True,testReachability=True,quasiStatic=True)
 tInterpolateConfigs = time.time() - tStart
-print "Done. "
-print "Contact sequence computed in "+str(tInterpolateConfigs)+" s."
+print "Done."
+print "Contact plan generated in : "+str(tInterpolateConfigs)+" s"
 print "number of configs :", len(configs)
 #raw_input("Press Enter to display the contact sequence ...")
 #displayContactSequence(v,configs)
+
 
 fullBody.resetJointsBounds()
 

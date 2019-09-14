@@ -6,7 +6,7 @@ from pinocchio import Quaternion
 import numpy as np
 import time
 import math
-statusFilename = "/res/infos.log"
+statusFilename = "infos.log"
 
 Z_VALUE = 0.465
 Y_VALUE = -0.1
@@ -59,7 +59,8 @@ vf = ViewerFactory (ps)
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
-afftool.loadObstacleModel ("hpp_environments", "ori/modular_palet_low", "planning", vf, reduceSizes=[0.06,0,0])
+afftool.setMinimumArea('Support',0.03)
+afftool.loadObstacleModel ("hpp_environments", "ori/modular_palet_low_collision", "planning", vf, reduceSizes=[0.1,0,0])
 #afftool.loadObstacleModel ("hpp_environments", "ori/modular_palet_low", "planning", vf)
 try :
     v = vf.createViewer(displayArrows = True)
@@ -72,7 +73,7 @@ except Exception:
             return
     v = FakeViewer()
     
-#afftool.visualiseAffordances('Support', v, v.color.lightBrown)
+afftool.visualiseAffordances('Support', v, v.color.lightBrown)
 
 #v.addLandmark(v.sceneName,1)
 q_init = rbprmBuilder.getCurrentConfig ();

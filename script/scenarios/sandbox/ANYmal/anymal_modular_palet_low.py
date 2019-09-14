@@ -4,6 +4,7 @@ from tools.display_tools import *
 import time
 print "Plan guide trajectory ..."
 import scenarios.sandbox.ANYmal.anymal_modular_palet_low_path as tp
+
 #Robot.urdfSuffix += "_safeFeet"
 statusFilename = tp.statusFilename
 pId = tp.pid
@@ -68,7 +69,7 @@ print "Generate limb DB ..."
 tStart = time.time()
 # generate databases : 
 
-fullBody.loadAllLimbs("static","ReferenceConfiguration",nbSamples=100000)
+fullBody.loadAllLimbs("static","ReferenceConfiguration",nbSamples=100000,disableEffectorCollision=False)
 tGenerate =  time.time() - tStart
 print "Done."
 print "Databases generated in : "+str(tGenerate)+" s"
@@ -83,8 +84,8 @@ vel_init = tp.ps.configAtParam(pId,0)[tp.indexECS:tp.indexECS+3]
 acc_init = tp.ps.configAtParam(pId,0)[tp.indexECS+3:tp.indexECS+6]
 vel_goal = tp.ps.configAtParam(pId,tp.ps.pathLength(pId))[tp.indexECS:tp.indexECS+3]
 acc_goal = [0,0,0]
-
-robTreshold = 2
+vel_init = [0,0,0]
+robTreshold = 5
 # copy extraconfig for start and init configurations
 q_init[configSize:configSize+3] = vel_init[::]
 q_init[configSize+3:configSize+6] = acc_init[::]
