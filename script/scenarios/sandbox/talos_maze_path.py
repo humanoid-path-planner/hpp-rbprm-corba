@@ -15,7 +15,7 @@ mu=0.5# coefficient of friction
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Robot ()
 # Define bounds for the root : bounding box of the scenario
-rbprmBuilder.setJointBounds ("root_joint", [0,18.5, 0, 24., 0.98, 0.98])
+rbprmBuilder.setJointBounds ("root_joint", [0,18.5, 0, 24., rbprmBuilder.ref_height, rbprmBuilder.ref_height])
 rbprmBuilder.setJointBounds ('torso_1_joint', [0,0])
 rbprmBuilder.setJointBounds ('torso_2_joint', [0,0])
 
@@ -60,7 +60,7 @@ v.addLandmark(v.sceneName,1)
 afftool.visualiseAffordances('Support', v, v.color.lightBrown)
 
 q_init = rbprmBuilder.getCurrentConfig ();
-q_init[0:3] = [0.1,3,0.98]
+q_init[0:3] = [0.1,3,rbprmBuilder.ref_height]
 q_init[3:7] = [0,0,0,1]
 q_init[-6:-3] = [0.05,0,0]
 v(q_init)
