@@ -1579,8 +1579,7 @@ namespace hpp {
                       hppDout(warning,"For rom : "<<it->first<<" unable to cast in a AllCollisionsValidationReport, did you correctly call computeAllContacts(true) before generating the report ? ");
                       //return;
                         }
-                  if(romReports->collisionReports.size()> 1){
-
+                  if(romReports->collisionReports.size()> 0){
                       for(std::vector<CollisionValidationReportPtr_t>::const_iterator itAff = romReports->collisionReports.begin() ; itAff != romReports->collisionReports.end() ; ++itAff){
                          res.push_back((*itAff)->object2->name ());
                       }
