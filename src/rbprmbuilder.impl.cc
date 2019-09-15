@@ -3501,7 +3501,7 @@ namespace hpp {
 
 
     CORBA::Short RbprmBuilder::addNewContact(unsigned short stateId, const char* limbName,
-                                        const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample, bool lockOtherJoints) throw (hpp::Error)
+                                        const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample, bool lockOtherJoints,const hpp::floatSeq& rotation) throw (hpp::Error)
     {
         try
         {
@@ -3514,8 +3514,15 @@ namespace hpp {
             fcl::Vec3f p; for(int i =0; i<3; ++i) p[i] = config[i];
             config = dofArrayToConfig (std::size_t(3), normal);
             fcl::Vec3f n; for(int i =0; i<3; ++i) n[i] = config[i];
-
-            projection::ProjectionReport rep = projection::projectStateToObstacle(fullBody(),limb, fullBody()->GetLimbs().at(limb), ns, n,p,lockOtherJoints);
+            fcl::Matrix3f rotationMatrix;
+            pinocchio::Configuration_t q = dofArrayToConfig(std::size_t(4), rotation);
+            if(q.isZero(1e-9)){
+              rotationMatrix = fcl::Matrix3f::Zero();
+            }else{
+              rotationMatrix = (fcl::Quaternion3f(q[3],q[0],q[1],q[2])).matrix();
+            }
+            hppDout(notice,"addNewContact, rotation = \n"<<rotationMatrix);
+            projection::ProjectionReport rep = projection::projectStateToObstacle(fullBody(),limb, fullBody()->GetLimbs().at(limb), ns, n,p,lockOtherJoints,rotationMatrix);
             hppDout(notice,"Projection State to obstacle success : "<<rep.success_);
             hppDout(notice,"report status : "<<rep.status_);
             ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
@@ -3531,7 +3538,7 @@ namespace hpp {
                 {
                     shooter->shoot(ns.configuration_);
                     ns.configuration_.head<7>() = head;
-                    rep = projection::projectStateToObstacle(fullBody(),limb, fullBody()->GetLimbs().at(limb), ns, n,p);
+                    rep = projection::projectStateToObstacle(fullBody(),limb, fullBody()->GetLimbs().at(limb), ns, n,p,false,rotationMatrix);
                     rep.success_ = rep.success_ && val->validate(rep.result_.configuration_,rport);
                 }
             }

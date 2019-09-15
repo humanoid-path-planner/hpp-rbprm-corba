@@ -363,7 +363,7 @@ namespace hpp {
 
         virtual Names_t* getAllLimbsNames()throw (hpp::Error);
         virtual CORBA::Short addNewContact(unsigned short stateId, const char* limbName,
-                                            const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample, bool lockOtherJoints) throw (hpp::Error);
+                                            const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample, bool lockOtherJoints, const floatSeq &rotation) throw (hpp::Error);
         virtual CORBA::Short removeContact(unsigned short stateId, const char* limbName) throw (hpp::Error);
         virtual hpp::floatSeq* computeTargetTransform(const char* limbName, const hpp::floatSeq& configuration, const hpp::floatSeq& p, const hpp::floatSeq& n) throw (hpp::Error);
         virtual Names_t* getEffectorsTrajectoriesNames(unsigned short pathId)throw (hpp::Error);
