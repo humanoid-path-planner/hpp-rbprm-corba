@@ -6,7 +6,7 @@ print "Plan guide trajectory ..."
 import talos_plateformes_path as tp
 print "Done."
 import time
-
+Robot.urdfSuffix+="_safeFeet"
 pId = tp.ps.numberPaths() -1
 fullBody = Robot ()
 

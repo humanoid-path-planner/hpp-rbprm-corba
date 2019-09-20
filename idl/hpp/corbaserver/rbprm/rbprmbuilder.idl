@@ -778,8 +778,9 @@ module hpp
     /// \param max_num_sample number of times it will try to randomly sample a configuration before failing
     /// \param lockOtherJoints : if True, the values of all the joints exepct the ones of 'limbName' are constrained to be constant.
     ///                           This only affect the first projection, if max_num_sample > 0 and the first projection was unsuccessfull, the parameter is ignored
+    /// \param rotation : desired rotation of the end-effector in contact, expressed as Quaternion (x,y,z,w). If different from zero, the normal is ignored. Otherwise the rotation is automatically computed from the normal (with one axis of freedom)
     /// \return (success,NState) whether the creation was successful, as well as the new state
-    short addNewContact(in unsigned short stateId, in string limbName, in floatSeq position, in floatSeq normal, in unsigned short max_num_sample, in boolean lockOtherJoints) raises (Error);
+    short addNewContact(in unsigned short stateId, in string limbName, in floatSeq position, in floatSeq normal, in unsigned short max_num_sample, in boolean lockOtherJoints,in floatSeq rotation) raises (Error);
 
     /// removes a contact from the state
     /// if the limb is not already in contact, does nothing

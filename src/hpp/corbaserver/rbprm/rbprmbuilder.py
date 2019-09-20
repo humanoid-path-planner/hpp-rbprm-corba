@@ -18,7 +18,6 @@
 
 from hpp.corbaserver.rbprm import Client as RbprmClient
 from hpp.corbaserver.robot import Robot
-import hpp.gepetto.blender.exportmotion as em
 
 ## Load and handle a RbprmDevice robot for rbprm planning
 #
@@ -94,6 +93,7 @@ class Builder (Robot):
   # \param pathId if of the considered path
   # \param filename name of the output file where to save the output
   def exportPath (self, viewer, problem, pathId, stepsize, filename):
+    import hpp.gepetto.blender.exportmotion as em
     em.exportPath(viewer, self.client.robot, problem, pathId, stepsize, filename)
 
   ## set a reference position of the end effector for the given ROM

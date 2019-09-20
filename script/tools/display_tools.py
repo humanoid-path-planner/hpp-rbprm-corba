@@ -8,7 +8,12 @@ def createSphere(name,r,size=0.01,color=[0,0,0,1]):
   r.client.gui.refresh()
 
 def moveSphere(name,r,pos):
-  q=pos+[1,0,0,0]
+  if len(pos) == 3:
+    q=pos+[1,0,0,0]
+  elif len(pos) == 7:
+    q = pos
+  else:
+    raise ValueError("pos should be of size 3 or 7 ")
   r.client.gui.applyConfiguration(name,q)
   r.client.gui.refresh()
 

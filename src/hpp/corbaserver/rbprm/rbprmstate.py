@@ -179,11 +179,12 @@ class StateHelper(object):
     # \param n 3d normal of the contact location center
     # \param max_num_sample number of times it will try to randomly sample a configuration before failing
     # \param lockOtherJoints : if True, the values of all the joints exepct the ones of 'limbName' are constrained to be constant.
+    # \param rotation : desired rotation of the end-effector in contact, expressed as Quaternion (x,y,z,w). If different from zero, the normal is ignored. Otherwise the rotation is automatically computed from the normal (with one axis of freedom)
     #                This only affect the first projection, if max_num_sample > 0 and the first projection was unsuccessfull, the parameter is ignored
     # \return (State, success) whether the creation was successful, as well as the new state
     @staticmethod
-    def addNewContact(state, limbName, p, n, num_max_sample = 0, lockOtherJoints= False):
-        sId = state.cl.addNewContact(state.sId, limbName, p, n, num_max_sample,lockOtherJoints)
+    def addNewContact(state, limbName, p, n, num_max_sample = 0, lockOtherJoints= False,rotation = [0,0,0,0]):
+        sId = state.cl.addNewContact(state.sId, limbName, p, n, num_max_sample,lockOtherJoints,rotation)
         if(sId != -1):
             return State(state.fullBody, sId = sId), True
         return state, False
