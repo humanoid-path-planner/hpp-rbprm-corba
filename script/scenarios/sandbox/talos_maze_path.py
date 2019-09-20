@@ -8,7 +8,7 @@ import time
 Robot.urdfName += "_large"
 
 vMax = 0.5# linear velocity bound for the root
-aMax = 0.5# linear acceleration bound for the root
+aMax = 0.7# linear acceleration bound for the root
 extraDof = 6
 mu=0.5# coefficient of friction
 # Creating an instance of the helper class, and loading the robot
@@ -44,7 +44,7 @@ ps.setParameter("DynamicPlanner/friction",mu)
 ps.setParameter("Kinodynamic/forceYawOrientation",True)
 # sample only configuration with null velocity and acceleration :
 ps.setParameter("ConfigurationShooter/sampleExtraDOF",False)
-ps.setParameter("PathOptimization/RandomShortcut/NumberOfLoops",100)
+ps.setParameter("PathOptimization/RandomShortcut/NumberOfLoops",500)
 # initialize the viewer :
 from hpp.gepetto import ViewerFactory
 vf = ViewerFactory (ps)
@@ -53,7 +53,7 @@ vf = ViewerFactory (ps)
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 5.])
-afftool.loadObstacleModel ("hpp_environments", "multicontact/maze_easy", "planning", vf)
+afftool.loadObstacleModel ("hpp_environments", "multicontact/maze_hard", "planning", vf)
 #load the viewer
 v = vf.createViewer(displayArrows = True)
 v.addLandmark(v.sceneName,1)
@@ -62,7 +62,7 @@ afftool.visualiseAffordances('Support', v, v.color.lightBrown)
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init[0:3] = [0.1,3,rbprmBuilder.ref_height]
 q_init[3:7] = [0,0,0,1]
-q_init[-6:-3] = [0.05,0,0]
+q_init[-6:-3] = [0.01,0,0]
 v(q_init)
 # sample random position on a circle of radius 2m
 q_goal = q_init[::]
@@ -84,8 +84,9 @@ ps.selectPathPlanner("DynamicPlanner")
 t = ps.solve ()
 print "Guide planning time : ",t
 #v.solveAndDisplay("rm",10,0.01)
-for i in range(10):
-    print "Optimize path, "+str(i+1)+"/10 ... "
+
+for i in range(20):
+    print "Optimize path, "+str(i+1)+"/20 ... "
     ps.optimizePath(ps.numberPaths()-1)
 pathId = ps.numberPaths()-1
 
@@ -98,6 +99,8 @@ pp.displayPath(pathId)
 v.client.gui.setVisibility("path_"+str(pathId)+"_root","ALWAYS_ON_TOP")
 pp.dt=0.01
 #pp(pathId)
+
+v.client.gui.writeNodeFile("path_"+str(pathId)+"_root","guide_path_maze_hard.obj")
 
 # move the robot out of the view before computing the contacts
 q_far = q_init[::]
