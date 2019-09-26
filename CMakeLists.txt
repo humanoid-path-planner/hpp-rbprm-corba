@@ -23,7 +23,7 @@ SET(CXX_DISABLE_WERROR true)
 INCLUDE(cmake/base.cmake)
 INCLUDE(cmake/idl.cmake)
 INCLUDE(cmake/hpp.cmake)
-INCLUDE(cmake/hpp/python.cmake)
+INCLUDE(cmake/python.cmake)
 
 SET(PROJECT_NAME hpp-rbprm-corba)
 SET(PROJECT_DESCRIPTION "Corba server for reachability based planning")
@@ -41,7 +41,7 @@ SET(${PROJECT_NAME}_HEADERS
   include/hpp/corbaserver/rbprm/server.hh
 )
 
-HPP_FINDPYTHON()
+FINDPYTHON()
 
 ADD_DOC_DEPENDENCY("hpp-core >= 4.3")
 ADD_REQUIRED_DEPENDENCY("hpp-corbaserver >= 4.3")
