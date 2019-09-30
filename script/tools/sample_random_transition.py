@@ -5,10 +5,11 @@ import numpy as np
 from numpy.linalg import norm
 from pinocchio import SE3,se3ToXYZQUATtuple, Quaternion
 import sys
+from math import isnan
 
 eff_x_range = [-0.4,0.4]
 eff_y_range=[-0.4,0.4]
-kin_distance_max = 0.85
+kin_distance_max = 0.84
 
 limb_ids = {'talos_rleg_rom':range(13,19), 'talos_lleg_rom':range(7,13)}
 
@@ -24,12 +25,15 @@ def projectInKinConstraints(fullBody,state):
     while distance > kin_distance_max and successProj and maxIt > 0:
       com_l[2] -= 0.001
       successProj = state.projectToCOM(com_l,0)
-      fullBody.setCurrentConfig(state.q())
-      pL = np.matrix(fullBody.getJointPosition('leg_left_sole_fix_joint')[0:3])
-      pR = np.matrix(fullBody.getJointPosition('leg_right_sole_fix_joint')[0:3])
-      com_l = fullBody.getCenterOfMass()
-      com = np.matrix(com_l)
-      distance = max(norm(pL-com),norm(pR-com))
+      if isnan(state.q()[0]):
+        successProj = False
+      else:
+        fullBody.setCurrentConfig(state.q())
+        pL = np.matrix(fullBody.getJointPosition('leg_left_sole_fix_joint')[0:3])
+        pR = np.matrix(fullBody.getJointPosition('leg_right_sole_fix_joint')[0:3])
+        com_l = fullBody.getCenterOfMass()
+        com = np.matrix(com_l)
+        distance = max(norm(pL-com),norm(pR-com))
       maxIt -= 1
     if maxIt == 0 :
       successProj = False
@@ -73,17 +77,22 @@ def sampleRotationAlongZ(placement):
     return placement
 
 # create a state with legs config and root orientation along z axis random, the rest is equal to the referenceConfig
-def createRandomState(fullBody,limbsInContact):
+def createRandomState(fullBody,limbsInContact,root_at_origin = True):
     extraDof = int(fullBody.client.robot.getDimensionExtraConfigSpace())
     q0 = fullBody.referenceConfig[::]
     if extraDof > 0:
         q0 += [0]*extraDof    
     qr = fullBody.shootRandomConfig()
-    root = SE3.Identity()
-    root.translation=np.matrix([0,0,qr[2]]).T
-    # sample random orientation along z : 
-    root = sampleRotationAlongZ(root)
-    q0[0:7] = se3ToXYZQUATtuple(root)
+    if root_at_origin : 
+      q0[0:2] = [0,0]
+      q0[2] = qr[2]
+      q0[3:7] = [0,0,0,1]
+    else : 
+      root = SE3.Identity()
+      root.translation=np.matrix(qr[0:3]).T
+      # sample random orientation along z : 
+      root = sampleRotationAlongZ(root)
+      q0[0:7] = se3ToXYZQUATtuple(root)
     # apply random config to legs (FIXME : ID hardcoded for Talos)
     q0[7:19] = qr[7:19]
     fullBody.setCurrentConfig(q0)
