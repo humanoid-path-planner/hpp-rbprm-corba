@@ -37,6 +37,7 @@
 # include <hpp/core/config-validations.hh>
 #include <hpp/rbprm/dynamic/dynamic-path-validation.hh>
 # include "hpp/corbaserver/fwd.hh"
+# include "hpp/corbaserver/rbprm/server.hh"
 
 namespace hpp {
   namespace rbprm {
@@ -168,6 +169,11 @@ namespace hpp {
         public:
         RbprmBuilder ();
 
+        void setServer (Server* server)
+        {
+          server_ = server;
+        }
+
         virtual void loadRobotRomModel (const char* robotName,
                  const char* rootJointType,
                  const char* packageName,
@@ -198,6 +204,7 @@ namespace hpp {
         void setReferenceConfig(const hpp::floatSeq &referenceConfig) throw (hpp::Error);
         void setPostureWeights(const hpp::floatSeq &postureWeights) throw (hpp::Error);
         void setReferenceEndEffector(const char* romName, const hpp::floatSeq &ref) throw(hpp::Error);
+        void usePosturalTaskContactCreation(const bool usePosturalTaskContactCreation) throw (hpp::Error);
 
         virtual void setFilter(const hpp::Names_t& roms) throw (hpp::Error);
 				virtual void setAffordanceFilter(const char* romName, const hpp::Names_t& affordances) throw (hpp::Error);
@@ -230,6 +237,9 @@ namespace hpp {
                                                    const hpp::floatSeq& direction,
                                                    unsigned short numSamples) throw (hpp::Error);
 
+        virtual short generateContactState(::CORBA::UShort  currentState, const char*  name,  const ::hpp::floatSeq& direction)  throw (hpp::Error);
+
+
         virtual hpp::floatSeq* getSamplesIdsInOctreeNode(const char* limb,
                                                    double octreeNodeId) throw (hpp::Error);
 
@@ -251,8 +261,8 @@ namespace hpp {
         virtual hpp::floatSeqSeq* computeContactPointsForLimb(unsigned short cId, const char* limbName) throw (hpp::Error);
         virtual hpp::floatSeqSeq* computeContactPointsAtStateForLimb(unsigned short cId, unsigned short isIntermediate, const char* limbName) throw (hpp::Error);
         virtual hpp::floatSeqSeq* computeCenterOfContactAtStateForLimb(unsigned short cId, unsigned short isIntermediate, const char *limbName) throw (hpp::Error);
-        virtual hpp::floatSeqSeq* interpolate(double timestep, double path, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic) throw (hpp::Error);
-        virtual hpp::floatSeqSeq* interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic) throw (hpp::Error);
+        virtual hpp::floatSeqSeq* interpolate(double timestep, double path, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic, bool erasePreviousStates) throw (hpp::Error);
+        virtual hpp::floatSeqSeq* interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic, bool erasePreviousStates) throw (hpp::Error);
         virtual hpp::floatSeqSeq* getContactCone(unsigned short stateId, double friction) throw (hpp::Error);
         virtual hpp::floatSeqSeq* getContactIntermediateCone(unsigned short stateId, double friction) throw (hpp::Error);
         virtual CORBA::Short generateComTraj(const hpp::floatSeqSeq& positions, const hpp::floatSeqSeq& velocities,
@@ -329,12 +339,15 @@ namespace hpp {
         double projectStateToCOMEigen(unsigned short stateId, const pinocchio::Configuration_t& com_target, unsigned short maxNumeSamples)throw (hpp::Error);
 
         virtual double projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com, unsigned short max_num_sample) throw (hpp::Error);
+        virtual CORBA::Short cloneState(unsigned short stateId) throw (hpp::Error);
+        virtual double projectStateToRoot(unsigned short stateId, const hpp::floatSeq& root, const hpp::floatSeq& offset) throw (hpp::Error);
         virtual void saveComputedStates(const char* filepath) throw (hpp::Error);
         virtual void saveLimbDatabase(const char* limbname,const char* filepath) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeBox(const char* limbName, double sampleId) throw (hpp::Error);
         virtual CORBA::Short  isLimbInContact(const char* limbName, unsigned short state) throw (hpp::Error);
         virtual CORBA::Short  isLimbInContactIntermediary(const char* limbName, unsigned short state) throw (hpp::Error);
         virtual CORBA::Short  computeIntermediary(unsigned short state1, unsigned short state2) throw (hpp::Error);
+        virtual CORBA::Short  getNumStates() throw (hpp::Error);
         virtual hpp::floatSeqSeq* getOctreeBoxes(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
         virtual hpp::floatSeq* getOctreeTransform(const char* limbName, const hpp::floatSeq& configuration) throw (hpp::Error);
         virtual CORBA::Short isConfigBalanced(const hpp::floatSeq& config, const hpp::Names_t& contactLimbs, double robustnessTreshold,const hpp::floatSeq& CoM) throw (hpp::Error);
@@ -344,20 +357,23 @@ namespace hpp {
         virtual hpp::floatSeq* evaluateConfig(const hpp::floatSeq& configuration, const hpp::floatSeq &direction) throw (hpp::Error);
         virtual void dumpProfile(const char* logFile) throw (hpp::Error);
         virtual double getTimeAtState(unsigned short stateId)throw (hpp::Error);
-        virtual Names_t* getContactsVariations(unsigned short stateIdFrom,unsigned short stateIdTo )throw (hpp::Error);
+        virtual Names_t* getContactsVariations(unsigned short stateIdFrom,unsigned short stateIdTo )throw (hpp::Error);        
+        virtual Names_t* getCollidingObstacleAtConfig(const ::hpp::floatSeq& configuration,const char* limbName)throw (hpp::Error);
+        virtual floatSeqSeq* getContactSurfacesAtConfig(const ::hpp::floatSeq& configuration,const char* limbName)throw (hpp::Error);
+
         virtual Names_t* getAllLimbsNames()throw (hpp::Error);
         virtual CORBA::Short addNewContact(unsigned short stateId, const char* limbName,
-                                            const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample) throw (hpp::Error);
+                                            const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample, bool lockOtherJoints, const floatSeq &rotation) throw (hpp::Error);
         virtual CORBA::Short removeContact(unsigned short stateId, const char* limbName) throw (hpp::Error);
         virtual hpp::floatSeq* computeTargetTransform(const char* limbName, const hpp::floatSeq& configuration, const hpp::floatSeq& p, const hpp::floatSeq& n) throw (hpp::Error);
         virtual Names_t* getEffectorsTrajectoriesNames(unsigned short pathId)throw (hpp::Error);
         virtual hpp::floatSeqSeqSeq* getEffectorTrajectoryWaypoints(unsigned short pathId,const char* effectorName)throw (hpp::Error);
         virtual hpp::floatSeqSeq* getPathAsBezier(unsigned short pathId)throw (hpp::Error);
 
-
+        virtual bool toggleNonContactingLimb(const char* limbName)throw (hpp::Error);
         virtual bool areKinematicsConstraintsVerified(const hpp::floatSeq &point)throw (hpp::Error);
         virtual bool areKinematicsConstraintsVerifiedForState(unsigned short stateId,const hpp::floatSeq &point)throw (hpp::Error);
-        virtual hpp::floatSeq *isReachableFromState(unsigned short stateFrom,unsigned short stateTo)throw (hpp::Error);
+        virtual hpp::floatSeq *isReachableFromState(unsigned short stateFrom,unsigned short stateTo,const bool useIntermediateState)throw (hpp::Error);
         virtual hpp::floatSeq* isDynamicallyReachableFromState(unsigned short stateFrom, unsigned short stateTo, bool addPathPerPhase, const hpp::floatSeq &timings, short numPointPerPhase )throw (hpp::Error);
 
 
@@ -375,12 +391,12 @@ namespace hpp {
         void initNewProblemSolver ();
 
         private:
-        /// \brief Pointer to hppPlanner object of hpp::corbaServer::Server.
-        corbaServer::ProblemSolverMapPtr_t psMap_;
         core::ProblemSolverPtr_t problemSolver()
         {
-            return psMap_->selected();
+            return server_->problemSolver();
         }
+
+        Server* server_;
         FullBodyMap fullBodyMap_;
         rbprm::RbPrmFullBodyPtr_t fullBody()
         {

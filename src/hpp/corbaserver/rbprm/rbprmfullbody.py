@@ -213,11 +213,19 @@ class FullBody (Robot):
           return self.clientRbprm.rbprm.generateGroundContact(contactLimbs)
           
      ## Create a state and push it to the state array
-     # \param q configuration
-     # \param names list of effectors in contact
+     # \param configuration configuration
+     # \param contacts list of effectors in contact
      # \return stateId
-     def createState(self, q, contactLimbs):
-          return self.clientRbprm.rbprm.createState(q, contactLimbs)
+     def createState(self, configuration, contacts, normals = None):
+          if normals is None:
+               return self.clientRbprm.rbprm.createState(configuration, contacts)
+          cl = self.clientRbprm.rbprm
+          sId = cl.createState(configuration, contacts)
+          num_max_sample = 1
+          for (limbName, normal) in  zip(contacts, normals):
+               p = cl.getEffectorPosition(limbName,configuration)[0]
+               cl.addNewContact(sId, limbName, p, normal, num_max_sample, False)
+          return sId
           
      ## Retrieves the contact candidates configurations given a configuration and a limb
      #
@@ -249,6 +257,11 @@ class FullBody (Robot):
      def getNumSamples(self, limbName):
           return self.clientRbprm.rbprm.getNumSamples(limbName)
           
+     ## Get the number of existing states in the client 
+     #
+     def getNumStates(self):
+          return self.clientRbprm.rbprm.getNumStates()
+          
      ## Get the number of octreeNodes
      #
      # \param limbName name of the limb from which to retrieve a sample
@@ -262,14 +275,41 @@ class FullBody (Robot):
      # \param sampleId id of the considered sample
      def getSampleValue(self, limbName, valueName, sampleId):
           return self.clientRbprm.rbprm.getSampleValue(limbName, valueName, sampleId)
-          
+                    
      ## Initialize the first configuration of the path interpolation
      # with a balanced configuration for the interpolation problem;
      #
      # \param configuration the desired start configuration
      # \param contacts the array of limbs in contact
-     def setStartState(self, configuration, contacts):
-          return self.clientRbprm.rbprm.setStartState(configuration, contacts)
+     # \param normals  the array describing one normal direction for each limb in contact
+     def setStartState(self, configuration, contacts, normals = None):
+          if normals is None:
+               return self.clientRbprm.rbprm.setStartState(configuration, contacts)
+          cl = self.clientRbprm.rbprm
+          sId = cl.createState(configuration, contacts)
+          num_max_sample = 1
+          for (limbName, normal) in  zip(contacts, normals):
+               p = cl.getEffectorPosition(limbName,configuration)[0]
+               cl.addNewContact(sId, limbName, p, normal, num_max_sample, False)
+          return cl.setStartStateId(sId)
+          
+          
+     ## Initialize the goal configuration of the path interpolation
+     # with a balanced configuration for the interpolation problem;
+     #
+     # \param configuration the desired goal configuration
+     # \param contacts the array of limbs in contact
+     # \param normals  the array describing one normal direction for each limb in contact
+     def setEndState(self, configuration, contacts, normals = None):
+          if normals is None:
+               return self.clientRbprm.rbprm.setEndState(configuration, contacts)
+          cl = self.clientRbprm.rbprm
+          sId = cl.createState(configuration, contacts)
+          num_max_sample = 1
+          for (limbName, normal) in  zip(contacts, normals):
+               p = cl.getEffectorPosition(limbName,configuration)[0]
+               cl.addNewContact(sId, limbName, p, normal, num_max_sample, False)
+          return cl.setEndStateId(sId)
 
      ## Initialize the first state of the path interpolation
      # \param stateId the Id of the desired start state in fullBody
@@ -289,15 +329,7 @@ class FullBody (Robot):
      # \return id of created state
      def createState(self, configuration, contacts):
           return self.clientRbprm.rbprm.createState(configuration, contacts)
-                
-     ## Initialize the last configuration of the path discretization 
-     # with a balanced configuration for the interpolation problem;
-     #
-     # \param configuration the desired end configuration
-     # \param contacts the array of limbs in contact          
-     def setEndState(self, configuration, contacts):
-          return self.clientRbprm.rbprm.setEndState(configuration, contacts)
-     
+                     
      ## Saves a computed contact sequence in a given filename
      #
      # \param The file where the configuration must be saved
@@ -321,12 +353,13 @@ class FullBody (Robot):
      # \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
      # \param testReachability : if true, check each contact transition with our reachability criterion
      # \param quasiStatic : if True, use our reachability criterion with the quasiStatic constraint
-     def interpolate(self, stepsize, pathId = 1, robustnessTreshold = 0, filterStates = False,testReachability = True, quasiStatic = False):
+     # \param erasePreviousStates : if True the list of previously computed states is erased
+     def interpolate(self, stepsize, pathId = 1, robustnessTreshold = 0, filterStates = False,testReachability = True, quasiStatic = False, erasePreviousStates = True):
           if(filterStates):
                 filt = 1
           else:
                 filt = 0
-          return self.clientRbprm.rbprm.interpolate(stepsize, pathId, robustnessTreshold, filt,testReachability, quasiStatic)
+          return self.clientRbprm.rbprm.interpolate(stepsize, pathId, robustnessTreshold, filt,testReachability, quasiStatic, erasePreviousStates)
      
      ## Provided a discrete contact sequence has already been computed, computes
      # all the contact positions and normals for a given state, the next one, and the intermediate between them.
@@ -380,7 +413,7 @@ class FullBody (Robot):
                           Ns.append({})
                      if(len(P[i]) > 0):
                           targetName = limb
-                          if(dicEffector.has_key(limb)):
+                          if(limb in dicEffector):
                                 targetName = dicEffector[limb]['effector']
                           Ps[i][targetName] = P[i]
                           Ns[i][targetName] = N[i]
@@ -707,6 +740,15 @@ class FullBody (Robot):
      # \return whether the projection was successful
      def projectStateToCOM(self, state, targetCom, maxNumSample = 0):
           return self.clientRbprm.rbprm.projectStateToCOM(state, targetCom, maxNumSample)     > 0
+
+     ## Project a given state into a given root position
+     # and update the state configuration.
+     # \param state index of first state.
+     # \param root : root configuration (size 7)
+     # \param offset specific point to be projected in root frame. If different than 0 root orientation is ignored
+     # \return whether the projection was successful
+     def projectStateToRoot(self, state, root, offset = [0,0,0.]):
+          return self.clientRbprm.rbprm.projectStateToRoot(state, root, offset)     > 0
           
      ## Project a given state into a given COM position
      # and update the state configuration.
@@ -848,6 +890,11 @@ class FullBody (Robot):
      def setPostureWeights(self,postureWeights):
           return self.clientRbprm.rbprm.setPostureWeights(postureWeights)
 
+     ## If true, optimize the orientation of all the newly created contact using a postural task
+     # \param use bool
+     def usePosturalTaskContactCreation(self,use):
+          return self.clientRbprm.rbprm.usePosturalTaskContactCreation(use)
+
       ## return the time at the given state index (in the path computed during the first phase)
       # \param stateId : index of the state
      def getTimeAtState(self,stateId):
@@ -930,8 +977,8 @@ class FullBody (Robot):
      def areKinematicsConstraintsVerifiedForState(self,stateFrom, point):
          return self.clientRbprm.rbprm.areKinematicsConstraintsVerifiedForState(stateFrom,point)
 
-     def isReachableFromState(self,stateFrom,stateTo,computePoint=False):
-          raw =  self.clientRbprm.rbprm.isReachableFromState(stateFrom,stateTo)
+     def isReachableFromState(self,stateFrom,stateTo,computePoint=False,useIntermediateState=True):
+          raw =  self.clientRbprm.rbprm.isReachableFromState(stateFrom,stateTo,useIntermediateState)
           if computePoint :
                 res = []
                 res += [raw[0]>0.]
@@ -944,4 +991,7 @@ class FullBody (Robot):
 
      def isDynamicallyReachableFromState(self,stateFrom,stateTo,addPathPerPhase = False,timings=[],numPointsPerPhases=5):
           return self.clientRbprm.rbprm.isDynamicallyReachableFromState(stateFrom,stateTo,addPathPerPhase,timings,numPointsPerPhases)
+          
+     def toggleNonContactingLimb(self,limbName):
+          return self.clientRbprm.rbprm.toggleNonContactingLimb(limbName)
 

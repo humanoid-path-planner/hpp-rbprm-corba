@@ -140,6 +140,15 @@ class State (object):
             return self.fullBody.projectToCom(self.sId, targetCom)
         else:
             return self.fullBody.projectStateToCOM(self.sId, targetCom,maxNumSample)     > 0
+
+    ## Project a state into a given root position and orientation
+    #
+    # \param stateId target state
+    # \param root the root configuration (size 7)
+    # \param offset specific point to be projected in root frame. If different than 0 root orientation is ignored
+    # \return Whether the projection has been successful or not
+    def projectToRoot(self,targetRoot, offset = [0., 0., 0.]):
+        return self.fullBody.projectStateToRoot(self.sId,targetRoot, offset) > 0
         
     def getComConstraint(self, limbsCOMConstraints, exceptList = []):
         return get_com_constraint(self.fullBody, self.sId, self.cl.getConfigAtState(self.sId), limbsCOMConstraints, interm = self.isIntermediate, exceptList = exceptList)
@@ -168,10 +177,21 @@ class StateHelper(object):
     # \param limbName name of the considered limb to create contact with
     # \param p 3d position of the point
     # \param n 3d normal of the contact location center
+    # \param max_num_sample number of times it will try to randomly sample a configuration before failing
+    # \param lockOtherJoints : if True, the values of all the joints exepct the ones of 'limbName' are constrained to be constant.
+    # \param rotation : desired rotation of the end-effector in contact, expressed as Quaternion (x,y,z,w). If different from zero, the normal is ignored. Otherwise the rotation is automatically computed from the normal (with one axis of freedom)
+    #                This only affect the first projection, if max_num_sample > 0 and the first projection was unsuccessfull, the parameter is ignored
     # \return (State, success) whether the creation was successful, as well as the new state
     @staticmethod
-    def addNewContact(state, limbName, p, n, num_max_sample = 0):
-        sId = state.cl.addNewContact(state.sId, limbName, p, n, num_max_sample)
+    def addNewContact(state, limbName, p, n, num_max_sample = 0, lockOtherJoints= False,rotation = [0,0,0,0]):
+        sId = state.cl.addNewContact(state.sId, limbName, p, n, num_max_sample,lockOtherJoints,rotation)
+        if(sId != -1):
+            return State(state.fullBody, sId = sId), True
+        return state, False
+        
+    @staticmethod
+    def cloneState(state):
+        sId = state.cl.cloneState(state.sId)
         if(sId != -1):
             return State(state.fullBody, sId = sId), True
         return state, False
@@ -196,3 +216,16 @@ class StateHelper(object):
         sId = fullBody.generateStateInContact(q,direction,acceleration)
         s = State(fullBody,sId=sId)
         return s
+        
+    @staticmethod
+    def moveAndContact(state,rootOffset,limbName):
+        s, success = StateHelper.removeContact(state, limbName)
+        assert success
+        success = s.projectToRoot((array(s.q()[:3]) + array(rootOffset)).tolist()+s.q()[3:7])
+        if not success:
+            return state, False
+        sId = s.fullBody.clientRbprm.rbprm.generateContactState(s.sId, limbName,rootOffset)
+        if sId < 0:
+            return state, False
+        s = State(s.fullBody,sId=sId)
+        return s, True

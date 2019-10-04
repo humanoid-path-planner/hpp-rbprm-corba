@@ -16,10 +16,15 @@
 # hpp-manipulation-corba.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
 from hpp.corbaserver.rbprm.rbprmstate import State
-from lp_find_point import find_valid_c_cwc, find_valid_c_cwc_qp, lp_ineq_4D
-from hpp.corbaserver.rbprm.tools.com_constraints import *
-from CWC_methods import compute_CWC, is_stable
+try:
+    from hpp.corbaserver.rbprm.tools.com_constraints import *
+    from CWC_methods import compute_CWC, is_stable
+    from lp_find_point import find_valid_c_cwc, find_valid_c_cwc_qp, lp_ineq_4D
+except:
+    #~ print "WARNING: in state_alg, some optinal dependencies were not found"
+    pass
 
 ## algorithmic methods on state
    
@@ -53,7 +58,7 @@ def isContactReachable(state, limbName, p, n, limbsCOMConstraints):
     res_ineq = [np.vstack([new_ineq[0],active_ineq[0]]), np.hstack([new_ineq[1],active_ineq[1]])]
     success, status_ok , res = lp_ineq_4D(res_ineq[0],-res_ineq[1])
     if not success:
-        print "In isContactReachable no stability, Lp failed (should not happen) ", status_ok
+        print("In isContactReachable no stability, Lp failed (should not happen) ", status_ok)
         return False, [-1,-1,-1]
     return (res[3] >= 0), res[0:3]
     
@@ -76,8 +81,8 @@ def computeIntermediateState(sfrom, sto):
 # \param p 3d position of the point
 # \param n 3d normal of the contact location center
 # \return (State, success) whether the creation was successful, as well as the new state
-def addNewContact(state, limbName, p, n, num_max_sample = 0):
-    sId = state.cl.addNewContact(state.sId, limbName, p, n, num_max_sample)
+def addNewContact(state, limbName, p, n, num_max_sample = 0, lockOtherJoints = False):
+    sId = state.cl.addNewContact(state.sId, limbName, p, n, num_max_sample, lockOtherJoints)
     if(sId != -1):
         return State(state.fullBody, sId = sId), True
     return state, False
@@ -134,8 +139,8 @@ def projectToFeasibleCom(state,  ddc =[0.,0.,0.], max_num_samples = 10, friction
     ps = state.getContactPosAndNormals()
     p = ps[0][0]
     N = ps[1][0]
-    print "p", p
-    print "N", N
+    print("p", p)
+    print("N", N)
     #~ try:
     H = compute_CWC(p, N, state.fullBody.client.basic.robot.getMass(), mu = friction, simplify_cones = False)
     c_ref = state.getCenterOfMass()
@@ -150,12 +155,12 @@ def projectToFeasibleCom(state,  ddc =[0.,0.,0.], max_num_samples = 10, friction
         x[2] += 0.35
         for i in range(10):
             if state.fullBody.projectStateToCOM(state.sId ,x, max_num_samples):
-                print "success after " + str(i) + " trials"
+                print("success after " + str(i) + " trials")
                 return True
             else:
                 x[2]-=0.05
     else:
-        print "qp failed"
+        print("qp failed")
     return False;
     
 def isContactCreated(s1, s2):

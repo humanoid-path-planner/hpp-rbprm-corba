@@ -57,7 +57,7 @@ t = ps.solve ()
 if isinstance(t, list):
 	t = t[0]* 3600000 + t[1] * 60000 + t[2] * 1000 + t[3]	
 
-print "computation time for root path ", t
+print("computation time for root path ", t)
 
 # Playing the computed path
 from hpp.gepetto import PathPlayer

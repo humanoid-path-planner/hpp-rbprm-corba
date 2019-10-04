@@ -39,7 +39,7 @@ ps.setParameter("Kinodynamic/accelerationBound",aMax)
 ps.setParameter("DynamicPlanner/sizeFootX",0.01)
 ps.setParameter("DynamicPlanner/sizeFootY",0.01)
 ps.setParameter("DynamicPlanner/friction",0.5)
-ps.setParameter("Kinodynamic/forceOrientation",True)
+ps.setParameter("Kinodynamic/forceYawOrientation",True)
 # sample only configuration with null velocity and acceleration :
 ps.setParameter("ConfigurationShooter/sampleExtraDOF",False)
 ps.setParameter("PathOptimization/RandomShortcut/NumberOfLoops",50)

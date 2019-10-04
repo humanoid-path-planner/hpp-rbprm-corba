@@ -18,7 +18,6 @@
 
 from hpp.corbaserver.rbprm import Client as RbprmClient
 from hpp.corbaserver.robot import Robot
-import hpp.gepetto.blender.exportmotion as em
 
 ## Load and handle a RbprmDevice robot for rbprm planning
 #
@@ -94,6 +93,7 @@ class Builder (Robot):
   # \param pathId if of the considered path
   # \param filename name of the output file where to save the output
   def exportPath (self, viewer, problem, pathId, stepsize, filename):
+    import hpp.gepetto.blender.exportmotion as em
     em.exportPath(viewer, self.client.robot, problem, pathId, stepsize, filename)
 
   ## set a reference position of the end effector for the given ROM
@@ -103,3 +103,14 @@ class Builder (Robot):
   # \param ref the 3D reference position of the end effector, expressed in the root frame
   def setReferenceEndEffector(self,romName,ref):
     return self.clientRbprm.rbprm.setReferenceEndEffector(romName,ref)
+
+  ## For a given limb, return all the intersections between the limb reachable workspace and a contact surface
+  # \param configuration the root configuration
+  # \param limbName name of the considered limb
+  # \return a 3D list : first id is the different surfaces, second id is the different vertex of a surface, last id is the 3 coordinate of each vertex
+  def getContactSurfacesAtConfig(self,configuration,limbName):
+    surfaces = self.clientRbprm.rbprm.getContactSurfacesAtConfig(configuration,limbName)
+    res = []
+    for surface in surfaces:
+        res += [[surface[i:i+3] for i in range(0, len(surface),3)]] # split list of coordinate every 3 points (3D points)
+    return res

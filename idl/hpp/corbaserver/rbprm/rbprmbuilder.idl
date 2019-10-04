@@ -110,6 +110,10 @@ module hpp
     void setPostureWeights(in floatSeq postureWeights)
       raises (Error);
 
+    /// If true, optimize the orientation of all the newly created contact using a postural task
+    void usePosturalTaskContactCreation(in boolean use)
+      raises (Error);
+
     /// set a reference position of the end effector for the given ROM
     void setReferenceEndEffector(in string romName, in floatSeq ref)
       raises (Error);
@@ -144,25 +148,39 @@ module hpp
     /// [z_inf, z_sup, y_inf, y_sup, x_inf, x_sup]
     void boundSO3(in floatSeq limitszyx) raises (Error);
 
-		/// Project a state into a COM
-		///
-		/// \param stateId target state
-		/// \param com target com
-                double projectStateToCOM(in unsigned short stateId,  in floatSeq com, in  unsigned short max_num_sample) raises (Error);
+    /// Project a state into a COM
+    ///
+    /// \param stateId target state
+    /// \param com target com
+    double projectStateToCOM(in unsigned short stateId,  in floatSeq com, in  unsigned short max_num_sample) raises (Error);
 
-                /// Project a state into a COM
-                ///
-                /// \param stateId target state
-                /// \param com target com
-                double setConfigAtState(in unsigned short stateId,  in floatSeq config) raises (Error);
+    /// Clone a state
+    ///
+    /// \param stateId target state
+    /// \return stateId of the cloned state
+    short cloneState(in unsigned short stateId) raises (Error);
+
+    /// Project a state into a given root position and orientation
+    ///
+    /// \param stateId target state
+    /// \param root the root configuration (size 7)
+    /// \param offset specific point to be projected in root frame. If different than 0 root orientation is ignored
+    double projectStateToRoot(in unsigned short stateId,  in floatSeq root, in floatSeq offset) raises (Error);
 
 
-		/// Create a state and push it to the state array
-		///
-		/// \param q configuration
-		/// \param names list of effectors in contact
-		/// \return stateId
-		short createState(in floatSeq configuration, in Names_t contactLimbs) raises (Error);
+    /// Project a state into a COM
+    ///
+    /// \param stateId target state
+    /// \param com target com
+    double setConfigAtState(in unsigned short stateId,  in floatSeq config) raises (Error);
+
+
+    /// Create a state and push it to the state array
+    ///
+    /// \param q configuration
+    /// \param names list of effectors in contact
+    /// \return stateId
+    short createState(in floatSeq configuration, in Names_t contactLimbs) raises (Error);
 
     /// Get Sample configuration by its id
     /// \param sampleName name of the limb from which to retrieve a sample
@@ -243,6 +261,13 @@ module hpp
     /// \return transformed configuration for which all possible contacts have been created
     floatSeqSeq getContactSamplesProjected(in string name, in floatSeq dofArray, in floatSeq direction,
     in unsigned short numSamples) raises (Error);
+
+    /// Given a contact state and a limb, tries to generate a new contact, and returns the id of the new State if successful
+    /// \param currentState Id of the considered state
+    /// \param name name of the limb used to create a contact
+    /// \param direction desired direction of motion for the robot
+    /// \return id of the new contact state if successful, -1 otherwise
+    short generateContactState(in unsigned short currentState, in string name, in floatSeq direction) raises (Error);
 
     /// get Ids of limb in an octree cell
     /// \param name name of the considered limb
@@ -353,7 +378,7 @@ module hpp
     /// \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
     /// \param testReachability : if true, check each contact transition with our reachability criterion
     /// \param quasiStatic : if True, use our reachability criterion with the quasiStatic constraint
-    floatSeqSeq interpolate(in double timestep, in double path, in double robustnessTreshold, in unsigned short filterStates, in boolean testReachability, in boolean quasiStatic) raises (Error);
+    floatSeqSeq interpolate(in double timestep, in double path, in double robustnessTreshold, in unsigned short filterStates, in boolean testReachability, in boolean quasiStatic, in boolean erasePreviousStates) raises (Error);
 
     /// Provided a path has already been computed, interpolates it and generates the statically stable
     /// constact configurations along it. setStartState and setEndState must have been called prior
@@ -364,7 +389,7 @@ module hpp
     /// \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
     /// \param testReachability : if true, check each contact transition with our reachability criterion
     /// \param quasiStatic : if True, use our reachability criterion with the quasiStatic constraint
-    floatSeqSeq interpolateConfigs(in floatSeqSeq configs, in double robustnessTreshold, in unsigned short filterStates,in boolean testReachability, in boolean quasiStatic) raises (Error);
+    floatSeqSeq interpolateConfigs(in floatSeqSeq configs, in double robustnessTreshold, in unsigned short filterStates,in boolean testReachability, in boolean quasiStatic, in boolean erasePreviousStates) raises (Error);
 
 
     /// returns the CWC of the robot at a given state
@@ -652,6 +677,10 @@ module hpp
     /// \return whether the limb is in contact at this state
     short computeIntermediary(in unsigned short state1, in unsigned short state2) raises (Error);
 
+    /// Compute the number of computed states
+    /// \return the number of computed states
+    short getNumStates() raises (Error);
+
     /// Saves the last computed states by the function interpolate in a filename.
     /// Raises an error if interpolate has not been called, or the file could not be opened.
     /// \param filename name of the file used to save the contacts.
@@ -725,6 +754,17 @@ module hpp
 	/// \param stateIdTo : index of the second state
     Names_t getContactsVariations(in unsigned short stateIdFrom,in unsigned short stateIdTo) raises (Error);
 
+
+    /// For a given limb, returns the names of all the contact surfaces in collisions with the limb's reachable workspace
+    /// \param configuration : root configuration
+    /// \param limbName : name of the considered limb
+    Names_t getCollidingObstacleAtConfig(in floatSeq configuration,in string limbName) raises (Error);
+
+    /// For a given limb, return all the intersections between the limb reachable workspace and a contact surface
+    /// \param configuration : root configuration
+    /// \param limbName : name of the considered limb
+    floatSeqSeq getContactSurfacesAtConfig(in floatSeq configuration,in string limbName) raises (Error);
+
     /// return a list of all the limbs names
     Names_t getAllLimbsNames() raises (Error);
     /// tries to add a new contact to the state
@@ -736,8 +776,11 @@ module hpp
     /// \param p 3d position of the point
     /// \param n 3d normal of the contact location center
     /// \param max_num_sample number of times it will try to randomly sample a configuration before failing
+    /// \param lockOtherJoints : if True, the values of all the joints exepct the ones of 'limbName' are constrained to be constant.
+    ///                           This only affect the first projection, if max_num_sample > 0 and the first projection was unsuccessfull, the parameter is ignored
+    /// \param rotation : desired rotation of the end-effector in contact, expressed as Quaternion (x,y,z,w). If different from zero, the normal is ignored. Otherwise the rotation is automatically computed from the normal (with one axis of freedom)
     /// \return (success,NState) whether the creation was successful, as well as the new state
-    short addNewContact(in unsigned short stateId, in string limbName, in floatSeq position, in floatSeq normal, in unsigned short max_num_sample) raises (Error);
+    short addNewContact(in unsigned short stateId, in string limbName, in floatSeq position, in floatSeq normal, in unsigned short max_num_sample, in boolean lockOtherJoints,in floatSeq rotation) raises (Error);
 
     /// removes a contact from the state
     /// if the limb is not already in contact, does nothing
@@ -775,11 +818,13 @@ module hpp
     floatSeqSeq getPathAsBezier(in unsigned short pathId)raises (Error);
 
 
+    boolean toggleNonContactingLimb(in string limbname)raises (Error);
+
     boolean areKinematicsConstraintsVerified(in floatSeq point)raises (Error);
 
     boolean areKinematicsConstraintsVerifiedForState(in unsigned short stateFrom,in floatSeq point)raises (Error);
 
-    floatSeq isReachableFromState(in unsigned short stateFrom, in unsigned short stateTo)raises (Error);
+    floatSeq isReachableFromState(in unsigned short stateFrom, in unsigned short stateTo, in boolean useIntermediateState)raises (Error);
 
     floatSeq isDynamicallyReachableFromState(in unsigned short stateFrom, in unsigned short stateTo,in boolean addPathPerPhase, in floatSeq timings,in short numPointsPerPhase)raises (Error);
 

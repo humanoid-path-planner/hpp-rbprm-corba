@@ -50,6 +50,8 @@
 #include <hpp/rbprm/sampling/heuristic-tools.hh>
 #include <hpp/rbprm/contact_generation/reachability.hh>
 #include <hpp/pinocchio/urdf/util.hh>
+#include "hpp/rbprm/utils/algorithms.h"
+
 #ifdef PROFILE
     #include "hpp/rbprm/rbprm-profiler.hh"
 #endif
@@ -170,13 +172,9 @@ namespace hpp {
             fullBodyMap_.selected_ = name;
             if(problemSolver()){
                 if(problemSolver()->problem()){
-                    try {
-                      double mu = problemSolver()->problem()->getParameter ("friction").floatValue();
-                      fullBody()->setFriction(mu);
-                      hppDout(notice,"fullbody : mu define in python : "<<fullBody()->getFriction());
-                    } catch (const std::exception& e) {
-                      hppDout(notice,"fullbody : mu not defined, take : "<<fullBody()->getFriction()<<" as default.");
-                    }
+                    double mu = problemSolver()->problem()->getParameter ("FullBody/frictionCoefficient").floatValue();
+                    fullBody()->setFriction(mu);
+                    hppDout(notice,"fullbody : friction coefficient used  : "<<fullBody()->getFriction());
                 }else{
                     hppDout(warning,"No instance of problem while initializing fullBody");
                 }
@@ -651,7 +649,11 @@ namespace hpp {
       device->setEffectorReference(name,config);
     }
 
-
+    void RbprmBuilder::usePosturalTaskContactCreation(const bool usePosturalTaskContactCreation) throw (hpp::Error){
+      if(!fullBodyLoaded_)
+        throw Error ("No full body robot was loaded");
+      fullBody()->usePosturalTaskContactCreation(usePosturalTaskContactCreation);
+    }
 
     void RbprmBuilder::setFilter(const hpp::Names_t& roms) throw (hpp::Error)
     {
@@ -841,10 +843,51 @@ namespace hpp {
         return (CORBA::Short)(lastStatesComputed_.size()-1);
     }
 
+    CORBA::Short RbprmBuilder::cloneState(unsigned short stateId) throw (hpp::Error)
+    {
+        try
+        {
+            if(lastStatesComputed_.size() <= stateId){
+              throw std::runtime_error ("Can't clone state: invalid state id : "+std::string(""+stateId)+" number of state = "+std::string(""+lastStatesComputed_.size()));
+            }
+            State newState = lastStatesComputed_[stateId];
+            lastStatesComputed_.push_back(newState);
+            lastStatesComputedTime_.push_back(std::make_pair(-1., newState));
+            return (CORBA::Short)(lastStatesComputed_.size()-1);
+        }
+        catch(std::runtime_error& e)
+        {
+            throw Error(e.what());
+        }
+    }
+
     double RbprmBuilder::projectStateToCOM(unsigned short stateId, const hpp::floatSeq& com, unsigned short max_num_sample) throw (hpp::Error)
     {
         pinocchio::Configuration_t com_target = dofArrayToConfig (3, com);
         return projectStateToCOMEigen(stateId, com_target, max_num_sample);
+    }
+
+    double RbprmBuilder::projectStateToRoot(unsigned short stateId, const hpp::floatSeq& root, const hpp::floatSeq& offset) throw (hpp::Error)
+    {
+        pinocchio::Configuration_t root_target = dofArrayToConfig (7, root);
+        pinocchio::Configuration_t offset_target = dofArrayToConfig (3, offset);
+        if(lastStatesComputed_.size() <= stateId)
+        {
+            throw std::runtime_error ("Unexisting state " + std::string(""+(stateId)));
+        }
+        State s = lastStatesComputed_[stateId];
+        projection::ProjectionReport rep = projection::projectToRootConfiguration(fullBody(),root_target,s,offset_target);
+        double success = 0.;
+        if(rep.success_){
+          ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
+          CollisionValidationPtr_t val = fullBody()->GetCollisionValidation();
+          if(val->validate(rep.result_.configuration_,rport)){
+            lastStatesComputed_[stateId] = rep.result_;
+            lastStatesComputedTime_[stateId].second = rep.result_;
+            success = 1.;
+          }
+        }
+        return success;
     }
 
 
@@ -918,9 +961,8 @@ namespace hpp {
             Configuration_t config;
             for(int i =0; i< 1000; ++i)
             {
-                core::DevicePtr_t device = fullBody()->device_->clone();
                 std::vector<std::string> names = stringConversion(contactLimbs);
-                core::ConfigProjectorPtr_t proj = core::ConfigProjector::create(device,"proj", 1e-4, 100);
+                core::ConfigProjectorPtr_t proj = core::ConfigProjector::create(fullBody()->device_,"proj", 1e-4, 100);
                 //hpp::tools::LockJointRec(limb->limb_->name(), body->device_->rootJoint(), proj);
                 for(std::vector<std::string>::const_iterator cit = names.begin(); cit !=names.end(); ++cit)
                 {
@@ -931,7 +973,7 @@ namespace hpp {
                     std::vector<bool> rotConstraints;
                     posConstraints.push_back(false);posConstraints.push_back(false);posConstraints.push_back(true);
                     rotConstraints.push_back(true);rotConstraints.push_back(true);rotConstraints.push_back(true);
-                    const pinocchio::Frame effectorFrame = device->getFrameByName(limb->effector_.name());
+                    const pinocchio::Frame effectorFrame = fullBody()->device_->getFrameByName(limb->effector_.name());
                     pinocchio::JointPtr_t effectorJoint= limb->effector_.joint();
                     proj->add(core::NumericalConstraint::create (constraints::Position::create("",fullBody()->device_,
                                                                                                effectorJoint,
@@ -1042,6 +1084,83 @@ namespace hpp {
         } catch (const std::exception& exc) {
         throw hpp::Error (exc.what ());
         }
+    }
+
+    short RbprmBuilder::generateContactState(::CORBA::UShort  cId, const char*  name,  const ::hpp::floatSeq& direction)
+    throw (hpp::Error)
+    {
+        try
+        {
+        if(lastStatesComputed_.size() <= (std::size_t)(cId))
+        {
+            throw std::runtime_error ("Unexisting state " + std::string(""+(cId+1)));
+        }
+        State& state = lastStatesComputed_[cId];
+        std::string limbname(name);
+        fcl::Vec3f dir;
+        for(std::size_t i =0; i <3; ++i)
+        {
+            dir[i] = direction[(_CORBA_ULong)i];
+        }
+        pinocchio::Configuration_t config = state.configuration_;
+        fullBody()->device_->currentConfiguration(config);
+
+        sampling::T_OctreeReport finalSet;
+        rbprm::T_Limb::const_iterator lit = fullBody()->GetLimbs().find(limbname);
+        if(lit == fullBody()->GetLimbs().end())
+        {
+            throw std::runtime_error ("Impossible to find limb for joint "
+                                      + std::string(limbname) + " to robot; limb not defined.");
+        }
+        const RbPrmLimbPtr_t& limb = lit->second;
+        pinocchio::Transform3f transformPino = limb->octreeRoot(); // get root transform from configuration
+        fcl::Transform3f transform(transformPino.rotation(),transformPino.translation());
+                    // TODO fix as in rbprm-fullbody.cc!!
+        const affMap_t &affMap = problemSolver()->affordanceObjects;
+        if (affMap.map.empty ())
+        {
+            throw hpp::Error ("No affordances found. Unable to interpolate.");
+        }
+        const std::vector<pinocchio::CollisionObjectPtr_t> objects = contact::getAffObjectsForLimb(std::string(limbname), affMap,
+                                                                   bindShooter_.affFilter_);
+
+        std::vector<sampling::T_OctreeReport> reports(objects.size());
+        std::size_t i (0);
+        //#pragma omp parallel for
+        for(std::vector<pinocchio::CollisionObjectPtr_t>::const_iterator oit = objects.begin();
+            oit != objects.end(); ++oit, ++i)
+        {
+            sampling::GetCandidates(limb->sampleContainer_, transform, *oit, dir, reports[i], sampling::HeuristicParam());
+        }
+        for(std::vector<sampling::T_OctreeReport>::const_iterator cit = reports.begin();
+            cit != reports.end(); ++cit)
+        {
+            finalSet.insert(cit->begin(), cit->end());
+        }
+        // randomize samples
+        std::random_shuffle(reports.begin(), reports.end());
+        unsigned short num_samples_ok (0);
+        pinocchio::Configuration_t sampleConfig = config;
+        sampling::T_OctreeReport::const_iterator candCit = finalSet.begin();
+        for(std::size_t i=0; i< _CORBA_ULong(finalSet.size()) && num_samples_ok < 100; ++i, ++candCit)
+        {
+            const sampling::OctreeReport& report = *candCit;
+            State state;
+            state.configuration_ = config;
+            hpp::rbprm::projection::ProjectionReport rep =
+            hpp::rbprm::projection::projectSampleToObstacle(fullBody(),std::string(limbname), limb, report, fullBody()->GetCollisionValidation(), sampleConfig, state);
+            if(rep.success_)
+            {
+
+                lastStatesComputed_.push_back(rep.result_);
+                lastStatesComputedTime_.push_back(std::make_pair(-1.,  rep.result_));
+                return lastStatesComputed_.size() -1;
+            }
+        }
+        return -1;
+    } catch (const std::exception& exc) {
+    throw hpp::Error (exc.what ());
+    }
     }
 
     hpp::floatSeqSeq* RbprmBuilder::getContactSamplesProjected(const char* limbname,
@@ -1254,6 +1373,11 @@ namespace hpp {
                 throw std::runtime_error ("Impossible to find limb for joint "
                                           + (*cit) + " to robot; limb not defined");
             }
+            if(lit->second->contactType_ == _3_DOF)
+            {
+                throw std::runtime_error ("Can't set contact normal to a limb with 3D contact: "
+                                          + (*cit) + ". The normal must be provided using method setStartState / setEndState (self, configuration, contacts, normals)");
+            }
             const pinocchio::Frame frame = fullBody->device_->getFrameByName(lit->second->effector_.name());
             const pinocchio::Transform3f& transform =  frame.currentTransformation ();
             const fcl::Matrix3f& rot = transform.rotation();
@@ -1415,7 +1539,7 @@ namespace hpp {
           }
           State stateFrom = lastStatesComputed_[stateIdFrom];
           State stateTo = lastStatesComputed_[stateIdTo];
-          std::vector<std::string> variations_s = stateTo.allVariations(stateFrom,rbprm::interpolation::extractEffectorsName(fullBody()->GetLimbs()));
+          std::vector<std::string> variations_s = stateTo.contactVariations(stateFrom);
           CORBA::ULong size = (CORBA::ULong) variations_s.size ();
           char** nameList = Names_t::allocbuf(size);
           Names_t *variations = new Names_t (size,size,nameList);
@@ -1424,6 +1548,155 @@ namespace hpp {
             strcpy (nameList [i], variations_s[i].c_str ());
           }
           return variations;
+      }
+      catch(std::runtime_error& e)
+      {
+          throw Error(e.what());
+      }
+    }
+
+    Names_t* RbprmBuilder::getCollidingObstacleAtConfig(const ::hpp::floatSeq& configuration,const char* limbName)throw (hpp::Error){
+      try
+      {
+          std::vector<std::string> res;
+          std::string name (limbName);
+          //hpp::pinocchio::RbPrmDevicePtr_t rbprmDevice = boost::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(problemSolver()->robot ());
+          const hpp::pinocchio::DevicePtr_t romDevice = romDevices_[name];
+          pinocchio::Configuration_t q = dofArrayToConfig(romDevice, configuration);
+          romDevice->currentConfiguration(q);
+          hpp::pinocchio::RbPrmDevicePtr_t rbprmDevice = boost::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(romDevice);
+          RbPrmPathValidationPtr_t rbprmPathValidation_ (boost::dynamic_pointer_cast<hpp::rbprm::RbPrmPathValidation>(problemSolver()->problem()->pathValidation()));
+          rbprmPathValidation_->getValidator()->computeAllContacts(true);
+          core::ValidationReportPtr_t report;
+          problemSolver()->problem()->configValidations()->validate(q,report);
+          core::RbprmValidationReportPtr_t rbReport = boost::dynamic_pointer_cast<hpp::core::RbprmValidationReport> (report);
+          for(std::map<std::string,core::CollisionValidationReportPtr_t>::const_iterator it = rbReport->ROMReports.begin() ; it != rbReport->ROMReports.end() ; ++it){
+              if (name == it->first)
+              //if (true)
+              {
+                    core::AllCollisionsValidationReportPtr_t romReports = boost::dynamic_pointer_cast<core::AllCollisionsValidationReport>(it->second);
+                    if(!romReports){
+                      hppDout(warning,"For rom : "<<it->first<<" unable to cast in a AllCollisionsValidationReport, did you correctly call computeAllContacts(true) before generating the report ? ");
+                      //return;
+                        }
+                  if(romReports->collisionReports.size()> 0){
+                      for(std::vector<CollisionValidationReportPtr_t>::const_iterator itAff = romReports->collisionReports.begin() ; itAff != romReports->collisionReports.end() ; ++itAff){
+                         res.push_back((*itAff)->object2->name ());
+                      }
+                  }
+              }
+          }
+          CORBA::ULong size = (CORBA::ULong) res.size ();
+          char** nameList = Names_t::allocbuf(size);
+          Names_t *variations = new Names_t (size,size,nameList);
+          for (std::size_t i = 0 ; i < res.size() ; ++i){
+            nameList[i] = (char*) malloc (sizeof(char)*(res[i].length ()+1));
+            strcpy (nameList [i], res[i].c_str ());
+          }
+          return variations;
+        }
+      catch(std::runtime_error& e)
+      {
+          throw Error(e.what());
+      }
+    }
+
+      floatSeqSeq* RbprmBuilder::getContactSurfacesAtConfig(const ::hpp::floatSeq& configuration,const char* limbName)throw (hpp::Error){
+      try
+      {
+          hppDout(notice,"begin getContactSurfacesAtConfig");
+          std::string name (limbName);
+          //hpp::pinocchio::RbPrmDevicePtr_t rbprmDevice = boost::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(problemSolver()->robot ());
+          const hpp::pinocchio::DevicePtr_t romDevice = romDevices_[name];
+          pinocchio::Configuration_t q = dofArrayToConfig(romDevice, configuration);
+          romDevice->currentConfiguration(q);
+          RbPrmPathValidationPtr_t rbprmPathValidation_ (boost::dynamic_pointer_cast<hpp::rbprm::RbPrmPathValidation>(problemSolver()->problem()->pathValidation()));
+          rbprmPathValidation_->getValidator()->computeAllContacts(true);
+          core::ValidationReportPtr_t report;
+          hppDout(notice,"begin collision check");
+          problemSolver()->problem()->configValidations()->validate(q,report);
+          hppDout(notice,"done.");
+          core::RbprmValidationReportPtr_t rbReport = boost::dynamic_pointer_cast<hpp::core::RbprmValidationReport> (report);
+          hppDout(notice,"try to find rom name");
+          if(rbReport->ROMReports.find(name) == rbReport->ROMReports.end()){
+            throw std::runtime_error ("The given ROM name is not in collision in the given configuration.");
+          }
+          hppDout(notice,"try to cast report");
+          core::AllCollisionsValidationReportPtr_t romReports = boost::dynamic_pointer_cast<core::AllCollisionsValidationReport>(rbReport->ROMReports.at(name));
+          if(!romReports){
+            throw std::runtime_error ("Error while retrieving collision reports.");
+          }
+          hppDout(notice,"try deviceSync");
+          pinocchio::DeviceSync deviceSync (romDevice);
+          hppDout(notice,"done.");
+          // Compute the referencePoint for the given configuration : heuristic used to select a 'best' contact surface:
+          hpp::pinocchio::RbPrmDevicePtr_t rbprmDevice = boost::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(problemSolver()->robot ());
+          fcl::Vec3f reference = rbprmDevice->getEffectorReference(name);
+          hppDout(notice,"Reference position for rom"<<name<<" = "<<reference);
+          //apply transform from currernt config :
+          fcl::Transform3f tRoot;
+          tRoot.setTranslation(fcl::Vec3f(q[0],q[1],q[2]));
+          fcl::Quaternion3f quat(q[6],q[3],q[4],q[5]);
+          tRoot.setRotation(quat.matrix());
+          reference = (tRoot*reference).getTranslation();
+          geom::Point refPoint(reference);
+          hppDout(notice,"Reference after root transform = "<<reference);
+          geom::Point normal,proj;
+          double minDistance = std::numeric_limits<double>::max();
+          double distance;
+          _CORBA_ULong bestSurface(0);
+
+          // init floatSeqSeq to store results
+          hpp::floatSeqSeq *res;
+          res = new hpp::floatSeqSeq ();
+          res->length ((_CORBA_ULong)romReports->collisionReports.size());
+          _CORBA_ULong idSurface(0);
+          geom::Point pn;
+          hppDout(notice,"Number of collision reports for the rom : "<<romReports->collisionReports.size());
+          // for all collision report of the given ROM, compute the intersection surface between the affordance object and the rom :
+          for(std::vector<CollisionValidationReportPtr_t>::const_iterator itReport = romReports->collisionReports.begin() ; itReport != romReports->collisionReports.end() ; ++itReport){
+            // compute the intersection for itReport :
+            core::CollisionObjectConstPtr_t obj_rom = (*itReport)->object1;
+            core::CollisionObjectConstPtr_t obj_env = (*itReport)->object2;
+            // convert the two objects  :
+            geom::BVHModelOBConst_Ptr_t model_rom =  geom::GetModel(obj_rom,deviceSync.d());
+            geom::BVHModelOBConst_Ptr_t model_env =  geom::GetModel(obj_env,deviceSync.d());
+            geom::T_Point plane = geom::intersectPolygonePlane(model_rom,model_env,pn);
+            // plane contains a list of points : the intersections between model_rom and the infinite plane defined by model_env.
+            // but they may not be contained inside the shape defined by model_env
+            if(plane.size() > 0){
+              geom::T_Point inter = geom::compute3DIntersection(plane,geom::convertBVH(model_env)); // hull contain only points inside the model_env shape
+              if(inter.size() > 0){
+                hppDout(notice,"Number of points for the intersection rom/surface : "<<inter.size());
+                // compute heuristic score :
+                distance = geom::projectPointInsidePlan(inter,refPoint,normal,inter.front(),proj);
+                hppDout(notice,"Distance found : "<<distance);
+                if(distance < minDistance){
+                    minDistance = distance;
+                    bestSurface = idSurface;
+                }
+                // add inter points to res list:
+                _CORBA_ULong size = (_CORBA_ULong) (inter.size()*3);
+                double* dofArray = hpp::floatSeq::allocbuf(size);
+                hpp::floatSeq floats (size, size, dofArray, true);
+                //convert the config in dofseq
+                for (pinocchio::size_type j=0 ; j < (pinocchio::size_type)inter.size() ; ++j) {
+                  dofArray[3*j] = inter[j][0];
+                  dofArray[3*j+1] = inter[j][1];
+                  dofArray[3*j+2] = inter[j][2];
+                }
+                (*res) [idSurface] = floats;
+                ++idSurface;
+              }
+            }
+          }
+          // swap res[0] and res[bestSurface]:
+          if(bestSurface>0){
+            hpp::floatSeq tmp = (*res)[0];
+            (*res)[0] = (*res)[bestSurface];
+            (*res)[bestSurface] = tmp;
+          }
+          return res;
       }
       catch(std::runtime_error& e)
       {
@@ -1441,7 +1714,7 @@ namespace hpp {
         return res;
     }
 
-    floatSeqSeq* RbprmBuilder::interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic) throw (hpp::Error)
+    floatSeqSeq* RbprmBuilder::interpolateConfigs(const hpp::floatSeqSeq& configs, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic, bool erasePreviousStates) throw (hpp::Error)
     {
         try
         {
@@ -1460,18 +1733,19 @@ namespace hpp {
                 throw hpp::Error ("No affordances found. Unable to interpolate.");
             }
             hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator = rbprm::interpolation::RbPrmInterpolation::create(fullBody(),startState_,endState_,core::PathVectorConstPtr_t(),testReachability,quasiStatic);
-            lastStatesComputedTime_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,configurations,robustnessTreshold, filterStates != 0);
-            lastStatesComputed_ = TimeStatesToStates(lastStatesComputedTime_);
+            rbprm::T_StateFrame newTimeStates =
+                    interpolator->Interpolate(affMap, bindShooter_.affFilter_,configurations,robustnessTreshold, filterStates != 0);
+            std::vector<rbprm::State> newStates =TimeStatesToStates(newTimeStates);
             hpp::floatSeqSeq *res;
             res = new hpp::floatSeqSeq ();
 
-            res->length ((_CORBA_ULong)lastStatesComputed_.size ());
+            res->length ((_CORBA_ULong)newStates.size ());
             std::size_t i=0;
             std::size_t id = 0;
-            for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin(); cit != lastStatesComputed_.end(); ++cit, ++id)
+            for(std::vector<State>::const_iterator cit = newStates.begin(); cit != newStates.end(); ++cit, ++id)
             {
-                std::cout << "ID " << id;
-                cit->print();
+                /*std::cout << "ID " << id;
+                cit->print();*/
                 const core::Configuration_t config = cit->configuration_;
                 _CORBA_ULong size = (_CORBA_ULong) config.size ();
                 double* dofArray = hpp::floatSeq::allocbuf(size);
@@ -1482,6 +1756,16 @@ namespace hpp {
                 }
                 (*res) [(_CORBA_ULong)i] = floats;
                 ++i;
+            }
+            if(erasePreviousStates)
+            {
+                lastStatesComputedTime_ = newTimeStates;
+                lastStatesComputed_ = newStates;
+            }
+            else
+            {
+                lastStatesComputed_.insert(lastStatesComputed_.end(), newStates.begin(), newStates.end());
+                lastStatesComputedTime_.insert(lastStatesComputedTime_.end(), newTimeStates.begin(), newTimeStates.end());
             }
             return res;
         }
@@ -2104,9 +2388,8 @@ namespace hpp {
 
 
         res->length ((_CORBA_ULong)2);
-
-        fcl::Vec3f& position = state.contactPositions_.at(limbName);
-        position += fullBody()->GetLimb(limb)->offset_;
+        fcl::Transform3f jointT( state.contactRotation_.at(limbName), state.contactPositions_.at(limbName));
+        fcl::Vec3f position =  jointT.transform(fullBody()->GetLimb(limb)->offset_);
         _CORBA_ULong size = (_CORBA_ULong) 3;
         double* dofArray = hpp::floatSeq::allocbuf(size);
         hpp::floatSeq floats (size, size, dofArray, true);
@@ -2131,7 +2414,7 @@ namespace hpp {
     }
 
 
-    floatSeqSeq* RbprmBuilder::interpolate(double timestep, double path, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic) throw (hpp::Error)
+    floatSeqSeq* RbprmBuilder::interpolate(double timestep, double path, double robustnessTreshold, unsigned short filterStates, bool testReachability, bool quasiStatic, bool erasePreviousStates) throw (hpp::Error)
     {
         hppDout(notice,"### Begin interpolate");
         try
@@ -2158,18 +2441,19 @@ namespace hpp {
 
         hpp::rbprm::interpolation::RbPrmInterpolationPtr_t interpolator =
                     rbprm::interpolation::RbPrmInterpolation::create(fullBody(),startState_,endState_,problemSolver()->paths()[pathId],testReachability,quasiStatic);
-        lastStatesComputedTime_ = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
+
+        rbprm::T_StateFrame newTimeStates = interpolator->Interpolate(affMap, bindShooter_.affFilter_,
                     timestep,robustnessTreshold, filterStates != 0);
-		lastStatesComputed_ = TimeStatesToStates(lastStatesComputedTime_);
+        std::vector<rbprm::State> newStates = TimeStatesToStates(newTimeStates);
 
         hpp::floatSeqSeq *res;
         res = new hpp::floatSeqSeq ();
 
-        res->length ((_CORBA_ULong)lastStatesComputed_.size ());
+        res->length ((_CORBA_ULong)newStates.size ());
         std::size_t i=0;
         std::size_t id = 0;
-        for(std::vector<State>::const_iterator cit = lastStatesComputed_.begin();
-					cit != lastStatesComputed_.end(); ++cit, ++id)
+        for(std::vector<State>::const_iterator cit = newStates.begin();
+                    cit != newStates.end(); ++cit, ++id)
         {
             /*std::cout << "ID " << id;
             cit->print();*/
@@ -2183,6 +2467,16 @@ namespace hpp {
             }
             (*res) [(_CORBA_ULong)i] = floats;
             ++i;
+        }
+        if(erasePreviousStates)
+        {
+            lastStatesComputedTime_ = newTimeStates;
+            lastStatesComputed_ = newStates;
+        }
+        else
+        {
+            lastStatesComputed_.insert(lastStatesComputed_.end(), newStates.begin(), newStates.end());
+            lastStatesComputedTime_.insert(lastStatesComputedTime_.end(), newTimeStates.begin(), newTimeStates.end());
         }
         return res;
         }
@@ -2949,6 +3243,12 @@ namespace hpp {
     }
 
 
+
+    CORBA::Short  RbprmBuilder::getNumStates() throw (hpp::Error)
+    {
+        return lastStatesComputed_.size();
+    }
+
     CORBA::Short  RbprmBuilder::computeIntermediary(unsigned short stateFrom, unsigned short stateTo) throw (hpp::Error)
     try
     {
@@ -3200,7 +3500,7 @@ namespace hpp {
 
 
     CORBA::Short RbprmBuilder::addNewContact(unsigned short stateId, const char* limbName,
-                                        const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample) throw (hpp::Error)
+                                        const hpp::floatSeq& position, const hpp::floatSeq& normal, unsigned short max_num_sample, bool lockOtherJoints,const hpp::floatSeq& rotation) throw (hpp::Error)
     {
         try
         {
@@ -3213,8 +3513,15 @@ namespace hpp {
             fcl::Vec3f p; for(int i =0; i<3; ++i) p[i] = config[i];
             config = dofArrayToConfig (std::size_t(3), normal);
             fcl::Vec3f n; for(int i =0; i<3; ++i) n[i] = config[i];
-
-            projection::ProjectionReport rep = projection::projectStateToObstacle(fullBody(),limb, fullBody()->GetLimbs().at(limb), ns, n,p);
+            fcl::Matrix3f rotationMatrix;
+            pinocchio::Configuration_t q = dofArrayToConfig(std::size_t(4), rotation);
+            if(q.isZero(1e-9)){
+              rotationMatrix = fcl::Matrix3f::Zero();
+            }else{
+              rotationMatrix = (fcl::Quaternion3f(q[3],q[0],q[1],q[2])).matrix();
+            }
+            hppDout(notice,"addNewContact, rotation = \n"<<rotationMatrix);
+            projection::ProjectionReport rep = projection::projectStateToObstacle(fullBody(),limb, fullBody()->GetLimbs().at(limb), ns, n,p,lockOtherJoints,rotationMatrix);
             hppDout(notice,"Projection State to obstacle success : "<<rep.success_);
             hppDout(notice,"report status : "<<rep.status_);
             ValidationReportPtr_t rport (ValidationReportPtr_t(new CollisionValidationReport));
@@ -3230,7 +3537,7 @@ namespace hpp {
                 {
                     shooter->shoot(ns.configuration_);
                     ns.configuration_.head<7>() = head;
-                    rep = projection::projectStateToObstacle(fullBody(),limb, fullBody()->GetLimbs().at(limb), ns, n,p);
+                    rep = projection::projectStateToObstacle(fullBody(),limb, fullBody()->GetLimbs().at(limb), ns, n,p,false,rotationMatrix);
                     rep.success_ = rep.success_ && val->validate(rep.result_.configuration_,rport);
                 }
             }
@@ -3294,13 +3601,6 @@ namespace hpp {
         }
     }
 
-    void RbprmBuilder::SetProblemSolverMap (hpp::corbaServer::ProblemSolverMapPtr_t psMap)
-    {
-        psMap_ = psMap;
-        //bind shooter creator to hide problem as a parameter and respect signature
-        //initNewProblemSolver();
-    }
-
     void RbprmBuilder::initNewProblemSolver()
     {
         //bind shooter creator to hide problem as a parameter and respect signature
@@ -3338,6 +3638,15 @@ namespace hpp {
       return limbsNames;
     }
 
+    bool RbprmBuilder::toggleNonContactingLimb(const char* limbName)throw (hpp::Error)
+    {
+        if(!fullBodyLoaded_){
+          throw std::runtime_error ("fullBody not loaded");
+        }
+        const std::string limb (limbName);
+        return fullBody()->toggleNonContactingLimb(limb);
+    }
+
     bool RbprmBuilder::areKinematicsConstraintsVerified(const hpp::floatSeq &point)throw (hpp::Error){
         if(!fullBodyLoaded_){
           throw std::runtime_error ("fullBody not loaded");
@@ -3373,14 +3682,14 @@ namespace hpp {
     }
 
 
-    hpp::floatSeq* RbprmBuilder::isReachableFromState(unsigned short stateFrom,unsigned short stateTo)throw (hpp::Error){
+    hpp::floatSeq* RbprmBuilder::isReachableFromState(unsigned short stateFrom, unsigned short stateTo , const bool useIntermediateState)throw (hpp::Error){
         if(!fullBodyLoaded_){
           throw std::runtime_error ("fullBody not loaded");
         }
         if(stateTo >= lastStatesComputed_.size() || stateFrom >= lastStatesComputed_.size()){
             throw std::runtime_error ("Unexisting state ID");
         }
-        reachability::Result res = reachability::isReachable(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo]);
+        reachability::Result res = reachability::isReachable(fullBody(),lastStatesComputed_[stateFrom],lastStatesComputed_[stateTo], fcl::Vec3f::Zero(),useIntermediateState);
 
         // convert vector of int to floatSeq :
         _CORBA_ULong size;
@@ -3453,6 +3762,13 @@ namespace hpp {
         }else
             return new hpp::floatSeq();
     }
+
+    HPP_START_PARAMETER_DECLARATION(FullBody)
+      Problem::declareParameter(core::ParameterDescription (core::Parameter::FLOAT,
+            "FullBody/frictionCoefficient",
+            "The coefficient of friction used between the robot and the environment.",
+            core::Parameter(0.5)));
+      HPP_END_PARAMETER_DECLARATION(FullBody)
 
 
     } // namespace impl

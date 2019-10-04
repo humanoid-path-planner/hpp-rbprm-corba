@@ -4,7 +4,7 @@ from hpp.corbaserver import Client
 from hpp.corbaserver import ProblemSolver
 import time
 
-
+Robot.urdfName += "_large"
 vMax = 0.3 # linear velocity bound for the root
 aMax = 0.1 # linear acceleration bound for the root
 extraDof = 6
@@ -37,7 +37,7 @@ ps = ProblemSolver( rbprmBuilder )
 ps.setParameter("Kinodynamic/velocityBound",vMax)
 ps.setParameter("Kinodynamic/accelerationBound",aMax)
 # force the orientation of the trunk to match the direction of the motion
-ps.setParameter("Kinodynamic/forceOrientation",True)
+ps.setParameter("Kinodynamic/forceYawOrientation",True)
 ps.setParameter("DynamicPlanner/sizeFootX",0.2)
 ps.setParameter("DynamicPlanner/sizeFootY",0.12)
 ps.setParameter("DynamicPlanner/friction",mu)
@@ -61,6 +61,7 @@ v.addLandmark(v.sceneName,1)
 
 # Setting initial configuration
 q_init = rbprmBuilder.getCurrentConfig ();
+q_init[8] = 0.006761 # torso 2 position in reference config
 q_init [0:3] = [-0.7,2,0.98]
 v (q_init)
 ps.setInitialConfig (q_init)
