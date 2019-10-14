@@ -6,13 +6,29 @@ from hpp.corbaserver import ProblemSolver
 import os
 import random
 import time
-statusFilename = "/res/infos.log"
+print "Plan guide trajectory ..."
+import talos_randomMove_path as tp
+print "Done."
+import time
+statusFilename = tp.statusFilename
+pId = 0
+f = open(statusFilename,"a")
+if tp.ps.numberPaths() > 0 :
+  print "Path planning OK."
+  f.write("Planning_success: True"+"\n")
+  f.close()
+else :
+  print "Error during path planning"
+  f.write("Planning_success: False"+"\n")
+  f.close()
+  import sys
+  sys.exit(1)
 
 
 
 fullBody = Robot ()
 # Set the bounds for the root
-fullBody.setJointBounds ("root_joint", [-0.3,0.3, -0.3, 0.3, 0.85, 1.05])
+fullBody.setJointBounds ("root_joint", [-0.3,0.3, -0.3, 0.3, tp.ROOT_Z_MIN, tp.ROOT_Z_MAX])
 ## reduce bounds on joints along x, to put conservative condition on the contact generation for sideway steps
 joint6L_bounds_prev=fullBody.getJointBounds('leg_left_6_joint')
 joint2L_bounds_prev=fullBody.getJointBounds('leg_left_2_joint')
@@ -37,7 +53,7 @@ fullBody.client.robot.setDimensionExtraConfigSpace(6)
 vMax = 0.5# linear velocity bound for the root
 aMax = 0.5# linear acceleration bound for the root
 fullBody.client.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax,0,0,-aMax,aMax,-aMax,aMax,0,0])
-ps = ProblemSolver( fullBody )
+ps = tp.ProblemSolver( fullBody )
 vf = ViewerFactory (ps)
 ps.setParameter("Kinodynamic/velocityBound",vMax)
 ps.setParameter("Kinodynamic/accelerationBound",aMax)
@@ -72,10 +88,10 @@ print "Generate limb DB ..."
 tStart = time.time()
 # generate databases : 
 
-nbSamples = 10
-fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "static", 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints,kinematicConstraintsMin = 0.7)
+nbSamples = 100000
+fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep1", 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints,kinematicConstraintsMin = 0.7)
 fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
-fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "static", 0.01,kinematicConstraintsPath=fullBody.lLegKinematicConstraints,kinematicConstraintsMin = 0.7)
+fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep1", 0.01,kinematicConstraintsPath=fullBody.lLegKinematicConstraints,kinematicConstraintsMin = 0.7)
 fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
 
 
@@ -83,38 +99,74 @@ tGenerate =  time.time() - tStart
 print "Done."
 print "Databases generated in : "+str(tGenerate)+" s"
 
-from tools.sample_random_transition import sampleRandomTransitionFlatFloor
+## generate random initial state : root pose at the origin exepct for z translation and both feet in contact with the floor
+from tools.sample_random_transition import sampleRandomStateFlatFloor
 limbsInContact = [fullBody.rLegId,fullBody.lLegId]
 random.seed()
-movingId = random.randint(0,1)
-movingLimb = limbsInContact[movingId]
-print "Move limb : ",movingLimb
-#floor_Z = - fullBody.dict_offset['leg_left_6_joint'].translation[2,0]
-floor_Z = -0.00099
-s0,s1 = sampleRandomTransitionFlatFloor(fullBody,limbsInContact,movingLimb,floor_Z)
+floor_Z = -0.00095
+floor_Z = 0.
+s0 = sampleRandomStateFlatFloor(fullBody,limbsInContact,floor_Z)
 
-configs = [s0.q(),s1.q()]
-beginId = s0.sId
-endId = beginId + 1
-v(configs[0])
+q_init = s0.q()
+q_goal = q_ref[::]
+q_goal[0:7] = tp.ps.configAtParam(pId,tp.ps.pathLength(pId))[0:7]
+q_goal[2] = q_ref[2]
+robTreshold = 3
 
-if len(configs) == 2 :
-    cg_success = True
-    cg_reach_goal = True
-    print "Contact generation successful."
+fullBody.setStaticStability(True)
+v.addLandmark('talos/base_link',0.3)
+v(q_init)
+
+# specify the full body configurations as start and goal state of the problem
+
+if q_goal[1] < 0: # goal on the right side of the circle, start motion with right leg first
+  fullBody.setStartState(q_init,[fullBody.rLegId,fullBody.lLegId])
+  fullBody.setEndState(q_goal,[fullBody.rLegId,fullBody.lLegId])
+  print "Right foot first"
+else :
+  fullBody.setStartState(q_init,[fullBody.lLegId,fullBody.rLegId])
+  fullBody.setEndState(q_goal,[fullBody.lLegId,fullBody.rLegId])
+  print "Left foot first"
+
+print "Generate contact plan ..."
+tStart = time.time()
+configs = fullBody.interpolate(0.005,pathId=pId,robustnessTreshold = robTreshold, filterStates = True,quasiStatic=True)
+tInterpolateConfigs = time.time() - tStart
+print "Done."
+print "Contact plan generated in : "+str(tInterpolateConfigs)+" s"
+print "number of configs :", len(configs)
+#raw_input("Press Enter to display the contact sequence ...")
+#displayContactSequence(v,configs)
+
+
+if len(configs) < 2 :
+  cg_success = False
+  print "Error during contact generation."
 else:
-    cg_success = False
-    cg_reach_goal = False
-    print "Contact generation failed."
+  cg_success = True
+  print "Contact generation Done."
+if abs(configs[-1][0] - tp.q_goal[0]) < 0.01 and abs(configs[-1][1]- tp.q_goal[1]) < 0.01  and (len(fullBody.getContactsVariations(len(configs)-2,len(configs)-1))==1):
+  print "Contact generation successful."
+  cg_reach_goal = True
+else:
+  print "Contact generation failed to reach the goal."
+  cg_reach_goal = False
+if len(configs) > 10 :
+  cg_too_many_states = True
+  cg_success = False
+  print "Discarded contact sequence because it was too long."
+else:
+  cg_too_many_states = False
 
-
-f = open(statusFilename,"w")
-f.write("q_init= "+str(s0.q())+"\n")
-f.write("q_goal= "+str(s1.q())+"\n")
+f = open(statusFilename,"a")
 f.write("cg_success: "+str(cg_success)+"\n")
 f.write("cg_reach_goal: "+str(cg_reach_goal)+"\n")
+f.write("cg_too_many_states: "+str(cg_too_many_states)+"\n")
 f.close()
 
+if (not cg_success) or cg_too_many_states:
+  import sys
+  sys.exit(1)
 
 # put back original bounds for wholebody methods
 fullBody.setJointBounds ("root_joint", [-2,2, -2, 2, 0.6, 1.4])
