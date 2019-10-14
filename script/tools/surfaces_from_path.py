@@ -79,16 +79,21 @@ def getMergedPhases (seqs):
   return nseqs    
   
 
-def getSurfacesFromGuideContinuous(rbprmBuilder, ps, surfaces_dict ,pId, viewer = None, step = 1., useIntersection= False):
+def getSurfacesFromGuideContinuous(rbprmBuilder,ps,afftool,pId,viewer = None,step = 1.,useIntersection= False,mergeCandidates = False):
   pathLength = ps.pathLength(pId) #length of the path
-  discretizationStep = 0.5 # step at which we check the colliding surfaces
-  
+  discretizationStep = 0.2 # step at which we check the colliding surfaces
+  #print "path length = ",pathLength
+  # get surface information
+  all_surfaces = getAllSurfaces(afftool) 
+  all_names = afftool.getAffRefObstacles("Support") # id in names and surfaces match
+  surfaces_dict = dict(zip(all_names, all_surfaces)) # map surface names to surface points
   seqs = [] # list of list of surfaces : for each phase contain a list of surfaces. One phase is defined by moving of 'step' along the path
   t = 0.
   current_phase_end = step
   end = False
   i = 0
   while not end: # for all the path
+    #print "Looking for surfaces for phase "+str(len(seqs))+" for t in ["+str(t)+" ; "+str(current_phase_end)+" ] "
     phase_contacts_names = []
     while t < current_phase_end: # get the names of all the surfaces that the rom collide while moving from current_phase_end-step to current_phase_end
       q = ps.configAtParam(pId, t)
@@ -111,10 +116,14 @@ def getSurfacesFromGuideContinuous(rbprmBuilder, ps, surfaces_dict ,pId, viewer 
           if viewer:
             displaySurfaceFromPoints(viewer,intersection,[0,0,1,1])
       else :
-        phase_surfaces.append(surface) 
-    phase_surfaces = sorted(phase_surfaces) 
-    seqs.append(phase_surfaces)
-
+        phase_surfaces.append(surface) # [0] because the last vector contain the normal of the surface
+    #print "There was "+str(len(phase_contacts_names))+" surfaces in contact during this phase."
+    phase_surfaces = sorted(phase_surfaces) # why is this step required ? without out the lp can fail
+    phase_surfaces_array = [] # convert from list to array, we cannot do this before because sorted() require list
+    for surface in phase_surfaces:
+      phase_surfaces_array.append(array(surface).T)
+    #print "phase_surfaces_array = ",phase_surfaces_array    
+    seqs.append(phase_surfaces_array)
     # increase values for next phase
     t = current_phase_end
     i += 1 
@@ -124,9 +133,6 @@ def getSurfacesFromGuideContinuous(rbprmBuilder, ps, surfaces_dict ,pId, viewer 
     if current_phase_end >= pathLength:
       current_phase_end = pathLength
   # end for all the guide path
-  
-  seqs = listToArray(seqs) 
-
   #get rotation matrix of the root at each discretization step
   configs = []
   for t in arange (0, pathLength, step) :
