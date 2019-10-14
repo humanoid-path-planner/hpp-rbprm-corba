@@ -54,7 +54,7 @@ v = vf.createViewer(displayArrows = True)
 # Setting initial configuration
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init[3:7] = [0,0,0,1]
-q_init [0:3] = [0, 0, 1.]
+q_init [0:3] = [0, 0, rbprmBuilder.ref_height]
 v (q_init)
 ps.setInitialConfig (q_init)
 # set goal config
@@ -79,6 +79,7 @@ ps.selectPathPlanner("DynamicPlanner")
 t = ps.solve ()
 print "Guide planning time : ",t
 
+pathId = 0
 
 # display solution : 
 from hpp.gepetto import PathPlayer
