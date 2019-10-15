@@ -43,11 +43,16 @@ def getAllSurfacesDict (afftool) :
 
 # get rotation matrices form configs
 def getRotationMatrixFromConfigs(configs) :
+  eigenpy.switchToNumpyMatrix()
   R = []
   for config in configs:
     q = [0,0,0] + config[3:7]
-    #print "q = ",q
-    R.append(np.array(XYZQUATToSe3(q).rotation))
+    print "q = ",q
+    placement = XYZQUATToSe3(q)
+    print "placement = ",placement
+    rot = placement.rotation
+    print "rot = ",rot
+    R.append(np.array(rot))
   print "R in getRotationMatrixFromConfigs : ",R
   return R   
     
@@ -112,9 +117,10 @@ def getSurfacesFromGuideContinuous(rbprmBuilder,ps,afftool,pId,viewer = None,ste
       if useIntersection and area(surface) > MAX_SURFACE : 
         if name in step_contacts : 
           intersection = intersections[step_contacts.index(name)]
-          phase_surfaces.append(intersection)
-          if viewer:
-            displaySurfaceFromPoints(viewer,intersection,[0,0,1,1])
+          if len(intersection) > 3 :
+            phase_surfaces.append(intersection)
+            if viewer:
+                displaySurfaceFromPoints(viewer,intersection,[0,0,1,1])
       else :
         phase_surfaces.append(surface) # [0] because the last vector contain the normal of the surface
     #print "There was "+str(len(phase_contacts_names))+" surfaces in contact during this phase."
