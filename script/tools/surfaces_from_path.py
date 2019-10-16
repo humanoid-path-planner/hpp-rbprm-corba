@@ -86,6 +86,7 @@ def getMergedPhases (seqs):
     nseqs.append(nseq)  
   return nseqs    
 
+
 def computeRootYawAngleBetwwenConfigs(q0,q1):
   quat0 = Quaternion(q0[6],q0[3],q0[4],q0[5])
   quat1 = Quaternion(q1[6],q1[3],q1[4],q1[5])

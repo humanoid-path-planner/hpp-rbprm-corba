@@ -13,7 +13,7 @@ mu=0.5# coefficient of friction
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Robot()
 # Define bounds for the root : bounding box of the scenario
-root_bounds = [0,12,0.,2., 0.98, 0.98]
+root_bounds = [0,18.5,0.,24., 0.98, 0.98]
 rbprmBuilder.setJointBounds ("root_joint", root_bounds)
 # As this scenario only consider walking, we fix the DOF of the torso :
 rbprmBuilder.setJointBounds ('torso_1_joint', [0,0])
@@ -99,16 +99,24 @@ def generate_random_conf(bounds):
 	    print "Getting invalid config. try again."
 	    print message
 #set init
-q_init = generate_random_conf(root_bounds)
-v (q_init)
-ps.setInitialConfig (q_init)
-print "Press ENTER to continue"
-raw_input()
+while(True):
+    q_init = generate_random_conf(root_bounds)
+    v (q_init)
+    ps.setInitialConfig (q_init)
+    print "Accept?y/n"
+    user_in = raw_input()
+    if user_in == 'y':
+        break
+
+
 #set goal
-q_goal = generate_random_conf(root_bounds)
-v (q_goal)
-print "Press ENTER to continue"
-raw_input()
+while(True):
+    q_goal = generate_random_conf(root_bounds)
+    v (q_goal)
+    print "Accept?y/n"
+    user_in = raw_input()
+    if user_in == 'y':
+        break
 
 ps.resetGoalConfigs()
 ps.addGoalConfig (q_goal)
@@ -127,6 +135,14 @@ ps.selectPathPlanner("DynamicPlanner")
 # Solve the planning problem :
 #ps.setMaxIterPathPlanning(1000)
 t = ps.solve ()
+#tic = time.time()
+#v.solveAndDisplay('rm',5,0.01)
+#ps.optimizePath(0)
+#print "solve in " + str(time.time()-tic)
+
+#raw_input()
+
+
 print "Guide planning time : ",t
 
 
