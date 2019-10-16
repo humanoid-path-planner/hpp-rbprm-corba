@@ -4,7 +4,8 @@ from hpp.corbaserver import Client
 from hpp.corbaserver import ProblemSolver
 import time
 
-
+Robot.urdfName +="_large_reducedROM"
+Robot.urdfNameRom =  ['talos_lleg_rom_reduced','talos_rleg_rom_reduced']
 
 vMax = 0.3# linear velocity bound for the root
 aMax = 0.1 # linear acceleration bound for the root
@@ -21,9 +22,13 @@ rbprmBuilder.setJointBounds ('torso_2_joint', [0.,0.])
 
 # The following lines set constraint on the valid configurations:
 # a configuration is valid only if all limbs can create a contact with the corresponding afforcances type
-rbprmBuilder.setFilter(['talos_lleg_rom','talos_rleg_rom'])
-rbprmBuilder.setAffordanceFilter('talos_lleg_rom', ['Support',])
-rbprmBuilder.setAffordanceFilter('talos_rleg_rom', ['Support'])
+rbprmBuilder.setFilter(Robot.urdfNameRom)
+for rom in Robot.urdfNameRom:
+    rbprmBuilder.setAffordanceFilter(rom, ['Support',])
+
+rbprmBuilder.setReferenceEndEffector('talos_lleg_rom_reduced',rbprmBuilder.ref_EE_lLeg)
+rbprmBuilder.setReferenceEndEffector('talos_rleg_rom_reduced',rbprmBuilder.ref_EE_rLeg)
+
 # We also bound the rotations of the torso. (z, y, x)
 rbprmBuilder.boundSO3([-4.,4.,-0.1,0.1,-0.1,0.1])
 # Add 6 extraDOF to the problem, used to store the linear velocity and acceleration of the root
