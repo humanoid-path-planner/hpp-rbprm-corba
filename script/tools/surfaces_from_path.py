@@ -50,13 +50,13 @@ def getRotationMatrixFromConfigs(configs) :
   R = []
   for config in configs:
     q = [0,0,0] + config[3:7]
-    print "q = ",q
+    #print "q = ",q
     placement = XYZQUATToSe3(q)
-    print "placement = ",placement
+    #print "placement = ",placement
     rot = placement.rotation
-    print "rot = ",rot
+    #print "rot = ",rot
     R.append(np.array(rot))
-  print "R in getRotationMatrixFromConfigs : ",R
+  #print "R in getRotationMatrixFromConfigs : ",R
   return R   
     
 # get contacted surface names at configuration
