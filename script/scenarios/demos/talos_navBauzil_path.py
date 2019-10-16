@@ -4,8 +4,7 @@ from hpp.corbaserver import Client
 from hpp.corbaserver import ProblemSolver
 import time
 
-
-
+Robot.urdfName += "_large"
 vMax = 0.3# linear velocity bound for the root
 aMax = 0.1 # linear acceleration bound for the root
 extraDof = 6
@@ -38,7 +37,7 @@ ps = ProblemSolver( rbprmBuilder )
 ps.setParameter("Kinodynamic/velocityBound",vMax)
 ps.setParameter("Kinodynamic/accelerationBound",aMax)
 # force the orientation of the trunk to match the direction of the motion
-ps.setParameter("Kinodynamic/forceYawOrientation",True)
+#ps.setParameter("Kinodynamic/forceYawOrientation",True)
 ps.setParameter("DynamicPlanner/sizeFootX",0.2)
 ps.setParameter("DynamicPlanner/sizeFootY",0.12)
 ps.setParameter("DynamicPlanner/friction",mu)
@@ -56,7 +55,7 @@ afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
 afftool.loadObstacleModel ("hpp_environments", "multicontact/floor_bauzil", "planning", vf)
 v = vf.createViewer(displayArrows = True)
-#afftool.visualiseAffordances('Support', v, v.color.lightBrown)
+afftool.visualiseAffordances('Support', v, v.color.lightBrown)
 v.addLandmark(v.sceneName,1)
 
 # Setting initial configuration

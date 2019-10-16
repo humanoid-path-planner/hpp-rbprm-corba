@@ -3,8 +3,6 @@ from hpp.gepetto import Viewer
 from hpp.corbaserver import ProblemSolver
 import time
 
-
-
 vMax = 0.3# linear velocity bound for the root
 aMax = 0.1# linear acceleration bound for the root
 extraDof = 6

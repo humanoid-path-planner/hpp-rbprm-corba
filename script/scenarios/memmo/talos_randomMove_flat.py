@@ -108,6 +108,7 @@ floor_Z = 0.
 s0 = sampleRandomStateFlatFloor(fullBody,limbsInContact,floor_Z)
 
 q_init = s0.q()
+
 q_goal = q_ref[::]
 q_goal[0:7] = tp.ps.configAtParam(pId,tp.ps.pathLength(pId))[0:7]
 q_goal[2] = q_ref[2]
