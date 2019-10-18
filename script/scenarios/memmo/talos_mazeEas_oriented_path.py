@@ -3,13 +3,12 @@ from hpp.gepetto import Viewer
 from hpp.corbaserver import Client
 from hpp.corbaserver import ProblemSolver
 import time
-from tools.sample_root_config import generate_random_conf_without_orientation
+from tools.sample_root_config import generate_random_conf_with_orientation
+
 Robot.urdfName += "_large"
-
 CONFIRM_SAMPLING = False
-
 vMax = 0.3# linear velocity bound for the root
-aMax = 0.2 # linear acceleration bound for the root
+aMax = 0.1 # linear acceleration bound for the root
 extraDof = 6
 mu=0.5# coefficient of friction
 # Creating an instance of the helper class, and loading the robot
@@ -80,9 +79,9 @@ v(q_goal)
 
 import numpy as np
 
-#set init
+
 while(True):
-    q_init = generate_random_conf_without_orientation(rbprmBuilder,root_bounds)
+    q_init = generate_random_conf_with_orientation(rbprmBuilder,root_bounds)
     v (q_init)
     ps.setInitialConfig (q_init)
     if CONFIRM_SAMPLING:
@@ -96,7 +95,7 @@ while(True):
 
 #set goal
 while(True):
-    q_goal = generate_random_conf_without_orientation(rbprmBuilder,root_bounds)
+    q_goal = generate_random_conf_with_orientation(rbprmBuilder,root_bounds)
     v (q_goal)
     if CONFIRM_SAMPLING:
       print "Accept?y/n"
@@ -121,23 +120,22 @@ ps.selectDistance("Kinodynamic")
 ps.selectPathPlanner("DynamicPlanner")
 
 # Solve the planning problem :
-ps.setMaxIterPathPlanning(100000)
+ps.setMaxIterPathPlanning(50000)
 t = ps.solve ()
+#tic = time.time()
 #v.solveAndDisplay('rm',5,0.01)
+#ps.optimizePath(0)
+#print "solve in " + str(time.time()-tic)
+
+#raw_input()
+
 
 print "Guide planning time : ",t
-
 
 for i in range(10):
     print "Optimize path, "+str(i+1)+"/10 ... "
     ps.optimizePath(ps.numberPaths()-1)
-
-ps.extractPath(ps.numberPaths()-1,1.,ps.pathLength(ps.numberPaths()-1)-1.)
 pathId = ps.numberPaths()-1
-q_init = ps.configAtParam(pathId,0)
-q_goal = ps.configAtParam(pathId,ps.pathLength(pathId))
-
-
 
 
 # display solution : 
@@ -149,6 +147,7 @@ v.client.gui.setVisibility("path_"+str(pathId)+"_root","ALWAYS_ON_TOP")
 pp.dt = 0.01
 pp(pathId)
 
+pathId = ps.numberPaths()-1
 # move the robot out of the view before computing the contacts
 q_far = q_init[::]
 q_far[2] = -2
