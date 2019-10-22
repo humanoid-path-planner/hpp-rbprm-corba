@@ -20,26 +20,27 @@
 from hpp.corbaserver.client import Client as _Parent
 from hpp_idl.hpp.corbaserver.rbprm import RbprmBuilder
 
-class Client (_Parent):
-  """
+
+class Client(_Parent):
+    """
   Connect and create clients for hpp-rbprm library.
   """
 
-  defaultClients = {
-          'rbprmbuilder'  : RbprmBuilder,
-          }
+    defaultClients = {
+        'rbprmbuilder': RbprmBuilder,
+    }
 
-  def __init__(self, url = None, context = "corbaserver"):
-    """
+    def __init__(self, url=None, context="corbaserver"):
+        """
     Initialize CORBA and create default clients.
     :param url: URL in the IOR, corbaloc, corbalocs, and corbanames formats.
                 For a remote corba server, use
                 url = "corbaloc:iiop:<host>:<port>/NameService"
     """
-    self._initOrb (url)
-    self._makeClients ("rbprm", self.defaultClients, context)
+        self._initOrb(url)
+        self._makeClients("rbprm", self.defaultClients, context)
 
-    # self.rbprmbuilder is created by self._makeClients
-    # The old code stored the object as self.rbprm
-    # Make it backward compatible.
-    self.rbprm = self.rbprmbuilder
+        # self.rbprmbuilder is created by self._makeClients
+        # The old code stored the object as self.rbprm
+        # Make it backward compatible.
+        self.rbprm = self.rbprmbuilder

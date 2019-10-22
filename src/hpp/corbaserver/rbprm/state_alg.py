@@ -17,21 +17,24 @@
 # <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
+
+import numpy as np
 from hpp.corbaserver.rbprm.rbprmstate import State
+
 try:
-    from hpp.corbaserver.rbprm.tools.com_constraints import *
-    from CWC_methods import compute_CWC, is_stable
-    from lp_find_point import find_valid_c_cwc, find_valid_c_cwc_qp, lp_ineq_4D
-except:
-    #~ print "WARNING: in state_alg, some optinal dependencies were not found"
+    from hpp.corbaserver.rbprm.tools.com_constraints import get_com_constraint_at_transform
+    from CWC_methods import compute_CWC
+    from lp_find_point import find_valid_c_cwc_qp, lp_ineq_4D
+except Exception:
+    # ~ print "WARNING: in state_alg, some optinal dependencies were not found"
     pass
 
-## algorithmic methods on state
-   
+# # algorithmic methods on state
 
-## Given a target location
-## computes the closest transformation from the current configuration
-## which is the most likely feaasible through projection
+
+# # Given a target location
+# # computes the closest transformation from the current configuration
+# # which is the most likely feaasible through projection
 # \param state State considered
 # \param limbName name of the considered limb to create contact with
 # \param p 3d position of the point
@@ -40,11 +43,12 @@ except:
 def closestTransform(state, limbName, p, n):
     return state.cl.computeTargetTransform(limbName, state.q(), p, n)
 
-## Uses a lp to determine whether the com kinematic constraints
-## will be satisfied at a given configuration
-## if the limb is already in contact, replace the 
-## previous contact. Only considers kinematic limitations.
-## collision and equilibrium are NOT considered.
+
+# # Uses a lp to determine whether the com kinematic constraints
+# # will be satisfied at a given configuration
+# # if the limb is already in contact, replace the
+# # previous contact. Only considers kinematic limitations.
+# # collision and equilibrium are NOT considered.
 # \param state State considered
 # \param limbName name of the considered limb to create contact with
 # \param p 3d position of the point
@@ -55,16 +59,16 @@ def isContactReachable(state, limbName, p, n, limbsCOMConstraints):
     tr = closestTransform(state, limbName, p, n)
     new_ineq = get_com_constraint_at_transform(tr, limbName, limbsCOMConstraints)
     active_ineq = state.getComConstraint(limbsCOMConstraints, [limbName])
-    res_ineq = [np.vstack([new_ineq[0],active_ineq[0]]), np.hstack([new_ineq[1],active_ineq[1]])]
-    success, status_ok , res = lp_ineq_4D(res_ineq[0],-res_ineq[1])
+    res_ineq = [np.vstack([new_ineq[0], active_ineq[0]]), np.hstack([new_ineq[1], active_ineq[1]])]
+    success, status_ok, res = lp_ineq_4D(res_ineq[0], -res_ineq[1])
     if not success:
         print("In isContactReachable no stability, Lp failed (should not happen) ", status_ok)
-        return False, [-1,-1,-1]
+        return False, [-1, -1, -1]
     return (res[3] >= 0), res[0:3]
-    
 
-## Computes the intermediary state between two states
-## that is the state where the broken configuration have been remove
+
+# # Computes the intermediary state between two states
+# # that is the state where the broken configuration have been remove
 # \param sfrom init state
 # \param sto target state
 # \return whether the creation was successful, as well as the new state
@@ -72,40 +76,43 @@ def computeIntermediateState(sfrom, sto):
     sid = sfrom.cl.computeIntermediary(sfrom.sId, sto.sId)
     return State(sfrom.fullBody, sid, False)
 
-## tries to add a new contact to the state
-## if the limb is already in contact, replace the 
-## previous contact. Only considers kinematic limitations.
-## collision and equilibrium are NOT considered.
+
+# # tries to add a new contact to the state
+# # if the limb is already in contact, replace the
+# # previous contact. Only considers kinematic limitations.
+# # collision and equilibrium are NOT considered.
 # \param state State considered
 # \param limbName name of the considered limb to create contact with
 # \param p 3d position of the point
 # \param n 3d normal of the contact location center
 # \return (State, success) whether the creation was successful, as well as the new state
-def addNewContact(state, limbName, p, n, num_max_sample = 0, lockOtherJoints = False):
+def addNewContact(state, limbName, p, n, num_max_sample=0, lockOtherJoints=False):
     sId = state.cl.addNewContact(state.sId, limbName, p, n, num_max_sample, lockOtherJoints)
-    if(sId != -1):
-        return State(state.fullBody, sId = sId), True
+    if (sId != -1):
+        return State(state.fullBody, sId=sId), True
     return state, False
 
-## tries to remove a new contact from a state
-## if the limb is already in contact, replace the 
-## previous contact. Only considers kinematic limitations.
-## collision and equilibrium are NOT considered.
+
+# # tries to remove a new contact from a state
+# # if the limb is already in contact, replace the
+# # previous contact. Only considers kinematic limitations.
+# # collision and equilibrium are NOT considered.
 # \param state State considered
 # \param limbName name of the considered limb to create contact with
 # \return (State, success) whether the removal was successful, as well as the new state
-def removeContact(state, limbName, projectToCOM = False, friction = 0.6):
+def removeContact(state, limbName, projectToCOM=False, friction=0.6):
     sId = state.cl.removeContact(state.sId, limbName)
-    if(sId != -1):        
-        s = State(state.fullBody, sId = sId)
+    if (sId != -1):
+        s = State(state.fullBody, sId=sId)
         if projectToCOM:
-            return s, projectToFeasibleCom(s, ddc =[0.,0.,0.], max_num_samples = 10, friction = friction)
+            return s, projectToFeasibleCom(s, ddc=[0., 0., 0.], max_num_samples=10, friction=friction)
         else:
             return s, True
     return state, False
 
-## tries to add a new contact to the state
-# if the limb is already in contact, replace the 
+
+# # tries to add a new contact to the state
+# if the limb is already in contact, replace the
 # previous contact. Only considers kinematic limitations.
 # collision and equilibrium are NOT considered. Before doing the costful profjection
 # first solves a reachability test to see if target is reachable
@@ -115,67 +122,76 @@ def removeContact(state, limbName, projectToCOM = False, friction = 0.6):
 # \param n 3d normal of the contact location center
 # \param max_num_samples max number of sampling in case projection ends up in collision
 # \return (State, success) whether the creation was successful, as well as the new state
-def addNewContactIfReachable(state, limbName, p, n, limbsCOMConstraints, projectToCom = False, max_num_samples = 0, friction = 0.6):
-    if limbsCOMConstraints == None:
+def addNewContactIfReachable(state,
+                             limbName,
+                             p,
+                             n,
+                             limbsCOMConstraints,
+                             projectToCom=False,
+                             max_num_samples=0,
+                             friction=0.6):
+    if limbsCOMConstraints is None:
         ok = True
     else:
-        ok, res  = isContactReachable(state, limbName, p, n, limbsCOMConstraints)
-    if(ok):
+        ok, res = isContactReachable(state, limbName, p, n, limbsCOMConstraints)
+    if (ok):
         s, success = addNewContact(state, limbName, p, n, max_num_samples)
         if success and projectToCom:
-            success = projectToFeasibleCom(s, ddc =[0.,0.,0.], max_num_samples = max_num_samples, friction = friction)
+            success = projectToFeasibleCom(s, ddc=[0., 0., 0.], max_num_samples=max_num_samples, friction=friction)
         return s, success
     else:
         return state, False
-        
-## Project a state to a static equilibrium location
+
+
+# # Project a state to a static equilibrium location
 # \param state State considered
 # \param ddc name considered acceleeration (null by default)
 # \param max_num_samples max number of sampling in case projection ends up in collision
 # \param friction considered friction coefficient
 # \return whether the projection was successful
-def projectToFeasibleCom(state,  ddc =[0.,0.,0.], max_num_samples = 10, friction = 0.6):
-    #~ H, h = state.getContactCone(friction)
+def projectToFeasibleCom(state, ddc=[0., 0., 0.], max_num_samples=10, friction=0.6):
+    # ~ H, h = state.getContactCone(friction)
     ps = state.getContactPosAndNormals()
     p = ps[0][0]
     N = ps[1][0]
     print("p", p)
     print("N", N)
-    #~ try:
-    H = compute_CWC(p, N, state.fullBody.client.basic.robot.getMass(), mu = friction, simplify_cones = False)
+    # ~ try:
+    H = compute_CWC(p, N, state.fullBody.client.basic.robot.getMass(), mu=friction, simplify_cones=False)
     c_ref = state.getCenterOfMass()
-        #~ Kin = state.getComConstraint(limbsCOMConstraints, [])
-        #~ res = find_valid_c_cwc_qp(H, c_ref, Kin, ddc, state.fullBody.getMass())
-    success, p_solved , x = find_valid_c_cwc_qp(H, c_ref,None, ddc, state.fullBody.getMass())
-    #~ except:
-        #~ success = False
+    # ~ Kin = state.getComConstraint(limbsCOMConstraints, [])
+    # ~ res = find_valid_c_cwc_qp(H, c_ref, Kin, ddc, state.fullBody.getMass())
+    success, p_solved, x = find_valid_c_cwc_qp(H, c_ref, None, ddc, state.fullBody.getMass())
+    # ~ except:
+    # ~ success = False
     if success:
         x = x.tolist()
-        #~ if x[2] < 0.9:
+        # ~ if x[2] < 0.9:
         x[2] += 0.35
         for i in range(10):
-            if state.fullBody.projectStateToCOM(state.sId ,x, max_num_samples):
+            if state.fullBody.projectStateToCOM(state.sId, x, max_num_samples):
                 print("success after " + str(i) + " trials")
                 return True
             else:
-                x[2]-=0.05
+                x[2] -= 0.05
     else:
         print("qp failed")
-    return False;
-    
+    return False
+
+
 def isContactCreated(s1, s2):
-    s15 = computeIntermediateState(s1,s2)
+    s15 = computeIntermediateState(s1, s2)
     lcS15 = s15.getLimbsInContact()
     lcS1 = s1.getLimbsInContact()
     lcS2 = s2.getLimbsInContact()
-    if(len(lcS15) == len(lcS1)): #no contact breaks
+    if (len(lcS15) == len(lcS1)):  # no contact breaks
         return True
     else:
         return not (len(lcS15) == len(lcS2))
-        
+
+
 def planToStates(fullBody, configs):
     states = []
     for i, _ in enumerate(configs):
-        states += [State(fullBody,i) ]
+        states += [State(fullBody, i)]
     return states
-        
