@@ -24,37 +24,26 @@
 #include <hpp/corbaserver/server.hh>
 
 namespace hpp {
-  namespace rbprm {
-    Server::Server (corbaServer::Server* server)
-      : corbaServer::ServerPlugin (server),
-      rbprmBuilder_ (NULL)
-    {}
+namespace rbprm {
+Server::Server(corbaServer::Server* server) : corbaServer::ServerPlugin(server), rbprmBuilder_(NULL) {}
 
-    Server::~Server ()
-    {
-      if (rbprmBuilder_) delete rbprmBuilder_;
-    }
+Server::~Server() {
+  if (rbprmBuilder_) delete rbprmBuilder_;
+}
 
-    std::string Server::name () const
-    {
-      return "rbprm";
-    }
+std::string Server::name() const { return "rbprm"; }
 
-    /// Start corba server
-    void Server::startCorbaServer(const std::string& contextId,
-                                  const std::string& contextKind)
-    {
-      bool mThd = parent()->multiThread();
-      rbprmBuilder_ = new corba::Server <impl::RbprmBuilder> (0, NULL, mThd, "child");
-      rbprmBuilder_->implementation ().setServer (this);
+/// Start corba server
+void Server::startCorbaServer(const std::string& contextId, const std::string& contextKind) {
+  bool mThd = parent()->multiThread();
+  rbprmBuilder_ = new corba::Server<impl::RbprmBuilder>(0, NULL, mThd, "child");
+  rbprmBuilder_->implementation().setServer(this);
 
-      if (rbprmBuilder_->startCorbaServer(contextId, contextKind,
-                                          "rbprm", "rbprmbuilder") != 0) {
-        HPP_THROW_EXCEPTION (hpp::Exception,
-            "Failed to start corba rbprm server.");
-      }
-    }
-  } // namespace rbprm
-} // namespace hpp
+  if (rbprmBuilder_->startCorbaServer(contextId, contextKind, "rbprm", "rbprmbuilder") != 0) {
+    HPP_THROW_EXCEPTION(hpp::Exception, "Failed to start corba rbprm server.");
+  }
+}
+}  // namespace rbprm
+}  // namespace hpp
 
 HPP_CORBASERVER_DEFINE_PLUGIN(hpp::rbprm::Server)

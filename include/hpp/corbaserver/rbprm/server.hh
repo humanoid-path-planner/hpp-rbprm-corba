@@ -18,37 +18,35 @@
 // <http://www.gnu.org/licenses/>.
 
 #ifndef HPP_RBPRM_CORBA_SERVER_HH
-# define HPP_RBPRM_CORBA_SERVER_HH
+#define HPP_RBPRM_CORBA_SERVER_HH
 
-# include <hpp/corba/template/server.hh>
+#include <hpp/corba/template/server.hh>
 
-# include <hpp/corbaserver/problem-solver-map.hh>
-# include <hpp/corbaserver/rbprm/config.hh>
-# include <hpp/corbaserver/server-plugin.hh>
+#include <hpp/corbaserver/problem-solver-map.hh>
+#include <hpp/corbaserver/rbprm/config.hh>
+#include <hpp/corbaserver/server-plugin.hh>
 
 namespace hpp {
-  namespace rbprm {
-    namespace impl {
-      class RbprmBuilder;
-    }
-    class HPP_RBPRM_CORBA_DLLAPI Server : public corbaServer::ServerPlugin
-    {
-    public:
-      Server (corbaServer::Server* parent);
+namespace rbprm {
+namespace impl {
+class RbprmBuilder;
+}
+class HPP_RBPRM_CORBA_DLLAPI Server : public corbaServer::ServerPlugin {
+ public:
+  Server(corbaServer::Server* parent);
 
-      ~Server ();
+  ~Server();
 
-      /// Start corba server
-      /// Call hpp::corba::Server <impl::Problem>::startCorbaServer
-      void startCorbaServer(const std::string& contextId,
-                            const std::string& contextKind);
+  /// Start corba server
+  /// Call hpp::corba::Server <impl::Problem>::startCorbaServer
+  void startCorbaServer(const std::string& contextId, const std::string& contextKind);
 
-      std::string name () const;
+  std::string name() const;
 
-    public:
-      corba::Server <impl::RbprmBuilder>* rbprmBuilder_;
-    }; // class Server
-  } // namespace rbprm
-} // namespace hpp
+ public:
+  corba::Server<impl::RbprmBuilder>* rbprmBuilder_;
+};  // class Server
+}  // namespace rbprm
+}  // namespace hpp
 
-#endif // HPP_RBPRM_CORBA_SERVER_HH
+#endif  // HPP_RBPRM_CORBA_SERVER_HH

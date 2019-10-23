@@ -16,12 +16,11 @@
 // <http://www.gnu.org/licenses/>.
 
 #ifndef HPP_MANIPULATION_CORBA_FWD_HH
-# define HPP_MANIPULATION_CORBA_FWD_HH
+#define HPP_MANIPULATION_CORBA_FWD_HH
 
 namespace hpp {
-  namespace manipulation {
-    namespace corba {
-    }
-  }
-}
-#endif // HPP_MANIPULATION_CORBA_FWD_HH
+namespace manipulation {
+namespace corba {}
+}  // namespace manipulation
+}  // namespace hpp
+#endif  // HPP_MANIPULATION_CORBA_FWD_HH

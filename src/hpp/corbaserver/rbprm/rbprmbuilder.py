@@ -19,98 +19,102 @@
 from hpp.corbaserver.rbprm import Client as RbprmClient
 from hpp.corbaserver.robot import Robot
 
-## Load and handle a RbprmDevice robot for rbprm planning
+
+# # Load and handle a RbprmDevice robot for rbprm planning
 #
-#  A RbprmDevice robot is a dual representation of a robots. One robot describes the 
+#  A RbprmDevice robot is a dual representation of a robots. One robot describes the
 #  trunk of the robot, and a set of robots describe the range of motion of each limb of the robot.
-class Builder (Robot):
-  ## Constructor
-  def __init__ (self, load = True):
-      self.tf_root = "base_link"
-      self.clientRbprm = RbprmClient ()
-      self.load = load
+class Builder(Robot):
+    # # Constructor
+    def __init__(self, load=True):
+        self.tf_root = "base_link"
+        self.clientRbprm = RbprmClient()
+        self.load = load
 
-  ## Virtual function to load the robot model.
-  #
-  # \param urdfName urdf description of the robot trunk,
-  # \param urdfNameroms either a string, or an array of strings, indicating the urdf of the different roms to add.
-  # \param rootJointType type of root joint among ("freeflyer", "planar",
-  #        "anchor"),
-  # \param meshPackageName name of the meshpackage from where the robot mesh will be loaded
-  # \param packageName name of the package from where the robot will be loaded
-  # \param urdfSuffix optional suffix for the urdf of the robot package
-  # \param srdfSuffix optional suffix for the srdf of the robot package
-  def loadModel (self, urdfName, urdfNameroms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix):
-    Robot.__init__(self,urdfName,rootJointType, False)
-    if(isinstance(urdfNameroms, list)):
-      for urdfNamerom in urdfNameroms:
-        self.clientRbprm.rbprm.loadRobotRomModel(urdfNamerom, rootJointType, packageName, urdfNamerom, urdfSuffix, srdfSuffix)
-    else:
-      self.clientRbprm.rbprm.loadRobotRomModel(urdfNameroms, rootJointType, packageName, urdfNameroms, urdfSuffix, srdfSuffix)
-    self.clientRbprm.rbprm.initNewProblemSolver()
-    self.clientRbprm.rbprm.loadRobotCompleteModel(urdfName, rootJointType, packageName, urdfName, urdfSuffix, srdfSuffix)
-    self.client.robot.meshPackageName = meshPackageName
-    self.meshPackageName = meshPackageName
-    self.packageName = packageName
-    self.urdfName = urdfName
-    self.urdfSuffix = urdfSuffix
-    self.srdfSuffix = srdfSuffix
-
-
-
-  ## Init RbprmShooter
-  #
-  def initshooter (self):
-    return self.clientRbprm.rbprm.initshooter ()
-
-  ## Sets limits on robot orientation, described according to Euler's ZYX rotation order
-  #
-  # \param bounds 6D vector with the lower and upperBound for each rotation axis in sequence
-  def boundSO3 (self,  bounds):
-    return self.clientRbprm.rbprm.boundSO3 (bounds)
-
-  ## Specifies a preferred affordance for a given rom.
-  # This constrains the planner to accept a rom configuration only if
-  # it collides with a surface the normal of which has these properties.
-  #
-  # \param rom name of the rome,
-  # \param affordances list of affordance names
-  def setAffordanceFilter (self, rom, affordances):
-    return self.clientRbprm.rbprm.setAffordanceFilter (rom, affordances)
-
-  ## Specifies a rom constraint for the planner.
-  # A configuration will be valid if and only if the considered rom collides
-  # with the environment.
-  #
-  # \param romFilter array of roms indicated by name, which determine the constraint.
-  def setFilter (self, romFilter):
-    return self.clientRbprm.rbprm.setFilter (romFilter)
-
-  ## Export a computed path for blender
+    # # Virtual function to load the robot model.
     #
-  # \param problem the problem associated with the path computed for the robot
-  # \param stepsize increment along the path
-  # \param pathId if of the considered path
-  # \param filename name of the output file where to save the output
-  def exportPath (self, viewer, problem, pathId, stepsize, filename):
-    import hpp.gepetto.blender.exportmotion as em
-    em.exportPath(viewer, self.client.robot, problem, pathId, stepsize, filename)
+    # \param urdfName urdf description of the robot trunk,
+    # \param urdfNameroms either a string, or an array of strings, indicating the urdf of the different roms to add.
+    # \param rootJointType type of root joint among ("freeflyer", "planar",
+    #        "anchor"),
+    # \param meshPackageName name of the meshpackage from where the robot mesh will be loaded
+    # \param packageName name of the package from where the robot will be loaded
+    # \param urdfSuffix optional suffix for the urdf of the robot package
+    # \param srdfSuffix optional suffix for the srdf of the robot package
+    def loadModel(self, urdfName, urdfNameroms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix):
+        Robot.__init__(self, urdfName, rootJointType, False)
+        if (isinstance(urdfNameroms, list)):
+            for urdfNamerom in urdfNameroms:
+                self.clientRbprm.rbprm.loadRobotRomModel(urdfNamerom, rootJointType, packageName, urdfNamerom,
+                                                         urdfSuffix, srdfSuffix)
+        else:
+            self.clientRbprm.rbprm.loadRobotRomModel(urdfNameroms, rootJointType, packageName, urdfNameroms,
+                                                     urdfSuffix, srdfSuffix)
+        self.clientRbprm.rbprm.initNewProblemSolver()
+        self.clientRbprm.rbprm.loadRobotCompleteModel(urdfName, rootJointType, packageName, urdfName, urdfSuffix,
+                                                      srdfSuffix)
+        self.client.robot.meshPackageName = meshPackageName
+        self.meshPackageName = meshPackageName
+        self.packageName = packageName
+        self.urdfName = urdfName
+        self.urdfSuffix = urdfSuffix
+        self.srdfSuffix = srdfSuffix
 
-  ## set a reference position of the end effector for the given ROM
-  # This reference will be used in the heuristic that choose the "best" contact surface
-  # and approximate the contact points in the kinodynamic planner
-  # \param romName the name of the rom
-  # \param ref the 3D reference position of the end effector, expressed in the root frame
-  def setReferenceEndEffector(self,romName,ref):
-    return self.clientRbprm.rbprm.setReferenceEndEffector(romName,ref)
+    # # Init RbprmShooter
+    #
+    def initshooter(self):
+        return self.clientRbprm.rbprm.initshooter()
 
-  ## For a given limb, return all the intersections between the limb reachable workspace and a contact surface
-  # \param configuration the root configuration
-  # \param limbName name of the considered limb
-  # \return a 3D list : first id is the different surfaces, second id is the different vertex of a surface, last id is the 3 coordinate of each vertex
-  def getContactSurfacesAtConfig(self,configuration,limbName):
-    surfaces = self.clientRbprm.rbprm.getContactSurfacesAtConfig(configuration,limbName)
-    res = []
-    for surface in surfaces:
-        res += [[surface[i:i+3] for i in range(0, len(surface),3)]] # split list of coordinate every 3 points (3D points)
-    return res
+    # # Sets limits on robot orientation, described according to Euler's ZYX rotation order
+    #
+    # \param bounds 6D vector with the lower and upperBound for each rotation axis in sequence
+    def boundSO3(self, bounds):
+        return self.clientRbprm.rbprm.boundSO3(bounds)
+
+    # # Specifies a preferred affordance for a given rom.
+    # This constrains the planner to accept a rom configuration only if
+    # it collides with a surface the normal of which has these properties.
+    #
+    # \param rom name of the rome,
+    # \param affordances list of affordance names
+    def setAffordanceFilter(self, rom, affordances):
+        return self.clientRbprm.rbprm.setAffordanceFilter(rom, affordances)
+
+    # # Specifies a rom constraint for the planner.
+    # A configuration will be valid if and only if the considered rom collides
+    # with the environment.
+    #
+    # \param romFilter array of roms indicated by name, which determine the constraint.
+    def setFilter(self, romFilter):
+        return self.clientRbprm.rbprm.setFilter(romFilter)
+
+    # # Export a computed path for blender
+    #
+    # \param problem the problem associated with the path computed for the robot
+    # \param stepsize increment along the path
+    # \param pathId if of the considered path
+    # \param filename name of the output file where to save the output
+    def exportPath(self, viewer, problem, pathId, stepsize, filename):
+        import hpp.gepetto.blender.exportmotion as em
+        em.exportPath(viewer, self.client.robot, problem, pathId, stepsize, filename)
+
+    # # set a reference position of the end effector for the given ROM
+    # This reference will be used in the heuristic that choose the "best" contact surface
+    # and approximate the contact points in the kinodynamic planner
+    # \param romName the name of the rom
+    # \param ref the 3D reference position of the end effector, expressed in the root frame
+    def setReferenceEndEffector(self, romName, ref):
+        return self.clientRbprm.rbprm.setReferenceEndEffector(romName, ref)
+
+    # # For a given limb, return all the intersections between the limb reachable workspace and a contact surface
+    # \param configuration the root configuration
+    # \param limbName name of the considered limb
+    # \return a 3D list : first id is the different surfaces, second id is the different vertex of a surface, last id
+    # is the 3 coordinate of each vertex
+    def getContactSurfacesAtConfig(self, configuration, limbName):
+        surfaces = self.clientRbprm.rbprm.getContactSurfacesAtConfig(configuration, limbName)
+        res = []
+        for surface in surfaces:
+            res += [[surface[i:i + 3]
+                     for i in range(0, len(surface), 3)]]  # split list of coordinate every 3 points (3D points)
+        return res
