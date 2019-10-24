@@ -1,9 +1,9 @@
 from hpp.corbaserver.rbprm.anymal import Robot
 from hpp.gepetto import Viewer
-from hpp.corbaserver.rbprm.tools.display_tools import *
+from tools.display_tools import *
 import time
 print "Plan guide trajectory ..."
-import anymal_flatGround_path as tp
+import anymal_slalom2_path as tp
 print "Done."
 import time
 
@@ -41,15 +41,15 @@ fullBody.setPostureWeights(fullBody.postureWeights[::]+[0]*6)
 
 print "Generate limb DB ..."
 tStart = time.time()
-dict_heuristic = {fullBody.rLegId:"fixedStep04", fullBody.lLegId:"fixedStep04", fullBody.rArmId:"static", fullBody.lArmId:"static"}
-#fullBody.loadAllLimbs("static","ReferenceConfiguration",nbSamples=50000,disableEffectorCollision=False)
-fullBody.loadAllLimbs(dict_heuristic,"ReferenceConfiguration",nbSamples=100000,disableEffectorCollision=False)
+#dict_heuristic = {fullBody.rLegId:"fixedStep04", fullBody.lLegId:"fixedStep04", fullBody.rArmId:"static", fullBody.lArmId:"static"}
+fullBody.loadAllLimbs("static","ReferenceConfiguration",nbSamples=100000,disableEffectorCollision=False)
+#fullBody.loadAllLimbs(dict_heuristic,"ReferenceConfiguration",nbSamples=100000,disableEffectorCollision=False)
 tGenerate =  time.time() - tStart
 print "Done."
 print "Databases generated in : "+str(tGenerate)+" s"
 fullBody.setReferenceConfig(q_ref)
 
-#define initial and final configurations :
+#define initial and final configurations : 
 configSize = fullBody.getConfigSize() -fullBody.client.robot.getDimensionExtraConfigSpace()
 
 q_init[0:7] = tp.ps.configAtParam(pId,0.)[0:7] # use this to get the correct orientation

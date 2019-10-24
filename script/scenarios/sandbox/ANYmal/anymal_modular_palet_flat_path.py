@@ -63,7 +63,7 @@ from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
 afftool.setMinimumArea('Support',0.03)
-afftool.loadObstacleModel ("hpp_environments", "ori/modular_palet_low_collision", "planning", vf,reduceSizes=[0.1,0,0])
+afftool.loadObstacleModel ("hpp_environments", "ori/modular_palet_flat", "planning", vf,reduceSizes=[0.11,0,0])
 #afftool.loadObstacleModel ("hpp_environments", "ori/modular_palet_low", "planning", vf)
 
 try :
@@ -88,11 +88,11 @@ v.addLandmark(v.sceneName,1)
 ps.selectConfigurationShooter("RbprmShooter")
 ps.selectPathValidation("RbprmPathValidation",0.05)
 # Choosing kinodynamic methods :
-#ps.selectSteeringMethod("RBPRMKinodynamic")
-#ps.selectDistance("Kinodynamic")
-#ps.selectPathPlanner("DynamicPlanner")
-#ps.addPathOptimizer ("RandomShortcutDynamic")
-ps.addPathOptimizer ("RandomShortcut")
+ps.selectSteeringMethod("RBPRMKinodynamic")
+ps.selectDistance("Kinodynamic")
+ps.selectPathPlanner("DynamicPlanner")
+ps.addPathOptimizer ("RandomShortcutDynamic")
+#ps.addPathOptimizer ("RandomShortcut")
 
 # init to beginning of palet
 q_init = rbprmBuilder.getCurrentConfig ();
@@ -102,7 +102,7 @@ q_init[-6] = vInit
 v(q_init)
 q_goal = q_init[::]
 q_goal[0] = -0.55
-q_goal[2] = Z_VALUE_PALET + 0.04
+q_goal[2] = Z_VALUE_PALET + 0.03
 q_goal[3:7] = [ 0, -0.0499792, 0, 0.9987503 ]
 
 ps.setInitialConfig (q_init)
@@ -150,8 +150,10 @@ ps.concatenatePath(pid,pidMiddle)
 ps.concatenatePath(pid,pidLast)
 
 """
-ps.optimizePath(pid)
-pid = ps.numberPaths()-1
+for i in range(5):
+  print "optimize pass : ",i
+  ps.optimizePath(pid)
+  pid = ps.numberPaths()-1
 """
 try :
     # display solution : 
