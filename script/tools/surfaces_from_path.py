@@ -8,7 +8,7 @@ import eigenpy
 eigenpy.switchToNumpyMatrix()
 
 ROBOT_NAME = 'talos'
-MAX_SURFACE = 0.3 # if a contact surface is greater than this value, the intersection is used instead of the whole surface
+MAX_SURFACE = 5. # if a contact surface is greater than this value, the intersection is used instead of the whole surface
 LF = 0
 RF = 1  
 
@@ -98,12 +98,12 @@ def computeRootYawAngleBetwwenConfigs(q0,q1):
 
 def isYawVariationsInsideBounds(q0,q1,max_yaw = 0.5):
   yaw = abs(computeRootYawAngleBetwwenConfigs(q0,q1))
-  print "yaw = ",yaw
+  #print "yaw = ",yaw
   return  yaw < max_yaw
 
 def getSurfacesFromGuideContinuous(rbprmBuilder,ps,afftool,pId,viewer = None,step = 1.,useIntersection= False,mergeCandidates = False,max_yaw = 0.5):
   pathLength = ps.pathLength(pId) #length of the path
-  discretizationStep = 0.1 # step at which we check the colliding surfaces
+  discretizationStep = 0.01 # step at which we check the colliding surfaces
   #print "path length = ",pathLength
   # get surface information
   all_surfaces = getAllSurfaces(afftool) 
@@ -119,21 +119,21 @@ def getSurfacesFromGuideContinuous(rbprmBuilder,ps,afftool,pId,viewer = None,ste
   q = q_prev[::]
   configs.append(q)
   while not end: # for all the path
-    print "Looking for surfaces for phase "+str(len(seqs))+" for t in ["+str(t+discretizationStep)+" ; "+str(current_phase_end)+" ] "
+    #print "Looking for surfaces for phase "+str(len(seqs))+" for t in ["+str(t+discretizationStep)+" ; "+str(current_phase_end)+" ] "
     phase_contacts_names = []
     rot_valid = True
     while t < current_phase_end and rot_valid: # get the names of all the surfaces that the rom collide while moving from current_phase_end-step to current_phase_end
       t += discretizationStep
       q = ps.configAtParam(pId, t)
       if not isYawVariationsInsideBounds(q_prev,q,max_yaw):
-        print "yaw variation out of bounds, try to reduce the time step : "
+        #print "yaw variation out of bounds, try to reduce the time step : "
         rot_valid = False
         t -= discretizationStep
         q = ps.configAtParam(pId, t)
         while isYawVariationsInsideBounds(q_prev,q,max_yaw):
-          t += 0.001
+          t += 0.0001
           q = ps.configAtParam(pId, t)
-      print " t in getSurfacesFromGuideContinuous : ",t
+      #print " t in getSurfacesFromGuideContinuous : ",t
       step_contacts = getContactsNames(rbprmBuilder,i,q)
       for contact_name in step_contacts : 
         if not contact_name in phase_contacts_names:
@@ -150,8 +150,6 @@ def getSurfacesFromGuideContinuous(rbprmBuilder,ps,afftool,pId,viewer = None,ste
           intersection = intersections[step_contacts.index(name)]
           if len(intersection) > 3 :
             phase_surfaces.append(intersection)
-            if viewer:
-                displaySurfaceFromPoints(viewer,intersection,[0,0,1,1])
       else :
         phase_surfaces.append(surface) # [0] because the last vector contain the normal of the surface
     #print "There was "+str(len(phase_contacts_names))+" surfaces in contact during this phase."
@@ -159,15 +157,17 @@ def getSurfacesFromGuideContinuous(rbprmBuilder,ps,afftool,pId,viewer = None,ste
     phase_surfaces_array = [] # convert from list to array, we cannot do this before because sorted() require list
     for surface in phase_surfaces:
       phase_surfaces_array.append(array(surface).T)
+      if viewer:
+        displaySurfaceFromPoints(viewer,surface,[0,0,1,1])
     #print "phase_surfaces_array = ",phase_surfaces_array    
     seqs.append(phase_surfaces_array)
     # increase values for next phase
     q_prev = q[::]
     configs.append(q)
     i += 1 
-    t -= discretizationStep # because we want the first iteration of the next phase to test the same t as the last iter of this phase
     if t >= (pathLength - discretizationStep/2.):
       end = True
+    t -= discretizationStep # because we want the first iteration of the next phase to test the same t as the last iter of this phase
     current_phase_end = t + step
     if current_phase_end >= pathLength:
       current_phase_end = pathLength
