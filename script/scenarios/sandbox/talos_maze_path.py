@@ -55,7 +55,18 @@ afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 5.])
 afftool.loadObstacleModel ("hpp_environments", "multicontact/maze_hard", "planning", vf)
 #load the viewer
-v = vf.createViewer(displayArrows = True)
+try :
+    v = vf.createViewer(displayArrows = True)
+except Exception:
+    print "No viewer started !"
+    class FakeViewer():
+        def __init__(self):
+            return
+        def __call__(self,q):
+            return
+        def addLandmark(self,a,b):
+            return
+    v = FakeViewer()
 v.addLandmark(v.sceneName,1)
 afftool.visualiseAffordances('Support', v, v.color.lightBrown)
 
@@ -96,11 +107,11 @@ from hpp.gepetto import PathPlayer
 pp = PathPlayer (v)
 pp.dt=0.01
 pp.displayPath(pathId)
-v.client.gui.setVisibility("path_"+str(pathId)+"_root","ALWAYS_ON_TOP")
+#v.client.gui.setVisibility("path_"+str(pathId)+"_root","ALWAYS_ON_TOP")
 pp.dt=0.01
 #pp(pathId)
 
-v.client.gui.writeNodeFile("path_"+str(pathId)+"_root","guide_path_maze_hard.obj")
+#v.client.gui.writeNodeFile("path_"+str(pathId)+"_root","guide_path_maze_hard.obj")
 
 # move the robot out of the view before computing the contacts
 q_far = q_init[::]

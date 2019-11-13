@@ -46,7 +46,18 @@ from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
 afftool.loadObstacleModel ("hpp_environments", "multicontact/ground", "planning", vf)
-v = vf.createViewer(displayArrows = True)
+try :
+    v = vf.createViewer(displayArrows = True)
+except Exception:
+    print "No viewer started !"
+    class FakeViewer():
+        def __init__(self):
+            return
+        def __call__(self,q):
+            return
+        def addLandmark(self,a,b):
+            return
+    v = FakeViewer()
 #afftool.visualiseAffordances('Support', v, v.color.lightBrown)
 
 # Setting initial configuration
@@ -84,7 +95,7 @@ from hpp.gepetto import PathPlayer
 pp = PathPlayer (v)
 pp.dt=0.1
 #pp.displayVelocityPath(0)
-v.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
+#v.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
 pp.dt=0.01
 #pp(0)
 
