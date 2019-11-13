@@ -177,7 +177,7 @@ def getSurfacesFromGuideContinuous(rbprmBuilder,ps,afftool,pId,viewer = None,ste
   return R,seqs
 
 
-def getSurfacesFromPath(rbprmBuilder, configs, surfaces_dict, viewer = None, useIntersection = False, useMergePhase = False):
+def getSurfacesFromGuide(rbprmBuilder, configs, surfaces_dict, viewer = None, useIntersection = False, useMergePhase = False):
   seqs = [] 
   # get sequence of surface candidates at each discretization step
   for i, q in enumerate(configs):    
