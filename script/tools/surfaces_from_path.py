@@ -8,7 +8,7 @@ import eigenpy
 eigenpy.switchToNumpyMatrix()
 
 ROBOT_NAME = 'talos'
-MAX_SURFACE = 5. # if a contact surface is greater than this value, the intersection is used instead of the whole surface
+MAX_SURFACE = 1. # if a contact surface is greater than this value, the intersection is used instead of the whole surface
 LF = 0
 RF = 1  
 
@@ -90,7 +90,7 @@ def getMergedPhases (seqs):
 def computeRootYawAngleBetwwenConfigs(q0,q1):
   quat0 = Quaternion(q0[6],q0[3],q0[4],q0[5])
   quat1 = Quaternion(q1[6],q1[3],q1[4],q1[5])
-  v_angular = log3(quat0.matrix().T*quat1.matrix())
+  v_angular = np.matrix(log3(quat0.matrix().T*quat1.matrix())).T
   #print "q_prev : ",q0
   #print "q      : ",q1
   #print "v_angular = ",v_angular
@@ -101,7 +101,7 @@ def isYawVariationsInsideBounds(q0,q1,max_yaw = 0.5):
   #print "yaw = ",yaw
   return  yaw < max_yaw
 
-def getSurfacesFromGuideContinuous(rbprmBuilder,ps,afftool,pId,viewer = None,step = 1.,useIntersection= False,mergeCandidates = False,max_yaw = 0.5):
+def getSurfacesFromGuideContinuous(rbprmBuilder,ps,afftool,pId,viewer = None,step = 1.,useIntersection= False,mergeCandidates = False,max_yaw = 0.5,max_surface_area = MAX_SURFACE):
   pathLength = ps.pathLength(pId) #length of the path
   discretizationStep = 0.01 # step at which we check the colliding surfaces
   #print "path length = ",pathLength
