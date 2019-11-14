@@ -324,8 +324,7 @@ std::vector<fcl::Vec3f> computeRectangleContactLocalTr(const rbprm::RbPrmFullBod
       fcl::Transform3f roWorld, roEffector;
       roWorld.setRotation(state.contactRotation_.at(name));
       roWorld.setTranslation(position);
-      roEffector = roWorld;
-      roEffector.inverse();
+      roEffector = roWorld.inverse();
       fcl::Vec3f z_axis(0, 0, 1);
       fcl::Matrix3f rotationLocal = tools::GetRotationMatrix(z_axis, limb->normal_);
       if (limb->contactType_ == _3_DOF) {
