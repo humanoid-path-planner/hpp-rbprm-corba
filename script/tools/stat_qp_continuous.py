@@ -15,10 +15,10 @@ import os
 import generate_muscod_problem as mp
 import muscodSSH as ssh
 from config import *
-from check_qp import check_traj_valid,check_muscod_traj 
+from check_qp import check_traj_valid,check_muscod_traj
 import disp_bezier
 from constraint_to_dae import *
-from display_tools import *
+from hpp.corbaserver.rbprm.tools.display_tools import *
 
 
 from gen_hrp2_statically_balanced_positions_2d_state import *
@@ -30,7 +30,7 @@ class Struct(object):
     def __init__(self):
         self.active = False
         self.placement = SE3()
-        
+
 
 def exportPickle(fullBody,s0,s1):
     configs = [s0.q() , s1.q()]
@@ -54,26 +54,26 @@ def exportPickle(fullBody,s0,s1):
             lh_patch.placement = phase.LH_patch.placement.copy()
         if phase.RH_patch.active :
             rh_patch.active = True
-            rh_patch.placement = phase.RH_patch.placement.copy()                   
+            rh_patch.placement = phase.RH_patch.placement.copy()
         phase_dic = {"LF":lf_patch, "RF":rf_patch, "RH":rh_patch,"LH":lh_patch}
         cs_dic.update({i:phase_dic})
         i+=1
-        
+
     pickle.dump(cs_dic, open('/local/fernbac/bench_iros18/export_pickle/cs0', 'wb'))
-        
-    
+
+
 
 def callMuscodBetweenTwoState(fullBody,s0,s1,c_qp = [], t_qp = []):
     configs = [s0.q() , s1.q()]
     cs = generateContactSequence(fullBody,configs,s0.sId, s1.sId,curves_initGuess=c_qp,timings_initGuess=t_qp)
     #cs = generateContactSequence(fullBody,configs,s0.sId, s1.sId)
     filename_xml = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
-    cs.saveAsXML(filename_xml, "ContactSequence")   
+    cs.saveAsXML(filename_xml, "ContactSequence")
     mp.generate_muscod_problem(filename_xml,True)
     success,ssh_ok = ssh.call_muscod()
     time.sleep(5.) # wait for sync of the ~/home (worst case, usually 0.1 is enough ... )
     converged = success and Path(CONTACT_SEQUENCE_WHOLEBODY_FILE).is_file()
-    if converged : 
+    if converged :
         cs.loadFromXML(CONTACT_SEQUENCE_WHOLEBODY_FILE,CONTACT_SEQUENCE_XML_TAG)
         kin_valid,stab_valid,stab_valid_discretized = check_muscod_traj(fullBody,cs,s0,s1)
         os.remove(CONTACT_SEQUENCE_WHOLEBODY_FILE)
@@ -82,13 +82,13 @@ def callMuscodBetweenTwoState(fullBody,s0,s1,c_qp = [], t_qp = []):
         stab_valid = False
         stab_valid_discretized = False
     return ssh_ok,converged,kin_valid,stab_valid,stab_valid_discretized
-    
+
 
 
 if Path(CONTACT_SEQUENCE_WHOLEBODY_FILE).is_file():
     os.remove(CONTACT_SEQUENCE_WHOLEBODY_FILE)
-    
-    
+
+
 states = genStateWithOneStep(fullBody,limbs[0], 500,False)
 name = "/local/fernbac/bench_iros18/muscod_qp/one_step"
 file_exist = True
@@ -97,7 +97,7 @@ while file_exist:
     filename = name +"_"+str(i)+".log"
     file_exist = Path(filename).is_file()
     i+= 1
-    
+
 f = open(filename,"w")
 print "write results in file : "+filename
 i=0
@@ -183,7 +183,7 @@ for [s0,s1] in states:
     print "#################################"
     print "#######  iter : "+str(i)+" / "+str(len(states))+"  ########"
     print "#################################"
-    
+
     f.write("Try for pair "+str(i)+" ------- \n")
     f.write("q0 = "+str(s0.q())+"\n")
     f.write("q1 = "+str(s1.q())+"\n")
@@ -194,66 +194,66 @@ for [s0,s1] in states:
     success_qp15= False
     success_qpC= False
     success_muscod= False
-    success_muscodWarmStart  = False 
+    success_muscodWarmStart  = False
     stab_valid_qp3= False
     stab_valid_qp7= False
     stab_valid_qp15= False
     stab_valid_qpC= False
-    stab_valid_muscod = False 
-    stab_valid_muscodWarmStart = False 
-    stab_valid_discretized_muscod = False 
-    stab_valid_discretized_muscodWarmStart = False 
-        
+    stab_valid_muscod = False
+    stab_valid_muscodWarmStart = False
+    stab_valid_discretized_muscod = False
+    stab_valid_discretized_muscodWarmStart = False
+
     kin_valid_qp3= False
     kin_valid_qp7= False
     kin_valid_qp15= False
     kin_valid_qpC= False
     kin_valid_muscod = False
-    kin_valid_muscodWarmStart = False    
+    kin_valid_muscodWarmStart = False
     success_qp_discret= False
     success_qp= False
     success_qp_valid= False
     success_qp_discret_valid= False
-    
+
     success_quasiStatic = fullBody.isReachableFromState(s0.sId,s1.sId)
-    
+
     best_pid = []
     pid = fullBody.isDynamicallyReachableFromState(s0.sId,s1.sId,True,numPointsPerPhases=3)
     success_qp3 = (len(pid) > 0)
     if success_qp3:
         print "qp3 converged."
-        best_pid = pid        
+        best_pid = pid
         kin_valid_qp3,stab_valid_qp3 = check_traj_valid(ps,fullBody,s0,s1,pid)
- 
-    
+
+
     pid = fullBody.isDynamicallyReachableFromState(s0.sId,s1.sId,True,numPointsPerPhases=7)
     success_qp7 = (len(pid) > 0)
     if success_qp7:
-        print "qp7 converged."        
-        best_pid = pid        
-        kin_valid_qp7,stab_valid_qp7 = check_traj_valid(ps,fullBody,s0,s1,pid)           
-    
+        print "qp7 converged."
+        best_pid = pid
+        kin_valid_qp7,stab_valid_qp7 = check_traj_valid(ps,fullBody,s0,s1,pid)
+
     pid = fullBody.isDynamicallyReachableFromState(s0.sId,s1.sId,True,numPointsPerPhases=15)
     success_qp15 = (len(pid) > 0)
     if success_qp15:
-        print "qp15 converged."        
-        best_pid = pid        
-        kin_valid_qp15,stab_valid_qp15 = check_traj_valid(ps,fullBody,s0,s1,pid)           
+        print "qp15 converged."
+        best_pid = pid
+        kin_valid_qp15,stab_valid_qp15 = check_traj_valid(ps,fullBody,s0,s1,pid)
 
     pid = fullBody.isDynamicallyReachableFromState(s0.sId,s1.sId,True,numPointsPerPhases=0)
     success_qpC = (len(pid) > 0)
     if success_qpC:
         print "qp continuous converged."
-        best_pid = pid        
-        kin_valid_qpC,stab_valid_qpC = check_traj_valid(ps,fullBody,s0,s1,pid)  
+        best_pid = pid
+        kin_valid_qpC,stab_valid_qpC = check_traj_valid(ps,fullBody,s0,s1,pid)
 
-    success_qp = success_qpC or success_qp3 or success_qp7 or success_qp15   
-    success_qp_valid = (success_qpC and stab_valid_qpC) or (success_qp3 and stab_valid_qp3) or (success_qp7 and stab_valid_qp7) or (success_qp15  and stab_valid_qp15) 
-    success_qp_discret = success_qp3 or success_qp7 or success_qp15 
-    success_qp_discret_valid = (success_qp3 and stab_valid_qp3) or (success_qp7 and stab_valid_qp7) or (success_qp15  and stab_valid_qp15) 
-        
-        
-    ssh_ok,success_muscod,kin_valid_muscod,stab_valid_muscod,stab_valid_discretized_muscod = callMuscodBetweenTwoState(fullBody,s0,s1) 
+    success_qp = success_qpC or success_qp3 or success_qp7 or success_qp15
+    success_qp_valid = (success_qpC and stab_valid_qpC) or (success_qp3 and stab_valid_qp3) or (success_qp7 and stab_valid_qp7) or (success_qp15  and stab_valid_qp15)
+    success_qp_discret = success_qp3 or success_qp7 or success_qp15
+    success_qp_discret_valid = (success_qp3 and stab_valid_qp3) or (success_qp7 and stab_valid_qp7) or (success_qp15  and stab_valid_qp15)
+
+
+    ssh_ok,success_muscod,kin_valid_muscod,stab_valid_muscod,stab_valid_discretized_muscod = callMuscodBetweenTwoState(fullBody,s0,s1)
 
 
     if success_qp :
@@ -261,132 +261,132 @@ for [s0,s1] in states:
         c_qp = fullBody.getPathAsBezier(int(best_pid[0]))
         t_qp = [ps.pathLength(int(best_pid[1])), ps.pathLength(int(best_pid[2])), ps.pathLength(int(best_pid[3]))]
         ssh_ok,success_muscodWarmStart,kin_valid_muscodWarmStart,stab_valid_muscodWarmStart,stab_valid_discretized_muscodWarmStart = callMuscodBetweenTwoState(fullBody,s0,s1,[c_qp],[t_qp])
-        
+
     if not ssh_ok :
         f.write("Error in ssh connection to muscod server ... \n")
 
-    
+
     ### compile the results and update the sums :
-    
+
     if success_quasiStatic :
         total_success_quasiStatic += 1.
-    
+
     if success_qp:
         total_success_qp += 1.
     if success_qp_valid:
         total_valid_success_qp += 1.
-        
+
     if success_muscod or success_muscodWarmStart:
         total_success_muscod_either += 1.
-    
+
     if success_qp3:
         total_success_qp3 += 1.
-        f.write( "qp 3 converged\n")                
+        f.write( "qp 3 converged\n")
         if stab_valid_qp3 :
             total_valid_success_qp3 += 1.
-            f.write( "qp 3 stab valid\n")        
-        else : 
+            f.write( "qp 3 stab valid\n")
+        else :
             stab_invalidated_qp3 += 1.
-            f.write( "qp 3 stab invalid\n")                    
+            f.write( "qp 3 stab invalid\n")
         if not kin_valid_qp3 :
             kin_invalidated_qp3 += 1.
             f.write( "qp 3 kin invalid \n")
-            
+
     if success_qp7:
         total_success_qp7 += 1.
-        f.write( "qp 7 converged\n")                
+        f.write( "qp 7 converged\n")
         if stab_valid_qp7 :
             total_valid_success_qp7 += 1.
-            f.write( "qp 7 stab valid\n")        
-        else : 
+            f.write( "qp 7 stab valid\n")
+        else :
             stab_invalidated_qp7 += 1.
-            f.write( "qp 7 stab invalid\n")                    
+            f.write( "qp 7 stab invalid\n")
         if not kin_valid_qp7 :
             kin_invalidated_qp7 += 1.
             f.write( "qp 7 kin invalid \n")
 
     if success_qp15:
         total_success_qp15 += 1.
-        f.write( "qp 15 converged\n")                
+        f.write( "qp 15 converged\n")
         if stab_valid_qp15 :
             total_valid_success_qp15 += 1.
-            f.write( "qp 15 stab valid\n")        
-        else : 
+            f.write( "qp 15 stab valid\n")
+        else :
             stab_invalidated_qp15 += 1.
-            f.write( "qp 15 stab invalid\n")                    
+            f.write( "qp 15 stab invalid\n")
         if not kin_valid_qp15 :
             kin_invalidated_qp15 += 1.
-            f.write( "qp 15 kin invalid \n")   
-            
+            f.write( "qp 15 kin invalid \n")
+
     if success_qpC:
         total_success_qpC += 1.
-        f.write( "qp C converged\n")                
+        f.write( "qp C converged\n")
         if stab_valid_qpC :
             total_valid_success_qpC += 1.
-            f.write( "qp C stab valid\n")        
-        else : 
+            f.write( "qp C stab valid\n")
+        else :
             stab_invalidated_qpC += 1.
-            f.write( "qp C stab invalid\n")                    
+            f.write( "qp C stab invalid\n")
         if not kin_valid_qpC :
             kin_invalidated_qpC += 1.
-            f.write( "qp C kin invalid \n")    
-            
+            f.write( "qp C kin invalid \n")
+
     if success_muscod:
         total_success_muscod += 1.
-        f.write( "muscod converged\n")                
+        f.write( "muscod converged\n")
         if stab_valid_muscod :
             total_valid_success_muscod += 1.
-            f.write( "muscod stab valid\n")        
-        else : 
+            f.write( "muscod stab valid\n")
+        else :
             stab_invalidated_muscod += 1.
             f.write( "muscod stab invalid\n")
         if not stab_valid_discretized_muscod:
             stab_invalidated_discretized_muscod +=1.
         if not kin_valid_muscod :
             kin_invalidated_muscod += 1.
-            f.write( "muscod kin invalid \n")   
-            
+            f.write( "muscod kin invalid \n")
+
     if success_muscodWarmStart:
         total_success_muscodWarmStart += 1.
-        f.write( "muscodWarmStart converged\n")                
+        f.write( "muscodWarmStart converged\n")
         if stab_valid_muscodWarmStart :
             total_valid_success_muscodWarmStart += 1.
-            f.write( "muscodWarmStart stab valid\n")        
-        else : 
+            f.write( "muscodWarmStart stab valid\n")
+        else :
             stab_invalidated_muscodWarmStart += 1.
-            f.write( "muscodWarmStart stab invalid\n") 
+            f.write( "muscodWarmStart stab invalid\n")
         if not stab_valid_discretized_muscodWarmStart:
-            stab_invalidated_discretized_muscodWarmStart +=1.        
+            stab_invalidated_discretized_muscodWarmStart +=1.
         if not kin_valid_muscodWarmStart :
             kin_invalidated_muscodWarmStart += 1.
-            f.write( "muscodWarmStart kin invalid \n")   
-            
-    if success_muscodWarmStart and not success_muscod : 
+            f.write( "muscodWarmStart kin invalid \n")
+
+    if success_muscodWarmStart and not success_muscod :
         muscod_only_warmStart += 1.
-    if success_muscod and success_qp and not success_muscodWarmStart : 
+    if success_muscod and success_qp and not success_muscodWarmStart :
         muscod_wrong_warmStart += 1.
-        
+
     if success_qpC and not success_qp_discret:
         total_continuous_notDiscret += 1.
     if success_qp_discret and not success_qpC:
         total_discret_notContinuous += 1.
-    if success_qp_discret_valid and not success_qpC : 
+    if success_qp_discret_valid and not success_qpC :
         total_discret_notContinuous_valid += 1.
-    
+
     if success_qp and not (success_muscod or success_muscodWarmStart):
         false_positive += 1.
     if success_qp_valid and not (success_muscod or success_muscodWarmStart):
         valid_false_positive += 1.
-    
+
     if not success_muscodWarmStart and not success_qp :
         # success muscod warm start : when no warm start was available, take same result as muscod
         success_muscodWarmStart = success_muscod
         stab_valid_muscodWarmStart = stab_valid_muscod
-        
-    if success_muscodWarmStart : 
-        # assume MUSCOD is Ground truth : 
+
+    if success_muscodWarmStart :
+        # assume MUSCOD is Ground truth :
         total_feasible += 1.
-        GT_success_muscodWarmStart += 1. 
+        GT_success_muscodWarmStart += 1.
         if success_muscod:
             GT_success_muscod += 1.
         if success_qp3:
@@ -397,8 +397,8 @@ for [s0,s1] in states:
             GT_success_qp15 += 1.
         if success_qpC:
             GT_success_qpC += 1.
-        
-        if stab_valid_muscodWarmStart : 
+
+        if stab_valid_muscodWarmStart :
             total_valid_feasible += 1.
             GT_valid_success_valid_muscodWarmStart += 1.
             GT_valid_success_muscodWarmStart +=1.
@@ -409,30 +409,30 @@ for [s0,s1] in states:
                 else :
                     GT_valid_stab_invalid_muscod += 1.
             if success_qp3 :
-                GT_valid_success_qp3 += 1.                
+                GT_valid_success_qp3 += 1.
                 if stab_valid_qp3:
                     GT_valid_success_valid_qp3 += 1.
                 else :
-                    GT_valid_stab_invalid_qp3 += 1.                    
+                    GT_valid_stab_invalid_qp3 += 1.
             if success_qp7 :
-                GT_valid_success_qp7 += 1.                
+                GT_valid_success_qp7 += 1.
                 if stab_valid_qp7:
                     GT_valid_success_valid_qp7 += 1.
                 else :
-                    GT_valid_stab_invalid_qp7 += 1.                    
+                    GT_valid_stab_invalid_qp7 += 1.
             if success_qp15 :
-                GT_valid_success_qp15 += 1.                
+                GT_valid_success_qp15 += 1.
                 if stab_valid_qp15:
                     GT_valid_success_valid_qp15 += 1.
                 else :
-                    GT_valid_stab_invalid_qp15 += 1.                    
+                    GT_valid_stab_invalid_qp15 += 1.
             if success_qpC :
-                GT_valid_success_qpC += 1.                
+                GT_valid_success_qpC += 1.
                 if stab_valid_qpC:
                     GT_valid_success_valid_qpC += 1.
                 else :
-                    GT_valid_stab_invalid_qpC += 1.                    
-                    
+                    GT_valid_stab_invalid_qpC += 1.
+
 
     f.flush()
     i += 1
@@ -455,7 +455,7 @@ if total_feasible > 0 :
 else :
     f.write( "No feasible pair found ... \n")
 f.write( "Considering only the results where muscod was valid, we get : \n")
-if total_valid_feasible > 0:       
+if total_valid_feasible > 0:
     f.write(str(float(GT_valid_success_muscodWarmStart/total_valid_feasible)*100.)+" % of success with muscod with warm start\n")
     f.write(str(float(GT_valid_success_muscod/total_valid_feasible)*100.)+" % of success with muscod \n")
     f.write(str(float(GT_valid_success_qp3/total_valid_feasible)*100.)+" % of success with qp discret and 3 points per phases \n")
@@ -471,16 +471,16 @@ if total_valid_feasible > 0:
     f.write(str(float(GT_valid_success_valid_qpC/total_valid_feasible)*100.)+" % of success with qp continuous\n")
 else:
     f.write( "No feasible valid pair found ... \n")
-    
+
 f.write( "Analysis of dynamic validity of the trajectories  : \n")
 if total_success_muscodWarmStart > 0:
     f.write(str(float(stab_invalidated_muscodWarmStart/total_success_muscodWarmStart)*100.)+" % of trajs were dynamically invalid for muscod with warm start with the same discretization as in the solver\n")
-if total_success_muscod > 0: 
+if total_success_muscod > 0:
     f.write(str(float(stab_invalidated_muscod/total_success_muscod)*100.)+" % of trajs were dynamically invalid for muscod with the same discretization as in the solver\n")
 if total_success_muscodWarmStart > 0:
     f.write(str(float(stab_invalidated_discretized_muscodWarmStart/total_success_muscodWarmStart)*100.)+" % of trajs were dynamically invalid for muscod with warm start\n")
-if total_success_muscod > 0: 
-    f.write(str(float(stab_invalidated_discretized_muscod/total_success_muscod)*100.)+" % of trajs were dynamically invalid for muscod \n")    
+if total_success_muscod > 0:
+    f.write(str(float(stab_invalidated_discretized_muscod/total_success_muscod)*100.)+" % of trajs were dynamically invalid for muscod \n")
 if total_success_qp3 > 0:
     f.write(str(float(stab_invalidated_qp3/total_success_qp3)*100.)+" % of trajs were dynamically invalid for qp3\n")
 if total_success_qp7 > 0:
@@ -567,5 +567,5 @@ disp_bezier.showPath(r,pp,pid)
 sm, success = StateHelper.removeContact(s0,'hrp2_rleg_rom')
 fullBody.isReachableFromState(sm.sId,sm.sId)
 displayOneStepConstraints(r)
- 
+
 """

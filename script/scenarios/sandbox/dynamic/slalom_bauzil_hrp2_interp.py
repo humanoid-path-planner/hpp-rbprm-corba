@@ -5,7 +5,7 @@ from hpp.gepetto import Viewer
 import slalom_bauzil_hrp2_path as tp
 import time
 import omniORB.any
-from display_tools import *
+from hpp.corbaserver.rbprm.tools.display_tools import *
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
 
 packageName = "hrp2_14_description"
@@ -94,7 +94,7 @@ print "Load databases in : "+str(tLoad)+" s"
 """
 
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 #~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
 
 

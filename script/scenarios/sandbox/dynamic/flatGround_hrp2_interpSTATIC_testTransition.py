@@ -4,7 +4,7 @@ from hpp.gepetto import Viewer
 import time
 from constraint_to_dae import *
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
-from display_tools import *
+from hpp.corbaserver.rbprm.tools.display_tools import *
 import flatGround_hrp2_pathKino as tp
 import time
 import numpy as np
@@ -64,7 +64,7 @@ fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "for
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
 fullBody.setReferenceConfig (q_ref)
-## Add arms (not used for contact) : 
+## Add arms (not used for contact) :
 
 
 """
@@ -101,7 +101,7 @@ tGenerate =  time.time() - tStart
 print "generate databases in : "+str(tGenerate)+" s"
 
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 #~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
 
 
@@ -311,7 +311,7 @@ for i in range(10000):
 from parse_bench import *
 parseBenchmark([])
 
-from check_qp import check_traj_valid 
+from check_qp import check_traj_valid
 check_traj_valid(ps,fullBody,s0,s02,pIds)
 
 

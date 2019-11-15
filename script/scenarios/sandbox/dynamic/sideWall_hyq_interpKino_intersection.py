@@ -4,7 +4,7 @@ from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
 import time
-from display_tools import *
+from hpp.corbaserver.rbprm.tools.display_tools import *
 from constraint_to_dae import *
 
 from hpp.gepetto import Viewer
@@ -30,7 +30,7 @@ urdfSuffix = ""
 srdfSuffix = ""
 
 #  This time we load the full body model of HyQ
-fullBody = FullBody () 
+fullBody = FullBody ()
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 fullBody.client.basic.robot.setDimensionExtraConfigSpace(tp.extraDof)
 fullBody.setJointBounds("base_joint_xyz", [0.8,5.6, -0.5, 0.5, 0.4, 1.2])
@@ -82,7 +82,7 @@ fullBody.runLimbSampleAnalysis(rhLegId, "jointLimitsDistance", True)
 
 
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.ps.configAtParam(0,0.01)[0:7] # use this to get the correct orientation
 q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.ps.configAtParam(0,tp.ps.pathLength(0))[0:7]
 dir_init = tp.ps.configAtParam(0,0.01)[7:10]
@@ -217,10 +217,10 @@ pp.displayPath(pid)
 r(q_far)
 
 
-### illustration (quasi static), limb RF a deplacer: 
+### illustration (quasi static), limb RF a deplacer:
 q_last = [1.48833,0,0.851836,1,0,0,0,-0.303342,1.18457,-1.50263,-0.293144,-0.140969,1.35962,-0.360039,1.21798,-1.52204,-0.36999,0.640851,0.41639,0,0,0,0,0,0,]
 
-q_unreachable =[1.49333,0,0.851865,1,0,0,0,-0.303326,1.18888,-1.49364,-0.293129,-0.127206,1.34773,-0.362259,0.193872,-1.44217,-0.369971,0.673584,0.360461,0,0,0,0,0,0,] 
+q_unreachable =[1.49333,0,0.851865,1,0,0,0,-0.303326,1.18888,-1.49364,-0.293129,-0.127206,1.34773,-0.362259,0.193872,-1.44217,-0.369971,0.673584,0.360461,0,0,0,0,0,0,]
 q_reachable = [1.49333,0,0.851865,1,0,0,0,-0.303326,1.18888,-1.49364,-0.293129,-0.127206,1.34773,-0.127441,0.503988,-1.35928,-0.369971,0.673584,0.360461,0,0,0,0,0,0,]
 
 
@@ -239,7 +239,7 @@ r.client.gui.setCameraTransform(0,camera)
 
 """
 """
-# infeasible : 
+# infeasible :
 r([1.46,0,0.851192,1,0,0,0,-0.32001,1.18232,-1.5504,-0.305161,-0.139056,1.37011,-0.36127,1.20462,-1.55472,-0.361812,0.407251,0.775043,0.2,0,0.000953452,0,0,0.000381381,])
 
  r([1.48,0,0.851289,1,0,0,0,-0.319954,1.20122,-1.51607,-0.305107,-0.083625,1.32092,-0.32883,0.24414,-1.45645,-0.361748,0.487359,0.65692,0.2,0,0.00099159,0,0,0.000381381,])

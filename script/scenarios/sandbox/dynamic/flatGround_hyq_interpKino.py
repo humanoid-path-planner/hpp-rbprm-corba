@@ -5,7 +5,7 @@ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
 from constraint_to_dae import *
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
-from display_tools import *
+from hpp.corbaserver.rbprm.tools.display_tools import *
 #calling script darpa_hyq_path to compute root path
 import flatGround_hyq_pathKino as tp
 
@@ -24,7 +24,7 @@ urdfSuffix = ""
 srdfSuffix = ""
 
 #  This time we load the full body model of HyQ
-fullBody = FullBody () 
+fullBody = FullBody ()
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 fullBody.client.basic.robot.setDimensionExtraConfigSpace(tp.extraDof)
 fullBody.setJointBounds ("base_joint_xyz", [-5,5, -1.5, 1.5, 0.5, 0.8])
@@ -77,7 +77,7 @@ fullBody.addLimb(rhLegId,rhLeg,rhFoot,offset,normal, legx, legy, nbSamples, "man
 fullBody.runLimbSampleAnalysis(rhLegId, "jointLimitsDistance", True)
 
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.ps.configAtParam(0,0.01)[0:7] # use this to get the correct orientation
 q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.ps.configAtParam(0,tp.ps.pathLength(0))[0:7]
 dir_init = tp.ps.configAtParam(0,0.01)[7:10]

@@ -34,7 +34,7 @@ fullBody.setReferenceConfig(q_ref)
 
 
 tStart = time.time()
-# generate databases : 
+# generate databases :
 nbSamples = 1
 fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "EFORT", 0.01)
 fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
@@ -55,13 +55,13 @@ q_init[0:2] = [-0.5,0.8]
 q_init[32] -=1.5 # right elbow
 v(q_init)
 
-# sphere = target 
-from tools.display_tools import *
+# sphere = target
+from hpp.corbaserver.rbprm.tools.display_tools import *
 createSphere('target',v,size=0.05,color=v.color.red)
 v.client.gui.setVisibility('target','ON')
 moveSphere('target',v,[0,0,0.5])
 
-# create contact : 
+# create contact :
 fullBody.setStartState(q_init,[fullBody.lLegId,fullBody.rLegId])
 n = [0,0,1]
 
@@ -70,11 +70,11 @@ s0 = State(fullBody,q=q_init,limbsIncontact=[fullBody.lLegId,fullBody.rLegId])
 ###  move left foot of 30cm in front
 pLLeg = s0.getCenterOfContactForLimb(fullBody.lLegId)[0]
 pLLeg[0] += 0.3
-pLLeg[2] -= 0.001 # required because this delta is added in rbprm ... 
+pLLeg[2] -= 0.001 # required because this delta is added in rbprm ...
 s1,success = StateHelper.addNewContact(s0,fullBody.lLegId,pLLeg,n,lockOtherJoints=False)
 assert success, "Unable to project contact position for left foot"
 
-###  move hand to the handle 
+###  move hand to the handle
 
 pHand  = [0.1,0.5,0.75]
 createSphere('s',v)
