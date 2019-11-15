@@ -1,25 +1,27 @@
-from hpp.corbaserver.rbprm.talos_abstract import Robot
+from hpp.corbaserver.rbprm.talos_abstract import Robot  # select the robot
 from hpp.gepetto import Viewer
 from hpp.corbaserver import Client
 from hpp.corbaserver import ProblemSolver
 import time
 
-Robot.urdfName += "_large"
+ # select the reduced model of the robot used for the guide planning
+Robot.urdfName += "_large" #the "large" one use a conservative bounding box for the hips, taking in account the swinging motion made during a walk
+
 vMax = 0.3# linear velocity bound for the root
 aMax = 0.1 # linear acceleration bound for the root
 extraDof = 6
 mu=0.5# coefficient of friction
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Robot()
-# Define bounds for the root : bounding box of the scenario
-root_bounds = [-1.5,3,0.,3.3, 0.98, 0.98]
+# Define bounds for the root : bounding box of the scenario [-x,+x,-y,+y,-z,+z]
+root_bounds = [-1.5,4,0.,3.3, rbprmBuilder.ref_height, rbprmBuilder.ref_height]
 rbprmBuilder.setJointBounds ("root_joint", root_bounds)
 # As this scenario only consider walking, we fix the DOF of the torso :
 rbprmBuilder.setJointBounds ('torso_1_joint', [0,0])
 rbprmBuilder.setJointBounds ('torso_2_joint', [0.006761,0.006761])
 
 # The following lines set constraint on the valid configurations:
-# a configuration is valid only if all limbs can create a contact with the corresponding afforcances type
+# a configuration is valid only if all feets can create a contact with the corresponding afforcances type
 rbprmBuilder.setFilter(['talos_lleg_rom','talos_rleg_rom'])
 rbprmBuilder.setAffordanceFilter('talos_lleg_rom', ['Support',])
 rbprmBuilder.setAffordanceFilter('talos_rleg_rom', ['Support'])
@@ -36,8 +38,9 @@ ps = ProblemSolver( rbprmBuilder )
 # define parameters used by various methods : 
 ps.setParameter("Kinodynamic/velocityBound",vMax)
 ps.setParameter("Kinodynamic/accelerationBound",aMax)
-# force the orientation of the trunk to match the direction of the motion
-#ps.setParameter("Kinodynamic/forceYawOrientation",True)
+# force the orientation of the trunk to match the direction of the motion: 
+ps.setParameter("Kinodynamic/forceYawOrientation",True)
+# size of the feet and friction coefficient used to check to the dynamic feasibility of the guide path
 ps.setParameter("DynamicPlanner/sizeFootX",0.2)
 ps.setParameter("DynamicPlanner/sizeFootY",0.12)
 ps.setParameter("DynamicPlanner/friction",mu)
@@ -53,6 +56,7 @@ vf = ViewerFactory (ps)
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
+# load the environment file and anaylse it :
 afftool.loadObstacleModel ("hpp_environments", "multicontact/floor_bauzil", "planning", vf)
 v = vf.createViewer(displayArrows = True)
 afftool.visualiseAffordances('Support', v, v.color.lightBrown)
@@ -61,18 +65,18 @@ v.addLandmark(v.sceneName,1)
 # Setting initial configuration
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init[8] = 0.006761 # torso 2 position in reference config
-q_init [0:3] = [-0.9,1.5,0.98]
-q_init[-6:-3] = [0.07,0,0]
+q_init [0:3] = [-0.9,1.7,rbprmBuilder.ref_height] # root x,y,z position
+q_init[-6:-3] = [0.07,0,0] # Used to constraint the initial orientation when forceYawOrientation = True, expressed as a 3D vector (x,y,z)
 v (q_init)
 ps.setInitialConfig (q_init)
 # set goal config
 rbprmBuilder.setCurrentConfig (q_init)
 q_goal = q_init [::]
-q_goal[0:3] = [2,2.6,0.98]
-q_goal[-6:-3] = [0.1,0,0]
+#q_goal[0:3] = [2,2.6,0.98]
+#q_goal[-6:-3] = [0.1,0,0]
+q_goal[0:3] = [3.6,1.2,rbprmBuilder.ref_height]
+q_goal[-6:-3] = [0,-0.1,0]
 v(q_goal)
-
-
 ps.addGoalConfig (q_goal)
 
 # Choosing RBPRM shooter and path validation methods.
