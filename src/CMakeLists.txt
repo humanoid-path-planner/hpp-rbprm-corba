@@ -100,6 +100,7 @@ INSTALL(
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/path_to_trajectory.py
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/obj_to_constraints.py
         ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/time_out.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/display_tools.py
   DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm/tools
   )
 # Stand alone corba server
