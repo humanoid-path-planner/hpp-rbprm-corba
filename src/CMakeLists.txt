@@ -17,8 +17,8 @@
 
 SET(LIBRARY_NAME ${PROJECT_NAME})
 SET(IDL_SOURCES
-	rbprmbuilder
-)
+  rbprmbuilder
+  )
 
 INCLUDE(${HPP_CORBASERVER_CMAKE_PLUGIN})
 
@@ -80,27 +80,27 @@ INSTALL(
   )
 INSTALL(
   FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/client.py
-	${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/rbprmbuilder.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/rbprmfullbody.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/rbprmstate.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/state_alg.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/fewstepsplanner.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/client.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/rbprmbuilder.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/rbprmfullbody.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/rbprmstate.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/state_alg.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/fewstepsplanner.py
   DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm
   )
 INSTALL(
   FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/__init__.py
-				${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/generateROMs.py
-				${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/com_constraints.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/plot_analytics.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/affordance_centroids.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/cwc_trajectory.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/cwc_trajectory_helper.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/path_to_trajectory.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/obj_to_constraints.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/time_out.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/display_tools.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/__init__.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/generateROMs.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/com_constraints.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/plot_analytics.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/affordance_centroids.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/cwc_trajectory.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/cwc_trajectory_helper.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/path_to_trajectory.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/obj_to_constraints.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/time_out.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/display_tools.py
   DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm/tools
   )
 # Stand alone corba server
