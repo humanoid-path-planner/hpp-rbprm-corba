@@ -6,7 +6,7 @@ import stair_bauzil_hrp2_path_noRamp as tp
 import time
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
 
-from display_tools import *
+from hpp.corbaserver.rbprm.tools.display_tools import *
 from constraint_to_dae import *
 
 
@@ -85,7 +85,7 @@ rLegOffset = [0.105,0.055,0.017]
 rLegNormal = [-1,0,0]
 rLegx = 0.05; rLegy = 0.05
 #~ fullBody.addLimb(rKneeId, rLeg,rKnee,rLegOffset,rLegNormal, rLegx, rLegy, 10000, 0.01)
-#~ 
+#~
 lKneeId = '1LKnee'
 lLeg = 'LLEG_JOINT0'
 lKnee = 'LLEG_JOINT3'
@@ -93,7 +93,7 @@ lLegOffset = [0.105,0.055,0.017]
 lLegNormal = [-1,0,0]
 lLegx = 0.05; lLegy = 0.05
 #~ fullBody.addLimb(lKneeId,lLeg,lKnee,lLegOffset,lLegNormal, lLegx, lLegy, 10000, 0.01)
- #~ 
+ #~
 
 #~ fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
 #~ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
@@ -105,7 +105,7 @@ lLegx = 0.05; lLegy = 0.05
 """
 
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 #~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
 
 

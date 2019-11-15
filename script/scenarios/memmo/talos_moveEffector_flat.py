@@ -1,6 +1,6 @@
 from hpp.corbaserver.rbprm.talos import Robot
 from hpp.gepetto import Viewer
-from tools.display_tools import *
+from hpp.corbaserver.rbprm.tools.display_tools import *
 from hpp.gepetto import ViewerFactory
 from hpp.corbaserver import ProblemSolver
 import os
@@ -22,7 +22,7 @@ fullBody.setJointBounds('leg_left_6_joint',[-0.25,0.25])
 fullBody.setJointBounds('leg_left_2_joint',[-0.25,0.25])
 fullBody.setJointBounds('leg_right_6_joint',[-0.25,0.25])
 fullBody.setJointBounds('leg_right_2_joint',[-0.25,0.25])
-# constraint z axis and y axis : 
+# constraint z axis and y axis :
 joint1L_bounds_prev=fullBody.getJointBounds('leg_left_1_joint')
 joint3L_bounds_prev=fullBody.getJointBounds('leg_left_3_joint')
 joint1R_bounds_prev=fullBody.getJointBounds('leg_right_1_joint')
@@ -70,7 +70,7 @@ fullBody.setPostureWeights(fullBody.postureWeights[::]+[0]*6)
 
 print "Generate limb DB ..."
 tStart = time.time()
-# generate databases : 
+# generate databases :
 
 nbSamples = 10
 fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "static", 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints,kinematicConstraintsMin = 0.7)

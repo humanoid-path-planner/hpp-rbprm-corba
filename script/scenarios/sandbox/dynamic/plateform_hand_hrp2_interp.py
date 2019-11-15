@@ -4,7 +4,7 @@ from hpp.gepetto import Viewer
 import time
 from constraint_to_dae import *
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
-from display_tools import *
+from hpp.corbaserver.rbprm.tools.display_tools import *
 import plateform_hand_hrp2_path as tp
 import time
 
@@ -82,7 +82,7 @@ tGenerate =  time.time() - tStart
 print "generate databases in : "+str(tGenerate)+" s"
 
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 #~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
 
 
@@ -231,7 +231,7 @@ moveSphere('s',r,p)
 
 sE,success = StateHelper.addNewContact(sE,lLegId,p,n)
 assert(success)
-p = [1.15,-0.1,0] 
+p = [1.15,-0.1,0]
 sfe, success = StateHelper.addNewContact(sE,rLegId,p,n)
 assert(success)
 
@@ -247,14 +247,14 @@ assert(success)
 
 n = [0,0,1]
 p = [1.15,0.1,0]
-moveSphere('s',r,p) 
+moveSphere('s',r,p)
 
 sE2,success = StateHelper.addNewContact(sE,lLegId,p,n)
 
 
 n = [0,0,1]
 p = [1.15,-0.1,0]
-moveSphere('s',r,p) 
+moveSphere('s',r,p)
 
 
 sEf,success = StateHelper.addNewContact(sE2,lLegId,p,n)

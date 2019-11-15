@@ -38,9 +38,9 @@ rbprmBuilder.client.robot.setDimensionExtraConfigSpace(extraDof)
 rbprmBuilder.client.robot.setExtraConfigSpaceBounds([-vMax,vMax,-vMax,vMax,0,0,-aMax,aMax,-aMax,aMax,0,0])
 indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.robot.getDimensionExtraConfigSpace()
 
-# Creating an instance of HPP problem solver 
+# Creating an instance of HPP problem solver
 psGuide = ProblemSolver( rbprmBuilder )
-# define parameters used by various methods : 
+# define parameters used by various methods :
 psGuide.setParameter("Kinodynamic/velocityBound",vMax)
 psGuide.setParameter("Kinodynamic/accelerationBound",aMax)
 psGuide.setParameter("DynamicPlanner/sizeFootX",0.01)
@@ -68,7 +68,7 @@ except Exception:
         def __call__(self,q):
             return
     v = FakeViewer()
-    
+
 #afftool.visualiseAffordances('Support', v, v.color.lightBrown)
 
 q_init = rbprmBuilder.getCurrentConfig ();
@@ -107,7 +107,7 @@ pp = PathPlayer (v)
 #~ from hpp.corbaserver.rbprm.anymal import Robot
 from hpp.corbaserver.rbprm.anymal_prong import Robot
 #~ from hpp.gepetto import Viewer
-from tools.display_tools import *
+from hpp.corbaserver.rbprm.tools.display_tools import *
 import time
 
 pId = 0
@@ -154,7 +154,7 @@ fullBody.setCurrentConfig (q_init)
 
 print "Generate limb DB ..."
 tStart = time.time()
-# generate databases : 
+# generate databases :
 """
 nbSamples = 100000
 fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, heuristicR, 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints,kinematicConstraintsMin = 0.85)
@@ -169,7 +169,7 @@ tGenerate =  time.time() - tStart
 print "Done."
 print "Databases generated in : "+str(tGenerate)+" s"
 
-#define initial and final configurations : 
+#define initial and final configurations :
 configSize = fullBody.getConfigSize() -fullBody.client.robot.getDimensionExtraConfigSpace()
 
 q_init[0:7] = cfg.INIT_CONFIG_ROOT[0:7] # use this to get the correct orientation

@@ -1,6 +1,6 @@
 from hpp.corbaserver.rbprm.talos import Robot
 from hpp.gepetto import Viewer
-from tools.display_tools import *
+from hpp.corbaserver.rbprm.tools.display_tools import *
 import time
 print "Plan guide trajectory ..."
 import talos_stairs10_random_path as tp
@@ -63,7 +63,7 @@ fullBody.setPostureWeights(fullBody.postureWeights[::]+[0]*6)
 fullBody.usePosturalTaskContactCreation(True)
 print "Generate limb DB ..."
 tStart = time.time()
-# generate databases : 
+# generate databases :
 nbSamples = 50000
 heuristic="fixedStep06"
 fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, heuristic, 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints,kinematicConstraintsMin = 0.85)
@@ -77,7 +77,7 @@ print "Done."
 print "Databases generated in : "+str(tGenerate)+" s"
 
 
-#define initial and final configurations : 
+#define initial and final configurations :
 configSize = fullBody.getConfigSize() -fullBody.client.robot.getDimensionExtraConfigSpace()
 
 q_init[0:7] = tp.ps.configAtParam(pId,0.)[0:7] # use this to get the correct orientation

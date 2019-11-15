@@ -61,7 +61,7 @@ fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fi
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
 
-## Add arms (not used for contact) : 
+## Add arms (not used for contact) :
 
 
 tGenerate =  time.time() - tStart
@@ -76,7 +76,7 @@ print "Load databases in : "+str(tLoad)+" s"
 """
 
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 #~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
 
 
@@ -137,7 +137,7 @@ print "number of configs : ", len(configs)
 print "generated in "+str(tInterpolate)+" s"
 r(configs[len(configs)-2])
 
-from display_tools import *
+from hpp.corbaserver.rbprm.tools.display_tools import *
 displayContactSequence(r,configs)
 
 

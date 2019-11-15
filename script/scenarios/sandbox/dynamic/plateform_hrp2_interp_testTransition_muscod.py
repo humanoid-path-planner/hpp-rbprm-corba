@@ -4,7 +4,7 @@ from hpp.gepetto import Viewer
 import time
 from constraint_to_dae import *
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
-from display_tools import *
+from hpp.corbaserver.rbprm.tools.display_tools import *
 import plateform_hrp2_path as tp
 import time
 
@@ -65,14 +65,14 @@ fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 100000, "fi
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
 fullBody.setReferenceConfig (q_ref)
-## Add arms (not used for contact) : 
+## Add arms (not used for contact) :
 
 
 tGenerate =  time.time() - tStart
 print "generate databases in : "+str(tGenerate)+" s"
 
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 #~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
 
 
@@ -201,7 +201,7 @@ moveSphere('s',r,p)
 
 sE,success = StateHelper.addNewContact(sE,lLegId,p,n)
 assert(success)
-p = [1.15,-0.1,0] 
+p = [1.15,-0.1,0]
 sfe, success = StateHelper.addNewContact(sE,rLegId,p,n)
 assert(success)
 

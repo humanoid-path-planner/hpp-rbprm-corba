@@ -6,7 +6,7 @@ import stairs10_hrp2_pathKino2 as tp
 import time
 import omniORB.any
 from constraint_to_dae import *
-from display_tools import *
+from hpp.corbaserver.rbprm.tools.display_tools import *
 from planning.configs.stairs10_bauzil_stairs import *
 from disp_bezier import *
 
@@ -75,7 +75,7 @@ print "Load databases in : "+str(tLoad)+" s"
 """
 
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 #~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
 
 
@@ -100,7 +100,7 @@ q_goal[configSize+3:configSize+6] = [0,0,0]
 
 
 # FIXME : test
-q_init[2] = q_ref[2] 
+q_init[2] = q_ref[2]
 q_goal[2] = q_ref[2] +0.2
 
 # Randomly generating a contact configuration at q_init

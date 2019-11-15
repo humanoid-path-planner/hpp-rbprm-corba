@@ -4,7 +4,7 @@ from hpp.gepetto import Viewer
 import time
 #from constraint_to_dae import *
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
-#from display_tools import *
+#from hpp.corbaserver.rbprm.tools.display_tools import *
 import talos.flatGround_pyrene_pathKino as tp
 import time
 from robot_config.talos import *
@@ -41,7 +41,7 @@ q_init = q_ref[::]
 
 fullBody.setReferenceConfig(q_ref)
 """
-#test correspondance with reduced : 
+#test correspondance with reduced :
 q_init[19] = -0.5
 q_init[20] = 0.8
 r(q_init)
@@ -52,7 +52,7 @@ qfar=q_ref[::]
 qfar[2] = -5
 
 tStart = time.time()
-# generate databases : 
+# generate databases :
 
 nbSamples = 50000
 rLegOffset = MRsole_offset.translation.transpose().tolist()[0]
@@ -87,7 +87,7 @@ fullBody.runLimbSampleAnalysis(larmId, "ReferenceConfiguration", True)
 """
 
 """
-# load databases from files : 
+# load databases from files :
 fullBody.addLimbDatabase("./db/talos_rLeg_walk.db",rLegId,"fixedStep06")
 fullBody.addLimbDatabase("./db/talos_lLeg_walk.db",lLegId,"fixedStep06")
 """
@@ -97,7 +97,7 @@ tGenerate =  time.time() - tStart
 print "generate databases in : "+str(tGenerate)+" s"
 
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 #~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
 
 

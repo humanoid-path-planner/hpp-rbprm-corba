@@ -1,6 +1,6 @@
 from hpp.corbaserver.rbprm.talos import Robot
 from hpp.gepetto import Viewer
-from tools.display_tools import *
+from hpp.corbaserver.rbprm.tools.display_tools import *
 import time
 print "Plan guide trajectory ..."
 import talos_navBauzil_hard_path as tp
@@ -39,13 +39,13 @@ fullBody.usePosturalTaskContactCreation(True)
 
 print "Generate limb DB ..."
 tStart = time.time()
-# generate databases : 
+# generate databases :
 nbSamples = 10000
 fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep06", 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints,kinematicConstraintsMin = 0.85)
 fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep06", 0.01,kinematicConstraintsPath=fullBody.lLegKinematicConstraints,kinematicConstraintsMin = 0.85)
 
 
-#In this scenario, the arms are not used to create contact, but they may move to avoid collision. 
+#In this scenario, the arms are not used to create contact, but they may move to avoid collision.
 fullBody.addNonContactingLimb(fullBody.lArmId,fullBody.larm,fullBody.lhand,5000)
 fullBody.runLimbSampleAnalysis(fullBody.lArmId, "ReferenceConfiguration", True)
 fullBody.addNonContactingLimb(fullBody.rArmId,fullBody.rarm,fullBody.rhand,5000)
@@ -55,7 +55,7 @@ tGenerate =  time.time() - tStart
 print "Done."
 print "Databases generated in : "+str(tGenerate)+" s"
 
-#define initial and final configurations : 
+#define initial and final configurations :
 configSize = fullBody.getConfigSize() -fullBody.client.robot.getDimensionExtraConfigSpace()
 
 q_init[0:7] = tp.ps.configAtParam(pId,0.01)[0:7] # use this to get the correct orientation

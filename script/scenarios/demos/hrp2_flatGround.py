@@ -1,6 +1,6 @@
 from hpp.corbaserver.rbprm.hrp2 import Robot
 from hpp.gepetto import Viewer
-from tools.display_tools import *
+from hpp.corbaserver.rbprm.tools.display_tools import *
 import time
 print "Plan guide trajectory ..."
 import hrp2_flatGround_path as tp
@@ -33,7 +33,7 @@ fullBody.setCurrentConfig (q_init)
 v(q_ref)
 print "Generate limb DB ..."
 tStart = time.time()
-# generate databases : 
+# generate databases :
 
 nbSamples = 100000
 fullBody.addLimb(fullBody.rLegId,fullBody.rleg,'',fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep06", 0.01,limbOffset=fullBody.rLegLimbOffset,kinematicConstraintsPath=fullBody.rLegKinematicConstraints,kinematicConstraintsMin = 0.4)
@@ -52,7 +52,7 @@ tGenerate =  time.time() - tStart
 print "Done."
 print "Databases generated in : "+str(tGenerate)+" s"
 
-#define initial and final configurations : 
+#define initial and final configurations :
 configSize = fullBody.getConfigSize() -fullBody.client.robot.getDimensionExtraConfigSpace()
 
 q_init[0:7] = tp.ps.configAtParam(pId,0.01)[0:7] # use this to get the correct orientation

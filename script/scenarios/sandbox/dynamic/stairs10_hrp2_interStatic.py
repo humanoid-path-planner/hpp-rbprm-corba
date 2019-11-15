@@ -6,7 +6,7 @@ import stairs10_hrp2_pathKino as tp
 import time
 import omniORB.any
 from constraint_to_dae import *
-from display_tools import *
+from hpp.corbaserver.rbprm.tools.display_tools import *
 from configs.stairs10_bauzil_stairs import *
 from disp_bezier import *
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
@@ -94,7 +94,7 @@ print "Load databases in : "+str(tLoad)+" s"
 """
 
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 #~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
 
 

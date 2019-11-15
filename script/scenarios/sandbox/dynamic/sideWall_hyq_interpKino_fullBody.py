@@ -4,7 +4,7 @@ from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
 
-from display_tools import *
+from hpp.corbaserver.rbprm.display_tools import *
 from constraint_to_dae import *
 
 from hpp.gepetto import Viewer
@@ -30,7 +30,7 @@ urdfSuffix = ""
 srdfSuffix = ""
 
 #  This time we load the full body model of HyQ
-fullBody = FullBody () 
+fullBody = FullBody ()
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 fullBody.client.basic.robot.setDimensionExtraConfigSpace(tp.extraDof)
 fullBody.setJointBounds("base_joint_xyz", [0.8,5.6, -0.5, 0.5, 0.4, 1.2])
@@ -82,7 +82,7 @@ fullBody.runLimbSampleAnalysis(rhLegId, "jointLimitsDistance", True)
 
 
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.ps.configAtParam(0,0.01)[0:7] # use this to get the correct orientation
 q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.ps.configAtParam(0,tp.ps.pathLength(0))[0:7]
 dir_init = tp.ps.configAtParam(0,0.01)[7:10]
@@ -146,11 +146,11 @@ player.interpolate(0,len(configs)-1)
 from hpp.corbaserver.rbprm.tools.path_to_trajectory import *
 from disp_bezier import *
 
-beginState = 0 
+beginState = 0
 endState = len(configs)-2
 time_per_paths = []
 total_paths_ids = []
-merged_paths_ids = [] 
+merged_paths_ids = []
 
 for id_state in range(beginState,endState):
 

@@ -25,10 +25,10 @@ def callMuscodBetweenTwoState(fullBody,s0,s1,c_qp = [], t_qp = []):
     cs = generateContactSequence(fullBody,configs,s0.sId, s1.sId,curves_initGuess=c_qp,timings_initGuess=t_qp)
     #cs = generateContactSequence(fullBody,configs,s0.sId, s1.sId,curves_initGuess=c_qp,timings_initGuess=t_qp)
     filename_xml = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
-    cs.saveAsXML(filename_xml, "ContactSequence")   
+    cs.saveAsXML(filename_xml, "ContactSequence")
     mp.generate_muscod_problem(filename_xml,True)
     return ssh.call_muscod()
-    
+
 
 
 
@@ -42,7 +42,7 @@ while file_exist:
     filename = name +"_"+str(i)+".log"
     file_exist = Path(filename).is_file()
     i+= 1
-    
+
 f = open(filename,"w")
 print "write results in file : "+filename
 i=0
@@ -58,16 +58,16 @@ need_init_guess =0
 wrong_init_guess = 0
 total_success_qp = 0
 for [s0,s1] in states:
-    
+
     f.write("Try for pair "+str(i)+" ------- \n")
     f.write("q0 = "+str(s0.q())+"\n")
     f.write("q1 = "+str(s1.q())+"\n")
-    
-    
-    success_quasiStatic = False    
+
+
+    success_quasiStatic = False
     success_qp = False
     success_muscod = False
-    
+
     success_quasiStatic = fullBody.isReachableFromState(s0.sId,s1.sId)
     pid = fullBody.isDynamicallyReachableFromState(s0.sId,s1.sId,True)
     success_qp = (len(pid) > 0)
@@ -89,23 +89,23 @@ for [s0,s1] in states:
         if success_muscod :
             muscod_converged_init_guess +=1
     else :
-        success_muscod, ssh_ok = callMuscodBetweenTwoState(fullBody,s0,s1) 
+        success_muscod, ssh_ok = callMuscodBetweenTwoState(fullBody,s0,s1)
 
-            
+
     if not ssh_ok :
         f.write("Error in ssh connection to muscod server ... \n")
     else :
-        f.write("quasiStatic = "+str(success_quasiStatic)+"\n")        
+        f.write("quasiStatic = "+str(success_quasiStatic)+"\n")
         f.write("qp = "+str(success_qp)+"\n")
         f.write("muscod = "+str(success_muscod)+"\n")
-        
-        # print timings : 
+
+        # print timings :
         if success_qp :
             f.write("time_qp "+str(t_qp[0])+" "+str(t_qp[1])+" "+str(t_qp[2])+"\n")
         else :
             f.write("time_qp\n")
         if success_muscod:
-            muscod_converged += 1            
+            muscod_converged += 1
             cs_out.loadFromXML(CONTACT_SEQUENCE_WHOLEBODY_FILE,CONTACT_SEQUENCE_XML_TAG)
             t_muscod = []
             for k in range(3):
@@ -113,7 +113,7 @@ for [s0,s1] in states:
             f.write("time_muscod "+str(t_muscod[0])+" "+str(t_muscod[1])+" "+str(t_muscod[2])+"\n")
         else :
             f.write("time_muscod\n")
-            
+
         if not success_muscod and not success_qp:
             f.write("same results, unreachable \n")
             same_negatif += 1
@@ -127,7 +127,7 @@ for [s0,s1] in states:
                 false_positive_quasiStatic += 1
             else :
                 f.write("false positive \n")
-                    
+
         if not success_qp and success_muscod:
             f.write("false negative \n")
             false_negatif +=1
@@ -172,7 +172,7 @@ f.close()
 
 """
 from constraint_to_dae import *
-from display_tools import *
+from hpp.corbaserver.rbprm.tools.display_tools import *
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
@@ -183,9 +183,9 @@ def showPath(pid):
         r.client.gui.setVisibility('path_'+str(int(pid[0]))+'_root','ALWAYS_ON_TOP')
     elif len(pid)==4:
         pp.displayPath(int(pid[1]),color=r.color.green)
-        r.client.gui.setVisibility('path_'+str(int(pid[1]))+'_root','ALWAYS_ON_TOP')  
+        r.client.gui.setVisibility('path_'+str(int(pid[1]))+'_root','ALWAYS_ON_TOP')
         pp.displayPath(int(pid[2]),color=r.color.blue)
-        r.client.gui.setVisibility('path_'+str(int(pid[2]))+'_root','ALWAYS_ON_TOP')  
+        r.client.gui.setVisibility('path_'+str(int(pid[2]))+'_root','ALWAYS_ON_TOP')
         pp.displayPath(int(pid[3]),color=r.color.yellow)
         r.client.gui.setVisibility('path_'+str(int(pid[3]))+'_root','ALWAYS_ON_TOP')
     elif len(pid) == 3:
@@ -193,7 +193,7 @@ def showPath(pid):
     else:
         print "no path, test failed."
 
-  
+
 [s0,s2] = states[8]
 r(s0.q())
 r(s2.q())
