@@ -16,29 +16,29 @@
 # <http://www.gnu.org/licenses/>.
 
 # Requires at least CMake 2.6 to configure the package.
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-
-SET(CXX_DISABLE_WERROR true)
-
-INCLUDE(cmake/base.cmake)
-INCLUDE(cmake/idl.cmake)
-INCLUDE(cmake/hpp.cmake)
-INCLUDE(cmake/python.cmake)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(PROJECT_NAME hpp-rbprm-corba)
 SET(PROJECT_DESCRIPTION "Corba server for reachability based planning")
+
+SET(CXX_DISABLE_WERROR true)
+
+INCLUDE(cmake/hpp.cmake)
+INCLUDE(cmake/idl.cmake)
+INCLUDE(cmake/python.cmake)
 
 # Set to 1 for profiling
 #add_definitions(-DPROFILE)
 
 SET(CUSTOM_HEADER_DIR hpp/corbaserver/rbprm)
 
-SETUP_HPP_PROJECT ()
+COMPUTE_PROJECT_ARGS(PROJECT_ARGS LANGUAGES CXX)
+PROJECT(${PROJECT_NAME} ${PROJECT_ARGS})
 
 LIST(APPEND PKG_CONFIG_ADDITIONAL_VARIABLES cmake_plugin)
 
 SET(${PROJECT_NAME}_HEADERS
-  include/hpp/corbaserver/rbprm/server.hh
+  include/${CUSTOM_HEADER_DIR}/server.hh
 )
 
 FINDPYTHON()
@@ -73,6 +73,4 @@ endif()
 PKG_CONFIG_APPEND_LIBS(${PROJECT_NAME})
 ADD_SUBDIRECTORY(src)
 
-CONFIG_FILES (include/hpp/corbaserver/rbprm/doc.hh)
-
-SETUP_HPP_PROJECT_FINALIZE()
+CONFIG_FILES (include/${CUSTOM_HEADER_DIR}/doc.hh)
