@@ -27,7 +27,7 @@ class Client(_Parent):
   """
 
     defaultClients = {
-        'rbprmbuilder': RbprmBuilder,
+        'builder': RbprmBuilder,
     }
 
     def __init__(self, url=None, context="corbaserver"):
@@ -40,7 +40,7 @@ class Client(_Parent):
         self._initOrb(url)
         self._makeClients("rbprm", self.defaultClients, context)
 
-        # self.rbprmbuilder is created by self._makeClients
+        # self.builder is created by self._makeClients
         # The old code stored the object as self.rbprm
         # Make it backward compatible.
-        self.rbprm = self.rbprmbuilder
+        self.rbprm = self.builder

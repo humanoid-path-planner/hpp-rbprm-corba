@@ -43,6 +43,8 @@ class HPP_RBPRM_CORBA_DLLAPI Server : public corbaServer::ServerPlugin {
 
   std::string name() const;
 
+  ::CORBA::Object_ptr servant (const std::string& name) const;
+
  public:
   corba::Server<impl::RbprmBuilder>* rbprmBuilder_;
 };  // class Server
