@@ -35,13 +35,13 @@ std::string Server::name() const { return "rbprm"; }
 
 /// Start corba server
 void Server::startCorbaServer(const std::string& contextId, const std::string& contextKind) {
-  bool mThd = parent()->multiThread();
-  rbprmBuilder_ = new corba::Server<impl::RbprmBuilder>(0, NULL, mThd, "child");
-  rbprmBuilder_->implementation().setServer(this);
+  initializeTplServer (rbprmBuilder_, contextId, contextKind, name(), "builder");
+}
 
-  if (rbprmBuilder_->startCorbaServer(contextId, contextKind, "rbprm", "rbprmbuilder") != 0) {
-    HPP_THROW_EXCEPTION(hpp::Exception, "Failed to start corba rbprm server.");
-  }
+::CORBA::Object_ptr Server::servant(const std::string& name) const
+{
+  if (name == "builder") return rbprmBuilder_->implementation()._this();
+  throw std::invalid_argument ("No servant " + name);
 }
 }  // namespace rbprm
 }  // namespace hpp
