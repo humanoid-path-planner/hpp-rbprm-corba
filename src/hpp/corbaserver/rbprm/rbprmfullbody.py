@@ -18,7 +18,7 @@
 
 from hpp.corbaserver.rbprm import Client as RbprmClient
 from hpp.corbaserver.robot import Robot
-from hpp_spline import bezier
+from curves import bezier
 from numpy import array, matrix
 
 

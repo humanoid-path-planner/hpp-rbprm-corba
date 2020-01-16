@@ -43,7 +43,6 @@
 #include <hpp/rbprm/planner/rbprm-steering-kinodynamic.hh>
 #include <algorithm>  // std::random_shuffle
 #include <hpp/rbprm/interpolation/time-constraint-helper.hh>
-#include <hpp/spline/bezier_curve.h>
 #include <hpp/rbprm/interpolation/polynom-trajectory.hh>
 #include <hpp/rbprm/planner/random-shortcut-dynamic.hh>
 #include <hpp/rbprm/planner/oriented-path-optimizer.hh>
@@ -59,7 +58,6 @@
 namespace hpp {
 namespace rbprm {
 
-typedef spline::bezier_curve<> bezier;
 namespace impl {
 
 const pinocchio::Computation_t flag =
@@ -1807,7 +1805,7 @@ CORBA::Short RbprmBuilder::straightPath(const hpp::floatSeqSeq& positions) throw
 CORBA::Short RbprmBuilder::generateCurveTraj(const hpp::floatSeqSeq& positions) throw(hpp::Error) {
   try {
     T_Configuration c = doubleDofArrayToConfig(3, positions);
-    bezier* curve = new bezier(c.begin(), c.end());
+    bezier_t* curve = new bezier_t(c.begin(), c.end());
     hpp::rbprm::interpolation::PolynomPtr_t curvePtr(curve);
     hpp::rbprm::interpolation::PolynomTrajectoryPtr_t path =
         hpp::rbprm::interpolation::PolynomTrajectory::create(curvePtr);
@@ -1824,7 +1822,7 @@ CORBA::Short RbprmBuilder::generateCurveTrajParts(const hpp::floatSeqSeq& positi
   try {
     pinocchio::Configuration_t config = dofArrayToConfig((std::size_t)partitions.length(), partitions);
     T_Configuration c = doubleDofArrayToConfig(3, positions);
-    bezier* curve = new bezier(c.begin(), c.end());
+    bezier_t* curve = new bezier_t(c.begin(), c.end());
     hpp::rbprm::interpolation::PolynomPtr_t curvePtr(curve);
     hpp::rbprm::interpolation::PolynomTrajectoryPtr_t path =
         hpp::rbprm::interpolation::PolynomTrajectory::create(curvePtr);
