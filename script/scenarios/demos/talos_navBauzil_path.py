@@ -1,4 +1,4 @@
-from hpp.corbaserver.rbprm.talos_abstract import Robot  # select the robot
+from talos_rbprm.talos_abstract import Robot  # select the robot
 from hpp.gepetto import Viewer
 from hpp.corbaserver import Client
 from hpp.corbaserver import ProblemSolver

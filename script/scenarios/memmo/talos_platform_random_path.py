@@ -1,4 +1,4 @@
-from hpp.corbaserver.rbprm.talos_abstract import Robot
+from talos_rbprm.talos_abstract import Robot
 from hpp.gepetto import Viewer
 from hpp.corbaserver import ProblemSolver
 from pinocchio import Quaternion

@@ -1,4 +1,4 @@
-from hpp.corbaserver.rbprm.talos import Robot # select the robot
+from talos_rbprm.talos import Robot # select the robot
 from hpp.gepetto import Viewer
 from hpp.corbaserver.rbprm.tools.display_tools import *
 import time

@@ -1,4 +1,4 @@
-from hpp.corbaserver.rbprm.talos import Robot
+from talos_rbprm.talos import Robot
 from hpp.gepetto import Viewer
 from hpp.corbaserver.rbprm.tools.display_tools import *
 from hpp.gepetto import ViewerFactory
