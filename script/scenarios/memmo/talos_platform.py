@@ -2,7 +2,7 @@ from talos_rbprm.talos import Robot
 from hpp.gepetto import Viewer
 from hpp.corbaserver.rbprm.tools.display_tools import *
 import time
-print "Plan guide trajectory ..."
+print("Plan guide trajectory ...")
 import talos_platform_path as tp
 
 pId = 0
@@ -40,7 +40,7 @@ ps.setParameter("Kinodynamic/accelerationBound",tp.aMax)
 try :
     v = tp.Viewer (ps,viewerClient=tp.v.client, displayCoM = True)
 except Exception:
-    print "No viewer started !"
+    print("No viewer started !")
     class FakeViewer():
         def __init__(self):
             return
@@ -79,7 +79,7 @@ else :
 
 fullBody.setCurrentConfig (q_init)
 
-print "Generate limb DB ..."
+print("Generate limb DB ...")
 tStart = time.time()
 # generate databases :
 
@@ -91,8 +91,8 @@ fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
 
 
 tGenerate =  time.time() - tStart
-print "Done."
-print "Databases generated in : "+str(tGenerate)+" s"
+print("Done.")
+print("Databases generated in : "+str(tGenerate)+" s")
 
 #define initial and final configurations :
 configSize = fullBody.getConfigSize() -fullBody.client.robot.getDimensionExtraConfigSpace()
@@ -137,33 +137,33 @@ else :
   fullBody.setStartState(q_init,[fullBody.lLegId,fullBody.rLegId])
   fullBody.setEndState(q_goal,[fullBody.lLegId,fullBody.rLegId])
 
-print "Generate contact plan ..."
+print("Generate contact plan ...")
 tStart = time.time()
 configs = fullBody.interpolate(0.005,pathId=pId,robustnessTreshold = 3, filterStates = True,quasiStatic=True)
 tInterpolateConfigs = time.time() - tStart
-print "Done."
-print "Contact plan generated in : "+str(tInterpolateConfigs)+" s"
-print "number of configs :", len(configs)
+print("Done.")
+print("Contact plan generated in : "+str(tInterpolateConfigs)+" s")
+print("number of configs :", len(configs))
 #raw_input("Press Enter to display the contact sequence ...")
 #displayContactSequence(v,configs)
 
 
 if len(configs) < 2 :
   cg_success = False
-  print "Error during contact generation."
+  print("Error during contact generation.")
 else:
   cg_success = True
-  print "Contact generation Done."
+  print("Contact generation Done.")
 if abs(configs[-1][0] - tp.q_goal[0]) < 0.01 and abs(configs[-1][1]- tp.q_goal[1]) < 0.01  and (len(fullBody.getContactsVariations(len(configs)-2,len(configs)-1))==1):
-  print "Contact generation successful."
+  print("Contact generation successful.")
   cg_reach_goal = True
 else:
-  print "Contact generation failed to reach the goal."
+  print("Contact generation failed to reach the goal.")
   cg_reach_goal = False
 if len(configs) > 5 :
   cg_too_many_states = True
   cg_success = False
-  print "Discarded contact sequence because it was too long."
+  print("Discarded contact sequence because it was too long.")
 else:
   cg_too_many_states = False
 

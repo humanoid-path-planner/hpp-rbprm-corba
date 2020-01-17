@@ -87,7 +87,7 @@ r(q_init)
 configs = fullBody.interpolate(0.08,pathId=0,robustnessTreshold = 3, filterStates = True)
 
 
-print "configs size = ",len(configs)
+print("configs size = ",len(configs))
 r(configs[-1])
 
 

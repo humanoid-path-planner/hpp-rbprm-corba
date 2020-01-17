@@ -4,7 +4,7 @@ from pathlib2 import Path
 import muscodSSH as ssh
 tryWarmStart = False
 
-print "run bench without feasibility criterion"
+print("run bench without feasibility criterion")
 
 com = fullBody.getCenterOfMass()
 if com[0] > 1.3:
@@ -29,7 +29,7 @@ if success :
     for id_state in range(beginState,endState):
         pid = fullBody.isDynamicallyReachableFromState(id_state,id_state+1,numPointsPerPhases=0)
         if len(pid) == 0:
-            print "Croc did not converge for state "+str(id_state)
+            print("Croc did not converge for state "+str(id_state))
             crocConverged = False
         
 else : 

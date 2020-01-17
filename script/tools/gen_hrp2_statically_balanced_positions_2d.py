@@ -107,11 +107,11 @@ def draw_cp(cid, limb, config):
 	r.client.gui.createScene(scene)
 	for i in range(4):
 		#~ pos = posetc[2*i]
-		print "P", array(P[i]+[1])
-		print "N", array(N[i]+[1])
-		print m.dot(array(P[i]+[1]))
+		print("P", array(P[i]+[1]))
+		print("N", array(N[i]+[1]))
+		print(m.dot(array(P[i]+[1])))
 		pos = m.dot(array(P[i]+[1]))[:3]
-		print "pos", pos
+		print("pos", pos)
 		r.client.gui.addBox(scene+"/b"+str(i),0.01,0.01,0.01, [1,0,0,1])
 		r.client.gui.applyConfiguration(scene+"/b"+str(i),pos.tolist()+[1,0,0,0])
 		r.client.gui.refresh()	
@@ -199,7 +199,7 @@ def _genbalance(limbs):
 		if fullBody.isConfigValid(q)[0] and fullBody.isConfigBalanced(q, limbs, 5) and __loosely_z_aligned(limbs[0], q) and __loosely_z_aligned(limbs[1], q):
 		#~ if fullBody.isConfigValid(q)[0] and  __loosely_z_aligned(limbs[0], q) and __loosely_z_aligned(limbs[1], q):
 			return q
-	print "can't generate equilibrium config"
+	print("can't generate equilibrium config")
 
 all_qs = []
 def gen(limbs, num_samples = 1000, coplanar = True):
@@ -226,11 +226,11 @@ def gen(limbs, num_samples = 1000, coplanar = True):
 	fname += "configs"
 	if(coplanar):
 		fname += "_coplanar"
-	from cPickle import dump
+	from pickle import dump
 	#~ f1=open("configs_feet_on_ground_static_eq", 'w+')
 	f1=open(fname, 'w+')
 	dump(states, f1)
-	print "export to file : "+fname
+	print("export to file : "+fname)
 	f1.close()
 
 j=0

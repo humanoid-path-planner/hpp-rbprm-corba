@@ -220,7 +220,7 @@ import parse_bench
 
 parse_bench.parseBenchmark(t)
 """
-print "path lenght = ",str(ps.client.problem.pathLength(ps.numberPaths()-1))
+print("path lenght = ",str(ps.client.problem.pathLength(ps.numberPaths()-1)))
 
 ###########################
 #display path with post-optimisation

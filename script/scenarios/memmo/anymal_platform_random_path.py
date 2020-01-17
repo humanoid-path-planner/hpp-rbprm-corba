@@ -58,7 +58,7 @@ afftool.loadObstacleModel ("hpp_environments", "multicontact/plateforme_not_flat
 try :
     v = vf.createViewer(displayArrows = True)
 except Exception:
-    print "No viewer started !"
+    print("No viewer started !")
     class FakeViewer():
         def __init__(self):
             return
@@ -98,8 +98,8 @@ q_goal[3:7] = q_init[3:7]
 
 
 
-print "initial root position : ",q_init
-print "final root position : ",q_goal
+print("initial root position : ",q_init)
+print("final root position : ",q_goal)
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
@@ -122,7 +122,7 @@ ps.selectPathValidation("RbprmPathValidation",0.05)
 success = ps.client.problem.prepareSolveStepByStep()
 
 if not success:
-  print "planning failed."
+  print("planning failed.")
   import sys
   sys.exit(1)
 

@@ -47,7 +47,7 @@ ps.setRandomSeed(random.SystemRandom().randint(0, 999999))
 try :
     v = vf.createViewer(displayCoM = True)
 except Exception:
-    print "No viewer started !"
+    print("No viewer started !")
     class FakeViewer():
         sceneName = ""
         def __init__(self):
@@ -68,7 +68,7 @@ fullBody.setReferenceConfig(q_ref)
 fullBody.setPostureWeights(fullBody.postureWeights[::]+[0]*6)
 
 
-print "Generate limb DB ..."
+print("Generate limb DB ...")
 tStart = time.time()
 # generate databases :
 
@@ -80,15 +80,15 @@ fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
 
 
 tGenerate =  time.time() - tStart
-print "Done."
-print "Databases generated in : "+str(tGenerate)+" s"
+print("Done.")
+print("Databases generated in : "+str(tGenerate)+" s")
 
 from tools.sample_random_transition import sampleRandomTransitionStairs
 limbsInContact = [fullBody.rLegId,fullBody.lLegId]
 random.seed()
 movingId = random.randint(0,1)
 movingLimb = limbsInContact[movingId]
-print "Move limb : ",movingLimb
+print("Move limb : ",movingLimb)
 zInterval = [0., 0.15]
 zMoving = [0.,0.15]
 s0,s1 = sampleRandomTransitionStairs(fullBody,limbsInContact,zInterval,movingLimb,zMoving)
@@ -101,11 +101,11 @@ v(configs[0])
 if len(configs) == 2 :
     cg_success = True
     cg_reach_goal = True
-    print "Contact generation successful."
+    print("Contact generation successful.")
 else:
     cg_success = False
     cg_reach_goal = False
-    print "Contact generation failed."
+    print("Contact generation failed.")
 
 f = open(statusFilename,"w")
 f.write("q_init= "+str(s0.q())+"\n")

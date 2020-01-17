@@ -86,7 +86,7 @@ ps.selectPathPlanner("DynamicPlanner")
 # Solve the planning problem :
 t = ps.solve ()
 #v.solveAndDisplay('rm',2,radiusSphere=0.01)
-print "Guide planning time : ",t
+print("Guide planning time : ",t)
 
 
 # display solution : 

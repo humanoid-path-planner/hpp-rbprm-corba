@@ -91,7 +91,7 @@ fullBody.setEndState(q_goal,[rLegId,lLegId])
 
 
 configs = fullBody.interpolate(0.08,pathId=0,robustnessTreshold = robTreshold, filterStates = True)
-print "number of configs :", len(configs)
+print("number of configs :", len(configs))
 
 
 

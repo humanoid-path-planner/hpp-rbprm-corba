@@ -53,7 +53,7 @@ afftool.loadObstacleModel ("hpp_environments", "multicontact/plateforme_not_flat
 try :
     v = vf.createViewer(displayArrows = True)
 except Exception:
-    print "No viewer started !"
+    print("No viewer started !")
     class FakeViewer():
         def __init__(self):
             return
@@ -81,8 +81,8 @@ q_goal [0:3] = [radius*np.sin(alpha), -radius*np.cos(alpha), 1.]
 q_goal = q_init[::]
 q_goal [0:2] = [3.3,2.2]
 
-print "initial root position : ",q_init[0:3]
-print "final root position : ",q_goal[0:3]
+print("initial root position : ",q_init[0:3])
+print("final root position : ",q_goal[0:3])
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
@@ -104,7 +104,7 @@ ps.selectPathPlanner("DynamicPlanner")
 
 # Solve the planning problem :
 t = ps.solve ()
-print "Guide planning time : ",t
+print("Guide planning time : ",t)
 
 try :
     # display solution : 

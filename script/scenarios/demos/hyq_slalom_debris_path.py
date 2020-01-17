@@ -81,7 +81,7 @@ ps.selectPathPlanner("DynamicPlanner")
 
 # Solve the planning problem :
 t = ps.solve ()
-print "Guide planning time : ",t
+print("Guide planning time : ",t)
 
 ps.optimizePath(1)
 pid = ps.numberPaths()-1

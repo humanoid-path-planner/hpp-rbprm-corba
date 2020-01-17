@@ -79,7 +79,7 @@ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 100000, 
 
 
 tGenerate =  time.time() - tStart
-print "generate databases in : "+str(tGenerate)+" s"
+print("generate databases in : "+str(tGenerate)+" s")
 
 
 q_0 = fullBody.getCurrentConfig();
@@ -150,7 +150,7 @@ import fullBodyPlayerHrp2
 tStart = time.time()
 configsFull = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = 0, filterStates = False)
 tInterpolateConfigs = time.time() - tStart
-print "number of configs :", len(configsFull)
+print("number of configs :", len(configsFull))
 
 """
 q_init[0] += 0.05

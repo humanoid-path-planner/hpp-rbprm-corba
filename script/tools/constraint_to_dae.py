@@ -15,9 +15,9 @@ def generate_off_file(name):
     cmd = "cat "+DIR+name+".txt | qhalf FP | qconvex Ft  >> "+DIR+name+"_.off"
     try :
         subprocess.check_output(cmd,shell=True)
-        print "qHull OK for file : "+name+".txt"
+        print("qHull OK for file : "+name+".txt")
     except subprocess.CalledProcessError:
-        print "Error in qHull for file "+name+".txt"
+        print("Error in qHull for file "+name+".txt")
     #replace first line with "OFF"
     with open(DIR+name+"_.off") as inFile, open(DIR+name+".off","w") as outFile:
         for i,line in enumerate(inFile):
@@ -40,9 +40,9 @@ def generate_off_file_2d(name):
     cmd = "cat "+DIR+name+".txt | qhalf Qb2:0B2:0 Fp >>"+DIR+name+"_.txt"    
     try :
         subprocess.check_output(cmd,shell=True)
-        print "qHalf 2D OK for file : "+name+".txt"
+        print("qHalf 2D OK for file : "+name+".txt")
     except subprocess.CalledProcessError:
-        print "Error in qHalf 2D for file "+name+".txt"
+        print("Error in qHalf 2D for file "+name+".txt")
         
     # add arbitrary z value for each point (eg 0;2)
     with open(DIR+name+"_.txt") as inFile, open(DIR+name+"__.txt","w") as outFile:
@@ -62,9 +62,9 @@ def generate_off_file_2d(name):
     cmd = "cat "+DIR+name+"__.txt | qconvex o >> "+DIR+name+"_.off"
     try :
         subprocess.check_output(cmd,shell=True)
-        print "qHull OK for file : "+name+".txt"
+        print("qHull OK for file : "+name+".txt")
     except subprocess.CalledProcessError:
-        print "Error in qHull for file "+name+".txt"    
+        print("Error in qHull for file "+name+".txt")    
     #replace first line with "OFF"
     with open(DIR+name+"_.off") as inFile, open(DIR+name+".off","w") as outFile:
         for i,line in enumerate(inFile):
@@ -86,9 +86,9 @@ def convert_off_dae(name):
     cmd = "ctmconv "+DIR+name+".off "+DIR+name+"_.dae --upaxis Z --flip --calc-normals"
     try :
         subprocess.check_output(cmd,shell=True)
-        print "convert constraints files to dae OK."
+        print("convert constraints files to dae OK.")
     except subprocess.CalledProcessError:
-        print "Error during conversion to dae ... "
+        print("Error during conversion to dae ... ")
     # insert lines after <assert> : 
     with open(DIR+name+"_.dae") as inFile, open(DIR+name+".dae","w") as outFile:
         for line in inFile:
@@ -108,7 +108,7 @@ def insert_color_material(name,materialName,color,alpha):
     if os.path.isfile(DIR+name+".dae"):
         os.rename(DIR+name+".dae",DIR+name+"_.dae")
     else:
-        print "Error, file doesn't exist : "+DIR+name+".dae"
+        print("Error, file doesn't exist : "+DIR+name+".dae")
         
     # insert the declaration of the material : 
     with open(DIR+name+"_.dae") as inFile, open(DIR+name+".dae","w") as outFile:

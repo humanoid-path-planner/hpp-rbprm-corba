@@ -163,7 +163,7 @@ def genPlan():
 	start = time.clock() 
 	configs = fullBody.interpolate(0.12, 10, 10, True)
 	end = time.clock() 
-	print "Contact plan generated in " + str(end-start) + "seconds"
+	print("Contact plan generated in " + str(end-start) + "seconds")
 	
 def contactPlan():
 	tp.cl.problem.selectProblem("default")
@@ -176,24 +176,24 @@ def contactPlan():
 
 		
 def a():
-	print "initial configuration"
+	print("initial configuration")
 	initConfig()
 		
 def b():
-	print "end configuration"
+	print("end configuration")
 	endConfig()
 		
 def c():
-	print "displaying root path"
+	print("displaying root path")
 	rootPath()
 	
 def d():
-	print "computing contact plan"
+	print("computing contact plan")
 	genPlan()
 	
 def e():
-	print "displaying contact plan"
+	print("displaying contact plan")
 	contactPlan()
 
-print "Root path generated in " + str(tp.t) + " ms."
+print("Root path generated in " + str(tp.t) + " ms.")
 	

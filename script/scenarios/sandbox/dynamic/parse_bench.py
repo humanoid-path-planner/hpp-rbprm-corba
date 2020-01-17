@@ -68,41 +68,41 @@ def parseBenchmark(tPlanningTab):
             dic[i][2] = dic[i][2]+it
 
 
-  print "Benchmark results (average, in ms): \n"
+  print("Benchmark results (average, in ms): \n")
 
 
   for i in range(0,len(dic)):
     if(dic[i][2] > 0):
       t = dic[i][1] / dic[i][2]
-      print dic[i][0],t
-      print str(dic[i][2])+" iterations"
+      print(dic[i][0],t)
+      print(str(dic[i][2])+" iterations")
 
   if tPlanning > 0:
-    print "\nDecomposition of the total planning time of "+str(tPlanning)+"s:"
+    print("\nDecomposition of the total planning time of "+str(tPlanning)+"s:")
     mt = tPlanning*1000.
-    print "# One step : "+str((dic[0][1]/mt)*100.)+" %"
-    print "\t * Random shooting : "+str((dic[1][1]/mt)*100.)+" %"
-    print "\t \t - collision checks : "+str((dic[14][1]/mt)*100.)+" %"
-    print "\t * Nearest search  : "+str((dic[2][1]/mt)*100.)+" %"
-    print "\t * extend          : "+str((dic[3][1]/mt)*100.)+" %"
-    print "\t \t - steering kino (core) : "+str((dic[4][1]/mt)*100.)+" %"
-    print "\t \t - fill node matrice    : "+str((dic[5][1]/mt)*100.)+" %"
-    print "\t \t \t . compute intersection (fcl) : "+str((dic[6][1]/mt)*100.)+" %"
-    print "\t \t - compute a max        : "+str((dic[8][1]/mt)*100.)+" %"
-    print "\t \t - check accelerations  : "+str((dic[9][1]/mt)*100.)+" %"
-    print "\t * path validation : "+str((dic[10][1]/mt)*100.)+" %"
-    print "\t \t - Dynamic validation : "+str((dic[11][1]/mt)*100.)+" %"
-    print "# Random shortcut       : "+str((dic[13][1]/mt)*100.)+" %"
-    print "# Orientation optimizer : "+str((dic[12][1]/mt)*100.)+" %"
+    print("# One step : "+str((dic[0][1]/mt)*100.)+" %")
+    print("\t * Random shooting : "+str((dic[1][1]/mt)*100.)+" %")
+    print("\t \t - collision checks : "+str((dic[14][1]/mt)*100.)+" %")
+    print("\t * Nearest search  : "+str((dic[2][1]/mt)*100.)+" %")
+    print("\t * extend          : "+str((dic[3][1]/mt)*100.)+" %")
+    print("\t \t - steering kino (core) : "+str((dic[4][1]/mt)*100.)+" %")
+    print("\t \t - fill node matrice    : "+str((dic[5][1]/mt)*100.)+" %")
+    print("\t \t \t . compute intersection (fcl) : "+str((dic[6][1]/mt)*100.)+" %")
+    print("\t \t - compute a max        : "+str((dic[8][1]/mt)*100.)+" %")
+    print("\t \t - check accelerations  : "+str((dic[9][1]/mt)*100.)+" %")
+    print("\t * path validation : "+str((dic[10][1]/mt)*100.)+" %")
+    print("\t \t - Dynamic validation : "+str((dic[11][1]/mt)*100.)+" %")
+    print("# Random shortcut       : "+str((dic[13][1]/mt)*100.)+" %")
+    print("# Orientation optimizer : "+str((dic[12][1]/mt)*100.)+" %")
 
 
-    print "% Is Reachable test     : called "+str(dic[15][2])+" times, average of "+str(dic[15][1]/dic[15][2])+" ms."
-    print "% QP solver isReachable : called "+str(dic[16][2])+" times, average of "+str(dic[16][1]/dic[16][2])+" ms." 
-    print "% stability constraints : called "+str(dic[17][2])+" times, average of "+str(dic[17][1]/dic[17][2])+" ms." 
-    print "% kinematic constraints : called "+str(dic[18][2])+" times, average of "+str(dic[18][1]/dic[18][2])+" ms." 
-    print "% stack matrices        : called "+str(dic[19][2])+" times, average of "+str(dic[19][1]/dic[19][2])+" ms." 
-    print "# Is Reachable Dynamic  : called "+str(dic[20][2])+" times, average of "+str(dic[20][1]/dic[20][2])+" ms." 
-    print "# Qp transition         : called "+str(dic[21][2])+" times, average of "+str(dic[21][1]/dic[21][2])+" ms." 
+    print("% Is Reachable test     : called "+str(dic[15][2])+" times, average of "+str(dic[15][1]/dic[15][2])+" ms.")
+    print("% QP solver isReachable : called "+str(dic[16][2])+" times, average of "+str(dic[16][1]/dic[16][2])+" ms.") 
+    print("% stability constraints : called "+str(dic[17][2])+" times, average of "+str(dic[17][1]/dic[17][2])+" ms.") 
+    print("% kinematic constraints : called "+str(dic[18][2])+" times, average of "+str(dic[18][1]/dic[18][2])+" ms.") 
+    print("% stack matrices        : called "+str(dic[19][2])+" times, average of "+str(dic[19][1]/dic[19][2])+" ms.") 
+    print("# Is Reachable Dynamic  : called "+str(dic[20][2])+" times, average of "+str(dic[20][1]/dic[20][2])+" ms.") 
+    print("# Qp transition         : called "+str(dic[21][2])+" times, average of "+str(dic[21][1]/dic[21][2])+" ms.") 
 
 
 

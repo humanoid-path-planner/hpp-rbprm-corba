@@ -57,7 +57,7 @@ afftool.loadObstacleModel ("hpp_environments", "multicontact/ground", "planning"
 try :
     v = vf.createViewer(displayArrows = True)
 except Exception:
-    print "No viewer started !"
+    print("No viewer started !")
     class FakeViewer():
         sceneName = ""
         def __init__(self):
@@ -81,7 +81,7 @@ import random
 random.seed()
 #alpha = random.uniform(0.,2.*np.pi)
 alpha = random.uniform(0.,2.*np.pi)
-print "Test on a circle, alpha = ",alpha
+print("Test on a circle, alpha = ",alpha)
 q_goal = q_init[::]
 q_goal [0:3] = [radius*np.sin(alpha), -radius*np.cos(alpha), 1.]
 # set final orientation to be along the circle : 
@@ -93,8 +93,8 @@ q_goal[3:7] = quat.coeffs().T.tolist()[0]
 q_goal[-6] = vGoal*np.sin(alpha)
 q_goal[-5] = -vGoal*np.cos(alpha)
 v(q_goal)
-print "initial root position : ",q_init
-print "final root position : ",q_goal
+print("initial root position : ",q_init)
+print("final root position : ",q_goal)
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
@@ -117,7 +117,7 @@ ps.selectPathPlanner("DynamicPlanner")
 success = ps.client.problem.prepareSolveStepByStep()
 
 if not success:
-  print "planning failed."
+  print("planning failed.")
   import sys
   sys.exit(1)
 

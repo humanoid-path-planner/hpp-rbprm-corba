@@ -2,9 +2,9 @@ from hpp.corbaserver.rbprm.anymal import Robot
 from hpp.gepetto import Viewer
 from hpp.corbaserver.rbprm.tools.display_tools import *
 import time
-print "Plan guide trajectory ..."
+print("Plan guide trajectory ...")
 import anymal_slalom_debris_path as tp
-print "Done."
+print("Done.")
 import time
 
 
@@ -38,12 +38,12 @@ fullBody.setCurrentConfig (q_init)
 fullBody.setPostureWeights(fullBody.postureWeights[::]+[0]*6)
 #fullBody.usePosturalTaskContactCreation(True)
 
-print "Generate limb DB ..."
+print("Generate limb DB ...")
 tStart = time.time()
 fullBody.loadAllLimbs("fixedStep04","ReferenceConfiguration")
 tGenerate =  time.time() - tStart
-print "Done."
-print "Databases generated in : "+str(tGenerate)+" s"
+print("Done.")
+print("Databases generated in : "+str(tGenerate)+" s")
 fullBody.setReferenceConfig(q_ref)
 
 #define initial and final configurations :
@@ -81,13 +81,13 @@ fullBody.setStartState(q_init,fullBody.limbs_names, [[0.,0.,1.] for _ in range(4
 fullBody.setEndState(q_goal,fullBody.limbs_names, [[0.,0.,1.] for _ in range(4)])
 
 
-print "Generate contact plan ..."
+print("Generate contact plan ...")
 tStart = time.time()
 configs = fullBody.interpolate(0.002,pathId=pId,robustnessTreshold = robTreshold, filterStates = True,testReachability=True,quasiStatic=True)
 tInterpolateConfigs = time.time() - tStart
-print "Done. "
-print "Contact sequence computed in "+str(tInterpolateConfigs)+" s."
-print "number of configs :", len(configs)
+print("Done. ")
+print("Contact sequence computed in "+str(tInterpolateConfigs)+" s.")
+print("number of configs :", len(configs))
 
 
 fullBody.resetJointsBounds()

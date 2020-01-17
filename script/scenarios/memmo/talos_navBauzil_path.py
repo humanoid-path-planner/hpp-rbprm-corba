@@ -96,8 +96,8 @@ def generate_random_conf(bounds):
         if status:
             return q
 	else:
-	    print "Getting invalid config. try again."
-	    print message
+	    print("Getting invalid config. try again.")
+	    print(message)
 #set init
 q_init = generate_random_conf(root_bounds)
 v (q_init)
@@ -127,7 +127,7 @@ ps.selectPathPlanner("DynamicPlanner")
 # Solve the planning problem :
 #ps.setMaxIterPathPlanning(1000)
 t = ps.solve ()
-print "Guide planning time : ",t
+print("Guide planning time : ",t)
 
 
 # display solution : 
@@ -149,6 +149,6 @@ tStart = time.time()
 for i in range(1000):
     rbprmBuilder.isConfigValid(q_init)
 tot = time.time() - tStart
-print "avg time : ",tot/1000.
+print("avg time : ",tot/1000.)
 
 

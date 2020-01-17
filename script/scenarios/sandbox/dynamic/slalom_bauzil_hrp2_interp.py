@@ -83,7 +83,7 @@ fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 
 
 tGenerate =  time.time() - tStart
-print "generate databases in : "+str(tGenerate)+" s"
+print("generate databases in : "+str(tGenerate)+" s")
 
 
 """
@@ -156,8 +156,8 @@ configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = robTreshold,
 
 
 tInterpolateConfigs = time.time()-tStart
-print "number of configs : ", len(configs)
-print "generated in "+str(tInterpolateConfigs)+" s"
+print("number of configs : ", len(configs))
+print("generated in "+str(tInterpolateConfigs)+" s")
 r(configs[1])
 
 displayContactSequence(r,configs)

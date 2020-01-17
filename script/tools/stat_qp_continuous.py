@@ -9,7 +9,7 @@ import time
 from hpp import Error as hpperr
 from numpy import array, matrix
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
-import cPickle as pickle
+import pickle as pickle
 from pathlib2 import Path
 import os
 import generate_muscod_problem as mp
@@ -99,7 +99,7 @@ while file_exist:
     i+= 1
 
 f = open(filename,"w")
-print "write results in file : "+filename
+print("write results in file : "+filename)
 i=0
 cs_out = ContactSequenceHumanoid(0)
 
@@ -180,9 +180,9 @@ GT_valid_stab_invalid_muscod = 0.
 GT_valid_stab_invalid_muscodWarmStart = 0.
 
 for [s0,s1] in states:
-    print "#################################"
-    print "#######  iter : "+str(i)+" / "+str(len(states))+"  ########"
-    print "#################################"
+    print("#################################")
+    print("#######  iter : "+str(i)+" / "+str(len(states))+"  ########")
+    print("#################################")
 
     f.write("Try for pair "+str(i)+" ------- \n")
     f.write("q0 = "+str(s0.q())+"\n")
@@ -221,7 +221,7 @@ for [s0,s1] in states:
     pid = fullBody.isDynamicallyReachableFromState(s0.sId,s1.sId,True,numPointsPerPhases=3)
     success_qp3 = (len(pid) > 0)
     if success_qp3:
-        print "qp3 converged."
+        print("qp3 converged.")
         best_pid = pid
         kin_valid_qp3,stab_valid_qp3 = check_traj_valid(ps,fullBody,s0,s1,pid)
 
@@ -229,21 +229,21 @@ for [s0,s1] in states:
     pid = fullBody.isDynamicallyReachableFromState(s0.sId,s1.sId,True,numPointsPerPhases=7)
     success_qp7 = (len(pid) > 0)
     if success_qp7:
-        print "qp7 converged."
+        print("qp7 converged.")
         best_pid = pid
         kin_valid_qp7,stab_valid_qp7 = check_traj_valid(ps,fullBody,s0,s1,pid)
 
     pid = fullBody.isDynamicallyReachableFromState(s0.sId,s1.sId,True,numPointsPerPhases=15)
     success_qp15 = (len(pid) > 0)
     if success_qp15:
-        print "qp15 converged."
+        print("qp15 converged.")
         best_pid = pid
         kin_valid_qp15,stab_valid_qp15 = check_traj_valid(ps,fullBody,s0,s1,pid)
 
     pid = fullBody.isDynamicallyReachableFromState(s0.sId,s1.sId,True,numPointsPerPhases=0)
     success_qpC = (len(pid) > 0)
     if success_qpC:
-        print "qp continuous converged."
+        print("qp continuous converged.")
         best_pid = pid
         kin_valid_qpC,stab_valid_qpC = check_traj_valid(ps,fullBody,s0,s1,pid)
 

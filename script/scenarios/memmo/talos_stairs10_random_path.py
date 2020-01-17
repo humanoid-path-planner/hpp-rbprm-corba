@@ -60,7 +60,7 @@ afftool.loadObstacleModel ("hpp_environments", "multicontact/bauzil_stairs", "pl
 try :
     v = vf.createViewer(displayArrows = True)
 except Exception:
-    print "No viewer started !"
+    print("No viewer started !")
     class FakeViewer():
         sceneName = ""
         def __init__(self):
@@ -107,10 +107,10 @@ q_down = q_up[::]
 random.seed()
 go_up = random.randint(0,1)
 if go_up:
-    print "go upstair"
+    print("go upstair")
     alphaBounds=[np.pi/4., 3.*np.pi/4.]
 else :
-    print "go downstair"
+    print("go downstair")
     alphaBounds=[5.*np.pi/4., 7.*np.pi/4.]
 
 # sample random valid position on the floor : 
@@ -160,7 +160,7 @@ ps.selectPathPlanner("DynamicPlanner")
 # Solve the planning problem :
 
 t = ps.solve ()
-print "Guide planning time : ",t
+print("Guide planning time : ",t)
 #pId = ps.numberPaths()-1
 pId = 0
 

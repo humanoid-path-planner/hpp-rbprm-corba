@@ -53,7 +53,7 @@ def genPlan(stepsize=0.1, rob = 2, filt = True):
 	start = time.clock() 
 	configs = fullBody.interpolate(stepsize, 1, rob, filt)
 	end = time.clock() 
-	print "Contact plan generated in " + str(end-start) + "seconds"
+	print("Contact plan generated in " + str(end-start) + "seconds")
 	
 def contactPlan(step = 0.5, rob = 2):
 	r.client.gui.setVisibility("hyq", "ON")
@@ -66,19 +66,19 @@ def contactPlan(step = 0.5, rob = 2):
 		
 		
 def a():
-	print "initial configuration"
+	print("initial configuration")
 	initConfig()
 		
 def b():
-	print "end configuration"
+	print("end configuration")
 	endConfig()
 		
 def c():
-	print "displaying root path"
+	print("displaying root path")
 	rootPath()
 	
 def d(step=0.1, filt = True):
-	print "computing contact plan"
+	print("computing contact plan")
 	genPlan(step, filt = filt)
 	return configs
 	
@@ -86,7 +86,7 @@ def e(step = 0.5, rob = 2, qs=None):
 	if(qs != None):
 		global configs
 		configs = qs[:]
-	print "displaying contact plan"
+	print("displaying contact plan")
 	contactPlan(step, rob)
     
 r = None

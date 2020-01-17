@@ -64,7 +64,7 @@ fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 
 
 tGenerate =  time.time() - tStart
-print "generate databases in : "+str(tGenerate)+" s"
+print("generate databases in : "+str(tGenerate)+" s")
 
 
 """
@@ -136,8 +136,8 @@ configsFull = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = robTresh
 
 
 tInterpolateConfigs = time.time()-tStart
-print "number of configs : ", len(configsFull)
-print "generated in "+str(tInterpolateConfigs)+" s"
+print("number of configs : ", len(configsFull))
+print("generated in "+str(tInterpolateConfigs)+" s")
 r(configsFull[len(configsFull)-1])
 
 
@@ -155,7 +155,7 @@ cs = generateContactSequence(fullBody,configs,beginState, endState,r)
 
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")
-print "save contact sequence : ",filename
+print("save contact sequence : ",filename)
 
 
 

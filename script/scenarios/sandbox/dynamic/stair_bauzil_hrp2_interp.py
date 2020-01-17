@@ -72,7 +72,7 @@ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 100000, 
 
 
 tGenerate =  time.time() - tStart
-print "generate databases in : "+str(tGenerate)+" s"
+print("generate databases in : "+str(tGenerate)+" s")
 
 
 
@@ -139,7 +139,7 @@ fullBody.setEndState(q_goal,[rLegId,lLegId,rarmId])
 tStart = time.time()
 configs = fullBody.interpolate(0.01,pathId=0,robustnessTreshold = 0, filterStates = True,testReachability=False,quasiStatic=False)
 tInterpolateConfigs = time.time()-tStart
-print "number of configs :", len(configs)
+print("number of configs :", len(configs))
 r(configs[-1])
 
 
@@ -163,7 +163,7 @@ from generate_contact_sequence import *
 cs = generateContactSequence(fullBody,configs,beginState,endState,r)
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")
-print "save contact sequence : ",filename
+print("save contact sequence : ",filename)
 
 
 

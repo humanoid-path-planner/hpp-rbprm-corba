@@ -2,9 +2,9 @@ from hpp.corbaserver.rbprm.hyq_contact6D import Robot
 from hpp.gepetto import Viewer
 from hpp.corbaserver.rbprm.tools.display_tools import *
 import time
-print "Plan guide trajectory ..."
+print("Plan guide trajectory ...")
 import hyq_slalom_debris_path as tp
-print "Done."
+print("Done.")
 import time
 
 pId = tp.ps.numberPaths() -1
@@ -30,7 +30,7 @@ q_init = q_ref[::]
 fullBody.setReferenceConfig(q_ref)
 fullBody.setCurrentConfig (q_init)
 
-print "Generate limb DB ..."
+print("Generate limb DB ...")
 tStart = time.time()
 # generate databases :
 
@@ -46,8 +46,8 @@ for limbId in fullBody.limbNames :
 
 
 tGenerate =  time.time() - tStart
-print "Done."
-print "Databases generated in : "+str(tGenerate)+" s"
+print("Done.")
+print("Databases generated in : "+str(tGenerate)+" s")
 
 #define initial and final configurations :
 configSize = fullBody.getConfigSize() -fullBody.client.robot.getDimensionExtraConfigSpace()
@@ -86,13 +86,13 @@ fullBody.setStartState(q_init,[fullBody.rLegId,fullBody.lArmId,fullBody.rArmId,f
 fullBody.setEndState(q_goal,[fullBody.rLegId,fullBody.lArmId,fullBody.rArmId,fullBody.lLegId])
 
 
-print "Generate contact plan ..."
+print("Generate contact plan ...")
 tStart = time.time()
 configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = True,testReachability = False)
 tInterpolateConfigs = time.time() - tStart
-print "Done."
-print "Contact plan generated in : "+str(tInterpolateConfigs)+" s"
-print "number of configs :", len(configs)
+print("Done.")
+print("Contact plan generated in : "+str(tInterpolateConfigs)+" s")
+print("number of configs :", len(configs))
 #raw_input("Press Enter to display the contact sequence ...")
 #displayContactSequence(v,configs)
 

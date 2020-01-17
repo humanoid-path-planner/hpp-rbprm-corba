@@ -31,7 +31,7 @@ for line in f.readlines():
 for i in range(0,len(dic)):
   if(dic[i][2] > 0):
     t = dic[i][1] / dic[i][2]
-    print dic[i][0],t
+    print(dic[i][0],t)
 
 
 

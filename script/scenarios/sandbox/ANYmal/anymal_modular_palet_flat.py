@@ -2,7 +2,7 @@ from hpp.corbaserver.rbprm.anymal import Robot
 from hpp.gepetto import Viewer
 from tools.display_tools import *
 import time
-print "Plan guide trajectory ..."
+print("Plan guide trajectory ...")
 import scenarios.sandbox.ANYmal.anymal_modular_palet_flat_path as tp
 
 #Robot.urdfSuffix += "_safeFeet"
@@ -10,11 +10,11 @@ statusFilename = tp.statusFilename
 pId = tp.pid
 f = open(statusFilename,"a")
 if tp.ps.numberPaths() > 0 :
-  print "Path planning OK."
+  print("Path planning OK.")
   f.write("Planning_success: True"+"\n")
   f.close()
 else :
-  print "Error during path planning"
+  print("Error during path planning")
   f.write("Planning_success: False"+"\n")
   f.close()
   import sys
@@ -45,7 +45,7 @@ ps.setParameter("FullBody/frictionCoefficient",tp.mu)
 try :
     v = tp.Viewer (ps,viewerClient=tp.v.client, displayCoM = True)
 except Exception:
-    print "No viewer started !"
+    print("No viewer started !")
     class FakeViewer():
         def __init__(self):
             return
@@ -65,14 +65,14 @@ fullBody.setPostureWeights(fullBody.postureWeights[::]+[0]*6)
 
 fullBody.setCurrentConfig (q_init)
 
-print "Generate limb DB ..."
+print("Generate limb DB ...")
 tStart = time.time()
 # generate databases : 
 
 fullBody.loadAllLimbs("static","ReferenceConfiguration",nbSamples=100000,disableEffectorCollision=False)
 tGenerate =  time.time() - tStart
-print "Done."
-print "Databases generated in : "+str(tGenerate)+" s"
+print("Done.")
+print("Databases generated in : "+str(tGenerate)+" s")
 v.addLandmark('anymal/base_0',0.2)
 
 #define initial and final configurations : 
@@ -108,27 +108,27 @@ fullBody.setCurrentConfig (q_goal)
 v(q_goal)
 
 
-print "Generate contact plan ..."
+print("Generate contact plan ...")
 tStart = time.time()
 configs = fullBody.interpolate(0.001,pathId=pId,robustnessTreshold = robTreshold, filterStates = True,testReachability=True,quasiStatic=True)
 tInterpolateConfigs = time.time() - tStart
-print "Done."
-print "Contact plan generated in : "+str(tInterpolateConfigs)+" s"
-print "number of configs :", len(configs)
+print("Done.")
+print("Contact plan generated in : "+str(tInterpolateConfigs)+" s")
+print("number of configs :", len(configs))
 #raw_input("Press Enter to display the contact sequence ...")
 #displayContactSequence(v,configs)
 
 if len(configs) < 2 :
   cg_success = False
-  print "Error during contact generation."
+  print("Error during contact generation.")
 else:
   cg_success = True
-  print "Contact generation Done."
+  print("Contact generation Done.")
 if abs(configs[-1][0] - tp.q_goal[0]) < 0.01 and abs(configs[-1][1]- tp.q_goal[1]) < 0.01  and (len(fullBody.getContactsVariations(len(configs)-2,len(configs)-1))==1):
-  print "Contact generation successful."
+  print("Contact generation successful.")
   cg_reach_goal = True
 else:
-  print "Contact generation failed to reach the goal."
+  print("Contact generation failed to reach the goal.")
   cg_reach_goal = False
 
 f = open(statusFilename,"a")

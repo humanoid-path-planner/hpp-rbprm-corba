@@ -158,7 +158,7 @@ configs = fullBody.interpolate(0.08,pathId=0,robustnessTreshold = 0, filterState
 
 
 
-print "number of configs :", len(configs)
+print("number of configs :", len(configs))
 
 
 

@@ -58,7 +58,7 @@ afftool.loadObstacleModel ("hpp_environments", "multicontact/maze_hard", "planni
 try :
     v = vf.createViewer(displayArrows = True)
 except Exception:
-    print "No viewer started !"
+    print("No viewer started !")
     class FakeViewer():
         def __init__(self):
             return
@@ -93,11 +93,11 @@ ps.selectDistance("Kinodynamic")
 ps.selectPathPlanner("DynamicPlanner")
 
 t = ps.solve ()
-print "Guide planning time : ",t
+print("Guide planning time : ",t)
 #v.solveAndDisplay("rm",10,0.01)
 
 for i in range(20):
-    print "Optimize path, "+str(i+1)+"/20 ... "
+    print("Optimize path, "+str(i+1)+"/20 ... ")
     ps.optimizePath(ps.numberPaths()-1)
 pathId = ps.numberPaths()-1
 

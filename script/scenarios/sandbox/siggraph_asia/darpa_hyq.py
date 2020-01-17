@@ -162,7 +162,7 @@ def genPlan(stepsize=0.06):
 	start = time.clock() 
 	configs = fullBody.interpolate(stepsize, 5, 5, True)
 	end = time.clock() 
-	print "Contact plan generated in " + str(end-start) + "seconds"
+	print("Contact plan generated in " + str(end-start) + "seconds")
 	
 def contactPlan(step = 0.5):
 	r.client.gui.setVisibility("hyq", "ON")
@@ -175,26 +175,26 @@ def contactPlan(step = 0.5):
 		
 		
 def a():
-	print "initial configuration"
+	print("initial configuration")
 	initConfig()
 		
 def b():
-	print "end configuration"
+	print("end configuration")
 	endConfig()
 		
 def c():
-	print "displaying root path"
+	print("displaying root path")
 	rootPath()
 	
 def d(step=0.06):
-	print "computing contact plan"
+	print("computing contact plan")
 	genPlan(step)
 	
 def e(step = 0.5):
-	print "displaying contact plan"
+	print("displaying contact plan")
 	contactPlan(step)
 	
-print "Root path generated in " + str(tp.t) + " ms."
+print("Root path generated in " + str(tp.t) + " ms.")
 
 #~ d();e()
 d(0.1);e(0.01)

@@ -65,7 +65,7 @@ fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 
 
 tGenerate =  time.time() - tStart
-print "generate databases in : "+str(tGenerate)+" s"
+print("generate databases in : "+str(tGenerate)+" s")
 
 
 """
@@ -133,8 +133,8 @@ import fullBodyPlayerHrp2
 tStart = time.time()
 configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = robTreshold, filterStates = True)
 tInterpolate = time.time()-tStart
-print "number of configs : ", len(configs)
-print "generated in "+str(tInterpolate)+" s"
+print("number of configs : ", len(configs))
+print("generated in "+str(tInterpolate)+" s")
 r(configs[len(configs)-2])
 
 from hpp.corbaserver.rbprm.tools.display_tools import *

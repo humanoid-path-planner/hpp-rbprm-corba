@@ -2,13 +2,13 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 
-print "####################################"
-print "#            SOLVING P1 :          #"
+print("####################################")
+print("#            SOLVING P1 :          #")
 import flatGround_hrp2_pathKino as tp
-print "#               DONE               #"
-print "####################################"
-print "#            SOLVING P2 :          #"
-print "####################################"
+print("#               DONE               #")
+print("####################################")
+print("#            SOLVING P2 :          #")
+print("####################################")
 import time
 
 
@@ -114,7 +114,7 @@ pp = PathPlayer (fullBody.client.basic, r)
 import fullBodyPlayerHrp2
 
 configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 1, filterStates = True)
-print "number of configs :", len(configs)
+print("number of configs :", len(configs))
 
 
 
@@ -129,22 +129,22 @@ configs = configs[:-1]
 player.displayContactPlan(1.)
 
 #player.interpolate(2,len(configs)-1)
-print "####################################"
-print "#            SOLVING P2 :          #"
-print "#               DONE               #"
-print "####################################"
-print "# Writing contact sequence file :  #"
-print "####################################"
+print("####################################")
+print("#            SOLVING P2 :          #")
+print("#               DONE               #")
+print("####################################")
+print("# Writing contact sequence file :  #")
+print("####################################")
 
 from planning.configs.straight_walk_dynamic_config import *
 from generate_contact_sequence import *
 cs = generateContactSequence(fullBody,configs,r)
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, CONTACT_SEQUENCE_XML_TAG)
-print "save contact sequence : ",filename
-print "####################################"
-print "# Writing contact sequence file :  #"
-print "#               DONE               #"
-print "####################################"
+print("save contact sequence : ",filename)
+print("####################################")
+print("# Writing contact sequence file :  #")
+print("#               DONE               #")
+print("####################################")
 
 

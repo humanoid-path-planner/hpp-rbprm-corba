@@ -111,7 +111,7 @@ pp = PathPlayer (fullBody.client.basic, r)
 import fullBodyPlayerHrp2
 
 configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 1, filterStates = True)
-print "number of configs :", len(configs)
+print("number of configs :", len(configs))
 
 
 
@@ -133,7 +133,7 @@ from generate_contact_sequence import *
 cs = generateContactSequence(fullBody,configs,r)
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")
-print "save contact sequence : ",filename
+print("save contact sequence : ",filename)
 
 
 

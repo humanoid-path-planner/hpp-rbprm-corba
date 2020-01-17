@@ -80,7 +80,7 @@ fullBody.runLimbSampleAnalysis(larmId, "ReferenceConfiguration", True)
 
 
 tGenerate =  time.time() - tStart
-print "generate databases in : "+str(tGenerate)+" s"
+print("generate databases in : "+str(tGenerate)+" s")
 
 
 q_0 = fullBody.getCurrentConfig();

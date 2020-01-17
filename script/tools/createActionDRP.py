@@ -134,5 +134,5 @@ steps:
         data['steps'].extend(step_data)
     stream = file(filename+'.yaml', 'w')
     yaml.dump(data, stream, default_flow_style=False)
-    print('saved .yaml file as '+filename+'.yaml')
+    print(('saved .yaml file as '+filename+'.yaml'))
 

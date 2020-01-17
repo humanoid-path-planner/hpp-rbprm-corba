@@ -86,8 +86,8 @@ while(True):
     v (q_init)
     ps.setInitialConfig (q_init)
     if CONFIRM_SAMPLING:
-      print "Accept?y/n"
-      user_in = raw_input()
+      print("Accept?y/n")
+      user_in = input()
       if user_in == 'y':
           break
     else:
@@ -99,8 +99,8 @@ while(True):
     q_goal = generate_random_conf_without_orientation(rbprmBuilder,root_bounds)
     v (q_goal)
     if CONFIRM_SAMPLING:
-      print "Accept?y/n"
-      user_in = raw_input()
+      print("Accept?y/n")
+      user_in = input()
       if user_in == 'y':
           break
     else:
@@ -125,11 +125,11 @@ ps.setMaxIterPathPlanning(100000)
 t = ps.solve ()
 #v.solveAndDisplay('rm',5,0.01)
 
-print "Guide planning time : ",t
+print("Guide planning time : ",t)
 
 
 for i in range(10):
-    print "Optimize path, "+str(i+1)+"/10 ... "
+    print("Optimize path, "+str(i+1)+"/10 ... ")
     ps.optimizePath(ps.numberPaths()-1)
 
 ps.extractPath(ps.numberPaths()-1,1.,ps.pathLength(ps.numberPaths()-1)-1.)

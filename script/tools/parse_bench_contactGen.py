@@ -33,7 +33,7 @@ while line.startswith("new"):
         if t[1].startswith("True"):
             totalMuscodWarmStartConverg += 1.
     else :
-        print "badly formated log"
+        print("badly formated log")
     line = f.readline()
     t = line.rstrip("\n").split(" ")
     assert t[0].startswith("time")
@@ -47,10 +47,10 @@ while line.startswith("new"):
     line = f.readline()
         
 
-print "For : "+str(totalIt)+" runs : " 
-print "success contact generation : "+str((totalSuccess/totalIt)*100.)+ "  %"
-print "success muscod             : "+str((totalMuscodConverg/totalSuccess)*100.)+ "  %"
-print "success muscod Warm Start  : "+str((totalMuscodWarmStartConverg/totalSuccess)*100.)+ "  %"
-print "success croc converged :   : "+str((totalCrocConverg/totalSuccess)*100.)+ "  %"
-print "avg time                   : "+str(totalTime/totalSuccess)+ "s"
-print "avg configs                : "+str(totalConf/totalSuccess)
+print("For : "+str(totalIt)+" runs : ") 
+print("success contact generation : "+str((totalSuccess/totalIt)*100.)+ "  %")
+print("success muscod             : "+str((totalMuscodConverg/totalSuccess)*100.)+ "  %")
+print("success muscod Warm Start  : "+str((totalMuscodWarmStartConverg/totalSuccess)*100.)+ "  %")
+print("success croc converged :   : "+str((totalCrocConverg/totalSuccess)*100.)+ "  %")
+print("avg time                   : "+str(totalTime/totalSuccess)+ "s")
+print("avg configs                : "+str(totalConf/totalSuccess))

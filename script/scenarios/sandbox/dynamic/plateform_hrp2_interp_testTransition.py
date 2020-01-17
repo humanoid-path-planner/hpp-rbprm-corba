@@ -69,7 +69,7 @@ fullBody.setReferenceConfig (q_ref)
 
 
 tGenerate =  time.time() - tStart
-print "generate databases in : "+str(tGenerate)+" s"
+print("generate databases in : "+str(tGenerate)+" s")
 
 
 q_0 = fullBody.getCurrentConfig();
@@ -253,7 +253,7 @@ cs = generateContactSequence(fullBody,configs,beginState, endState,r)
 
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")
-print "save contact sequence : ",filename
+print("save contact sequence : ",filename)
 
 
 

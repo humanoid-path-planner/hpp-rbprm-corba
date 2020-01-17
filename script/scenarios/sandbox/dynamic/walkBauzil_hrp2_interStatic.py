@@ -78,7 +78,7 @@ fullBody.runLimbSampleAnalysis(larmId, "ReferenceConfiguration", True)
 
 fullBody.setReferenceConfig (q_ref) # must be called after adding the limbs
 tGenerate =  time.time() - tStart
-print "generate databases in : "+str(tGenerate)+" s"
+print("generate databases in : "+str(tGenerate)+" s")
 
 
 """
@@ -149,8 +149,8 @@ import fullBodyPlayerHrp2
 tStart = time.time()
 configsFull = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = robTreshold, filterStates = True)
 tInterpolateConfigs = time.time()-tStart
-print "number of configs : ", len(configsFull)
-print "generated in "+str(tInterpolateConfigs)+" s"
+print("number of configs : ", len(configsFull))
+print("generated in "+str(tInterpolateConfigs)+" s")
 r(configsFull[len(configsFull)-1])
 
 
@@ -176,7 +176,7 @@ cs = generateContactSequence(fullBody,configs,beginState, endState,r)
 
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")
-print "save contact sequence : ",filename
+print("save contact sequence : ",filename)
 
 
 """

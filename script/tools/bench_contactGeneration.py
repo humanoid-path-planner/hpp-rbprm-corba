@@ -4,7 +4,7 @@ from pathlib2 import Path
 import muscodSSH as ssh
 tryWarmStart = True
 
-print "run bench with feasibility criterion"
+print("run bench with feasibility criterion")
 
 com = fullBody.getCenterOfMass()
 if com[0] > 1.25 :

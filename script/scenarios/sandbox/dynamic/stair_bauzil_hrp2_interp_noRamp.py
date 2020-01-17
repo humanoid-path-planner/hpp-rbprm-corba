@@ -164,7 +164,7 @@ pp = PathPlayer (fullBody.client.basic, r)
 pp.dt=0.001
 
 configs = fullBody.interpolate(0.05,pathId=0,robustnessTreshold = 0, filterStates = True)
-print "number of configs :", len(configs)
+print("number of configs :", len(configs))
 r(configs[-1])
 
 

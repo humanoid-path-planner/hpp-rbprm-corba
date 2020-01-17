@@ -34,7 +34,7 @@ def addData(filename):
                     else :
                         resultsOrdered[(timings[0],timings[1],timings[2])] = [str(v)]            
                             
-    print "file : "+filename+" parsed successfully. Current number of states : "+str(total_states)
+    print("file : "+filename+" parsed successfully. Current number of states : "+str(total_states))
     f.close()
     
 
@@ -50,7 +50,7 @@ def fuseData():
         else:
             timings_fused[idxOrd]  = [timing]
             
-    print "num different values", len(timings_fused)
+    print("num different values", len(timings_fused))
     return timings_fused
 
 totalSucc = 0
@@ -91,7 +91,7 @@ def getNumSamplesToPercentageTarget(target = 0.95):
 
 def computeTimingsForPercentage(targetPercentage = 0.35):
     aggTimings = getNumSamplesToPercentageTarget(target = targetPercentage)
-    print "total number of timings required to cover {0} % of the successes :".format(targetPercentage * 100.), len(aggTimings)
+    print("total number of timings required to cover {0} % of the successes :".format(targetPercentage * 100.), len(aggTimings))
     return aggTimings
     
 
@@ -116,6 +116,6 @@ results = getTimingsFromAggIndex(aggTimings[-1][-1])
 results
 
 
-import cPickle as pickle
+import pickle as pickle
 
 #pickle.dump( [resultsOrdered,timings_fused], open( "timings_hyq_hrp2.p", "wb" ) )

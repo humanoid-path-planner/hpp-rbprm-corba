@@ -2,9 +2,9 @@ from hpp.corbaserver.rbprm.anymal_contact6D import Robot
 from hpp.gepetto import Viewer
 from hpp.corbaserver.rbprm.tools.display_tools import *
 import time
-print "Plan guide trajectory ..."
+print("Plan guide trajectory ...")
 import darpa_path as tp
-print "Done."
+print("Done.")
 import time
 
 
@@ -46,12 +46,12 @@ fullBody.setReferenceConfig(q_ref)
 fullBody.setCurrentConfig (q_init)
 
 dict_heuristic = {fullBody.rLegId:"static", fullBody.lLegId:"static", fullBody.rArmId:"fixedStep04", fullBody.lArmId:"fixedStep04"}
-print "Generate limb DB ..."
+print("Generate limb DB ...")
 tStart = time.time()
 fullBody.loadAllLimbs(dict_heuristic,"ReferenceConfigurationCustom",nbSamples=50000)
 tGenerate =  time.time() - tStart
-print "Done."
-print "Databases generated in : "+str(tGenerate)+" s"
+print("Done.")
+print("Databases generated in : "+str(tGenerate)+" s")
 fullBody.setReferenceConfig(q_ref)
 
 #define initial and final configurations :
@@ -89,14 +89,14 @@ fullBody.setStartState(q_init,fullBody.limbs_names)
 fullBody.setEndState(q_goal,fullBody.limbs_names)
 
 
-print "Generate contact plan ..."
+print("Generate contact plan ...")
 tStart = time.time()
 configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = robTreshold, filterStates = True,testReachability=True,quasiStatic=True)
 tInterpolateConfigs = time.time() - tStart
-print "Done. "
-print "Contact sequence computed in "+str(tInterpolateConfigs)+" s."
-print "number of configs :", len(configs)
-raw_input("Press Enter to display the contact sequence ...")
+print("Done. ")
+print("Contact sequence computed in "+str(tInterpolateConfigs)+" s.")
+print("number of configs :", len(configs))
+input("Press Enter to display the contact sequence ...")
 displayContactSequence(v,configs)
 
 import tools.createActionDRP as exp

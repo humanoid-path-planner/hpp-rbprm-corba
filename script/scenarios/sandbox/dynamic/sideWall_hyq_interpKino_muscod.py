@@ -129,7 +129,7 @@ r(configs[-1])
 
 
 
-print "number of configs =", len(configs)
+print("number of configs =", len(configs))
 r(configs[-1])
 
 from hpp.gepetto import PathPlayer
@@ -151,7 +151,7 @@ cs = generateContactSequence(fullBody,configs,beginState, endState,r)
 
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")
-print "save contact sequence : ",filename
+print("save contact sequence : ",filename)
 
 
 

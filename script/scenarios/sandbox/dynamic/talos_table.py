@@ -45,7 +45,7 @@ fullBody.addLimb(fullBody.rArmId,fullBody.rarm,fullBody.rhand,fullBody.rArmOffse
 fullBody.runLimbSampleAnalysis(fullBody.rArmId, "ReferenceConfiguration", True)
 
 tGenerate =  time.time() - tStart
-print "generate databases in : "+str(tGenerate)+" s"
+print("generate databases in : "+str(tGenerate)+" s")
 
 v = vf.createViewer(displayCoM=True)
 v(q_init)

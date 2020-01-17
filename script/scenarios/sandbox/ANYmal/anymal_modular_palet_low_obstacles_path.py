@@ -69,7 +69,7 @@ afftool.loadObstacleModel ("hpp_environments", "ori/modular_palet_low_obstacles"
 try :
     v = vf.createViewer(displayArrows = True)
 except Exception:
-    print "No viewer started !"
+    print("No viewer started !")
     class FakeViewer():
         def __init__(self):
             return
@@ -110,7 +110,7 @@ ps.addGoalConfig (q_goal)
 
 # Solve the planning problem :
 t = ps.solve()
-print "Guide planning done in "+str(t)
+print("Guide planning done in "+str(t))
 
 pidBegin = ps.numberPaths()-1
 
@@ -126,7 +126,7 @@ ps.addGoalConfig (q_goal)
 rbprmBuilder.setJointBounds ("root_joint", [q_init[0],q_goal[0],-0.2,0.2,q_init[2],q_init[2]])
 # Solve the planning problem :
 t = ps.solve()
-print "Guide planning done in "+str(t)
+print("Guide planning done in "+str(t))
 #v.solveAndDisplay('rm',2,0.001)
 pidMiddle = ps.numberPaths()-1
 rbprmBuilder.setJointBounds ("root_joint", rootBounds)
@@ -144,7 +144,7 @@ ps.addGoalConfig (q_goal)
 
 # Solve the planning problem :
 t = ps.solve()
-print "Guide planning done in "+str(t)
+print("Guide planning done in "+str(t))
 
 pidLast = ps.numberPaths()-1
 

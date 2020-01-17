@@ -2,9 +2,9 @@ from talos_rbprm.talos import Robot # select the robot
 from hpp.gepetto import Viewer
 from hpp.corbaserver.rbprm.tools.display_tools import *
 import time
-print "Plan guide trajectory ..."
+print("Plan guide trajectory ...")
 import talos_navBauzil_path as tp # load the guide planning script
-print "Done."
+print("Done.")
 import time
 Robot.urdfSuffix += "_safeFeet"
 
@@ -37,7 +37,7 @@ fullBody.setCurrentConfig (q_init)
 fullBody.setPostureWeights(fullBody.postureWeights[::]+[0]*6)
 fullBody.usePosturalTaskContactCreation(True)
 
-print "Generate limb DB ..."
+print("Generate limb DB ...")
 tStart = time.time()
 # generate databases : 
 nbSamples = 100000
@@ -50,8 +50,8 @@ fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffse
 #fullBody.saveLimbDatabase(rLegId, "./db/talos_lLeg_walk.db")
 
 tGenerate =  time.time() - tStart
-print "Done."
-print "Databases generated in : "+str(tGenerate)+" s"
+print("Done.")
+print("Databases generated in : "+str(tGenerate)+" s")
 
 
 #define initial and final configurations :
@@ -89,13 +89,13 @@ fullBody.setStartState(q_init,[fullBody.lLegId,fullBody.rLegId])
 fullBody.setEndState(q_goal,[fullBody.lLegId,fullBody.rLegId])
 
 
-print "Generate contact plan ..."
+print("Generate contact plan ...")
 tStart = time.time()
 configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 2, filterStates = True,testReachability=True,quasiStatic=True)
 tInterpolateConfigs = time.time() - tStart
-print "Done."
-print "number of configs :", len(configs)
-raw_input("Press Enter to display the contact sequence ...")
+print("Done.")
+print("number of configs :", len(configs))
+input("Press Enter to display the contact sequence ...")
 displayContactSequence(v,configs)
 
 

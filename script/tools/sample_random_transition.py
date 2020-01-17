@@ -119,7 +119,7 @@ def sampleRandomStateFlatFloor(fullBody,limbsInContact,z):
         if success :
             success = projectInKinConstraints(fullBody,s0)
     if not success :
-        print "Timeout for generation of static configuration with ground contact"
+        print("Timeout for generation of static configuration with ground contact")
         sys.exit(1)
     return s0
 
@@ -146,7 +146,7 @@ def sampleRandomStateStairs(fullBody,limbsInContact,zInterval,movingLimb,z_movin
             # check stability
             success = fullBody.isStateBalanced(s0.sId,5)
     if not success :
-        print "Timeout for generation of static configuration with ground contact"
+        print("Timeout for generation of static configuration with ground contact")
         sys.exit(1)
     return s0
 
@@ -206,7 +206,7 @@ def sampleRandomTransitionFlatFloor(fullBody,limbsInContact,movingLimb, z=0):
         s0 = sampleRandomStateFlatFloor(fullBody,limbsInContact,z)
         success,s1 = sampleRandomTranstionFromState(fullBody,s0,limbsInContact,movingLimb,z)
     if not success :
-        print "Timeout for generation of feasible transition"
+        print("Timeout for generation of feasible transition")
         sys.exit(1)    
     # recreate the states to assure the continuity of the index in fullBody :     
     state0 = State(fullBody,q=s0.q(),limbsIncontact=s0.getLimbsInContact())
@@ -227,7 +227,7 @@ def sampleRandomTransitionStairs(fullBody,limbsInContact,zInterval,movingLimb,zI
         s0 = sampleRandomStateStairs(fullBody,limbsInContact,zInterval,movingLimb,zInterval_moving[0])
         success,s1 = sampleRandomTranstionFromState(fullBody,s0,limbsInContact,movingLimb,zInterval_moving[1])
     if not success :
-        print "Timeout for generation of feasible transition"
+        print("Timeout for generation of feasible transition")
         sys.exit(1)    
     # recreate the states to assure the continuity of the index in fullBody :     
     state0 = State(fullBody,q=s0.q(),limbsIncontact=s0.getLimbsInContact())

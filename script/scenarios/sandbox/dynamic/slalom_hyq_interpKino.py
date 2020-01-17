@@ -90,7 +90,7 @@ r(q_init)
 configs = fullBody.interpolate(0.01,pathId=pathId,robustnessTreshold = 0, filterStates = True)
 
 
-print "number of configs =", len(configs)
+print("number of configs =", len(configs))
 r(configs[-1])
 
 

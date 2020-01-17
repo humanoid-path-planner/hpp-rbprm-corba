@@ -46,8 +46,8 @@ def showPath(r,pp,pid):
         pp.displayPath(int(pid[3]),color=r.color.yellow)
         r.client.gui.setVisibility('path_'+str(int(pid[3]))+'_root','ALWAYS_ON_TOP')
     elif len(pid) == 3:
-        print "only two phases, not implemented yet."
+        print("only two phases, not implemented yet.")
     else:
-        print "no path, test failed."
+        print("no path, test failed.")
 
 

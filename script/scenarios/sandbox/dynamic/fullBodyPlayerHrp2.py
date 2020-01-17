@@ -74,7 +74,7 @@ class Player(object):
       start = time.clock() 
       self.configs = self.fullBody.interpolate(0.12, 10, 10, True)
       end = time.clock() 
-      print "Contact plan generated in " + str(end-start) + "seconds"
+      print("Contact plan generated in " + str(end-start) + "seconds")
 	
     def displayContactPlan(self,timeScale = 1.):
       self.viewer.client.gui.setVisibility("hrp2_14", "ON")

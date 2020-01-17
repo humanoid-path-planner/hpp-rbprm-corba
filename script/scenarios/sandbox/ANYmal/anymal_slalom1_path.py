@@ -83,11 +83,11 @@ ps.addPathOptimizer ("RandomShortcutDynamic")
 #ps.addPathOptimizer ("RandomShortcut")
 # Solve the planning problem :
 t = ps.solve ()
-print "Guide planning time : ",t
+print("Guide planning time : ",t)
 pid = ps.numberPaths()-1
 
 for i in range(5):
-    print "Optimization pass ",i
+    print("Optimization pass ",i)
     ps.optimizePath(pid)
     pid = ps.numberPaths()-1
 

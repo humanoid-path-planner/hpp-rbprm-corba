@@ -162,7 +162,7 @@ def genPlan(stepsize=0.06):
 	start = time.clock() 
 	configs = fullBody.interpolate(stepsize, 5, 5, True)
 	end = time.clock() 
-	print "Contact plan generated in " + str(end-start) + "seconds"
+	print("Contact plan generated in " + str(end-start) + "seconds")
 	
 def contactPlan(step = 0.5):
 	r.client.gui.setVisibility("hyq", "ON")
@@ -175,26 +175,26 @@ def contactPlan(step = 0.5):
 		
 		
 def a():
-	print "initial configuration"
+	print("initial configuration")
 	initConfig()
 		
 def b():
-	print "end configuration"
+	print("end configuration")
 	endConfig()
 		
 def c():
-	print "displaying root path"
+	print("displaying root path")
 	rootPath()
 	
 def d(step=0.06):
-	print "computing contact plan"
+	print("computing contact plan")
 	genPlan(step)
 	
 def e(step = 0.5):
-	print "displaying contact plan"
+	print("displaying contact plan")
 	contactPlan(step)
 	
-print "Root path generated in " + str(tp.t) + " ms."
+print("Root path generated in " + str(tp.t) + " ms.")
 
 #~ d();e()
 d(0.07);e(0.01)
@@ -236,13 +236,13 @@ def go(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
     global a_s
     a = []
     for l in range(sid,sid+rg):
-        print "STATE ", l
+        print("STATE ", l)
         s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1
         a,com_vel,com_acc = gen_several_states_partial(l,window,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc, path=True)
         a_s+=[a]
         vels += [com_vel[:]]
         accs += [com_acc[:]]
-    print "STATE ", sid+rg
+    print("STATE ", sid+rg)
     #~ path,com_vel,com_acc = gen_several_states(sid+rg,1,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
     vels += [com_vel[:]]
     accs += [com_acc[:]]
@@ -257,13 +257,13 @@ def go_stop(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
 	global a_s
 	a = []
 	for l in range(sid,sid+rg):
-		print "STATE ", l		
+		print("STATE ", l)		
 		s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1
 		a,com_vel,com_acc = gen_several_states_partial(l,window,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc, path=True)
 		a_s+=[a]
 		vels += [com_vel[:]]
 		accs += [com_acc[:]]
-	print "STATE ", sid+rg
+	print("STATE ", sid+rg)
 	s = max(norm(array(configs[sid+rg+1]) - array(configs[sid+rg])), 1.) * 1
 	a,com_vel,com_acc = gen_several_states(sid+rg,1,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
 	a_s+=[a]
@@ -279,7 +279,7 @@ def go0(sid, rg, num_optim = 0, mu = 0.6, s =None):
     global path
     if s == None:
         s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1.5
-        print "$$$$$$$$$$$$$$$ S $$$$$$$$ *********************444444444444444444444444444 ", s
+        print("$$$$$$$$$$$$$$$ S $$$$$$$$ *********************444444444444444444444444444 ", s)
     for i in range(rg-1):
         path = gen(sid+i,1,mu=mu,num_optim=num_optim, s=s, gen_traj = False)
 	i = rg -1
@@ -295,7 +295,7 @@ def go2(sid, rg = 1, num_optim = 0, mu = 0.5, t =2, s =None):
     for i in range(rg):
 		if s == None:
 			s = max(norm(array(configs[sid+i+1]) - array(configs[sid+i])), 1.) * 0.6
-			print "$$$$$$$$$$$$$$$ S $$$$$$$$ ", s
+			print("$$$$$$$$$$$$$$$ S $$$$$$$$ ", s)
 		path,com_vel,com_acc = gen_several_states(sid+i,sid+i+t,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
 		vels += [com_vel[:]]
 		accs += [com_acc[:]]

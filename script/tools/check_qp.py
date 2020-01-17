@@ -35,7 +35,7 @@ def compute_time_array(t_qp,t_c):
             t_discretized.append(t)
             t_for_phase.append(t)
         t_per_phase.append(t_for_phase)
-    print "test for timings : "+str(t_discretized)
+    print("test for timings : "+str(t_discretized))
     return t_discretized,t_per_phase
 
 def check_acceleration_bounds(ddc_qp,t_discretized):
@@ -45,20 +45,20 @@ def check_acceleration_bounds(ddc_qp,t_discretized):
         a = ddc_qp(t).transpose().tolist()[0]
         for i in range(3):
             if abs(a[i]) > max_acc:
-                print "Acceleration sup to bound, at time : "+str(t)+"    a = "+str(a)
+                print("Acceleration sup to bound, at time : "+str(t)+"    a = "+str(a))
                 return False
             if a[i] < min[i]:
                 min[i] = a[i]
             if a[i] > max[i]:
                 max[i] = a[i]
-    print "acceleration between : "+str(min)+" ; "+str(max)
+    print("acceleration between : "+str(min)+" ; "+str(max))
     return True;
 
 def check_projection(s,c,t):
     return True
     success = s.projectToCOM(c(t).transpose().tolist()[0],500)
     if not success : 
-        print "Unable to project to com at time : "+str(t)
+        print("Unable to project to com at time : "+str(t))
         return False  
     else:
         return True
@@ -69,7 +69,7 @@ def check_stability(s,c,dc,ddc,t):
     q[-3:]   = ddc(t).transpose().tolist()[0]
     success = s.fullBody.isConfigBalanced(q,s.getLimbsInContact(),CoM = c(t).transpose().tolist()[0])
     if not success : 
-        print "UNSTABLE  at time : "+str(t)
+        print("UNSTABLE  at time : "+str(t))
         #print "q = ",q
         return False          
     else : 
@@ -83,10 +83,10 @@ def check_projection_path(s0,s1,c,dc,ddc,t_per_phase):
     s1_orig = State(s1.fullBody,q=s1.q(),limbsIncontact=s1.getLimbsInContact())
     
     if len(moving_limb)>1:
-        print "Too many contact variation between adjacent states"
+        print("Too many contact variation between adjacent states")
         return False,False
     if len(moving_limb)==0:
-        print "No contact between adjacent states"
+        print("No contact between adjacent states")
         return True,True
     #print "test for phase 0 :"
     for t in t_per_phase[0]:
@@ -98,7 +98,7 @@ def check_projection_path(s0,s1,c,dc,ddc,t_per_phase):
     smid_orig,success_orig = StateHelper.removeContact(s0_orig,moving_limb[0])
     
     if not (success and success_orig):
-        print "Error in creation of intermediate state"
+        print("Error in creation of intermediate state")
         return False,False   
     #print "test for phase 1 :"
     for t in t_per_phase[1]:
@@ -125,7 +125,7 @@ def check_one_transition(ps,fullBody,s0,s1,r=None,pp=None):
     
     pid = fullBody.isDynamicallyReachableFromState(s0.sId,s1.sId,True)
     if len(pid)==0:
-        print "unable to compute trajectory"
+        print("unable to compute trajectory")
         return False
     if r!=None and pp != None:
         showPath(r,pp,pid)
@@ -135,9 +135,9 @@ def check_one_transition(ps,fullBody,s0,s1,r=None,pp=None):
     valid = True
     t_qp = [ps.pathLength(int(pid[1])), ps.pathLength(int(pid[2])), ps.pathLength(int(pid[3]))]  
     t_discretized,t_per_phase = compute_time_array(t_qp,c_qp.max())
-    print "### test acceleration bounds ###"
+    print("### test acceleration bounds ###")
     valid = valid and check_acceleration_bounds(ddc_qp,t_discretized)
-    print "### test kinematic projection ###"
+    print("### test kinematic projection ###")
     valid = valid and check_projection_path(s0,s1,c_qp,dc_qp,ddc_qp,t_per_phase)
     
     curves_initGuess.append(c_qp)
@@ -177,7 +177,7 @@ def check_traj_valid(ps,fullBody,s0_,s1_,pIds,dt=0.001):
     
 def check_muscod_traj(fullBody,cs,s0_,s1_):
     if cs.size() != 3 :
-        print "Contact sequence must be of size 3 (one step)"
+        print("Contact sequence must be of size 3 (one step)")
         return False,False
     kin_valid = True
     stab_valid = True
@@ -188,7 +188,7 @@ def check_muscod_traj(fullBody,cs,s0_,s1_):
     moving_limb = s0.contactsVariations(s1)
     smid,success = StateHelper.removeContact(s0,moving_limb[0])
     if not success:
-        print "Error in creation of intermediate state"
+        print("Error in creation of intermediate state")
         return False,False   
     phases = []
     c_array = []
@@ -234,7 +234,7 @@ def check_contact_plan(ps,r,pp,fullBody,idBegin,idEnd):
     fullBody.setStaticStability(False)
     validPlan = True
     for id_state in range(idBegin,idEnd-1):
-        print "#### check for transition between state "+str(id_state) +" and "+str(id_state+1)
+        print("#### check for transition between state "+str(id_state) +" and "+str(id_state+1))
         s0 = State(fullBody, sId = id_state)
         s1 = State(fullBody, sId = id_state + 1)
         # make a copy of each state because they are modified by the projection

@@ -157,7 +157,7 @@ def genPlan():
 	start = time.clock() 
 	configs = configs = fullBody.interpolate(0.1, True)
 	end = time.clock() 
-	print "Contact plan generated in " + str(end-start) + "seconds"
+	print("Contact plan generated in " + str(end-start) + "seconds")
 	
 def contactPlan():
 	tp.cl.problem.selectProblem("default")
@@ -188,9 +188,9 @@ def play(frame_rate = 1./24.):
 	
 def saveAll(name):
 	saveAllData(fullBody, r, name)
-print "Root path generated in " + str(tp.t) + " ms."
+print("Root path generated in " + str(tp.t) + " ms.")
 	
-print "go" 
+print("go") 
 #~ genPlan()
 
 from hpp.corbaserver.rbprm.rbprmstate import *
@@ -247,9 +247,9 @@ def computeNext(state, limb, projectToCom = False, max_num_samples = 10, mu = 0.
     t2 = time.clock()
     #~ t4 = time.clock()
     resultsFinal = [el[0] for el in results if el[1]]
-    print "time to filter", t2 - t1
+    print("time to filter", t2 - t1)
     #~ print "time to create", t4 - t3
-    print "num res", len(resultsFinal)
+    print("num res", len(resultsFinal))
     #sorting
     sortedlist = sorted(resultsFinal, key=distq_ref(state.q()))
     return sortedlist

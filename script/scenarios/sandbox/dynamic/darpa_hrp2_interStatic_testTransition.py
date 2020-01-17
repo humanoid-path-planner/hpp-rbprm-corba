@@ -67,7 +67,7 @@ fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 
 
 tGenerate =  time.time() - tStart
-print "generate databases in : "+str(tGenerate)+" s"
+print("generate databases in : "+str(tGenerate)+" s")
 
 
 """
@@ -135,8 +135,8 @@ import fullBodyPlayerHrp2
 tStart = time.time()
 configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = robTreshold, filterStates = True, testReachability=True, quasiStatic=True)
 tInterpolate = time.time()-tStart
-print "number of configs : ", len(configs)
-print "generated in "+str(tInterpolate)+" s"
+print("number of configs : ", len(configs))
+print("generated in "+str(tInterpolate)+" s")
 r(configs[len(configs)-2])
 
 
@@ -176,7 +176,7 @@ def check_traj(s,c0,c1,reverse=False):
       if successProj :
         valid_length += dt
       else :
-        print "projection failed."
+        print("projection failed.")
         successProj_total = False
       u += dtu
       
@@ -184,7 +184,7 @@ def check_traj(s,c0,c1,reverse=False):
     if successProj :
       valid_length += dist - current_dist
     else :
-      print "projection failed."
+      print("projection failed.")
       successProj_total = False  
   else :
     u = 1.
@@ -195,7 +195,7 @@ def check_traj(s,c0,c1,reverse=False):
       if successProj :
         valid_length += dt
       else :
-        print "projection failed."
+        print("projection failed.")
         successProj_total = False
       u -= dtu
       
@@ -203,7 +203,7 @@ def check_traj(s,c0,c1,reverse=False):
     if successProj :
       valid_length += dist - current_dist
     else :
-      print "projection failed."
+      print("projection failed.")
       successProj_total = False 
   
   return successProj_total
@@ -211,7 +211,7 @@ def check_traj(s,c0,c1,reverse=False):
 def check_kin_feasibility(s0Id,s1Id):
   res = fullBody.isReachableFromState(s0Id,s1Id,True)
   if not res[0]:
-    print "Error : isReachable returned False !"
+    print("Error : isReachable returned False !")
     raise Exception('Error : isReachable returned False !') 
   r(configs[s0Id])
   c0 = np.array(fullBody.getCenterOfMass())
@@ -229,17 +229,17 @@ def check_kin_feasibility(s0Id,s1Id):
     return False
   
   successFeasible = True
-  print "check first part"
+  print("check first part")
   successFeasible = successFeasible and check_traj(s0_orig,c0,c1)
-  print "check mid part"
+  print("check mid part")
   successFeasible = successFeasible and check_traj(smid,c1,c2)
-  print "check last part"
+  print("check last part")
   successFeasible = successFeasible and check_traj(s1_orig,c2,c3,True)
   return successFeasible
   
 
 for i in range(len(configs)-2):
-  print "check traj between state "+str(i)+" and "+str(i+1)
+  print("check traj between state "+str(i)+" and "+str(i+1))
   success = check_kin_feasibility(i,i+1)
   num_transition +=1.
   if success :

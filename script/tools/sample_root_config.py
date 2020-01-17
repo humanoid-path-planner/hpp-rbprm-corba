@@ -30,8 +30,8 @@ def generate_random_conf_without_orientation(rbprmBuilder,bounds,v=None):
       if status:
         return q
       else:
-        print "Getting invalid config. try again."
-        print message
+        print("Getting invalid config. try again.")
+        print(message)
 
 
 def generate_random_conf_with_orientation(rbprmBuilder,bounds,v_init = 0.1,v=None):
@@ -52,5 +52,5 @@ def generate_random_conf_with_orientation(rbprmBuilder,bounds,v_init = 0.1,v=Non
       if status:
         return q
       else:
-        print "Getting invalid config. try again."
-        print message
+        print("Getting invalid config. try again.")
+        print(message)

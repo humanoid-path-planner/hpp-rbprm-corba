@@ -49,7 +49,7 @@ afftool.loadObstacleModel ("hpp_environments", "multicontact/ground", "planning"
 try :
     v = vf.createViewer(displayArrows = True)
 except Exception:
-    print "No viewer started !"
+    print("No viewer started !")
     class FakeViewer():
         def __init__(self):
             return
@@ -86,7 +86,7 @@ ps.selectPathPlanner("DynamicPlanner")
 
 # Solve the planning problem :
 t = ps.solve ()
-print "Guide planning time : ",t
+print("Guide planning time : ",t)
 
 pathId = 0
 

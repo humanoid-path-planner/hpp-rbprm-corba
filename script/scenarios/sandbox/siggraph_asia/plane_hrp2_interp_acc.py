@@ -189,7 +189,7 @@ def genPlan(stepsize=0.1):
 	start = time.clock() 
 	configs = fullBody.interpolate(stepsize, 1, 2, True)
 	end = time.clock() 
-	print "Contact plan generated in " + str(end-start) + "seconds"
+	print("Contact plan generated in " + str(end-start) + "seconds")
 	
 def contactPlan(step = 0.5):
 	r.client.gui.setVisibility("hyq", "ON")
@@ -202,30 +202,30 @@ def contactPlan(step = 0.5):
 		
 		
 def a():
-	print "initial configuration"
+	print("initial configuration")
 	initConfig()
 		
 def b():
-	print "end configuration"
+	print("end configuration")
 	endConfig()
 		
 def c():
-	print "displaying root path"
+	print("displaying root path")
 	rootPath()
 	
 def d(step=0.1):
-	print "computing contact plan"
+	print("computing contact plan")
 	genPlan(step)
 	
 def e(step = 0.5):
-	print "displaying contact plan"
+	print("displaying contact plan")
 	contactPlan(step)
 	
-print "Root path generated in " + str(tp.t) + " ms."
+print("Root path generated in " + str(tp.t) + " ms.")
 	
 d(0.05); e(0.01)
 
-print "Root path generated in " + str(tp.t) + " ms."
+print("Root path generated in " + str(tp.t) + " ms.")
 	
 #~ from gen_data_from_rbprm import *
 #~ 
@@ -303,7 +303,7 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False) :
             bezier_0 = __Bezier([com_1,c_mid_1[0].tolist(),c_mid_2[0].tolist(),com_2], init_acc = [0.0,-20.,0.], end_acc = [0.0,0.,0.], init_vel = [1.,0.,0.], end_vel = [1.,0.,0.])
         
             p0 = fullBody.generateCurveTrajParts(bezier_0,[0.,0.1,0.9,1.])
-            print "p0", p0
+            print("p0", p0)
             #~ pp.displayPath(p0+1)
             #~ pp.displayPath(p0+2)
             pp.displayPath(p0)
@@ -315,7 +315,7 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False) :
             bezier_2 = __Bezier([c_mid_2[0].tolist(),com_2]              , init_acc = c_mid_2[1].tolist(), init_vel = [0.,0.,0.])
         
             p0 = fullBody.generateCurveTraj(bezier_0)
-            print "p0", p0
+            print("p0", p0)
             fullBody.generateCurveTraj(bezier_1)
             fullBody.generateCurveTraj(bezier_2)
             pp.displayPath(p0)
@@ -355,11 +355,11 @@ def prepare_whole_interp(stateid, stateid_end):
 		for i in range(0, num_paths):
 			dec = increment * float(i)
 			partitions += [dec + 0.01 * increment, dec + 0.99 * increment,dec + 1. * increment]
-		print "partitions", partitions, len(partitions)
+		print("partitions", partitions, len(partitions))
 		p0 = fullBody.generateCurveTrajParts(bezier_0,partitions) +1
 		paths_ids = []
 		for i in range(0, num_paths):
-			print "***************************3i", p0+3*i
+			print("***************************3i", p0+3*i)
 			paths_ids += [int(el) for el in fullBody.comRRTFromPos(stateid + i,p0+3*i,p0+3*i+1,p0+3*i+2)]
         #~ paths_ids = []
 			global allpaths

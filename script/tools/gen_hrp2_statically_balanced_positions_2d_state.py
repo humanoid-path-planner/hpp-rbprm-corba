@@ -132,11 +132,11 @@ def draw_cp(cid, limb, config):
 	r.client.gui.createScene(scene)
 	for i in range(4):
 		#~ pos = posetc[2*i]
-		print "P", array(P[i]+[1])
-		print "N", array(N[i]+[1])
-		print m.dot(array(P[i]+[1]))
+		print("P", array(P[i]+[1]))
+		print("N", array(N[i]+[1]))
+		print(m.dot(array(P[i]+[1])))
 		pos = m.dot(array(P[i]+[1]))[:3]
-		print "pos", pos
+		print("pos", pos)
 		r.client.gui.addBox(scene+"/b"+str(i),0.01,0.01,0.01, [1,0,0,1])
 		r.client.gui.applyConfiguration(scene+"/b"+str(i),pos.tolist()+[1,0,0,0])
 		r.client.gui.refresh()	
@@ -253,7 +253,7 @@ def _genbalance(fullBody,limbs):
 		#r(q)
 		if __loosely_z_aligned(limbs[0], q) and __loosely_z_aligned(limbs[1], q) and _feet_far_enough(fullBody,q) and fullBody.isConfigValid(q)[0]  and fullBody.isConfigBalanced(q, limbs, 5):
 		  return q
-	print "can't generate equilibrium config"
+	print("can't generate equilibrium config")
 	return []
 
 all_qs = []
@@ -317,15 +317,15 @@ def genStateWithOneStep(fullbody,limbs, num_samples = 100, coplanar = True):
 					# recreate the states to assure the continuity of the index in fullBody : 
 					state0 = State(fullBody,q=s0.q(),limbsIncontact=limbs)
 					states += [[s1,state0]]
-					print "Step "+str(i)+" done."
+					print("Step "+str(i)+" done.")
 				else :
-					print "cannot make the step."
+					print("cannot make the step.")
       			else :
-        			print "cannot project between feet"
+        			print("cannot project between feet")
 		else : 
-			print "unable to generate first configuration."
+			print("unable to generate first configuration.")
 		it +=1
-	print "Done generating pairs of states, found : "+str(len(states))+" pairs."
+	print("Done generating pairs of states, found : "+str(len(states))+" pairs.")
 	return states
 
 q_init =  [

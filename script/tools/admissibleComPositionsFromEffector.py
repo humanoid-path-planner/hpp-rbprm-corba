@@ -173,5 +173,5 @@ def printComPosition(nbConfigs):
 #~ printRootPosition(rarmId, rHand, nbSamples)
 #~ printRootPosition(larmId, lHand, nbSamples) 
 printComPosition(100000)
-print "successes ", success
-print "fails  ", fails
+print("successes ", success)
+print("fails  ", fails)

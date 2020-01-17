@@ -38,22 +38,22 @@ com2 = c3[-1].tolist()[0]
 
 
 value = np.max(res1[0].dot(com1) - res1[1])
-print "value 1 = "+str(value)
+print("value 1 = "+str(value))
 if value > 0. :
-    print "Infeasible."
+    print("Infeasible.")
 
 
 value = np.max(res1Bis[0].dot(com1Bis) - res1Bis[1])
-print "value 1 bis = "+str(value)
+print("value 1 bis = "+str(value))
 if value > 0. :
-    print "Infeasible."
+    print("Infeasible.")
 
 value = np.max(res2Bis[0].dot(com2Bis) - res2Bis[1])
-print "value 2 bis = "+str(value)
+print("value 2 bis = "+str(value))
 if value > 0. :
-    print "Infeasible."
+    print("Infeasible.")
     
 value = np.max(res2[0].dot(com2) - res2[1])
-print "value 2 = "+str(value)
+print("value 2 = "+str(value))
 if value > 0. :
-    print "Infeasible."            
+    print("Infeasible.")            

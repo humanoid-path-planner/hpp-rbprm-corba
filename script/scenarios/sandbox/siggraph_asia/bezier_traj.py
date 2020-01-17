@@ -60,13 +60,13 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
     #~ success, c_mid_1, c_mid_2 = solve_dyn(data, c_bounds = [c_bounds_1, c_bounds_2, c_bounds_mid], use_rand = use_rand)
     #~ success, c_mid_1, c_mid_2 = solve_dyn(data, c_bounds = [c_bounds_1, c_bounds_2])
     
-    print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ calling effector", effector
+    print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ calling effector", effector)
     paths_ids = []
     if path and success:
         #~ fullBody.straightPath([c_mid_1[0].tolist(),c_mid_2[0].tolist()])
         #~ fullBody.straightPath([c_mid_2[0].tolist(),com_2])
         if just_one_curve:
-            print "just one curve"
+            print("just one curve")
             bezier_0, curve = __Bezier([com_1,c_mid_1[0].tolist(),c_mid_2[0].tolist(),com_2])
             createPtBox(viewer.client.gui, 0, c_mid_1[0].tolist(), 0.01, [0,1,0,1.])
             createPtBox(viewer.client.gui, 0, c_mid_2[0].tolist(), 0.01, [0,1,0,1.])
@@ -74,22 +74,22 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
             partions = [0.,0.2,0.8,1.]
             p0 = fullBody.generateCurveTrajParts(bezier_0,partions)
             #testing intermediary configurations 
-            print 'wtf', partions[1], " "
+            print('wtf', partions[1], " ")
             com_interm1 = curve(partions[1])
             com_interm2 = curve(partions[2])
-            print "com_1", com_1
+            print("com_1", com_1)
             success_proj1 = project_com_colfree(fullBody, stateid  , asarray((com_interm1).transpose()).tolist()[0])
             success_proj2 = project_com_colfree(fullBody, stateid+1, asarray((com_interm2).transpose()).tolist()[0])
             
             if not success_proj1:
-                print "proj 1 failed"
+                print("proj 1 failed")
                 return False, c_mid_1, c_mid_2, paths_ids
                 
             if not success_proj2:
-                print "proj 2 failed"
+                print("proj 2 failed")
                 return False, c_mid_1, c_mid_2, paths_ids
             
-            print "p0", p0
+            print("p0", p0)
             #~ pp.displayPath(p0+1)
             #~ pp.displayPath(p0+2)
             ppl.displayPath(p0)
@@ -97,7 +97,7 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
             #~ pp.displayPath(p0+2)
             #~ pp.displayPath(p0+3)
             if(effector):
-                print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ calling effector"
+                print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ calling effector")
                 paths_ids = [int(el) for el in fullBody.effectorRRT(stateid,p0+1,p0+2,p0+3,num_optim)]
             else:
                 paths_ids = [int(el) for el in fullBody.comRRTFromPos(stateid,p0+1,p0+2,p0+3,num_optim)]
@@ -108,20 +108,20 @@ def test(stateid = 1, path = False, use_rand = False, just_one_curve = False, nu
             success_proj2 = project_com_colfree(fullBody, stateid+1, c_mid_2[0].tolist())
             
             if not success_proj1:
-                print "proj 1 failed"
+                print("proj 1 failed")
                 return False, c_mid_1, c_mid_2, paths_ids
                 
             if not success_proj2:
-                print "proj 2 failed"
+                print("proj 2 failed")
                 return False, c_mid_1, c_mid_2, paths_ids
             
-            print "three curves"
+            print("three curves")
             bezier_0, curve = __Bezier([com_1,c_mid_1[0].tolist()]              , end_acc = c_mid_1[1].tolist() , end_vel = [0.,0.,0.])
             bezier_1, curve = __Bezier([c_mid_1[0].tolist(),c_mid_2[0].tolist()], end_acc = c_mid_2[1].tolist(), init_acc = c_mid_1[1].tolist(), init_vel = [0.,0.,0.], end_vel = [0.,0.,0.])
             bezier_2, curve = __Bezier([c_mid_2[0].tolist(),com_2]              , init_acc = c_mid_2[1].tolist(), init_vel = [0.,0.,0.])
         
             p0 = fullBody.generateCurveTraj(bezier_0)
-            print "p0", p0
+            print("p0", p0)
             fullBody.generateCurveTraj(bezier_1)
             fullBody.generateCurveTraj(bezier_2)
             ppl.displayPath(p0)
@@ -162,9 +162,9 @@ def test_ineq(stateid, constraints, n_samples = 10, color=[1,1,1,1.]):
     bounds_c = flatten([[com[i]-1., com[i]+1.] for i in range(3)]) # arbitrary
     for i in range(n_samples):
         c = array([uniform(bounds_c[2*i], bounds_c[2*i+1]) for i in range(3)])
-        print "c: ", c
+        print("c: ", c)
         if(Kin[0].dot(c)<=Kin[1]).all():
-            print "boundaries satisfied"
+            print("boundaries satisfied")
             createPtBox(viewer.client.gui, 0, c, 0.01, color)
         
 #~ test_ineq(0,{ rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'}}, 1000, [1,0,0,1])
@@ -180,7 +180,7 @@ def gen(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s = 1., effector
         viewer(configs[i])
         res =  test(i, True, False, ine_curve,num_optim, effector, mu)
         if(not res[0]):       
-            print "lp failed"
+            print("lp failed")
             createPtBox(viewer.client.gui, 0, res[1][0], 0.01, [1,0,0,1.])
             createPtBox(viewer.client.gui, 0, res[2][0], 0.01, [1,0,0,1.])
             found = False
@@ -192,7 +192,7 @@ def gen(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s = 1., effector
                     break
             if not res[0]:
                 n_fail += 1
-    print "n_fail ", n_fail
+    print("n_fail ", n_fail)
     if(gen_traj):
         a = gen_trajectory_to_play(fullBody, ppl, allpaths, flatten([[s*0.2, s* 0.6, s* 0.2] for _ in range(len(allpaths) / 3)]))
         return a
@@ -203,8 +203,8 @@ def gen_several_states(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s
     com_2 = __get_com(fullBody, fullBody.getConfigAtState(start+len_con))
     com_vel = init_vel[:]
     com_acc = init_acc[:]
-    print "going from, to ", com_1, "->", com_2
-    print "going from, to ", start, "->", start + len_con
+    print("going from, to ", com_1, "->", com_2)
+    print("going from, to ", start, "->", start + len_con)
     allpoints = [com_1]  
     all_partitions = [] 
     n_fail = 0;
@@ -212,7 +212,7 @@ def gen_several_states(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s
         #~ viewer(configs[i])
         res =  test(i, False, False, ine_curve,num_optim, effector, mu)
         if(not res[0]):       
-            print "lp failed"
+            print("lp failed")
             createPtBox(viewer.client.gui, 0, res[1][0], 0.01, [1,0,0,1.])
             createPtBox(viewer.client.gui, 0, res[2][0], 0.01, [1,0,0,1.])
             found = False
@@ -234,9 +234,9 @@ def gen_several_states(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s
             idx = step * (i - start)
             all_partitions +=  [idx +0.2*step,idx+0.8*step,idx+step]
     all_partitions =  [0.] + all_partitions
-    print "n_fail ", n_fail
-    print "generating super curve"
-    print all_partitions
+    print("n_fail ", n_fail)
+    print("generating super curve")
+    print(all_partitions)
     allpoints+=[com_2] 
     bezier_0, curve = __Bezier(allpoints)    
     
@@ -245,9 +245,9 @@ def gen_several_states(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s
     com_acc = curve.derivate(0.5,2)
     com_vel = flatten(asarray(com_vel).transpose().tolist())
     com_acc = flatten(asarray(com_acc).transpose().tolist())    
-    print "at", 0.5
-    print "com_vel", com_vel
-    print "com_acc", com_acc
+    print("at", 0.5)
+    print("com_vel", com_vel)
+    print("com_acc", com_acc)
     
     
     
@@ -256,42 +256,42 @@ def gen_several_states(start = 0, len_con = 1, num_optim = 0, ine_curve =True, s
     com_vel = flatten(asarray(com_vel).transpose().tolist())
     com_acc = flatten(asarray(com_acc).transpose().tolist())
     
-    print "at", all_partitions[-1]
-    print "com_vel", com_vel
-    print "com_acc", com_acc
+    print("at", all_partitions[-1])
+    print("com_vel", com_vel)
+    print("com_acc", com_acc)
     
     p0 = fullBody.generateCurveTrajParts(bezier_0,all_partitions) + 1
     ppl.displayPath(p0-1)
     # now we need to project all states to the new com positions
-    print "WTF ", len(all_partitions)
+    print("WTF ", len(all_partitions))
     for k in range(3, len(all_partitions),3):
-        print "k ", k
-        print all_partitions[k]
+        print("k ", k)
+        print(all_partitions[k])
         new_com = flatten(asarray(curve(all_partitions[k]).transpose()).tolist())
-        print "curve end ", curve(1.)
+        print("curve end ", curve(1.))
         ok = False
         #~ try:
         sid = start+k/3
-        print "for state", sid
-        print "before project to new com ", new_com
-        print "before previous com", __get_com(fullBody, fullBody.getConfigAtState(sid))
+        print("for state", sid)
+        print("before project to new com ", new_com)
+        print("before previous com", __get_com(fullBody, fullBody.getConfigAtState(sid)))
         ok = fullBody.projectStateToCOM(sid, new_com)
-        print "projection", ok
+        print("projection", ok)
         if ok:
             q1 = fullBody.getConfigAtState(sid)
             ok = fullBody.isConfigValid(q1)[0]
-            print "is config valud", ok
+            print("is config valud", ok)
         #~ except:
             #~ print "hpperr"
             #~ break
         if not ok:
-            print "faield to project"
+            print("faield to project")
             return
     j = 0;
-    print "WTF2"
+    print("WTF2")
     for i in range(p0,p0+len_con*3,3):
-        print "paths ids", i, " ", i+1, " ", i+3
-        print "state ", start + j
+        print("paths ids", i, " ", i+1, " ", i+3)
+        print("state ", start + j)
         paths_ids = [int(el) for el in fullBody.comRRTFromPos(start+j,i,i+1,i+2,num_optim)]    
         j += 1
         global allpaths
@@ -306,7 +306,7 @@ def gen_several_states_partial(start = 0, len_con = 1, num_optim = 0, ine_curve 
     com_2 = __get_com(fullBody, fullBody.getConfigAtState(start+len_con))
     com_vel = init_vel[:]
     com_acc = init_acc[:]
-    print "going from, to ", com_1, "->", com_2
+    print("going from, to ", com_1, "->", com_2)
     #~ print "going from, to ", start, "->", start + len_con
     allpoints = [com_1]  
     all_partitions = [] 
@@ -315,7 +315,7 @@ def gen_several_states_partial(start = 0, len_con = 1, num_optim = 0, ine_curve 
         #~ viewer(configs[i])
         res =  test(i, False, False, ine_curve,num_optim, effector, mu)
         if(not res[0]):       
-            print "lp failed"
+            print("lp failed")
             createPtBox(viewer.client.gui, 0, res[1][0], 0.01, [1,0,0,1.])
             createPtBox(viewer.client.gui, 0, res[2][0], 0.01, [1,0,0,1.])
             found = False
@@ -336,7 +336,7 @@ def gen_several_states_partial(start = 0, len_con = 1, num_optim = 0, ine_curve 
             step = (1./ len_con)
             idx = step * (i - start)
             all_partitions +=  [idx +0.2*step,idx+0.8*step,idx+step]
-    print "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[", all_partitions
+    print("[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[", all_partitions)
     allpoints+=[com_2] 
     bezier_0, curve = __Bezier(allpoints, init_acc = com_acc, init_vel = com_vel)
     all_partitions =  [0.] + all_partitions[:-3]
@@ -345,7 +345,7 @@ def gen_several_states_partial(start = 0, len_con = 1, num_optim = 0, ine_curve 
     com_vel = flatten(asarray(com_vel).transpose().tolist())
     com_acc = flatten(asarray(com_acc).transpose().tolist())
     p0 = fullBody.generateCurveTrajParts(bezier_0,all_partitions) + 1
-    print all_partitions
+    print(all_partitions)
     #~ ppl.displayPath(p0-1)
     ppl.displayPath(p0)
     ppl.displayPath(p0+1)
@@ -353,15 +353,15 @@ def gen_several_states_partial(start = 0, len_con = 1, num_optim = 0, ine_curve 
     #~ ppl.displayPath(p0)
     # now we need to project all states to the new com positions
     for k in range(3, len(all_partitions),3):
-        print "k ", k
-        print all_partitions[k]
+        print("k ", k)
+        print(all_partitions[k])
         new_com = flatten(asarray(curve(all_partitions[k]).transpose()).tolist())
         ok = False
         #~ try:
         sid = start+k/3
-        print "for state", sid
-        print "before project to new com ", new_com
-        print "before previous com", __get_com(fullBody, fullBody.getConfigAtState(sid))
+        print("for state", sid)
+        print("before project to new com ", new_com)
+        print("before previous com", __get_com(fullBody, fullBody.getConfigAtState(sid)))
         #~ new_com[0]+=0.02
         ok = fullBody.projectStateToCOM(sid, new_com)
         #~ print "projection", ok
@@ -373,7 +373,7 @@ def gen_several_states_partial(start = 0, len_con = 1, num_optim = 0, ine_curve 
             #~ print "hpperr"
             #~ break
         if not ok:
-            print "faield to project"
+            print("faield to project")
             return [], com_vel, com_acc
     j = 0;
     #~ print "WTF2"
@@ -385,7 +385,7 @@ def gen_several_states_partial(start = 0, len_con = 1, num_optim = 0, ine_curve 
                 paths_ids = [int(el) for el in fullBody.comRRTFromPos(start+j,i,i+1,i+2,num_optim)]    
                 #~ paths_ids = [int(el) for el in fullBody.effectorRRT(start+j,i,i+1,i+2,num_optim)]    
             except:
-                print "COULD NOT SOLVE COMRRT"
+                print("COULD NOT SOLVE COMRRT")
                 return [], com_vel, com_acc
             j += 1
             global allpaths
@@ -447,13 +447,13 @@ def go(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
     global a_s
     a = []
     for l in range(sid,sid+rg):
-        print "STATE ", l
+        print("STATE ", l)
         s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1
         a,com_vel,com_acc = gen_several_states_partial(l,window,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc, path=True)
         a_s+=[a]
         vels += [com_vel[:]]
         accs += [com_acc[:]]
-    print "STATE ", sid+rg
+    print("STATE ", sid+rg)
     #~ path,com_vel,com_acc = gen_several_states(sid+rg,1,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
     vels += [com_vel[:]]
     accs += [com_acc[:]]
@@ -468,13 +468,13 @@ def go_stop(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
 	global a_s
 	a = []
 	for l in range(sid,sid+rg):
-		print "STATE ", l		
+		print("STATE ", l)		
 		s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1
 		a,com_vel,com_acc = gen_several_states_partial(l,window,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc, path=True)
 		a_s+=[a]
 		vels += [com_vel[:]]
 		accs += [com_acc[:]]
-	print "STATE ", sid+rg
+	print("STATE ", sid+rg)
 	s = max(norm(array(configs[sid+rg+1]) - array(configs[sid+rg])), 1.) * 1
 	a,com_vel,com_acc = gen_several_states(sid+rg,1,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
 	a_s+=[a]
@@ -490,7 +490,7 @@ def go0(sid, rg, num_optim = 0, mu = 0.6, s =None):
     global path
     if s == None:
         s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1.5
-        print "$$$$$$$$$$$$$$$ S $$$$$$$$ *********************444444444444444444444444444 ", s
+        print("$$$$$$$$$$$$$$$ S $$$$$$$$ *********************444444444444444444444444444 ", s)
     for i in range(rg):
         path = gen(sid+i,1,mu=mu,num_optim=num_optim, s=s)
     return path
@@ -504,7 +504,7 @@ def go2(sid, rg = 1, num_optim = 0, mu = 0.5, t =2, s =None):
     for i in range(rg):
 		if s == None:
 			s = max(norm(array(configs[sid+i+1]) - array(configs[sid+i])), 1.) * 0.6
-			print "$$$$$$$$$$$$$$$ S $$$$$$$$ ", s
+			print("$$$$$$$$$$$$$$$ S $$$$$$$$ ", s)
 		path,com_vel,com_acc = gen_several_states(sid+i,sid+i+t,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc)
 		vels += [com_vel[:]]
 		accs += [com_acc[:]]

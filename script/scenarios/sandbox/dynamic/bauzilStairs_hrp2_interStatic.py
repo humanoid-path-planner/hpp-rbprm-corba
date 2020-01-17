@@ -61,7 +61,7 @@ fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "dyn
 fullBody.runLimbSampleAnalysis(lLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(lLegId, "./db/hrp2_lleg_db.db")
 tGenerate =  time.time() - tStart
-print "generate databases in : "+str(tGenerate)+" s"
+print("generate databases in : "+str(tGenerate)+" s")
 
 
 """
@@ -131,8 +131,8 @@ import fullBodyPlayerHrp2
 tStart = time.time()
 configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = robTreshold, filterStates = True)
 tInterpolate = time.time()-tStart
-print "number of configs : ", len(configs)
-print "generated in "+str(tInterpolate)+" s"
+print("number of configs : ", len(configs))
+print("generated in "+str(tInterpolate)+" s")
 r(configs[len(configs)-2])
 
 
@@ -156,7 +156,7 @@ from generate_contact_sequence import *
 cs = generateContactSequence(fullBody,configs,r)
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")
-print "save contact sequence : ",filename
+print("save contact sequence : ",filename)
 
 
 r(q_init)
