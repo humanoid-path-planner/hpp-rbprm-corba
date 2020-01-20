@@ -36,6 +36,7 @@ std::string Server::name() const { return "rbprm"; }
 /// Start corba server
 void Server::startCorbaServer(const std::string& contextId, const std::string& contextKind) {
   initializeTplServer (rbprmBuilder_, contextId, contextKind, name(), "builder");
+  rbprmBuilder_->implementation ().setServer (this);
 }
 
 ::CORBA::Object_ptr Server::servant(const std::string& name) const
