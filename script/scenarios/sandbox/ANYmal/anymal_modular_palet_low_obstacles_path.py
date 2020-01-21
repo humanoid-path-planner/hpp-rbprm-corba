@@ -12,9 +12,9 @@ Z_VALUE_LOGS = REF_Z_VALUE + 0.13
 Z_VALUE_PALET = REF_Z_VALUE + 0.165
 Z_VALUE_WOOD = REF_Z_VALUE + 0.15
 Y_VALUE = -0.13
-vInit = 0.01
+vInit = 0.2
 vMax = 0.5# linear velocity bound for the root
-aMax = 0.5# linear acceleration bound for the root
+aMax = 0.8# linear acceleration bound for the root
 aMaxZ = 5.
 extraDof = 6
 mu=0.5# coefficient of friction
@@ -22,7 +22,7 @@ mu=0.5# coefficient of friction
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Robot ()
 # Define bounds for the root : bounding box of the scenario
-rootBounds = [-1.201,1.11, Y_VALUE-0.001, Y_VALUE+0.001, Z_VALUE_LOGS - 0.001, Z_VALUE_PALET + 0.06]
+rootBounds = [-1.201,1.11, Y_VALUE-0.3, Y_VALUE+0.3, Z_VALUE_LOGS - 0.001, Z_VALUE_PALET + 0.06]
 rbprmBuilder.setJointBounds ("root_joint", rootBounds)
 
 # The following lines set constraint on the valid configurations:
@@ -32,7 +32,7 @@ for rom in rbprmBuilder.urdfNameRom :
     rbprmBuilder.setAffordanceFilter(rom, ['Support'])
 
 # We also bound the rotations of the torso. (z, y, x)
-rbprmBuilder.boundSO3([-0.01,0.01,-0.01,0.01,-0.01,0.01])
+rbprmBuilder.boundSO3([-0.3,0.3,-0.01,0.01,-0.01,0.01])
 # Add 6 extraDOF to the problem, used to store the linear velocity and acceleration of the root
 rbprmBuilder.client.robot.setDimensionExtraConfigSpace(extraDof)
 # We set the bounds of this extraDof with velocity and acceleration bounds (expect on z axis)
@@ -46,13 +46,13 @@ ps.setParameter("Kinodynamic/velocityBound",vMax)
 ps.setParameter("Kinodynamic/accelerationBound",aMax)
 ps.setParameter("Kinodynamic/verticalAccelerationBound",aMaxZ)
 #ps.setParameter("Kinodynamic/synchronizeVerticalAxis",False)
-#ps.setParameter("Kinodynamic/forceYawOrientation",True)
+ps.setParameter("Kinodynamic/forceYawOrientation",True)
 ps.setParameter("DynamicPlanner/sizeFootX",0.01)
 ps.setParameter("DynamicPlanner/sizeFootY",0.01)
 ps.setParameter("DynamicPlanner/friction",mu)
 # sample only configuration with null velocity and acceleration :
 ps.setParameter("ConfigurationShooter/sampleExtraDOF",False)
-ps.setParameter("PathOptimization/RandomShortcut/NumberOfLoops",100)
+ps.setParameter("PathOptimization/RandomShortcut/NumberOfLoops",500)
 
 # initialize the viewer :
 from hpp.gepetto import ViewerFactory
@@ -63,7 +63,7 @@ from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
 afftool.setMinimumArea('Support',0.03)
-afftool.loadObstacleModel ("hpp_environments", "ori/modular_palet_low_collision", "planning", vf,reduceSizes=[0.1,0,0])
+afftool.loadObstacleModel ("hpp_environments", "ori/modular_palet_low_obstacles", "planning", vf,reduceSizes=[0.1,0,0])
 #afftool.loadObstacleModel ("hpp_environments", "ori/modular_palet_low", "planning", vf)
 
 try :
@@ -88,11 +88,11 @@ v.addLandmark(v.sceneName,1)
 ps.selectConfigurationShooter("RbprmShooter")
 ps.selectPathValidation("RbprmPathValidation",0.05)
 # Choosing kinodynamic methods :
-#ps.selectSteeringMethod("RBPRMKinodynamic")
-#ps.selectDistance("Kinodynamic")
-#ps.selectPathPlanner("DynamicPlanner")
-#ps.addPathOptimizer ("RandomShortcutDynamic")
-ps.addPathOptimizer ("RandomShortcut")
+ps.selectSteeringMethod("RBPRMKinodynamic")
+ps.selectDistance("Kinodynamic")
+ps.selectPathPlanner("DynamicPlanner")
+ps.addPathOptimizer ("RandomShortcutDynamic")
+#ps.addPathOptimizer ("RandomShortcut")
 
 # init to beginning of palet
 q_init = rbprmBuilder.getCurrentConfig ();
@@ -102,9 +102,9 @@ q_init[-6] = vInit
 v(q_init)
 q_goal = q_init[::]
 q_goal[0] = -0.55
-q_goal[2] = Z_VALUE_PALET + 0.04
+q_goal[2] = Z_VALUE_PALET + 0.03
 q_goal[3:7] = [ 0, -0.0499792, 0, 0.9987503 ]
-
+q_goal[-6] = vInit
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
 
@@ -118,22 +118,26 @@ pidBegin = ps.numberPaths()-1
 q_init = q_goal[::]
 q_goal[3:7] = [ 0, 0.0499792, 0, 0.9987503 ]
 q_goal[0] = 0.55
+q_goal[1] = -Y_VALUE
+q_goal[-6] = vInit
 ps.resetGoalConfigs()
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)
-
+rbprmBuilder.setJointBounds ("root_joint", [q_init[0],q_goal[0],-0.2,0.2,q_init[2],q_init[2]])
 # Solve the planning problem :
 t = ps.solve()
 print "Guide planning done in "+str(t)
-
+#v.solveAndDisplay('rm',2,0.001)
 pidMiddle = ps.numberPaths()-1
-
+rbprmBuilder.setJointBounds ("root_joint", rootBounds)
 
 ## last part on wood floor
 q_init = q_goal[::]
+q_goal[1] = Y_VALUE
 q_goal[3:7] = [ 0, 0, 0, 1. ]
 q_goal[0] = 1.1
 q_goal[2] = Z_VALUE_WOOD
+q_goal[-6] = vInit
 ps.resetGoalConfigs()
 ps.setInitialConfig (q_init)
 ps.addGoalConfig (q_goal)

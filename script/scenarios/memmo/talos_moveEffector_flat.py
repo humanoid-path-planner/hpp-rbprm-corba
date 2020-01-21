@@ -8,8 +8,6 @@ import random
 import time
 statusFilename = "/res/infos.log"
 
-
-
 fullBody = Robot ()
 # Set the bounds for the root
 fullBody.setJointBounds ("root_joint", [-0.3,0.3, -0.3, 0.3, 0.85, 1.05])
@@ -74,9 +72,9 @@ tStart = time.time()
 
 nbSamples = 10
 fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "static", 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints,kinematicConstraintsMin = 0.7)
-fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
+#fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
 fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "static", 0.01,kinematicConstraintsPath=fullBody.lLegKinematicConstraints,kinematicConstraintsMin = 0.7)
-fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
+#fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
 
 
 tGenerate =  time.time() - tStart
@@ -108,12 +106,12 @@ else:
     print "Contact generation failed."
 
 
-f = open(statusFilename,"w")
-f.write("q_init= "+str(s0.q())+"\n")
-f.write("q_goal= "+str(s1.q())+"\n")
-f.write("cg_success: "+str(cg_success)+"\n")
-f.write("cg_reach_goal: "+str(cg_reach_goal)+"\n")
-f.close()
+#f = open(statusFilename,"w")
+#f.write("q_init= "+str(s0.q())+"\n")
+#f.write("q_goal= "+str(s1.q())+"\n")
+#f.write("cg_success: "+str(cg_success)+"\n")
+#f.write("cg_reach_goal: "+str(cg_reach_goal)+"\n")
+#f.close()
 
 
 # put back original bounds for wholebody methods

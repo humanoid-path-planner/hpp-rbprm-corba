@@ -3,8 +3,6 @@ from hpp.gepetto import Viewer
 from hpp.corbaserver import ProblemSolver
 import time
 
-
-
 vMax = 0.3# linear velocity bound for the root
 aMax = 0.1# linear acceleration bound for the root
 extraDof = 6
@@ -48,13 +46,24 @@ from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
 afftool.loadObstacleModel ("hpp_environments", "multicontact/ground", "planning", vf)
-v = vf.createViewer(displayArrows = True)
+try :
+    v = vf.createViewer(displayArrows = True)
+except Exception:
+    print "No viewer started !"
+    class FakeViewer():
+        def __init__(self):
+            return
+        def __call__(self,q):
+            return
+        def addLandmark(self,a,b):
+            return
+    v = FakeViewer()
 #afftool.visualiseAffordances('Support', v, v.color.lightBrown)
 
 # Setting initial configuration
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init[3:7] = [0,0,0,1]
-q_init [0:3] = [0, 0, 1.]
+q_init [0:3] = [0, 0, rbprmBuilder.ref_height]
 v (q_init)
 ps.setInitialConfig (q_init)
 # set goal config
@@ -79,13 +88,14 @@ ps.selectPathPlanner("DynamicPlanner")
 t = ps.solve ()
 print "Guide planning time : ",t
 
+pathId = 0
 
 # display solution : 
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (v)
 pp.dt=0.1
 #pp.displayVelocityPath(0)
-v.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
+#v.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
 pp.dt=0.01
 #pp(0)
 

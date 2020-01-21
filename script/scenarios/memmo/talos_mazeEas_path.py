@@ -1,27 +1,28 @@
-from hpp.corbaserver.rbprm.talos_abstract import Robot  # select the robot
+from hpp.corbaserver.rbprm.talos_abstract import Robot
 from hpp.gepetto import Viewer
 from hpp.corbaserver import Client
 from hpp.corbaserver import ProblemSolver
 import time
+from tools.sample_root_config import generate_random_conf_without_orientation
+Robot.urdfName += "_large"
 
- # select the reduced model of the robot used for the guide planning
-Robot.urdfName += "_large" #the "large" one use a conservative bounding box for the hips, taking in account the swinging motion made during a walk
+CONFIRM_SAMPLING = False
 
 vMax = 0.3# linear velocity bound for the root
-aMax = 0.1 # linear acceleration bound for the root
+aMax = 0.2 # linear acceleration bound for the root
 extraDof = 6
 mu=0.5# coefficient of friction
 # Creating an instance of the helper class, and loading the robot
 rbprmBuilder = Robot()
-# Define bounds for the root : bounding box of the scenario [-x,+x,-y,+y,-z,+z]
-root_bounds = [-1.5,4,0.,3.3, rbprmBuilder.ref_height, rbprmBuilder.ref_height]
+# Define bounds for the root : bounding box of the scenario
+root_bounds = [0,18.5,0.,24., 0.98, 0.98]
 rbprmBuilder.setJointBounds ("root_joint", root_bounds)
 # As this scenario only consider walking, we fix the DOF of the torso :
 rbprmBuilder.setJointBounds ('torso_1_joint', [0,0])
 rbprmBuilder.setJointBounds ('torso_2_joint', [0.006761,0.006761])
 
 # The following lines set constraint on the valid configurations:
-# a configuration is valid only if all feets can create a contact with the corresponding afforcances type
+# a configuration is valid only if all limbs can create a contact with the corresponding afforcances type
 rbprmBuilder.setFilter(['talos_lleg_rom','talos_rleg_rom'])
 rbprmBuilder.setAffordanceFilter('talos_lleg_rom', ['Support',])
 rbprmBuilder.setAffordanceFilter('talos_rleg_rom', ['Support'])
@@ -38,15 +39,14 @@ ps = ProblemSolver( rbprmBuilder )
 # define parameters used by various methods : 
 ps.setParameter("Kinodynamic/velocityBound",vMax)
 ps.setParameter("Kinodynamic/accelerationBound",aMax)
-# force the orientation of the trunk to match the direction of the motion: 
+# force the orientation of the trunk to match the direction of the motion
 ps.setParameter("Kinodynamic/forceYawOrientation",True)
-# size of the feet and friction coefficient used to check to the dynamic feasibility of the guide path
 ps.setParameter("DynamicPlanner/sizeFootX",0.2)
 ps.setParameter("DynamicPlanner/sizeFootY",0.12)
 ps.setParameter("DynamicPlanner/friction",mu)
 # sample only configuration with null velocity and acceleration :
 ps.setParameter("ConfigurationShooter/sampleExtraDOF",False)
-ps.setParameter("PathOptimization/RandomShortcut/NumberOfLoops",100)
+ps.setParameter("PathOptimization/RandomShortcut/NumberOfLoops",500)
 
 # initialize the viewer :
 from hpp.gepetto import ViewerFactory
@@ -56,28 +56,60 @@ vf = ViewerFactory (ps)
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 afftool = AffordanceTool ()
 afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
-# load the environment file and anaylse it :
-afftool.loadObstacleModel ("hpp_environments", "multicontact/floor_bauzil", "planning", vf)
+afftool.loadObstacleModel ("hpp_environments", "multicontact/maze_easy", "planning", vf)
 v = vf.createViewer(displayArrows = True)
-afftool.visualiseAffordances('Support', v, v.color.lightBrown)
+#afftool.visualiseAffordances('Support', v, v.color.lightBrown)
 v.addLandmark(v.sceneName,1)
 
+
+'''
 # Setting initial configuration
 q_init = rbprmBuilder.getCurrentConfig ();
 q_init[8] = 0.006761 # torso 2 position in reference config
-q_init [0:3] = [-0.9,1.7,rbprmBuilder.ref_height] # root x,y,z position
-q_init[-6:-3] = [0.07,0,0] # Used to constraint the initial orientation when forceYawOrientation = True, expressed as a 3D vector (x,y,z)
+q_init [0:3] = [-0.9,1.5,0.98]
+q_init[-6:-3] = [0.07,0,0]
 v (q_init)
 ps.setInitialConfig (q_init)
 # set goal config
 rbprmBuilder.setCurrentConfig (q_init)
 q_goal = q_init [::]
-#q_goal[0:3] = [2,2.6,0.98]
-#q_goal[-6:-3] = [0.1,0,0]
-q_goal[0:3] = [3.6,1.2,rbprmBuilder.ref_height]
-q_goal[-6:-3] = [0,-0.1,0]
+q_goal[0:3] = [2,2.6,0.98]
+q_goal[-6:-3] = [0.1,0,0]
 v(q_goal)
+'''
+
+import numpy as np
+
+#set init
+while(True):
+    q_init = generate_random_conf_without_orientation(rbprmBuilder,root_bounds)
+    v (q_init)
+    ps.setInitialConfig (q_init)
+    if CONFIRM_SAMPLING:
+      print "Accept?y/n"
+      user_in = raw_input()
+      if user_in == 'y':
+          break
+    else:
+      break
+
+
+#set goal
+while(True):
+    q_goal = generate_random_conf_without_orientation(rbprmBuilder,root_bounds)
+    v (q_goal)
+    if CONFIRM_SAMPLING:
+      print "Accept?y/n"
+      user_in = raw_input()
+      if user_in == 'y':
+          break
+    else:
+      break
+
+ps.resetGoalConfigs()
 ps.addGoalConfig (q_goal)
+
+
 
 # Choosing RBPRM shooter and path validation methods.
 ps.selectConfigurationShooter("RbprmShooter")
@@ -89,21 +121,43 @@ ps.selectDistance("Kinodynamic")
 ps.selectPathPlanner("DynamicPlanner")
 
 # Solve the planning problem :
+ps.setMaxIterPathPlanning(100000)
 t = ps.solve ()
+#v.solveAndDisplay('rm',5,0.01)
+
 print "Guide planning time : ",t
+
+
+for i in range(10):
+    print "Optimize path, "+str(i+1)+"/10 ... "
+    ps.optimizePath(ps.numberPaths()-1)
+
+ps.extractPath(ps.numberPaths()-1,1.,ps.pathLength(ps.numberPaths()-1)-1.)
+pathId = ps.numberPaths()-1
+q_init = ps.configAtParam(pathId,0)
+q_goal = ps.configAtParam(pathId,ps.pathLength(pathId))
+
+
 
 
 # display solution : 
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (v)
 pp.dt=0.1
-pp.displayVelocityPath(1)
-v.client.gui.setVisibility("path_1_root","ALWAYS_ON_TOP")
+pp.displayVelocityPath(pathId)
+v.client.gui.setVisibility("path_"+str(pathId)+"_root","ALWAYS_ON_TOP")
 pp.dt = 0.01
-pp(1)
+pp(pathId)
 
 # move the robot out of the view before computing the contacts
 q_far = q_init[::]
 q_far[2] = -2
 v(q_far)
+
+#tStart = time.time()
+#for i in range(1000):
+#    rbprmBuilder.isConfigValid(q_init)
+#tot = time.time() - tStart
+#print "avg time : ",tot/1000.
+
 

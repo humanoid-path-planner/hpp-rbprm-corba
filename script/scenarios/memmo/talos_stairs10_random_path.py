@@ -2,6 +2,7 @@ from hpp.corbaserver.rbprm.talos_abstract import Robot
 from hpp.gepetto import Viewer
 from hpp.corbaserver import Client
 from hpp.corbaserver import ProblemSolver
+from tools.sample_root_config import generate_random_conf_without_orientation
 import time
 statusFilename = "infos.log"
 Robot.urdfName+="_large"

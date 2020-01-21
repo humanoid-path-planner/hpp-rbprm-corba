@@ -1,9 +1,9 @@
-from hpp.corbaserver.rbprm.talos import Robot # select the robot
+from hpp.corbaserver.rbprm.talos import Robot
 from hpp.gepetto import Viewer
-from hpp.corbaserver.rbprm.tools.display_tools import *
+from tools.display_tools import *
 import time
 print "Plan guide trajectory ..."
-import talos_navBauzil_path as tp # load the guide planning script
+import talos_navBauzil_path as tp
 print "Done."
 import time
 Robot.urdfSuffix += "_safeFeet"
@@ -30,7 +30,7 @@ ps.setParameter("Kinodynamic/accelerationBound",tp.aMax)
 v = tp.Viewer (ps,viewerClient=tp.v.client, displayCoM = True)
 
 # load a reference configuration
-q_ref = fullBody.referenceConfig_elbowsUp[::]+[0,0,0,0,0,0]
+q_ref = fullBody.referenceConfig[::]+[0,0,0,0,0,0]
 q_init = q_ref[::]
 fullBody.setReferenceConfig(q_ref)
 fullBody.setCurrentConfig (q_init)
@@ -40,8 +40,7 @@ fullBody.usePosturalTaskContactCreation(True)
 print "Generate limb DB ..."
 tStart = time.time()
 # generate databases : 
-nbSamples = 100000
-
+nbSamples = 10000
 fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep06", 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints,kinematicConstraintsMin = 0.85)
 #fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
 #fullBody.saveLimbDatabase(rLegId, "./db/talos_rLeg_walk.db")
@@ -54,7 +53,7 @@ print "Done."
 print "Databases generated in : "+str(tGenerate)+" s"
 
 
-#define initial and final configurations :
+#define initial and final configurations : 
 configSize = fullBody.getConfigSize() -fullBody.client.robot.getDimensionExtraConfigSpace()
 
 q_init[0:7] = tp.ps.configAtParam(pId,0.01)[0:7] # use this to get the correct orientation
