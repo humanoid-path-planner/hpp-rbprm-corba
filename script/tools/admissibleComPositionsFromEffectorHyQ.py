@@ -2,7 +2,7 @@
 from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
-import quaternion as quat
+from . import quaternion as quat
 
 packageName = "hyq_description"
 meshPackageName = "hyq_description"

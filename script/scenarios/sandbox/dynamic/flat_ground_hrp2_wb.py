@@ -1,4 +1,4 @@
-from flatGround_hrp2_interp import * 
+from .flatGround_hrp2_interp import * 
 
 print("#    generating MUSCOD problem     #")
 print("####################################")

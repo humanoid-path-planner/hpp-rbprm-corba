@@ -7,7 +7,7 @@ import os
 import random
 import time
 print("Plan guide trajectory ...")
-import talos_randomMove_path as tp
+from . import talos_randomMove_path as tp
 print("Done.")
 import time
 statusFilename = tp.statusFilename

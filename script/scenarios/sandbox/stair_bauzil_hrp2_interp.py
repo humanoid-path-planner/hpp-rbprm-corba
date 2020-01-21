@@ -1,7 +1,7 @@
 from hpp.corbaserver.rbprm.hrp2 import Robot
 from hpp.gepetto import Viewer
 
-import stair_bauzil_hrp2_path as tp
+from . import stair_bauzil_hrp2_path as tp
 import time
 
 
@@ -226,7 +226,7 @@ def d3():
         return s.projectToCOM([0.01,0.,0.], maxNumSample = 0)
         
 from hpp.corbaserver.rbprm.state_alg  import addNewContact, isContactReachable, closestTransform, removeContact, addNewContactIfReachable, projectToFeasibleCom
-from geom import  *
+from .geom import  *
 
 
 def dist(q0,q1):

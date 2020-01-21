@@ -3,7 +3,7 @@ from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 import omniORB.any
 
-import hrp2_wall_path as tp
+from . import hrp2_wall_path as tp
 import time
 
 
@@ -147,7 +147,7 @@ fullBody.setEndState(q_goal,[rLegId,lLegId])
 
 
 from hpp.gepetto import PathPlayer
-from fullBodyPlayerHrp2 import Player
+from .fullBodyPlayerHrp2 import Player
 pp = PathPlayer (fullBody.client.basic, r)
 
 

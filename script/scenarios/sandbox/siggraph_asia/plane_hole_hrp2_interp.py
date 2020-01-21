@@ -3,10 +3,10 @@ from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 from hpp.gepetto import PathPlayer
 
-import plane_hole_hrp2_path as path_planner
+from . import plane_hole_hrp2_path as path_planner
 #~ import hrp2_model as model
-import hrp2_model_no_arm as model
-from hrp2_model import *
+from . import hrp2_model_no_arm as model
+from .hrp2_model import *
 import time
 
 
@@ -16,7 +16,7 @@ fullBody = model.fullBody
 fullBody.setJointBounds ("base_joint_xyz", [-0.135,20, -1, 1, 0, 2.2])
 pp = PathPlayer (fullBody.client.basic, r)
 
-from plan_execute import a, b, c, d, e, init_plan_execute
+from .plan_execute import a, b, c, d, e, init_plan_execute
 init_plan_execute(model.fullBody, r, path_planner, pp)
 
 q_0 = model.fullBody.getCurrentConfig(); 
@@ -47,7 +47,7 @@ fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
 
 configs = d(0.01); e(0.01)
 
-from bezier_traj import *
+from .bezier_traj import *
 init_bezier_traj(model.fullBody, r, pp, configs, model.limbsCOMConstraints)
 #~ AFTER loading obstacles
 

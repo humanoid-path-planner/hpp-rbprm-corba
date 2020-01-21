@@ -2,7 +2,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 #from tools import *
-import slalom_bauzil_hrp2_path as tp
+from . import slalom_bauzil_hrp2_path as tp
 import time
 import omniORB.any
 from hpp.corbaserver.rbprm.tools.display_tools import *
@@ -148,7 +148,7 @@ fullBody.setStaticStability(True) # only set it after the init/goal configuratio
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
-import fullBodyPlayerHrp2
+from . import fullBodyPlayerHrp2
 
 tStart = time.time()
 configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = robTreshold, filterStates = True,testReachability=True,quasiStatic=False)

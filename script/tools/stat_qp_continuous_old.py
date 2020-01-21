@@ -13,11 +13,11 @@ import pickle as pickle
 from pathlib2 import Path
 
 import generate_muscod_problem as mp
-import muscodSSH as ssh
+from . import muscodSSH as ssh
 from config import *
-from check_qp import check_traj_valid 
+from .check_qp import check_traj_valid 
 
-from gen_hrp2_statically_balanced_positions_2d_state import *
+from .gen_hrp2_statically_balanced_positions_2d_state import *
 from generate_contact_sequence import *
 
 

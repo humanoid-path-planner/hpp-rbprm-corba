@@ -2,7 +2,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 import omniORB.any
-import downSlope_hrp2_waypoint as tp
+from . import downSlope_hrp2_waypoint as tp
 import time
 
 
@@ -106,7 +106,7 @@ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
-import fullBodyPlayerHrp2
+from . import fullBodyPlayerHrp2
 
 configs = fullBody.interpolate(0.05,pathId=pId,robustnessTreshold = 1, filterStates = True)
 print("number of configs :", len(configs))

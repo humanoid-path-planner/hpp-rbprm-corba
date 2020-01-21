@@ -4,7 +4,7 @@ from hpp.corbaserver.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
 
 #calling script darpa_hyq_path to compute root path
-import darpa_hyq_path as tp
+from . import darpa_hyq_path as tp
 
 from os import environ
 ins_dir = environ['DEVEL_HPP_DIR']

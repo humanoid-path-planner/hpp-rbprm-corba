@@ -5,7 +5,7 @@ import time
 from constraint_to_dae import *
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
 from hpp.corbaserver.rbprm.tools.display_tools import *
-import flatGround_hrp2_pathKino as tp
+from . import flatGround_hrp2_pathKino as tp
 import time
 
 tPlanning = tp.tPlanning

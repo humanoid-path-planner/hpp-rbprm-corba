@@ -6,7 +6,7 @@ from pinocchio.utils import *
 import locomote
 from locomote import WrenchCone,SOC6,ControlType,IntegratorType,ContactPatch, ContactPhaseHumanoid, ContactSequenceHumanoid
 import generate_muscod_problem as mp
-import muscodSSH as ssh
+from . import muscodSSH as ssh
 from config import *
 
 statesPerStep=5 # number of double support configs from the planning per call to muscod

@@ -2,7 +2,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 
-import polaris_hrp2_path_no_step as tp
+from . import polaris_hrp2_path_no_step as tp
 
 
 

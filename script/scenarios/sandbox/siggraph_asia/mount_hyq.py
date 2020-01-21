@@ -4,10 +4,10 @@ from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
 #reference pose for hyq
-from hyq_ref_pose import hyq_ref
+from .hyq_ref_pose import hyq_ref
 
 #calling script darpa_hyq_path to compute root path
-import mount_hyq_path as tp
+from . import mount_hyq_path as tp
 
 from os import environ
 ins_dir = environ['DEVEL_DIR']
@@ -204,7 +204,7 @@ d(0.07);e(0.01)
 qs = configs
 fb = fullBody
 ttp = tp
-from bezier_traj import *
+from .bezier_traj import *
 init_bezier_traj(fb, r, pp, qs, limbsCOMConstraints)
 #~ AFTER loading obstacles
 configs = qs

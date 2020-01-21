@@ -11,7 +11,7 @@ from hpp.gepetto import Viewer
 
 
 #calling script darpa_hyq_path to compute root path
-import sideWall_hyq_pathKino as tp
+from . import sideWall_hyq_pathKino as tp
 
 
 from os import environ

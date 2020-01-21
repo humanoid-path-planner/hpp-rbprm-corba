@@ -2,7 +2,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 import omniORB.any
-import stair_bauzil_hrp2_path_noRamp as tp
+from . import stair_bauzil_hrp2_path_noRamp as tp
 import time
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
 

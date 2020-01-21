@@ -9,7 +9,7 @@ from hpp.gepetto import Viewer
 
 
 #calling script darpa_hyq_path to compute root path
-import sideWall_hyq_pathKino as tp
+from . import sideWall_hyq_pathKino as tp
 
 
 from os import environ
@@ -105,7 +105,7 @@ r(configs[-1])
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
-from fullBodyPlayer import Player
+from .fullBodyPlayer import Player
 player = Player(fullBody,pp,tp,configs,draw=True,optim_effector=False,use_velocity=dynamic,pathId = 1)
 
 #player.displayContactPlan()

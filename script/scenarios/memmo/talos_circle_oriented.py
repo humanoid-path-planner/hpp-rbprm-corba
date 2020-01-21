@@ -4,7 +4,7 @@ from hpp.corbaserver.rbprm.tools.display_tools import *
 import numpy as np
 import time
 print("Plan guide trajectory ...")
-import talos_circle_oriented_path as tp
+from . import talos_circle_oriented_path as tp
 print("Done.")
 import time
 statusFilename = tp.statusFilename

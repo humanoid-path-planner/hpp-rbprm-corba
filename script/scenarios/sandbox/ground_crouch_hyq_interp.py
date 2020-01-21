@@ -10,7 +10,7 @@ from os import environ
 ins_dir = environ['DEVEL_DIR']
 db_dir = ins_dir+"/install/share/hyq-rbprm/database/hyq_"
 
-import ground_crouch_hyq_path as tp
+from . import ground_crouch_hyq_path as tp
 #~ import ground_crouch_hyq_path_bridge as tp
 
 packageName = "hyq_description"

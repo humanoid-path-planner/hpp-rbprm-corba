@@ -2,7 +2,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 import omniORB.any
-import stair_bauzil_hrp2_path as tp
+from . import stair_bauzil_hrp2_path as tp
 import time
 
 
@@ -146,7 +146,7 @@ r(configs[-1])
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
-from fullBodyPlayerHrp2 import Player
+from .fullBodyPlayerHrp2 import Player
 player = Player(fullBody,pp,tp,configs,draw=False,optim_effector=False,use_velocity=False,pathId = 0)
 
 

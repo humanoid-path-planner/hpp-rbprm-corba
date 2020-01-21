@@ -2,7 +2,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 
-import downSlope_hrp2_pathKino2 as tp
+from . import downSlope_hrp2_pathKino2 as tp
 import time
 
 
@@ -98,7 +98,7 @@ print("number of configs :", len(configs))
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
-from fullBodyPlayerHrp2 import Player
+from .fullBodyPlayerHrp2 import Player
 player = Player(fullBody,pp,tp,configs,draw=False,optim_effector=False,use_velocity=True,pathId = 0)
 
 player.displayContactPlan()

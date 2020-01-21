@@ -5,7 +5,7 @@ import time
 from constraint_to_dae import *
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
 from hpp.corbaserver.rbprm.tools.display_tools import *
-import flatGround_hrp2_pathKino as tp
+from . import flatGround_hrp2_pathKino as tp
 import time
 import numpy as np
 tPlanning = tp.tPlanning
@@ -175,7 +175,7 @@ mid_sid = fullBody.addState(q,[lLegId,rLegId])
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
-import fullBodyPlayerHrp2
+from . import fullBodyPlayerHrp2
 
 tStart = time.time()
 configsFull = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 0, filterStates = True,testReachability=False,quasiStatic=False)

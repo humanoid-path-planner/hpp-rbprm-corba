@@ -134,7 +134,7 @@ pp.displayVelocityPath(ps.numberPaths()-1)
 pp.speed=0.5
 #pp (0)
 
-import parse_bench
+from . import parse_bench
 
 parse_bench.parseBenchmark(t)
 print("path lenght = ",str(ps.client.problem.pathLength(ps.numberPaths()-1)))

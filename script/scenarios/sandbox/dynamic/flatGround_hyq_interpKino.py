@@ -7,7 +7,7 @@ from constraint_to_dae import *
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
 from hpp.corbaserver.rbprm.tools.display_tools import *
 #calling script darpa_hyq_path to compute root path
-import flatGround_hyq_pathKino as tp
+from . import flatGround_hyq_pathKino as tp
 
 from os import environ
 ins_dir = environ['DEVEL_DIR']

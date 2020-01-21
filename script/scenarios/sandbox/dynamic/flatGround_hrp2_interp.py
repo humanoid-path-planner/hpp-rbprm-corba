@@ -4,7 +4,7 @@ from hpp.gepetto import Viewer
 
 print("####################################")
 print("#            SOLVING P1 :          #")
-import flatGround_hrp2_pathKino as tp
+from . import flatGround_hrp2_pathKino as tp
 print("#               DONE               #")
 print("####################################")
 print("#            SOLVING P2 :          #")
@@ -111,7 +111,7 @@ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
-import fullBodyPlayerHrp2
+from . import fullBodyPlayerHrp2
 
 configs = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 1, filterStates = True)
 print("number of configs :", len(configs))

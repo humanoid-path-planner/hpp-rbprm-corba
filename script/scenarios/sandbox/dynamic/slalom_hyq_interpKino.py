@@ -5,7 +5,7 @@ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
 import omniORB.any
 #calling script darpa_hyq_path to compute root path
-import slalom_hyq_pathKino as tp
+from . import slalom_hyq_pathKino as tp
 
 from os import environ
 ins_dir = environ['DEVEL_DIR']

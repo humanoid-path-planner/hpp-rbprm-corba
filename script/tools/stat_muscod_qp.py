@@ -12,11 +12,11 @@ import pickle as pickle
 from pathlib2 import Path
 
 import planning.generate_muscod_problem as mp
-import muscodSSH as ssh
+from . import muscodSSH as ssh
 from planning.config import *
 
 
-from gen_hrp2_statically_balanced_positions_2d_state import *
+from .gen_hrp2_statically_balanced_positions_2d_state import *
 from generate_contact_sequence import *
 
 

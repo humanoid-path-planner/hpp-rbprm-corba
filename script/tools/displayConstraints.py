@@ -2,8 +2,8 @@
 id = 5
 leg = lLegId
 
-from disp_bezier import *
-from constraint_to_dae import *
+from .disp_bezier import *
+from .constraint_to_dae import *
 s0 = State(fullBody,sId=id)
 s2 = State(fullBody,sId=id+1)
 s1,success = StateHelper.removeContact(s0,leg)

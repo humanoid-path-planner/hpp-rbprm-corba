@@ -1,6 +1,6 @@
 
 from darpa_hrp2_interStatic import *
-from disp_bezier import *
+from .disp_bezier import *
 from hpp.corbaserver.rbprm.tools.path_to_trajectory import *
 
 

@@ -2,7 +2,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 
-import grasp_hrp2_path as tp
+from . import grasp_hrp2_path as tp
 import time
 
 path_planner = tp
@@ -208,7 +208,7 @@ print("Root path SDDSD in " + str(tp.t) + " ms.")
 qs = configs
 fb = fullBody
 ttp = path_planner
-from bezier_traj import *
+from .bezier_traj import *
 init_bezier_traj(fb, r, pp, qs, limbsCOMConstraints)
 #~ AFTER loading obstacles
 configs = qs

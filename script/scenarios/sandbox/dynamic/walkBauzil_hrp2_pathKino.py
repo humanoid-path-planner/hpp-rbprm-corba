@@ -169,7 +169,7 @@ pp.speed=1
 #pp (0)
 
 
-import parse_bench
+from . import parse_bench
 
 parse_bench.parseBenchmark(t)
 

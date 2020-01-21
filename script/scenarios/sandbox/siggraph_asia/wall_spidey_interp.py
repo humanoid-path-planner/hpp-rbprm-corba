@@ -3,7 +3,7 @@ from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 from hpp.gepetto import PathPlayer
 
-import wall_spiderman_path as path_planner
+from . import wall_spiderman_path as path_planner
 #~ import hrp2_model as model
 import time
 tp = path_planner
@@ -61,7 +61,7 @@ r = path_planner.Viewer (ps, viewerClient=path_planner.r.client)
 fullBody.setJointBounds ("base_joint_xyz", [-1,3, -1, 1, 0, 6])
 pp = PathPlayer (fullBody.client.basic, r)
 
-from plan_execute import a, b, c, d, e, init_plan_execute
+from .plan_execute import a, b, c, d, e, init_plan_execute
 init_plan_execute(fullBody, r, path_planner, pp)
 
 q_0 = fullBody.getCurrentConfig(); 
@@ -77,5 +77,5 @@ fullBody.setEndState(q_goal,[rLegId,lLegId])#,rarmId,larmId])
 
 configs = d(0.005); e()
 
-from bezier_traj import *
+from .bezier_traj import *
 init_bezier_traj(fullBody, r, pp, configs, limbsCOMConstraints)

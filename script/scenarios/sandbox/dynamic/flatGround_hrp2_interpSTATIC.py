@@ -5,7 +5,7 @@ import time
 
 
 
-import flatGround_hrp2_pathKino as tp
+from . import flatGround_hrp2_pathKino as tp
 import time
 
 tPlanning = tp.tPlanning
@@ -141,7 +141,7 @@ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
-import fullBodyPlayerHrp2
+from . import fullBodyPlayerHrp2
 
 tStart = time.time()
 configsFull = fullBody.interpolate(0.01,pathId=pId,robustnessTreshold = 3, filterStates = True)

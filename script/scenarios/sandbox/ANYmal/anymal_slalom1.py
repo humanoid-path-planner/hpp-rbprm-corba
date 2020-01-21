@@ -3,7 +3,7 @@ from hpp.gepetto import Viewer
 from tools.display_tools import *
 import time
 print("Plan guide trajectory ...")
-import anymal_slalom1_path as tp
+from . import anymal_slalom1_path as tp
 print("Done.")
 import time
 

@@ -1,5 +1,5 @@
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
-from disp_bezier import * 
+from .disp_bezier import * 
 import numpy as np
 max_acc = 5.
 pointsPerPhase=5

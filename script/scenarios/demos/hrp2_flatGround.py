@@ -3,7 +3,7 @@ from hpp.gepetto import Viewer
 from hpp.corbaserver.rbprm.tools.display_tools import *
 import time
 print("Plan guide trajectory ...")
-import hrp2_flatGround_path as tp
+from . import hrp2_flatGround_path as tp
 print("Done.")
 import time
 

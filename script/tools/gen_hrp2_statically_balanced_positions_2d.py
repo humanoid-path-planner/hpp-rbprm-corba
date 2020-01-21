@@ -68,7 +68,7 @@ limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG
 #~ fullBody.client.basic.robot.setJointConfig('LARM_JOINT0',[1])
 #~ fullBody.client.basic.robot.setJointConfig('RARM_JOINT0',[-1])
 
-import quaternion as quat
+from . import quaternion as quat
 
 
 def _getTransform(qEffector):

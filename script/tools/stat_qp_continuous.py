@@ -13,15 +13,15 @@ import pickle as pickle
 from pathlib2 import Path
 import os
 import generate_muscod_problem as mp
-import muscodSSH as ssh
+from . import muscodSSH as ssh
 from config import *
-from check_qp import check_traj_valid,check_muscod_traj
-import disp_bezier
-from constraint_to_dae import *
+from .check_qp import check_traj_valid,check_muscod_traj
+from . import disp_bezier
+from .constraint_to_dae import *
 from hpp.corbaserver.rbprm.tools.display_tools import *
 
 
-from gen_hrp2_statically_balanced_positions_2d_state import *
+from .gen_hrp2_statically_balanced_positions_2d_state import *
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 from generate_contact_sequence import *

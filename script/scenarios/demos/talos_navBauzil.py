@@ -3,7 +3,7 @@ from hpp.gepetto import Viewer
 from hpp.corbaserver.rbprm.tools.display_tools import *
 import time
 print("Plan guide trajectory ...")
-import talos_navBauzil_path as tp # load the guide planning script
+from . import talos_navBauzil_path as tp # load the guide planning script
 print("Done.")
 import time
 Robot.urdfSuffix += "_safeFeet"

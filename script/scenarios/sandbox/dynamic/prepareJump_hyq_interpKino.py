@@ -5,7 +5,7 @@ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
 
 #calling script darpa_hyq_path to compute root path
-import prepareJump_hyq_pathKino as tp
+from . import prepareJump_hyq_pathKino as tp
 
 from os import environ
 ins_dir = environ['DEVEL_DIR']
@@ -95,7 +95,7 @@ r(configs[-1])
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (fullBody.client.basic, r)
 
-from fullBodyPlayer import Player
+from .fullBodyPlayer import Player
 player = Player(fullBody,pp,tp,configs,draw=False,optim_effector=False,use_velocity=dynamic,pathId = 0)
 
 #player.displayContactPlan()
