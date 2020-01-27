@@ -87,7 +87,7 @@ q_goal [0:3] = [radius*np.sin(alpha), -radius*np.cos(alpha), 0.465]
 vx = np.matrix([1,0,0]).T
 v_goal = np.matrix([q_goal[0],q_goal[1],0]).T
 quat = Quaternion.FromTwoVectors(vx,v_goal)
-q_goal[3:7] = quat.coeffs().T.tolist()[0]
+q_goal[3:7] = quat.coeffs().tolist()
 # set final velocity to fix the orientation : 
 q_goal[-6] = vGoal*np.sin(alpha)
 q_goal[-5] = -vGoal*np.cos(alpha)

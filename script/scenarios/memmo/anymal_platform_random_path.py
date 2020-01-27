@@ -93,7 +93,7 @@ q_goal[0:3] = [random.uniform(X_BOUNDS[0],X_BOUNDS[1]),random.uniform(Y_BOUNDS[0
 vx = np.matrix([1,0,0]).T
 v_init = np.matrix([q_goal[0]-q_init[0],q_goal[1]-q_init[1],0]).T
 quat = Quaternion.FromTwoVectors(vx,v_init)
-q_init[3:7] = quat.coeffs().T.tolist()[0]
+q_init[3:7] = quat.coeffs().tolist()
 q_goal[3:7] = q_init[3:7]
 
 
