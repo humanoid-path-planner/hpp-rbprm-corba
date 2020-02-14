@@ -2,7 +2,7 @@
 
 gepetto-gui &
 hppcorbaserver &
-ipython -i --no-confirm-exit ./$1
+ipython3 -i --no-confirm-exit $1
 
 pkill -f  'gepetto-gui'
 pkill -f  'hppcorbaserver'

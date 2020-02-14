@@ -110,14 +110,62 @@ def plan(ps):
     
 
 
+
+import os
+
+EXPORT_PATH = "/media/data/memmo/talos_reach0/"
+DT = 0.01
+
+# ~ if not os.path.exists(EXPORT_PATH):
+        # ~ os.makedirs(EXPORT_PATH)
+
+#create session dir
+import datetime
+session = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
+sessionPath = EXPORT_PATH+session
+os.makedirs(sessionPath)
+
+
+from mlp.utils import wholebody_result as wr
+
+
+def exportPath(pId):
+    ln = ps.pathLength(pId)
+    nIters = (int)(ln / DT)
+    qs = []
+    cs = []    
+    ts = []    
+    for dt in range(nIters):
+        t = dt * DT
+        ts += [t]
+        qs += [ps.configAtParam(pId,t)]; 
+        v(qs[-1])
+        cs += [robot.getCenterOfMass()]
+    # ~ qs += [ps.configAtParam(pId,ln)]
+    # ~ ts += [ln]
+    # ~ v(qs[-1])
+    # ~ cs += [robot.getCenterOfMass()]
+    r = wr.Result(len(robot.getCurrentConfig()),len(robot.getCurrentVelocity()),DT,[],len(qs))
+    r.q_t[:] = np.matrix(qs).T
+    r.c_t[:] = np.matrix(cs).T
+    r.t_t[:] = np.array(ts)
+    r.phases_intervals = None
+    fname = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
+    r.exportNPZ(sessionPath,fname)
+    return r
+
+
+
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (v)
 
 pps = []
 
-for i in range(100):
+
+for i in range(10):
     ps.resetGoalConfigs()
     plan(ps)
     ps.solve()
     pp(ps.numberPaths()-1)
     pps += [ps.numberPaths()-1]
+    exportPath(ps.numberPaths()-1)
