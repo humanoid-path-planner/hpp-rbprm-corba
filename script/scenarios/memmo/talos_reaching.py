@@ -17,7 +17,7 @@ from tools.display_tools import *
 
 HumanoidRobot.packageName = "talos_data"
 HumanoidRobot.urdfName = "talos"
-HumanoidRobot.urdfSuffix = "_full_v2"
+HumanoidRobot.urdfSuffix = "_reduced"
 HumanoidRobot.srdfSuffix = ""
 rootJointType = "freeflyer"
 
@@ -35,7 +35,8 @@ ps.setMaxIterProjection(40)
 
 #init config 
 
-init_conf = [0, 0, 0, 0, 0, 0, 1, 0.0, 0.0, -0.411354, 0.859395, -0.448041, -0.001708, 0.0, 0.0, -0.411354, 0.859395, -0.448041, -0.001708, 0, 0.006761, 0.25847, 0.173046, -0.0002, -0.525366, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0, -0.25847, -0.173046, 0.0002, -0.525366, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+# ~ init_conf = [0, 0, 0, 0, 0, 0, 1, 0.0, 0.0, -0.411354, 0.859395, -0.448041, -0.001708, 0.0, 0.0, -0.411354, 0.859395, -0.448041, -0.001708, 0, 0.006761, 0.25847, 0.173046, -0.0002, -0.525366, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0, -0.25847, -0.173046, 0.0002, -0.525366, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+init_conf = robot.getCurrentConfig()
 init_conf[0:7] = [0.1, -0.65, 1.0192720229567027, 0, 0, sqrt(2) / 2, sqrt(2) / 2]  # root_joint
 
 #~ ps.resetConstraints()
@@ -178,6 +179,8 @@ for effector in EFFECTORS:
         ps.resetGoalConfigs()
         plan(ps, effector)
         ps.solve()
+        for i in range(10):
+            ps.optimizePath(ps.numberPaths()-1)
         pp(ps.numberPaths()-1)
         pps += [ps.numberPaths()-1]
         r = exportPath(ps.numberPaths()-1, directoryPath)
