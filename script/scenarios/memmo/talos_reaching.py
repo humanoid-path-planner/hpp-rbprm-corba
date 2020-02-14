@@ -56,7 +56,7 @@ def addCons(ps):
 
 posIdx = 0
 
-def genTarget(ps):
+def genTarget(ps, effector):
     global posIdx
     ok = False
     while not ok:
@@ -65,12 +65,12 @@ def genTarget(ps):
         q [:7] = init_conf[:7]
         robot.setCurrentConfig(q)
         #~ v(q)
-        p = robot.getJointPosition('gripper_right_fingertip_1_joint') [:3]
+        p = robot.getJointPosition(effector) [:3]
         pointName = "point"+str(posIdx)
         ps.createPositionConstraint(
         pointName,
         '',
-        'gripper_right_fingertip_1_joint',
+        effector,
         p,
         (0, 0, 0),
         (True, True, True))
@@ -101,10 +101,11 @@ v = Viewer (ps, displayCoM = True)
 #load obstacles
 v.loadObstacleModel("gerard_bauzil", "rolling_table", "planning")
 
-def plan(ps):
-    q = genTarget(ps)
+def plan(ps, effector):
+    q1 = genTarget(ps, effector)
+    q = genTarget(ps, effector)
     #~ addCons(ps)
-    ps.setInitialConfig(init_conf)
+    ps.setInitialConfig(q1)
     ps.addGoalConfig(q)
     #~ v(q)
     
@@ -115,10 +116,10 @@ import os
 
 EXPORT_PATH = "/media/data/memmo/talos_reach0/"
 DT = 0.01
-
+EFFECTORS = ['gripper_right_fingertip_1_joint','gripper_left_fingertip_1_joint' ]
 # ~ if not os.path.exists(EXPORT_PATH):
         # ~ os.makedirs(EXPORT_PATH)
-
+N = 5
 #create session dir
 import datetime
 session = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
@@ -127,31 +128,41 @@ os.makedirs(sessionPath)
 
 
 from mlp.utils import wholebody_result as wr
-
-
-def exportPath(pId):
+from mlp.utils.util import SE3FromConfig, SE3toVec
+import eigenpy
+eigenpy.switchToNumpyMatrix()
+def exportPath(pId, directoryPath):
     ln = ps.pathLength(pId)
     nIters = (int)(ln / DT)
     qs = []
     cs = []    
     ts = []    
+    effectorTraj = {}
+    for effector in EFFECTORS:
+        effectorTraj[effector] = []
     for dt in range(nIters):
         t = dt * DT
         ts += [t]
         qs += [ps.configAtParam(pId,t)]; 
         v(qs[-1])
         cs += [robot.getCenterOfMass()]
+        for effector in EFFECTORS:
+            effectorTraj[effector] += [np.array(SE3toVec(SE3FromConfig(robot.getJointPosition(effector)))).reshape(-1,).tolist()]
     # ~ qs += [ps.configAtParam(pId,ln)]
     # ~ ts += [ln]
     # ~ v(qs[-1])
     # ~ cs += [robot.getCenterOfMass()]
-    r = wr.Result(len(robot.getCurrentConfig()),len(robot.getCurrentVelocity()),DT,[],len(qs))
+    r = wr.Result(len(robot.getCurrentConfig()),len(robot.getCurrentVelocity()),DT,EFFECTORS,len(qs))
     r.q_t[:] = np.matrix(qs).T
     r.c_t[:] = np.matrix(cs).T
-    r.t_t[:] = np.array(ts)
+    r.t_t[:] = np.array(ts)    
+    for effector in EFFECTORS:
+        print (r.effector_trajectories[effector].shape)
+        print (np.matrix(effectorTraj[effector]))
+        r.effector_trajectories[effector][:] = np.matrix(effectorTraj[effector]).T
     r.phases_intervals = None
     fname = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
-    r.exportNPZ(sessionPath,fname)
+    r.exportNPZ(directoryPath,fname)
     return r
 
 
@@ -161,11 +172,12 @@ pp = PathPlayer (v)
 
 pps = []
 
-
-for i in range(10):
-    ps.resetGoalConfigs()
-    plan(ps)
-    ps.solve()
-    pp(ps.numberPaths()-1)
-    pps += [ps.numberPaths()-1]
-    exportPath(ps.numberPaths()-1)
+for effector in EFFECTORS:
+    directoryPath = sessionPath + "/" + effector
+    for i in range(N):
+        ps.resetGoalConfigs()
+        plan(ps, effector)
+        ps.solve()
+        pp(ps.numberPaths()-1)
+        pps += [ps.numberPaths()-1]
+        r = exportPath(ps.numberPaths()-1, directoryPath)
