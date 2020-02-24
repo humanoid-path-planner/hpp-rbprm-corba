@@ -15,9 +15,11 @@ rbprmBuilder.setJointBounds ("root_joint", [-5,5, -1.5, 1.5, 0.95, 1.05])
 
 # The following lines set constraint on the valid configurations:
 # a configuration is valid only if all limbs can create a contact with the corresponding afforcances type
-rbprmBuilder.setFilter(['talos_lleg_rom','talos_rleg_rom'])
-rbprmBuilder.setAffordanceFilter('talos_lleg_rom', ['Support',])
-rbprmBuilder.setAffordanceFilter('talos_rleg_rom', ['Support'])
+used_limbs = ['talos_lleg_rom','talos_rleg_rom']
+rbprmBuilder.setFilter(used_limbs)
+for limb in used_limbs:
+  rbprmBuilder.setAffordanceFilter(limb, ['Support',])
+
 # We also bound the rotations of the torso. (z, y, x)
 rbprmBuilder.boundSO3([-1.7,1.7,-0.1,0.1,-0.1,0.1])
 # Add 6 extraDOF to the problem, used to store the linear velocity and acceleration of the root
@@ -69,7 +71,7 @@ ps.setInitialConfig (q_init)
 # set goal config
 rbprmBuilder.setCurrentConfig (q_init)
 q_goal = q_init [::]
-q_goal[0] = 1.5
+q_goal[0] = 1.
 v(q_goal)
 
 

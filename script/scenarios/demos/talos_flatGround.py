@@ -23,56 +23,39 @@ v = tp.Viewer (ps,viewerClient=tp.v.client, displayCoM = True)
 
 # load a reference configuration
 q_ref = fullBody.referenceConfig[::]+[0]*6
-q_init = q_ref[::]
 fullBody.setReferenceConfig(q_ref)
-fullBody.setCurrentConfig (q_init)
+fullBody.setCurrentConfig (q_ref)
 fullBody.setPostureWeights(fullBody.postureWeights[::]+[0]*6)
-#fullBody.usePosturalTaskContactCreation(True)
+fullBody.usePosturalTaskContactCreation(True)
 
 print("Generate limb DB ...")
 tStart = time.time()
 # generate databases :
-
-nbSamples = 50000
-fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "fixedStep06", 0.01,kinematicConstraintsPath=fullBody.rLegKinematicConstraints,kinematicConstraintsMin = 0.75)
-#fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
-fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "fixedStep06", 0.01,kinematicConstraintsPath=fullBody.lLegKinematicConstraints,kinematicConstraintsMin = 0.75)
-#fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
-
-
+fullBody.limbs_names = tp.used_limbs
+fullBody.loadAllLimbs("fixedStep06")
 tGenerate =  time.time() - tStart
 print("Done.")
 print("Databases generated in : "+str(tGenerate)+" s")
 
 #define initial and final configurations :
-configSize = fullBody.getConfigSize() -fullBody.client.robot.getDimensionExtraConfigSpace()
+q_init = q_ref[::]
+q_init[0:7] = tp.ps.configAtParam(pId,0.001)[0:7] 
+q_goal = q_init[::]
+q_goal[0:7] = tp.ps.configAtParam(pId,tp.ps.pathLength(pId))[0:7]
 
-q_init[0:7] = tp.ps.configAtParam(pId,0.001)[0:7] # use this to get the correct orientation
-q_goal = q_init[::]; q_goal[0:7] = tp.ps.configAtParam(pId,tp.ps.pathLength(pId))[0:7]
-vel_init = tp.ps.configAtParam(pId,0)[tp.indexECS:tp.indexECS+3]
-acc_init = tp.ps.configAtParam(pId,0)[tp.indexECS+3:tp.indexECS+6]
-vel_goal = tp.ps.configAtParam(pId,tp.ps.pathLength(pId))[tp.indexECS:tp.indexECS+3]
-acc_goal = [0,0,0]
-
-robTreshold = 3
-# copy extraconfig for start and init configurations
-q_init[configSize:configSize+3] = vel_init[::]
-q_init[configSize+3:configSize+6] = acc_init[::]
-q_goal[configSize:configSize+3] = vel_goal[::]
-q_goal[configSize+3:configSize+6] = [0,0,0]
-
-
+# force root height to be at the reference position: 
 q_init[2] = q_ref[2]
 q_goal[2] = q_ref[2]
 
+# copy extraconfig for start and init configurations
+configSize = fullBody.getConfigSize() -fullBody.client.robot.getDimensionExtraConfigSpace()
+q_init[configSize:configSize+3] = tp.ps.configAtParam(pId,0)[tp.indexECS:tp.indexECS+3]
+q_init[configSize+3:configSize+6] = tp.ps.configAtParam(pId,0)[tp.indexECS:tp.indexECS+3]
+q_goal[configSize:configSize+3] = tp.ps.configAtParam(pId,tp.ps.pathLength(pId))[tp.indexECS:tp.indexECS+3]
+q_goal[configSize+3:configSize+6] = [0,0,0]
+
 
 fullBody.setStaticStability(True)
-fullBody.setCurrentConfig (q_init)
-v(q_init)
-
-fullBody.setCurrentConfig (q_goal)
-v(q_goal)
-
 v.addLandmark('talos/base_link',0.3)
 v(q_init)
 
