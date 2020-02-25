@@ -18,7 +18,7 @@
 
 from hpp.corbaserver.rbprm import Client as RbprmClient
 from hpp.corbaserver.robot import Robot
-from hpp_spline import bezier
+from curves import bezier
 from numpy import array, matrix
 
 
@@ -988,7 +988,7 @@ class FullBody(Robot):
             wp = curvesWp[cid]
             if len(wp[0]) == 1:  # length is provided :
                 waypoints = matrix(wp[1:]).transpose()
-                curve = bezier(waypoints, wp[0][0])
+                curve = bezier(waypoints, 0., wp[0][0])
             else:
                 waypoints = matrix(wp).transpose()
                 curve = bezier(waypoints)
@@ -1000,7 +1000,7 @@ class FullBody(Robot):
         path = self.clientRbprm.rbprm.getPathAsBezier(pathId)
         t = path[0][0]
         wps = matrix(path[1:]).transpose()
-        curve = bezier(wps, t)
+        curve = bezier(wps, 0., t)
         return curve
 
     # # return the contacts variation between two states
