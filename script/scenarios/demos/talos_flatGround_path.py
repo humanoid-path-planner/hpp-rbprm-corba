@@ -1,6 +1,6 @@
-from scenarios.template_talos_path import TalosPathPlanning
+from scenarios.talos_path_planner import TalosPathPlanner
 
-class PathPlanning(TalosPathPlanning):
+class PathPlanner(TalosPathPlanner):
 
     def run(self):
         self.init_problem()
@@ -12,8 +12,9 @@ class PathPlanning(TalosPathPlanning):
         self.init_planner()
         self.solve()
         self.display_path()
-        self.play_path()
-
+        #self.play_path()
+        self.hide_rom()
 
 if __name__ == "__main__":
-    PathPlanning().run()
+    planner = PathPlanner()
+    planner.run()
