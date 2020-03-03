@@ -14,9 +14,6 @@ class ContactGenerator(TalosContactGenerator):
         self.init_problem()
         self.init_viewer()
         self.compute_configs_from_guide()
-        # force root height to be at the reference position:
-        self.q_init[2] = self.q_ref[2]
-        self.q_goal[2] = self.q_ref[2]
         self.interpolate()
 
 
