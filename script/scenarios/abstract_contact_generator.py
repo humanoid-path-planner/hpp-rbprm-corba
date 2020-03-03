@@ -6,13 +6,13 @@ from abc import abstractmethod
 
 class AbstractContactGenerator:
 
-    fullbody = None
-    ps = None
-    v = None
-    q_ref = None
-    weight_postural = None
-    q_init = None
-    q_goal = None
+    fullbody = None # rborpm.FullBody instance
+    ps = None # ProblemSolver instance
+    v = None # gepetto.Viewer instance
+    q_ref = None # reference configuration used (depending on the settings)
+    weight_postural = None # weight used for the postural task (depending on the setting)
+    q_init = None # Initial whole body configuration
+    q_goal = None # Desired final whole body configuration
 
     def __init__(self, path_planner):
         """
@@ -21,34 +21,65 @@ class AbstractContactGenerator:
         """
         path_planner.run()
         self.path_planner = path_planner
+        # ID of the guide path used in problemSolver, default to the last one
         self.pid = self.path_planner.ps.numberPaths() - 1
         self.used_limbs = path_planner.used_limbs
-        self.dt = 0.01
-        self.robustness = 0
-        self.filter_states = True
-        self.test_reachability = True
-        self.quasi_static = True
-        self.erase_previous_states = True
-        self.init_contacts = self.used_limbs
-        self.end_contacts = self.used_limbs
-        self.configs = []
+        self.root_translation_bounds = self.path_planner.root_translation_bounds
+        # increase bounds from path planning, to leave room for the root motion during the steps
+        for i in range(3):
+            self.root_translation_bounds[2*i] -= 0.1
+            self.root_translation_bounds[2*i + 1] += 0.1
+        # settings related to the 'interpolate' method:
+        self.dt = 0.01    # discretisation step used
+        self.robustness = 0  # robustness treshold
+        # (see https://github.com/humanoid-path-planner/hpp-centroidal-dynamics/blob/master/include/hpp/centroidal-dynamics/centroidal_dynamics.hh#L215)
+        self.filter_states = True # if True, after contact generation try to remove all the redundant steps
+        self.test_reachability = True # if True, check feasibility of the contact transition during contact generation
+        self.quasi_static = True # if True, use the 2-PAC method to check feasibility, if False use CROC
+        self.erase_previous_states = True # if False, keep^the previously computed states if 'interpolate' is called a second time
+        self.static_stability = True # if True, the acceleration computed by the guide is ignored during contact planning
+        self.init_contacts = self.used_limbs # limbs in contact in the initial configuration
+        # the order of the limbs in the list define the initial order in which the contacts are removed when then cannot be maintained anymore
+        self.end_contacts = self.used_limbs # limbs in contact in the final configuration
+        self.configs = [] # will contains the whole body configuration computed after calling 'interpolate'
 
     @abstractmethod
     def load_fullbody(self):
+        """
+        Load the robot from urdf and instanciate a fullBody object
+        Also initialize the q_ref and weight_postural vectors
+        """
         pass
 
     def set_joints_bounds(self):
-        self.fullbody.setJointBounds ("root_joint", self.path_planner.root_translation_bounds)
+        """
+        Define the root translation bounds and the extra config bounds
+        """
+        self.fullbody.setJointBounds ("root_joint", self.root_translation_bounds)
         self.fullbody.client.robot.setDimensionExtraConfigSpace(self.path_planner.extra_dof)
         self.fullbody.client.robot.setExtraConfigSpaceBounds(self.path_planner.extra_dof_bounds)
 
     def set_reference(self, use_postural_task = True):
+        """
+        Set the reference configuration used and the weight for the postural task
+        :param use_postural_task: if True, when projecting configurations to contact a postural task is added to the cost function
+        Disabling this setting will greatly reduce the computation time, but may result in weird configurations in contact
+        """
         self.fullbody.setReferenceConfig(self.q_ref)
         self.fullbody.setCurrentConfig(self.q_ref)
         self.fullbody.setPostureWeights(self.weight_postural)
         self.fullbody.usePosturalTaskContactCreation(use_postural_task)
 
     def load_limbs(self, heuristic = "fixedStep06", analysis=None, nb_samples=None, octree_size=None):
+        """
+        Generate the samples used for each limbs in 'used_limbs'
+        :param heuristic: the name of the heuristic used,
+        see https://github.com/humanoid-path-planner/hpp-rbprm/blob/master/src/sampling/heuristic.cc#L272-L285
+        :param analysis: The name of the analysis used,
+        see https://github.com/humanoid-path-planner/hpp-rbprm/blob/master/src/sampling/analysis.cc#L318-L335
+        :param nb_samples: The number of samples for each limb database. Default is set in the Robot python class
+        :param octree_size: The size of each cell of the octree. Default is set in the Robot python class
+        """
         self.fullbody.limbs_names = self.used_limbs
         if nb_samples is None:
             nb_samples = self.fullbody.nbSamples
@@ -62,6 +93,9 @@ class AbstractContactGenerator:
 
 
     def init_problem(self):
+        """
+        Create a ProblemSolver instance, and set the velocity and acceleration bounds
+        """
         self.ps = ProblemSolver(self.fullbody)
         if self.path_planner.v_max >= 0:
             self.ps.setParameter("Kinodynamic/velocityBound", self.path_planner.v_max)
@@ -69,9 +103,18 @@ class AbstractContactGenerator:
             self.ps.setParameter("Kinodynamic/accelerationBound", self.path_planner.a_max)
 
     def init_viewer(self):
+        """
+        Create a Viewer instance
+        """
         self.v = Viewer(self.ps, viewerClient=self.path_planner.v.client, displayCoM=True)
 
-    def compute_configs_from_guide(self, use_acc_init = True, use_acc_end = False):
+    def compute_configs_from_guide(self, use_acc_init = True, use_acc_end = False, set_ref_height = True):
+        """
+        Compute the wholebody configurations from the reference one and the guide init/goal config
+        :param use_acc_init: if True, use the initial acceleration from the guide path
+        :param use_acc_end: if True, use the final acceleration from the guide path
+        :param set_ref_height: if True, set the root Z position of q_init and q_goal to be equal to q_ref
+        """
         self.q_init = self.q_ref[::]
         self.q_init[0:7] = self.path_planner.ps.configAtParam(self.pid, 0.001)[0:7]
         # do not use 0 but an epsilon in order to avoid the orientation discontinuity that may happen at t=0
@@ -93,12 +136,22 @@ class AbstractContactGenerator:
             self.q_goal[configSize + 3 : configSize + 6] = q_goal_guide[index_ecs + 3 : index_ecs + 6]
         else:
             self.q_goal[configSize + 3 : configSize + 6] = [0, 0, 0]
+        if set_ref_height:
+            # force root height to be at the reference position:
+            self.q_init[2] = self.q_ref[2]
+            self.q_goal[2] = self.q_ref[2]
+        self.v(self.q_init)
+
 
     def interpolate(self):
+        """
+        Compute the sequence of configuration in contact between q_init and q_goal
+        """
         # specify the full body configurations as start and goal state of the problem
+        self.fullbody.setStaticStability(self.static_stability)
         self.fullbody.setStartState(self.q_init, self.init_contacts)
         self.fullbody.setEndState(self.q_goal, self.end_contacts)
-
+        self.v(self.q_init)
         print("Generate contact plan ...")
         t_start = time.time()
         self.configs = self.fullbody.interpolate(0.01,
@@ -113,6 +166,10 @@ class AbstractContactGenerator:
         print("number of configs :", len(self.configs))
 
     def display_sequence(self):
+        """
+        Display the sequence of configuration in contact,
+        requires that self.configs is not empty
+        """
         displayContactSequence(self.v, self.configs)
 
     @abstractmethod
@@ -129,9 +186,6 @@ class AbstractContactGenerator:
         self.init_problem()
         self.init_viewer()
         self.compute_configs_from_guide()
-        # force root height to be at the reference position:
-        self.q_init[2] = self.q_ref[2]
-        self.q_goal[2] = self.q_ref[2]
         self.interpolate()
         """
         pass

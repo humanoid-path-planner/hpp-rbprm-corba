@@ -11,6 +11,7 @@ class AbstractPathPlanner:
   v = None
   afftool = None
   pp = None
+  extra_dof_bounds = None
 
   def __init__(self):
     self.v_max = -1 # bounds on the linear velocity for the root, negative values mean unused
@@ -23,12 +24,8 @@ class AbstractPathPlanner:
     self.used_limbs = [] # names of the limbs that must be in contact during all the motion
     self.size_foot_x = 0 # size of the feet along the x axis
     self.size_foot_y = 0 # size of the feet along the y axis
-    # bounds for the extradof : by default use v_max/a_max on x and y axis and 0 on z axis
-    self.extra_dof_bounds = [-self.v_max,self.v_max,-self.v_max,self.v_max,0,0,
-                             -self.a_max,self.a_max,-self.a_max,self.a_max,0,0]
     self.q_init = []
     self.q_goal = []
-
 
   @abstractmethod
   def load_rbprm(self):
@@ -36,6 +33,18 @@ class AbstractPathPlanner:
     Build an rbprmBuilder instance for the correct robot and initialize it's extra config size
     """
     pass
+
+  def set_configurations(self):
+    self.rbprmBuilder.client.robot.setDimensionExtraConfigSpace(self.extra_dof)
+    self.q_init = self.rbprmBuilder.getCurrentConfig()
+    self.q_goal = self.rbprmBuilder.getCurrentConfig()
+    self.q_init[2] = self.rbprmBuilder.ref_height
+    self.q_goal[2] = self.rbprmBuilder.ref_height
+
+  def compute_extra_config_bounds(self):
+    # bounds for the extradof : by default use v_max/a_max on x and y axis and 0 on z axis
+    self.extra_dof_bounds = [-self.v_max,self.v_max,-self.v_max,self.v_max,0,0,
+                             -self.a_max,self.a_max,-self.a_max,self.a_max,0,0]
 
   def set_joints_bounds(self):
     """
@@ -61,6 +70,8 @@ class AbstractPathPlanner:
     The values of v_max, a_max, mu, size_foot_x and size_foot_y must be defined before calling this method
     """
     self.load_rbprm()
+    self.set_configurations()
+    self.compute_extra_config_bounds()
     self.set_joints_bounds()
     self.set_rom_filters()
     self.ps = ProblemSolver( self.rbprmBuilder)
@@ -77,17 +88,19 @@ class AbstractPathPlanner:
     # sample only configuration with null velocity and acceleration :
     self.ps.setParameter("ConfigurationShooter/sampleExtraDOF", False)
 
-  def init_viewer(self, env_name, env_package = "hpp_environments", visualize_affordances = []):
+  def init_viewer(self, env_name, env_package = "hpp_environments",reduce_sizes = [0, 0, 0], visualize_affordances = []):
     """
     Build an instance of hpp-gepetto-viewer from the current problemSolver
     :param env_name: name of the urdf describing the environment
     :param env_package: name of the package containing this urdf (default to hpp_environments)
+    :param reduce_sizes: Distance used to reduce the affordances plan toward the center of the plane
+    (in order to avoid putting contacts closes to the edges of the surface)
     :param visualize_affordances: list of affordances type to visualize, default to none
     """
     vf = ViewerFactory(self.ps)
     self.afftool = AffordanceTool ()
     self.afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
-    self.afftool.loadObstacleModel (env_package, env_name, "planning", vf)
+    self.afftool.loadObstacleModel (env_package, env_name, "planning", vf, reduceSizes = reduce_sizes)
     try :
         self.v = vf.createViewer(displayArrows = True)
     except Exception:
