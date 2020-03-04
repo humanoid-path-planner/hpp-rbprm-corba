@@ -48,7 +48,7 @@ class PathPlanner(TalosPathPlanner):
         print("final root position : ", self.q_goal)
         self.ps.setInitialConfig(self.q_init)
         self.ps.addGoalConfig(self.q_goal)
-
+        self.alpha = alpha
         # write problem in files :
         f = open(self.status_filename, "w")
         f.write("q_init= " + str(self.q_init) + "\n")

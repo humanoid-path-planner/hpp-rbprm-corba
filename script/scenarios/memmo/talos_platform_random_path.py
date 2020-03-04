@@ -10,7 +10,7 @@ class PathPlanner(TalosPathPlanner):
 
     Y_BOUNDS = [0.3, 2.1]
     Z_VALUE = 0.98
-    MAX_ANGLE = 0.4363323129985824  # 25 degree
+    MAX_ANGLE = 0.4  # radian
 
     def __init__(self):
         super().__init__()
