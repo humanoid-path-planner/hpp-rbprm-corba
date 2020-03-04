@@ -1,4 +1,4 @@
-from scenarios.memmo.talos_mazeEas_path import PathPlanner as Parent
+from scenarios.memmo.talos_navBauzil_path import PathPlanner as Parent
 import numpy as np
 
 class PathPlanner(Parent):

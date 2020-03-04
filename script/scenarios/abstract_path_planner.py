@@ -113,24 +113,32 @@ class AbstractPathPlanner:
             def addLandmark(self,a,b):
                 return
         self.v = FakeViewer()
-    self.pp = PathPlayer(self.v)
+    try:
+      self.pp = PathPlayer(self.v)
+    except Exception:
+      pass
     for aff_type in visualize_affordances:
       self.afftool.visualiseAffordances(aff_type, self.v, self.v.color.lightBrown)
 
 
 
-  def init_planner(self, kinodynamic = True):
+  def init_planner(self, kinodynamic = True, optimize = True):
     """
     Select the rbprm methods, and the kinodynamic ones if required
     :param kinodynamic: if True, also select the kinodynamic methods
+    :param optimize: if True, add randomShortcut path optimizer (or randomShortcutDynamic if kinodynamic is also True)
     """
     self.ps.selectConfigurationShooter("RbprmShooter")
     self.ps.selectPathValidation("RbprmPathValidation", 0.05)
     if kinodynamic:
-      self.ps.addPathOptimizer("RandomShortcutDynamic")
       self.ps.selectSteeringMethod("RBPRMKinodynamic")
       self.ps.selectDistance("Kinodynamic")
       self.ps.selectPathPlanner("DynamicPlanner")
+    if optimize:
+      if kinodynamic:
+        self.ps.addPathOptimizer("RandomShortcutDynamic")
+      else:
+        self.ps.addPathOptimizer("RandomShortcut")
 
 
   def solve(self):
@@ -160,10 +168,11 @@ class AbstractPathPlanner:
     :param path_id: the Id of the path specified, default to the most recent one
     :param dt: discretization step used to display the path (default to 0.1)
     """
-    if path_id < 0:
-      path_id = self.ps.numberPaths()-1
-    self.pp.dt = dt
-    self.pp.displayVelocityPath(path_id)
+    if self.pp is not None:
+      if path_id < 0:
+        path_id = self.ps.numberPaths()-1
+      self.pp.dt = dt
+      self.pp.displayVelocityPath(path_id)
 
   def play_path(self, path_id = -1, dt = 0.01):
     """
@@ -171,10 +180,11 @@ class AbstractPathPlanner:
     :param path_id: the Id of the path specified, default to the most recent one
     :param dt: discretization step used to display the path (default to 0.01)
     """
-    if path_id < 0:
-      path_id = self.ps.numberPaths()-1
-    self.pp.dt = dt
-    self.pp(path_id)
+    if self.pp is not None:
+      if path_id < 0:
+        path_id = self.ps.numberPaths()-1
+      self.pp.dt = dt
+      self.pp(path_id)
 
   def hide_rom(self):
     """

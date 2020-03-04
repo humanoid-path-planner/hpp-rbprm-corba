@@ -15,7 +15,7 @@ def sampleRotationForConfig(alphaBounds,q,vPredef):
     alpha = random.uniform(alphaBounds[0],alphaBounds[1])
     v = Vector3FromAlpha(alpha)
     quat = quatFromAlpha(alpha)
-    q[3:7] = quat.coeffs().T.tolist()[0]
+    q[3:7] = quat.coeffs().tolist()
     # set velocity to match this orientation :
     q[-6] = v[0,0]*vPredef 
     q[-5] = v[1,0]*vPredef  

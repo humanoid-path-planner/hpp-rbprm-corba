@@ -17,6 +17,8 @@ class PathPlanner(TalosPathPlanner):
         super().init_problem()
         # greatly increase the number of loops of the random shortcut
         self.ps.setParameter("PathOptimization/RandomShortcut/NumberOfLoops", 100)
+        self.ps.setParameter("Kinodynamic/synchronizeVerticalAxis", True)
+        self.ps.setParameter("Kinodynamic/verticalAccelerationBound", 3.)
 
     def compute_extra_config_bounds(self):
         # bounds for the extradof : by default use v_max/a_max on x and y axis and a large value on z axis
