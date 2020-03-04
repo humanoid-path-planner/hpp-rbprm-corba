@@ -43,6 +43,7 @@ class AbstractContactGenerator:
         self.end_contacts = self.used_limbs # limbs in contact in the final configuration
         self.configs = [] # will contains the whole body configuration computed after calling 'interpolate'
 
+
     @abstractmethod
     def load_fullbody(self):
         """
@@ -172,20 +173,16 @@ class AbstractContactGenerator:
         """
         displayContactSequence(self.v, self.configs)
 
-    @abstractmethod
     def run(self):
         """
         Must be defined in the child class to run all the methods with the correct arguments.
         """
-        # example of definition:
-        """
         self.load_fullbody()
         self.set_joints_bounds()
-        self.set_reference(True)
-        self.load_limbs("fixedStep06")
+        self.set_reference()
+        self.load_limbs()
         self.init_problem()
         self.init_viewer()
         self.compute_configs_from_guide()
         self.interpolate()
-        """
-        pass
+

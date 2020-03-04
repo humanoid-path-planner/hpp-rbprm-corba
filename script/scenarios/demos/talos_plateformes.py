@@ -20,6 +20,7 @@ class ContactGenerator(TalosContactGenerator):
         self.fullbody.setJointBounds('leg_left_1_joint', [-0.1, 0.2])
         self.fullbody.setJointBounds('leg_right_1_joint', [-0.2, 0.1])
 
+
     def run(self):
         self.load_fullbody()
         self.set_joints_bounds()
