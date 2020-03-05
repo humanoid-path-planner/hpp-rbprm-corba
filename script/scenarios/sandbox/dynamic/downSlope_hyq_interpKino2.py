@@ -5,7 +5,7 @@ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
 
 #calling script darpa_hyq_path to compute root path
-from . import downSlope_hyq_pathKino2 as tp
+import downSlope_hyq_pathKino2 as tp
 
 from os import environ
 ins_dir = environ['DEVEL_DIR']

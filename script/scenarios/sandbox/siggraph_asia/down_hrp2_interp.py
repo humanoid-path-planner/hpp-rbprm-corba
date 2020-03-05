@@ -3,8 +3,8 @@ from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 from hpp.gepetto import PathPlayer
 
-from . import down_hrp2_path as path_planner
-from . import hrp2_model_grasp as model
+import down_hrp2_path as path_planner
+import hrp2_model_grasp as model
 from .hrp2_model import *
 import time
 

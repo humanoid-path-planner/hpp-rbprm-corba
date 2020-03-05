@@ -2,7 +2,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 
-from . import polaris_hrp2_path_3 as tp
+import polaris_hrp2_path_3 as tp
 
 
 

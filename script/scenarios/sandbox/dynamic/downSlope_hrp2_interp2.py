@@ -2,7 +2,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 
-from . import downSlope_hrp2_pathKino2 as tp
+import downSlope_hrp2_pathKino2 as tp
 import time
 
 

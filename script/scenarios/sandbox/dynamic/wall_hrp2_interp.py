@@ -3,7 +3,7 @@ from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 import omniORB.any
 
-from . import hrp2_wall_path as tp
+import hrp2_wall_path as tp
 import time
 
 

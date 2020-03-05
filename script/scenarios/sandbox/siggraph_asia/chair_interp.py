@@ -4,7 +4,7 @@ from hpp.gepetto import Viewer
 from hpp.gepetto import PathPlayer
 
 import chair_path_2 as path_planner
-from . import hrp2_model as model
+import hrp2_model as model
 #~ import hrp2_model_grasp as model
 from .hrp2_model import *
 import time

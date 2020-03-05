@@ -3,7 +3,7 @@ from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.gepetto import Viewer
 from hpp.gepetto import PathPlayer
 
-from . import wall_spiderman_path as path_planner
+import wall_spiderman_path as path_planner
 #~ import hrp2_model as model
 import time
 tp = path_planner

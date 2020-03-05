@@ -7,7 +7,7 @@ from hpp.gepetto import Viewer
 from .hyq_ref_pose import hyq_ref
 
 #calling script darpa_hyq_path to compute root path
-from . import mount_hyq_path as tp
+import mount_hyq_path as tp
 
 from os import environ
 ins_dir = environ['DEVEL_DIR']
