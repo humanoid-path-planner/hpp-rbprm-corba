@@ -73,36 +73,6 @@ ADD_DEPENDENCIES (rbprm-corba generate_idl_cpp)
 ADD_DEPENDENCIES (rbprm-corba generate_idl_python)
 TARGET_INCLUDE_DIRECTORIES(rbprm-corba PUBLIC ${CDD_INCLUDE_DIRS})
 
-INSTALL(
-  FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/__init__.py
-  DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm
-  )
-INSTALL(
-  FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/client.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/rbprmbuilder.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/rbprmfullbody.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/rbprmstate.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/state_alg.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/fewstepsplanner.py
-  DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm
-  )
-INSTALL(
-  FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/__init__.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/generateROMs.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/com_constraints.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/plot_analytics.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/affordance_centroids.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/cwc_trajectory.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/cwc_trajectory_helper.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/path_to_trajectory.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/obj_to_constraints.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/time_out.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/hpp/corbaserver/rbprm/tools/display_tools.py
-  DESTINATION ${PYTHON_SITELIB}/hpp/corbaserver/rbprm/tools
-  )
 # Stand alone corba server
 ADD_EXECUTABLE (hpp-rbprm-server hpp-rbprm-corba.cc)
 
@@ -110,3 +80,105 @@ PKG_CONFIG_USE_DEPENDENCY(hpp-rbprm-server hpp-corbaserver)
 PKG_CONFIG_USE_DEPENDENCY(hpp-rbprm-server hpp-pinocchio)
 
 INSTALL (TARGETS hpp-rbprm-server DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+# Install python files : 
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm" __init__.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm" client.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm" fewstepsplanner.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm" rbprmbuilder.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm" rbprmfullbody.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm" rbprmstate.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm" state_alg.py)
+
+# /tools 
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" affordance_centroids.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" com_constraints.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" constraint_to_dae.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" cwc_trajectory_helper.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" cwc_trajectory.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" display_tools.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" generateROMs.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" getSurfaceExtremumPoints.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" __init__.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" narrow_convex_hull.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" obj_to_constraints.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" path_to_trajectory.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" plot_analytics.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" sample_random_transition.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" sample_root_config.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" sampleRotation.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" surfaces_from_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" time_out.py)
+
+# /scenarios
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios" abstract_contact_generator.py )
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios" abstract_path_planner.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios" anymal_contact_generator.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios" anymal_path_planner.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios" hrp2_contact_generator.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios" hrp2_path_planner.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios" hyq_contact_generator.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios" hyq_path_planner.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios" __init__.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios" talos_contact_generator.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios" talos_path_planner.py)
+
+# /scenarios/demos
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" hrp2_flatGround_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" hrp2_flatGround.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" hrp2_plateformes_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" hrp2_plateformes.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" hyq_darpa_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" hyq_darpa.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" hyq_slalom_debris_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" hyq_slalom_debris.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" __init__.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" talos_flatGround_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" talos_flatGround.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" talos_navBauzil_hard_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" talos_navBauzil_hard.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" talos_navBauzil_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" talos_navBauzil.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" talos_plateformes_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" talos_plateformes.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" talos_stairs10_path.py )
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/demos" talos_stairs10.py)
+
+# /scenarios/memmo
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" anymal_circle_oriented_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" anymal_circle_oriented.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" anymal_circle_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" anymal_circle.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" anymal_contact_generator.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" anymal_platform_random_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" anymal_platform_random.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" __init__.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_bauzil_with_stairs_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_circle_oriented_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_circle_oriented.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_circle_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_circle.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_contact_generator.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_mazeEas_oriented_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_mazeEas_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_moveEffector_flat.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_moveEffector_stairs_m10.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_moveEffector_stairs_m15.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_moveEffector_stairs_p10.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_moveEffector_stairs_p15.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_navBauzil_oriented_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_navBauzil_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_navBauzil.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_platform_random_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_platform_random.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_randomMove_flat.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_randomMove_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_stairs10_random_path.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" talos_stairs10_random.py)
+
+
+
+
+
+
+
