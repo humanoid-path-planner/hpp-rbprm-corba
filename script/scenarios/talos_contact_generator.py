@@ -6,7 +6,7 @@ class TalosContactGenerator(AbstractContactGenerator):
     def __init__(self, path_planner):
         super().__init__(path_planner)
         self.robustness = 2
-
+        self.robot_node_name = "talos"
 
     def load_fullbody(self):
         from talos_rbprm.talos import Robot

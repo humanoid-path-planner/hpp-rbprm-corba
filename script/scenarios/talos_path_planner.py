@@ -15,6 +15,7 @@ class TalosPathPlanner(AbstractPathPlanner):
         self.a_max = 0.1
         self.extra_dof_bounds = [-self.v_max, self.v_max, -self.v_max, self.v_max, 0, 0,
                                  -self.a_max, self.a_max, -self.a_max, self.a_max, 0, 0]
+        self.robot_node_name = "talos_trunk"
 
     def load_rbprm(self):
         from talos_rbprm.talos_abstract import Robot

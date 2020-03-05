@@ -6,6 +6,7 @@ class HRP2ContactGenerator(AbstractContactGenerator):
     def __init__(self, path_planner):
         super().__init__(path_planner)
         self.robustness = 1
+        self.robot_node_name = "hrp2_14"
 
 
     def load_fullbody(self):

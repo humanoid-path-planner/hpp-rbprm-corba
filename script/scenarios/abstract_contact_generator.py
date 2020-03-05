@@ -1,6 +1,6 @@
 from hpp.gepetto import Viewer
 from hpp.corbaserver.rbprm.tools.display_tools import displayContactSequence
-from hpp.corbaserver import ProblemSolver
+from hpp.corbaserver import ProblemSolver, Client
 import time
 from abc import abstractmethod
 
@@ -13,6 +13,7 @@ class AbstractContactGenerator:
     weight_postural = None # weight used for the postural task (depending on the setting)
     q_init = None # Initial whole body configuration
     q_goal = None # Desired final whole body configuration
+    robot_node_name = None  # name of the robot in the node list of the viewer
 
     def __init__(self, path_planner):
         """
@@ -21,8 +22,18 @@ class AbstractContactGenerator:
         """
         path_planner.run()
         self.path_planner = path_planner
+        self.path_planner.hide_rom()
         # ID of the guide path used in problemSolver, default to the last one
         self.pid = self.path_planner.ps.numberPaths() - 1
+        # Save the guide planning problem in a specific instance,
+        # such that we can use it again even after creating the "fullbody" problem:
+        self.cl = Client()
+        self.cl.problem.selectProblem("guide_planning")
+        path_planner.load_rbprm()
+        ProblemSolver(path_planner.rbprmBuilder)
+        self.cl.problem.selectProblem("default")
+        self.cl.problem.movePathToProblem(self.pid, "guide_planning", self.path_planner.rbprmBuilder.getAllJointNames()[1:])
+        # copy bounds and limbs used from path planning :
         self.used_limbs = path_planner.used_limbs
         self.root_translation_bounds = self.path_planner.root_translation_bounds
         # increase bounds from path planning, to leave room for the root motion during the steps
@@ -143,15 +154,19 @@ class AbstractContactGenerator:
             self.q_goal[2] = self.q_ref[2]
         self.v(self.q_init)
 
+    def set_start_end_states(self):
+        """
+        Set the current q_init and q_goal as initial/goal state for the contact planning
+        """
+        self.fullbody.setStartState(self.q_init, self.init_contacts)
+        self.fullbody.setEndState(self.q_goal, self.end_contacts)
 
     def interpolate(self):
         """
         Compute the sequence of configuration in contact between q_init and q_goal
         """
-        # specify the full body configurations as start and goal state of the problem
+        self.set_start_end_states()
         self.fullbody.setStaticStability(self.static_stability)
-        self.fullbody.setStartState(self.q_init, self.init_contacts)
-        self.fullbody.setEndState(self.q_goal, self.end_contacts)
         self.v(self.q_init)
         print("Generate contact plan ...")
         t_start = time.time()
@@ -166,12 +181,40 @@ class AbstractContactGenerator:
         print("Contact plan generated in : " + str(t_interpolate_configs) + " s")
         print("number of configs :", len(self.configs))
 
-    def display_sequence(self):
+
+    """
+    Helper methods used to display results
+    """
+
+    def display_sequence(self, dt = 0.5):
         """
         Display the sequence of configuration in contact,
         requires that self.configs is not empty
+        :param dt: the pause (in second) between each configuration
         """
-        displayContactSequence(self.v, self.configs)
+        displayContactSequence(self.v, self.configs, dt)
+
+    def display_init_config(self):
+        self.v(self.q_init)
+
+    def display_end_config(self):
+        self.v(self.q_goal)
+
+    def play_guide_path(self):
+        """
+        display the guide path planned
+        """
+        self.v.client.gui.setVisibility(self.robot_node_name, "OFF")
+        self.path_planner.show_rom()
+        self.cl.problem.selectProblem("guide_planning")
+        # this is not the same problem as in the guide_planner. We only added the final path in this problem,
+        # thus there is only 1 path in this problem
+        self.path_planner.pp(0)
+        self.cl.problem.selectProblem("default")
+        self.path_planner.hide_rom()
+        self.v.client.gui.setVisibility(self.robot_node_name, "ON")
+
+
 
     def run(self):
         """

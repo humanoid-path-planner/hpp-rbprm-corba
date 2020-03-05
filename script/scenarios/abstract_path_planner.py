@@ -12,6 +12,7 @@ class AbstractPathPlanner:
   afftool = None
   pp = None
   extra_dof_bounds = None
+  robot_node_name = None # name of the robot in the node list of the viewer
 
   def __init__(self):
     self.v_max = -1 # bounds on the linear velocity for the root, negative values mean unused
@@ -180,6 +181,7 @@ class AbstractPathPlanner:
     :param path_id: the Id of the path specified, default to the most recent one
     :param dt: discretization step used to display the path (default to 0.01)
     """
+    self.show_rom()
     if self.pp is not None:
       if path_id < 0:
         path_id = self.ps.numberPaths()-1
@@ -188,11 +190,16 @@ class AbstractPathPlanner:
 
   def hide_rom(self):
     """
-    Move visual ROM far above the meshs, as we cannot just delete it.
+    Remove the current robot from the display
     """
-    q_far = self.q_init[::]
-    q_far[2] = -3
-    self.v(q_far)
+    self.v.client.gui.setVisibility(self.robot_node_name, "OFF")
+
+  def show_rom(self):
+    """
+    Add the current robot to the display
+    """
+    self.v.client.gui.setVisibility(self.robot_node_name, "ON")
+
 
   @abstractmethod
   def run(self):

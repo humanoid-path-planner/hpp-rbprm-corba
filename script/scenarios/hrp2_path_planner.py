@@ -16,13 +16,10 @@ class HRP2PathPlanner(AbstractPathPlanner):
         self.a_max = 0.1
         self.extra_dof_bounds = [-self.v_max, self.v_max, -self.v_max, self.v_max, 0, 0,
                                  -self.a_max, self.a_max, -self.a_max, self.a_max, 0, 0]
+        self.robot_node_name = "hrp2_trunk_flexible"
 
 
     def load_rbprm(self):
         from hpp.corbaserver.rbprm.hrp2_abstract import Robot
         self.rbprmBuilder = Robot()
-        self.rbprmBuilder.client.robot.setDimensionExtraConfigSpace(self.extra_dof)
-        self.q_init = self.rbprmBuilder.getCurrentConfig()
-        self.q_goal = self.rbprmBuilder.getCurrentConfig()
-        self.q_init[2] = self.rbprmBuilder.ref_height
-        self.q_goal[2] = self.rbprmBuilder.ref_height
+
