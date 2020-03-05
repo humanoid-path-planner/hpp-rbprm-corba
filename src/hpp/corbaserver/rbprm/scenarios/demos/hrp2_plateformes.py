@@ -1,5 +1,5 @@
-from scenarios.demos.hrp2_plateformes_path import PathPlanner
-from scenarios.hrp2_contact_generator import HRP2ContactGenerator
+from hpp.corbaserver.rbprm.scenarios.demos.hrp2_plateformes_path import PathPlanner
+from hpp.corbaserver.rbprm.scenarios.hrp2_contact_generator import HRP2ContactGenerator
 
 class ContactGenerator(HRP2ContactGenerator):
 

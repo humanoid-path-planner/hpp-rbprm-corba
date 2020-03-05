@@ -1,4 +1,4 @@
-from scenarios.talos_path_planner import TalosPathPlanner
+from hpp.corbaserver.rbprm.scenarios.talos_path_planner import TalosPathPlanner
 import numpy as np
 class PathPlanner(TalosPathPlanner):
 
@@ -20,7 +20,7 @@ class PathPlanner(TalosPathPlanner):
         """
         randomly sample initial and goal configuration :
         """
-        from tools.sample_root_config import generate_random_conf_without_orientation
+        from hpp.corbaserver.rbprm.tools.sample_root_config import generate_random_conf_without_orientation
         self.q_init = generate_random_conf_without_orientation(self.rbprmBuilder, self.root_translation_bounds)
         self.q_goal = generate_random_conf_without_orientation(self.rbprmBuilder, self.root_translation_bounds)
         print("q_init= " + str(self.q_init))

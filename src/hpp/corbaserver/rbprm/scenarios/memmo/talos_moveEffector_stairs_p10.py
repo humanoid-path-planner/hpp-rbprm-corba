@@ -83,7 +83,7 @@ tGenerate =  time.time() - tStart
 print("Done.")
 print("Databases generated in : "+str(tGenerate)+" s")
 
-from tools.sample_random_transition import sampleRandomTransitionStairs
+from hpp.corbaserver.rbprm.tools.sample_random_transition import sampleRandomTransitionStairs
 limbsInContact = [fullBody.rLegId,fullBody.lLegId]
 random.seed()
 movingId = random.randint(0,1)

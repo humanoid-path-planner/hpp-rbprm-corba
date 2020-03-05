@@ -1,4 +1,4 @@
-from scenarios.talos_path_planner import TalosPathPlanner
+from hpp.corbaserver.rbprm.scenarios.talos_path_planner import TalosPathPlanner
 
 class PathPlanner(TalosPathPlanner):
 

@@ -1,5 +1,5 @@
-from scenarios.demos.hyq_darpa_path import PathPlanner
-from scenarios.hyq_contact_generator import HyqContactGenerator
+from hpp.corbaserver.rbprm.scenarios.demos.hyq_darpa_path import PathPlanner
+from hpp.corbaserver.rbprm.scenarios.hyq_contact_generator import HyqContactGenerator
 
 class ContactGenerator(HyqContactGenerator):
 

@@ -1,4 +1,4 @@
-from scenarios.hyq_path_planner import HyqPathPlanner
+from hpp.corbaserver.rbprm.scenarios.hyq_path_planner import HyqPathPlanner
 
 class PathPlanner(HyqPathPlanner):
 

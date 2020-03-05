@@ -1,4 +1,4 @@
-from scenarios.anymal_contact_generator import AnymalContactGenerator as Parent
+from hpp.corbaserver.rbprm.scenarios.anymal_contact_generator import AnymalContactGenerator as Parent
 
 class AnymalContactGenerator(Parent):
 

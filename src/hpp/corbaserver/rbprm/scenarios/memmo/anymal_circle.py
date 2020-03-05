@@ -1,5 +1,5 @@
-from scenarios.memmo.anymal_circle_path import PathPlanner
-from scenarios.memmo.anymal_contact_generator import AnymalContactGenerator
+from hpp.corbaserver.rbprm.scenarios.memmo.anymal_circle_path import PathPlanner
+from hpp.corbaserver.rbprm.scenarios.memmo.anymal_contact_generator import AnymalContactGenerator
 import time
 
 class ContactGenerator(AnymalContactGenerator):

@@ -1,5 +1,5 @@
-from scenarios.memmo.talos_randomMove_path import PathPlanner
-from scenarios.memmo.talos_contact_generator import TalosContactGenerator
+from hpp.corbaserver.rbprm.scenarios.memmo.talos_randomMove_path import PathPlanner
+from hpp.corbaserver.rbprm.scenarios.memmo.talos_contact_generator import TalosContactGenerator
 import time
 import random
 
@@ -34,7 +34,7 @@ class ContactGenerator(TalosContactGenerator):
     def compute_configs_from_guide(self):
         super().compute_configs_from_guide()
         ## generate random initial state : root pose at the origin exepct for z translation and both feet in contact with the floor
-        from tools.sample_random_transition import sampleRandomStateFlatFloor
+        from hpp.corbaserver.rbprm.tools.sample_random_transition import sampleRandomStateFlatFloor
         limbsInContact = [self.fullbody.rLegId, self.fullbody.lLegId]
         random.seed()
         self.ps.setRandomSeed(random.SystemRandom().randint(0, 999999)) # is it really usefull ?

@@ -1,4 +1,4 @@
-from scenarios.talos_path_planner import TalosPathPlanner
+from hpp.corbaserver.rbprm.scenarios.talos_path_planner import TalosPathPlanner
 import numpy as np
 
 class PathPlanner(TalosPathPlanner):
@@ -43,7 +43,7 @@ class PathPlanner(TalosPathPlanner):
 
     def set_random_configs(self):
         import random
-        from tools.sampleRotation import sampleRotationForConfig
+        from hpp.corbaserver.rbprm.tools.sampleRotation import sampleRotationForConfig
         q_up = self.q_init[::]
         q_down = q_up[::]
         # generate a random problem : (q_init, q_goal)

@@ -1,5 +1,5 @@
-from tools.sample_root_config import generate_random_conf_without_orientation
-from scenarios.talos_path_planner import TalosPathPlanner
+from hpp.corbaserver.rbprm.tools.sample_root_config import generate_random_conf_without_orientation
+from hpp.corbaserver.rbprm.scenarios.talos_path_planner import TalosPathPlanner
 from talos_rbprm.talos_abstract import Robot
 
 

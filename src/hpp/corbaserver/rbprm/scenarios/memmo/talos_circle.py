@@ -1,5 +1,5 @@
-from scenarios.memmo.talos_circle_path import PathPlanner
-from scenarios.memmo.talos_contact_generator import TalosContactGenerator
+from hpp.corbaserver.rbprm.scenarios.memmo.talos_circle_path import PathPlanner
+from hpp.corbaserver.rbprm.scenarios.memmo.talos_contact_generator import TalosContactGenerator
 import time
 
 class ContactGenerator(TalosContactGenerator):

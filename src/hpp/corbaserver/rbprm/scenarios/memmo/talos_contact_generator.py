@@ -1,4 +1,4 @@
-from scenarios.talos_contact_generator import TalosContactGenerator as Parent
+from hpp.corbaserver.rbprm.scenarios.talos_contact_generator import TalosContactGenerator as Parent
 
 class TalosContactGenerator(Parent):
 

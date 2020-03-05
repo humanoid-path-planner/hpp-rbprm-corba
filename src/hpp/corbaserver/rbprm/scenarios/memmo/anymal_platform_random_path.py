@@ -1,4 +1,4 @@
-from scenarios.anymal_path_planner import AnymalPathPlanner
+from hpp.corbaserver.rbprm.scenarios.anymal_path_planner import AnymalPathPlanner
 from pinocchio import Quaternion
 import numpy as np
 
