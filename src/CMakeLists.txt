@@ -83,6 +83,7 @@ INSTALL (TARGETS hpp-rbprm-server DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # Install python files : 
 PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm" __init__.py)
+PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm" __main__.py)
 PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm" client.py)
 PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm" fewstepsplanner.py)
 PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm" rbprmbuilder.py)
