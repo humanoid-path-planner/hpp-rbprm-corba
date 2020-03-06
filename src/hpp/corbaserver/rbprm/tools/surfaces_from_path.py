@@ -1,6 +1,6 @@
 from numpy import arange, array
 from pinocchio import Quaternion, SE3, XYZQUATToSe3
-from tools.narrow_convex_hull import getSurfaceExtremumPoints, removeDuplicates, normal, area
+from hpp.corbaserver.rbprm.tools.narrow_convex_hull import getSurfaceExtremumPoints, removeDuplicates, normal, area
 from hpp.corbaserver.rbprm.tools.display_tools import displaySurfaceFromPoints
 import numpy as np
 from pinocchio import Quaternion, log3
