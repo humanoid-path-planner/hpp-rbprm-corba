@@ -1,8 +1,8 @@
 from hpp.corbaserver.rbprm.scenarios.demos.hrp2_plateformes_path import PathPlanner
 from hpp.corbaserver.rbprm.scenarios.hrp2_contact_generator import HRP2ContactGenerator
 
-class ContactGenerator(HRP2ContactGenerator):
 
+class ContactGenerator(HRP2ContactGenerator):
     def __init__(self):
         super().__init__(PathPlanner())
         self.root_translation_bounds = [-5, 5, -1.5, 1.5, 0.65, 0.9]
@@ -21,5 +21,3 @@ class ContactGenerator(HRP2ContactGenerator):
 if __name__ == "__main__":
     cg = ContactGenerator()
     cg.run()
-
-

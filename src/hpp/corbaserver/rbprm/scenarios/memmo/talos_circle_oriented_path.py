@@ -2,8 +2,8 @@ from hpp.corbaserver.rbprm.scenarios.talos_path_planner import TalosPathPlanner
 from pinocchio import Quaternion
 import numpy as np
 
-class PathPlanner(TalosPathPlanner):
 
+class PathPlanner(TalosPathPlanner):
     def __init__(self):
         super().__init__()
         self.status_filename = "/res/infos.log"
@@ -12,13 +12,11 @@ class PathPlanner(TalosPathPlanner):
         self.v_init = 0.05
         self.v_goal = 0.01
         self.radius = 1.
-        self.root_translation_bounds = [-2,2, -2, 2, 1., 1.]
-
+        self.root_translation_bounds = [-2, 2, -2, 2, 1., 1.]
 
     def init_problem(self):
         super().init_problem()
         self.ps.setParameter("Kinodynamic/forceYawOrientation", True)
-
 
     def set_random_configs(self):
         """
@@ -30,7 +28,7 @@ class PathPlanner(TalosPathPlanner):
 
         import random
         random.seed()
-        alpha = random.uniform(0.,2.*np.pi)
+        alpha = random.uniform(0., 2. * np.pi)
         #alpha = 4.
         print("Test on a circle, alpha = ", alpha)
         self.q_goal = self.q_init[::]
@@ -59,7 +57,7 @@ class PathPlanner(TalosPathPlanner):
         self.init_problem()
         self.init_viewer("multicontact/ground", visualize_affordances=["Support"])
         self.set_random_configs()
-        self.init_planner(optimize= False)
+        self.init_planner(optimize=False)
         success = self.ps.client.problem.prepareSolveStepByStep()
         if not success:
             print("planning failed.")
@@ -70,6 +68,7 @@ class PathPlanner(TalosPathPlanner):
         self.display_path()
         #self.play_path()
         self.hide_rom()
+
 
 if __name__ == "__main__":
     planner = PathPlanner()

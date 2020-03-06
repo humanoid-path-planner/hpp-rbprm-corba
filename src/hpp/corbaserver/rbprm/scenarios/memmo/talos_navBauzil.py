@@ -2,11 +2,10 @@ from hpp.corbaserver.rbprm.scenarios.memmo.talos_navBauzil_oriented_path import 
 from hpp.corbaserver.rbprm.scenarios.memmo.talos_contact_generator import TalosContactGenerator
 import time
 
-class ContactGenerator(TalosContactGenerator):
 
+class ContactGenerator(TalosContactGenerator):
     def __init__(self):
         super().__init__(PathPlanner())
-
 
     def load_fullbody(self):
         from talos_rbprm.talos import Robot
@@ -20,9 +19,6 @@ class ContactGenerator(TalosContactGenerator):
         self.write_status(50)
 
 
-
 if __name__ == "__main__":
     cg = ContactGenerator()
     cg.run()
-
-

@@ -2,6 +2,7 @@ from hpp.corbaserver.rbprm.scenarios.anymal_path_planner import AnymalPathPlanne
 from pinocchio import Quaternion
 import numpy as np
 
+
 class PathPlanner(AnymalPathPlanner):
 
     status_filename = "/res/infos.log"
@@ -19,8 +20,7 @@ class PathPlanner(AnymalPathPlanner):
 
     def init_problem(self):
         super().init_problem()
-        self.ps.setParameter("Kinodynamic/forceYawOrientation",True)
-
+        self.ps.setParameter("Kinodynamic/forceYawOrientation", True)
 
     def set_rom_filters(self):
         super().set_rom_filters()
@@ -28,20 +28,23 @@ class PathPlanner(AnymalPathPlanner):
         # we need to disable ROM checks in this scenario with really small contact surfaces
         self.rbprmBuilder.setFilter([])
 
-
-
-
     def set_random_configs(self):
         """
         randomly sample initial and goal configuration :
         """
         import random
         random.seed()
-        self.q_init[0:3] = [random.uniform(self.X_BOUNDS[0], self.X_BOUNDS[1]), random.uniform(self.Y_BOUNDS[0], self.Y_BOUNDS[1]), self.Z_VALUE]
+        self.q_init[0:3] = [
+            random.uniform(self.X_BOUNDS[0], self.X_BOUNDS[1]),
+            random.uniform(self.Y_BOUNDS[0], self.Y_BOUNDS[1]), self.Z_VALUE
+        ]
         self.q_goal = self.q_init[::]
         for i in range(random.randint(0, 1000)):
             random.uniform(0., 1.)
-        self.q_goal[0:3] = [random.uniform(self.X_BOUNDS[0], self.X_BOUNDS[1]), random.uniform(self.Y_BOUNDS[0], self.Y_BOUNDS[1]), self.Z_VALUE]
+        self.q_goal[0:3] = [
+            random.uniform(self.X_BOUNDS[0], self.X_BOUNDS[1]),
+            random.uniform(self.Y_BOUNDS[0], self.Y_BOUNDS[1]), self.Z_VALUE
+        ]
 
         # compute the orientation such that q_init face q_goal :
         # set final orientation to be along the circle :
@@ -62,10 +65,9 @@ class PathPlanner(AnymalPathPlanner):
         f.write("q_goal= " + str(self.q_goal) + "\n")
         f.close()
 
-
     def run(self):
         self.init_problem()
-        self.init_viewer("multicontact/plateforme_not_flat", reduce_sizes=[0.03,0,0])
+        self.init_viewer("multicontact/plateforme_not_flat", reduce_sizes=[0.03, 0, 0])
         self.set_random_configs()
         self.init_planner(kinodynamic=False, optimize=False)
         success = self.ps.client.problem.prepareSolveStepByStep()
@@ -80,5 +82,3 @@ class PathPlanner(AnymalPathPlanner):
 if __name__ == "__main__":
     planner = PathPlanner()
     planner.run()
-
-

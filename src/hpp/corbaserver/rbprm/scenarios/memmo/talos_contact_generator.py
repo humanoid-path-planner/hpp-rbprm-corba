@@ -1,13 +1,12 @@
 from hpp.corbaserver.rbprm.scenarios.talos_contact_generator import TalosContactGenerator as Parent
 
-class TalosContactGenerator(Parent):
 
+class TalosContactGenerator(Parent):
     """
     Add specific method for benchmark,
     write result of planning / contact generation in file
     """
-
-    def __init__(self,path_planner):
+    def __init__(self, path_planner):
         super().__init__(path_planner)
         self.status_filename = self.path_planner.status_filename
         f = open(self.status_filename, "a")
@@ -52,4 +51,3 @@ class TalosContactGenerator(Parent):
         if (not cg_success) or cg_too_many_states or (not cg_reach_goal):
             import sys
             sys.exit(1)
-

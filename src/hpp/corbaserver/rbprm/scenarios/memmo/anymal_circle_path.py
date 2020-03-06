@@ -2,6 +2,7 @@ from hpp.corbaserver.rbprm.scenarios.anymal_path_planner import AnymalPathPlanne
 from pinocchio import Quaternion
 import numpy as np
 
+
 class PathPlanner(AnymalPathPlanner):
 
     status_filename = "/res/infos.log"
@@ -11,7 +12,6 @@ class PathPlanner(AnymalPathPlanner):
         self.v_max = 0.5
         self.a_max = 0.5
         self.radius = 0.3
-
 
     def set_random_configs(self):
         """
@@ -38,7 +38,6 @@ class PathPlanner(AnymalPathPlanner):
         f.write("q_goal= " + str(self.q_goal) + "\n")
         f.close()
 
-
     def run(self):
         self.init_problem()
         self.init_viewer("multicontact/ground")
@@ -56,4 +55,3 @@ class PathPlanner(AnymalPathPlanner):
 if __name__ == "__main__":
     planner = PathPlanner()
     planner.run()
-

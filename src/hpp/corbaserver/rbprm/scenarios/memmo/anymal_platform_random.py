@@ -2,19 +2,17 @@ from hpp.corbaserver.rbprm.scenarios.memmo.anymal_platform_random_path import Pa
 from hpp.corbaserver.rbprm.scenarios.memmo.anymal_contact_generator import AnymalContactGenerator
 import time
 
-class ContactGenerator(AnymalContactGenerator):
 
+class ContactGenerator(AnymalContactGenerator):
     def __init__(self):
         super().__init__(PathPlanner())
         self.pid = 0
         self.robustness = 1
         self.dt = 0.001
 
-
     def set_joints_bounds(self):
-      super().set_joints_bounds()
-      self.fullbody.setVeryConstrainedJointsBounds()
-
+        super().set_joints_bounds()
+        self.fullbody.setVeryConstrainedJointsBounds()
 
     def compute_configs_from_guide(self):
         super().compute_configs_from_guide()
@@ -29,7 +27,7 @@ class ContactGenerator(AnymalContactGenerator):
         super().set_reference(False)
 
     def load_limbs(self):
-        super().load_limbs("static","ReferenceConfiguration",nb_samples=100000)
+        super().load_limbs("static", "ReferenceConfiguration", nb_samples=100000)
 
     def compute_configs_from_guide(self):
         super().compute_configs_from_guide()
@@ -43,6 +41,7 @@ class ContactGenerator(AnymalContactGenerator):
         super().run()
         self.fullbody.resetJointsBounds()
         self.write_status(100, False)
+
 
 if __name__ == "__main__":
     cg = ContactGenerator()

@@ -1,13 +1,12 @@
 from hpp.corbaserver.rbprm.scenarios.anymal_contact_generator import AnymalContactGenerator as Parent
 
-class AnymalContactGenerator(Parent):
 
+class AnymalContactGenerator(Parent):
     """
     Add specific method for benchmark,
     write result of planning / contact generation in file
     """
-
-    def __init__(self,path_planner):
+    def __init__(self, path_planner):
         super().__init__(path_planner)
         self.status_filename = self.path_planner.status_filename
         f = open(self.status_filename, "a")
@@ -22,7 +21,7 @@ class AnymalContactGenerator(Parent):
             import sys
             sys.exit(1)
 
-    def write_status(self, max_configs, throw_if_goal_not_reached = True):
+    def write_status(self, max_configs, throw_if_goal_not_reached=True):
         if len(self.configs) < 2:
             cg_success = False
             print("Error during contact generation.")
@@ -55,4 +54,3 @@ class AnymalContactGenerator(Parent):
         if throw_if_goal_not_reached and not cg_reach_goal:
             import sys
             sys.exit(1)
-

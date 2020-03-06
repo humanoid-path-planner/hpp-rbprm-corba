@@ -1,8 +1,8 @@
 from hpp.corbaserver.rbprm.scenarios.demos.talos_stairs10_path import PathPlanner
 from hpp.corbaserver.rbprm.scenarios.talos_contact_generator import TalosContactGenerator
 
-class ContactGenerator(TalosContactGenerator):
 
+class ContactGenerator(TalosContactGenerator):
     def __init__(self):
         super().__init__(PathPlanner())
 
@@ -22,10 +22,9 @@ class ContactGenerator(TalosContactGenerator):
 
     def compute_configs_from_guide(self):
         super().compute_configs_from_guide()
-        self.q_goal[2] = self.q_ref[2] + 0.6 # set height to the top of the stairs
+        self.q_goal[2] = self.q_ref[2] + 0.6  # set height to the top of the stairs
 
 
 if __name__ == "__main__":
     cg = ContactGenerator()
     cg.run()
-

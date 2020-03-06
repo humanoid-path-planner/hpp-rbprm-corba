@@ -158,23 +158,23 @@ class FullBody(Robot):
     # \param kinematicConstraintsMin : add an additionnal inequalities on the kinematicConstraints, of normal (0,0,1)
     # and origin (0,0,kinematicConstraintsMin)
     def addLimb(  # noqa
-            self,
-            limbId,
-            name,
-            effectorname,
-            offset,
-            normal,
-            x,
-            y,
-            samples,
-            heuristicName,
-            resolution,
-            contactType="_6_DOF",
-            disableEffectorCollision=False,
-            grasp=False,
-            limbOffset=[0, 0, 0],
-            kinematicConstraintsPath="",
-            kinematicConstraintsMin=0.):
+        self,
+        limbId,
+        name,
+        effectorname,
+        offset,
+        normal,
+        x,
+        y,
+        samples,
+        heuristicName,
+        resolution,
+        contactType="_6_DOF",
+        disableEffectorCollision=False,
+        grasp=False,
+        limbOffset=[0, 0, 0],
+        kinematicConstraintsPath="",
+        kinematicConstraintsMin=0.):
         boolValEff = 0.
         if (disableEffectorCollision):
             boolValEff = 1.
@@ -256,7 +256,7 @@ class FullBody(Robot):
         num_max_sample = 1
         for (limbName, normal) in zip(contacts, normals):
             p = cl.getEffectorPosition(limbName, configuration)[0]
-            cl.addNewContact(sId, limbName, p, normal, num_max_sample, False,[0,0,0,0])
+            cl.addNewContact(sId, limbName, p, normal, num_max_sample, False, [0, 0, 0, 0])
         return sId
 
     # # Retrieves the contact candidates configurations given a configuration and a limb
@@ -322,7 +322,7 @@ class FullBody(Robot):
         num_max_sample = 1
         for (limbName, normal) in zip(contacts, normals):
             p = cl.getEffectorPosition(limbName, configuration)[0]
-            cl.addNewContact(sId, limbName, p, normal, num_max_sample, False,[0,0,0,0])
+            cl.addNewContact(sId, limbName, p, normal, num_max_sample, False, [0, 0, 0, 0])
         return cl.setStartStateId(sId)
 
     # # Initialize the goal configuration of the path interpolation
@@ -339,7 +339,7 @@ class FullBody(Robot):
         num_max_sample = 1
         for (limbName, normal) in zip(contacts, normals):
             p = cl.getEffectorPosition(limbName, configuration)[0]
-            cl.addNewContact(sId, limbName, p, normal, num_max_sample, False,[0,0,0,0])
+            cl.addNewContact(sId, limbName, p, normal, num_max_sample, False, [0, 0, 0, 0])
         return cl.setEndStateId(sId)
 
     # # Initialize the first state of the path interpolation

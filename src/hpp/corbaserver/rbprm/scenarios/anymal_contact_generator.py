@@ -1,8 +1,8 @@
 from .abstract_contact_generator import AbstractContactGenerator
 import time
 
-class AnymalContactGenerator(AbstractContactGenerator):
 
+class AnymalContactGenerator(AbstractContactGenerator):
     def __init__(self, path_planner):
         super().__init__(path_planner)
         self.robustness = 5
@@ -10,7 +10,6 @@ class AnymalContactGenerator(AbstractContactGenerator):
         self.init_contacts = self.used_limbs[::]
         self.end_contacts = self.used_limbs[::]
         self.robot_node_name = "anymal"
-
 
     def set_start_end_states(self):
         # for 3D contacts, we must specify the normals manually
@@ -33,5 +32,5 @@ class AnymalContactGenerator(AbstractContactGenerator):
         super().init_viewer()
         self.v.addLandmark('anymal/base_0', 0.3)
 
-    def load_limbs(self, heuristic = "fixedStep04", analysis=None, nb_samples=None, octree_size=None):
+    def load_limbs(self, heuristic="fixedStep04", analysis=None, nb_samples=None, octree_size=None):
         super().load_limbs(heuristic, analysis, nb_samples, octree_size)

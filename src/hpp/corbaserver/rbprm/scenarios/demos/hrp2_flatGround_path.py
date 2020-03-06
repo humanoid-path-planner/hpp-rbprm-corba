@@ -1,7 +1,7 @@
 from hpp.corbaserver.rbprm.scenarios.hrp2_path_planner import HRP2PathPlanner
 
-class PathPlanner(HRP2PathPlanner):
 
+class PathPlanner(HRP2PathPlanner):
     def run(self):
         self.init_problem()
 

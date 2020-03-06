@@ -3,8 +3,8 @@ from hpp.corbaserver.rbprm.scenarios.memmo.talos_contact_generator import TalosC
 import time
 import random
 
-class ContactGenerator(TalosContactGenerator):
 
+class ContactGenerator(TalosContactGenerator):
     def __init__(self):
         super().__init__(PathPlanner())
         self.dt = 0.005
@@ -18,7 +18,6 @@ class ContactGenerator(TalosContactGenerator):
         self.fullbody.setJointBounds('leg_right_1_joint', [-0.7, 0.2])
         self.fullbody.setJointBounds('leg_right_3_joint', [-1.3, 0.4])
 
-
     def load_limbs(self):
         super().load_limbs("fixedStep1", "ReferenceConfiguration", nb_samples=100000)
         # define init gait according to the direction of motion, try to move first the leg on the outside of the turn :
@@ -26,7 +25,7 @@ class ContactGenerator(TalosContactGenerator):
             gait = [self.fullbody.rLegId, self.fullbody.lLegId]
             print("Right foot first")
         else:
-            gait =[self.fullbody.lLegId, self.fullbody.rLegId]
+            gait = [self.fullbody.lLegId, self.fullbody.rLegId]
             print("Left foot first")
         self.init_contacts = gait
         self.end_contacts = gait
@@ -37,7 +36,7 @@ class ContactGenerator(TalosContactGenerator):
         from hpp.corbaserver.rbprm.tools.sample_random_transition import sampleRandomStateFlatFloor
         limbsInContact = [self.fullbody.rLegId, self.fullbody.lLegId]
         random.seed()
-        self.ps.setRandomSeed(random.SystemRandom().randint(0, 999999)) # is it really usefull ?
+        self.ps.setRandomSeed(random.SystemRandom().randint(0, 999999))  # is it really usefull ?
 
         #floor_Z = -0.00095
         floor_Z = 0.
@@ -51,11 +50,6 @@ class ContactGenerator(TalosContactGenerator):
         self.fullbody.resetJointsBounds()
 
 
-
-
 if __name__ == "__main__":
     cg = ContactGenerator()
     cg.run()
-
-
-

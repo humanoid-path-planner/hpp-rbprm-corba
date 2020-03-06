@@ -1,8 +1,8 @@
 from hpp.corbaserver.rbprm.scenarios.talos_path_planner import TalosPathPlanner
 import numpy as np
 
-class PathPlanner(TalosPathPlanner):
 
+class PathPlanner(TalosPathPlanner):
     def __init__(self):
         super().__init__()
         self.status_filename = "/res/infos.log"
@@ -51,7 +51,7 @@ class PathPlanner(TalosPathPlanner):
         #self.play_path()
         self.hide_rom()
 
+
 if __name__ == "__main__":
     planner = PathPlanner()
     planner.run()
-

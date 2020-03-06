@@ -2,8 +2,8 @@ from hpp.corbaserver.rbprm.scenarios.memmo.talos_platform_random_path import Pat
 from hpp.corbaserver.rbprm.scenarios.memmo.talos_contact_generator import TalosContactGenerator
 import time
 
-class ContactGenerator(TalosContactGenerator):
 
+class ContactGenerator(TalosContactGenerator):
     def __init__(self):
         super().__init__(PathPlanner())
         self.dt = 0.005
@@ -32,17 +32,12 @@ class ContactGenerator(TalosContactGenerator):
         self.init_contacts = gait
         self.end_contacts = gait
 
-
     def run(self):
         super().run()
         self.write_status(50)
         self.fullbody.resetJointsBounds()
 
 
-
-
 if __name__ == "__main__":
     cg = ContactGenerator()
     cg.run()
-
-

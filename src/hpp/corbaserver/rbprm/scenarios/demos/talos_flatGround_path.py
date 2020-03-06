@@ -1,7 +1,7 @@
 from hpp.corbaserver.rbprm.scenarios.talos_path_planner import TalosPathPlanner
 
-class PathPlanner(TalosPathPlanner):
 
+class PathPlanner(TalosPathPlanner):
     def run(self):
         self.init_problem()
 
@@ -14,6 +14,7 @@ class PathPlanner(TalosPathPlanner):
         self.display_path()
         #self.play_path()
         self.hide_rom()
+
 
 if __name__ == "__main__":
     planner = PathPlanner()

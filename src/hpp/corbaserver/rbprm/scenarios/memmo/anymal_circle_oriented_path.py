@@ -2,6 +2,7 @@ from hpp.corbaserver.rbprm.scenarios.anymal_path_planner import AnymalPathPlanne
 from pinocchio import Quaternion
 import numpy as np
 
+
 class PathPlanner(AnymalPathPlanner):
 
     status_filename = "/res/infos.log"
@@ -16,8 +17,7 @@ class PathPlanner(AnymalPathPlanner):
 
     def init_problem(self):
         super().init_problem()
-        self.ps.setParameter("Kinodynamic/forceYawOrientation",True)
-
+        self.ps.setParameter("Kinodynamic/forceYawOrientation", True)
 
     def set_random_configs(self):
         """
@@ -29,7 +29,7 @@ class PathPlanner(AnymalPathPlanner):
 
         import random
         random.seed()
-        alpha = random.uniform(0.,2.*np.pi)
+        alpha = random.uniform(0., 2. * np.pi)
         #alpha = 4.
         print("Test on a circle, alpha = ", alpha)
         self.q_goal = self.q_init[::]
@@ -54,7 +54,6 @@ class PathPlanner(AnymalPathPlanner):
         f.write("q_goal= " + str(self.q_goal) + "\n")
         f.close()
 
-
     def run(self):
         self.init_problem()
         self.init_viewer("multicontact/ground")
@@ -72,4 +71,3 @@ class PathPlanner(AnymalPathPlanner):
 if __name__ == "__main__":
     planner = PathPlanner()
     planner.run()
-

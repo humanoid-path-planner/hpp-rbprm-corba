@@ -1,6 +1,7 @@
 from hpp.corbaserver.rbprm.scenarios.talos_path_planner import TalosPathPlanner
 import numpy as np
 
+
 class PathPlanner(TalosPathPlanner):
 
     status_filename = "/res/infos.log"
@@ -98,19 +99,22 @@ class PathPlanner(TalosPathPlanner):
 
     def compute_extra_config_bounds(self):
         # bounds for the extradof : by default use v_max/a_max on x and y axis and a large value on z axis
-        self.extra_dof_bounds = [-self.v_max, self.v_max, -self.v_max, self.v_max, -10, 10,
-                                 -self.a_max, self.a_max, -self.a_max, self.a_max, -10, 10]
+        self.extra_dof_bounds = [
+            -self.v_max, self.v_max, -self.v_max, self.v_max, -10, 10, -self.a_max, self.a_max, -self.a_max,
+            self.a_max, -10, 10
+        ]
 
     def run(self):
-        self.root_translation_bounds = [-0.9,2.55,-0.13,2., 0.98, 1.62]
+        self.root_translation_bounds = [-0.9, 2.55, -0.13, 2., 0.98, 1.62]
         self.init_problem()
-        self.init_viewer("multicontact/bauzil_stairs", reduce_sizes=[0.11,0.,0.], visualize_affordances=["Support"])
+        self.init_viewer("multicontact/bauzil_stairs", reduce_sizes=[0.11, 0., 0.], visualize_affordances=["Support"])
         self.set_random_configs()
         self.init_planner()
         self.solve()
         self.display_path()
         #self.play_path()
         self.hide_rom()
+
 
 if __name__ == "__main__":
     planner = PathPlanner()

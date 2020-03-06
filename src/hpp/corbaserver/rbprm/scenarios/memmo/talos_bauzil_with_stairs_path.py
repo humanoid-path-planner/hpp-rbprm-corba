@@ -13,7 +13,6 @@ class PathPlanner(TalosPathPlanner):
     BOUNDS_PLAT_10 = [1.9, 2.4, -0.1, 1.6, Z_PLATFORM, Z_PLATFORM]
     BOUNDS_PLAT_15 = [-2.1, -1.5, -0.1, 0.5, Z_PLATFORM, Z_PLATFORM]
 
-
     def __init__(self):
         super().__init__()
         self.status_filename = "/res/infos.log"
@@ -30,12 +29,12 @@ class PathPlanner(TalosPathPlanner):
         self.rbprmBuilder.setReferenceEndEffector('talos_lleg_rom_reduced', self.rbprmBuilder.ref_EE_lLeg)
         self.rbprmBuilder.setReferenceEndEffector('talos_rleg_rom_reduced', self.rbprmBuilder.ref_EE_rLeg)
 
-
     def compute_extra_config_bounds(self):
         # bounds for the extradof : by default use v_max/a_max on x and y axis and a large value on z axis
-        self.extra_dof_bounds = [-self.v_max, self.v_max, -self.v_max, self.v_max, -2, 2,
-                                 -self.a_max, self.a_max, -self.a_max, self.a_max, -3, 3]
-
+        self.extra_dof_bounds = [
+            -self.v_max, self.v_max, -self.v_max, self.v_max, -2, 2, -self.a_max, self.a_max, -self.a_max, self.a_max,
+            -3, 3
+        ]
 
     def init_problem(self):
         super().init_problem()
@@ -108,7 +107,7 @@ class PathPlanner(TalosPathPlanner):
 
     def run(self):
         self.init_problem()
-        self.init_viewer("multicontact/bauzil_stairs", visualize_affordances=["Support"], reduce_sizes=[0.12,0.,0.])
+        self.init_viewer("multicontact/bauzil_stairs", visualize_affordances=["Support"], reduce_sizes=[0.12, 0., 0.])
         self.set_random_configs()
         self.init_planner()
         self.solve()
@@ -119,7 +118,7 @@ class PathPlanner(TalosPathPlanner):
             self.ps.optimizePath(self.ps.numberPaths() - 1)
             print(("New path length : ", self.ps.pathLength(self.ps.numberPaths() - 1)))
         # remove the very beginning and end of the path to avoid orientation discontinuities
-        self.ps.extractPath(self.ps.numberPaths() - 1, 0.05,self.ps.pathLength(self.ps.numberPaths() - 1) - 0.05)
+        self.ps.extractPath(self.ps.numberPaths() - 1, 0.05, self.ps.pathLength(self.ps.numberPaths() - 1) - 0.05)
         pathId = self.ps.numberPaths() - 1
         self.q_init = self.ps.configAtParam(pathId, 0)
         self.q_goal = self.ps.configAtParam(pathId, self.ps.pathLength(pathId))
@@ -127,7 +126,7 @@ class PathPlanner(TalosPathPlanner):
         #self.play_path()
         self.hide_rom()
 
+
 if __name__ == "__main__":
     planner = PathPlanner()
     planner.run()
-

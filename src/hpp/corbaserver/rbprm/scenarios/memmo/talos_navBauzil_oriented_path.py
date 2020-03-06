@@ -1,8 +1,8 @@
 from hpp.corbaserver.rbprm.scenarios.memmo.talos_navBauzil_path import PathPlanner as Parent
 import numpy as np
 
-class PathPlanner(Parent):
 
+class PathPlanner(Parent):
     def set_random_configs(self):
         """
         randomly sample initial and goal configuration :
@@ -18,7 +18,7 @@ class PathPlanner(Parent):
         f.write("q_goal= " + str(self.q_goal) + "\n")
         f.close()
 
+
 if __name__ == "__main__":
     planner = PathPlanner()
     planner.run()
-

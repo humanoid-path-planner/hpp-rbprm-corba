@@ -1,8 +1,8 @@
 from hpp.corbaserver.rbprm.scenarios.demos.talos_navBauzil_path import PathPlanner
 from hpp.corbaserver.rbprm.scenarios.talos_contact_generator import TalosContactGenerator
 
-class ContactGenerator(TalosContactGenerator):
 
+class ContactGenerator(TalosContactGenerator):
     def __init__(self):
         super().__init__(PathPlanner())
 
@@ -14,6 +14,3 @@ class ContactGenerator(TalosContactGenerator):
 if __name__ == "__main__":
     cg = ContactGenerator()
     cg.run()
-
-
-

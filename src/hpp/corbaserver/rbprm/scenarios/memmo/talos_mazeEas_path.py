@@ -1,14 +1,14 @@
 from hpp.corbaserver.rbprm.scenarios.talos_path_planner import TalosPathPlanner
 import numpy as np
 
-class PathPlanner(TalosPathPlanner):
 
+class PathPlanner(TalosPathPlanner):
     def __init__(self):
         super().__init__()
         self.status_filename = "/res/infos.log"
         self.v_max = 0.3
         self.a_max = 0.2
-        self.root_translation_bounds = [0,18.5,0.,24., 0.98, 0.98]
+        self.root_translation_bounds = [0, 18.5, 0., 24., 0.98, 0.98]
 
     def load_rbprm(self):
         from talos_rbprm.talos_abstract import Robot
@@ -55,10 +55,7 @@ class PathPlanner(TalosPathPlanner):
         #self.play_path()
         self.hide_rom()
 
+
 if __name__ == "__main__":
     planner = PathPlanner()
     planner.run()
-
-
-
-

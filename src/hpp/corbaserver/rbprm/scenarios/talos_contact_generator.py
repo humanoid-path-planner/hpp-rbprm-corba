@@ -1,8 +1,8 @@
 from .abstract_contact_generator import AbstractContactGenerator
 import time
 
-class TalosContactGenerator(AbstractContactGenerator):
 
+class TalosContactGenerator(AbstractContactGenerator):
     def __init__(self, path_planner):
         super().__init__(path_planner)
         self.robustness = 2
