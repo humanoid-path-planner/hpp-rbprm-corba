@@ -1,6 +1,5 @@
 from hpp.corbaserver.rbprm.scenarios.talos_contact_generator import TalosContactGenerator as Parent
 import sys
-import sys
 
 
 class TalosContactGenerator(Parent):
@@ -11,17 +10,14 @@ class TalosContactGenerator(Parent):
     def __init__(self, path_planner):
         super().__init__(path_planner)
         self.status_filename = self.path_planner.status_filename
-        f = open(self.status_filename, "a")
-        if self.path_planner.ps.numberPaths() > 0:
-            print("Path planning OK.")
-            f.write("Planning_success: True" + "\n")
-            f.close()
-        else:
-            print("Error during path planning")
-            f.write("Planning_success: False" + "\n")
-            f.close()
-            import sys
-            sys.exit(1)
+        with open(self.status_filename, "a") as f:
+            if self.path_planner.ps.numberPaths() > 0:
+                print("Path planning OK.")
+                f.write("Planning_success: True" + "\n")
+            else:
+                print("Error during path planning")
+                f.write("Planning_success: False" + "\n")
+                sys.exit(1)
 
     def write_status(self, max_configs):
         if len(self.configs) < 2:
@@ -45,10 +41,9 @@ class TalosContactGenerator(Parent):
         else:
             cg_too_many_states = False
 
-        f = open(self.status_filename, "a")
-        f.write("cg_success: " + str(cg_success) + "\n")
-        f.write("cg_reach_goal: " + str(cg_reach_goal) + "\n")
-        f.write("cg_too_many_states: " + str(cg_too_many_states) + "\n")
-        f.close()
+        with open(self.status_filename, "a") as f:
+            f.write("cg_success: " + str(cg_success) + "\n")
+            f.write("cg_reach_goal: " + str(cg_reach_goal) + "\n")
+            f.write("cg_too_many_states: " + str(cg_too_many_states) + "\n")
         if (not cg_success) or cg_too_many_states or (not cg_reach_goal):
             sys.exit(1)

@@ -31,10 +31,9 @@ class PathPlanner(TalosPathPlanner):
         self.ps.addGoalConfig(self.q_goal)
 
         # write problem in files :
-        f = open(self.status_filename, "w")
-        f.write("q_init= " + str(self.q_init) + "\n")
-        f.write("q_goal= " + str(self.q_goal) + "\n")
-        f.close()
+        with open(self.status_filename, "w") as f:
+            f.write("q_init= " + str(self.q_init) + "\n")
+            f.write("q_goal= " + str(self.q_goal) + "\n")
 
     def run(self):
         self.init_problem()

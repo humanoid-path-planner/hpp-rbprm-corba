@@ -13,10 +13,9 @@ class PathPlanner(Parent):
         print("q_init= " + str(self.q_init))
         print("q_goal= " + str(self.q_goal))
         # write problem in files :
-        f = open(self.status_filename, "w")
-        f.write("q_init= " + str(self.q_init) + "\n")
-        f.write("q_goal= " + str(self.q_goal) + "\n")
-        f.close()
+        with open(self.status_filename, "w") as f:
+            f.write("q_init= " + str(self.q_init) + "\n")
+            f.write("q_goal= " + str(self.q_goal) + "\n")
 
 
 if __name__ == "__main__":
