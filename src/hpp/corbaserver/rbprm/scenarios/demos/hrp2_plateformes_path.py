@@ -12,8 +12,8 @@ class PathPlanner(HRP2PathPlanner):
         self.v_max = 0.3
         self.root_translation_bounds = [-5, 5, -1.5, 1.5, 0.70, 0.8]
         self.init_problem()
-        self.q_init[0:3] = [0.12, 0.25, 0.75]
-        self.q_goal[0:3] = [1.08, 0.25, 0.75]
+        self.q_init[:3] = [0.12, 0.25, 0.75]
+        self.q_goal[:3] = [1.08, 0.25, 0.75]
         self.init_viewer("multicontact/plateforme_surfaces",
                          reduce_sizes=[0.1, 0, 0],
                          visualize_affordances=["Support"])

@@ -47,7 +47,7 @@ class PathPlanner(TalosPathPlanner):
 
         # uniformly sample y position
         y_init = random.uniform(self.Y_BOUNDS[0], self.Y_BOUNDS[1])
-        self.q_init[0:3] = [x_init, y_init, self.Z_VALUE]
+        self.q_init[:3] = [x_init, y_init, self.Z_VALUE]
 
         # y_goal must be random inside Y_BOUNDS but such that the line between q_init and q_goal is between +- MAX_ANGLE radian from the x axis
         y_bound_goal = self.Y_BOUNDS[::]
@@ -65,7 +65,7 @@ class PathPlanner(TalosPathPlanner):
         self.q_init[3:7] = quat.coeffs().tolist()
 
         self.q_goal = self.q_init[::]
-        self.q_goal[0:2] = [x_goal, y_goal]
+        self.q_goal[:2] = [x_goal, y_goal]
 
         print("q_init= " + str(self.q_init))
         print("q_goal= " + str(self.q_goal))

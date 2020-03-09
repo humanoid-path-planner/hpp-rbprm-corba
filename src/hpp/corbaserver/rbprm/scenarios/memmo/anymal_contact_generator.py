@@ -1,4 +1,5 @@
 from hpp.corbaserver.rbprm.scenarios.anymal_contact_generator import AnymalContactGenerator as Parent
+import sys
 
 
 class AnymalContactGenerator(Parent):
@@ -49,8 +50,6 @@ class AnymalContactGenerator(Parent):
         f.write("cg_too_many_states: " + str(cg_too_many_states) + "\n")
         f.close()
         if (not cg_success) or cg_too_many_states:
-            import sys
             sys.exit(1)
         if throw_if_goal_not_reached and not cg_reach_goal:
-            import sys
             sys.exit(1)

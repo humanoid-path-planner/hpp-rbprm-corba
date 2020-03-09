@@ -21,14 +21,14 @@ class PathPlanner(TalosPathPlanner):
         ]
         self.set_joints_bounds()
 
-        self.q_init[0:2] = [-0.7, 2]
-        self.q_goal[0:2] = [0, -1]
+        self.q_init[:2] = [-0.7, 2]
+        self.q_goal[:2] = [0, -1]
 
         self.init_viewer("multicontact/floor_bauzil", visualize_affordances=["Support"])
         self.init_planner()
         self.solve()
         self.display_path()
-        #self.play_path()
+        # self.play_path()
         self.hide_rom()
 
 

@@ -1,6 +1,8 @@
 from hpp.corbaserver.rbprm.scenarios.talos_path_planner import TalosPathPlanner
 import numpy as np
 from pinocchio import Quaternion
+import random
+import sys
 
 
 class PathPlanner(TalosPathPlanner):
@@ -29,17 +31,16 @@ class PathPlanner(TalosPathPlanner):
         randomly sample initial and goal configuration :
         """
         # init position at the origin, facing x axis
-        self.q_init[0:3] = [0, 0, 1.]
+        self.q_init[:3] = [0, 0, 1.]
         self.q_init[-6] = self.v_init
         # sample random position on a circle of radius random in [MIN_ROOT_DIST; MAX_ROOT_DIST]
-        import random
         random.seed()
         radius = random.uniform(self.MIN_ROOT_DIST, self.MAX_ROOT_DIST)
         alpha = random.uniform(0., 2. * np.pi)
         print("Test on a circle, alpha = ", alpha)
         print("Radius = ", radius)
         self.q_goal = self.q_init[::]
-        self.q_goal[0:3] = [radius * np.sin(alpha), -radius * np.cos(alpha), 1.]
+        self.q_goal[:3] = [radius * np.sin(alpha), -radius * np.cos(alpha), 1.]
 
         if self.FINAL_ORIENTATION_RANDOM:
             alpha = random.uniform(0., 2. * np.pi)  # sample new random yaw value for the orientation
@@ -73,11 +74,10 @@ class PathPlanner(TalosPathPlanner):
         success = self.ps.client.problem.prepareSolveStepByStep()
         if not success:
             print("planning failed.")
-            import sys
             sys.exit(1)
         self.ps.client.problem.finishSolveStepByStep()
         self.display_path()
-        #self.play_path()
+        # self.play_path()
         self.hide_rom()
 
 

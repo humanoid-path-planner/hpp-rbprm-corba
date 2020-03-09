@@ -11,8 +11,8 @@ class PathPlanner(HyqPathPlanner):
         self.root_rotation_bounds = [-0.4, 0.4, -0.3, 0.3, -0.3, 0.3]
         self.init_problem()
 
-        self.q_init[0:2] = [-2, 0]
-        self.q_goal[0:2] = [3, 0]
+        self.q_init[:2] = [-2, 0]
+        self.q_goal[:2] = [3, 0]
         self.init_viewer("multicontact/darpa", visualize_affordances=["Support"], reduce_sizes=[0.06, 0, 0])
         self.init_planner(kinodynamic=False)
         self.solve()

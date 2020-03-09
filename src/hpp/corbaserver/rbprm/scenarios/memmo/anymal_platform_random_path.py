@@ -1,6 +1,8 @@
 from hpp.corbaserver.rbprm.scenarios.anymal_path_planner import AnymalPathPlanner
 from pinocchio import Quaternion
 import numpy as np
+import random
+import sys
 
 
 class PathPlanner(AnymalPathPlanner):
@@ -32,16 +34,15 @@ class PathPlanner(AnymalPathPlanner):
         """
         randomly sample initial and goal configuration :
         """
-        import random
         random.seed()
-        self.q_init[0:3] = [
+        self.q_init[:3] = [
             random.uniform(self.X_BOUNDS[0], self.X_BOUNDS[1]),
             random.uniform(self.Y_BOUNDS[0], self.Y_BOUNDS[1]), self.Z_VALUE
         ]
         self.q_goal = self.q_init[::]
         for i in range(random.randint(0, 1000)):
             random.uniform(0., 1.)
-        self.q_goal[0:3] = [
+        self.q_goal[:3] = [
             random.uniform(self.X_BOUNDS[0], self.X_BOUNDS[1]),
             random.uniform(self.Y_BOUNDS[0], self.Y_BOUNDS[1]), self.Z_VALUE
         ]
@@ -54,8 +55,8 @@ class PathPlanner(AnymalPathPlanner):
         self.q_init[3:7] = quat.coeffs().tolist()
         self.q_goal[3:7] = self.q_init[3:7]
         self.v(self.q_init)
-        print("initial root position : ", self.q_init[0:3])
-        print("final root position : ", self.q_goal[0:3])
+        print("initial root position : ", self.q_init[:3])
+        print("final root position : ", self.q_goal[:3])
         self.ps.setInitialConfig(self.q_init)
         self.ps.addGoalConfig(self.q_goal)
 
@@ -73,7 +74,6 @@ class PathPlanner(AnymalPathPlanner):
         success = self.ps.client.problem.prepareSolveStepByStep()
         if not success:
             print("planning failed.")
-            import sys
             sys.exit(1)
         self.ps.client.problem.finishSolveStepByStep()
         self.display_path()

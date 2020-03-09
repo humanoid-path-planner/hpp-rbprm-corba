@@ -52,7 +52,7 @@ class PathPlanner(TalosPathPlanner):
         self.q_init = self.ps.configAtParam(pathId, 0)
         self.q_goal = self.ps.configAtParam(pathId, self.ps.pathLength(pathId))
         self.display_path()
-        #self.play_path()
+        # self.play_path()
         self.hide_rom()
 
 

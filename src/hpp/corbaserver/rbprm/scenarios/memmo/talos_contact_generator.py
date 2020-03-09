@@ -1,4 +1,6 @@
 from hpp.corbaserver.rbprm.scenarios.talos_contact_generator import TalosContactGenerator as Parent
+import sys
+import sys
 
 
 class TalosContactGenerator(Parent):
@@ -49,5 +51,4 @@ class TalosContactGenerator(Parent):
         f.write("cg_too_many_states: " + str(cg_too_many_states) + "\n")
         f.close()
         if (not cg_success) or cg_too_many_states or (not cg_reach_goal):
-            import sys
             sys.exit(1)

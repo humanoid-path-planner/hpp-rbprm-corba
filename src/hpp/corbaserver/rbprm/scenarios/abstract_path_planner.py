@@ -2,8 +2,6 @@ from abc import abstractmethod
 from hpp.gepetto import ViewerFactory, PathPlayer
 from hpp.corbaserver.affordance.affordance import AffordanceTool
 from hpp.corbaserver import ProblemSolver
-import time
-
 
 class AbstractPathPlanner:
 
@@ -33,8 +31,8 @@ class AbstractPathPlanner:
     @abstractmethod
     def load_rbprm(self):
         """
-    Build an rbprmBuilder instance for the correct robot and initialize it's extra config size
-    """
+        Build an rbprmBuilder instance for the correct robot and initialize it's extra config size
+        """
         pass
 
     def set_configurations(self):
@@ -45,35 +43,41 @@ class AbstractPathPlanner:
         self.q_goal[2] = self.rbprmBuilder.ref_height
 
     def compute_extra_config_bounds(self):
+        """
+        Compute extra dof bounds from the current values of v_max and a_max
+        By default, set symmetrical bounds on x and y axis and bounds z axis values to 0
+        """
         # bounds for the extradof : by default use v_max/a_max on x and y axis and 0 on z axis
-        self.extra_dof_bounds = [
-            -self.v_max, self.v_max, -self.v_max, self.v_max, 0, 0, -self.a_max, self.a_max, -self.a_max, self.a_max,
-            0, 0
-        ]
+        self.extra_dof_bounds = [-self.v_max, self.v_max,
+                                 -self.v_max, self.v_max,
+                                 0, 0,
+                                 -self.a_max, self.a_max,
+                                 -self.a_max, self.a_max,
+                                 0, 0 ]
 
     def set_joints_bounds(self):
         """
-    Set the root translation and rotation bounds as well as the the extra dofs bounds
-    """
+        Set the root translation and rotation bounds as well as the the extra dofs bounds
+        """
         self.rbprmBuilder.setJointBounds("root_joint", self.root_translation_bounds)
         self.rbprmBuilder.boundSO3(self.root_rotation_bounds)
         self.rbprmBuilder.client.robot.setExtraConfigSpaceBounds(self.extra_dof_bounds)
 
     def set_rom_filters(self):
         """
-    Define which ROM must be in collision at all time and with which kind of affordances
-    By default it set all the roms in used_limbs to be in contact with 'support' affordances
-    """
+        Define which ROM must be in collision at all time and with which kind of affordances
+        By default it set all the roms in used_limbs to be in contact with 'support' affordances
+        """
         self.rbprmBuilder.setFilter(self.used_limbs)
         for limb in self.used_limbs:
             self.rbprmBuilder.setAffordanceFilter(limb, ['Support'])
 
     def init_problem(self):
         """
-    Load the robot, set the bounds and the ROM filters and then
-    Create a ProblemSolver instance and set the default parameters.
-    The values of v_max, a_max, mu, size_foot_x and size_foot_y must be defined before calling this method
-    """
+        Load the robot, set the bounds and the ROM filters and then
+        Create a ProblemSolver instance and set the default parameters.
+        The values of v_max, a_max, mu, size_foot_x and size_foot_y must be defined before calling this method
+        """
         self.load_rbprm()
         self.set_configurations()
         self.compute_extra_config_bounds()
@@ -95,13 +99,13 @@ class AbstractPathPlanner:
 
     def init_viewer(self, env_name, env_package="hpp_environments", reduce_sizes=[0, 0, 0], visualize_affordances=[]):
         """
-    Build an instance of hpp-gepetto-viewer from the current problemSolver
-    :param env_name: name of the urdf describing the environment
-    :param env_package: name of the package containing this urdf (default to hpp_environments)
-    :param reduce_sizes: Distance used to reduce the affordances plan toward the center of the plane
-    (in order to avoid putting contacts closes to the edges of the surface)
-    :param visualize_affordances: list of affordances type to visualize, default to none
-    """
+        Build an instance of hpp-gepetto-viewer from the current problemSolver
+        :param env_name: name of the urdf describing the environment
+        :param env_package: name of the package containing this urdf (default to hpp_environments)
+        :param reduce_sizes: Distance used to reduce the affordances plan toward the center of the plane
+        (in order to avoid putting contacts closes to the edges of the surface)
+        :param visualize_affordances: list of affordances type to visualize, default to none
+        """
         vf = ViewerFactory(self.ps)
         self.afftool = AffordanceTool()
         self.afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
@@ -131,10 +135,10 @@ class AbstractPathPlanner:
 
     def init_planner(self, kinodynamic=True, optimize=True):
         """
-    Select the rbprm methods, and the kinodynamic ones if required
-    :param kinodynamic: if True, also select the kinodynamic methods
-    :param optimize: if True, add randomShortcut path optimizer (or randomShortcutDynamic if kinodynamic is also True)
-    """
+        Select the rbprm methods, and the kinodynamic ones if required
+        :param kinodynamic: if True, also select the kinodynamic methods
+        :param optimize: if True, add randomShortcut path optimizer (or randomShortcutDynamic if kinodynamic is also True)
+        """
         self.ps.selectConfigurationShooter("RbprmShooter")
         self.ps.selectPathValidation("RbprmPathValidation", 0.05)
         if kinodynamic:
@@ -149,9 +153,9 @@ class AbstractPathPlanner:
 
     def solve(self):
         """
-    Solve the path planning problem.
-    q_init and q_goal must have been defined before calling this method
-    """
+        Solve the path planning problem.
+        q_init and q_goal must have been defined before calling this method
+        """
         if len(self.q_init) != self.rbprmBuilder.getConfigSize():
             raise ValueError("Initial configuration vector do not have the right size")
         if len(self.q_goal) != self.rbprmBuilder.getConfigSize():
@@ -162,18 +166,13 @@ class AbstractPathPlanner:
         t = self.ps.solve()
         print("Guide planning time : ", t)
 
-    def run(self):
-        self.init_problem()
-        self.init_viewer()
-        self.init_planner()
-        self.solve()
 
     def display_path(self, path_id=-1, dt=0.1):
         """
-    Display the path in the viewer, if no path specified display the last one
-    :param path_id: the Id of the path specified, default to the most recent one
-    :param dt: discretization step used to display the path (default to 0.1)
-    """
+        Display the path in the viewer, if no path specified display the last one
+        :param path_id: the Id of the path specified, default to the most recent one
+        :param dt: discretization step used to display the path (default to 0.1)
+        """
         if self.pp is not None:
             if path_id < 0:
                 path_id = self.ps.numberPaths() - 1
@@ -182,10 +181,10 @@ class AbstractPathPlanner:
 
     def play_path(self, path_id=-1, dt=0.01):
         """
-    play the path in the viewer, if no path specified display the last one
-    :param path_id: the Id of the path specified, default to the most recent one
-    :param dt: discretization step used to display the path (default to 0.01)
-    """
+        play the path in the viewer, if no path specified display the last one
+        :param path_id: the Id of the path specified, default to the most recent one
+        :param dt: discretization step used to display the path (default to 0.01)
+        """
         self.show_rom()
         if self.pp is not None:
             if path_id < 0:
@@ -195,32 +194,32 @@ class AbstractPathPlanner:
 
     def hide_rom(self):
         """
-    Remove the current robot from the display
-    """
+        Remove the current robot from the display
+        """
         self.v.client.gui.setVisibility(self.robot_node_name, "OFF")
 
     def show_rom(self):
         """
-    Add the current robot to the display
-    """
+        Add the current robot to the display
+        """
         self.v.client.gui.setVisibility(self.robot_node_name, "ON")
 
     @abstractmethod
     def run(self):
         """
-    Must be defined in the child class to run all the methods with the correct arguments.
-    """
+        Must be defined in the child class to run all the methods with the correct arguments.
+        """
         # example of definition:
         """
-    self.init_problem()
-    # define initial and goal position
-    self.q_init[0:2] = [0, 0]
-    self.q_goal[0:2] = [1, 0]
-    
-    self.init_viewer("multicontact/ground", visualize_affordances=["Support"])
-    self.init_planner()
-    self.solve()
-    self.display_path()
-    self.play_path()
-    """
+        self.init_problem()
+        # define initial and goal position
+        self.q_init[:2] = [0, 0]
+        self.q_goal[:2] = [1, 0]
+        
+        self.init_viewer("multicontact/ground", visualize_affordances=["Support"])
+        self.init_planner()
+        self.solve()
+        self.display_path()
+        self.play_path()
+        """
         pass

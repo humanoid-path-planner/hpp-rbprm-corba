@@ -1,5 +1,6 @@
 from hpp.corbaserver.rbprm.scenarios.talos_path_planner import TalosPathPlanner
 import numpy as np
+import random
 
 
 class PathPlanner(TalosPathPlanner):
@@ -43,7 +44,6 @@ class PathPlanner(TalosPathPlanner):
         self.rbprmBuilder.setReferenceEndEffector('talos_rleg_rom_reduced', self.rbprmBuilder.ref_EE_rLeg)
 
     def set_random_configs(self):
-        import random
         from hpp.corbaserver.rbprm.tools.sampleRotation import sampleRotationForConfig
         q_up = self.q_init[::]
         q_down = q_up[::]
@@ -112,7 +112,7 @@ class PathPlanner(TalosPathPlanner):
         self.init_planner()
         self.solve()
         self.display_path()
-        #self.play_path()
+        # self.play_path()
         self.hide_rom()
 
 

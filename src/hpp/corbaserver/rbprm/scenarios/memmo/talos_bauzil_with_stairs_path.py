@@ -1,6 +1,7 @@
 from hpp.corbaserver.rbprm.tools.sample_root_config import generate_random_conf_without_orientation
 from hpp.corbaserver.rbprm.scenarios.talos_path_planner import TalosPathPlanner
 from talos_rbprm.talos_abstract import Robot
+import random
 
 
 class PathPlanner(TalosPathPlanner):
@@ -50,7 +51,6 @@ class PathPlanner(TalosPathPlanner):
         """
         randomly sample initial and goal configuration :
         """
-        import random
         random.seed()
         # sample an initial and goal zone : either floor, right platform or left platform. With more weight on the floor
         # 0,1,2 are floor, 3 is platform10 4 is platform15
@@ -123,7 +123,7 @@ class PathPlanner(TalosPathPlanner):
         self.q_init = self.ps.configAtParam(pathId, 0)
         self.q_goal = self.ps.configAtParam(pathId, self.ps.pathLength(pathId))
         self.display_path()
-        #self.play_path()
+        # self.play_path()
         self.hide_rom()
 
 

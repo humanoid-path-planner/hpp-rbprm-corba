@@ -13,9 +13,9 @@ class PathPlanner(HyqPathPlanner):
         self.root_translation_bounds = [-1.7, 2.5, -0.2, 2, 0.64, 0.64]
         self.init_problem()
 
-        self.q_init[0:2] = [-1.5, 0]
+        self.q_init[:2] = [-1.5, 0]
         self.q_init[-6] = 0.05
-        self.q_goal[0:2] = [2.2, 0]
+        self.q_goal[:2] = [2.2, 0]
         self.q_goal[-6] = 0.05
 
         self.init_viewer("multicontact/slalom_debris")

@@ -128,10 +128,10 @@ class AbstractContactGenerator:
         :param set_ref_height: if True, set the root Z position of q_init and q_goal to be equal to q_ref
         """
         self.q_init = self.q_ref[::]
-        self.q_init[0:7] = self.path_planner.ps.configAtParam(self.pid, 0.001)[0:7]
+        self.q_init[:7] = self.path_planner.ps.configAtParam(self.pid, 0.001)[0:7]
         # do not use 0 but an epsilon in order to avoid the orientation discontinuity that may happen at t=0
         self.q_goal = self.q_init[::]
-        self.q_goal[0:7] = self.path_planner.ps.configAtParam(self.pid, self.path_planner.ps.pathLength(self.pid))[0:7]
+        self.q_goal[:7] = self.path_planner.ps.configAtParam(self.pid, self.path_planner.ps.pathLength(self.pid))[0:7]
 
         # copy extraconfig for start and init configurations
         configSize = self.fullbody.getConfigSize() - self.fullbody.client.robot.getDimensionExtraConfigSpace()
@@ -181,9 +181,7 @@ class AbstractContactGenerator:
         print("Contact plan generated in : " + str(t_interpolate_configs) + " s")
         print("number of configs :", len(self.configs))
 
-    """
-    Helper methods used to display results
-    """
+    # Helper methods used to display results
 
     def display_sequence(self, dt=0.5):
         """

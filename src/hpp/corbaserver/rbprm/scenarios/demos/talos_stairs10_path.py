@@ -31,14 +31,14 @@ class PathPlanner(TalosPathPlanner):
         self.root_translation_bounds = [-1.5, 3, 0., 3.3, 0.95, 2.]
         self.init_problem()
 
-        self.q_init[0:3] = [0.05, 1.2, 0.98]
-        self.q_goal[0:3] = [1.87, 1.2, 1.58]
+        self.q_init[:3] = [0.05, 1.2, 0.98]
+        self.q_goal[:3] = [1.87, 1.2, 1.58]
 
         self.init_viewer("multicontact/bauzil_stairs", reduce_sizes=[0.11, 0., 0.], visualize_affordances=["Support"])
         self.init_planner()
         self.solve()
         self.display_path()
-        #self.play_path()
+        # self.play_path()
         self.hide_rom()
 
 

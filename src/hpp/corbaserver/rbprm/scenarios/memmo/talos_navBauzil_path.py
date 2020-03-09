@@ -42,7 +42,7 @@ class PathPlanner(TalosPathPlanner):
         self.init_planner()
         self.solve()
         self.display_path()
-        #self.play_path()
+        # self.play_path()
         self.hide_rom()
 
 
