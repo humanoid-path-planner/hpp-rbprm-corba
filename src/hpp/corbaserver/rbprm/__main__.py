@@ -7,15 +7,9 @@ import sys
 import os
 
 
-def kill_process(proc):
-    proc.kill()
-
-
 # init argument parser
-parser = argparse.ArgumentParser(description="This script must be called with one argumemnt : "
-                                 "the name of the script describing the scenario."
-                                 "If a relative path is given, "
-                                 "hpp.corbaserver.rbprm.scenarios is prepended")
+parser = argparse.ArgumentParser(description="Run a hpp-rbprm scenario. \n"
+                                             "Take care of starting and closing the viewer and the hpp-rbprm-server.")
 parser.add_argument('scenario_name',
                     type=str,
                     help="The name of the scenario script to run. "
@@ -41,7 +35,7 @@ except ImportError:
 subprocess.run(["killall", "gepetto-gui"])
 subprocess.run(["killall", "hpp-rbprm-server"])
 # run the viewer/server in background
-# stdout and sterr outputs of the child process are redirected to denull (hidden).
+# stdout and stderr outputs of the child process are redirected to devnull (hidden).
 # preexec_fn is used to ignore ctrl-c signal send to the main script (otherwise they are forwarded to the child process)
 process_viewer = subprocess.Popen("gepetto-gui",
                                   stdout=subprocess.PIPE,
@@ -53,6 +47,10 @@ process_server = subprocess.Popen("hpp-rbprm-server",
                                   preexec_fn=os.setpgrp)
 # wait a little for the initialization of the server/viewer
 time.sleep(3)
+
+# register cleanup methods to kill viewer/server when exiting python interpreter
+atexit.register(process_server.kill)
+atexit.register(process_viewer.kill)
 
 # Get ContactGenerator or PathPlanner class from the imported module and run it
 if hasattr(module_scenario, 'ContactGenerator'):
@@ -69,6 +67,4 @@ else:
     print("Given script doesn't contain ContactGenerator neither PathPlanner class.")
     sys.exit(1)
 
-# register cleanup methods to kill viewer/server when exiting python interpreter
-atexit.register(kill_process, process_server)
-atexit.register(kill_process, process_viewer)
+
