@@ -24,12 +24,12 @@ try:
     module_scenario = import_module(scenario_name)
 except ImportError:
     print("Cannot import " + scenario_name + " try to prepend path")
-scenario_name = "hpp.corbaserver.rbprm.scenarios." + scenario_name
-try:
-    module_scenario = import_module(scenario_name)
-except ImportError:
-    print("Cannot import " + scenario_name + ". Check if the path is correct")
-    sys.exit(1)
+    scenario_name = "hpp.corbaserver.rbprm.scenarios." + scenario_name
+    try:
+        module_scenario = import_module(scenario_name)
+    except ImportError:
+        print("Cannot import " + scenario_name + ". Check if the path is correct")
+        sys.exit(1)
 
 # kill already existing instance of the viewer/server
 subprocess.run(["killall", "gepetto-gui"])
