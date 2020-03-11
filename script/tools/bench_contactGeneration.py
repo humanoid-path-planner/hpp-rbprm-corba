@@ -1,10 +1,10 @@
 from stair_bauzil_hrp2_interp import *
 import generate_muscod_problem as mp
 from pathlib2 import Path
-import muscodSSH as ssh
+from . import muscodSSH as ssh
 tryWarmStart = True
 
-print "run bench with feasibility criterion"
+print("run bench with feasibility criterion")
 
 com = fullBody.getCenterOfMass()
 if com[0] > 1.25 :

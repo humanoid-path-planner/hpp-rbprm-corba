@@ -18,6 +18,6 @@ for line in f.readlines():
     
     
 
-print "for "+str(total_success)+" success :"
-print "average : "+str((total_candidates/total_success))+" candidate per runs."
+print("for "+str(total_success)+" success :")
+print("average : "+str((total_candidates/total_success))+" candidate per runs.")
    

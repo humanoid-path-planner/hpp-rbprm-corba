@@ -23,10 +23,10 @@ for line in f.readlines():
         valid_length += float(t[i].rstrip(' '))
 
 f.close()
-print "for "+str(run)+" runs : "
-print "total num transition              : "+str(int(num_transition))
-print "total valid transition            : "+str(int(valid_transition))
-print "percentage of feasible transition : "+str(float(valid_transition/num_transition)*100.)+" %"
-print "total length of trajectory tested : "+str(traj_length)
-print "total length of valid trajectory  : "+str(valid_length)
-print "percentage of feasible trajectory : "+str(float(valid_length/traj_length)*100.)+" %"
+print("for "+str(run)+" runs : ")
+print("total num transition              : "+str(int(num_transition)))
+print("total valid transition            : "+str(int(valid_transition)))
+print("percentage of feasible transition : "+str(float(valid_transition/num_transition)*100.)+" %")
+print("total length of trajectory tested : "+str(traj_length))
+print("total length of valid trajectory  : "+str(valid_length))
+print("percentage of feasible trajectory : "+str(float(valid_length/traj_length)*100.)+" %")

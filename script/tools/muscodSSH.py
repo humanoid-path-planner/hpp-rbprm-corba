@@ -19,17 +19,17 @@ def call_muscod(forceFormulation=False):
     DAT_NAME = REDUCED_DAT_NAME
   #cmd = "ssh"+d+"iwaki 'cd "+MUSCOD_DIR+" ; source /local/pfernbac/config.sh ; muscod_release "+DAT_NAME+" ; killall pgxwin_server'"
   cmd = "ssh"+d+"iwaki 'cd "+MUSCOD_DIR+" ; source /local/pfernbac/config.sh ; muscod_release "+DAT_NAME+"' "
-  print "calling muscod for file : "+DAT_NAME
-  print "in directory : "+MUSCOD_DIR
+  print("calling muscod for file : "+DAT_NAME)
+  print("in directory : "+MUSCOD_DIR)
   try :
     #output = subprocess.check_output(cmd,shell=True)
     p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
     output = p.stdout.read()    
-    print "close PGPLOT server to continue ..."
+    print("close PGPLOT server to continue ...")
   except subprocess.CalledProcessError as e :
     success = False
     #print "above error 'Error in `muscod_release'' is normal, only red ERROR message are an issue"
-    print "Error in call to muscod : "+str(e.returncode)
+    print("Error in call to muscod : "+str(e.returncode))
     #print "Error output : "+str(e.output)
     if e.returncode == 255:
       ssh_ok = False
@@ -40,8 +40,8 @@ def call_muscod(forceFormulation=False):
     success = False
   
   if success :
-    print "muscod complete. file generated : "+CONTACT_SEQUENCE_WHOLEBODY_FILE
+    print("muscod complete. file generated : "+CONTACT_SEQUENCE_WHOLEBODY_FILE)
   else :
-    print "Muscod did not converge."
+    print("Muscod did not converge.")
   return success,ssh_ok
 

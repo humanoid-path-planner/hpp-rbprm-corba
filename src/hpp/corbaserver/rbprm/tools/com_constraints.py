@@ -8,7 +8,7 @@ import numpy as np
 from .obj_to_constraints import ineq_from_file, rotate_inequalities
 
 #ineqPath = ine.__path__[0] + "/"
-ineqPath=""
+ineqPath = ""
 # epsilon for testing whether a number is close to zero
 _EPS = np.finfo(float).eps * 4.0
 

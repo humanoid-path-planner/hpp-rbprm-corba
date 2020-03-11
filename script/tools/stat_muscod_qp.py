@@ -8,15 +8,15 @@ import numpy as np
 from hpp import Error as hpperr
 from numpy import array, matrix
 from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
-import cPickle as pickle
+import pickle as pickle
 from pathlib2 import Path
 
 import planning.generate_muscod_problem as mp
-import muscodSSH as ssh
+from . import muscodSSH as ssh
 from planning.config import *
 
 
-from gen_hrp2_statically_balanced_positions_2d_state import *
+from .gen_hrp2_statically_balanced_positions_2d_state import *
 from generate_contact_sequence import *
 
 
@@ -44,7 +44,7 @@ while file_exist:
     i+= 1
 
 f = open(filename,"w")
-print "write results in file : "+filename
+print("write results in file : "+filename)
 i=0
 cs_out = ContactSequenceHumanoid(0)
 same_positif = 0
@@ -138,11 +138,11 @@ f.close()
 
 
 num_states = float(len(states))
-print "for : "+str(num_states)+" states."
-print "same result, unreachable : "+str(same_negatif) + "   ; "+str((float(same_negatif)/num_states)*100.)+" % "
-print "same result, reachable : "+str(same_positif) + "   ; "+str((float(same_positif)/num_states)*100.)+" % "
-print "false negative : "+str(false_negatif) + "   ; "+str((float(false_negatif)/num_states)*100.)+" %"
-print "false positive : "+str(false_positif) + "   ; "+str((float(false_positif)/num_states)*100.)+" %"
+print("for : "+str(num_states)+" states.")
+print("same result, unreachable : "+str(same_negatif) + "   ; "+str((float(same_negatif)/num_states)*100.)+" % ")
+print("same result, reachable : "+str(same_positif) + "   ; "+str((float(same_positif)/num_states)*100.)+" % ")
+print("false negative : "+str(false_negatif) + "   ; "+str((float(false_negatif)/num_states)*100.)+" %")
+print("false positive : "+str(false_positif) + "   ; "+str((float(false_positif)/num_states)*100.)+" %")
 
 f = open(filename+"C","w")
 f.write( "for : "+str(num_states)+" states.\n")
