@@ -112,11 +112,15 @@ class AbstractPathPlanner:
         self.afftool.loadObstacleModel(env_package, env_name, "planning", vf, reduceSizes=reduce_sizes)
         try:
             self.v = vf.createViewer(displayArrows=True)
+            self.pp = PathPlayer(self.v)
+            for aff_type in visualize_affordances:
+                self.afftool.visualiseAffordances(aff_type, self.v, self.v.color.lightBrown)
         except Exception:
             print("No viewer started !")
 
             class FakeViewer():
                 def __init__(self):
+                    self.client = None
                     return
 
                 def __call__(self, q):
@@ -126,12 +130,6 @@ class AbstractPathPlanner:
                     return
 
             self.v = FakeViewer()
-        try:
-            self.pp = PathPlayer(self.v)
-        except Exception:
-            pass
-        for aff_type in visualize_affordances:
-            self.afftool.visualiseAffordances(aff_type, self.v, self.v.color.lightBrown)
 
     def init_planner(self, kinodynamic=True, optimize=True):
         """
@@ -196,13 +194,15 @@ class AbstractPathPlanner:
         """
         Remove the current robot from the display
         """
-        self.v.client.gui.setVisibility(self.robot_node_name, "OFF")
+        if self.v.client is not None:
+            self.v.client.gui.setVisibility(self.robot_node_name, "OFF")
 
     def show_rom(self):
         """
         Add the current robot to the display
         """
-        self.v.client.gui.setVisibility(self.robot_node_name, "ON")
+        if self.v.client is not None:
+            self.v.client.gui.setVisibility(self.robot_node_name, "ON")
 
     @abstractmethod
     def run(self):
