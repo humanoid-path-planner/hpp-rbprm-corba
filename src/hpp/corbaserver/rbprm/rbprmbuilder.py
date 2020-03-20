@@ -28,7 +28,7 @@ class Builder(Robot):
     # # Constructor
     def __init__(self, load=True, clientRbprm=None):
         self.tf_root = "base_link"
-        if clientRbprm==None:
+        if clientRbprm is None:
             self.clientRbprm = RbprmClient()
         else:
             self.clientRbprm = clientRbprm
@@ -44,7 +44,7 @@ class Builder(Robot):
     # \param packageName name of the package from where the robot will be loaded
     # \param urdfSuffix optional suffix for the urdf of the robot package
     # \param srdfSuffix optional suffix for the srdf of the robot package
-    def loadModel(self, urdfName, urdfNameroms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix, client):
+    def loadModel(self, urdfName, urdfNameroms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix, client=None):
         Robot.__init__(self, urdfName, rootJointType, False, client=client)
         if (isinstance(urdfNameroms, list)):
             for urdfNamerom in urdfNameroms:
