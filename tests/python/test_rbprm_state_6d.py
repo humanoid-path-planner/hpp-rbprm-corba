@@ -8,7 +8,6 @@ from talos_rbprm.talos import Robot
 
 
 class TestRBPRMstate6D(unittest.TestCase):
-
     def test_contacts_6d(self):
         subprocess.run(["killall", "hpp-rbprm-server"])
         process = subprocess.Popen("hpp-rbprm-server")
@@ -16,10 +15,9 @@ class TestRBPRMstate6D(unittest.TestCase):
         fullbody = Robot()
         fullbody.client.robot.setDimensionExtraConfigSpace(6)
         fullbody.setJointBounds("root_joint", [-10, 10, -10, 10, -10, 10])
-        fullbody.client.robot.setExtraConfigSpaceBounds(
-            [-10, 10, -10, 10, -10, 10, -10, 10, -10, 10, -10, 10])
+        fullbody.client.robot.setExtraConfigSpaceBounds([-10, 10, -10, 10, -10, 10, -10, 10, -10, 10, -10, 10])
         fullbody.loadAllLimbs("static", nbSamples=10000)
-        q = fullbody.referenceConfig[::] + [0]*6
+        q = fullbody.referenceConfig[::] + [0] * 6
         fullbody.setCurrentConfig(q)
         com = fullbody.getCenterOfMass()
         contacts = [fullbody.rLegId, fullbody.lLegId]
@@ -77,14 +75,14 @@ class TestRBPRMstate6D(unittest.TestCase):
         self.assertTrue(state4.isLimbInContact(fullbody.rLegId))
         self.assertTrue(state4.isLimbInContact(fullbody.lLegId))
         self.assertTrue(state4.isBalanced())
-        for i in range(7,13):
+        for i in range(7, 13):
             self.assertAlmostEqual(state.q()[i], state4.q()[i])
         for i in range(19, len(q)):
             self.assertAlmostEqual(state.q()[i], state4.q()[i])
 
         # try with a rotation
         rot = [0.259, 0, 0, 0.966]
-        state5, success = StateHelper.addNewContact(state, fullbody.rLegId, p, n, rotation = rot)
+        state5, success = StateHelper.addNewContact(state, fullbody.rLegId, p, n, rotation=rot)
         self.assertTrue(success)
         self.assertTrue(state5.isLimbInContact(fullbody.rLegId))
         self.assertTrue(state5.isLimbInContact(fullbody.lLegId))
@@ -92,10 +90,9 @@ class TestRBPRMstate6D(unittest.TestCase):
         fullbody.setCurrentConfig(state5.q())
         rf_pose = fullbody.getJointPosition(fullbody.rfoot)
         for i in range(4):
-            self.assertAlmostEqual(rf_pose[i+3], rot[i], 3)
+            self.assertAlmostEqual(rf_pose[i + 3], rot[i], 3)
 
         process.kill()
-
 
 
 if __name__ == '__main__':

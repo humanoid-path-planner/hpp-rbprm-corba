@@ -8,7 +8,6 @@ from hpp.corbaserver.rbprm.hyq import Robot
 
 
 class TestRBPRMstate3D(unittest.TestCase):
-
     def test_contacts_3d(self):
         subprocess.run(["killall", "hpp-rbprm-server"])
         process = subprocess.Popen("hpp-rbprm-server")
@@ -16,8 +15,7 @@ class TestRBPRMstate3D(unittest.TestCase):
         fullbody = Robot()
         fullbody.client.robot.setDimensionExtraConfigSpace(6)
         fullbody.setJointBounds("root_joint", [-10, 10, -10, 10, -10, 10])
-        fullbody.client.robot.setExtraConfigSpaceBounds(
-            [-10, 10, -10, 10, -10, 10, -10, 10, -10, 10, -10, 10])
+        fullbody.client.robot.setExtraConfigSpaceBounds([-10, 10, -10, 10, -10, 10, -10, 10, -10, 10, -10, 10])
         fullbody.loadAllLimbs("static", nbSamples=10000)
         q = fullbody.referenceConfig[::] + [0] * 6
         fullbody.setCurrentConfig(q)
@@ -51,9 +49,9 @@ class TestRBPRMstate3D(unittest.TestCase):
         self.assertTrue(state.isLimbInContact(fullbody.rArmId))
         self.assertTrue(state.isLimbInContact(fullbody.lArmId))
         self.assertTrue(state2.isBalanced())
-        
 
         process.kill()
+
 
 if __name__ == '__main__':
     unittest.main()
