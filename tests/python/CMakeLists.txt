@@ -1,6 +1,8 @@
 SET(${PROJECT_NAME}_PYTHON_TESTS
   test_talos_walk_contacts
   test_talos_walk_path
+  test_rbprm_state_6d
+  test_rbprm_state_3d
   )
 
 FOREACH(TEST ${${PROJECT_NAME}_PYTHON_TESTS})

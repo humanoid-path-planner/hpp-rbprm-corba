@@ -2,7 +2,6 @@
 # Authors: Pierre Fernbach <pfernbac@laas.fr>
 import subprocess
 from importlib import import_module
-import os
 import unittest
 import time
 
