@@ -109,7 +109,8 @@ class AbstractPathPlanner:
         vf = ViewerFactory(self.ps)
         self.afftool = AffordanceTool()
         self.afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
-        self.afftool.loadObstacleModel(env_package, env_name, "planning", vf, reduceSizes=reduce_sizes)
+        self.afftool.loadObstacleModel("package://"+env_package + "/urdf/" + env_name + ".urdf",
+                                       "planning", vf, reduceSizes=reduce_sizes)
         try:
             self.v = vf.createViewer(displayArrows=True)
             self.pp = PathPlayer(self.v)
