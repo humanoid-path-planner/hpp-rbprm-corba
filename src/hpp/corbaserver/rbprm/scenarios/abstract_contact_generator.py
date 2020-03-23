@@ -173,7 +173,7 @@ class AbstractContactGenerator:
         self.v(self.q_init)
         print("Generate contact plan ...")
         t_start = time.time()
-        self.configs = self.fullbody.interpolate(0.01,
+        self.configs = self.fullbody.interpolate(self.dt,
                                                  pathId=self.pid,
                                                  robustnessTreshold=self.robustness,
                                                  filterStates=self.filter_states,
