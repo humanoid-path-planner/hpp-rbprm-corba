@@ -5,10 +5,12 @@ from hpp.corbaserver.rbprm.scenarios.talos_contact_generator import TalosContact
 class ContactGenerator(TalosContactGenerator):
     def __init__(self):
         super().__init__(PathPlanner())
+        self.robustness = 2.
 
-    def set_reference(self):
-        super().set_reference()
-        self.q_ref = self.fullbody.referenceConfig_elbowsUp[::] + [0] * self.path_planner.extra_dof
+    def load_fullbody(self):
+        super().load_fullbody()
+        self.fullbody.nbSamples = 100000
+        self.fullbody.limbs_names=[self.fullbody.lLegId, self.fullbody.rLegId] # left feet first on this scenario
 
 
 if __name__ == "__main__":
