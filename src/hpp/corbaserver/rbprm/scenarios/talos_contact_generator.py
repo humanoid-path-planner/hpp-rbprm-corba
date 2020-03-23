@@ -13,6 +13,7 @@ class TalosContactGenerator(AbstractContactGenerator):
         self.fullbody = Robot()
         self.q_ref = self.fullbody.referenceConfig[::] + [0] * self.path_planner.extra_dof
         self.weight_postural = self.fullbody.postureWeights[::] + [0] * self.path_planner.extra_dof
+        self.fullbody.limbs_names=[self.fullbody.rLegId, self.fullbody.lLegId]
 
     def init_viewer(self):
         super().init_viewer()
