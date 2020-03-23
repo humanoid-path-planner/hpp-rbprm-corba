@@ -13,7 +13,8 @@ class PathPlanner(TalosPathPlanner):
     def load_rbprm(self):
         from talos_rbprm.talos_abstract import Robot
         # select model with conservative collision geometry for trunk
-        Robot.urdfName += "_large"
+        Robot.urdfName = "talos_trunk_large"
+        self.robot_node_name = "talos_trunk_large"
         self.rbprmBuilder = Robot()
 
     def init_problem(self):
