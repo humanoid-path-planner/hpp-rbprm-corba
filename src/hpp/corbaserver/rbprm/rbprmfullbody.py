@@ -28,9 +28,12 @@ from numpy import array, matrix
 #  trunk of the robot, one for the range of motion
 class FullBody(Robot):
     # # Constructor
-    def __init__(self, load=True):
+    def __init__(self, load=True, clientRbprm=None):
         self.tf_root = "base_link"
-        self.clientRbprm = RbprmClient()
+        if clientRbprm == None:
+            self.clientRbprm = RbprmClient()
+        else:
+            self.clientRbprm = clientRbprm
         self.load = load
         self.limbNames = []
 
@@ -43,8 +46,8 @@ class FullBody(Robot):
     # \param packageName name of the package from where the robot will be loaded
     # \param urdfSuffix optional suffix for the urdf of the robot package
     # \param srdfSuffix optional suffix for the srdf of the robot package
-    def loadFullBodyModel(self, urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix):
-        Robot.__init__(self, urdfName, rootJointType, False)
+    def loadFullBodyModel(self, urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix, client=None):
+        Robot.__init__(self, urdfName, rootJointType, False, client)
         self.clientRbprm.rbprm.loadFullBodyRobot(urdfName, rootJointType, packageName, urdfName, urdfSuffix,
                                                  srdfSuffix,
                                                  self.client.problem.getSelected("problem")[0])

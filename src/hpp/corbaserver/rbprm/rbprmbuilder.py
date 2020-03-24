@@ -26,9 +26,12 @@ from hpp.corbaserver.robot import Robot
 #  trunk of the robot, and a set of robots describe the range of motion of each limb of the robot.
 class Builder(Robot):
     # # Constructor
-    def __init__(self, load=True):
+    def __init__(self, load=True, clientRbprm=None):
         self.tf_root = "base_link"
-        self.clientRbprm = RbprmClient()
+        if clientRbprm is None:
+            self.clientRbprm = RbprmClient()
+        else:
+            self.clientRbprm = clientRbprm
         self.load = load
 
     # # Virtual function to load the robot model.
@@ -41,8 +44,8 @@ class Builder(Robot):
     # \param packageName name of the package from where the robot will be loaded
     # \param urdfSuffix optional suffix for the urdf of the robot package
     # \param srdfSuffix optional suffix for the srdf of the robot package
-    def loadModel(self, urdfName, urdfNameroms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix):
-        Robot.__init__(self, urdfName, rootJointType, False)
+    def loadModel(self, urdfName, urdfNameroms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix, client=None):
+        Robot.__init__(self, urdfName, rootJointType, False, client=client)
         if (isinstance(urdfNameroms, list)):
             for urdfNamerom in urdfNameroms:
                 self.clientRbprm.rbprm.loadRobotRomModel(urdfNamerom, rootJointType, packageName, urdfNamerom,
