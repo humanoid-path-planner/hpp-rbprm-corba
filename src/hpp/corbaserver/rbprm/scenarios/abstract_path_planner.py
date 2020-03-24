@@ -111,26 +111,11 @@ class AbstractPathPlanner:
         self.afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
         self.afftool.loadObstacleModel("package://"+env_package + "/urdf/" + env_name + ".urdf",
                                        "planning", vf, reduceSizes=reduce_sizes)
-        try:
-            self.v = vf.createViewer(displayArrows=True)
-            self.pp = PathPlayer(self.v)
-            for aff_type in visualize_affordances:
-                self.afftool.visualiseAffordances(aff_type, self.v, self.v.color.lightBrown)
-        except Exception:
-            print("No viewer started !")
 
-            class FakeViewer():
-                def __init__(self):
-                    self.client = None
-                    return
-
-                def __call__(self, q):
-                    return
-
-                def addLandmark(self, a, b):
-                    return
-
-            self.v = FakeViewer()
+        self.v = vf.createViewer(ghost = True, displayArrows=True)
+        self.pp = PathPlayer(self.v)
+        for aff_type in visualize_affordances:
+            self.afftool.visualiseAffordances(aff_type, self.v, self.v.color.lightBrown)
 
     def init_planner(self, kinodynamic=True, optimize=True):
         """
@@ -195,15 +180,13 @@ class AbstractPathPlanner:
         """
         Remove the current robot from the display
         """
-        if self.v.client is not None:
-            self.v.client.gui.setVisibility(self.robot_node_name, "OFF")
+        self.v.client.gui.setVisibility(self.robot_node_name, "OFF")
 
     def show_rom(self):
         """
         Add the current robot to the display
         """
-        if self.v.client is not None:
-            self.v.client.gui.setVisibility(self.robot_node_name, "ON")
+        self.v.client.gui.setVisibility(self.robot_node_name, "ON")
 
     @abstractmethod
     def run(self):

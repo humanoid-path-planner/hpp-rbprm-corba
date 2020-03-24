@@ -118,10 +118,7 @@ class AbstractContactGenerator:
         """
         Create a Viewer instance
         """
-        if self.path_planner.v.client is not None:
-            self.v = Viewer(self.ps, viewerClient=self.path_planner.v.client, displayCoM=True)
-        else:
-            self.v = self.path_planner.v
+        self.v = Viewer(self.ps, viewerClient=self.path_planner.v.client, displayCoM=True)
 
     def compute_configs_from_guide(self, use_acc_init=True, use_acc_end=False, set_ref_height=True):
         """
@@ -204,16 +201,15 @@ class AbstractContactGenerator:
         """
         display the guide path planned
         """
-        if self.v.client is not None:
-            self.v.client.gui.setVisibility(self.robot_node_name, "OFF")
-            self.path_planner.show_rom()
-            self.cl.problem.selectProblem("guide_planning")
-            # this is not the same problem as in the guide_planner. We only added the final path in this problem,
-            # thus there is only 1 path in this problem
-            self.path_planner.pp(0)
-            self.cl.problem.selectProblem("default")
-            self.path_planner.hide_rom()
-            self.v.client.gui.setVisibility(self.robot_node_name, "ON")
+        self.v.client.gui.setVisibility(self.robot_node_name, "OFF")
+        self.path_planner.show_rom()
+        self.cl.problem.selectProblem("guide_planning")
+        # this is not the same problem as in the guide_planner. We only added the final path in this problem,
+        # thus there is only 1 path in this problem
+        self.path_planner.pp(0)
+        self.cl.problem.selectProblem("default")
+        self.path_planner.hide_rom()
+        self.v.client.gui.setVisibility(self.robot_node_name, "ON")
 
     def run(self):
         """
