@@ -1189,6 +1189,7 @@ void RbprmBuilder::setStartState(const hpp::floatSeq& configuration,
     bool validity = problemSolver()->problem()->configValidations()->validate(
         dofArrayToConfig(fullBody()->device_, configuration), validationReport);
     if (validity) {
+      startState_ = State();
       SetPositionAndNormal(startState_, fullBody(), configuration, names);
     } else {
       std::ostringstream oss;
@@ -1233,6 +1234,7 @@ void RbprmBuilder::setEndState(const hpp::floatSeq& configuration,
     bool validity = problemSolver()->problem()->configValidations()->validate(
         dofArrayToConfig(fullBody()->device_, configuration), validationReport);
     if (validity) {
+      endState_ = State();
       SetPositionAndNormal(endState_, fullBody(), configuration, names);
     } else {
       std::ostringstream oss;
