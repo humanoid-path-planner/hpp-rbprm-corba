@@ -975,7 +975,7 @@ short RbprmBuilder::generateContactState(::CORBA::UShort cId, const char* name,
       if (rep.success_) {
         lastStatesComputed_.push_back(rep.result_);
         lastStatesComputedTime_.push_back(std::make_pair(-1., rep.result_));
-        return lastStatesComputed_.size() - 1;
+        return (CORBA::Short)(lastStatesComputed_.size() - 1);
       }
     }
     return -1;
@@ -2785,7 +2785,7 @@ CORBA::Short RbprmBuilder::isLimbInContactIntermediary(const char* limbName, uns
   }
 }
 
-CORBA::Short RbprmBuilder::getNumStates() throw(hpp::Error) { return lastStatesComputed_.size(); }
+CORBA::Short RbprmBuilder::getNumStates() throw(hpp::Error) { return (CORBA::Short)lastStatesComputed_.size(); }
 
 CORBA::Short RbprmBuilder::computeIntermediary(unsigned short stateFrom,
                                                unsigned short stateTo) throw(hpp::Error) try {
