@@ -66,18 +66,18 @@ def getRotationMatrixFromConfigs(configs):
 # get contacted surface names at configuration
 def getContactsNames(rbprmBuilder, i, q):
     if i % 2 == LF:  # left leg
-        step_contacts = rbprmBuilder.clientRbprm.rbprm.getCollidingObstacleAtConfig(q, ROBOT_NAME + '_lleg_rom')
+        step_contacts = rbprmBuilder.clientRbprm.rbprm.getCollidingObstacleAtConfig(q, rbprmBuilder.lLegId)
     elif i % 2 == RF:  # right leg
-        step_contacts = rbprmBuilder.clientRbprm.rbprm.getCollidingObstacleAtConfig(q, ROBOT_NAME + '_rleg_rom')
+        step_contacts = rbprmBuilder.clientRbprm.rbprm.getCollidingObstacleAtConfig(q, rbprmBuilder.rLegId)
     return step_contacts
 
 
 # get intersections with the rom and surface at configuration
 def getContactsIntersections(rbprmBuilder, i, q):
     if i % 2 == LF:  # left leg
-        intersections = rbprmBuilder.getContactSurfacesAtConfig(q, ROBOT_NAME + '_lleg_rom')
+        intersections = rbprmBuilder.getContactSurfacesAtConfig(q, rbprmBuilder.lLegId)
     elif i % 2 == RF:  # right leg
-        intersections = rbprmBuilder.getContactSurfacesAtConfig(q, ROBOT_NAME + '_rleg_rom')
+        intersections = rbprmBuilder.getContactSurfacesAtConfig(q, rbprmBuilder.rLegId)
     return intersections
 
 
