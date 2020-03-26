@@ -163,7 +163,7 @@ def getSurfacesFromGuideContinuous(rbprmBuilder,
         phase_surfaces = []
         for name in phase_contacts_names:
             surface = surfaces_dict[name][0]
-            if useIntersection and area(surface) > MAX_SURFACE:
+            if useIntersection and area(surface) > max_surface_area:
                 if name in step_contacts:
                     intersection = intersections[step_contacts.index(name)]
                     if len(intersection) > 3:
