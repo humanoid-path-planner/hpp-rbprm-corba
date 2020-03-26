@@ -14,6 +14,8 @@ parser.add_argument('scenario_name',
                     type=str,
                     help="The name of the scenario script to run. "
                     "If a relative path is given, hpp.corbaserver.rbprm.scenarios is prepended")
+parser.add_argument("-n", "--no_viewer", help="Run rbprm without visualization.",action="store_true")
+
 args = parser.parse_args()
 # retrieve argument
 scenario_name = args.scenario_name
@@ -31,26 +33,30 @@ except ImportError:
         print("Cannot import " + scenario_name + ". Check if the path is correct")
         sys.exit(1)
 
-# kill already existing instance of the viewer/server
-subprocess.run(["killall", "gepetto-gui"])
+# kill already existing instance of the server
 subprocess.run(["killall", "hpp-rbprm-server"])
-# run the viewer/server in background
+# run the server in background :
 # stdout and stderr outputs of the child process are redirected to devnull (hidden).
 # preexec_fn is used to ignore ctrl-c signal send to the main script (otherwise they are forwarded to the child process)
-process_viewer = subprocess.Popen("gepetto-gui",
-                                  stdout=subprocess.PIPE,
-                                  stderr=subprocess.DEVNULL,
-                                  preexec_fn=os.setpgrp)
 process_server = subprocess.Popen("hpp-rbprm-server",
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.DEVNULL,
                                   preexec_fn=os.setpgrp)
+# register cleanup methods to kill server when exiting python interpreter
+atexit.register(process_server.kill)
+
+# do the same for the viewer, exept if --no-viewer flag is set
+if not args.no_viewer:
+    subprocess.run(["killall", "gepetto-gui"])
+    process_viewer = subprocess.Popen("gepetto-gui",
+                                      stdout=subprocess.PIPE,
+                                      stderr=subprocess.DEVNULL,
+                                      preexec_fn=os.setpgrp)
+    atexit.register(process_viewer.kill)
+
+
 # wait a little for the initialization of the server/viewer
 time.sleep(3)
-
-# register cleanup methods to kill viewer/server when exiting python interpreter
-atexit.register(process_server.kill)
-atexit.register(process_viewer.kill)
 
 # Get ContactGenerator or PathPlanner class from the imported module and run it
 if hasattr(module_scenario, 'ContactGenerator'):

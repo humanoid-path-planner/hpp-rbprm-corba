@@ -109,27 +109,11 @@ class AbstractPathPlanner:
         vf = ViewerFactory(self.ps)
         self.afftool = AffordanceTool()
         self.afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
-        self.afftool.loadObstacleModel(env_package, env_name, "planning", vf, reduceSizes=reduce_sizes)
-        try:
-            self.v = vf.createViewer(displayArrows=True)
-        except Exception:
-            print("No viewer started !")
+        self.afftool.loadObstacleModel("package://"+env_package + "/urdf/" + env_name + ".urdf",
+                                       "planning", vf, reduceSizes=reduce_sizes)
 
-            class FakeViewer():
-                def __init__(self):
-                    return
-
-                def __call__(self, q):
-                    return
-
-                def addLandmark(self, a, b):
-                    return
-
-            self.v = FakeViewer()
-        try:
-            self.pp = PathPlayer(self.v)
-        except Exception:
-            pass
+        self.v = vf.createViewer(ghost = True, displayArrows=True)
+        self.pp = PathPlayer(self.v)
         for aff_type in visualize_affordances:
             self.afftool.visualiseAffordances(aff_type, self.v, self.v.color.lightBrown)
 

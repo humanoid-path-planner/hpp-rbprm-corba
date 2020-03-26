@@ -23,7 +23,8 @@ class PathPlanner(TalosPathPlanner):
 
     def load_rbprm(self):
         # select model with conservative collision geometry for trunk
-        Robot.urdfName += "_large_reducedROM"
+        Robot.urdfName = "talos_trunk_large_reducedROM"
+        self.robot_node_name = "talos_trunk_large_reducedROM"
         # select conservative ROM for feet
         Robot.urdfNameRom += ['talos_lleg_rom_reduced', 'talos_rleg_rom_reduced']
         self.rbprmBuilder = Robot()

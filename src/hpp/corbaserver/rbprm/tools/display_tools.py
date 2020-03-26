@@ -51,10 +51,11 @@ def displaySurfaceFromPoints(viewer, p_list, color=[0, 0, 0, 1], name=None):
     if len(p_list) < 2:
         return
     gui = viewer.client.gui
-    if name is None:
+    node_list = gui.getNodeList()
+    if name is None and node_list is not None:
         i = 0
         name = 'surface_' + str(i)
-        while name in gui.getNodeList():
+        while name in node_list:
             i = i + 1
             name = 'surface_' + str(i)
     gui.addCurve(name, p_list, color)

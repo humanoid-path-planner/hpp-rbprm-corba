@@ -8,7 +8,8 @@ class PathPlanner(TalosPathPlanner):
 
     def load_rbprm(self):
         from talos_rbprm.talos_abstract import Robot
-        Robot.urdfName += "_large"  # load the model with conservative bounding boxes for trunk
+        Robot.urdfName = "talos_trunk_large"  # load the model with conservative bounding boxes for trunk
+        self.robot_node_name = "talos_trunk_large"
         self.rbprmBuilder = Robot()
 
     def init_problem(self):

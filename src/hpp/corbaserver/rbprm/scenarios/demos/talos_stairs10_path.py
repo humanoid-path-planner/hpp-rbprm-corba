@@ -5,7 +5,8 @@ class PathPlanner(TalosPathPlanner):
     def load_rbprm(self):
         from talos_rbprm.talos_abstract import Robot
         # select ROM model with really conservative ROM shapes
-        Robot.urdfName += "_large_reducedROM"
+        Robot.urdfName = "talos_trunk_large_reducedROM"
+        self.robot_node_name = "talos_trunk_large_reducedROM"
         Robot.urdfNameRom = ['talos_lleg_rom_reduced', 'talos_rleg_rom_reduced']
         self.used_limbs = Robot.urdfNameRom
         self.rbprmBuilder = Robot()

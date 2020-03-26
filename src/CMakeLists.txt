@@ -142,7 +142,9 @@ SET(${PROJECT_NAME}_PYTHON_SCENARIOS_DEMOS
     talos_navBauzil_hard_path.py
     talos_navBauzil_hard.py
     talos_navBauzil_path.py
+    talos_navBauzil_obstacles_path.py
     talos_navBauzil.py
+    talos_navBauzil_obstacles.py
     talos_plateformes_path.py
     talos_plateformes.py
     talos_stairs10_path.py 

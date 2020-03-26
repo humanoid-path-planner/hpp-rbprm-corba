@@ -83,7 +83,7 @@ class AbstractContactGenerator:
         self.fullbody.setPostureWeights(self.weight_postural)
         self.fullbody.usePosturalTaskContactCreation(use_postural_task)
 
-    def load_limbs(self, heuristic="fixedStep06", analysis=None, nb_samples=None, octree_size=None):
+    def load_limbs(self, heuristic="fixedStep06", analysis="ReferenceConfiguration", nb_samples=None, octree_size=None):
         """
         Generate the samples used for each limbs in 'used_limbs'
         :param heuristic: the name of the heuristic used,
@@ -170,7 +170,7 @@ class AbstractContactGenerator:
         self.v(self.q_init)
         print("Generate contact plan ...")
         t_start = time.time()
-        self.configs = self.fullbody.interpolate(0.01,
+        self.configs = self.fullbody.interpolate(self.dt,
                                                  pathId=self.pid,
                                                  robustnessTreshold=self.robustness,
                                                  filterStates=self.filter_states,
