@@ -5,7 +5,7 @@ from hpp.corbaserver.rbprm.tools.display_tools import displaySurfaceFromPoints
 import numpy as np
 from pinocchio import Quaternion, log3
 import eigenpy
-eigenpy.switchToNumpyMatrix()
+eigenpy.switchToNumpyArray()
 
 ROBOT_NAME = 'talos'
 MAX_SURFACE = 1.  # if a contact surface is greater than this value, the intersection is used instead of the whole surface
@@ -50,7 +50,6 @@ def getAllSurfacesDict(afftool):
 
 # get rotation matrices form configs
 def getRotationMatrixFromConfigs(configs):
-    eigenpy.switchToNumpyMatrix()
     R = []
     for config in configs:
         q = [0, 0, 0] + config[3:7]
@@ -97,11 +96,11 @@ def getMergedPhases(seqs):
 def computeRootYawAngleBetwwenConfigs(q0, q1):
     quat0 = Quaternion(q0[6], q0[3], q0[4], q0[5])
     quat1 = Quaternion(q1[6], q1[3], q1[4], q1[5])
-    v_angular = np.matrix(log3(quat0.matrix().T * quat1.matrix())).T
-    #print "q_prev : ",q0
-    #print "q      : ",q1
-    #print "v_angular = ",v_angular
-    return v_angular[2, 0]
+    v_angular = np.array(log3(quat0.matrix() @ quat1.matrix()))
+    #print ("q_prev : ",q0)
+    #print ("q      : ",q1)
+    #print ("v_angular = ",v_angular)
+    return v_angular[2]
 
 
 def isYawVariationsInsideBounds(q0, q1, max_yaw=0.5):
