@@ -26,10 +26,12 @@ class PathPlanner(TalosPathPlanner):
         Robot.urdfName = "talos_trunk_large_reducedROM"
         self.robot_node_name = "talos_trunk_large_reducedROM"
         # select conservative ROM for feet
-        Robot.urdfNameRom += ['talos_lleg_rom_reduced', 'talos_rleg_rom_reduced']
+        Robot.rLegId = 'talos_rleg_rom_reduced'
+        Robot.lLegId = 'talos_lleg_rom_reduced'
+        Robot.urdfNameRom = [Robot.lLegId, Robot.rLegId]
         self.rbprmBuilder = Robot()
-        self.rbprmBuilder.setReferenceEndEffector('talos_lleg_rom_reduced', self.rbprmBuilder.ref_EE_lLeg)
-        self.rbprmBuilder.setReferenceEndEffector('talos_rleg_rom_reduced', self.rbprmBuilder.ref_EE_rLeg)
+        self.rbprmBuilder.setReferenceEndEffector(Robot.lLegId, self.rbprmBuilder.ref_EE_lLeg)
+        self.rbprmBuilder.setReferenceEndEffector(Robot.rLegId, self.rbprmBuilder.ref_EE_rLeg)
 
     def compute_extra_config_bounds(self):
         # bounds for the extradof : by default use v_max/a_max on x and y axis and a large value on z axis

@@ -5,7 +5,7 @@ from hpp.corbaserver.rbprm.tools.display_tools import displaySurfaceFromPoints
 import numpy as np
 from pinocchio import Quaternion, log3
 import eigenpy
-eigenpy.switchToNumpyMatrix()
+eigenpy.switchToNumpyArray()
 
 ROBOT_NAME = 'talos'
 MAX_SURFACE = 1.  # if a contact surface is greater than this value, the intersection is used instead of the whole surface
@@ -50,7 +50,6 @@ def getAllSurfacesDict(afftool):
 
 # get rotation matrices form configs
 def getRotationMatrixFromConfigs(configs):
-    eigenpy.switchToNumpyMatrix()
     R = []
     for config in configs:
         q = [0, 0, 0] + config[3:7]
@@ -67,18 +66,18 @@ def getRotationMatrixFromConfigs(configs):
 # get contacted surface names at configuration
 def getContactsNames(rbprmBuilder, i, q):
     if i % 2 == LF:  # left leg
-        step_contacts = rbprmBuilder.clientRbprm.rbprm.getCollidingObstacleAtConfig(q, ROBOT_NAME + '_lleg_rom')
+        step_contacts = rbprmBuilder.clientRbprm.rbprm.getCollidingObstacleAtConfig(q, rbprmBuilder.lLegId)
     elif i % 2 == RF:  # right leg
-        step_contacts = rbprmBuilder.clientRbprm.rbprm.getCollidingObstacleAtConfig(q, ROBOT_NAME + '_rleg_rom')
+        step_contacts = rbprmBuilder.clientRbprm.rbprm.getCollidingObstacleAtConfig(q, rbprmBuilder.rLegId)
     return step_contacts
 
 
 # get intersections with the rom and surface at configuration
 def getContactsIntersections(rbprmBuilder, i, q):
     if i % 2 == LF:  # left leg
-        intersections = rbprmBuilder.getContactSurfacesAtConfig(q, ROBOT_NAME + '_lleg_rom')
+        intersections = rbprmBuilder.getContactSurfacesAtConfig(q, rbprmBuilder.lLegId)
     elif i % 2 == RF:  # right leg
-        intersections = rbprmBuilder.getContactSurfacesAtConfig(q, ROBOT_NAME + '_rleg_rom')
+        intersections = rbprmBuilder.getContactSurfacesAtConfig(q, rbprmBuilder.rLegId)
     return intersections
 
 
@@ -97,11 +96,11 @@ def getMergedPhases(seqs):
 def computeRootYawAngleBetwwenConfigs(q0, q1):
     quat0 = Quaternion(q0[6], q0[3], q0[4], q0[5])
     quat1 = Quaternion(q1[6], q1[3], q1[4], q1[5])
-    v_angular = np.matrix(log3(quat0.matrix().T * quat1.matrix())).T
-    #print "q_prev : ",q0
-    #print "q      : ",q1
-    #print "v_angular = ",v_angular
-    return v_angular[2, 0]
+    v_angular = np.array(log3(quat0.matrix() @ quat1.matrix()))
+    #print ("q_prev : ",q0)
+    #print ("q      : ",q1)
+    #print ("v_angular = ",v_angular)
+    return v_angular[2]
 
 
 def isYawVariationsInsideBounds(q0, q1, max_yaw=0.5):
@@ -164,7 +163,7 @@ def getSurfacesFromGuideContinuous(rbprmBuilder,
         phase_surfaces = []
         for name in phase_contacts_names:
             surface = surfaces_dict[name][0]
-            if useIntersection and area(surface) > MAX_SURFACE:
+            if useIntersection and area(surface) > max_surface_area:
                 if name in step_contacts:
                     intersection = intersections[step_contacts.index(name)]
                     if len(intersection) > 3:
