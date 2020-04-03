@@ -322,10 +322,10 @@ class FullBody(Robot):
             return self.clientRbprm.rbprm.setStartState(configuration, contacts)
         cl = self.clientRbprm.rbprm
         sId = cl.createState(configuration, contacts)
-        num_max_sample = 1
+        num_max_sample = 0
         for (limbName, normal) in zip(contacts, normals):
             p = cl.getEffectorPosition(limbName, configuration)[0]
-            cl.addNewContact(sId, limbName, p, normal, num_max_sample, False, [0, 0, 0, 0])
+            sId = cl.addNewContact(sId, limbName, p, normal, num_max_sample, False, [0, 0, 0, 0])
         return cl.setStartStateId(sId)
 
     # # Initialize the goal configuration of the path interpolation
@@ -339,10 +339,10 @@ class FullBody(Robot):
             return self.clientRbprm.rbprm.setEndState(configuration, contacts)
         cl = self.clientRbprm.rbprm
         sId = cl.createState(configuration, contacts)
-        num_max_sample = 1
+        num_max_sample = 0
         for (limbName, normal) in zip(contacts, normals):
             p = cl.getEffectorPosition(limbName, configuration)[0]
-            cl.addNewContact(sId, limbName, p, normal, num_max_sample, False, [0, 0, 0, 0])
+            sId = cl.addNewContact(sId, limbName, p, normal, num_max_sample, False, [0, 0, 0, 0])
         return cl.setEndStateId(sId)
 
     # # Initialize the first state of the path interpolation

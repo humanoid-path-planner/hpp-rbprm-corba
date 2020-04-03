@@ -49,6 +49,8 @@ class TestRBPRMstate3D(unittest.TestCase):
         self.assertTrue(state.isLimbInContact(fullbody.rArmId))
         self.assertTrue(state.isLimbInContact(fullbody.lArmId))
         self.assertTrue(state2.isBalanced())
+        p_real, n_real = state2.getCenterOfContactForLimb(fullbody.rLegId)
+        self.assertEqual(n, n_real)
 
         process.kill()
 
