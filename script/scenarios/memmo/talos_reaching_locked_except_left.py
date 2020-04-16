@@ -63,7 +63,9 @@ def addCons(ps):
     # ~ pass
     #NOTHING !
     # ~ ps.addNumericalConstraints('c',['balancerelative-com', 'balancepose-left-foot', 'balancepose-right-foot'])
-    ps.addNumericalConstraints('c',['balancepose-left-foot', 'balancepose-right-foot'])
+    # ~ ps.addNumericalConstraints('c',['balancepose-left-foot', 'balancepose-right-foot'])
+    ps.addLockedJointConstraints("locked",lockedJoints)
+
     
 
 posIdx = 0
@@ -170,6 +172,8 @@ def gen_rand_conf_from_generators(generators):
     target = sum([ w * el  for w,el in zip(weights, generators)])
     return target.tolist()[:3]
 
+q0 = None
+q1 = None
 
 def plan(ps, effector, orientation,  generators):
     # ~ q1 = genTarget(ps, effector)
@@ -182,16 +186,41 @@ def plan(ps, effector, orientation,  generators):
             q_init, ok = genTarget(ps, effector,posT, orientation, rand = True )
         else:
             q_init, ok = genTarget(ps, effector,None, None, rand = True )
+            v(q_init)
+            pos = robot.getJointPosition(effector)
+            ok = pos[0] < -0.3 and pos[1] > -0.8 and pos[2] < 1. and robot.isConfigValid(q_init)[0]
+            if ok:
+                pos = robot.getJointPosition(effector)
+                print ("init ok ", robot.isConfigValid(q_init))
+                print ("init ok ", pos)
+                print ("init ok ", pos[2] < 1.)
     ok = False
     while not ok:
         q, ok = genTarget(ps, effector,None, None, rand = True )
+        v(q)
+        pos = robot.getJointPosition(effector)
+        ok = pos[0] > -0.3 and pos[1] > -0.8 and pos[2] < 1. and robot.isConfigValid(q)[0]
+        if ok:
+            pos = robot.getJointPosition(effector)
+            print ("end ok ", pos)
         # ~ posT2 = gen_rand_conf_from_generators(table)
         # ~ q, ok = genTarget(ps, effector,posT2, orientation, rand = True )
     #~ addCons(ps)
     # ~ createBox(posT+[0.,0.,0.,1.])
     # ~ createBox(posT2+[0.,0.,0.,1.])
+    # ~ q_init[:7] = init_conf[:7]
+    # ~ q[:7] = init_conf[:7]
+    print ("init ok ", robot.isConfigValid(q_init))
     ps.setInitialConfig(q_init)
+    print ("end ok ", robot.isConfigValid(q))
     ps.addGoalConfig(q)
+    global q0, q1
+    q0 = q_init
+    q1 = q
+    v(q0)
+    time.sleep(1)
+    v(q1)
+    time.sleep(1)
     #~ v(q)
     
 
@@ -212,6 +241,7 @@ START_ZONE_BY_EFFECTORS = [np.array(el) for el in START_ZONE_BY_EFFECTORS]
 ORIENTATIONS = [(0.37,0.52,-0.18,-0.73),(0.37,-0.52,-0.18,-0.73)]
 INIT_ORIENTATIONS = []
 N = 100
+# ~ N = 1
 #create session dir
 import datetime
 session = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
@@ -219,8 +249,59 @@ sessionPath = EXPORT_PATH+session
 os.makedirs(sessionPath)
 
 
-# ~ from mlp.utils import wholebody_result as wr
+from mlp.utils import wholebody_result as wr
 # ~ from mlp.utils.util import SE3FromConfig, SE3toVec
+
+from pinocchio import SE3
+from pinocchio import Quaternion as QuaternionP
+
+def SE3FromConfig(q):
+    # ~ if isinstance(q,types.ListType):
+    if (type(q) is list) or (type(q) is tuple):
+        q = np.matrix(q).T
+    placement = SE3.Identity()
+    placement.translation = q[0:3]
+    r = QuaternionP(q[6,0],q[3,0],q[4,0],q[5,0])
+    placement.rotation = r.matrix()
+    return placement
+
+
+def SE3toVec(M):
+    v = np.matrix(np.zeros((12, 1)))
+    for j in range(3):
+        v[j] = M.translation[j]
+        v[j + 3] = M.rotation[j, 0]
+        v[j + 6] = M.rotation[j, 1]
+        v[j + 9] = M.rotation[j, 2]
+    return v
+
+def MotiontoVec(M):
+    v = np.matrix(np.zeros((6, 1)))
+    for j in range(3):
+        v[j] = M.linear[j]
+        v[j + 3] = M.angular[j]
+    return v
+
+
+def SE3FromVec(vect):
+    if vect.shape[0] != 12 or vect.shape[1] != 1 :
+        raise ValueError("SE3FromVect take as input a vector of size 12")
+    placement = SE3.Identity()
+    placement.translation=vect[0:3]
+    rot = placement.rotation
+    if len(rot[:,0].shape) == 1 : # depend if eigenpy.switchToNumpyArray() have been called, FIXME : there should be a better way to check this
+        rot[:,0]=np.asarray(vect[3:6]).reshape(-1)
+        rot[:,1]=np.asarray(vect[6:9]).reshape(-1)
+        rot[:,2]=np.asarray(vect[9:12]).reshape(-1)
+    else :
+        rot[:,0]=vect[3:6]
+        rot[:,1]=vect[6:9]
+        rot[:,2]=vect[9:12]
+    placement.rotation =rot
+    return placement
+
+
+
 import eigenpy
 eigenpy.switchToNumpyMatrix()
 def exportPath(pId, directoryPath):
@@ -339,11 +420,26 @@ scene = 'scene'
 v.client.gui.createScene(scene)
 v.client.gui.addSceneToWindow(scene,0)
 boxId = 0
-def createBox(pos):
+def createBox(position, avoidCollision = False):
+    pos = position[:]
+    if len(pos) == 3:
+        pos = pos + [0.,0.,0.,1.]
     global boxId
     boxId += 1
+    boxsize = 0.05
     bName = scene+"/box"+str(boxId)
-    v.client.gui.addBox(bName,0.05,.05,.05,[1.,0.,0.,1.])
+    if avoidCollision:
+        bName = "box"+str(boxId)
+        print ("name ", bName, pos)
+        boxsize = 0.1
+        ps.client.obstacle.createBox(bName,boxsize,boxsize,boxsize) # x,y,z size
+        v.client.gui.addBox(bName,boxsize,boxsize,boxsize,[1.,0.,0.,1.])
+        ps.client.obstacle.addObstacle(bName,True,False)
+        ps.client.obstacle.moveObstacle(bName, pos)
+        v.client.gui.addToGroup(bName,v.sceneName)
+    # ~ bName = scene+"/box"+str(boxId)
+    else:
+        v.client.gui.addBox(bName,boxsize,boxsize,boxsize,[1.,0.,0.,1.])
     v.client.gui.applyConfiguration(bName,pos)
     v.client.gui.refresh()
 
@@ -354,16 +450,29 @@ pp = PathPlayer (v)
 pps = []
 
 
-    
+def move_table(pos):
+    a = 'planning/table_link'
+    q = v.client.gui.getNodeGlobalTransform(a)
+    q[:len(pos)]=pos
+    v.client.gui.applyConfiguration(a,q)
+    v.client.gui.refresh()
+
+lockedJoints = []
 
 def lock_all_but_arm(arm='left'):
     v(init_conf)
     idx = 0
     for jointName in robot.getAllJointNames():
-        if jointName.find('arm_'+arm) < 0 and jointName != "universe" and jointName != "root_joint":
-            if robot.getJointConfigSize(jointName) == 1 and len(init_conf) > idx:
+        # ~ if jointName.find('arm_'+arm) < 0 and jointName != "universe" and jointName != "root_joint":
+        if (jointName.find('arm_'+arm) < 0 and jointName != "universe" and jointName.find('torso_') < 0) or jointName == "arm_left_5_joint" or jointName == "arm_left_6_joint" or jointName == "arm_left_7_joint" :
+        # ~ if jointName.find('arm_'+arm) < 0:
+            if robot.getJointConfigSize(jointName) >= 1 and len(init_conf) > idx:
+                print ("joint name", jointName)
                 qi = robot.getCurrentConfig()[idx]
-                robot.setJointBounds(jointName, [qi,qi])
+                # ~ robot.setJointBounds(jointName, [qi,qi])
+                global lockedJoints
+                ps.createLockedJoint("name"+jointName, jointName, init_conf[idx:idx+robot.getJointConfigSize(jointName)])
+                lockedJoints += ["name"+jointName]
         idx += robot.getJointConfigSize(jointName)
 
 
@@ -394,7 +503,8 @@ def gen_path():
             ps.solve()
             for i in range(100):
                 ps.optimizePath(ps.numberPaths()-1)
-            if(ps.pathLength(ps.numberPaths()-1)) < 1.5:
+            if(ps.pathLength(ps.numberPaths()-1)) < 1.:
+            # ~ if True:
                 pp(ps.numberPaths()-1)
                 # ~ time.sleep(0.5)
                 pps += [ps.numberPaths()-1]
@@ -405,6 +515,25 @@ def gen_path():
 # ~ def find_reachable_space():
 
 ps.client.problem.setRandomSeed(np.random.randint(10000))
+
+#create boxes
+corner = [-0.25, -0.3, .7425,0.,0.,0.,1.]
+offsetTable = [-0.3,-0.1,0.]
+
+#offset table
+# ~ move_table(offsetTable)
+offsetCorner = [corner[i] + offsetTable[i] for i in range(3)]
+offsetCorner = corner[:]
+#create boxes
+# ~ createBox(offsetCorner,True)
+initz = -0.05
+initx = -0.2
+offsetCorner[2] += initz
+offsetCorner[0] += initx
+for i in range(2):
+    offsetCorner[2] += 0.1
+    print ("pos", offsetCorner)
+    createBox(offsetCorner,True)
 gen_path()
 
 
