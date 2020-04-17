@@ -1,5 +1,5 @@
-# Copyright (c) 2012 CNRS
-# Author: Florent Lamiraux
+# Copyright (c) 2012, 2020, CNRS
+# Author: Florent Lamiraux, Guilhem Saurel
 #
 # This file is part of hpp-rbprm-corba.
 # hpp-rbprm-corba is free software: you can redistribute it
@@ -60,26 +60,18 @@ HPP_ADD_SERVER_PLUGIN(rbprm-corba
   rbprmbuilder.impl.hh
   server.cc
 
+  LINK_DEPENDENCIES
+  hpp-rbprm::hpp-rbprm
+  hpp-corbaserver::hpp-corbaserver
+
   PKG_CONFIG_DEPENDENCIES
-  hpp-rbprm
-  hpp-corbaserver
-  omniORB4
-  hpp-util
-  hpp-rbprm)
+  omniORB4)
 
 ADD_CUSTOM_TARGET(generate_idl_cpp DEPENDS ${ALL_IDL_CPP_STUBS})
 ADD_CUSTOM_TARGET(generate_idl_python DEPENDS ${ALL_IDL_PYTHON_STUBS})
 ADD_DEPENDENCIES (rbprm-corba generate_idl_cpp)
 ADD_DEPENDENCIES (rbprm-corba generate_idl_python)
 TARGET_INCLUDE_DIRECTORIES(rbprm-corba PUBLIC ${CDD_INCLUDE_DIRS})
-
-# Stand alone corba server
-ADD_EXECUTABLE (hpp-rbprm-server hpp-rbprm-corba.cc)
-
-PKG_CONFIG_USE_DEPENDENCY(hpp-rbprm-server hpp-corbaserver)
-PKG_CONFIG_USE_DEPENDENCY(hpp-rbprm-server hpp-pinocchio)
-
-INSTALL (TARGETS hpp-rbprm-server DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 SET(${PROJECT_NAME}_PYTHON_FILES
     __init__.py
@@ -114,7 +106,7 @@ SET(${PROJECT_NAME}_PYTHON_TOOLS
     )
 
 SET(${PROJECT_NAME}_PYTHON_SCENARIOS
-    abstract_contact_generator.py 
+    abstract_contact_generator.py
     abstract_path_planner.py
     anymal_contact_generator.py
     anymal_path_planner.py
@@ -147,7 +139,7 @@ SET(${PROJECT_NAME}_PYTHON_SCENARIOS_DEMOS
     talos_navBauzil_obstacles.py
     talos_plateformes_path.py
     talos_plateformes.py
-    talos_stairs10_path.py 
+    talos_stairs10_path.py
     talos_stairs10.py
     )
 
@@ -184,12 +176,12 @@ SET(${PROJECT_NAME}_PYTHON_SCENARIOS_MEMMO
     talos_stairs10_random.py
     )
 
-# Install python files : 
+# Install python files :
 FOREACH(file ${${PROJECT_NAME}_PYTHON_FILES})
   PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm" ${file})
 ENDFOREACH(file ${${PROJECT_NAME}_PYTHON_FILES})
 
-# /tools 
+# /tools
 FOREACH(file ${${PROJECT_NAME}_PYTHON_TOOLS})
   PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/tools" ${file})
 ENDFOREACH(file ${${PROJECT_NAME}_PYTHON_TOOLS})
@@ -208,8 +200,3 @@ ENDFOREACH(file ${${PROJECT_NAME}_PYTHON_SCENARIOS_DEMOS})
 FOREACH(file ${${PROJECT_NAME}_PYTHON_SCENARIOS_MEMMO})
   PYTHON_INSTALL_ON_SITE("hpp/corbaserver/rbprm/scenarios/memmo" ${file})
 ENDFOREACH(file ${${PROJECT_NAME}_PYTHON_SCENARIOS_MEMMO})
-
-
-
-
-
