@@ -82,6 +82,7 @@ SET(${PROJECT_NAME}_PYTHON_FILES
     rbprmfullbody.py
     rbprmstate.py
     state_alg.py
+    utils.py
     )
 
 SET(${PROJECT_NAME}_PYTHON_TOOLS
