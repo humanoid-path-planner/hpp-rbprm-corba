@@ -9,7 +9,7 @@ class ServerManager:
     """A context to ensure a server is running."""
     def __init__(self, server):
         self.server = server
-        subprocess.run(['killall', self.server])
+        subprocess.run(['/usr/bin/killall', self.server])
 
     def __enter__(self):
         self.process = subprocess.Popen(self.server)
