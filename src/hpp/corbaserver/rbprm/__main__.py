@@ -1,20 +1,21 @@
-import subprocess
-import time
-import atexit
 import argparse
-from importlib import import_module
-import sys
+import atexit
 import os
+import subprocess
+import sys
+import time
+from importlib import import_module
 
+from .utils import ServerManager
 
 # init argument parser
 parser = argparse.ArgumentParser(description="Run a hpp-rbprm scenario. \n"
-                                             "Take care of starting and closing the viewer and the hpp-rbprm-server.")
+                                 "Take care of starting and closing the viewer and the hpp-rbprm-server.")
 parser.add_argument('scenario_name',
                     type=str,
                     help="The name of the scenario script to run. "
                     "If a relative path is given, hpp.corbaserver.rbprm.scenarios is prepended")
-parser.add_argument("-n", "--no_viewer", help="Run rbprm without visualization.",action="store_true")
+parser.add_argument("-n", "--no_viewer", help="Run rbprm without visualization.", action="store_true")
 
 args = parser.parse_args()
 # retrieve argument
@@ -33,44 +34,31 @@ except ImportError:
         print("Cannot import " + scenario_name + ". Check if the path is correct")
         sys.exit(1)
 
-# kill already existing instance of the server
-subprocess.run(["killall", "hpp-rbprm-server"])
-# run the server in background :
-# stdout and stderr outputs of the child process are redirected to devnull (hidden).
-# preexec_fn is used to ignore ctrl-c signal send to the main script (otherwise they are forwarded to the child process)
-process_server = subprocess.Popen("hpp-rbprm-server",
-                                  stdout=subprocess.PIPE,
-                                  stderr=subprocess.DEVNULL,
-                                  preexec_fn=os.setpgrp)
-# register cleanup methods to kill server when exiting python interpreter
-atexit.register(process_server.kill)
+with ServerManager('hpp-rbprm-server'):
+    # do the same for the viewer, exept if --no-viewer flag is set
+    if not args.no_viewer:
+        # TODO: we could also use a ServerManager for gepetto-gui.
+        subprocess.run(["/usr/bin/killall", "gepetto-gui"])
+        process_viewer = subprocess.Popen("gepetto-gui",
+                                          stdout=subprocess.PIPE,
+                                          stderr=subprocess.DEVNULL,
+                                          preexec_fn=os.setpgrp)
+        atexit.register(process_viewer.kill)
 
-# do the same for the viewer, exept if --no-viewer flag is set
-if not args.no_viewer:
-    subprocess.run(["killall", "gepetto-gui"])
-    process_viewer = subprocess.Popen("gepetto-gui",
-                                      stdout=subprocess.PIPE,
-                                      stderr=subprocess.DEVNULL,
-                                      preexec_fn=os.setpgrp)
-    atexit.register(process_viewer.kill)
+    # wait a little for the initialization of the server/viewer
+    time.sleep(3)
 
-
-# wait a little for the initialization of the server/viewer
-time.sleep(3)
-
-# Get ContactGenerator or PathPlanner class from the imported module and run it
-if hasattr(module_scenario, 'ContactGenerator'):
-    print("# Run contact generation script ...")
-    ContactGenerator = getattr(module_scenario, 'ContactGenerator')
-    cg = ContactGenerator()
-    cg.run()
-elif hasattr(module_scenario, 'PathPlanner'):
-    print("# Run guide planning script ...")
-    PathPlanner = getattr(module_scenario, 'PathPlanner')
-    planner = PathPlanner()
-    planner.run()
-else:
-    print("Given script doesn't contain ContactGenerator neither PathPlanner class.")
-    sys.exit(1)
-
-
+    # Get ContactGenerator or PathPlanner class from the imported module and run it
+    if hasattr(module_scenario, 'ContactGenerator'):
+        print("# Run contact generation script ...")
+        ContactGenerator = getattr(module_scenario, 'ContactGenerator')
+        cg = ContactGenerator()
+        cg.run()
+    elif hasattr(module_scenario, 'PathPlanner'):
+        print("# Run guide planning script ...")
+        PathPlanner = getattr(module_scenario, 'PathPlanner')
+        planner = PathPlanner()
+        planner.run()
+    else:
+        print("Given script doesn't contain ContactGenerator neither PathPlanner class.")
+        sys.exit(1)
