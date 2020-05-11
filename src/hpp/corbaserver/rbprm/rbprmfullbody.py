@@ -475,18 +475,21 @@ class FullBody(Robot):
     # \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
     # \param testReachability : if true, check each contact transition with our reachability criterion
     # \param quasiStatic : if True, use our reachability criterion with the quasiStatic constraint
+    # \param erasePreviousStates : if True, the method override the current state list in fullBody,
+    # otherwise it append the results
     def interpolateConfigs(self,
                            configs,
                            robustnessTreshold=0,
                            filterStates=False,
                            testReachability=True,
-                           quasiStatic=False):
+                           quasiStatic=False,
+                           erasePreviousStates=False):
         if (filterStates):
             filt = 1
         else:
             filt = 0
         return self.clientRbprm.rbprm.interpolateConfigs(configs, robustnessTreshold, filt, testReachability,
-                                                         quasiStatic)
+                                                         quasiStatic, erasePreviousStates)
 
     # #
     #

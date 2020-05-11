@@ -389,6 +389,7 @@ module hpp
     /// \param filterStates If different than 0, the resulting state list will be filtered to remove unnecessary states
     /// \param testReachability : if true, check each contact transition with our reachability criterion
     /// \param quasiStatic : if True, use our reachability criterion with the quasiStatic constraint
+    /// \param erasePreviousStates : if True, the method override the current state list in fullBody, otherwise it append the results
     floatSeqSeq interpolateConfigs(in floatSeqSeq configs, in double robustnessTreshold, in unsigned short filterStates,in boolean testReachability, in boolean quasiStatic, in boolean erasePreviousStates) raises (Error);
 
 
