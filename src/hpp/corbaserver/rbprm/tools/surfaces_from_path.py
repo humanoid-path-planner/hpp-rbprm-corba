@@ -96,7 +96,7 @@ def getMergedPhases(seqs):
 def computeRootYawAngleBetwwenConfigs(q0, q1):
     quat0 = Quaternion(q0[6], q0[3], q0[4], q0[5])
     quat1 = Quaternion(q1[6], q1[3], q1[4], q1[5])
-    v_angular = np.array(log3(quat0.matrix() @ quat1.matrix()))
+    v_angular = np.array(log3(quat0.matrix().dot(quat1.matrix())))
     #print ("q_prev : ",q0)
     #print ("q      : ",q1)
     #print ("v_angular = ",v_angular)
