@@ -28,7 +28,8 @@ from numpy import array, matrix
 #  trunk of the robot, one for the range of motion
 class FullBody(Robot):
     # # Constructor
-    def __init__(self, load=True, clientRbprm=None):
+    def __init__(self, robotName = None, rootJointType = None, load = True, client = None, hppcorbaClient = None, clientRbprm=None):
+        Robot.__init__(self, robotName, rootJointType, False, client, hppcorbaClient)
         self.tf_root = "base_link"
         if clientRbprm == None:
             self.clientRbprm = RbprmClient()
@@ -36,27 +37,22 @@ class FullBody(Robot):
             self.clientRbprm = clientRbprm
         self.load = load
         self.limbNames = []
+        if load:
+          self.loadFullBodyModel(robotName, rootJointType)
 
     # # Virtual function to load the fullBody robot model.
-    #
-    # \param urdfName urdf description of the fullBody robot
+    # This method looks for the following class attribute in order to find the files to load:
+    # First it looks for urdfFilename and srdfFilename and use it if available
+    # Otherwise it looks for packageName, urdfName, urdfSuffix, srdfSuffix
+    # \param robotNamethe name of the robot
     # \param rootJointType type of root joint among ("freeflyer", "planar",
     #          "anchor"), WARNING. Currently RB-PRM only considerds freeflyer roots
-    # \param meshPackageName name of the meshpackage from where the robot mesh will be loaded
-    # \param packageName name of the package from where the robot will be loaded
-    # \param urdfSuffix optional suffix for the urdf of the robot package
-    # \param srdfSuffix optional suffix for the srdf of the robot package
-    def loadFullBodyModel(self, urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix, client=None):
-        Robot.__init__(self, urdfName, rootJointType, False, client)
-        self.clientRbprm.rbprm.loadFullBodyRobot(urdfName, rootJointType, packageName, urdfName, urdfSuffix,
-                                                 srdfSuffix,
+    def loadFullBodyModel(self, robotName, rootJointType):
+        urdfFilename, srdfFilename = self.urdfSrdfFilenames () # inherited method from corbaserver.robot
+        print("selected problem: ",self.client.problem.getSelected("problem")[0])
+        self.clientRbprm.rbprm.loadFullBodyRobot(robotName, rootJointType,
+                                                 urdfFilename, srdfFilename,
                                                  self.client.problem.getSelected("problem")[0])
-        self.client.robot.meshPackageName = meshPackageName
-        self.meshPackageName = meshPackageName
-        self.packageName = packageName
-        self.urdfName = urdfName
-        self.urdfSuffix = urdfSuffix
-        self.srdfSuffix = srdfSuffix
         self.octrees = {}
 
     # Virtual function to load the fullBody robot model.
