@@ -26,42 +26,55 @@ from hpp.corbaserver.robot import Robot
 #  trunk of the robot, and a set of robots describe the range of motion of each limb of the robot.
 class Builder(Robot):
     # # Constructor
-    def __init__(self, load=True, clientRbprm=None):
+    def __init__(self, robotName = None, rootJointType = None, load = True, client = None, hppcorbaClient = None, clientRbprm=None):
+        Robot.__init__(self, robotName, rootJointType, False, client, hppcorbaClient)
         self.tf_root = "base_link"
         if clientRbprm is None:
             self.clientRbprm = RbprmClient()
         else:
             self.clientRbprm = clientRbprm
         self.load = load
+        if load:
+          self.loadModel(robotName, rootJointType)
+
+    ## Return urdf and srdf filenames of the roms
+    #
+    def urdfROMFilenames (self):
+        urdfNameRoms = []
+        nameRoms = []
+        if hasattr (self, 'packageName') and hasattr (self,  'urdfNameRom') and \
+           hasattr (self, 'urdfSuffix') :
+            if not isinstance(self.urdfNameRom, list):
+                self.urdfNameRom = [self.urdfNameRom]
+            nameRoms = self.urdfNameRom
+            for urdfName in nameRoms:
+                urdfNameRoms += ["package://" + self.packageName + '/urdf/' + urdfName + self.urdfSuffix + '.urdf']
+        elif hasattr (self, 'urdfFilenameRom'):
+            urdfNameRoms = self.urdfFilenameRom
+            for urdfNameRom in urdfNameRoms:
+              nameRoms += [urdfNameRom.split("/")[-1].rstrip(".urdf")]
+        else :
+            raise RuntimeError (\
+            """instance should have one of the following sets of members
+            - (packageName, urdfNameRom, urdfSuffix),
+            - (urdfFilenameRom)""")
+        return nameRoms, urdfNameRoms
 
     # # Virtual function to load the robot model.
     #
-    # \param urdfName urdf description of the robot trunk,
-    # \param urdfNameroms either a string, or an array of strings, indicating the urdf of the different roms to add.
+    # This method looks for the following class attribute in order to find the files to load:
+    # First it looks for urdfFilename and srdfFilename and use it if available
+    # Otherwise it looks for packageName, urdfName, urdfSuffix, srdfSuffix
+    # \param robotNamethe name of the robot
     # \param rootJointType type of root joint among ("freeflyer", "planar",
-    #        "anchor"),
-    # \param meshPackageName name of the meshpackage from where the robot mesh will be loaded
-    # \param packageName name of the package from where the robot will be loaded
-    # \param urdfSuffix optional suffix for the urdf of the robot package
-    # \param srdfSuffix optional suffix for the srdf of the robot package
-    def loadModel(self, urdfName, urdfNameroms, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix, client=None):
-        Robot.__init__(self, urdfName, rootJointType, False, client=client)
-        if (isinstance(urdfNameroms, list)):
-            for urdfNamerom in urdfNameroms:
-                self.clientRbprm.rbprm.loadRobotRomModel(urdfNamerom, rootJointType, packageName, urdfNamerom,
-                                                         urdfSuffix, srdfSuffix)
-        else:
-            self.clientRbprm.rbprm.loadRobotRomModel(urdfNameroms, rootJointType, packageName, urdfNameroms,
-                                                     urdfSuffix, srdfSuffix)
+    #          "anchor"), WARNING. Currently RB-PRM only considerds freeflyer roots
+    def loadModel(self, robotName, rootJointType):
+        nameRoms, urdfROMFilenames = self.urdfROMFilenames()
+        for i, urdfNameRom in enumerate(urdfROMFilenames):
+            self.clientRbprm.rbprm.loadRobotRomModel(nameRoms[i], rootJointType, urdfNameRom)
         self.clientRbprm.rbprm.initNewProblemSolver()
-        self.clientRbprm.rbprm.loadRobotCompleteModel(urdfName, rootJointType, packageName, urdfName, urdfSuffix,
-                                                      srdfSuffix)
-        self.client.robot.meshPackageName = meshPackageName
-        self.meshPackageName = meshPackageName
-        self.packageName = packageName
-        self.urdfName = urdfName
-        self.urdfSuffix = urdfSuffix
-        self.srdfSuffix = srdfSuffix
+        urdfFilename, srdfFilename = self.urdfSrdfFilenames () # inherited method from corbaserver.robot
+        self.clientRbprm.rbprm.loadRobotCompleteModel(robotName, rootJointType, urdfFilename, srdfFilename)
 
     # # Init RbprmShooter
     #
