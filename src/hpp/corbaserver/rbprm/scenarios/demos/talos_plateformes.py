@@ -11,7 +11,7 @@ class ContactGenerator(TalosContactGenerator):
         # use a model with upscaled collision geometry for the feet
         Robot.urdfSuffix += "_safeFeet"
         self.fullbody = Robot()
-        self.q_ref = self.fullbody.referenceConfig[::] + [0] * self.path_planner.extra_dof
+        self.q_ref = self.fullbody.referenceConfig_legsApart[::] + [0] * self.path_planner.extra_dof
         self.weight_postural = self.fullbody.postureWeights[::] + [0] * self.path_planner.extra_dof
 
     def set_joints_bounds(self):
