@@ -82,14 +82,16 @@ hpp::floatSeq vectorToFloatseq(const hpp::core::vector_t& input) {
   return floats;
 }
 
-void RbprmBuilder::loadRobotRomModel(const char* robotName, const char* rootJointType, const char* packageName,
-                                     const char* modelName, const char* urdfSuffix,
-                                     const char* srdfSuffix) throw(hpp::Error) {
+void RbprmBuilder::loadRobotRomModel(const char* robotName,
+                                     const char* rootJointType,
+                                     const char* urdfName) throw(hpp::Error) {
   try {
     hpp::pinocchio::DevicePtr_t romDevice = pinocchio::Device::create(robotName);
     romDevices_.insert(std::make_pair(robotName, romDevice));
-    hpp::pinocchio::urdf::loadRobotModel(romDevice, std::string(rootJointType), std::string(packageName),
-                                         std::string(modelName), std::string(urdfSuffix), std::string(srdfSuffix));
+    hpp::pinocchio::urdf::loadModel(romDevice, 0, "",
+                                         std::string (rootJointType),
+                                         std::string (urdfName),
+                                         std::string ());
   } catch (const std::exception& exc) {
     hppDout(error, exc.what());
     throw hpp::Error(exc.what());
@@ -97,9 +99,10 @@ void RbprmBuilder::loadRobotRomModel(const char* robotName, const char* rootJoin
   romLoaded_ = true;
 }
 
-void RbprmBuilder::loadRobotCompleteModel(const char* robotName, const char* rootJointType, const char* packageName,
-                                          const char* modelName, const char* urdfSuffix,
-                                          const char* srdfSuffix) throw(hpp::Error) {
+void RbprmBuilder::loadRobotCompleteModel(const char* robotName,
+                                          const char* rootJointType,
+                                          const char* urdfName,
+                                          const char* srdfName) throw(hpp::Error) {
   if (!romLoaded_) {
     std::string err("Rom must be loaded before loading complete model");
     hppDout(error, err);
@@ -107,8 +110,10 @@ void RbprmBuilder::loadRobotCompleteModel(const char* robotName, const char* roo
   }
   try {
     hpp::pinocchio::RbPrmDevicePtr_t device = hpp::pinocchio::RbPrmDevice::create(robotName, romDevices_);
-    hpp::pinocchio::urdf::loadRobotModel(device, std::string(rootJointType), std::string(packageName),
-                                         std::string(modelName), std::string(urdfSuffix), std::string(srdfSuffix));
+    hpp::pinocchio::urdf::loadModel(device, 0, "",
+                                         std::string (rootJointType),
+                                         std::string (urdfName),
+                                         std::string (srdfName));
     // Add device to the planner
     problemSolver()->robot(device);
     problemSolver()->robot()->controlComputation(flag);
