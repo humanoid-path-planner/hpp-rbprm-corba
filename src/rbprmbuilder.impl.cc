@@ -118,13 +118,17 @@ void RbprmBuilder::loadRobotCompleteModel(const char* robotName, const char* roo
   }
 }
 
-void RbprmBuilder::loadFullBodyRobot(const char* robotName, const char* rootJointType, const char* packageName,
-                                     const char* modelName, const char* urdfSuffix, const char* srdfSuffix,
+void RbprmBuilder::loadFullBodyRobot(const char* robotName,
+                                     const char* rootJointType,
+                                     const char* urdfName,
+                                     const char* srdfName,
                                      const char* selectedProblem) throw(hpp::Error) {
   try {
     hpp::pinocchio::DevicePtr_t device = pinocchio::Device::create(robotName);
-    hpp::pinocchio::urdf::loadRobotModel(device, std::string(rootJointType), std::string(packageName),
-                                         std::string(modelName), std::string(urdfSuffix), std::string(srdfSuffix));
+    hpp::pinocchio::urdf::loadModel(device, 0, "",
+                                         std::string (rootJointType),
+                                         std::string (urdfName),
+                                         std::string (srdfName));
     std::string name(selectedProblem);
     fullBodyLoaded_ = true;
     fullBodyMap_.map_[name] = rbprm::RbPrmFullBody::create(device);

@@ -165,8 +165,10 @@ class RbprmBuilder : public virtual POA_hpp::corbaserver::rbprm::RbprmBuilder {
                                       const char* modelName, const char* urdfSuffix,
                                       const char* srdfSuffix) throw(hpp::Error);
 
-  virtual void loadFullBodyRobot(const char* robotName, const char* rootJointType, const char* packageName,
-                                 const char* modelName, const char* urdfSuffix, const char* srdfSuffix,
+  virtual void loadFullBodyRobot(const char* robotName,
+                                 const char* rootJointType,
+                                 const char* urdfName,
+                                 const char* srdfName,
                                  const char* selectedProblem) throw(hpp::Error);
 
   virtual void loadFullBodyRobotFromExistingRobot() throw(hpp::Error);
