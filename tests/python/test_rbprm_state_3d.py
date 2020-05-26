@@ -2,7 +2,7 @@
 # Authors: Pierre Fernbach <pfernbac@laas.fr>
 import unittest
 
-from hpp.corbaserver.rbprm.hyq import Robot
+from hyq_rbprm.hyq import Robot
 from hpp.corbaserver.rbprm.rbprmstate import State, StateHelper
 
 from hpp.corbaserver.rbprm.utils import ServerManager

@@ -19,7 +19,7 @@ class AnymalPathPlanner(AbstractPathPlanner):
         self.robot_node_name = "anymal_trunk"
 
     def load_rbprm(self):
-        from hpp.corbaserver.rbprm.anymal_abstract import Robot
+        from anymal_rbprm.anymal_abstract import Robot
         self.rbprmBuilder = Robot(client=self.hpp_client, clientRbprm=self.rbprm_client)
 
     def set_joints_bounds(self):

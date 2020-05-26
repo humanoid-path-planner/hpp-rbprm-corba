@@ -19,5 +19,5 @@ class HRP2PathPlanner(AbstractPathPlanner):
         self.robot_node_name = "hrp2_trunk_flexible"
 
     def load_rbprm(self):
-        from hpp.corbaserver.rbprm.hrp2_abstract import Robot
+        from hrp2_rbprm.hrp2_abstract import Robot
         self.rbprmBuilder = Robot(client=self.hpp_client, clientRbprm=self.rbprm_client)

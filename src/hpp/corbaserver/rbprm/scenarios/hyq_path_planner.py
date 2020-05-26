@@ -19,7 +19,7 @@ class HyqPathPlanner(AbstractPathPlanner):
         self.robot_node_name = "hyq_trunk_large"
 
     def load_rbprm(self):
-        from hpp.corbaserver.rbprm.hyq_abstract import Robot
+        from hyq_rbprm.hyq_abstract import Robot
         self.rbprmBuilder = Robot(client=self.hpp_client, clientRbprm=self.rbprm_client)
 
     def set_joints_bounds(self):

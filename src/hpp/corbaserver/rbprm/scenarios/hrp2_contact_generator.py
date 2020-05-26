@@ -9,7 +9,7 @@ class HRP2ContactGenerator(AbstractContactGenerator):
         self.robot_node_name = "hrp2_14"
 
     def load_fullbody(self):
-        from hpp.corbaserver.rbprm.hrp2 import Robot
+        from hrp2_rbprm.hrp2 import Robot
         self.fullbody = Robot()
         self.q_ref = self.fullbody.referenceConfig[::] + [0] * self.path_planner.extra_dof
         self.weight_postural = self.fullbody.postureWeights[::] + [0] * self.path_planner.extra_dof
