@@ -88,6 +88,7 @@ SET(${PROJECT_NAME}_PYTHON_FILES
 SET(${PROJECT_NAME}_PYTHON_TOOLS
     affordance_centroids.py
     com_constraints.py
+    constants_and_tools.py
     constraint_to_dae.py
     cwc_trajectory_helper.py
     cwc_trajectory.py
