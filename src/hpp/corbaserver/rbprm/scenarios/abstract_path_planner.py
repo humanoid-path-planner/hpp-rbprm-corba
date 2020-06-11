@@ -156,7 +156,7 @@ class AbstractPathPlanner:
             else:
                 self.ps.addPathOptimizer("RandomShortcut")
 
-    def solve(self):
+    def solve(self, display_roadmap = False):
         """
         Solve the path planning problem.
         q_init and q_goal must have been defined before calling this method
@@ -168,7 +168,10 @@ class AbstractPathPlanner:
         self.ps.setInitialConfig(self.q_init)
         self.ps.addGoalConfig(self.q_goal)
         self.v(self.q_init)
-        t = self.ps.solve()
+        if display_roadmap and self.v.client.gui.getNodeList() is not None:
+            t = self.v.solveAndDisplay("roadmap", 5, 0.001)
+        else:
+            t = self.ps.solve()
         print("Guide planning time : ", t)
 
 
