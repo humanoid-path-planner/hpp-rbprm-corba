@@ -6,7 +6,7 @@ class PathPlanner(TalosPathPlanner):
         from talos_rbprm.talos_abstract import Robot
         Robot.urdfName = "talos_trunk_large"  # load the model with conservative bounding boxes for trunk
         self.robot_node_name = "talos_trunk_large"
-        self.rbprmBuilder = Robot()
+        self.rbprmBuilder = Robot(client=self.hpp_client, clientRbprm=self.rbprm_client)
 
     def init_problem(self):
         super().init_problem()
