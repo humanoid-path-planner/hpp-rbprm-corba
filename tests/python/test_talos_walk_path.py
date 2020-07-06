@@ -19,12 +19,11 @@ class TestTalosWalkPath(unittest.TestCase):
             planner = PathPlanner()
             planner.run()
             ps = planner.ps
-            self.assertEqual(ps.numberPaths(), 2)
-            self.assertEqual(ps.pathLength(0), ps.pathLength(1))
-            self.assertTrue(ps.pathLength(1) > 6.)
-            self.assertTrue(ps.pathLength(1) < 7.)
-            self.assertEqual(planner.q_init, ps.configAtParam(1, 0))
-            self.assertEqual(planner.q_goal, ps.configAtParam(1, ps.pathLength(1)))
+            self.assertEqual(ps.numberPaths(), 1)
+            self.assertTrue(ps.pathLength(0) > 6.)
+            self.assertTrue(ps.pathLength(0) < 7.)
+            self.assertEqual(planner.q_init, ps.configAtParam(0, 0))
+            self.assertEqual(planner.q_goal, ps.configAtParam(0, ps.pathLength(0)))
 
 
 if __name__ == '__main__':
