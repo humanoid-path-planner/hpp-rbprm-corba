@@ -12,8 +12,8 @@ class PathPlanner(TalosPathPlanner):
         self.root_translation_bounds = [-5, 5, -1.5, 1.5, 0.95, 1.3]
         self.init_problem()
 
-        self.q_init[:3] = [0.16, 0.25, 1.14]
-        self.q_goal[:3] = [1.09, 0.25, 1.14]
+        self.q_init[:3] = [0.18, 0.25, 1.14]
+        self.q_goal[:3] = [1.07, 0.25, 1.14]
 
         self.init_viewer("multicontact/plateforme_surfaces",
                          reduce_sizes=[0.18, 0, 0],

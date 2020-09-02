@@ -32,21 +32,14 @@ module hpp
     /// This function can be called several times to include several ROMs (one for each limb)
     /// The device automatically has an anchor joint called "base_joint" as
     /// root joint.
-    /// \param romRobotName the name of the robot range of motion.
-    ///  Load robot model
+    /// \param robotName the name of the robot range of motion,
     /// \param rootJointType type of root joint among "anchor", "freeflyer",
     /// "planar",
-    /// \param packageName Name of the ROS package containing the model,
-    /// \param modelName Name of the package containing the model
-    /// \param urdfSuffix suffix for urdf file,
+    /// \param urdfName name of the urdf file. It may contain
+    ///        "file://", or "package://" prefixes.
     ///
-    /// The ros url are built as follows:
-    /// "package://${packageName}/urdf/${modelName}${urdfSuffix}.urdf"
-    /// "package://${packageName}/srdf/${modelName}${srdfSuffix}.srdf"
-    ///
-    void loadRobotRomModel (in string romRobotName, in string rootJointType,
-             in string packageName, in string modelName,
-             in string urdfSuffix, in string srdfSuffix)
+    void loadRobotRomModel (in string robotName, in string rootJointType,
+    in string urdfName)
       raises (Error);
 
 
@@ -54,39 +47,34 @@ module hpp
 
     /// The device automatically has an anchor joint called "base_joint" as
     /// root joint.
-    /// \param trunkRobotName the name of the robot trunk used for collision.
+    /// \param robotName the name of the robot trunk used for collision,
     /// \param rootJointType type of root joint among "anchor", "freeflyer",
     /// "planar",
-    /// \param packageName Name of the ROS package containing the model,
-    /// \param modelName Name of the package containing the model
-    /// \param urdfSuffix suffix for urdf file,
+    /// \param urdfName name of the urdf file. It may contain
+    ///        "file://", or "package://" prefixes.
+    /// \param srdfName name of the srdf file. It may contain
+    ///        "file://", or "package://" prefixes.
     ///
-    /// The ros url are built as follows:
-    /// "package://${packageName}/urdf/${modelName}${urdfSuffix}.urdf"
-    /// "package://${packageName}/srdf/${modelName}${srdfSuffix}.srdf"
-    ///
-    void loadRobotCompleteModel (in string trunkRobotName, in string rootJointType,
-             in string packageName, in string modelName,
-             in string urdfSuffix, in string srdfSuffix)
+    void loadRobotCompleteModel (in string robotName, in string rootJointType,
+    in string urdfName, in string srdfName)
       raises (Error);
 
+    ///  Load fullbody robot model
+    ///
     /// Create a RbprmFullBody object
     /// The device automatically has an anchor joint called "base_joint" as
     /// root joint.
-    /// \param trunkRobotName the name of the robot trunk used for collision.
+    ///
+    /// \param robotName Name of the robot that is constructed,
     /// \param rootJointType type of root joint among "anchor", "freeflyer",
     /// "planar",
-    /// \param packageName Name of the ROS package containing the model,
-    /// \param modelName Name of the package containing the model
-    /// \param urdfSuffix suffix for urdf file,
+    /// \param urdfName name of the urdf file. It may contain
+    ///        "file://", or "package://" prefixes.
+    /// \param srdfName name of the srdf file. It may contain
+    ///        "file://", or "package://" prefixes.
     ///
-    /// The ros url are built as follows:
-    /// "package://${packageName}/urdf/${modelName}${urdfSuffix}.urdf"
-    /// "package://${packageName}/srdf/${modelName}${srdfSuffix}.srdf"
-    ///
-    void loadFullBodyRobot (in string trunkRobotName, in string rootJointType,
-             in string packageName, in string modelName,
-             in string urdfSuffix, in string srdfSuffix, in string selectedProblem)
+    void loadFullBodyRobot (in string robotName, in string rootJointType,
+       in string urdfName, in string srdfName, in string selectedProblem)
       raises (Error);
 
 		/// Create a RbprmFullBody object

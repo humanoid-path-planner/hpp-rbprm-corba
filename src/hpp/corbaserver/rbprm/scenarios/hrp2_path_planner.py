@@ -2,8 +2,8 @@ from .abstract_path_planner import AbstractPathPlanner
 
 
 class HRP2PathPlanner(AbstractPathPlanner):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, context = None):
+        super().__init__(context)
         # set default bounds to a large workspace on x,y with small interval around reference z value
         self.root_translation_bounds = [-5., 5., -5., 5., 0.5, 0.8]
         # set default used limbs to be both feet
@@ -19,5 +19,5 @@ class HRP2PathPlanner(AbstractPathPlanner):
         self.robot_node_name = "hrp2_trunk_flexible"
 
     def load_rbprm(self):
-        from hpp.corbaserver.rbprm.hrp2_abstract import Robot
-        self.rbprmBuilder = Robot()
+        from hrp2_rbprm.hrp2_abstract import Robot
+        self.rbprmBuilder = Robot(client=self.hpp_client, clientRbprm=self.rbprm_client)

@@ -23,7 +23,7 @@ class AnymalContactGenerator(AbstractContactGenerator):
         self.fullbody.setEndState(self.q_goal, self.end_contacts, normals_end)
 
     def load_fullbody(self):
-        from hpp.corbaserver.rbprm.anymal import Robot
+        from anymal_rbprm.anymal import Robot
         self.fullbody = Robot()
         self.q_ref = self.fullbody.referenceConfig[::] + [0] * self.path_planner.extra_dof
         self.weight_postural = self.fullbody.postureWeights[::] + [0] * self.path_planner.extra_dof

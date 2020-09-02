@@ -1,7 +1,9 @@
 from abc import abstractmethod
 from hpp.gepetto import ViewerFactory, PathPlayer
 from hpp.corbaserver.affordance.affordance import AffordanceTool
-from hpp.corbaserver import ProblemSolver
+from hpp.corbaserver import ProblemSolver, Client
+from hpp.corbaserver import createContext, loadServerPlugin
+from hpp.corbaserver.rbprm import Client as RbprmClient
 
 class AbstractPathPlanner:
 
@@ -13,7 +15,11 @@ class AbstractPathPlanner:
     extra_dof_bounds = None
     robot_node_name = None  # name of the robot in the node list of the viewer
 
-    def __init__(self):
+    def __init__(self, context = None):
+        """
+        Constructor
+        :param context: An optional string that give a name to a corba context instance
+        """
         self.v_max = -1  # bounds on the linear velocity for the root, negative values mean unused
         self.a_max = -1  # bounds on the linear acceleration for the root, negative values mean unused
         self.root_translation_bounds = [0] * 6  # bounds on the root translation position (-x, +x, -y, +y, -z, +z)
@@ -27,6 +33,17 @@ class AbstractPathPlanner:
         self.size_foot_y = 0  # size of the feet along the y axis
         self.q_init = []
         self.q_goal = []
+        self.context = context
+        if context:
+            createContext(context)
+            loadServerPlugin(context, 'rbprm-corba.so')
+            loadServerPlugin(context, 'affordance-corba.so')
+            self.hpp_client = Client(context=context)
+            self.hpp_client.problem.selectProblem(context)
+            self.rbprm_client = RbprmClient(context=context)
+        else:
+            self.hpp_client = None
+            self.rbprm_client = None
 
     @abstractmethod
     def load_rbprm(self):
@@ -107,7 +124,11 @@ class AbstractPathPlanner:
         :param visualize_affordances: list of affordances type to visualize, default to none
         """
         vf = ViewerFactory(self.ps)
-        self.afftool = AffordanceTool()
+        if self.context:
+            self.afftool = AffordanceTool(context=self.context)
+            self.afftool.client.affordance.affordance.resetAffordanceConfig()  # FIXME: this should be called in afftool constructor
+        else:
+            self.afftool = AffordanceTool()
         self.afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
         self.afftool.loadObstacleModel("package://"+env_package + "/urdf/" + env_name + ".urdf",
                                        "planning", vf, reduceSizes=reduce_sizes)
@@ -135,7 +156,7 @@ class AbstractPathPlanner:
             else:
                 self.ps.addPathOptimizer("RandomShortcut")
 
-    def solve(self):
+    def solve(self, display_roadmap = False):
         """
         Solve the path planning problem.
         q_init and q_goal must have been defined before calling this method
@@ -147,7 +168,10 @@ class AbstractPathPlanner:
         self.ps.setInitialConfig(self.q_init)
         self.ps.addGoalConfig(self.q_goal)
         self.v(self.q_init)
-        t = self.ps.solve()
+        if display_roadmap and self.v.client.gui.getNodeList() is not None:
+            t = self.v.solveAndDisplay("roadmap", 5, 0.001)
+        else:
+            t = self.ps.solve()
         print("Guide planning time : ", t)
 
 
