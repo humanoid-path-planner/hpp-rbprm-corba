@@ -113,7 +113,8 @@ class AbstractPathPlanner:
         # sample only configuration with null velocity and acceleration :
         self.ps.setParameter("ConfigurationShooter/sampleExtraDOF", False)
 
-    def init_viewer(self, env_name, env_package="hpp_environments", reduce_sizes=[0, 0, 0], visualize_affordances=[]):
+    def init_viewer(self, env_name, env_package="hpp_environments", reduce_sizes=[0, 0, 0], visualize_affordances=[],
+                    min_area = None):
         """
         Build an instance of hpp-gepetto-viewer from the current problemSolver
         :param env_name: name of the urdf describing the environment
@@ -121,6 +122,7 @@ class AbstractPathPlanner:
         :param reduce_sizes: Distance used to reduce the affordances plan toward the center of the plane
         (in order to avoid putting contacts closes to the edges of the surface)
         :param visualize_affordances: list of affordances type to visualize, default to none
+        :param min_area: list of couple [affordanceType, size]. If provided set the minimal area for each affordance
         """
         vf = ViewerFactory(self.ps)
         if self.context:
@@ -130,11 +132,13 @@ class AbstractPathPlanner:
         else:
             self.afftool = AffordanceTool()
         self.afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
+        if min_area is not None:
+            for (aff_type, min_size) in min_area:
+                self.afftool.setMinimumArea(aff_type, min_size)
         self.afftool.loadObstacleModel("package://" + env_package + "/urdf/" + env_name + ".urdf",
                                        "planning",
                                        vf,
                                        reduceSizes=reduce_sizes)
-
         self.v = vf.createViewer(ghost=True, displayArrows=True)
         self.pp = PathPlayer(self.v)
         for aff_type in visualize_affordances:
