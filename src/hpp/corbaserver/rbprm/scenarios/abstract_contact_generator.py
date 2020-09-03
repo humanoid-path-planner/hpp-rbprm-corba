@@ -83,7 +83,16 @@ class AbstractContactGenerator:
         self.fullbody.setPostureWeights(self.weight_postural)
         self.fullbody.usePosturalTaskContactCreation(use_postural_task)
 
-    def load_limbs(self, heuristic="fixedStep06", analysis="ReferenceConfiguration", nb_samples=None, octree_size=None):
+    def set_rom_filters(self):
+        """
+        Define which type of affordance should be considered to create contact with each limb
+        By default, use "Support" type for all limbs
+        """
+        for limb in self.used_limbs:
+            self.path_planner.rbprmBuilder.setAffordanceFilter(limb, ['Support'])
+
+    def load_limbs(self, heuristic="fixedStep06", analysis="ReferenceConfiguration", nb_samples=None, octree_size=None,
+                   disableEffectorCollision=False):
         """
         Generate the samples used for each limbs in 'used_limbs'
         :param heuristic: the name of the heuristic used,
@@ -93,6 +102,7 @@ class AbstractContactGenerator:
         :param nb_samples: The number of samples for each limb database. Default is set in the Robot python class
         :param octree_size: The size of each cell of the octree. Default is set in the Robot python class
         """
+        self.set_rom_filters()
         self.fullbody.limbs_names = self.used_limbs
         if nb_samples is None:
             nb_samples = self.fullbody.nbSamples
@@ -100,7 +110,8 @@ class AbstractContactGenerator:
             octree_size = self.fullbody.octreeSize
         print("Generate limb DB ...")
         t_start = time.time()
-        self.fullbody.loadAllLimbs(heuristic, analysis, nb_samples, octree_size)
+        self.fullbody.loadAllLimbs(heuristic, analysis, nb_samples, octree_size,
+                                   disableEffectorCollision=disableEffectorCollision)
         t_generate = time.time() - t_start
         print("Databases generated in : " + str(t_generate) + " s")
 
