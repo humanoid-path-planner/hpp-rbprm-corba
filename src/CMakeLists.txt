@@ -119,6 +119,8 @@ SET(${PROJECT_NAME}_PYTHON_SCENARIOS
     __init__.py
     talos_contact_generator.py
     talos_path_planner.py
+    solo_contact_generator.py
+    solo_path_planner.py
     )
 
 SET(${PROJECT_NAME}_PYTHON_SCENARIOS_DEMOS
@@ -143,6 +145,12 @@ SET(${PROJECT_NAME}_PYTHON_SCENARIOS_DEMOS
     talos_plateformes.py
     talos_stairs10_path.py
     talos_stairs10.py
+    talos_stairs15_path.py
+    talos_stairs15.py
+    solo_flatGround_path.py
+    solo_flatGround.py
+    solo_slalom_path.py
+    solo_pallet_path.py
     )
 
 SET(${PROJECT_NAME}_PYTHON_SCENARIOS_MEMMO
