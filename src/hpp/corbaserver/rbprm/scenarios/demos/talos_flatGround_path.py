@@ -1,16 +1,14 @@
 from hpp.corbaserver.rbprm.scenarios.talos_path_planner import TalosPathPlanner
 
 
-class PathPlanner(TalosPathPlanner):
-
+class PathPlanner(TalosPathPlanner, object):
     def init_problem(self):
         self.a_max = 0.1
-        super().init_problem()
+        super(PathPlanner, self).init_problem()
         # greatly increase the number of loops of the random shortcut
         self.ps.setParameter("PathOptimization/RandomShortcut/NumberOfLoops", 50)
         # force the base orientation to follow the direction of motion along the Z axis
         self.ps.setParameter("Kinodynamic/forceYawOrientation", True)
-
 
     def run(self):
         self.init_problem()

@@ -1,9 +1,10 @@
 from abc import abstractmethod
-from hpp.gepetto import ViewerFactory, PathPlayer
+
+from hpp.corbaserver import Client, ProblemSolver, createContext, loadServerPlugin
 from hpp.corbaserver.affordance.affordance import AffordanceTool
-from hpp.corbaserver import ProblemSolver, Client
-from hpp.corbaserver import createContext, loadServerPlugin
 from hpp.corbaserver.rbprm import Client as RbprmClient
+from hpp.gepetto import PathPlayer, ViewerFactory
+
 
 class AbstractPathPlanner:
 
@@ -15,7 +16,7 @@ class AbstractPathPlanner:
     extra_dof_bounds = None
     robot_node_name = None  # name of the robot in the node list of the viewer
 
-    def __init__(self, context = None):
+    def __init__(self, context=None):
         """
         Constructor
         :param context: An optional string that give a name to a corba context instance
@@ -27,7 +28,7 @@ class AbstractPathPlanner:
                                      0.01]  # bounds on the rotation of the root (-z, z, -y, y, -x, x)
         # The rotation bounds are only used during the random sampling, they are not enforced along the path
         self.extra_dof = 6  # number of extra config appended after the joints configuration, 6 to store linear root velocity and acceleration
-        self.mu = 0.5  # friction coefficient between the robot and the environment
+        self.mu = 0.5  # friction coefficient between the robot and the environment
         self.used_limbs = []  # names of the limbs that must be in contact during all the motion
         self.size_foot_x = 0  # size of the feet along the x axis
         self.size_foot_y = 0  # size of the feet along the y axis
@@ -65,12 +66,10 @@ class AbstractPathPlanner:
         By default, set symmetrical bounds on x and y axis and bounds z axis values to 0
         """
         # bounds for the extradof : by default use v_max/a_max on x and y axis and 0 on z axis
-        self.extra_dof_bounds = [-self.v_max, self.v_max,
-                                 -self.v_max, self.v_max,
-                                 0, 0,
-                                 -self.a_max, self.a_max,
-                                 -self.a_max, self.a_max,
-                                 0, 0 ]
+        self.extra_dof_bounds = [
+            -self.v_max, self.v_max, -self.v_max, self.v_max, 0, 0, -self.a_max, self.a_max, -self.a_max, self.a_max,
+            0, 0
+        ]
 
     def set_joints_bounds(self):
         """
@@ -126,14 +125,17 @@ class AbstractPathPlanner:
         vf = ViewerFactory(self.ps)
         if self.context:
             self.afftool = AffordanceTool(context=self.context)
-            self.afftool.client.affordance.affordance.resetAffordanceConfig()  # FIXME: this should be called in afftool constructor
+            self.afftool.client.affordance.affordance.resetAffordanceConfig(
+            )  # FIXME: this should be called in afftool constructor
         else:
             self.afftool = AffordanceTool()
         self.afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
-        self.afftool.loadObstacleModel("package://"+env_package + "/urdf/" + env_name + ".urdf",
-                                       "planning", vf, reduceSizes=reduce_sizes)
+        self.afftool.loadObstacleModel("package://" + env_package + "/urdf/" + env_name + ".urdf",
+                                       "planning",
+                                       vf,
+                                       reduceSizes=reduce_sizes)
 
-        self.v = vf.createViewer(ghost = True, displayArrows=True)
+        self.v = vf.createViewer(ghost=True, displayArrows=True)
         self.pp = PathPlayer(self.v)
         for aff_type in visualize_affordances:
             self.afftool.visualiseAffordances(aff_type, self.v, self.v.color.lightBrown)
@@ -156,7 +158,7 @@ class AbstractPathPlanner:
             else:
                 self.ps.addPathOptimizer("RandomShortcut")
 
-    def solve(self, display_roadmap = False):
+    def solve(self, display_roadmap=False):
         """
         Solve the path planning problem.
         q_init and q_goal must have been defined before calling this method
@@ -173,7 +175,6 @@ class AbstractPathPlanner:
         else:
             t = self.ps.solve()
         print("Guide planning time : ", t)
-
 
     def display_path(self, path_id=-1, dt=0.1):
         """
@@ -223,7 +224,7 @@ class AbstractPathPlanner:
         # define initial and goal position
         self.q_init[:2] = [0, 0]
         self.q_goal[:2] = [1, 0]
-        
+
         self.init_viewer("multicontact/ground", visualize_affordances=["Support"])
         self.init_planner()
         self.solve()
