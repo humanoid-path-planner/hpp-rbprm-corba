@@ -50,6 +50,7 @@
 #include <hpp/rbprm/contact_generation/reachability.hh>
 #include <hpp/pinocchio/urdf/util.hh>
 #include "hpp/rbprm/utils/algorithms.h"
+#include <boost/bind.hpp>
 
 #ifdef PROFILE
 #include "hpp/rbprm/rbprm-profiler.hh"
