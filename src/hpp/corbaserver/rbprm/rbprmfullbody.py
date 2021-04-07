@@ -16,10 +16,11 @@
 # hpp-manipulation-corba.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+from numpy import array, matrix
+
 from hpp.corbaserver.rbprm import Client as RbprmClient
 from hpp.corbaserver.robot import Robot
-from curves import bezier
-from numpy import array, matrix
+from ndcurves import bezier
 
 
 # # Load and handle a RbprmFullbody robot for rbprm planning
@@ -31,7 +32,7 @@ class FullBody(Robot):
     def __init__(self, robotName = None, rootJointType = None, load = True, client = None, hppcorbaClient = None, clientRbprm=None):
         Robot.__init__(self, robotName, rootJointType, False, client, hppcorbaClient)
         self.tf_root = "base_link"
-        if clientRbprm == None:
+        if clientRbprm is None:
             self.clientRbprm = RbprmClient()
         else:
             self.clientRbprm = clientRbprm
