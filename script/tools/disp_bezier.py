@@ -1,13 +1,10 @@
-from curves import bezier, polynomial
-
 from numpy import matrix
-from numpy.linalg import norm
 
-
+from ndcurves import bezier, polynomial
 
 
 def displayBezierCurve(r,curve,step=0.001,color=[0.85, 0.75, 0.15, 1.0],name=None,offset = None):
-    if name==None:
+    if name is None:
         name="bezier_curve"
         list = r.client.gui.getNodeList()
         i=0
