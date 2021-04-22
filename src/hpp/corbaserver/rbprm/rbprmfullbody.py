@@ -50,6 +50,8 @@ class FullBody(Robot):
     #          "anchor"), WARNING. Currently RB-PRM only considerds freeflyer roots
     def loadFullBodyModel(self, robotName, rootJointType):
         urdfFilename, srdfFilename = self.urdfSrdfFilenames () # inherited method from corbaserver.robot
+        if hasattr(self, 'urdfDir'):
+            urdfFilename = urdfFilename.replace('/urdf/', '/%s/' % self.urdfDir)
         print("selected problem: ",self.client.problem.getSelected("problem")[0])
         self.clientRbprm.rbprm.loadFullBodyRobot(robotName, rootJointType,
                                                  urdfFilename, srdfFilename,
