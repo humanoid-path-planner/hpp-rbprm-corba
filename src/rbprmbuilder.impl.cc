@@ -832,9 +832,11 @@ hpp::floatSeq* RbprmBuilder::generateGroundContact(const hpp::Names_t& contactLi
         rotConstraints.push_back(true);
         const pinocchio::Frame effectorFrame = fullBody()->device_->getFrameByName(limb->effector_.name());
         pinocchio::JointPtr_t effectorJoint = limb->effector_.joint();
-        proj->add(core::NumericalConstraint::create(constraints::Position::create(
+        const constraints::DifferentiableFunctionPtr_t& function = constraints::Position::create(
             "", fullBody()->device_, effectorJoint, effectorFrame.pinocchio().placement * globalFrame, localFrame,
-            posConstraints)));
+            posConstraints);
+        constraints::ComparisonTypes_t comp (function->outputDerivativeSize(), constraints::EqualToZero);
+        proj->add(constraints::Implicit::create(function, comp));
         if (limb->contactType_ == hpp::rbprm::_6_DOF) {
           // rotation matrix around z
           value_type theta = 2 * (value_type(rand()) / value_type(RAND_MAX) - 0.5) * M_PI;
@@ -843,9 +845,10 @@ hpp::floatSeq* RbprmBuilder::generateGroundContact(const hpp::Names_t& contactLi
           fcl::Matrix3f rotation =
               r * effectorFrame.pinocchio().placement.rotation().transpose();  // * limb->effector_->initialPosition
                                                                                // ().getRotation();
-          proj->add(core::NumericalConstraint::create(
-              constraints::Orientation::create("", fullBody()->device_, effectorJoint,
-                                               pinocchio::Transform3f(rotation, fcl::Vec3f::Zero()), rotConstraints)));
+          const constraints::DifferentiableFunctionPtr_t& orientation_function = constraints::Orientation::create("", fullBody()->device_, effectorJoint,
+                                               pinocchio::Transform3f(rotation, fcl::Vec3f::Zero()), rotConstraints);
+          constraints::ComparisonTypes_t orientation_comp(orientation_function->outputDerivativeSize(), constraints::EqualToZero);
+          proj->add(constraints::Implicit::create(orientation_function, orientation_comp));
         }
       }
       shooter->shoot(config);
