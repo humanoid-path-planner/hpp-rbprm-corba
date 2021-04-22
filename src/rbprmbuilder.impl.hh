@@ -54,7 +54,7 @@ struct BindShooter {
       /*const hpp::pinocchio::DevicePtr_t& robot,*/ const hpp::core::Problem& problem) {
     affMap_ = problemSolver_->affordanceObjects;
     hpp::pinocchio::RbPrmDevicePtr_t robotcast =
-        boost::static_pointer_cast<hpp::pinocchio::RbPrmDevice>(problem.robot());
+        std::static_pointer_cast<hpp::pinocchio::RbPrmDevice>(problem.robot());
     if (affMap_.map.empty()) {
       throw hpp::Error("No affordances found. Unable to create shooter object.");
     }
@@ -69,7 +69,7 @@ struct BindShooter {
 
   hpp::core::PathValidationPtr_t createPathValidation(const hpp::pinocchio::DevicePtr_t& robot,
                                                       const hpp::pinocchio::value_type& val) {
-    hpp::pinocchio::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::pinocchio::RbPrmDevice>(robot);
+    hpp::pinocchio::RbPrmDevicePtr_t robotcast = std::static_pointer_cast<hpp::pinocchio::RbPrmDevice>(robot);
     affMap_ = problemSolver_->affordanceObjects;
     if (affMap_.map.empty()) {
       throw hpp::Error("No affordances found. Unable to create Path Validaton object.");
@@ -85,7 +85,7 @@ struct BindShooter {
 
   hpp::core::PathValidationPtr_t createDynamicPathValidation(const hpp::pinocchio::DevicePtr_t& robot,
                                                              const hpp::pinocchio::value_type& val) {
-    hpp::pinocchio::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::pinocchio::RbPrmDevice>(robot);
+    hpp::pinocchio::RbPrmDevicePtr_t robotcast = std::static_pointer_cast<hpp::pinocchio::RbPrmDevice>(robot);
     affMap_ = problemSolver_->affordanceObjects;
     if (affMap_.map.empty()) {
       throw hpp::Error("No affordances found. Unable to create Path Validaton object.");
