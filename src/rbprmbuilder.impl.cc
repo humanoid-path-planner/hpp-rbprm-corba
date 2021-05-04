@@ -529,7 +529,7 @@ void RbprmBuilder::setPostureWeights(const hpp::floatSeq& postureWeights) throw(
 void RbprmBuilder::setReferenceEndEffector(const char* romName, const hpp::floatSeq& ref) throw(hpp::Error) {
   std::string name(romName);
   hpp::pinocchio::RbPrmDevicePtr_t device =
-      boost::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(problemSolver()->robot());
+      std::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(problemSolver()->robot());
   if (!device) throw Error("No rbprmDevice in problemSolver");
   if (device->robotRoms_.find(name) == device->robotRoms_.end()) throw Error("Device do not contain this rom ");
   Configuration_t config(dofArrayToConfig(3, ref));
@@ -832,9 +832,11 @@ hpp::floatSeq* RbprmBuilder::generateGroundContact(const hpp::Names_t& contactLi
         rotConstraints.push_back(true);
         const pinocchio::Frame effectorFrame = fullBody()->device_->getFrameByName(limb->effector_.name());
         pinocchio::JointPtr_t effectorJoint = limb->effector_.joint();
-        proj->add(core::NumericalConstraint::create(constraints::Position::create(
+        const constraints::DifferentiableFunctionPtr_t& function = constraints::Position::create(
             "", fullBody()->device_, effectorJoint, effectorFrame.pinocchio().placement * globalFrame, localFrame,
-            posConstraints)));
+            posConstraints);
+        constraints::ComparisonTypes_t comp (function->outputDerivativeSize(), constraints::EqualToZero);
+        proj->add(constraints::Implicit::create(function, comp));
         if (limb->contactType_ == hpp::rbprm::_6_DOF) {
           // rotation matrix around z
           value_type theta = 2 * (value_type(rand()) / value_type(RAND_MAX) - 0.5) * M_PI;
@@ -843,9 +845,10 @@ hpp::floatSeq* RbprmBuilder::generateGroundContact(const hpp::Names_t& contactLi
           fcl::Matrix3f rotation =
               r * effectorFrame.pinocchio().placement.rotation().transpose();  // * limb->effector_->initialPosition
                                                                                // ().getRotation();
-          proj->add(core::NumericalConstraint::create(
-              constraints::Orientation::create("", fullBody()->device_, effectorJoint,
-                                               pinocchio::Transform3f(rotation, fcl::Vec3f::Zero()), rotConstraints)));
+          const constraints::DifferentiableFunctionPtr_t& orientation_function = constraints::Orientation::create("", fullBody()->device_, effectorJoint,
+                                               pinocchio::Transform3f(rotation, fcl::Vec3f::Zero()), rotConstraints);
+          constraints::ComparisonTypes_t orientation_comp(orientation_function->outputDerivativeSize(), constraints::EqualToZero);
+          proj->add(constraints::Implicit::create(orientation_function, orientation_comp));
         }
       }
       shooter->shoot(config);
@@ -1337,24 +1340,24 @@ Names_t* RbprmBuilder::getCollidingObstacleAtConfig(const ::hpp::floatSeq& confi
     std::vector<std::string> res;
     std::string name(limbName);
     // hpp::pinocchio::RbPrmDevicePtr_t rbprmDevice =
-    // boost::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(problemSolver()->robot ());
+    // std::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(problemSolver()->robot ());
     const hpp::pinocchio::DevicePtr_t romDevice = romDevices_[name];
     pinocchio::Configuration_t q = dofArrayToConfig(romDevice, configuration);
     romDevice->currentConfiguration(q);
-    hpp::pinocchio::RbPrmDevicePtr_t rbprmDevice = boost::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(romDevice);
+    hpp::pinocchio::RbPrmDevicePtr_t rbprmDevice = std::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(romDevice);
     RbPrmPathValidationPtr_t rbprmPathValidation_(
-        boost::dynamic_pointer_cast<hpp::rbprm::RbPrmPathValidation>(problemSolver()->problem()->pathValidation()));
+        std::dynamic_pointer_cast<hpp::rbprm::RbPrmPathValidation>(problemSolver()->problem()->pathValidation()));
     rbprmPathValidation_->getValidator()->computeAllContacts(true);
     core::ValidationReportPtr_t report;
     problemSolver()->problem()->configValidations()->validate(q, report);
-    core::RbprmValidationReportPtr_t rbReport = boost::dynamic_pointer_cast<hpp::core::RbprmValidationReport>(report);
+    core::RbprmValidationReportPtr_t rbReport = std::dynamic_pointer_cast<hpp::core::RbprmValidationReport>(report);
     for (std::map<std::string, core::CollisionValidationReportPtr_t>::const_iterator it = rbReport->ROMReports.begin();
          it != rbReport->ROMReports.end(); ++it) {
       if (name == it->first)
       // if (true)
       {
         core::AllCollisionsValidationReportPtr_t romReports =
-            boost::dynamic_pointer_cast<core::AllCollisionsValidationReport>(it->second);
+            std::dynamic_pointer_cast<core::AllCollisionsValidationReport>(it->second);
         if (!romReports) {
           hppDout(warning, "For rom : " << it->first
                                         << " unable to cast in a AllCollisionsValidationReport, did you correctly "
@@ -1389,25 +1392,25 @@ floatSeqSeq* RbprmBuilder::getContactSurfacesAtConfig(const ::hpp::floatSeq& con
     hppDout(notice, "begin getContactSurfacesAtConfig");
     std::string name(limbName);
     // hpp::pinocchio::RbPrmDevicePtr_t rbprmDevice =
-    // boost::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(problemSolver()->robot ());
+    // std::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(problemSolver()->robot ());
     const hpp::pinocchio::DevicePtr_t romDevice = romDevices_[name];
     pinocchio::Configuration_t q = dofArrayToConfig(romDevice, configuration);
     romDevice->currentConfiguration(q);
     RbPrmPathValidationPtr_t rbprmPathValidation_(
-        boost::dynamic_pointer_cast<hpp::rbprm::RbPrmPathValidation>(problemSolver()->problem()->pathValidation()));
+        std::dynamic_pointer_cast<hpp::rbprm::RbPrmPathValidation>(problemSolver()->problem()->pathValidation()));
     rbprmPathValidation_->getValidator()->computeAllContacts(true);
     core::ValidationReportPtr_t report;
     hppDout(notice, "begin collision check");
     problemSolver()->problem()->configValidations()->validate(q, report);
     hppDout(notice, "done.");
-    core::RbprmValidationReportPtr_t rbReport = boost::dynamic_pointer_cast<hpp::core::RbprmValidationReport>(report);
+    core::RbprmValidationReportPtr_t rbReport = std::dynamic_pointer_cast<hpp::core::RbprmValidationReport>(report);
     hppDout(notice, "try to find rom name");
     if (rbReport->ROMReports.find(name) == rbReport->ROMReports.end()) {
       throw std::runtime_error("The given ROM name is not in collision in the given configuration.");
     }
     hppDout(notice, "try to cast report");
     core::AllCollisionsValidationReportPtr_t romReports =
-        boost::dynamic_pointer_cast<core::AllCollisionsValidationReport>(rbReport->ROMReports.at(name));
+        std::dynamic_pointer_cast<core::AllCollisionsValidationReport>(rbReport->ROMReports.at(name));
     if (!romReports) {
       throw std::runtime_error("Error while retrieving collision reports.");
     }
@@ -1416,7 +1419,7 @@ floatSeqSeq* RbprmBuilder::getContactSurfacesAtConfig(const ::hpp::floatSeq& con
     hppDout(notice, "done.");
     // Compute the referencePoint for the given configuration : heuristic used to select a 'best' contact surface:
     hpp::pinocchio::RbPrmDevicePtr_t rbprmDevice =
-        boost::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(problemSolver()->robot());
+        std::dynamic_pointer_cast<hpp::pinocchio::RbPrmDevice>(problemSolver()->robot());
     fcl::Vec3f reference = rbprmDevice->getEffectorReference(name);
     hppDout(notice, "Reference position for rom" << name << " = " << reference);
     // apply transform from currernt config :
@@ -1702,7 +1705,7 @@ hpp::floatSeqSeq* RbprmBuilder::getPathAsBezier(unsigned short pathId) throw(hpp
     PathVectorPtr_t pathVector = problemSolver()->paths()[pathId];
     PathPtr_t path = pathVector->pathAtRank(0);
     // try to cast path as BezierPath :
-    BezierPathPtr_t bezierPath = boost::dynamic_pointer_cast<BezierPath>(path);
+    BezierPathPtr_t bezierPath = std::dynamic_pointer_cast<BezierPath>(path);
     if (!bezierPath)
       throw std::runtime_error("Not a bezier path at index " + boost::lexical_cast<std::string>(pathId));
 

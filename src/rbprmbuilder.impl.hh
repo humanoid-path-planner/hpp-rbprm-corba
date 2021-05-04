@@ -51,10 +51,10 @@ struct BindShooter {
       : shootLimit_(shootLimit), displacementLimit_(displacementLimit) {}
 
   hpp::rbprm::RbPrmShooterPtr_t create(
-      /*const hpp::pinocchio::DevicePtr_t& robot,*/ const hpp::core::Problem& problem) {
+      /*const hpp::pinocchio::DevicePtr_t& robot,*/ const hpp::core::ProblemConstPtr_t& problem) {
     affMap_ = problemSolver_->affordanceObjects;
     hpp::pinocchio::RbPrmDevicePtr_t robotcast =
-        boost::static_pointer_cast<hpp::pinocchio::RbPrmDevice>(problem.robot());
+        std::static_pointer_cast<hpp::pinocchio::RbPrmDevice>(problem->robot());
     if (affMap_.map.empty()) {
       throw hpp::Error("No affordances found. Unable to create shooter object.");
     }
@@ -62,14 +62,14 @@ struct BindShooter {
         hpp::rbprm::RbPrmShooter::create(robotcast, problemSolver_->problem()->collisionObstacles(), affMap_,
                                          romFilter_, affFilter_, shootLimit_, displacementLimit_);
     if (!so3Bounds_.empty()) shooter->BoundSO3(so3Bounds_);
-    shooter->sampleExtraDOF(problem.getParameter("ConfigurationShooter/sampleExtraDOF").boolValue());
-    shooter->ratioWeighted(problem.getParameter("RbprmShooter/ratioWeighted").floatValue());
+    shooter->sampleExtraDOF(problem->getParameter("ConfigurationShooter/sampleExtraDOF").boolValue());
+    shooter->ratioWeighted(problem->getParameter("RbprmShooter/ratioWeighted").floatValue());
     return shooter;
   }
 
   hpp::core::PathValidationPtr_t createPathValidation(const hpp::pinocchio::DevicePtr_t& robot,
                                                       const hpp::pinocchio::value_type& val) {
-    hpp::pinocchio::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::pinocchio::RbPrmDevice>(robot);
+    hpp::pinocchio::RbPrmDevicePtr_t robotcast = std::static_pointer_cast<hpp::pinocchio::RbPrmDevice>(robot);
     affMap_ = problemSolver_->affordanceObjects;
     if (affMap_.map.empty()) {
       throw hpp::Error("No affordances found. Unable to create Path Validaton object.");
@@ -85,7 +85,7 @@ struct BindShooter {
 
   hpp::core::PathValidationPtr_t createDynamicPathValidation(const hpp::pinocchio::DevicePtr_t& robot,
                                                              const hpp::pinocchio::value_type& val) {
-    hpp::pinocchio::RbPrmDevicePtr_t robotcast = boost::static_pointer_cast<hpp::pinocchio::RbPrmDevice>(robot);
+    hpp::pinocchio::RbPrmDevicePtr_t robotcast = std::static_pointer_cast<hpp::pinocchio::RbPrmDevice>(robot);
     affMap_ = problemSolver_->affordanceObjects;
     if (affMap_.map.empty()) {
       throw hpp::Error("No affordances found. Unable to create Path Validaton object.");
