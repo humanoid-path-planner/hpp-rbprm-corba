@@ -2509,7 +2509,7 @@ hpp::floatSeqSeq* RbprmBuilder::generateEffectorBezierArray(unsigned short state
       (void)id;
 #endif
       hppDout(notice, "Add com-rrt path at index : " << id);
-    } catch (std::runtime_error e) {
+    } catch (const std::runtime_error& e) {
       hppDout(notice, "In generateEffectorBezierArray : comRRT failed. ");
       hppDout(notice, "Error = " << e.what());
     }
