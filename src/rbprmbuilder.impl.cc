@@ -38,6 +38,7 @@
 #include <hpp/core/configuration-shooter/uniform.hh>
 #include <hpp/core/collision-validation.hh>
 #include <hpp/core/problem-solver.hh>
+#include <hpp/corbaserver/conversions.hh>
 #include <fstream>
 #include <hpp/rbprm/planner/dynamic-planner.hh>
 #include <hpp/rbprm/planner/rbprm-steering-kinodynamic.hh>
@@ -61,6 +62,9 @@ namespace rbprm {
 
 namespace impl {
 
+using corbaServer::vectorToFloatSeq;
+using corbaServer::toNames_t;
+
 const pinocchio::Computation_t flag =
     static_cast<pinocchio::Computation_t>(pinocchio::JOINT_POSITION | pinocchio::JACOBIAN | pinocchio::COM);
 
@@ -71,16 +75,6 @@ RbprmBuilder::RbprmBuilder()
       bindShooter_(),
       analysisFactory_(0) {
   // NOTHING
-}
-
-hpp::floatSeq vectorToFloatseq(const hpp::core::vector_t& input) {
-  CORBA::ULong size = (CORBA::ULong)input.size();
-  double* dofArray = hpp::floatSeq::allocbuf(size);
-  hpp::floatSeq floats(size, size, dofArray, true);
-  for (std::size_t i = 0; i < size; ++i) {
-    dofArray[i] = input[i];
-  }
-  return floats;
 }
 
 void RbprmBuilder::loadRobotRomModel(const char* robotName,
@@ -187,7 +181,6 @@ hpp::floatSeq* RbprmBuilder::getSampleConfig(const char* limb, unsigned int samp
     throw Error(err.c_str());
   }
   const RbPrmLimbPtr_t& limbPtr = lit->second;
-  hpp::floatSeq* dofArray;
   Eigen::VectorXd config = fullBody()->device_->currentConfiguration();
   if (sampleId > limbPtr->sampleContainer_.samples_.size()) {
     std::string err("Limb " + std::string(limb) + "does not have samples.");
@@ -195,10 +188,7 @@ hpp::floatSeq* RbprmBuilder::getSampleConfig(const char* limb, unsigned int samp
   }
   const sampling::Sample& sample = limbPtr->sampleContainer_.samples_[sampleId];
   config.segment(sample.startRank_, sample.length_) = sample.configuration_;
-  dofArray = new hpp::floatSeq();
-  dofArray->length(_CORBA_ULong(config.rows()));
-  for (std::size_t i = 0; i < _CORBA_ULong(config.rows()); i++) (*dofArray)[(_CORBA_ULong)i] = config[i];
-  return dofArray;
+  return vectorToFloatSeq(config);
 }
 
 hpp::floatSeq* RbprmBuilder::getSamplePosition(const char* limb, unsigned int sampleId) throw(hpp::Error) {
@@ -210,17 +200,12 @@ hpp::floatSeq* RbprmBuilder::getSamplePosition(const char* limb, unsigned int sa
     throw Error(err.c_str());
   }
   const RbPrmLimbPtr_t& limbPtr = lit->second;
-  hpp::floatSeq* dofArray;
   if (sampleId > limbPtr->sampleContainer_.samples_.size()) {
     std::string err("Limb " + std::string(limb) + "does not have samples.");
     throw Error(err.c_str());
   }
   const sampling::Sample& sample = limbPtr->sampleContainer_.samples_[sampleId];
-  const fcl::Vec3f& position = sample.effectorPosition_;
-  dofArray = new hpp::floatSeq();
-  dofArray->length(_CORBA_ULong(3));
-  for (std::size_t i = 0; i < 3; i++) (*dofArray)[(_CORBA_ULong)i] = position[i];
-  return dofArray;
+  return vectorToFloatSeq(sample.effectorPosition_);
 }
 
 typedef Eigen::Matrix<value_type, 4, 3, Eigen::RowMajor> Matrix43;
@@ -1321,14 +1306,7 @@ Names_t* RbprmBuilder::getContactsVariations(unsigned short stateIdFrom, unsigne
     State stateFrom = lastStatesComputed_[stateIdFrom];
     State stateTo = lastStatesComputed_[stateIdTo];
     std::vector<std::string> variations_s = stateTo.contactVariations(stateFrom);
-    CORBA::ULong size = (CORBA::ULong)variations_s.size();
-    char** nameList = Names_t::allocbuf(size);
-    Names_t* variations = new Names_t(size, size, nameList);
-    for (std::size_t i = 0; i < variations_s.size(); ++i) {
-      nameList[i] = (char*)malloc(sizeof(char) * (variations_s[i].length() + 1));
-      strcpy(nameList[i], variations_s[i].c_str());
-    }
-    return variations;
+    return toNames_t(variations_s.begin(), variations_s.end());
   } catch (std::runtime_error& e) {
     throw Error(e.what());
   }
@@ -1373,14 +1351,7 @@ Names_t* RbprmBuilder::getCollidingObstacleAtConfig(const ::hpp::floatSeq& confi
         }
       }
     }
-    CORBA::ULong size = (CORBA::ULong)res.size();
-    char** nameList = Names_t::allocbuf(size);
-    Names_t* variations = new Names_t(size, size, nameList);
-    for (std::size_t i = 0; i < res.size(); ++i) {
-      nameList[i] = (char*)malloc(sizeof(char) * (res[i].length() + 1));
-      strcpy(nameList[i], res[i].c_str());
-    }
-    return variations;
+    return toNames_t(res.begin(), res.end());
   } catch (std::runtime_error& e) {
     throw Error(e.what());
   }
@@ -1637,15 +1608,7 @@ Names_t* RbprmBuilder::getEffectorsTrajectoriesNames(unsigned short pathId) thro
     for (EffectorTrajectoriesMap_t::const_iterator it = map.begin(); it != map.end(); ++it) {
       names.push_back(it->first);
     }
-    // convert names (vector of string) to corba Names_t
-    CORBA::ULong size = (CORBA::ULong)names.size();
-    char** nameList = Names_t::allocbuf(size);
-    Names_t* limbsNames = new Names_t(size, size, nameList);
-    for (std::size_t i = 0; i < names.size(); ++i) {
-      nameList[i] = (char*)malloc(sizeof(char) * (names[i].length() + 1));
-      strcpy(nameList[i], names[i].c_str());
-    }
-    return limbsNames;
+    return toNames_t(names.begin(), names.end());
   } catch (std::runtime_error& e) {
     std::cout << "ERROR " << e.what() << std::endl;
     throw Error(e.what());
@@ -1686,7 +1649,7 @@ hpp::floatSeqSeqSeq* RbprmBuilder::getEffectorTrajectoryWaypoints(unsigned short
       std::size_t i = 1;
       for (bezier_t::t_point_t::const_iterator wit = waypoints.begin(); wit != waypoints.end(); ++wit, ++i) {
         const bezier_t::point_t position = *wit;
-        (*curveWp)[(_CORBA_ULong)i] = vectorToFloatseq(position);
+        vectorToFloatSeq(position, (*curveWp)[(_CORBA_ULong)i]);
       }
       (*res)[(_CORBA_ULong)curveId] = (*curveWp);
     }
@@ -1726,7 +1689,7 @@ hpp::floatSeqSeq* RbprmBuilder::getPathAsBezier(unsigned short pathId) throw(hpp
     // now add the waypoints :
     std::size_t i = 1;
     for (bezier_t::t_point_t::const_iterator wit = waypoints.begin(); wit != waypoints.end(); ++wit, ++i) {
-      (*res)[(_CORBA_ULong)i] = vectorToFloatseq(*wit);
+      vectorToFloatSeq(*wit, (*res)[(_CORBA_ULong)i]);
     }
     return res;
   } catch (std::runtime_error& e) {
@@ -3122,14 +3085,7 @@ Names_t* RbprmBuilder::getAllLimbsNames() throw(hpp::Error) {
     throw std::runtime_error("fullBody not loaded");
   }
   std::vector<std::string> names = rbprm::interpolation::extractEffectorsName(fullBody()->GetLimbs());
-  CORBA::ULong size = (CORBA::ULong)names.size();
-  char** nameList = Names_t::allocbuf(size);
-  Names_t* limbsNames = new Names_t(size, size, nameList);
-  for (std::size_t i = 0; i < names.size(); ++i) {
-    nameList[i] = (char*)malloc(sizeof(char) * (names[i].length() + 1));
-    strcpy(nameList[i], names[i].c_str());
-  }
-  return limbsNames;
+  return toNames_t(names.begin(), names.end());
 }
 
 bool RbprmBuilder::toggleNonContactingLimb(const char* limbName) throw(hpp::Error) {
