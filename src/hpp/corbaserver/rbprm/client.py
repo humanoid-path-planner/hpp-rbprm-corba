@@ -30,14 +30,14 @@ class Client(_Parent):
         'builder': RbprmBuilder,
     }
 
-    def __init__(self, url=None, context="corbaserver"):
+    def __init__(self, url=None, context="corbaserver", port=13331):
         """
     Initialize CORBA and create default clients.
     :param url: URL in the IOR, corbaloc, corbalocs, and corbanames formats.
                 For a remote corba server, use
                 url = "corbaloc:iiop:<host>:<port>/NameService"
     """
-        self._initOrb(url)
+        self._initOrb(url, port)
         self._makeClients("rbprm", self.defaultClients, context)
 
         # self.builder is created by self._makeClients
