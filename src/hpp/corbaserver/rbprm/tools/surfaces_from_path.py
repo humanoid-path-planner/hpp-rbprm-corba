@@ -62,18 +62,33 @@ def getRotationMatrixFromConfigs(configs):
     #print "R in getRotationMatrixFromConfigs : ",R
     return R
 
+def getALlContactsNames(rbprmBuilder, q):
+    step_contacts = []
+    for limb in rbprmBuilder.urdfNameRom:
+        step_contacts += rbprmBuilder.clientRbprm.rbprm.getCollidingObstacleAtConfig(q, limb)
+    return step_contacts
 
 # get contacted surface names at configuration
-def getContactsNames(rbprmBuilder, i, q):
+def getContactsNames(rbprmBuilder, i, q, use_all_limbs=False):
+    if use_all_limbs:
+        return getALlContactsNames(rbprmBuilder, q)
     if i % 2 == LF:  # left leg
         step_contacts = rbprmBuilder.clientRbprm.rbprm.getCollidingObstacleAtConfig(q, rbprmBuilder.lLegId)
     elif i % 2 == RF:  # right leg
         step_contacts = rbprmBuilder.clientRbprm.rbprm.getCollidingObstacleAtConfig(q, rbprmBuilder.rLegId)
     return step_contacts
 
+def getALlContactsIntersections(rbprmBuilder, q):
+    intersections = []
+    for limb in rbprmBuilder.urdfNameRom:
+        intersections += rbprmBuilder.getContactSurfacesAtConfig(q, limb)
+    return intersections
+
 
 # get intersections with the rom and surface at configuration
-def getContactsIntersections(rbprmBuilder, i, q):
+def getContactsIntersections(rbprmBuilder, i, q, use_all_limbs=False):
+    if use_all_limbs:
+        return getALlContactsIntersections(rbprmBuilder, q)
     if i % 2 == LF:  # left leg
         intersections = rbprmBuilder.getContactSurfacesAtConfig(q, rbprmBuilder.lLegId)
     elif i % 2 == RF:  # right leg
@@ -118,7 +133,8 @@ def getSurfacesFromGuideContinuous(rbprmBuilder,
                                    useIntersection=False,
                                    mergeCandidates=False,
                                    max_yaw=0.5,
-                                   max_surface_area=MAX_SURFACE):
+                                   max_surface_area=MAX_SURFACE,
+                                   use_all_limbs=False):
     pathLength = ps.pathLength(pId)  #length of the path
     discretizationStep = 0.01  # step at which we check the colliding surfaces
     #print "path length = ",pathLength
@@ -152,24 +168,42 @@ def getSurfacesFromGuideContinuous(rbprmBuilder,
                     t += 0.0001
                     q = ps.configAtParam(pId, t)
             #print " t in getSurfacesFromGuideContinuous : ",t
-            step_contacts = getContactsNames(rbprmBuilder, i, q)
+            step_contacts = getContactsNames(rbprmBuilder, i, q, use_all_limbs)
             for contact_name in step_contacts:
                 if not contact_name in phase_contacts_names:
                     phase_contacts_names.append(contact_name)
         # end current phase
         # get all the surfaces from the names and add it to seqs:
-        if useIntersection:
-            intersections = getContactsIntersections(rbprmBuilder, i, q)
         phase_surfaces = []
+        if useIntersection:
+            intersections = getContactsIntersections(rbprmBuilder, i, q, use_all_limbs)
+            # First add intersection for the surfaces in contact at the last discretization step
+            for k, name in enumerate(step_contacts):
+                surface = surfaces_dict[name][0]  # [0] because the last vector contain the normal of the surface
+                if area(surface) > max_surface_area:
+                    intersection = intersections[k]
+                    if len(intersection) > 3:
+                        phase_surfaces.append(intersection)
+                else:
+                    phase_surfaces.append(surfaces_dict[name][0])
+            # then add possible small surfaces encountered during the discretization of the path
+            for name in phase_contacts_names:
+                if name not in step_contacts:
+                    phase_surfaces.append(surfaces_dict[name][0])
+        else:
+            # add all the surfaces encountered during the path
+            for name in phase_contacts_names:
+                phase_surfaces.append(surfaces_dict[name][0])
+
         for name in phase_contacts_names:
-            surface = surfaces_dict[name][0]
+            surface = surfaces_dict[name][0] # [0] because the last vector contain the normal of the surface
             if useIntersection and area(surface) > max_surface_area:
                 if name in step_contacts:
                     intersection = intersections[step_contacts.index(name)]
                     if len(intersection) > 3:
                         phase_surfaces.append(intersection)
             else:
-                phase_surfaces.append(surface)  # [0] because the last vector contain the normal of the surface
+                phase_surfaces.append(surface)
         #print "There was "+str(len(phase_contacts_names))+" surfaces in contact during this phase."
         phase_surfaces = sorted(phase_surfaces)  # why is this step required ? without out the lp can fail
         phase_surfaces_array = []  # convert from list to array, we cannot do this before because sorted() require list
