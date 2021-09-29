@@ -86,8 +86,8 @@ def computeIntermediateState(sfrom, sto):
 # \param p 3d position of the point
 # \param n 3d normal of the contact location center
 # \return (State, success) whether the creation was successful, as well as the new state
-def addNewContact(state, limbName, p, n, num_max_sample=0, lockOtherJoints=False):
-    sId = state.cl.addNewContact(state.sId, limbName, p, n, num_max_sample, lockOtherJoints)
+def addNewContact(state, limbName, p, n, num_max_sample=0, lockOtherJoints=False, rotation=[0 for _ in range (4)]):
+    sId = state.cl.addNewContact(state.sId, limbName, p, n, num_max_sample, lockOtherJoints, rotation)
     if (sId != -1):
         return State(state.fullBody, sId=sId), True
     return state, False
