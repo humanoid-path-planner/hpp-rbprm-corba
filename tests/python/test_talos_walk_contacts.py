@@ -12,13 +12,12 @@ class TestTalosWalkContact(unittest.TestCase):
     def test_talos_walk_contacts(self):
         with ServerManager('hpp-rbprm-server'):
             module_scenario = import_module(PATH + ".talos_flatGround")
-            if not hasattr(module_scenario, 'ContactGenerator'):
-                self.assertTrue(False)
+            self.assertTrue(hasattr(module_scenario, 'ContactGenerator'))
             ContactGenerator = getattr(module_scenario, 'ContactGenerator')
             cg = ContactGenerator()
             cg.run()
-            self.assertTrue(len(cg.configs) > 5)
-            self.assertTrue(len(cg.configs) < 10)
+            self.assertGreater(len(cg.configs), 5)
+            self.assertLess(len(cg.configs), 10)
             self.assertEqual(cg.q_init, cg.configs[0])
             self.assertEqual(cg.q_goal, cg.configs[-1])
 

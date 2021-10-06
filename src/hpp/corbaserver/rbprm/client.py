@@ -30,7 +30,7 @@ class Client(_Parent):
         'builder': RbprmBuilder,
     }
 
-    def __init__(self, url=None, context="corbaserver", port=13331):
+    def __init__(self, url=None, context="corbaserver", port=None):
         """
     Initialize CORBA and create default clients.
     :param url: URL in the IOR, corbaloc, corbalocs, and corbanames formats.

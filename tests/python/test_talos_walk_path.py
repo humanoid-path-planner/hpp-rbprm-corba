@@ -13,15 +13,14 @@ class TestTalosWalkPath(unittest.TestCase):
     def test_talos_walk_path(self):
         with ServerManager('hpp-rbprm-server'):
             module_scenario = import_module(PATH + ".talos_flatGround_path")
-            if not hasattr(module_scenario, 'PathPlanner'):
-                self.assertTrue(False)
+            self.assertTrue(hasattr(module_scenario, 'PathPlanner'))
             PathPlanner = getattr(module_scenario, 'PathPlanner')
             planner = PathPlanner()
             planner.run()
             ps = planner.ps
             self.assertEqual(ps.numberPaths(), 1)
-            self.assertTrue(ps.pathLength(0) > 6.)
-            self.assertTrue(ps.pathLength(0) < 7.)
+            self.assertGreater(ps.pathLength(0), 6.)
+            self.assertLess(ps.pathLength(0), 7.)
             self.assertEqual(planner.q_init, ps.configAtParam(0, 0))
             self.assertEqual(planner.q_goal, ps.configAtParam(0, ps.pathLength(0)))
 
