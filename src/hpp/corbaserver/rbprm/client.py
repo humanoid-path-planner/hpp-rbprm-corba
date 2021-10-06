@@ -37,7 +37,7 @@ class Client(_Parent):
                 For a remote corba server, use
                 url = "corbaloc:iiop:<host>:<port>/NameService"
     """
-        self._initOrb(url, port)
+        self._initOrb(url, port=port)
         self._makeClients("rbprm", self.defaultClients, context)
 
         # self.builder is created by self._makeClients
