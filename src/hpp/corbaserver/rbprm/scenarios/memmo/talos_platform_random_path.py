@@ -10,7 +10,7 @@ class PathPlanner(TalosPathPlanner):
     status_filename = "/res/infos.log"
 
     Y_BOUNDS = [0.3, 2.1]
-    Z_VALUE = 0.98
+    Z_VALUE = self.rbprmBuilder.ref_heigh - 0.02
     MAX_ANGLE = 0.4  # radian
 
     def __init__(self):

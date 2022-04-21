@@ -10,20 +10,20 @@ class PathPlanner(TalosPathPlanner):
         self.status_filename = "/res/infos.log"
         self.v_max = 0.5
         self.a_max = 0.5
-        self.radius = 0.3
+        self.radius = 0.2
 
     def set_random_configs(self):
         """
         randomly sample initial and goal configuration :
         """
-        self.q_init[:3] = [0, 0, 1.]
+        self.q_init[:3] = [0, 0, self.rbprmBuilder.ref_height]
         self.q_init[3:7] = [0, 0, 0, 1]
 
         random.seed()
         alpha = random.uniform(0., 2. * np.pi)
         print("Test on a circle, alpha = ", alpha)
         self.q_goal = self.q_init[::]
-        self.q_goal[:3] = [self.radius * np.sin(alpha), -self.radius * np.cos(alpha), 1.]
+        self.q_goal[:3] = [self.radius * np.sin(alpha), -self.radius * np.cos(alpha), self.rbprmBuilder.ref_height]
 
         print("initial root position : ", self.q_init[:3])
         print("final root position : ", self.q_goal[:3])

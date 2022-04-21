@@ -19,11 +19,11 @@ class PathPlanner(TalosPathPlanner):
     # rectangle used to sample position of the floor
     x_floor = [-0.9, 0.05]
     y_floor = [0.8, 1.50]
-    z_floor = 0.98
+    z_floor = self.rbprmBuilder.ref_height - 0.02
     # rectangle used to sample position on the plateform
     x_plat = [1.9, 2.55]
     y_plat = [0.8, 1.50]
-    z_plat = 1.58
+    z_plat = self.rbprmBuilder.ref_height + 0.6
     v_predef = 0.05
     vx = np.matrix([1, 0, 0]).T
 
@@ -107,7 +107,7 @@ class PathPlanner(TalosPathPlanner):
         ]
 
     def run(self):
-        self.root_translation_bounds = [-0.9, 2.55, -0.13, 2., 0.98, 1.62]
+        self.root_translation_bounds = [-0.9, 2.55, -0.13, 2., z_floor - 0.05, z_plat + 0.05]
         self.init_problem()
         self.init_viewer("multicontact/bauzil_stairs", reduce_sizes=[0.11, 0., 0.], visualize_affordances=["Support"])
         self.set_random_configs()
