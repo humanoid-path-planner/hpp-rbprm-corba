@@ -37,7 +37,7 @@ class PathPlanner(TalosPathPlanner):
 
     def run(self):
         self.init_problem()
-        self.init_viewer("multicontact/ground", visualize_affordances=["Support"])
+        self.init_viewer("multicontact/ground")
         self.set_random_configs()
         self.init_planner()
         success = self.ps.client.problem.prepareSolveStepByStep()
