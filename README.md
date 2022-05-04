@@ -1,7 +1,9 @@
 #  Humanoid Path Planner - RBPRM-CORBA module
 
-[![Pipeline status](https://gepgitlab.laas.fr/humanoid-path-planner/hpp-rbprm-corba/badges/master/pipeline.svg)](https://gepgitlab.laas.fr/humanoid-path-planner/hpp-rbprm-corba/commits/master)
-[![Coverage report](https://gepgitlab.laas.fr/humanoid-path-planner/hpp-rbprm-corba/badges/master/coverage.svg?job=doc-coverage)](http://projects.laas.fr/gepetto/doc/humanoid-path-planner/hpp-rbprm-corba/master/coverage/)
+[![Pipeline status](https://gitlab.laas.fr/humanoid-path-planner/hpp-rbprm-corba/badges/master/pipeline.svg)](https://gitlab.laas.fr/humanoid-path-planner/hpp-rbprm-corba/commits/master)
+[![Coverage report](https://gitlab.laas.fr/humanoid-path-planner/hpp-rbprm-corba/badges/master/coverage.svg?job=doc-coverage)](https://gepettoweb.laas.fr/doc/humanoid-path-planner/hpp-rbprm-corba/master/coverage/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/humanoid-path-planner/hpp-rbprm-corba/master.svg)](https://results.pre-commit.ci/latest/github/humanoid-path-planner/hpp-rbprm-corba)
 
 Copyright 2015-2020 LAAS-CNRS
 
@@ -67,42 +69,42 @@ If you are planning to use the visualization tools used by the Gepetto team, alo
   - The planning is decomposed in two phases / scripts. First, a root path is computed (`\*_path.py files`). Then, the contacts are generated along the computed path.
 
   - In order to start a scenario, run:
-  
+
   `python -im hpp.corbaserver.rbprm demos.hyq_darpa`
-  
+
    Replace demos.hyq_darpa with the name of any file in the demos or memmo folder to try different scenarios.
-  
+
   - Once the script have been executed, you can display the results in the viewer (if you installed it):
-  
+
       - If it was a `\*_path.py` script, you can run:
-      
+
           - `planner.play_path()` to display the computed guide path
-          
+
           - `planner.v(planner.q_init)` or `planner.v(planner.q_goal)` to put the robot at the initial / goal position of the planning
-          
+
       - If it was a a contact generation script, you can run:
-      
+
           - `cg.display_sequence()` to display the sequence of configurations in contact computed
-          
+
           - `cg.display_init_config()` or `cg.display_end_config()` to put the robot at the initial / final whole body configuration
-          
+
           - `cg.v(cg.configs[i])` to display the i-th wholebody configuration of the sequence
-          
+
           - `cg.play_guide_path()` to display the guide path
 
 
 ## Creating a new scenario script
 
-Start from one of the scripts in the scenarios/demos folder, eg `talos_flatGround.py`. 
+Start from one of the scripts in the scenarios/demos folder, eg `talos_flatGround.py`.
 
 * All the `\*_path.py` scripts must define a class called `PathPlanner` that inherit from one of the `{robot}_path_planner` classes defined in the scenarios folder.
-    
+
     * In the run() method, define the environment used and the initial/goal position
-    
+
     * If further customization is needed, override the required methods from the parent class.
-    
+
 * All the contact generation scripts must define a class called `ContactGenerator` that inherit from one of the `{robot}_contact_generator` classes defined in the scenarios folder.
 
-    * In the constructor of this class, the parent constructor must be called with an instance of the desired `PathPlanner` class, defining the environment and the guide trajectory. 
-    
+    * In the constructor of this class, the parent constructor must be called with an instance of the desired `PathPlanner` class, defining the environment and the guide trajectory.
+
     * This class may override any method from the parent class in order to change the default settings/choices regarding the contact generation
