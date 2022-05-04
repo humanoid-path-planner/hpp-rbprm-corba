@@ -10,11 +10,13 @@ from hpp.corbaserver.rbprm.utils import ServerManager
 
 class TestRBPRMstate6D(unittest.TestCase):
     def test_contacts_6d(self):
-        with ServerManager('hpp-rbprm-server'):
+        with ServerManager("hpp-rbprm-server"):
             fullbody = Robot()
             fullbody.client.robot.setDimensionExtraConfigSpace(6)
             fullbody.setJointBounds("root_joint", [-10, 10, -10, 10, -10, 10])
-            fullbody.client.robot.setExtraConfigSpaceBounds([-10, 10, -10, 10, -10, 10, -10, 10, -10, 10, -10, 10])
+            fullbody.client.robot.setExtraConfigSpaceBounds(
+                [-10, 10, -10, 10, -10, 10, -10, 10, -10, 10, -10, 10]
+            )
             fullbody.loadAllLimbs("static", nbSamples=10000)
             q = fullbody.referenceConfig[::] + [0] * 6
             fullbody.setCurrentConfig(q)
@@ -69,7 +71,9 @@ class TestRBPRMstate6D(unittest.TestCase):
 
             # try lockOtherJoints:
             p = [0.1, -0.085, 0.002]
-            state4, success = StateHelper.addNewContact(state, fullbody.rLegId, p, n, lockOtherJoints=True)
+            state4, success = StateHelper.addNewContact(
+                state, fullbody.rLegId, p, n, lockOtherJoints=True
+            )
             self.assertTrue(success)
             self.assertTrue(state4.isLimbInContact(fullbody.rLegId))
             self.assertTrue(state4.isLimbInContact(fullbody.lLegId))
@@ -81,7 +85,9 @@ class TestRBPRMstate6D(unittest.TestCase):
 
             # try with a rotation
             rot = [0.259, 0, 0, 0.966]
-            state5, success = StateHelper.addNewContact(state, fullbody.rLegId, p, n, rotation=rot)
+            state5, success = StateHelper.addNewContact(
+                state, fullbody.rLegId, p, n, rotation=rot
+            )
             self.assertTrue(success)
             self.assertTrue(state5.isLimbInContact(fullbody.rLegId))
             self.assertTrue(state5.isLimbInContact(fullbody.lLegId))
@@ -92,5 +98,5 @@ class TestRBPRMstate6D(unittest.TestCase):
                 self.assertAlmostEqual(rf_pose[i + 3], rot[i], 3)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

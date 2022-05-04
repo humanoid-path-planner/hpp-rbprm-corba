@@ -1,4 +1,4 @@
-#!/bin/bash         
+#!/bin/bash
 
 gepetto-gui &
 hpp-rbprm-server &

@@ -6,91 +6,118 @@ from hpp.gepetto import Viewer
 import time
 import omniORB.any
 
-rootJointType = 'freeflyer'
-packageName = 'hpp-rbprm-corba'
-meshPackageName = 'hpp-rbprm-corba'
+rootJointType = "freeflyer"
+packageName = "hpp-rbprm-corba"
+meshPackageName = "hpp-rbprm-corba"
 # URDF file describing the trunk of the robot HyQ
-urdfName = 'hyq_trunk_large'
+urdfName = "hyq_trunk_large"
 # URDF files describing the reachable workspace of each limb of HyQ
-urdfNameRom = ['hyq_lhleg_rom','hyq_lfleg_rom','hyq_rfleg_rom','hyq_rhleg_rom']
+urdfNameRom = ["hyq_lhleg_rom", "hyq_lfleg_rom", "hyq_rfleg_rom", "hyq_rhleg_rom"]
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = omniORB.any.to_any(0.2);
-aMax = omniORB.any.to_any(0.1);
+vMax = omniORB.any.to_any(0.2)
+aMax = omniORB.any.to_any(0.1)
 extraDof = 6
 # Creating an instance of the helper class, and loading the robot
-rbprmBuilder = Builder ()
-rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-rbprmBuilder.setJointBounds ("base_joint_xyz", [-5,5, -1.5, 1.5, 0.5, 0.8])
+rbprmBuilder = Builder()
+rbprmBuilder.loadModel(
+    urdfName,
+    urdfNameRom,
+    rootJointType,
+    meshPackageName,
+    packageName,
+    urdfSuffix,
+    srdfSuffix,
+)
+rbprmBuilder.setJointBounds("base_joint_xyz", [-5, 5, -1.5, 1.5, 0.5, 0.8])
 # The following lines set constraint on the valid configurations:
 # a configuration is valid only if all limbs can create a contact ...
-rbprmBuilder.setFilter(['hyq_rhleg_rom', 'hyq_lfleg_rom', 'hyq_rfleg_rom','hyq_lhleg_rom'])
-rbprmBuilder.setAffordanceFilter('hyq_rhleg_rom', ['Support'])
-rbprmBuilder.setAffordanceFilter('hyq_rfleg_rom', ['Support',])
-rbprmBuilder.setAffordanceFilter('hyq_lhleg_rom', ['Support'])
-rbprmBuilder.setAffordanceFilter('hyq_lfleg_rom', ['Support',])
+rbprmBuilder.setFilter(
+    ["hyq_rhleg_rom", "hyq_lfleg_rom", "hyq_rfleg_rom", "hyq_lhleg_rom"]
+)
+rbprmBuilder.setAffordanceFilter("hyq_rhleg_rom", ["Support"])
+rbprmBuilder.setAffordanceFilter(
+    "hyq_rfleg_rom",
+    [
+        "Support",
+    ],
+)
+rbprmBuilder.setAffordanceFilter("hyq_lhleg_rom", ["Support"])
+rbprmBuilder.setAffordanceFilter(
+    "hyq_lfleg_rom",
+    [
+        "Support",
+    ],
+)
 # We also bound the rotations of the torso.
-rbprmBuilder.boundSO3([-0.4,0.4,-3,3,-3,3])
+rbprmBuilder.boundSO3([-0.4, 0.4, -3, 3, -3, 3])
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
-rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-0.2,0.2,-0.2,0.2,0,0,0,0,0,0,0,0])
+rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds(
+    [-0.2, 0.2, -0.2, 0.2, 0, 0, 0, 0, 0, 0, 0, 0]
+)
 
 # Creating an instance of HPP problem solver and the viewer
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
-ps = ProblemSolver( rbprmBuilder )
-ps.client.problem.setParameter("aMax",aMax)
-ps.client.problem.setParameter("vMax",vMax)
-r = Viewer (ps)
+
+ps = ProblemSolver(rbprmBuilder)
+ps.client.problem.setParameter("aMax", aMax)
+ps.client.problem.setParameter("vMax", vMax)
+r = Viewer(ps)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
-afftool = AffordanceTool ()
-afftool.loadObstacleModel (packageName, "ground", "planning", r)
-#r.loadObstacleModel (packageName, "ground", "planning")
-afftool.visualiseAffordances('Support', r, [0.25, 0.5, 0.5])
-r.addLandmark(r.sceneName,1)
+
+afftool = AffordanceTool()
+afftool.loadObstacleModel(packageName, "ground", "planning", r)
+# r.loadObstacleModel (packageName, "ground", "planning")
+afftool.visualiseAffordances("Support", r, [0.25, 0.5, 0.5])
+r.addLandmark(r.sceneName, 1)
 
 # Setting initial and goal configurations
-q_init = rbprmBuilder.getCurrentConfig ();
-q_init [0:3] = [-2, 0, 0.63]; rbprmBuilder.setCurrentConfig (q_init); r (q_init)
-q_goal = q_init [::]
+q_init = rbprmBuilder.getCurrentConfig()
+q_init[0:3] = [-2, 0, 0.63]
+rbprmBuilder.setCurrentConfig(q_init)
+r(q_init)
+q_goal = q_init[::]
 
-#q_goal[0:3]=[2,0,0.63]#position easy
-q_goal[0:3]=[2,0,0.63]#position easy
-#q_goal [0:3] = [4, 0, 0.71]
-#q_goal[7:10]=[2,0,0.9]#velocity
-#q_goal[7:10]=[1,0,0]#velocity
-r (q_goal)
-#~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
+# q_goal[0:3]=[2,0,0.63]#position easy
+q_goal[0:3] = [2, 0, 0.63]  # position easy
+# q_goal [0:3] = [4, 0, 0.71]
+# q_goal[7:10]=[2,0,0.9]#velocity
+# q_goal[7:10]=[1,0,0]#velocity
+r(q_goal)
+# ~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
 
 # Choosing a path optimizer
-ps.setInitialConfig (q_init)
-ps.addGoalConfig (q_goal)
+ps.setInitialConfig(q_init)
+ps.addGoalConfig(q_goal)
 # Choosing RBPRM shooter and path validation methods.
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
-# Choosing kinodynamic methods : 
+ps.client.problem.selectPathValidation("RbprmPathValidation", 0.05)
+# Choosing kinodynamic methods :
 ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
 ps.selectPathPlanner("DynamicPlanner")
-ps.selectPathProjector('Progressive',0.05)
+ps.selectPathProjector("Progressive", 0.05)
 
-#solve the problem :
+# solve the problem :
 r(q_init)
-#ps.client.problem.prepareSolveStepByStep()
-#ps.client.problem.executeOneStep()
+# ps.client.problem.prepareSolveStepByStep()
+# ps.client.problem.executeOneStep()
 
-ps.solve ()
+ps.solve()
 
 
 # Playing the computed path
 from hpp.gepetto import PathPlayer
-pp = PathPlayer (rbprmBuilder.client.basic, r)
-pp.dt=0.03
-#r.client.gui.removeFromGroup("rm0",r.sceneName)
-pp.displayVelocityPath(0)
-#display path
-#pp (0)
 
-#display path with post-optimisation
+pp = PathPlayer(rbprmBuilder.client.basic, r)
+pp.dt = 0.03
+# r.client.gui.removeFromGroup("rm0",r.sceneName)
+pp.displayVelocityPath(0)
+# display path
+# pp (0)
+
+# display path with post-optimisation
 """
 r.client.gui.removeFromGroup("path_0_root",r.sceneName)
 pp.displayVelocityPath(1)
@@ -107,7 +134,6 @@ for i in range(1,10):
     pp.displayVelocityPath(i+1)
     #time.sleep(2)
 """
-
 
 
 """
@@ -127,4 +153,3 @@ r.client.gui.addToGroup("c2",r.sceneName)
 
 
 """
-

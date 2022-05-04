@@ -87,7 +87,7 @@ f.close()
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 #~ pp.fromFile("/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
-#~ 
+#~
 #~ pp (2)
 #~ pp (0)
 

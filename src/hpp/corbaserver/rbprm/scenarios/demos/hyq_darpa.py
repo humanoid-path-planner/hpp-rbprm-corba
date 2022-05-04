@@ -11,7 +11,7 @@ class ContactGenerator(HyqContactGenerator):
             self.fullbody.rLegId: "fixedStep04",
             self.fullbody.lLegId: "fixedStep04",
             self.fullbody.rArmId: "static",
-            self.fullbody.lArmId: "static"
+            self.fullbody.lArmId: "static",
         }
         super().load_limbs(dict_heuristic, "ReferenceConfiguration")
 

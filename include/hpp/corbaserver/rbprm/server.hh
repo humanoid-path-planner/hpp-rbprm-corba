@@ -21,7 +21,6 @@
 #define HPP_RBPRM_CORBA_SERVER_HH
 
 #include <hpp/corba/template/server.hh>
-
 #include <hpp/corbaserver/problem-solver-map.hh>
 #include <hpp/corbaserver/rbprm/config.hh>
 #include <hpp/corbaserver/server-plugin.hh>
@@ -39,11 +38,12 @@ class HPP_RBPRM_CORBA_DLLAPI Server : public corbaServer::ServerPlugin {
 
   /// Start corba server
   /// Call hpp::corba::Server <impl::Problem>::startCorbaServer
-  void startCorbaServer(const std::string& contextId, const std::string& contextKind);
+  void startCorbaServer(const std::string& contextId,
+                        const std::string& contextKind);
 
   std::string name() const;
 
-  ::CORBA::Object_ptr servant (const std::string& name) const;
+  ::CORBA::Object_ptr servant(const std::string& name) const;
 
  public:
   corba::Server<impl::RbprmBuilder>* rbprmBuilder_;

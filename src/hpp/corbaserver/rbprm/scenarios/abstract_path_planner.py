@@ -21,15 +21,33 @@ class AbstractPathPlanner:
         Constructor
         :param context: An optional string that give a name to a corba context instance
         """
-        self.v_max = -1  # bounds on the linear velocity for the root, negative values mean unused
-        self.a_max = -1  # bounds on the linear acceleration for the root, negative values mean unused
-        self.root_translation_bounds = [0] * 6  # bounds on the root translation position (-x, +x, -y, +y, -z, +z)
-        self.root_rotation_bounds = [-3.14, 3.14, -0.01, 0.01, -0.01,
-                                     0.01]  # bounds on the rotation of the root (-z, z, -y, y, -x, x)
-        # The rotation bounds are only used during the random sampling, they are not enforced along the path
-        self.extra_dof = 6  # number of extra config appended after the joints configuration, 6 to store linear root velocity and acceleration
-        self.mu = 0.5  # friction coefficient between the robot and the environment
-        self.used_limbs = []  # names of the limbs that must be in contact during all the motion
+        # bounds on the linear velocity for the root, negative values mean unused
+        self.v_max = -1
+        # bounds on the linear acceleration for the root, negative values mean unused
+        self.a_max = -1
+        self.root_translation_bounds = [
+            # bounds on the root translation position (-x, +x, -y, +y, -z, +z)
+            0
+        ] * 6
+        # bounds on the rotation of the root (-z, z, -y, y, -x, x)
+        self.root_rotation_bounds = [
+            -3.14,
+            3.14,
+            -0.01,
+            0.01,
+            -0.01,
+            0.01,
+        ]
+        # The rotation bounds are only used during the random sampling, they are not
+        # enforced along the path.
+
+        # number of extra config appended after the joints configuration, 6 to store
+        # linear root velocity and acceleration.
+        self.extra_dof = 6
+        # friction coefficient between the robot and the environment
+        self.mu = 0.5
+        # names of the limbs that must be in contact during all the motion
+        self.used_limbs = []
         self.size_foot_x = 0  # size of the feet along the x axis
         self.size_foot_y = 0  # size of the feet along the y axis
         self.q_init = []
@@ -37,8 +55,8 @@ class AbstractPathPlanner:
         self.context = context
         if context:
             createContext(context)
-            loadServerPlugin(context, 'rbprm-corba.so')
-            loadServerPlugin(context, 'affordance-corba.so')
+            loadServerPlugin(context, "rbprm-corba.so")
+            loadServerPlugin(context, "affordance-corba.so")
             self.hpp_client = Client(context=context)
             self.hpp_client.problem.selectProblem(context)
             self.rbprm_client = RbprmClient(context=context)
@@ -49,7 +67,8 @@ class AbstractPathPlanner:
     @abstractmethod
     def load_rbprm(self):
         """
-        Build an rbprmBuilder instance for the correct robot and initialize it's extra config size
+        Build an rbprmBuilder instance for the correct robot and initialize it's extra
+        config size.
         """
         pass
 
@@ -63,17 +82,30 @@ class AbstractPathPlanner:
     def compute_extra_config_bounds(self):
         """
         Compute extra dof bounds from the current values of v_max and a_max
-        By default, set symmetrical bounds on x and y axis and bounds z axis values to 0
+        By default, set symmetrical bounds on x and y axis and bounds z axis values to
+        0.
         """
-        # bounds for the extradof : by default use v_max/a_max on x and y axis and 0 on z axis
+        # bounds for the extradof : by default use v_max/a_max on x and y axis and 0 on
+        # z axis.
         self.extra_dof_bounds = [
-            -self.v_max, self.v_max, -self.v_max, self.v_max, 0, 0, -self.a_max, self.a_max, -self.a_max, self.a_max,
-            0, 0
+            -self.v_max,
+            self.v_max,
+            -self.v_max,
+            self.v_max,
+            0,
+            0,
+            -self.a_max,
+            self.a_max,
+            -self.a_max,
+            self.a_max,
+            0,
+            0,
         ]
 
     def set_joints_bounds(self):
         """
-        Set the root translation and rotation bounds as well as the the extra dofs bounds
+        Set the root translation and rotation bounds as well as the the extra dofs
+        bounds.
         """
         self.rbprmBuilder.setJointBounds("root_joint", self.root_translation_bounds)
         self.rbprmBuilder.boundSO3(self.root_rotation_bounds)
@@ -81,18 +113,21 @@ class AbstractPathPlanner:
 
     def set_rom_filters(self):
         """
-        Define which ROM must be in collision at all time and with which kind of affordances
-        By default it set all the roms in used_limbs to be in contact with 'support' affordances
+        Define which ROM must be in collision at all time and with which kind of
+        affordances.
+        By default it set all the roms in used_limbs to be in contact with 'support'
+        affordances.
         """
         self.rbprmBuilder.setFilter(self.used_limbs)
         for limb in self.used_limbs:
-            self.rbprmBuilder.setAffordanceFilter(limb, ['Support'])
+            self.rbprmBuilder.setAffordanceFilter(limb, ["Support"])
 
     def init_problem(self):
         """
         Load the robot, set the bounds and the ROM filters and then
         Create a ProblemSolver instance and set the default parameters.
-        The values of v_max, a_max, mu, size_foot_x and size_foot_y must be defined before calling this method
+        The values of v_max, a_max, mu, size_foot_x and size_foot_y must be defined
+        before calling this method.
         """
         self.load_rbprm()
         self.set_configurations()
@@ -113,32 +148,44 @@ class AbstractPathPlanner:
         # sample only configuration with null velocity and acceleration :
         self.ps.setParameter("ConfigurationShooter/sampleExtraDOF", False)
 
-    def init_viewer(self, env_name, env_package="hpp_environments", reduce_sizes=[0, 0, 0], visualize_affordances=[],
-                    min_area = None):
+    def init_viewer(
+        self,
+        env_name,
+        env_package="hpp_environments",
+        reduce_sizes=[0, 0, 0],
+        visualize_affordances=[],
+        min_area=None,
+    ):
         """
         Build an instance of hpp-gepetto-viewer from the current problemSolver
         :param env_name: name of the urdf describing the environment
-        :param env_package: name of the package containing this urdf (default to hpp_environments)
-        :param reduce_sizes: Distance used to reduce the affordances plan toward the center of the plane
+        :param env_package: name of the package containing this urdf (default to
+        hpp_environments).
+        :param reduce_sizes: Distance used to reduce the affordances plan toward the
+        center of the plane.
         (in order to avoid putting contacts closes to the edges of the surface)
-        :param visualize_affordances: list of affordances type to visualize, default to none
-        :param min_area: list of couple [affordanceType, size]. If provided set the minimal area for each affordance
+        :param visualize_affordances: list of affordances type to visualize, default to
+        none.
+        :param min_area: list of couple [affordanceType, size]. If provided set the
+        minimal area for each affordance.
         """
         vf = ViewerFactory(self.ps)
         if self.context:
             self.afftool = AffordanceTool(context=self.context)
-            self.afftool.client.affordance.affordance.resetAffordanceConfig(
-            )  # FIXME: this should be called in afftool constructor
+            # FIXME: this should be called in afftool constructor
+            self.afftool.client.affordance.affordance.resetAffordanceConfig()
         else:
             self.afftool = AffordanceTool()
-        self.afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
+        self.afftool.setAffordanceConfig("Support", [0.5, 0.03, 0.00005])
         if min_area is not None:
             for (aff_type, min_size) in min_area:
                 self.afftool.setMinimumArea(aff_type, min_size)
-        self.afftool.loadObstacleModel("package://" + env_package + "/urdf/" + env_name + ".urdf",
-                                       "planning",
-                                       vf,
-                                       reduceSizes=reduce_sizes)
+        self.afftool.loadObstacleModel(
+            "package://" + env_package + "/urdf/" + env_name + ".urdf",
+            "planning",
+            vf,
+            reduceSizes=reduce_sizes,
+        )
         self.v = vf.createViewer(ghost=True, displayArrows=True)
         self.pp = PathPlayer(self.v)
         for aff_type in visualize_affordances:
@@ -148,7 +195,8 @@ class AbstractPathPlanner:
         """
         Select the rbprm methods, and the kinodynamic ones if required
         :param kinodynamic: if True, also select the kinodynamic methods
-        :param optimize: if True, add randomShortcut path optimizer (or randomShortcutDynamic if kinodynamic is also True)
+        :param optimize: if True, add randomShortcut path optimizer (or
+        randomShortcutDynamic if kinodynamic is also True).
         """
         self.ps.selectConfigurationShooter("RbprmShooter")
         self.ps.selectPathValidation("RbprmPathValidation", 0.05)
@@ -220,7 +268,8 @@ class AbstractPathPlanner:
     @abstractmethod
     def run(self):
         """
-        Must be defined in the child class to run all the methods with the correct arguments.
+        Must be defined in the child class to run all the methods with the correct
+        arguments.
         """
         # example of definition:
         """

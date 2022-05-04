@@ -1,5 +1,4 @@
 from hpp.corbaserver.rbprm.scenarios.talos_path_planner import TalosPathPlanner
-import numpy as np
 
 
 class PathPlanner(TalosPathPlanner):
@@ -8,7 +7,9 @@ class PathPlanner(TalosPathPlanner):
 
     def load_rbprm(self):
         from talos_rbprm.talos_abstract import Robot
-        Robot.urdfName = "talos_trunk_large"  # load the model with conservative bounding boxes for trunk
+
+        # load the model with conservative bounding boxes for trunk
+        Robot.urdfName = "talos_trunk_large"
         self.robot_node_name = "talos_trunk_large"
         self.rbprmBuilder = Robot()
 
@@ -23,9 +24,16 @@ class PathPlanner(TalosPathPlanner):
         """
         randomly sample initial and goal configuration :
         """
-        from hpp.corbaserver.rbprm.tools.sample_root_config import generate_random_conf_without_orientation
-        self.q_init = generate_random_conf_without_orientation(self.rbprmBuilder, self.root_translation_bounds)
-        self.q_goal = generate_random_conf_without_orientation(self.rbprmBuilder, self.root_translation_bounds)
+        from hpp.corbaserver.rbprm.tools.sample_root_config import (
+            generate_random_conf_without_orientation,
+        )
+
+        self.q_init = generate_random_conf_without_orientation(
+            self.rbprmBuilder, self.root_translation_bounds
+        )
+        self.q_goal = generate_random_conf_without_orientation(
+            self.rbprmBuilder, self.root_translation_bounds
+        )
         print("q_init= " + str(self.q_init))
         print("q_goal= " + str(self.q_goal))
         # write problem in files :
@@ -35,7 +43,14 @@ class PathPlanner(TalosPathPlanner):
 
     def run(self):
         self.init_problem()
-        self.root_translation_bounds = [-1.5, 3, 0., 3.3, self.rbprmBuilder.ref_height, self.rbprmBuilder.ref_height]
+        self.root_translation_bounds = [
+            -1.5,
+            3,
+            0.0,
+            3.3,
+            self.rbprmBuilder.ref_height,
+            self.rbprmBuilder.ref_height,
+        ]
         self.set_joints_bounds()
         self.init_viewer("multicontact/floor_bauzil", visualize_affordances=["Support"])
         self.set_random_configs()

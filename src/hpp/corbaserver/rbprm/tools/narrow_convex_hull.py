@@ -1,5 +1,5 @@
 import numpy as np
-from numpy import arange, array, append, cross, dot, zeros
+from numpy import array, cross
 from numpy.linalg import norm
 
 from scipy.spatial import ConvexHull
@@ -23,8 +23,8 @@ def area(s):
     return area * 0.5
 
 
-def cutList2D(l):
-    return [el[:2] for el in l]
+def cutList2D(lst):
+    return [el[:2] for el in lst]
 
 
 def roundPoints(points, precision):
@@ -44,13 +44,15 @@ def computeAxisAngleRotation(u, c):
     uy = u[1]
     uz = u[2]
     s = np.sqrt(1 - c * c)
-    return [[c + ux * ux * (1 - c), ux * uy * (1 - c) - uz * s, ux * uz * (1 - c) + uy * s],
-            [uy * ux * (1 - c) + uz * s, c + uy * uy * (1 - c), uy * uz * (1 - c) - ux * s],
-            [uz * ux * (1 - c) - uy * s, uz * uy * (1 - c) + ux * s, c + uz * uz * (1 - c)]]
+    return [
+        [c + ux * ux * (1 - c), ux * uy * (1 - c) - uz * s, ux * uz * (1 - c) + uy * s],
+        [uy * ux * (1 - c) + uz * s, c + uy * uy * (1 - c), uy * uz * (1 - c) - ux * s],
+        [uz * ux * (1 - c) - uy * s, uz * uy * (1 - c) + ux * s, c + uz * uz * (1 - c)],
+    ]
 
 
 def getSurfaceRotation(surface):
-    n = surface[1]
+    # n = surface[1]
     cosx = np.dot(surface[1], [0, 0, 1])
     axisx = np.cross(surface[1], [0, 0, 1])
     n_axisx = norm(axisx)
@@ -90,7 +92,9 @@ def pointsTransform(points, R, t):
 
 
 def getSurfaceExtremumPoints(el):
-    pts = removeDuplicates(el[0] + el[1])  # This might only works in rectangular shape? with triangular mesh*2
+    pts = removeDuplicates(
+        el[0] + el[1]
+    )  # This might only works in rectangular shape? with triangular mesh*2
     apts = allignPoints(pts)
     hull = ConvexHull(cutList2D(apts))
     return [pts[idx] for idx in hull.vertices]

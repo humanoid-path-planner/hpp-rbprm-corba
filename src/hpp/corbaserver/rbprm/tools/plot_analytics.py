@@ -57,8 +57,8 @@ def plotcube(plt, ax, c, pos):
 
 def getOctreeValues(robot, valueName, limb):
     res = {}
-    res['boxes'] = []
-    res['values'] = []
+    res["boxes"] = []
+    res["values"] = []
     octreeIds = robot.getOctreeNodeIds(limb)
     for ocId in octreeIds:
         sampleIds = robot.getSamplesIdsInOctreeNode(limb, ocId)
@@ -68,47 +68,47 @@ def getOctreeValues(robot, valueName, limb):
             g = robot.getSampleValue(limb, valueName, i)
             max_val = max(max_val, g)
         box = robot.getOctreeBox(limb, (int)(ocId))
-        res['boxes'].append(box)
-        res['values'].append(max_val)
+        res["boxes"].append(box)
+        res["values"].append(max_val)
     return res
 
 
 def plotOctreeValues(robot, valueName, limb):
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111, projection="3d")
     boxesValues = getOctreeValues(robot, valueName, limb)
-    boxes = boxesValues['boxes']
-    values = boxesValues['values']
+    boxes = boxesValues["boxes"]
+    values = boxesValues["values"]
     for i in range(0, len(boxes)):
         plotcube(plt, ax, values[i], boxes[i])
-    ax.set_xlabel('X Label')
-    ax.set_ylabel('Y Label')
-    ax.set_zlabel('Z Label')
+    ax.set_xlabel("X Label")
+    ax.set_ylabel("Y Label")
+    ax.set_zlabel("Z Label")
     plt.title(valueName)
     plt.show()
 
 
 def plotOctreeValuesCompare(ax, boxesValues):
-    boxes = boxesValues['boxes']
-    values = boxesValues['values']
+    boxes = boxesValues["boxes"]
+    values = boxesValues["values"]
     for i in range(0, len(boxes)):
         plotcube(plt, ax, values[i], boxes[i])
-    ax.set_xlabel('X Label')
-    ax.set_ylabel('Y Label')
-    ax.set_zlabel('Z Label')
+    ax.set_xlabel("X Label")
+    ax.set_ylabel("Y Label")
+    ax.set_zlabel("Z Label")
 
 
 def compareOctreeValues(robotName1, robotName2, boxesValues1, boxesValues2, valueName):
     fig = plt.figure()
     fig.suptitle(valueName)
-    ax = fig.add_subplot(121, projection='3d')
+    ax = fig.add_subplot(121, projection="3d")
     ax.set_title(robotName1)
     plotOctreeValuesCompare(ax, boxesValues1)
-    bx = fig.add_subplot(122, projection='3d')
+    bx = fig.add_subplot(122, projection="3d")
     bx.set_title(robotName2)
     plotOctreeValuesCompare(bx, boxesValues2)
     # ~ plt.title(valueName)
-    plt.savefig(valueName + '.png')
+    plt.savefig(valueName + ".png")
     plt.draw()
 
 
@@ -123,7 +123,7 @@ def plotValues(robot, valueName, limb):
     zs = []
     vals = []
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111, projection="3d")
     numSamples = robot.getNumSamples(limb)
     for i in range(0, numSamples):
         g = robot.getSampleValue(limb, valueName, i)
@@ -134,8 +134,8 @@ def plotValues(robot, valueName, limb):
         g = robot.getSampleValue(limb, valueName, i)
         vals.append(cma(g))
     ax.scatter(xs, ys, zs, color=vals)
-    ax.set_xlabel('X Label')
-    ax.set_ylabel('Y Label')
-    ax.set_zlabel('Z Label')
+    ax.set_xlabel("X Label")
+    ax.set_ylabel("Y Label")
+    ax.set_zlabel("Z Label")
     plt.title(valueName)
     plt.show()

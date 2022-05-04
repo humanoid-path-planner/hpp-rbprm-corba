@@ -20,7 +20,7 @@ pp = PathPlayer (fullBody.client.basic, r)
 from .plan_execute import a, b, c, d, e, init_plan_execute
 init_plan_execute(model.fullBody, r, path_planner, pp)
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = path_planner.q_init[0:7]
 q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = path_planner.q_goal[0:7]
 
@@ -91,7 +91,7 @@ def go(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
     vels += [com_vel[:]]
     accs += [com_acc[:]]
     return a
-    
+
 def go_stop(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
 	global com_vel
 	global com_acc
@@ -101,7 +101,7 @@ def go_stop(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
 	global a_s
 	a = []
 	for l in range(sid,sid+rg):
-		print("STATE ", l)		
+		print("STATE ", l)
 		s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1
 		a,com_vel,com_acc = gen_several_states_partial(l,window,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc, path=True)
 		a_s+=[a]
@@ -114,7 +114,7 @@ def go_stop(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
 	vels += [com_vel[:]]
 	accs += [com_acc[:]]
 	return a
-    
+
 def go0(sid, rg, num_optim = 0, mu = 0.6, s =None):
     global com_vel
     global com_acc
@@ -142,7 +142,7 @@ def go2(sid, rg = 1, num_optim = 0, mu = 0.5, t =2, s =None):
 		vels += [com_vel[:]]
 		accs += [com_acc[:]]
     return path
-    
+
 #~ a = go2(0, s = 1)
 #~ a = go2(0, num_optim=0, s = 1.2, mu=0.6)
 #~ a = go2(2, num_optim=0, s = 1.2, mu=0.6)

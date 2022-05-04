@@ -1,4 +1,6 @@
-from hpp.corbaserver.rbprm.tools.sample_root_config import generate_random_conf_without_orientation
+from hpp.corbaserver.rbprm.tools.sample_root_config import (
+    generate_random_conf_without_orientation,
+)
 from hpp.corbaserver.rbprm.scenarios.talos_path_planner import TalosPathPlanner
 from talos_rbprm.talos_abstract import Robot
 import random
@@ -26,18 +28,33 @@ class PathPlanner(TalosPathPlanner):
         Robot.urdfName = "talos_trunk_large_reducedROM"
         self.robot_node_name = "talos_trunk_large_reducedROM"
         # select conservative ROM for feet
-        Robot.rLegId = 'talos_rleg_rom_reduced'
-        Robot.lLegId = 'talos_lleg_rom_reduced'
+        Robot.rLegId = "talos_rleg_rom_reduced"
+        Robot.lLegId = "talos_lleg_rom_reduced"
         Robot.urdfNameRom = [Robot.lLegId, Robot.rLegId]
         self.rbprmBuilder = Robot()
-        self.rbprmBuilder.setReferenceEndEffector(Robot.lLegId, self.rbprmBuilder.ref_EE_lLeg)
-        self.rbprmBuilder.setReferenceEndEffector(Robot.rLegId, self.rbprmBuilder.ref_EE_rLeg)
+        self.rbprmBuilder.setReferenceEndEffector(
+            Robot.lLegId, self.rbprmBuilder.ref_EE_lLeg
+        )
+        self.rbprmBuilder.setReferenceEndEffector(
+            Robot.rLegId, self.rbprmBuilder.ref_EE_rLeg
+        )
 
     def compute_extra_config_bounds(self):
-        # bounds for the extradof : by default use v_max/a_max on x and y axis and a large value on z axis
+        # bounds for the extradof : by default use v_max/a_max on x and y axis and a
+        # large value on z axis.
         self.extra_dof_bounds = [
-            -self.v_max, self.v_max, -self.v_max, self.v_max, -2, 2, -self.a_max, self.a_max, -self.a_max, self.a_max,
-            -3, 3
+            -self.v_max,
+            self.v_max,
+            -self.v_max,
+            self.v_max,
+            -2,
+            2,
+            -self.a_max,
+            self.a_max,
+            -self.a_max,
+            self.a_max,
+            -3,
+            3,
         ]
 
     def init_problem(self):
@@ -47,7 +64,7 @@ class PathPlanner(TalosPathPlanner):
         # force the base orientation to follow the direction of motion along the Z axis
         self.ps.setParameter("Kinodynamic/forceYawOrientation", True)
         self.ps.setParameter("Kinodynamic/synchronizeVerticalAxis", True)
-        self.ps.setParameter("Kinodynamic/verticalAccelerationBound", 3.)
+        self.ps.setParameter("Kinodynamic/verticalAccelerationBound", 3.0)
         self.ps.setMaxIterPathPlanning(50000)
 
     def set_random_configs(self):
@@ -55,18 +72,21 @@ class PathPlanner(TalosPathPlanner):
         randomly sample initial and goal configuration :
         """
         random.seed()
-        # sample an initial and goal zone : either floor, right platform or left platform. With more weight on the floor
+        # sample an initial and goal zone : either floor, right platform or left
+        # platform. With more weight on the floor.
         # 0,1,2 are floor, 3 is platform10 4 is platform15
         WEIGHT_FLOOR = 3
         plat_id_init = random.randint(0, WEIGHT_FLOOR + 1)
         plat_id_goal = random.randint(0, WEIGHT_FLOOR + 1)
-        while plat_id_goal >= WEIGHT_FLOOR and plat_id_goal == plat_id_init:  # cannot have init and end on the same platform (too easy)
+        while (
+            plat_id_goal >= WEIGHT_FLOOR and plat_id_goal == plat_id_init
+        ):  # cannot have init and end on the same platform (too easy)
             plat_id_goal = random.randint(0, WEIGHT_FLOOR + 1)
 
         print(("platform id init : ", plat_id_init))
         print(("platform id goal : ", plat_id_goal))
-        #plat_id_init = 3
-        #plat_id_goal = 0
+        # plat_id_init = 3
+        # plat_id_goal = 0
         if plat_id_init < WEIGHT_FLOOR:
             print("init of flat floor")
             init_bounds = self.BOUNDS_FLOOR[::]
@@ -97,8 +117,12 @@ class PathPlanner(TalosPathPlanner):
             root_bounds[i * 2 + 1] = max(init_bounds[i * 2 + 1], goal_bounds[i * 2 + 1])
 
         self.rbprmBuilder.setJointBounds("root_joint", root_bounds)
-        self.q_init = generate_random_conf_without_orientation(self.rbprmBuilder, init_bounds, self.v)
-        self.q_goal = generate_random_conf_without_orientation(self.rbprmBuilder, goal_bounds, self.v)
+        self.q_init = generate_random_conf_without_orientation(
+            self.rbprmBuilder, init_bounds, self.v
+        )
+        self.q_goal = generate_random_conf_without_orientation(
+            self.rbprmBuilder, goal_bounds, self.v
+        )
 
         print(("init config : ", self.q_init))
         print(("goal config : ", self.q_goal))
@@ -109,7 +133,11 @@ class PathPlanner(TalosPathPlanner):
 
     def run(self):
         self.init_problem()
-        self.init_viewer("multicontact/bauzil_stairs", visualize_affordances=["Support"], reduce_sizes=[0.12, 0., 0.])
+        self.init_viewer(
+            "multicontact/bauzil_stairs",
+            visualize_affordances=["Support"],
+            reduce_sizes=[0.12, 0.0, 0.0],
+        )
         self.set_random_configs()
         self.init_planner()
         self.solve()
@@ -119,8 +147,13 @@ class PathPlanner(TalosPathPlanner):
             print(("Optimize path, " + str(i + 1) + "/5 ... "))
             self.ps.optimizePath(self.ps.numberPaths() - 1)
             print(("New path length : ", self.ps.pathLength(self.ps.numberPaths() - 1)))
-        # remove the very beginning and end of the path to avoid orientation discontinuities
-        self.ps.extractPath(self.ps.numberPaths() - 1, 0.05, self.ps.pathLength(self.ps.numberPaths() - 1) - 0.05)
+        # remove the very beginning and end of the path to avoid orientation
+        # discontinuities.
+        self.ps.extractPath(
+            self.ps.numberPaths() - 1,
+            0.05,
+            self.ps.pathLength(self.ps.numberPaths() - 1) - 0.05,
+        )
         pathId = self.ps.numberPaths() - 1
         self.q_init = self.ps.configAtParam(pathId, 0)
         self.q_goal = self.ps.configAtParam(pathId, self.ps.pathLength(pathId))

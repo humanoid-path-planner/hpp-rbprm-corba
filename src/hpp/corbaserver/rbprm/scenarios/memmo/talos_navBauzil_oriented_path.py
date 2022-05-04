@@ -1,5 +1,6 @@
-from hpp.corbaserver.rbprm.scenarios.memmo.talos_navBauzil_path import PathPlanner as Parent
-import numpy as np
+from hpp.corbaserver.rbprm.scenarios.memmo.talos_navBauzil_path import (
+    PathPlanner as Parent,
+)
 
 
 class PathPlanner(Parent):
@@ -7,9 +8,16 @@ class PathPlanner(Parent):
         """
         randomly sample initial and goal configuration :
         """
-        from hpp.corbaserver.rbprm.tools.sample_root_config import generate_random_conf_with_orientation
-        self.q_init = generate_random_conf_with_orientation(self.rbprmBuilder, self.root_translation_bounds)
-        self.q_goal = generate_random_conf_with_orientation(self.rbprmBuilder, self.root_translation_bounds)
+        from hpp.corbaserver.rbprm.tools.sample_root_config import (
+            generate_random_conf_with_orientation,
+        )
+
+        self.q_init = generate_random_conf_with_orientation(
+            self.rbprmBuilder, self.root_translation_bounds
+        )
+        self.q_goal = generate_random_conf_with_orientation(
+            self.rbprmBuilder, self.root_translation_bounds
+        )
         print("q_init= " + str(self.q_init))
         print("q_goal= " + str(self.q_goal))
         # write problem in files :

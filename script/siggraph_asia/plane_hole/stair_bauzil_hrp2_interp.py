@@ -29,15 +29,15 @@ r = tp.Viewer (ps, viewerClient=tp.r.client)
 rLegId = 'hrp2_rleg_rom'
 rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,0,-0.105]
-rLegNormal = [0,0,1]       
+rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 10000, "manipulability", 0.1)
-                                                                                                
-lLegId = 'hrp2_lleg_rom'                                                                                
-lLeg = 'LLEG_JOINT0'                                                                     
-lLegx = 0.09; lLegy = 0.05      
+
+lLegId = 'hrp2_lleg_rom'
+lLeg = 'LLEG_JOINT0'
+lLegx = 0.09; lLegy = 0.05
 lLegOffset = [0,0,-0.105]
-lLegNormal = [0,0,1]                                                                  
+lLegNormal = [0,0,1]
 fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.1)
 
 #~ AFTER loading obstacles
@@ -61,7 +61,7 @@ rArmx = 0.024; rArmy = 0.024
 #~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF", False,grasp = True)
 #~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF", True)
 
- #~ 
+ #~
 
 fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
 fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
@@ -69,7 +69,7 @@ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 #~ fullBody.client.basic.robot.setJointConfig('LARM_JOINT0',[1])
 #~ fullBody.client.basic.robot.setJointConfig('RARM_JOINT0',[-1])
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 #~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.q_init[0:7]
 q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.q_goal[0:7]
@@ -101,13 +101,13 @@ configs = []
 #~ r.loadObstacleModel ('hpp-rbprm-corba', "stair_bauzil", "contact")
 #~ fullBody.exportAll(r, configs, 'stair_bauzil_hrp2_robust_2');
 #~ fullBody.client.basic.robot.setJointConfig('LLEG_JOINT0',[-1])
-#~ q_0 = fullBody.getCurrentConfig(); 
+#~ q_0 = fullBody.getCurrentConfig();
 #~ fullBody.draw(q_0,r);
 #~ print(fullBody.client.rbprm.rbprm.getOctreeTransform(rarmId, q_0))
-#~ 
-#~ 
+#~
+#~
 #~ fullBody.client.basic.robot.setJointConfig('LLEG_JOINT0',[1])
-#~ q_0 = fullBody.getCurrentConfig(); 
+#~ q_0 = fullBody.getCurrentConfig();
 #~ fullBody.draw(q_0,r);
 #~ print(fullBody.client.rbprm.rbprm.getOctreeTransform(rarmId, q_0))
 #~ q_init = fullBody.generateContacts(q_init, [0,0,-1]); r (q_init)
@@ -117,7 +117,7 @@ configs = []
 #~ f1.write(str(configs))
 #~ f1.close()
 
-limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},  
+limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},
 						lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'},
 						rarmId : {'file': "hrp2/RA_com.ineq", 'effector' : rHand} }
 						#~ larmId : {'file': "hrp2/LA_com.ineq", 'effector' : lHand} }
@@ -133,10 +133,10 @@ def act(i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True,
 
 def play(frame_rate = 1./24.):
 	play_traj(fullBody,pp,frame_rate)
-	
+
 def saveAll(name):
 	saveAllData(fullBody, r, name)
-	
+
 
 def initConfig():
 	r.client.gui.setVisibility("hrp2_14", "ON")
@@ -144,14 +144,14 @@ def initConfig():
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
 	r(q_init)
-	
+
 def endConfig():
 	r.client.gui.setVisibility("hrp2_14", "ON")
 	tp.cl.problem.selectProblem("default")
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
 	r(q_goal)
-	
+
 
 def rootPath():
 	tp.cl.problem.selectProblem("rbprm_path")
@@ -163,18 +163,18 @@ def rootPath():
 	r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
-	
+
 def genPlan(stepsize=0.1):
 	r.client.gui.setVisibility("hrp2_14", "ON")
 	tp.cl.problem.selectProblem("default")
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
 	global configs
-	start = time.clock() 
+	start = time.clock()
 	configs = fullBody.interpolate(stepsize, 1, 2, True)
-	end = time.clock() 
+	end = time.clock()
 	print "Contact plan generated in " + str(end-start) + "seconds"
-	
+
 def contactPlan(step = 0.5):
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
@@ -182,32 +182,32 @@ def contactPlan(step = 0.5):
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	for i in range(0,len(configs)):
 		r(configs[i]);
-		time.sleep(step)	
-		
-		
+		time.sleep(step)
+
+
 def a():
 	print "initial configuration"
 	initConfig()
-		
+
 def b():
 	print "end configuration"
 	endConfig()
-		
+
 def c():
 	print "displaying root path"
 	rootPath()
-	
+
 def d(step=0.1):
 	print "computing contact plan"
 	genPlan(step)
-	
+
 def e(step = 0.5):
 	print "displaying contact plan"
 	contactPlan(step)
-	
+
 print "Root path generated in " + str(tp.t) + " ms."
 
-	
+
 
 
 from bezier_traj import go0, go2, init_bezier_traj, reset
@@ -226,23 +226,23 @@ def sc(ec):
 def pl(iid = None):
     global path
     if iid == None:
-        iid = len(path) -1 
+        iid = len(path) -1
     play_trajectory(fullBody,pp,path[iid])
-    
+
 def plc(ctx = 0, iid = None):
     sc(ctx)
     pl(iid)
 
 def go():
     return go0(states, mu=0.6,num_optim=2, use_kin = context == 0)
-    
+
 def plall(first = 0):
     global path
     sc(first)
     for pId in range(len(path)):
         play_trajectory(fullBody,pp,path[pId])
-        
-        
+
+
 
 from pickle import load, dump
 def save(fname):
@@ -269,7 +269,7 @@ def load_save(fname):
     for _, s in enumerate(all_data[0]):
         states+=[State(fullBody,q=s[0], limbsIncontact = s[1]) ]
 	r(states[0].q())
-    
+
 def onepath(ol, ctxt=1, nopt=1, mu=1, effector = False):
     reset()
     sc(ctxt)
@@ -284,7 +284,7 @@ def onepath(ol, ctxt=1, nopt=1, mu=1, effector = False):
     else:
         path[ol]=go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = False, s=s, effector = effector)
     all_paths[ctxt] = path
-    
+
 def onepath2(states_subset, ctxt=1, nopt=1, mu=1, effector = False, init_vel =None, init_acc = None):
     reset()
     sc(ctxt)
@@ -299,7 +299,7 @@ def onepath2(states_subset, ctxt=1, nopt=1, mu=1, effector = False, init_vel =No
     path += [go2(states_subset, num_optim=nopt, mu=mu, use_kin = False, s=None, effector = effector)]
     #~ else:
         #~ path[ol]=go2(states_subset, num_optim=nopt, mu=mu, use_kin = False, s=s, effector = effector)
-    all_paths[ctxt] = path    
+    all_paths[ctxt] = path
 
 def save_paths(fname):
     f = open(fname, "w")
@@ -313,7 +313,7 @@ def save_paths(fname):
     f = open(fname+"all", "w")
     dump(all_paths,f)
     f.close()
-    
+
 def load_paths(fname):
     f = open(fname, "r")
     global all_paths
@@ -322,21 +322,21 @@ def load_paths(fname):
     sc(0)
     global path
     path = all_paths[0][:]
-    
+
 def sh(ctxt, i):
     sc(ctxt)
     r(states[i].q())
-    
+
 def lc():
     load_save("19_06_s")
     load_paths("19_06_p")
     save_paths("19_06_p_save")
     save("19_06_s_save")
-    
+
 def sac():
     save("19_06_s")
     save_paths("19_06_p")
-    
+
 init_bezier_traj(fullBody, r, pp, configs, limbsCOMConstraints)
 
 all_paths = [[],[]]
@@ -351,4 +351,3 @@ fullBody.setReferenceConfig(configs[-1])
 onepath2(states [0:-1],nopt=6,mu=1,effector=False,init_acc=[0,0,0.], init_vel=[0.,0.,0.])
 plall()
 #~ e(0.01)
-

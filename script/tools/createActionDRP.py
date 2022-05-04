@@ -1,9 +1,11 @@
 # Create actions YAML file
 
 import yaml
-#import anymal_darpa_Asil as drp
 
-def autoBaseFootstep(configs,fullbody,filename):
+# import anymal_darpa_Asil as drp
+
+
+def autoBaseFootstep(configs, fullbody, filename):
     initial = """\
 steps:
 
@@ -19,8 +21,8 @@ steps:
        name: RF_LEG
        target:
         frame: odom
-        position: 
-        
+        position:
+
  - step:
     - base_auto:
        average_linear_velocity: 0.5
@@ -60,8 +62,8 @@ steps:
         position:
 
  - step:
-    - base_auto: 
-       average_linear_velocity: 0.5 
+    - base_auto:
+       average_linear_velocity: 0.5
     """
     data = yaml.load(initial)
 
@@ -70,12 +72,11 @@ steps:
     RF_footPos = fullbody.getEffectorPosition("RFleg", configs[0])
     RH_footPos = fullbody.getEffectorPosition("RHleg", configs[0])
 
-    data['steps'][0]['step'][0]['base_auto']['height'] = configs[0][2]
-    data['steps'][1]['step'][1]['footstep']['target']['position'] = RF_footPos[0]
-    data['steps'][3]['step'][1]['footstep']['target']['position'] = LH_footPos[0]
-    data['steps'][5]['step'][1]['footstep']['target']['position'] = LF_footPos[0]
-    data['steps'][7]['step'][1]['footstep']['target']['position'] = RH_footPos[0]
-
+    data["steps"][0]["step"][0]["base_auto"]["height"] = configs[0][2]
+    data["steps"][1]["step"][1]["footstep"]["target"]["position"] = RF_footPos[0]
+    data["steps"][3]["step"][1]["footstep"]["target"]["position"] = LH_footPos[0]
+    data["steps"][5]["step"][1]["footstep"]["target"]["position"] = LF_footPos[0]
+    data["steps"][7]["step"][1]["footstep"]["target"]["position"] = RH_footPos[0]
 
     for i in range(1, len(configs)):
         step = """\
@@ -83,7 +84,7 @@ steps:
     - base_auto:
        average_linear_velocity: 0.5
     - footstep:
-       name: 
+       name:
        target:
         frame: odom
         position:
@@ -94,45 +95,42 @@ steps:
         """
         step_data = yaml.load(step)
 
-        if i == (len(configs)-1):
+        if i == (len(configs) - 1):
             footPos = fullbody.getEffectorPosition("RFleg", configs[i])
-            step_data[0]['step'][1]['footstep']['name'] = 'RF_LEG'
-            step_data[0]['step'][1]['footstep']['target']['position'] = footPos[0]
+            step_data[0]["step"][1]["footstep"]["name"] = "RF_LEG"
+            step_data[0]["step"][1]["footstep"]["target"]["position"] = footPos[0]
 
             footPos = fullbody.getEffectorPosition("LHleg", configs[i])
-            step_data[0]['step'][1]['footstep']['name'] = 'LH_LEG'
-            step_data[0]['step'][1]['footstep']['target']['position'] = footPos[0]
+            step_data[0]["step"][1]["footstep"]["name"] = "LH_LEG"
+            step_data[0]["step"][1]["footstep"]["target"]["position"] = footPos[0]
 
             footPos = fullbody.getEffectorPosition("LFleg", configs[i])
-            step_data[0]['step'][1]['footstep']['name'] = 'LF_LEG'
-            step_data[0]['step'][1]['footstep']['target']['position'] = footPos[0]
+            step_data[0]["step"][1]["footstep"]["name"] = "LF_LEG"
+            step_data[0]["step"][1]["footstep"]["target"]["position"] = footPos[0]
 
             footPos = fullbody.getEffectorPosition("RHleg", configs[i])
-            step_data[0]['step'][1]['footstep']['name'] = 'RH_LEG'
-            step_data[0]['step'][1]['footstep']['target']['position'] = footPos[0]
+            step_data[0]["step"][1]["footstep"]["name"] = "RH_LEG"
+            step_data[0]["step"][1]["footstep"]["target"]["position"] = footPos[0]
 
-        movedLeg = fullbody.getContactsVariations(i-1, i)
-        if movedLeg[0] == 'LFleg':
+        movedLeg = fullbody.getContactsVariations(i - 1, i)
+        if movedLeg[0] == "LFleg":
             footPos = fullbody.getEffectorPosition("LFleg", configs[i])
-            step_data[0]['step'][1]['footstep']['name'] = 'LF_LEG'
-            step_data[0]['step'][1]['footstep']['target']['position'] = footPos[0]
-        elif movedLeg[0] == 'LHleg':
+            step_data[0]["step"][1]["footstep"]["name"] = "LF_LEG"
+            step_data[0]["step"][1]["footstep"]["target"]["position"] = footPos[0]
+        elif movedLeg[0] == "LHleg":
             footPos = fullbody.getEffectorPosition("LHleg", configs[i])
-            step_data[0]['step'][1]['footstep']['name'] = 'LH_LEG'
-            step_data[0]['step'][1]['footstep']['target']['position'] = footPos[0]
-        elif movedLeg[0] == 'RFleg':
+            step_data[0]["step"][1]["footstep"]["name"] = "LH_LEG"
+            step_data[0]["step"][1]["footstep"]["target"]["position"] = footPos[0]
+        elif movedLeg[0] == "RFleg":
             footPos = fullbody.getEffectorPosition("RFleg", configs[i])
-            step_data[0]['step'][1]['footstep']['name'] = 'RF_LEG'
-            step_data[0]['step'][1]['footstep']['target']['position'] = footPos[0]
-        elif movedLeg[0] == 'RHleg':
+            step_data[0]["step"][1]["footstep"]["name"] = "RF_LEG"
+            step_data[0]["step"][1]["footstep"]["target"]["position"] = footPos[0]
+        elif movedLeg[0] == "RHleg":
             footPos = fullbody.getEffectorPosition("RHleg", configs[i])
-            step_data[0]['step'][1]['footstep']['name'] = 'RH_LEG'
-            step_data[0]['step'][1]['footstep']['target']['position'] = footPos[0]
+            step_data[0]["step"][1]["footstep"]["name"] = "RH_LEG"
+            step_data[0]["step"][1]["footstep"]["target"]["position"] = footPos[0]
 
-
-
-        data['steps'].extend(step_data)
-    stream = file(filename+'.yaml', 'w')
+        data["steps"].extend(step_data)
+    stream = file(filename + ".yaml", "w")
     yaml.dump(data, stream, default_flow_style=False)
-    print(('saved .yaml file as '+filename+'.yaml'))
-
+    print(("saved .yaml file as " + filename + ".yaml"))

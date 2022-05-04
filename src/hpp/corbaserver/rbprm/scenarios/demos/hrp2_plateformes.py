@@ -6,7 +6,7 @@ class ContactGenerator(HRP2ContactGenerator):
     def __init__(self):
         super().__init__(PathPlanner())
         self.root_translation_bounds = [-5, 5, -1.5, 1.5, 0.65, 0.9]
-        self.robustness = 0.
+        self.robustness = 0.0
         self.quasi_static = False
 
     def load_limbs(self):

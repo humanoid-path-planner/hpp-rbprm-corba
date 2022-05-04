@@ -23,7 +23,7 @@ fullBody.setJointBounds ("base_joint_xyz", [-2,2.5, -2, 2, 0, 2.2])
 from plan_execute import a, b, c, d, e, init_plan_execute
 init_plan_execute(model.fullBody, r, path_planner, pp)
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 #~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = path_planner.q_init[0:7]
 q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = path_planner.q_goal[0:7]
@@ -65,7 +65,7 @@ tp = ttp
 from hpp.corbaserver.rbprm.rbprmstate import State
 from hpp.corbaserver.rbprm.state_alg  import addNewContact, isContactReachable, closestTransform, removeContact, addNewContactIfReachable, projectToFeasibleCom
 
-s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId])  
+s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId])
 
 q0 = s1.q()[:]
 
@@ -104,9 +104,9 @@ def dist(q0,q1):
     return norm(array(q0[7:]) - array(q1[7:]) )
 
 def distq_ref(q0):
-    return lambda s: dist(s.q(),q0) 
+    return lambda s: dist(s.q(),q0)
 
-a = computeAffordanceCentroids(tp.afftool, ["Support"]) 
+a = computeAffordanceCentroids(tp.afftool, ["Support"])
 def computeNext(state, limb, projectToCom = False, max_num_samples = 10, mu = 0.6):
     global a
     t1 = time.clock()
@@ -144,14 +144,14 @@ def plot_feasible_Kin(state):
                         #~ print "inactive"
                         createPtBox(r.client.gui, 0, c, color = [1,0,0,1])
     return -1
-    
+
 def compute_w(c, ddc=array([0.,0.,0.]), dL=array([0.,0.,0.]), m = 54., g_vec=array([0.,0.,-9.81])):
     w1 = m * (ddc - g_vec)
     return array(w1.tolist() + (cross(c, w1) + dL).tolist())
-    
+
 def plot_feasible_cone(state):
     com = array(state.getCenterOfMass())
-    #~ H, h = state.getContactCone(0.6)  
+    #~ H, h = state.getContactCone(0.6)
     ps = state.getContactPosAndNormals()
     p = ps[0][0]
     N = ps[1][0]
@@ -163,8 +163,8 @@ def plot_feasible_cone(state):
     for i in range(10):
         for j in range(10):
             for k in range(1):
-                c = com + array([(i - 5)*0.1, (j - 5)*0.1, k])   
-                w = compute_w(c)             
+                c = com + array([(i - 5)*0.1, (j - 5)*0.1, k])
+                w = compute_w(c)
                 print "w, " , w
                 if(H.dot( w )<= 0).all():
                     #~ print 'active'
@@ -185,7 +185,7 @@ def plot_feasible(state):
         for j in range(5):
             for k in range(10):
                 c = com + array([(i - 2.5)*0.2, (j - 2.5)*0.2, (k-5)*0.2])
-                w = compute_w(c)           
+                w = compute_w(c)
                 active_ineq = state.getComConstraint(limbsCOMConstraints,[])
                 if(active_ineq[0].dot( c )<= active_ineq[1]).all() and (H.dot( w )<= 0).all():
                     #~ print 'active'
@@ -195,7 +195,7 @@ def plot_feasible(state):
                         #~ print "inactive"
                         createPtBox(r.client.gui, 0, c, color = [1,0,0,1])
     return -1
- 
+
 def plot(c):
     createPtBox(r.client.gui, 0, c, color = [0,1,0,1])
 
@@ -249,14 +249,14 @@ def add(lId):
     global states
     states +=[ns]
     r(ns.q())
-    
+
 def rm(lId):
     sF = states[-1]
     ns = removeContact(sF,lId,True)[0]
     global states
     states +=[ns]
     r(ns.q())
-    
+
 def go():
     return go0(states, mu=0.6,num_optim=2)
 
@@ -279,8 +279,8 @@ def computeSupportPolygon(state, filename = "sp"):
         for j in range(rg):
             for k in range(1):
                 c = com + array([(i - eq)*scale, (j - eq)*scale, k])
-                w = compute_w(c)         
-                #~ print "c", c  
+                w = compute_w(c)
+                #~ print "c", c
                 if(H.dot( w )<= 0).all():
                     print 'active'
                     res+=[c]
@@ -289,7 +289,7 @@ def computeSupportPolygon(state, filename = "sp"):
                     #~ createPtBox(r.client.gui, 0, c, color = [0,1,0,1])
                 #~ else:
                     #~ createPtBox(r.client.gui, 0, c, color = [1,0,0,1])
-                    
+
     f = open(filename, "w")
     dump(res,f)
     f.close()

@@ -13,7 +13,11 @@ class PathPlanner(HyqPathPlanner):
 
         self.q_init[:2] = [-2, 0]
         self.q_goal[:2] = [3, 0]
-        self.init_viewer("multicontact/darpa", visualize_affordances=["Support"], reduce_sizes=[0.06, 0, 0])
+        self.init_viewer(
+            "multicontact/darpa",
+            visualize_affordances=["Support"],
+            reduce_sizes=[0.06, 0, 0],
+        )
         self.init_planner(kinodynamic=False)
         self.solve()
         print("Optimize path ...")

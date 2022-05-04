@@ -4,7 +4,7 @@ from pinocchio import Quaternion
 
 
 def Vector3FromAlpha(alpha):
-    return np.matrix([np.sin(alpha), -np.cos(alpha), 0.]).T
+    return np.matrix([np.sin(alpha), -np.cos(alpha), 0.0]).T
 
 
 def quatFromAlpha(alpha):

@@ -23,20 +23,20 @@ from hpp_idl.hpp.corbaserver.rbprm import RbprmBuilder
 
 class Client(_Parent):
     """
-  Connect and create clients for hpp-rbprm library.
-  """
+    Connect and create clients for hpp-rbprm library.
+    """
 
     defaultClients = {
-        'builder': RbprmBuilder,
+        "builder": RbprmBuilder,
     }
 
     def __init__(self, url=None, context="corbaserver", port=None):
         """
-    Initialize CORBA and create default clients.
-    :param url: URL in the IOR, corbaloc, corbalocs, and corbanames formats.
-                For a remote corba server, use
-                url = "corbaloc:iiop:<host>:<port>/NameService"
-    """
+        Initialize CORBA and create default clients.
+        :param url: URL in the IOR, corbaloc, corbalocs, and corbanames formats.
+                    For a remote corba server, use
+                    url = "corbaloc:iiop:<host>:<port>/NameService"
+        """
         self._initOrb(url, port=port)
         self._makeClients("rbprm", self.defaultClients, context)
 

@@ -56,7 +56,7 @@ ps.addGoalConfig (q_goal)
 # Choosing RBPRM shooter and path validation methods.
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.01)
-# Choosing kinodynamic methods : 
+# Choosing kinodynamic methods :
 ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
 ps.selectPathPlanner("DynamicPlanner")
@@ -96,4 +96,3 @@ math.sqrt((np.linalg.norm(u)*np.linalg.norm(u)) * (np.linalg.norm(v)*np.linalg.n
 
 from hpp import quaternion as Quaternion
 q = Quaternion.Quaternion([1,0,0],[2,3,-1])
-

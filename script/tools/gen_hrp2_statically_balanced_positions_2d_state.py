@@ -80,15 +80,15 @@ rfoot = "RLEG_JOINT5"
 lleg = 'LLEG_JOINT0'
 lfoot = "LLEG_JOINT5"
 
-limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},  
-						lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}, 
-						larmId : {'file': "hrp2/LA_com.ineq", 'effector' : 'LARM_JOINT5'}, 
+limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},
+						lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'},
+						larmId : {'file': "hrp2/LA_com.ineq", 'effector' : 'LARM_JOINT5'},
 						rarmId : {'file': "hrp2/RA_com.ineq", 'effector' : 'RARM_JOINT5'} }
-#~ limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},  
-						#~ lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}, 
+#~ limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},
+						#~ lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'},
 						#~ rarmId : {'file': "hrp2/RA_com.ineq", 'effector' : rHand} }
 
- #~ 
+ #~
 
 #~ fullBody.client.basic.robot.setJointConfig('LARM_JOINT0',[1])
 #~ fullBody.client.basic.robot.setJointConfig('RARM_JOINT0',[-1])
@@ -108,7 +108,7 @@ def _getTransform(qEffector):
 		rm[m,3] = qEffector[m]
 	rm[3,3] = 1
 	return rm
-			
+
 from numpy.linalg import norm
 def __loosely_z_aligned(limb, config):
 	fullBody.setCurrentConfig(config)
@@ -139,7 +139,7 @@ def draw_cp(cid, limb, config):
 		print("pos", pos)
 		r.client.gui.addBox(scene+"/b"+str(i),0.01,0.01,0.01, [1,0,0,1])
 		r.client.gui.applyConfiguration(scene+"/b"+str(i),pos.tolist()+[1,0,0,0])
-		r.client.gui.refresh()	
+		r.client.gui.refresh()
 	r.client.gui.addSceneToWindow(scene,0)
 
 
@@ -152,7 +152,7 @@ def fill_contact_points(limbs, config, config_pinocchio):
 	for limb in limbs:
 		effector = limbsCOMConstraints[limb]['effector']
 		#~ posetc = fullBody.getEffectorPosition(limb, config)
-		P, N = fullBody.computeContactForConfig(config, limb)		
+		P, N = fullBody.computeContactForConfig(config, limb)
 		#~ posetc = fullBody.getEffectorPosition(limb, config)
 		res["contact_points"][effector] = {}
 		#~ res["contact_points"][effector]["P"] = [p for i, p in enumerate (posetc) if (i%2 == 0)]
@@ -164,7 +164,7 @@ def fill_contact_points(limbs, config, config_pinocchio):
 		#~ res["N"] += [n for i, n in enumerate (posetc) if (i%2 == 1)]
 		res["N"] += N
 	return res
-	
+
 from numpy import cos, sin, pi
 def __eulerToQuat(pitch, roll, yaw):
 	t0 = cos(yaw * 0.5);
@@ -178,7 +178,7 @@ def __eulerToQuat(pitch, roll, yaw):
 	y= t0 * t2 * t5 + t1 * t3 * t4;
 	z= t1 * t2 * t4 - t0 * t3 * t5;
 	return [w, x, y, z]
-	#~ 
+	#~
 #~ void SampleRotation(model::DevicePtr_t so3, ConfigurationPtr_t config, JointVector_t& jv)
 #~ {
 	#~ std::size_t id = 1;
@@ -203,19 +203,19 @@ def __eulerToQuat(pitch, roll, yaw):
 	#~ if(id < jv.size())
 		#~ SampleRotationRec(config,jv,id);
 #~ }
-	
+
 from random import uniform
 def _boundSO3(q, num_limbs):
 	#q[:3] = [0,0,0.5]
 	limb_weight = float(4 - num_limbs)
-	#generate random angle 
+	#generate random angle
 	#rot_y = uniform(-pi/(4+limb_weight), pi/(4+limb_weight))
 	#rot_x = uniform(-pi/8, pi/(3+limb_weight))
-	
+
 	rot_z = uniform(-pi/4, pi/4);
 	q[3:7] = __eulerToQuat(0, 0, rot_z)
 	return q
-	
+
 def _feet_far_enough(fullBody,q):
 	fullBody.setCurrentConfig(q)
 	c = fullBody.getCenterOfMass()
@@ -230,13 +230,13 @@ def _feet_far_enough(fullBody,q):
 		return False
 	else:
 		return True
-	
+
 def projectMidFeet(fullBody,q,limbs):
 	fullBody.setCurrentConfig(q)
 	s = State(fullBody,q=q,limbsIncontact=limbs)
 	com = np.array(fullBody.getJointPosition(rfoot)[0:3])
 	com += np.array(fullBody.getJointPosition(lfoot)[0:3])
-	com /= 2.			
+	com /= 2.
 	com[2] = fullBody.getCenterOfMass()[2]
 	successProj = s.projectToCOM(com.tolist())
 	if successProj and fullBody.isConfigValid(s.q())[0]  and fullBody.isConfigBalanced(s.q(), limbs, 5) :
@@ -258,9 +258,9 @@ def _genbalance(fullBody,limbs):
 
 all_qs = []
 def genStates(fullbody,limbs, num_samples = 1000, coplanar = True):
-	q_0 = fullBody.getCurrentConfig(); 
+	q_0 = fullBody.getCurrentConfig();
 	#~ fullBody.getSampleConfig()
-	qs=[] 
+	qs=[]
 	states = []
 	for _ in range(num_samples):
 		if(coplanar):
@@ -274,9 +274,9 @@ def genStates(fullbody,limbs, num_samples = 1000, coplanar = True):
 	return states
 
 def genStateWithOneStep(fullbody,limbs, num_samples = 100, coplanar = True):
-	q_0 = fullBody.getCurrentConfig(); 
+	q_0 = fullBody.getCurrentConfig();
 	#~ fullBody.getSampleConfig()
-	qs=[] 
+	qs=[]
 	states = []
 	assert(len(limbs) == 2 and "only implemented for 2 limbs in contact for now")
 	it = 0
@@ -286,9 +286,9 @@ def genStateWithOneStep(fullbody,limbs, num_samples = 100, coplanar = True):
 			q0 = fullBody.generateGroundContact(limbs)
 		else:
 			q0 = _genbalance(fullBody,limbs)
-		if len(q0)> 1 :  
+		if len(q0)> 1 :
 			s0 = projectMidFeet(fullBody,q0,limbs)
-      			if s0 is not None: 
+      			if s0 is not None:
 				success = False
 				iter = 0
 				# try to make a step
@@ -297,7 +297,7 @@ def genStateWithOneStep(fullbody,limbs, num_samples = 100, coplanar = True):
 						q2 = fullBody.generateGroundContact(limbs)
 					else:
 						q2 = _genbalance(fullBody,limbs)
-					if len(q2) > 1 : 
+					if len(q2) > 1 :
 						s2 = State(fullbody,q=q2,limbsIncontact=limbs)
 						moving_limb = limbs[i%2]
 						[p,n]= s2.getCenterOfContactForLimb(moving_limb) # get position of the moving limb in the next state
@@ -310,11 +310,11 @@ def genStateWithOneStep(fullbody,limbs, num_samples = 100, coplanar = True):
 							com[2] = fullBody.getCenterOfMass()[2]
 							successProj = s1.projectToCOM(com.tolist())
 							success = successProj and fullBody.isConfigValid(s1.q())[0]  and fullBody.isConfigBalanced(s1.q(), limbs, 5)
-					else : 
+					else :
 						success = False
 					iter += 1
 				if success:
-					# recreate the states to assure the continuity of the index in fullBody : 
+					# recreate the states to assure the continuity of the index in fullBody :
 					state0 = State(fullBody,q=s0.q(),limbsIncontact=limbs)
 					states += [[s1,state0]]
 					print("Step "+str(i)+" done.")
@@ -322,7 +322,7 @@ def genStateWithOneStep(fullbody,limbs, num_samples = 100, coplanar = True):
 					print("cannot make the step.")
       			else :
         			print("cannot project between feet")
-		else : 
+		else :
 			print("unable to generate first configuration.")
 		it +=1
 	print("Done generating pairs of states, found : "+str(len(states))+" pairs.")
@@ -336,7 +336,7 @@ q_init =  [
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # LLEG       25-30
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # RLEG       31-36
         0,0,0,0,0,0]; r (q_init)
-        
+
 limbs = [[lLegId,rLegId]]
 
 
@@ -344,4 +344,3 @@ limbs = [[lLegId,rLegId]]
 
 #states = genStates(fullBody,limbs[0], 50,False)
 #states = genStateWithOneStep(fullBody,limbs[0], 50,False)
-

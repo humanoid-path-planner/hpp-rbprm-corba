@@ -21,7 +21,7 @@ pp = PathPlayer (fullBody.client.basic, r)
 from plan_execute import a, b, c, d, e, init_plan_execute
 init_plan_execute(model.fullBody, r, path_planner, pp)
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = path_planner.q_init[0:7]
 q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = path_planner.q_goal[0:7]
 
@@ -35,13 +35,13 @@ q_init =  [
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # LLEG       25-30
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # RLEG       31-36
         ]; r (q_init)
-        
+
 #~ f = open("scale_1_save","r+")
 #~ from pickle import load
 #~ q_init= load(f)
 #~ f.close()
 #~ r (q_init)
- 
+
 fullBody.setCurrentConfig (q_goal)
 q_goal = fullBody.generateContacts(q_goal, [0,0,1])
 q_init = fullBody.generateContacts(q_init, [0,0,1])
@@ -72,23 +72,23 @@ def sc(ec):
 def pl(iid = None):
     global path
     if iid == None:
-        iid = len(path) -1 
+        iid = len(path) -1
     play_trajectory(fullBody,pp,path[iid])
-    
+
 def plc(ctx = 0, iid = None):
     sc(ctx)
     pl(iid)
 
 def go():
     return go0(states, mu=0.6,num_optim=2, use_kin = context == 0)
-    
+
 def plall(first = 0):
     global path
     sc(first)
     for pId in range(len(path)):
         play_trajectory(fullBody,pp,path[pId])
-        
-        
+
+
 
 from pickle import load, dump
 def save(fname):
@@ -115,7 +115,7 @@ def load_save(fname):
     for _, s in enumerate(all_data[0]):
         states+=[State(fullBody,q=s[0], limbsIncontact = s[1]) ]
 	r(states[0].q())
-    
+
 def onepath(ol, ctxt=1, nopt=1, mu=1, effector = False):
     reset()
     sc(ctxt)
@@ -130,7 +130,7 @@ def onepath(ol, ctxt=1, nopt=1, mu=1, effector = False):
     else:
         path[ol]=go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = True, s=s, effector = effector)
     all_paths[ctxt] = path
-    
+
 def onepath2(states_subset, ctxt=1, nopt=1, mu=1, effector = False):
     reset()
     sc(ctxt)
@@ -145,7 +145,7 @@ def onepath2(states_subset, ctxt=1, nopt=1, mu=1, effector = False):
     path += [go2(states_subset, num_optim=nopt, mu=mu, use_kin = True, s=s, effector = effector)]
     #~ else:
         #~ path[ol]=go2(states_subset, num_optim=nopt, mu=mu, use_kin = False, s=s, effector = effector)
-    all_paths[ctxt] = path    
+    all_paths[ctxt] = path
 
 def save_paths(fname):
     f = open(fname, "w")
@@ -159,7 +159,7 @@ def save_paths(fname):
     f = open(fname+"all", "w")
     dump(all_paths,f)
     f.close()
-    
+
 def load_paths(fname):
     f = open(fname, "r")
     global all_paths
@@ -168,28 +168,28 @@ def load_paths(fname):
     sc(0)
     global path
     path = all_paths[0][:]
-    
+
 def sh(ctxt, i):
     sc(ctxt)
     r(states[i].q())
-    
+
 def lc():
     load_save("19_06_s")
     load_paths("19_06_p")
     #~ save_paths("19_06_p_save")
     save("19_06_s_save")
-    
+
 def sac():
     save("19_06_s")
     save_paths("19_06_p")
-    
+
 def add(lId):
     sF = states[-1]
     ns = computeNext(sF,lId,True,10)[0]
     global states
     states +=[ns]
     r(ns.q())
-    
+
 def rm(lId, nu = 1):
     sF = states[-1]
     ns, res = removeContact(sF,lId,True,friction = nu)
@@ -199,7 +199,7 @@ def rm(lId, nu = 1):
     if res:
         states +=[ns]
         r(ns.q())
-        
+
 def cpa(mu = 1):
     global path
     reset()
@@ -211,21 +211,21 @@ def cpa(mu = 1):
     except:
         global states
         states = states[:-1]
-    
+
 init_bezier_traj(fullBody, r, pp, configs, limbsCOMConstraints)
 
 all_paths = [[],[]]
 from hpp.corbaserver.rbprm.state_alg import *
 #~ d(0.07);e(0.01)
 i=0
-#~ d(0.09); e(0.01); 
+#~ d(0.09); e(0.01);
 configs = d(0.1);e();
 
 states = planToStates(fullBody,configs)[:-1]
 
 s = State(fullBody,q=states[-1].q(),limbsIncontact=states[-1].getLimbsInContact())
 x = s.getCenterOfMass()
-x[0]-=0.05 
+x[0]-=0.05
 x[2]-=0.1
 fullBody.projectStateToCOM(s.sId ,x, 10); r(s.q())
 states+=[s]
@@ -239,9 +239,8 @@ lc()
 #~ for i in range(0,4):
     #~ print i
     #~ onepath(i,0,nopt=1,effector=False,mu=1);
-    #~ 
-#~ 
+    #~
+#~
 #~ onepath2(states [2:-2],nopt=0,mu=1,effector=False)
 
 #~ e(0.01)
-

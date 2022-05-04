@@ -16,7 +16,7 @@ class Robot (Parent):
 		self.tf_root = "base_footprint"
 		self.client.basic = Client ()
 		self.load = load
-		
+
 rootJointType = 'freeflyer'
 packageName = 'hpp-rbprm-corba'
 meshPackageName = 'hpp-rbprm-corba'
@@ -41,7 +41,7 @@ rbprmBuilder.setAffordanceFilter('SpidermanRHandSphere', affordanceTypeHand)
 #~ rbprmBuilder.setContactSize (0.03,0.08)
 #~ rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(ecsSize)
 #~ rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([0,0,0,0,0,0,-3.14,3.14])
-#~ 
+#~
 #~ rbprmBuilder.boundSO3([-0.,0,-1,1,-1,1])
 
 #~ from hpp.corbaserver.rbprm. import ProblemSolver
@@ -96,7 +96,7 @@ f.close()
 from hpp.gepetto import PathPlayer
 pp = PathPlayer (rbprmBuilder.client.basic, r)
 #~ pp.fromFile("/home/stonneau/dev/hpp/src/hpp-rbprm-corba/script/paths/stair.path")
-#~ 
+#~
 #~ pp (2)
 #~ pp (0)
 

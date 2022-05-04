@@ -2,32 +2,71 @@ from talos_rbprm.talos import Robot
 from hpp.gepetto import Viewer
 import time
 from hpp.corbaserver import ProblemSolver
-from hpp.corbaserver.rbprm.rbprmstate import State,StateHelper
+from hpp.corbaserver.rbprm.rbprmstate import State, StateHelper
 import time
 
 
-fullBody = Robot ()
-fullBody.setJointBounds ("root_joint",  [-5,5, -1.5, 1.5, 0.95, 1.05])
+fullBody = Robot()
+fullBody.setJointBounds("root_joint", [-5, 5, -1.5, 1.5, 0.95, 1.05])
 fullBody.client.robot.setDimensionExtraConfigSpace(6)
-fullBody.client.robot.setExtraConfigSpaceBounds([0]*12)
-ps = ProblemSolver( fullBody )
+fullBody.client.robot.setExtraConfigSpaceBounds([0] * 12)
+ps = ProblemSolver(fullBody)
 
 
 from hpp.gepetto import ViewerFactory
-vf = ViewerFactory (ps)
-vf.loadObstacleModel ("hpp_environments", "multicontact/table_140_70_73", "planning")
 
+vf = ViewerFactory(ps)
+vf.loadObstacleModel("hpp_environments", "multicontact/table_140_70_73", "planning")
 
 
 q_ref = [
-        0.0, 0.0,  1.0232773,  0.0 ,  0.0, 0.0, 1,                   #Free flyer
-        0.0,  0.0, -0.411354,  0.859395, -0.448041, -0.001708,          #Left Leg
-        0.0,  0.0, -0.411354,  0.859395, -0.448041, -0.001708,          #Right Leg
-        0.0 ,  0.006761,                                                #Chest
-        0.25847 ,  0.173046, -0.0002, -0.525366, 0.0, -0.0,  0.1,-0.005,  #Left Arm
-        -0.25847 , -0.173046, 0.0002  , -0.525366, 0.0,  0.0,  0.1,-0.005,#Right Arm
-        0.,  0.,
-0,0,0,0,0,0]; # head
+    0.0,
+    0.0,
+    1.0232773,
+    0.0,
+    0.0,
+    0.0,
+    1,  # Free flyer
+    0.0,
+    0.0,
+    -0.411354,
+    0.859395,
+    -0.448041,
+    -0.001708,  # Left Leg
+    0.0,
+    0.0,
+    -0.411354,
+    0.859395,
+    -0.448041,
+    -0.001708,  # Right Leg
+    0.0,
+    0.006761,  # Chest
+    0.25847,
+    0.173046,
+    -0.0002,
+    -0.525366,
+    0.0,
+    -0.0,
+    0.1,
+    -0.005,  # Left Arm
+    -0.25847,
+    -0.173046,
+    0.0002,
+    -0.525366,
+    0.0,
+    0.0,
+    0.1,
+    -0.005,  # Right Arm
+    0.0,
+    0.0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+]
+# head
 
 q_init = q_ref[::]
 fullBody.setReferenceConfig(q_ref)
@@ -36,50 +75,88 @@ fullBody.setReferenceConfig(q_ref)
 tStart = time.time()
 # generate databases :
 nbSamples = 1
-fullBody.addLimb(fullBody.rLegId,fullBody.rleg,fullBody.rfoot,fullBody.rLegOffset,fullBody.rLegNormal, fullBody.rLegx, fullBody.rLegy, nbSamples, "EFORT", 0.01)
+fullBody.addLimb(
+    fullBody.rLegId,
+    fullBody.rleg,
+    fullBody.rfoot,
+    fullBody.rLegOffset,
+    fullBody.rLegNormal,
+    fullBody.rLegx,
+    fullBody.rLegy,
+    nbSamples,
+    "EFORT",
+    0.01,
+)
 fullBody.runLimbSampleAnalysis(fullBody.rLegId, "ReferenceConfiguration", True)
-#fullBody.saveLimbDatabase(rLegId, "./db/talos_rLeg_walk.db")
-fullBody.addLimb(fullBody.lLegId,fullBody.lleg,fullBody.lfoot,fullBody.lLegOffset,fullBody.rLegNormal, fullBody.lLegx, fullBody.lLegy, nbSamples, "EFORT", 0.01)
+# fullBody.saveLimbDatabase(rLegId, "./db/talos_rLeg_walk.db")
+fullBody.addLimb(
+    fullBody.lLegId,
+    fullBody.lleg,
+    fullBody.lfoot,
+    fullBody.lLegOffset,
+    fullBody.rLegNormal,
+    fullBody.lLegx,
+    fullBody.lLegy,
+    nbSamples,
+    "EFORT",
+    0.01,
+)
 fullBody.runLimbSampleAnalysis(fullBody.lLegId, "ReferenceConfiguration", True)
-fullBody.addLimb(fullBody.rArmId,fullBody.rarm,fullBody.rhand,fullBody.rArmOffset,fullBody.rArmNormal, fullBody.rArmx, fullBody.rArmx, nbSamples, "EFORT", 0.01)
+fullBody.addLimb(
+    fullBody.rArmId,
+    fullBody.rarm,
+    fullBody.rhand,
+    fullBody.rArmOffset,
+    fullBody.rArmNormal,
+    fullBody.rArmx,
+    fullBody.rArmx,
+    nbSamples,
+    "EFORT",
+    0.01,
+)
 fullBody.runLimbSampleAnalysis(fullBody.rArmId, "ReferenceConfiguration", True)
 
-tGenerate =  time.time() - tStart
-print("generate databases in : "+str(tGenerate)+" s")
+tGenerate = time.time() - tStart
+print("generate databases in : " + str(tGenerate) + " s")
 
 v = vf.createViewer(displayCoM=True)
 v(q_init)
-v.addLandmark(v.sceneName,0.5)
-v.addLandmark('talos/arm_right_7_link',0.1)
-q_init[0:2] = [-0.5,0.8]
-q_init[32] -=1.5 # right elbow
+v.addLandmark(v.sceneName, 0.5)
+v.addLandmark("talos/arm_right_7_link", 0.1)
+q_init[0:2] = [-0.5, 0.8]
+q_init[32] -= 1.5  # right elbow
 v(q_init)
 
 # sphere = target
 from hpp.corbaserver.rbprm.tools.display_tools import *
-createSphere('target',v,size=0.05,color=v.color.red)
-v.client.gui.setVisibility('target','ON')
-moveSphere('target',v,[0,0,0.5])
+
+createSphere("target", v, size=0.05, color=v.color.red)
+v.client.gui.setVisibility("target", "ON")
+moveSphere("target", v, [0, 0, 0.5])
 
 # create contact :
-fullBody.setStartState(q_init,[fullBody.lLegId,fullBody.rLegId])
-n = [0,0,1]
+fullBody.setStartState(q_init, [fullBody.lLegId, fullBody.rLegId])
+n = [0, 0, 1]
 
-s0 = State(fullBody,q=q_init,limbsIncontact=[fullBody.lLegId,fullBody.rLegId])
+s0 = State(fullBody, q=q_init, limbsIncontact=[fullBody.lLegId, fullBody.rLegId])
 
 ###  move left foot of 30cm in front
 pLLeg = s0.getCenterOfContactForLimb(fullBody.lLegId)[0]
 pLLeg[0] += 0.3
-pLLeg[2] -= 0.001 # required because this delta is added in rbprm ...
-s1,success = StateHelper.addNewContact(s0,fullBody.lLegId,pLLeg,n,lockOtherJoints=False)
+pLLeg[2] -= 0.001  # required because this delta is added in rbprm ...
+s1, success = StateHelper.addNewContact(
+    s0, fullBody.lLegId, pLLeg, n, lockOtherJoints=False
+)
 assert success, "Unable to project contact position for left foot"
 
 ###  move hand to the handle
 
-pHand  = [0.1,0.5,0.75]
-createSphere('s',v)
-moveSphere('s',v,pHand)
-s2,success = StateHelper.addNewContact(s1,fullBody.rArmId,pHand,n,lockOtherJoints=False)
+pHand = [0.1, 0.5, 0.75]
+createSphere("s", v)
+moveSphere("s", v, pHand)
+s2, success = StateHelper.addNewContact(
+    s1, fullBody.rArmId, pHand, n, lockOtherJoints=False
+)
 assert success, "Unable to project contact position for right hand"
 """
 v(s2.q())
@@ -203,9 +280,7 @@ s3.projectToCOM(com,10000)
 v(s3.q())
 
 """
-configs = [s0.q(), s1.q(),s2.q()]
-#configs = [s0.q(),s2.q()]
+configs = [s0.q(), s1.q(), s2.q()]
+# configs = [s0.q(),s2.q()]
 
 v(configs[-1])
-
-

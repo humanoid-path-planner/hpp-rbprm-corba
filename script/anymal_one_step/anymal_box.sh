@@ -9,4 +9,3 @@ ipython -i --no-confirm-exit $DEVEL_HPP_DIR/src/multicontact-locomotion-planning
 
 pkill -f  'gepetto-gui'
 pkill -f  'hpp-rbprm-server'
-

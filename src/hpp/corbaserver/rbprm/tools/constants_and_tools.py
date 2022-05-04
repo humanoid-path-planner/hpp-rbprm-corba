@@ -1,6 +1,8 @@
 import numpy as np
+
 # from hpp.corbaserver.rbprm.hrp2 import Robot as rob
-# from hpp.corbaserver.rbprm.tools.obj_to_constraints import load_obj, as_inequalities, rotate_inequalities
+# from hpp.corbaserver.rbprm.tools.obj_to_constraints import load_obj, as_inequalities,
+# rotate_inequalities.
 # from hpp_centroidal_dynamics import *
 # from hpp_spline import *e
 from numpy import array, hstack, identity, matrix, ones, vstack, zeros
@@ -12,8 +14,8 @@ import cdd
 # from hpp_bezier_com_traj import *
 # from qp import solve_lp
 
-Id = matrix([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]])
-z = array([0., 0., 1.])
+Id = matrix([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+z = array([0.0, 0.0, 1.0])
 zero3 = zeros(3)
 
 
@@ -33,7 +35,7 @@ def generators(A, b, Aeq=None, beq=None):
 
 
 def filter(pts):
-    hull = ConvexHull(pts, qhull_options='Q12')
+    hull = ConvexHull(pts, qhull_options="Q12")
     return [pts[i] for i in hull.vertices.tolist()]
 
 
@@ -118,11 +120,12 @@ def convex_hull_ineq(pts):
     error = False
     for pt in allpts:
         print("pt ", pt)
-        assert (resA.dot(pt.reshape((-1, 1))) - resb).max() < 0.001, "antecedent point not in End polytope" + str(
-            (resA.dot(pt.reshape((-1, 1))) - resb).max())
+        assert (resA.dot(pt.reshape((-1, 1))) - resb).max() < 0.001, "antecedent point
+        not in End polytope" + str( (resA.dot(pt.reshape((-1, 1))) - resb).max())
         if (H.dot(w(m, pt).reshape((-1, 1))) - h).max() > 0.001:
             error = True
-            print("antecedent point not in End polytope" + str((H.dot(w(m, pt).reshape((-1, 1))) - h).max()))
+            print("antecedent point not in End polytope" + str((H.dot(w(m,
+            pt).reshape((-1, 1))) - h).max()))
     assert not error, str(len(allpts))
 
     return (resA, resb)
@@ -134,7 +137,7 @@ def convex_hull_ineq(pts):
 def default_transform_from_pos_normal(pos, normal):
     # print("pos ", pos
     # print("normal ", normal)
-    f = array([0., 0., 1.])
+    f = array([0.0, 0.0, 1.0])
     t = array(normal)
     v = np.cross(f, t)
     c = np.dot(f, t)
@@ -142,13 +145,17 @@ def default_transform_from_pos_normal(pos, normal):
         rot = identity(3)
     else:
         # u = v / norm(v)
-        h = (1. - c) / (1. - c**2)
+        h = (1.0 - c) / (1.0 - c**2)
 
         vx, vy, vz = v
-        rot = array([[c + h * vx**2, h * vx * vy - vz, h * vx * vz + vy],
-                     [h * vx * vy + vz, c + h * vy**2, h * vy * vz - vx],
-                     [h * vx * vz - vy, h * vy * vz + vx, c + h * vz**2]])
-    return vstack([hstack([rot, pos.reshape((-1, 1))]), [0., 0., 0., 1.]])
+        rot = array(
+            [
+                [c + h * vx**2, h * vx * vy - vz, h * vx * vz + vy],
+                [h * vx * vy + vz, c + h * vy**2, h * vy * vz - vx],
+                [h * vx * vz - vy, h * vy * vz + vx, c + h * vz**2],
+            ]
+        )
+    return vstack([hstack([rot, pos.reshape((-1, 1))]), [0.0, 0.0, 0.0, 1.0]])
 
 
 def continuous(h, initpts):
@@ -169,17 +176,18 @@ def hull_to_obj(h, pts, name):
     # first write points
     for pt in pts:
         # print("??")
-        f.write('v ' + str(pt[0]) + ' ' + str(pt[1]) + ' ' + str(pt[2]) + ' \n')
-    f.write('g foo\n')
+        f.write("v " + str(pt[0]) + " " + str(pt[1]) + " " + str(pt[2]) + " \n")
+    f.write("g foo\n")
     for pt in faces:
         # print("???")
-        f.write('f ' + str(pt[0]) + ' ' + str(pt[1]) + ' ' + str(pt[2]) + ' \n')
-    f.write('g \n')
+        f.write("f " + str(pt[0]) + " " + str(pt[1]) + " " + str(pt[2]) + " \n")
+    f.write("g \n")
     f.close()
 
 
 # function vertface2obj(v,f,name)
-# % VERTFACE2OBJ Save a set of vertice coordinates and faces as a Wavefront/Alias Obj file
+# % VERTFACE2OBJ Save a set of vertice coordinates and faces as a Wavefront/Alias Obj
+# file.
 # % VERTFACE2OBJ(v,f,fname)
 # %     v is a Nx3 matrix of vertex coordinates.
 # %     f is a Mx3 matrix of vertex indices.

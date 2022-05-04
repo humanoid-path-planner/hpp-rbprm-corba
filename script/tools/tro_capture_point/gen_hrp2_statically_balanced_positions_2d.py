@@ -35,15 +35,15 @@ n_samples = 10000
 rLegId = '0rLeg'
 rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,0,-0.105]
-rLegNormal = [0,0,1]       
+rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 10000, "manipulability", 0.1)
-                                                                                                
-lLegId = '1lLeg'                                                                                
-lLeg = 'LLEG_JOINT0'                                                                     
-lLegx = 0.09; lLegy = 0.05      
+
+lLegId = '1lLeg'
+lLeg = 'LLEG_JOINT0'
+lLegx = 0.09; lLegy = 0.05
 lLegOffset = [0,0,-0.105]
-lLegNormal = [0,0,1]                                                                  
+lLegNormal = [0,0,1]
 fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.1)
 
 
@@ -92,15 +92,15 @@ fullBody.addLimb(larmId,larm,lHand,lArmOffset,lArmNormal, lArmx, lArmy, 10000, "
 
 
 
-limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},  
-                        lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}, 
-                        larmId : {'file': "hrp2/LA_com.ineq", 'effector' : lHand}, 
+limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},
+                        lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'},
+                        larmId : {'file': "hrp2/LA_com.ineq", 'effector' : lHand},
                         rarmId : {'file': "hrp2/RA_com.ineq", 'effector' : rHand} }
-#~ limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},  
-                        #~ lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'}, 
+#~ limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},
+                        #~ lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'},
                         #~ rarmId : {'file': "hrp2/RA_com.ineq", 'effector' : rHand} }
 
- #~ 
+ #~
 
 #~ fullBody.client.basic.robot.setJointConfig('LARM_JOINT0',[1])
 #~ fullBody.client.basic.robot.setJointConfig('RARM_JOINT0',[-1])
@@ -120,7 +120,7 @@ def _getTransform(qEffector):
         rm[m,3] = qEffector[m]
     rm[3,3] = 1
     return rm
-            
+
 from numpy.linalg import norm
 def __loosely_z_aligned(limb, config):
     fullBody.setCurrentConfig(config)
@@ -151,9 +151,9 @@ def draw_cp(cid, limb, config):
         print "pos", pos
         r.client.gui.addBox(scene+"/b"+str(i),0.01,0.01,0.01, [1,0,0,1])
         r.client.gui.applyConfiguration(scene+"/b"+str(i),pos.tolist()+[1,0,0,0])
-        r.client.gui.refresh()  
+        r.client.gui.refresh()
     r.client.gui.addSceneToWindow(scene,0)
-    
+
 def draw_com(config):
     fullBody.setCurrentConfig(config)
     effectorName = limbsCOMConstraints[limb]['effector']
@@ -170,7 +170,7 @@ def draw_com(config):
         print "pos", pos
         r.client.gui.addBox(scene+"/b"+str(i),0.01,0.01,0.01, [1,0,0,1])
         r.client.gui.applyConfiguration(scene+"/b"+str(i),pos.tolist()+[1,0,0,0])
-        r.client.gui.refresh()  
+        r.client.gui.refresh()
     r.client.gui.addSceneToWindow(scene,0)
 
 
@@ -179,7 +179,7 @@ def fill_contact_points(limbs, fullbody, data):
     for limb in limbs:
         print "LIMB ", limb
         effector = limbsCOMConstraints[limb]['effector']
-        P, N = fullBody.computeContactForConfig(fullbody.getCurrentConfig(), limb)  
+        P, N = fullBody.computeContactForConfig(fullbody.getCurrentConfig(), limb)
         print "\t P \n"
         for _,p in enumerate (P):
             print "\t ", p
@@ -190,8 +190,8 @@ def fill_contact_points(limbs, fullbody, data):
         data["contact_points"][effector]["P"] = P
         data["contact_points"][effector]["N"] = N
     return data
-    
-    
+
+
 from random import randint
 
 def pos_quat_to_pinocchio(q):
@@ -228,12 +228,12 @@ def gen_contact_candidates_one_limb(limb, data, num_candidates = 10, projectToOb
             #~ candidates.append(pos_quat_to_pinocchio(fullBody.getJointPosition(effectorName)))
     data[effectorName]["transforms"] = candidates
     return config_candidates #DEBUG
-        
+
 
 def removeLimb(limb, limbs):
     return [l for l in limbs if l != limb]
-    
-#~ 
+
+#~
 #~ def find_limbs_broken(target_c, config, limbs):
     #~ res = []
     #~ for limb in limbs:
@@ -242,7 +242,7 @@ def removeLimb(limb, limbs):
         #~ if (fullBody.projectStateToCOM(state_id,target_c)):
             #~ res.append(limb)
     #~ return res
-    
+
 def predict_com_for_limb_candidate(c, limb, limbs, res, data, config_gepetto, orig_contact_points):
     effector = limbsCOMConstraints[limb]['effector']
     contact_points = {}
@@ -255,7 +255,7 @@ def predict_com_for_limb_candidate(c, limb, limbs, res, data, config_gepetto, or
     print "c for limb ", c_final ,  ":", limb
     print "success ",success
     effector_data = {}
-    print "maintained_limbs ", maintained_limbs 
+    print "maintained_limbs ", maintained_limbs
     state_id = fullBody.createState(config_gepetto, maintained_limbs)
     if(success and fullBody.projectStateToCOM(state_id,c_final.tolist())): #all good, all contacts kinematically maintained):
         effector_data["dc"] = dc
@@ -267,36 +267,36 @@ def predict_com_for_limb_candidate(c, limb, limbs, res, data, config_gepetto, or
         return True
     print "projection failed for limb ", limb
     return False
-    
-    
+
+
 def gen_contact_candidates(limbs, config_gepetto, res, contact_points, num_candidates = 10, projectToObstacles = False):
     #first generate a com translation current configuration
     fullBody.setCurrentConfig(config_gepetto)
     c = matrix(fullBody.getCenterOfMass())
-    success, v0, dc = scv.gen_com_vel(res["q"], contact_points) 
+    success, v0, dc = scv.gen_com_vel(res["q"], contact_points)
     if(success):
         data = {}
         data["v0"] = v0
         data["candidates_per_effector"] = {}
-        configs_candidates = {} #DEBUG      
-        data["init_config"] = config_gepetto  #DEBUG    
-        for limb in limbsCOMConstraints.keys(): 
+        configs_candidates = {} #DEBUG
+        data["init_config"] = config_gepetto  #DEBUG
+        for limb in limbsCOMConstraints.keys():
             #~ print "limb ", limb
             if (predict_com_for_limb_candidate(c, limb, limbs, res, data, config_gepetto, contact_points)):  #all good, all contacts kinematically maintained
-               val  = gen_contact_candidates_one_limb(limb, data["candidates_per_effector"], num_candidates, projectToObstacles) #DEBUG 
+               val  = gen_contact_candidates_one_limb(limb, data["candidates_per_effector"], num_candidates, projectToObstacles) #DEBUG
                if len(val) > 0:
                     configs_candidates[limb] = val
         if(len(data["candidates_per_effector"].keys()) >0):
             #~ if((data["candidates_per_effector"].has_key('RARM_JOINT5') and not data["candidates_per_effector"].has_key('LARM_JOINT5')) or
                 #~ (data["candidates_per_effector"].has_key('LARM_JOINT5') and not data["candidates_per_effector"].has_key('RARM_JOINT5'))):
                     #~ raise ValueError("RARM AND LARM candidates not coherent (if there is candidates for one there should be for the other)");
-            data["candidates_per_effector"]["config_candidates"] = configs_candidates  #DEBUG     
+            data["candidates_per_effector"]["config_candidates"] = configs_candidates  #DEBUG
             if (not res.has_key("candidates")):
-                res["candidates"] = []  
+                res["candidates"] = []
             res["candidates"].append(data)
-            
-        
-    
+
+
+
 from numpy import cos, sin, pi
 def __eulerToQuat(pitch, roll, yaw):
     t0 = cos(yaw * 0.5);
@@ -310,7 +310,7 @@ def __eulerToQuat(pitch, roll, yaw):
     y= t0 * t2 * t5 + t1 * t3 * t4;
     z= t1 * t2 * t4 - t0 * t3 * t5;
     return [w, x, y, z]
-    #~ 
+    #~
 #~ void SampleRotation(model::DevicePtr_t so3, ConfigurationPtr_t config, JointVector_t& jv)
 #~ {
     #~ std::size_t id = 1;
@@ -335,26 +335,26 @@ def __eulerToQuat(pitch, roll, yaw):
     #~ if(id < jv.size())
         #~ SampleRotationRec(config,jv,id);
 #~ }
-    
+
 from random import uniform
 def _boundSO3(q, num_limbs):
     q[:3] = [0,0,0.5]
     limb_weight = float(4 - num_limbs)
-    #generate random angle 
+    #generate random angle
     rot_y = uniform(-pi/(4+limb_weight), pi/(4+limb_weight))
     rot_x = uniform(-pi/8, pi/(3+limb_weight))
-    
+
     rot_z = 0;
     q[3:7] = __eulerToQuat(rot_x, rot_y, rot_z)
     return q
-    
+
 
 def _genbalance(limbs, unstable):
     for i in range(10000):
         q = fullBody.client.basic.robot.shootRandomConfig()
         q = _boundSO3(q, len(limbs))
         if fullBody.isConfigValid(q)[0] and __loosely_z_aligned(limbs[0], q) and __loosely_z_aligned(limbs[1], q):
-			if (unstable and not fullBody.isConfigBalanced(q, limbs, 5)) or  (not unstable and fullBody.isConfigBalanced(q, limbs, 5)): 
+			if (unstable and not fullBody.isConfigBalanced(q, limbs, 5)) or  (not unstable and fullBody.isConfigBalanced(q, limbs, 5)):
         #~ if fullBody.isConfigValid(q)[0] and  __loosely_z_aligned(limbs[0], q) and __loosely_z_aligned(limbs[1], q):
 				return q
     print "can't generate equilibrium config"
@@ -363,9 +363,9 @@ all_qs = []
 all_states = []
 all_data = []
 def gen(limbs, num_samples = 1000, coplanar = True, num_candidates_per_config = 0, num_contact_candidates = 10, q_entries = None, projectToObstacles = False, unstable = False):
-    q_0 = fullBody.getCurrentConfig(); 
+    q_0 = fullBody.getCurrentConfig();
     #~ fullBody.getSampleConfig()
-    qs = []; qs_gepetto = []; states = []    
+    qs = []; qs_gepetto = []; states = []
     data = {}
     fill_contact_points(limbs, fullBody, data)
     if(q_entries != None):
@@ -421,7 +421,7 @@ q_init =  [
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # LLEG       25-30
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # RLEG       31-36
         ]; r (q_init)
-        
+
 #~ limbs = [[lLegId,rLegId],[lLegId,rLegId, rarmId], [lLegId,rLegId, larmId], [lLegId,rLegId, rarmId, larmId] ]
 #~ limbs = [[lLegId,rLegId] ]
 limbs = [[lLegId,rLegId, rarmId, larmId]]
@@ -434,7 +434,7 @@ q_init = fullBody.getCurrentConfig()
 for ls in limbs:
     gen(ls, 1, False, unstable=True)
 #~ gen(limbs[0], 1000, unstable=True)
-    
+
 i = 0
 a = None
 b = None
@@ -443,51 +443,51 @@ b = None
 #~ b = a ['candidates_per_effector']
 def init():
     r(a['init_config'])
-    
+
 #~ b = a ['candidates_per_effector']
 
 def rleg():
     r(b['RLEG_JOINT5']['projected_config'])
-    
+
 def lleg():
     r(b['LLEG_JOINT5']['projected_config'])
-    
+
 def larm():
     r(b['LARM_JOINT5']['projected_config'])
-    
+
 def rarm():
     r(b['RARM_JOINT5']['projected_config'])
-    
-def rlegi(j):                 
+
+def rlegi(j):
     r(b['config_candidates'][rLegId][j])
-                             
-def llegi(j):                 
+
+def llegi(j):
     r(b['config_candidates'][lLegId][j])
-                             
-def larmi(j):                 
+
+def larmi(j):
     r(b['config_candidates'][larmId][j])
-                             
-def rarmi(j):                 
+
+def rarmi(j):
     r(b['config_candidates'][rarmId][j])
-    
-    
-    
+
+
+
 def c1():
     r(b['config_candidates'][0][0])
-    
+
 def c2():
     r(b['config_candidates'][1][0])
-    
+
 def c3():
     r(b['config_candidates'][2][0])
-    
+
 def c4():
     r(b['config_candidates'][3][0])
-    
-    
+
+
 def cij(l,m):
     r(b['config_candidates'][l][m])
-    
+
 def inc():
     global i
     global a
@@ -495,10 +495,9 @@ def inc():
     i+=1
     a = all_states[0][i]['candidates'][0]
     b = a ['candidates_per_effector']
-    
+
 def a():
     return a
-    
+
 def b():
     return b
-

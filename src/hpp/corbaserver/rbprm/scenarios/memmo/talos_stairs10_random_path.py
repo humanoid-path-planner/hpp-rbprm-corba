@@ -34,20 +34,27 @@ class PathPlanner(TalosPathPlanner):
 
     def load_rbprm(self):
         from talos_rbprm.talos_abstract import Robot
+
         # select ROM model with really conservative ROM shapes
         Robot.urdfName = "talos_trunk_large_reducedROM"
         self.robot_node_name = "talos_trunk_large_reducedROM"
-        Robot.rLegId = 'talos_rleg_rom_reduced'
-        Robot.lLegId = 'talos_lleg_rom_reduced'
+        Robot.rLegId = "talos_rleg_rom_reduced"
+        Robot.lLegId = "talos_lleg_rom_reduced"
         Robot.urdfNameRom = [Robot.lLegId, Robot.rLegId]
         self.used_limbs = Robot.urdfNameRom
         self.rbprmBuilder = Robot()
-        # As the ROM names have changed, we need to set this values again (otherwise it's automatically done)
-        self.rbprmBuilder.setReferenceEndEffector(Robot.lLegId, self.rbprmBuilder.ref_EE_lLeg)
-        self.rbprmBuilder.setReferenceEndEffector(Robot.rLegId, self.rbprmBuilder.ref_EE_rLeg)
+        # As the ROM names have changed, we need to set this values again (otherwise
+        # it's automatically done).
+        self.rbprmBuilder.setReferenceEndEffector(
+            Robot.lLegId, self.rbprmBuilder.ref_EE_lLeg
+        )
+        self.rbprmBuilder.setReferenceEndEffector(
+            Robot.rLegId, self.rbprmBuilder.ref_EE_rLeg
+        )
 
     def set_random_configs(self):
         from hpp.corbaserver.rbprm.tools.sampleRotation import sampleRotationForConfig
+
         q_up = self.q_init[::]
         q_down = q_up[::]
         # generate a random problem : (q_init, q_goal)
@@ -55,10 +62,10 @@ class PathPlanner(TalosPathPlanner):
         go_up = random.randint(0, 1)
         if go_up:
             print("go upstair")
-            alphaBounds = [np.pi / 4., 3. * np.pi / 4.]
+            alphaBounds = [np.pi / 4.0, 3.0 * np.pi / 4.0]
         else:
             print("go downstair")
-            alphaBounds = [5. * np.pi / 4., 7. * np.pi / 4.]
+            alphaBounds = [5.0 * np.pi / 4.0, 7.0 * np.pi / 4.0]
 
         # sample random valid position on the floor :
         while not self.rbprmBuilder.isConfigValid(q_down)[0]:
@@ -97,19 +104,34 @@ class PathPlanner(TalosPathPlanner):
         # greatly increase the number of loops of the random shortcut
         self.ps.setParameter("PathOptimization/RandomShortcut/NumberOfLoops", 100)
         self.ps.setParameter("Kinodynamic/synchronizeVerticalAxis", True)
-        self.ps.setParameter("Kinodynamic/verticalAccelerationBound", 3.)
+        self.ps.setParameter("Kinodynamic/verticalAccelerationBound", 3.0)
 
     def compute_extra_config_bounds(self):
-        # bounds for the extradof : by default use v_max/a_max on x and y axis and a large value on z axis
+        # bounds for the extradof : by default use v_max/a_max on x and y axis and a
+        # large value on z axis.
         self.extra_dof_bounds = [
-            -self.v_max, self.v_max, -self.v_max, self.v_max, -10, 10, -self.a_max, self.a_max, -self.a_max,
-            self.a_max, -10, 10
+            -self.v_max,
+            self.v_max,
+            -self.v_max,
+            self.v_max,
+            -10,
+            10,
+            -self.a_max,
+            self.a_max,
+            -self.a_max,
+            self.a_max,
+            -10,
+            10,
         ]
 
     def run(self):
-        self.root_translation_bounds = [-0.9, 2.55, -0.13, 2., 0.98, 1.62]
+        self.root_translation_bounds = [-0.9, 2.55, -0.13, 2.0, 0.98, 1.62]
         self.init_problem()
-        self.init_viewer("multicontact/bauzil_stairs", reduce_sizes=[0.11, 0., 0.], visualize_affordances=["Support"])
+        self.init_viewer(
+            "multicontact/bauzil_stairs",
+            reduce_sizes=[0.11, 0.0, 0.0],
+            visualize_affordances=["Support"],
+        )
         self.set_random_configs()
         self.init_planner()
         self.solve()

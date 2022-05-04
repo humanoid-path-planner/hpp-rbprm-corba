@@ -1,5 +1,7 @@
 from hpp.corbaserver.rbprm.scenarios.demos.talos_plateformes_path import PathPlanner
-from hpp.corbaserver.rbprm.scenarios.talos_contact_generator import TalosContactGenerator
+from hpp.corbaserver.rbprm.scenarios.talos_contact_generator import (
+    TalosContactGenerator,
+)
 
 
 class ContactGenerator(TalosContactGenerator):
@@ -8,17 +10,23 @@ class ContactGenerator(TalosContactGenerator):
 
     def load_fullbody(self):
         from talos_rbprm.talos import Robot
+
         # use a model with upscaled collision geometry for the feet
         Robot.urdfSuffix += "_safeFeet"
         self.fullbody = Robot()
-        self.q_ref = self.fullbody.referenceConfig_legsApart[::] + [0] * self.path_planner.extra_dof
-        self.weight_postural = self.fullbody.postureWeights[::] + [0] * self.path_planner.extra_dof
+        self.q_ref = (
+            self.fullbody.referenceConfig_legsApart[::]
+            + [0] * self.path_planner.extra_dof
+        )
+        self.weight_postural = (
+            self.fullbody.postureWeights[::] + [0] * self.path_planner.extra_dof
+        )
 
     def set_joints_bounds(self):
         super().set_joints_bounds()
         # set conservative bounds for the leg z joint
-        self.fullbody.setJointBounds('leg_left_1_joint', [-0.1, 0.2])
-        self.fullbody.setJointBounds('leg_right_1_joint', [-0.2, 0.1])
+        self.fullbody.setJointBounds("leg_left_1_joint", [-0.1, 0.2])
+        self.fullbody.setJointBounds("leg_right_1_joint", [-0.2, 0.1])
 
     def run(self):
         self.load_fullbody()

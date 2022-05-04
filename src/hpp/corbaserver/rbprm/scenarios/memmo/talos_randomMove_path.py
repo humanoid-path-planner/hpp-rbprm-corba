@@ -10,7 +10,9 @@ class PathPlanner(TalosPathPlanner):
     status_filename = "/res/infos.log"
     MIN_ROOT_DIST = 0.05
     MAX_ROOT_DIST = 0.3
-    FINAL_ORIENTATION_RANDOM = False  # if true : random value of yaw orientation, if false : constrained to be along the direction of root_init->root_goal
+    # if true : random value of yaw orientation, if false : constrained to be along the
+    # direction of root_init->root_goal.
+    FINAL_ORIENTATION_RANDOM = False
     ROOT_Z_MIN = 0.85
     ROOT_Z_MAX = 1.05
 
@@ -20,7 +22,7 @@ class PathPlanner(TalosPathPlanner):
         self.a_max = 0.05
         self.v_init = 0.01
         self.v_goal = 0.01
-        self.root_translation_bounds = [-2, 2, -2, 2, 1., 1.]
+        self.root_translation_bounds = [-2, 2, -2, 2, 1.0, 1.0]
 
     def init_problem(self):
         super().init_problem()
@@ -31,22 +33,27 @@ class PathPlanner(TalosPathPlanner):
         randomly sample initial and goal configuration :
         """
         # init position at the origin, facing x axis
-        self.q_init[:3] = [0, 0, 1.]
+        self.q_init[:3] = [0, 0, 1.0]
         self.q_init[-6] = self.v_init
-        # sample random position on a circle of radius random in [MIN_ROOT_DIST; MAX_ROOT_DIST]
+        # sample random position on a circle of radius random in [MIN_ROOT_DIST;
+        # MAX_ROOT_DIST].
         random.seed()
         radius = random.uniform(self.MIN_ROOT_DIST, self.MAX_ROOT_DIST)
-        alpha = random.uniform(0., 2. * np.pi)
+        alpha = random.uniform(0.0, 2.0 * np.pi)
         print("Test on a circle, alpha = ", alpha)
         print("Radius = ", radius)
         self.q_goal = self.q_init[::]
-        self.q_goal[:3] = [radius * np.sin(alpha), -radius * np.cos(alpha), 1.]
+        self.q_goal[:3] = [radius * np.sin(alpha), -radius * np.cos(alpha), 1.0]
 
         if self.FINAL_ORIENTATION_RANDOM:
-            alpha = random.uniform(0., 2. * np.pi)  # sample new random yaw value for the orientation
+            alpha = random.uniform(
+                0.0, 2.0 * np.pi
+            )  # sample new random yaw value for the orientation
             v_goal = np.matrix([radius * np.sin(alpha), -radius * np.cos(alpha), 0]).T
         else:
-            v_goal = np.matrix([self.q_goal[0], self.q_goal[1], 0]).T  # direction root_init -> root_goal
+            v_goal = np.matrix(
+                [self.q_goal[0], self.q_goal[1], 0]
+            ).T  # direction root_init -> root_goal
 
         # set final orientation to be along the circle :
         vx = np.matrix([1, 0, 0]).T

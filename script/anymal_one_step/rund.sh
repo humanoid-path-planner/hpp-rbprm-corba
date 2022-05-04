@@ -1,6 +1,6 @@
-#!/bin/bash         
+#!/bin/bash
 
-gepetto-gui & 
+gepetto-gui &
 ipython -i --no-confirm-exit ./$1
 
 pkill -f  'gepetto-gui'

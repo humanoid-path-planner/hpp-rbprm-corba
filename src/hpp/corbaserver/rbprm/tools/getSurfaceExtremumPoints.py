@@ -1,5 +1,5 @@
 import numpy as np
-from numpy import arange, array, append, cross, dot, zeros
+from numpy import array, cross
 from numpy.linalg import norm
 
 from scipy.spatial import ConvexHull
@@ -14,11 +14,11 @@ def normal(points):
     return normal.tolist()
 
 
-def cutList2D(l):
-    return [el[:2] for el in l]
+def cutList2D(lst):
+    return [el[:2] for el in lst]
 
 
-#precision handling
+# precision handling
 def roundPoints(points, precision):
     return [[round(x, precision) for x in p] for p in points]
 
@@ -36,19 +36,21 @@ def computeAxisAngleRotation(u, c):
     uy = u[1]
     uz = u[2]
     s = np.sqrt(1 - c * c)
-    return [[c + ux * ux * (1 - c), ux * uy * (1 - c) - uz * s, ux * uz * (1 - c) + uy * s],
-            [uy * ux * (1 - c) + uz * s, c + uy * uy * (1 - c), uy * uz * (1 - c) - ux * s],
-            [uz * ux * (1 - c) - uy * s, uz * uy * (1 - c) + ux * s, c + uz * uz * (1 - c)]]
+    return [
+        [c + ux * ux * (1 - c), ux * uy * (1 - c) - uz * s, ux * uz * (1 - c) + uy * s],
+        [uy * ux * (1 - c) + uz * s, c + uy * uy * (1 - c), uy * uz * (1 - c) - ux * s],
+        [uz * ux * (1 - c) - uy * s, uz * uy * (1 - c) + ux * s, c + uz * uz * (1 - c)],
+    ]
 
 
 def getSurfaceRotation(surface):
-    n = surface[1]
+    # n = surface[1]
     cosx = np.dot(surface[1], [0, 0, 1])
-    #print "normal = ",n
+    # print "normal = ",n
     axisx = np.cross(surface[1], [0, 0, 1])
-    #print "axisx = ",axisx
+    # print "axisx = ",axisx
     n_axisx = norm(axisx)
-    #print "axisx norm = ",n_axisx
+    # print "axisx norm = ",n_axisx
     if n_axisx > 0:
         axisx /= n_axisx
     return computeAxisAngleRotation(axisx, cosx)
@@ -66,7 +68,7 @@ def getPtsTranslation(points):
     return getSurfaceTranslation((points, normal(points)))
 
 
-#into xy plane, back to its position
+# into xy plane, back to its position
 def allignSurface(surface):
     R = getSurfaceRotation(surface)
     t = getSurfaceTranslation(surface)
@@ -88,19 +90,19 @@ def pointsTransform(points, R, t):
 def getSurfaceExtremumPoints(el):
     pts = removeDuplicates(el[0] + el[1])
     apts = allignPoints(pts)
-    #print pts
-    hull = ConvexHull(cutList2D(apts))  #,False,'QbB')
+    # print pts
+    hull = ConvexHull(cutList2D(apts))  # ,False,'QbB')
     return [pts[idx] for idx in hull.vertices]
 
 
-#get contact surfaces (pts and normal)
+# get contact surfaces (pts and normal)
 def contactSurfaces(afftool):
-    l = afftool.getAffordancePoints("Support")
-    return [(getSurfaceExtremumPoints(el)) for el in l]
-    #return [(getSurfaceExtremumPoints(el), normal(el[0])) for el in l]
+    supports = afftool.getAffordancePoints("Support")
+    return [(getSurfaceExtremumPoints(el)) for el in supports]
+    # return [(getSurfaceExtremumPoints(el), normal(el[0])) for el in l]
 
 
 #########################################################################
 
-#get surface information
-#surfaces = contactSurfaces(afftool)
+# get surface information
+# surfaces = contactSurfaces(afftool)

@@ -1,6 +1,9 @@
-from hpp.corbaserver.rbprm.scenarios.memmo.anymal_platform_random_path import PathPlanner
-from hpp.corbaserver.rbprm.scenarios.memmo.anymal_contact_generator import AnymalContactGenerator
-import time
+from hpp.corbaserver.rbprm.scenarios.memmo.anymal_platform_random_path import (
+    PathPlanner,
+)
+from hpp.corbaserver.rbprm.scenarios.memmo.anymal_contact_generator import (
+    AnymalContactGenerator,
+)
 
 
 class ContactGenerator(AnymalContactGenerator):
@@ -14,12 +17,25 @@ class ContactGenerator(AnymalContactGenerator):
         super().set_joints_bounds()
         self.fullbody.setVeryConstrainedJointsBounds()
 
-    def compute_configs_from_guide(self):
+    def compute_configs_from_guide_dummy(self):
+        # TODO: this was redefined below, so I renamed it to dummy
         super().compute_configs_from_guide()
-        if self.q_goal[1] < 0:  # goal on the right side of the circle, start motion with right leg first
-            gait = [self.fullbody.rArmId, self.fullbody.rLegId, self.fullbody.lArmId, self.fullbody.lLegId]
+        if (
+            self.q_goal[1] < 0
+        ):  # goal on the right side of the circle, start motion with right leg first
+            gait = [
+                self.fullbody.rArmId,
+                self.fullbody.rLegId,
+                self.fullbody.lArmId,
+                self.fullbody.lLegId,
+            ]
         else:
-            gait = [self.fullbody.lArmId, self.fullbody.lLegId, self.fullbody.rArmId, self.fullbody.rLegId]
+            gait = [
+                self.fullbody.lArmId,
+                self.fullbody.lLegId,
+                self.fullbody.rArmId,
+                self.fullbody.rLegId,
+            ]
         self.init_contacts = gait
         self.end_contacts = gait
 

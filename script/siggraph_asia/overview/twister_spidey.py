@@ -42,8 +42,8 @@ tp = ttp
 from hpp.corbaserver.rbprm.rbprmstate import State
 from hpp.corbaserver.rbprm.state_alg  import addNewContact, isContactReachable, closestTransform, removeContact, addNewContactIfReachable, projectToFeasibleCom
 
-#~ s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId])  
-s1 = State(fullBody,q=q_0, limbsIncontact = [rLegId, lLegId])  
+#~ s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId])
+s1 = State(fullBody,q=q_0, limbsIncontact = [rLegId, lLegId])
 
 q0 = s1.q()[:]
 
@@ -81,9 +81,9 @@ def dist(q0,q1):
     return norm(array(q0[7:]) - array(q1[7:]) )
 
 def distq_ref(q0):
-    return lambda s: dist(s.q(),q0) 
+    return lambda s: dist(s.q(),q0)
 
-a = computeAffordanceCentroids(tp.afftool, ["Support"]) 
+a = computeAffordanceCentroids(tp.afftool, ["Support"])
 def computeNext(state, limb, projectToCom = False, max_num_samples = 10):
     global a
     t1 = time.clock()
@@ -121,14 +121,14 @@ def plot_feasible_Kin(state):
                         #~ print "inactive"
                         createPtBox(r.client.gui, 0, c, color = [1,0,0,1])
     return -1
-    
+
 def compute_w(c, ddc=array([0.,0.,0.]), dL=array([0.,0.,0.]), m = 54., g_vec=array([0.,0.,-9.81])):
 	w1 = m * (ddc - g_vec)
 	return array(w1.tolist() + (cross(c, w1) + dL).tolist())
-    
+
 def plot_feasible_cone(state):
     com = array(state.getCenterOfMass())
-    #~ H, h = state.getContactCone(0.6)  
+    #~ H, h = state.getContactCone(0.6)
     ps = state.getContactPosAndNormals()
     p = ps[0][0]
     N = ps[1][0]
@@ -140,8 +140,8 @@ def plot_feasible_cone(state):
     for i in range(10):
         for j in range(10):
             for k in range(1):
-                c = com + array([(i - 5)*0.1, (j - 5)*0.1, k])   
-                w = compute_w(c)             
+                c = com + array([(i - 5)*0.1, (j - 5)*0.1, k])
+                w = compute_w(c)
                 print "w, " , w
                 if(H.dot( w )<= 0).all():
                     #~ print 'active'
@@ -162,7 +162,7 @@ def plot_feasible(state):
         for j in range(5):
             for k in range(10):
                 c = com + array([(i - 2.5)*0.2, (j - 2.5)*0.2, (k-5)*0.2])
-                w = compute_w(c)           
+                w = compute_w(c)
                 active_ineq = state.getComConstraint(limbsCOMConstraints,[])
                 if(active_ineq[0].dot( c )<= active_ineq[1]).all() and (H.dot( w )<= 0).all():
                     #~ print 'active'
@@ -172,7 +172,7 @@ def plot_feasible(state):
                         #~ print "inactive"
                         createPtBox(r.client.gui, 0, c, color = [1,0,0,1])
     return -1
- 
+
 def plot(c):
     createPtBox(r.client.gui, 0, c, color = [0,1,0,1])
 
@@ -210,4 +210,3 @@ r(q_init)
 #~ path = go0([s2,s1], mu=0.3,num_optim=1)
 s2 = computeNext(s1,rarmId,True,10)[0]; r(s2.q())
 #~ s3 = computeNext(s2,rLegId,True,10)[0]; r(s3.q())
-

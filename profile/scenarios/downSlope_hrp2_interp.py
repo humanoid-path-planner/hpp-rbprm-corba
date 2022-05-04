@@ -45,7 +45,7 @@ fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 50000, "man
 
 
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 #~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
 
 

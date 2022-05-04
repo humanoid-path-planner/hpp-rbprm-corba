@@ -14,11 +14,12 @@ class PathPlanner(TalosPathPlanner, object):
         self.init_problem()
 
         self.q_init[:2] = [0, 0]
-        self.q_goal[:2] = [1., 0]
+        self.q_goal[:2] = [1.0, 0]
 
-        # Constraint the initial orientation when forceYawOrientation = True, expressed as a 3D vector (x,y,z)
-        #self.q_init[-6:-3] = [0.1, 0, 0]
-        #self.q_goal[-6:-3] = [0, -0.1, 0]
+        # Constraint the initial orientation when forceYawOrientation = True, expressed
+        # as a 3D vector (x,y,z).
+        # self.q_init[-6:-3] = [0.1, 0, 0]
+        # self.q_goal[-6:-3] = [0, -0.1, 0]
 
         self.init_viewer("multicontact/ground", visualize_affordances=["Support"])
         self.init_planner(True, False)

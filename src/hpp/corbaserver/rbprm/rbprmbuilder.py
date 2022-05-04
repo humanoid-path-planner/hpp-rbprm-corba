@@ -23,10 +23,19 @@ from hpp.corbaserver.robot import Robot
 # # Load and handle a RbprmDevice robot for rbprm planning
 #
 #  A RbprmDevice robot is a dual representation of a robots. One robot describes the
-#  trunk of the robot, and a set of robots describe the range of motion of each limb of the robot.
+#  trunk of the robot, and a set of robots describe the range of motion of each limb of
+#  the robot.
 class Builder(Robot):
     # # Constructor
-    def __init__(self, robotName = None, rootJointType = None, load = True, client = None, hppcorbaClient = None, clientRbprm=None):
+    def __init__(
+        self,
+        robotName=None,
+        rootJointType=None,
+        load=True,
+        client=None,
+        hppcorbaClient=None,
+        clientRbprm=None,
+    ):
         Robot.__init__(self, robotName, rootJointType, False, client, hppcorbaClient)
         self.tf_root = "base_link"
         if clientRbprm is None:
@@ -35,34 +44,46 @@ class Builder(Robot):
             self.clientRbprm = clientRbprm
         self.load = load
         if load:
-          self.loadModel(robotName, rootJointType)
+            self.loadModel(robotName, rootJointType)
 
-    ## Return urdf and srdf filenames of the roms
+    # Return urdf and srdf filenames of the roms
     #
-    def urdfROMFilenames (self):
+    def urdfROMFilenames(self):
         urdfNameRoms = []
         nameRoms = []
-        if hasattr (self, 'packageName') and hasattr (self,  'urdfNameRom') and \
-           hasattr (self, 'urdfSuffix') :
+        if (
+            hasattr(self, "packageName")
+            and hasattr(self, "urdfNameRom")
+            and hasattr(self, "urdfSuffix")
+        ):
             if not isinstance(self.urdfNameRom, list):
                 self.urdfNameRom = [self.urdfNameRom]
             nameRoms = self.urdfNameRom
             for urdfName in nameRoms:
-                urdfNameRoms += ["package://" + self.packageName + '/urdf/' + urdfName + self.urdfSuffix + '.urdf']
-        elif hasattr (self, 'urdfFilenameRom'):
+                urdfNameRoms += [
+                    "package://"
+                    + self.packageName
+                    + "/urdf/"
+                    + urdfName
+                    + self.urdfSuffix
+                    + ".urdf"
+                ]
+        elif hasattr(self, "urdfFilenameRom"):
             urdfNameRoms = self.urdfFilenameRom
             for urdfNameRom in urdfNameRoms:
-              nameRoms += [urdfNameRom.split("/")[-1].rstrip(".urdf")]
-        else :
-            raise RuntimeError (\
-            """instance should have one of the following sets of members
+                nameRoms += [urdfNameRom.split("/")[-1].rstrip(".urdf")]
+        else:
+            raise RuntimeError(
+                """instance should have one of the following sets of members
             - (packageName, urdfNameRom, urdfSuffix),
-            - (urdfFilenameRom)""")
+            - (urdfFilenameRom)"""
+            )
         return nameRoms, urdfNameRoms
 
     # # Virtual function to load the robot model.
     #
-    # This method looks for the following class attribute in order to find the files to load:
+    # This method looks for the following class attribute in order to find the files to
+    # load:
     # First it looks for urdfFilename and srdfFilename and use it if available
     # Otherwise it looks for packageName, urdfName, urdfSuffix, srdfSuffix
     # \param robotNamethe name of the robot
@@ -71,19 +92,28 @@ class Builder(Robot):
     def loadModel(self, robotName, rootJointType):
         nameRoms, urdfROMFilenames = self.urdfROMFilenames()
         for i, urdfNameRom in enumerate(urdfROMFilenames):
-            self.clientRbprm.rbprm.loadRobotRomModel(nameRoms[i], rootJointType, urdfNameRom)
+            self.clientRbprm.rbprm.loadRobotRomModel(
+                nameRoms[i], rootJointType, urdfNameRom
+            )
         self.clientRbprm.rbprm.initNewProblemSolver()
-        urdfFilename, srdfFilename = self.urdfSrdfFilenames () # inherited method from corbaserver.robot
-        self.clientRbprm.rbprm.loadRobotCompleteModel(robotName, rootJointType, urdfFilename, srdfFilename)
+        (
+            urdfFilename,
+            srdfFilename,
+        ) = self.urdfSrdfFilenames()  # inherited method from corbaserver.robot
+        self.clientRbprm.rbprm.loadRobotCompleteModel(
+            robotName, rootJointType, urdfFilename, srdfFilename
+        )
 
     # # Init RbprmShooter
     #
     def initshooter(self):
         return self.clientRbprm.rbprm.initshooter()
 
-    # # Sets limits on robot orientation, described according to Euler's ZYX rotation order
+    # # Sets limits on robot orientation, described according to Euler's ZYX rotation
+    # order
     #
-    # \param bounds 6D vector with the lower and upperBound for each rotation axis in sequence
+    # \param bounds 6D vector with the lower and upperBound for each rotation axis in
+    # sequence
     def boundSO3(self, bounds):
         return self.clientRbprm.rbprm.boundSO3(bounds)
 
@@ -112,25 +142,33 @@ class Builder(Robot):
     # \param filename name of the output file where to save the output
     def exportPath(self, viewer, problem, pathId, stepsize, filename):
         import hpp.gepetto.blender.exportmotion as em
+
         em.exportPath(viewer, self.client.robot, problem, pathId, stepsize, filename)
 
     # # set a reference position of the end effector for the given ROM
-    # This reference will be used in the heuristic that choose the "best" contact surface
+    # This reference will be used in the heuristic that choose the "best" contact
+    # surface
     # and approximate the contact points in the kinodynamic planner
     # \param romName the name of the rom
-    # \param ref the 3D reference position of the end effector, expressed in the root frame
+    # \param ref the 3D reference position of the end effector, expressed in the root
+    # frame
     def setReferenceEndEffector(self, romName, ref):
         return self.clientRbprm.rbprm.setReferenceEndEffector(romName, ref)
 
-    # # For a given limb, return all the intersections between the limb reachable workspace and a contact surface
+    # # For a given limb, return all the intersections between the limb reachable
+    # workspace and a contact surface
     # \param configuration the root configuration
     # \param limbName name of the considered limb
-    # \return a 3D list : first id is the different surfaces, second id is the different vertex of a surface, last id
+    # \return a 3D list : first id is the different surfaces, second id is the different
+    # vertex of a surface, last id
     # is the 3 coordinate of each vertex
     def getContactSurfacesAtConfig(self, configuration, limbName):
-        surfaces = self.clientRbprm.rbprm.getContactSurfacesAtConfig(configuration, limbName)
+        surfaces = self.clientRbprm.rbprm.getContactSurfacesAtConfig(
+            configuration, limbName
+        )
         res = []
         for surface in surfaces:
-            res += [[surface[i:i + 3]
-                     for i in range(0, len(surface), 3)]]  # split list of coordinate every 3 points (3D points)
+            res += [
+                [surface[i : i + 3] for i in range(0, len(surface), 3)]
+            ]  # split list of coordinate every 3 points (3D points)
         return res

@@ -27,7 +27,7 @@ urdfSuffix = ""
 srdfSuffix = ""
 
 #  This time we load the full body model of HyQ
-fullBody = FullBody () 
+fullBody = FullBody ()
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 fullBody.setJointBounds ("base_joint_xyz", [-4,6, -1, 1, 0.3, 2.5])
 
@@ -56,7 +56,7 @@ lLegId = 'lhleg'
 lLeg = 'lh_haa_joint'
 lfoot = 'lh_foot_joint'
 fullBody.addLimb(lLegId,lLeg,lfoot,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
-#~ 
+#~
 rarmId = 'rhleg'
 rarm = 'rh_haa_joint'
 rHand = 'rh_foot_joint'
@@ -72,8 +72,8 @@ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 fullBody.runLimbSampleAnalysis(rarmId, "jointLimitsDistance", True)
 fullBody.runLimbSampleAnalysis(larmId, "jointLimitsDistance", True)
 
-#~ q_init = hyq_ref[:]; q_init[0:7] = tp.q_init[0:7]; 
-#~ q_goal = hyq_ref[:]; q_goal[0:7] = tp.q_goal[0:7]; 
+#~ q_init = hyq_ref[:]; q_init[0:7] = tp.q_init[0:7];
+#~ q_goal = hyq_ref[:]; q_goal[0:7] = tp.q_goal[0:7];
 q_init = hyq_ref[:]; q_init[0:7] = tp.q_init[0:7]; q_init[2]=hyq_ref[2]+0.02
 q_goal = hyq_ref[:]; q_goal[0:7] = tp.q_goal[0:7]; q_init[2]=hyq_ref[2]+0.02
 
@@ -102,14 +102,14 @@ pp = PathPlayer (fullBody.client.basic, r)
 
 from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import step, clean,stats, saveAllData, play_traj
 
-	
-	
-#~ limbsCOMConstraints = { rLegId : {'file': "hyq/"+rLegId+"_com.ineq", 'effector' : rfoot},  
-						#~ lLegId : {'file': "hyq/"+lLegId+"_com.ineq", 'effector' : lfoot},  
-						#~ rarmId : {'file': "hyq/"+rarmId+"_com.ineq", 'effector' : rHand},  
+
+
+#~ limbsCOMConstraints = { rLegId : {'file': "hyq/"+rLegId+"_com.ineq", 'effector' : rfoot},
+						#~ lLegId : {'file': "hyq/"+lLegId+"_com.ineq", 'effector' : lfoot},
+						#~ rarmId : {'file': "hyq/"+rarmId+"_com.ineq", 'effector' : rHand},
 						#~ larmId : {'file': "hyq/"+larmId+"_com.ineq", 'effector' : lHand} }
-						
-limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : rfoot},  
+
+limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : rfoot},
 						lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : lfoot},
 						rarmId : {'file': "hrp2/RA_com.ineq", 'effector' : rHand},
 						larmId : {'file': "hrp2/LA_com.ineq", 'effector' : lHand} }
@@ -121,7 +121,7 @@ def act(i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True,
 
 def play(frame_rate = 1./24.):
 	play_traj(fullBody,pp,frame_rate)
-	
+
 
 import time
 
@@ -133,14 +133,14 @@ def initConfig():
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	r(q_init)
-	
+
 def endConfig():
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	r(q_goal)
-	
+
 
 def rootPath():
 	r.client.gui.setVisibility("hyq", "OFF")
@@ -152,18 +152,18 @@ def rootPath():
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
-	
+
 def genPlan(stepsize=0.06):
 	tp.cl.problem.selectProblem("default")
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	global configs
-	start = time.clock() 
+	start = time.clock()
 	configs = fullBody.interpolate(stepsize, 5, 5, True)
-	end = time.clock() 
+	end = time.clock()
 	print("Contact plan generated in " + str(end-start) + "seconds")
-	
+
 def contactPlan(step = 0.5):
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
@@ -171,29 +171,29 @@ def contactPlan(step = 0.5):
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	for i in range(0,len(configs)):
 		r(configs[i]);
-		time.sleep(step)		
-		
-		
+		time.sleep(step)
+
+
 def a():
 	print("initial configuration")
 	initConfig()
-		
+
 def b():
 	print("end configuration")
 	endConfig()
-		
+
 def c():
 	print("displaying root path")
 	rootPath()
-	
+
 def d(step=0.06):
 	print("computing contact plan")
 	genPlan(step)
-	
+
 def e(step = 0.5):
 	print("displaying contact plan")
 	contactPlan(step)
-	
+
 print("Root path generated in " + str(tp.t) + " ms.")
 
 #~ d();e()
@@ -247,7 +247,7 @@ def go(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
     vels += [com_vel[:]]
     accs += [com_acc[:]]
     return a
-    
+
 def go_stop(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
 	global com_vel
 	global com_acc
@@ -257,7 +257,7 @@ def go_stop(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
 	global a_s
 	a = []
 	for l in range(sid,sid+rg):
-		print("STATE ", l)		
+		print("STATE ", l)
 		s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1
 		a,com_vel,com_acc = gen_several_states_partial(l,window,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc, path=True)
 		a_s+=[a]
@@ -270,7 +270,7 @@ def go_stop(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
 	vels += [com_vel[:]]
 	accs += [com_acc[:]]
 	return a
-    
+
 def go0(sid, rg, num_optim = 0, mu = 0.6, s =None):
     global com_vel
     global com_acc
@@ -300,7 +300,7 @@ def go2(sid, rg = 1, num_optim = 0, mu = 0.5, t =2, s =None):
 		vels += [com_vel[:]]
 		accs += [com_acc[:]]
     return path
-    
+
 #~ a = go2(0, s = 1)
 #~ a = go2(0, num_optim=0, s = 1.2, mu=0.6)
 #~ a = go2(2, num_optim=0, s = 1.2, mu=0.6)
@@ -322,4 +322,3 @@ def reset():
     a_s = []
     for i, config in enumerate(configs):
 		fullBody.setConfigAtState(i,config)
-

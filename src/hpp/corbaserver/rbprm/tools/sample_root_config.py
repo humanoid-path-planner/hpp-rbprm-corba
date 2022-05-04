@@ -1,5 +1,6 @@
 import numpy as np
 import random
+
 random.seed()
 
 
@@ -26,7 +27,7 @@ def generate_random_conf_without_orientation(rbprmBuilder, bounds, v=None):
             q[3:7] = quat
             status, message = rbprmBuilder.isConfigValid(q)
         if status:
-            quat = [0, 0, 0, 1.]
+            quat = [0, 0, 0, 1.0]
             q[3:7] = quat
             status, message = rbprmBuilder.isConfigValid(q)
         if status:
@@ -42,7 +43,7 @@ def generate_random_conf_with_orientation(rbprmBuilder, bounds, v_init=0.1, v=No
         pos = [0, 0, 0]
         for i in range(3):
             pos[i] = random.uniform(bounds[i * 2], bounds[i * 2 + 1])
-        angle = random.uniform(0., 2. * np.pi)
+        angle = random.uniform(0.0, 2.0 * np.pi)
         quat = np.array([0, 0, np.sin(angle / 2), np.cos(angle / 2)])
         q[0:3] = pos
         q[3:7] = quat

@@ -124,7 +124,7 @@ module hpp
     /// Set Rom surface constraints for the configuration shooter
     /// a Rom configuration will only be valid it collides with a surface
     /// that forms a given affordance (support, lean, etc.)
-    /// \param affordances a list of affordances accepted for 
+    /// \param affordances a list of affordances accepted for
 		/// validation of given Rom
 		///
     void setAffordanceFilter(in string romName, in Names_t affordances) raises (Error);

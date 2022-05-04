@@ -1,6 +1,7 @@
 from hpp.corbaserver.rbprm.scenarios.memmo.talos_stairs10_random_path import PathPlanner
-from hpp.corbaserver.rbprm.scenarios.memmo.talos_contact_generator import TalosContactGenerator
-import time
+from hpp.corbaserver.rbprm.scenarios.memmo.talos_contact_generator import (
+    TalosContactGenerator,
+)
 
 
 class ContactGenerator(TalosContactGenerator):

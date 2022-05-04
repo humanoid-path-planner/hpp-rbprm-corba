@@ -23,7 +23,7 @@ urdfSuffix = ""
 srdfSuffix = ""
 
 #  This time we load the full body model of HyQ
-fullBody = FullBody () 
+fullBody = FullBody ()
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 fullBody.client.basic.robot.setDimensionExtraConfigSpace(tp.extraDof)
 fullBody.setJointBounds ("base_joint_xyz", [-6,6, -2.5, 2.5, 0.0, 1.])
@@ -53,7 +53,7 @@ addLimbDb(lLegId, "manipulability")
 addLimbDb(rarmId, "manipulability")
 addLimbDb(larmId, "manipulability")
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.ps.configAtParam(0,0.01)[0:7] # use this to get the correct orientation
 q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.ps.configAtParam(pathId,tp.ps.pathLength(pathId))[0:7]
 dir_init = tp.ps.configAtParam(pathId,0.01)[7:10]
@@ -138,5 +138,3 @@ reload(fullBodyPlayer)
 
 
 """
-
-

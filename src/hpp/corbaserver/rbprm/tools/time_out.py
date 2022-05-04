@@ -19,10 +19,11 @@ def run_time_out(method, t, *args):
     signal.alarm(0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     def loop(dt1, dt2):
         import time
+
         for i in range(dt1 + dt2):
             print("sec")
             time.sleep(1)

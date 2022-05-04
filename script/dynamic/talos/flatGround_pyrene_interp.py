@@ -169,8 +169,3 @@ cs = generateContactSequence(fullBody,configs,beginState, endState,r)
 filename = OUTPUT_DIR + "/" + OUTPUT_SEQUENCE_FILE
 cs.saveAsXML(filename, "ContactSequence")
 print "save contact sequence : ",filename
-
-
-
-
-

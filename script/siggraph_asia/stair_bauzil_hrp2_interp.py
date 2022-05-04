@@ -28,15 +28,15 @@ r = tp.Viewer (ps, viewerClient=tp.r.client)
 rLegId = 'hrp2_rleg_rom'
 rLeg = 'RLEG_JOINT0'
 rLegOffset = [0,0,-0.105]
-rLegNormal = [0,0,1]       
+rLegNormal = [0,0,1]
 rLegx = 0.09; rLegy = 0.05
 fullBody.addLimb(rLegId,rLeg,'',rLegOffset,rLegNormal, rLegx, rLegy, 10000, "manipulability", 0.1)
-                                                                                                
-lLegId = 'hrp2_lleg_rom'                                                                                
-lLeg = 'LLEG_JOINT0'                                                                     
-lLegx = 0.09; lLegy = 0.05      
+
+lLegId = 'hrp2_lleg_rom'
+lLeg = 'LLEG_JOINT0'
+lLegx = 0.09; lLegy = 0.05
 lLegOffset = [0,0,-0.105]
-lLegNormal = [0,0,1]                                                                  
+lLegNormal = [0,0,1]
 fullBody.addLimb(lLegId,lLeg,'',lLegOffset,rLegNormal, lLegx, lLegy, 10000, "manipulability", 0.1)
 
 #~ AFTER loading obstacles
@@ -60,7 +60,7 @@ rArmx = 0.024; rArmy = 0.024
 #~ fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF", False,grasp = True)
 fullBody.addLimb(rarmId,rarm,rHand,rArmOffset,rArmNormal, rArmx, rArmy, 10000, "manipulability", 0.1, "_6_DOF", True)
 
- #~ 
+ #~
 
 fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
 fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
@@ -68,7 +68,7 @@ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 #~ fullBody.client.basic.robot.setJointConfig('LARM_JOINT0',[1])
 #~ fullBody.client.basic.robot.setJointConfig('RARM_JOINT0',[-1])
 
-q_0 = fullBody.getCurrentConfig(); 
+q_0 = fullBody.getCurrentConfig();
 #~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
 q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.q_init[0:7]
 q_goal = fullBody.getCurrentConfig(); q_goal[0:7] = tp.q_goal[0:7]
@@ -100,13 +100,13 @@ configs = []
 #~ r.loadObstacleModel ('hpp-rbprm-corba', "stair_bauzil", "contact")
 #~ fullBody.exportAll(r, configs, 'stair_bauzil_hrp2_robust_2');
 #~ fullBody.client.basic.robot.setJointConfig('LLEG_JOINT0',[-1])
-#~ q_0 = fullBody.getCurrentConfig(); 
+#~ q_0 = fullBody.getCurrentConfig();
 #~ fullBody.draw(q_0,r);
 #~ print(fullBody.client.rbprm.rbprm.getOctreeTransform(rarmId, q_0))
-#~ 
-#~ 
+#~
+#~
 #~ fullBody.client.basic.robot.setJointConfig('LLEG_JOINT0',[1])
-#~ q_0 = fullBody.getCurrentConfig(); 
+#~ q_0 = fullBody.getCurrentConfig();
 #~ fullBody.draw(q_0,r);
 #~ print(fullBody.client.rbprm.rbprm.getOctreeTransform(rarmId, q_0))
 #~ q_init = fullBody.generateContacts(q_init, [0,0,-1]); r (q_init)
@@ -116,7 +116,7 @@ configs = []
 #~ f1.write(str(configs))
 #~ f1.close()
 
-limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},  
+limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : 'RLEG_JOINT5'},
 						lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : 'LLEG_JOINT5'},
 						rarmId : {'file': "hrp2/RA_com.ineq", 'effector' : rHand} }
 						#~ larmId : {'file': "hrp2/LA_com.ineq", 'effector' : lHand} }
@@ -132,10 +132,10 @@ def act(i, numOptim = 0, use_window = 0, friction = 0.5, optim_effectors = True,
 
 def play(frame_rate = 1./24.):
 	play_traj(fullBody,pp,frame_rate)
-	
+
 def saveAll(name):
 	saveAllData(fullBody, r, name)
-	
+
 
 def initConfig():
 	r.client.gui.setVisibility("hrp2_14", "ON")
@@ -143,14 +143,14 @@ def initConfig():
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
 	r(q_init)
-	
+
 def endConfig():
 	r.client.gui.setVisibility("hrp2_14", "ON")
 	tp.cl.problem.selectProblem("default")
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
 	r(q_goal)
-	
+
 
 def rootPath():
 	tp.cl.problem.selectProblem("rbprm_path")
@@ -162,18 +162,18 @@ def rootPath():
 	r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
-	
+
 def genPlan(stepsize=0.1):
 	r.client.gui.setVisibility("hrp2_14", "ON")
 	tp.cl.problem.selectProblem("default")
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hrp2_trunk_flexible", "OFF")
 	global configs
-	start = time.clock() 
+	start = time.clock()
 	configs = fullBody.interpolate(stepsize, 1, 2, True)
-	end = time.clock() 
+	end = time.clock()
 	print("Contact plan generated in " + str(end-start) + "seconds")
-	
+
 def contactPlan(step = 0.5):
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
@@ -181,41 +181,41 @@ def contactPlan(step = 0.5):
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	for i in range(0,len(configs)):
 		r(configs[i]);
-		time.sleep(step)	
-		
-		
+		time.sleep(step)
+
+
 def a():
 	print("initial configuration")
 	initConfig()
-		
+
 def b():
 	print("end configuration")
 	endConfig()
-		
+
 def c():
 	print("displaying root path")
 	rootPath()
-	
+
 def d(step=0.1):
 	print("computing contact plan")
 	genPlan(step)
-	
+
 def e(step = 0.5):
 	print("displaying contact plan")
 	contactPlan(step)
-	
-print("Root path generated in " + str(tp.t) + " ms.")
-d(0.1); e(0.01)
-	
 
 print("Root path generated in " + str(tp.t) + " ms.")
-	
+d(0.1); e(0.01)
+
+
+print("Root path generated in " + str(tp.t) + " ms.")
+
 #~ from gen_data_from_rbprm import *
-#~ 
+#~
 #~ for config in configs:
 	#~ r(config)
 	#~ print(fullBody.client.basic.robot.getComPosition())
-#~ 
+#~
 
 #~ gen_and_save(fullBody,configs, "stair_bauzil_contacts_data")
 #~ main()
@@ -267,7 +267,7 @@ def go(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
     vels += [com_vel[:]]
     accs += [com_acc[:]]
     return a
-    
+
 def go_stop(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
 	global com_vel
 	global com_acc
@@ -277,7 +277,7 @@ def go_stop(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
 	global a_s
 	a = []
 	for l in range(sid,sid+rg):
-		print("STATE ", l)		
+		print("STATE ", l)
 		s = max(norm(array(configs[sid+1]) - array(configs[sid])), 1.) * 1
 		a,com_vel,com_acc = gen_several_states_partial(l,window,mu=mu,num_optim=num_optim, s=s,init_vel=com_vel, init_acc=com_acc, path=True)
 		a_s+=[a]
@@ -290,7 +290,7 @@ def go_stop(sid, rg = 2, num_optim = 0, mu = 0.6, window = 2, s = None):
 	vels += [com_vel[:]]
 	accs += [com_acc[:]]
 	return a
-    
+
 def go0(sid, rg, num_optim = 0, mu = 0.6, s =None):
     global com_vel
     global com_acc
@@ -318,7 +318,7 @@ def go2(sid, rg = 1, num_optim = 0, mu = 0.5, t =2, s =None):
 		vels += [com_vel[:]]
 		accs += [com_acc[:]]
     return path
-    
+
 #~ a = go2(0, s = 1)
 #~ a = go2(0, num_optim=0, s = 1.2, mu=0.6)
 #~ a = go2(2, num_optim=0, s = 1.2, mu=0.6)
@@ -385,5 +385,3 @@ def reset():
 #~ a = go_stop(3 ,1,0,mu=2)
 #~ a = go_stop(5 ,1,0,mu=2)
 #~ a = go_stop(7 ,1,0,mu=2)
-
-

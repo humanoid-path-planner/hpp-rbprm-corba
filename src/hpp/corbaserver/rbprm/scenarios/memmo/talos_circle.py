@@ -1,5 +1,7 @@
 from hpp.corbaserver.rbprm.scenarios.memmo.talos_circle_path import PathPlanner
-from hpp.corbaserver.rbprm.scenarios.memmo.talos_contact_generator import TalosContactGenerator
+from hpp.corbaserver.rbprm.scenarios.memmo.talos_contact_generator import (
+    TalosContactGenerator,
+)
 import time
 
 
@@ -21,10 +23,14 @@ class ContactGenerator(TalosContactGenerator):
             print("Use weight for straight walk")
             self.fullbody.usePosturalTaskContactCreation(True)
         else:
-            self.fullbody.setPostureWeights(self.fullbody.postureWeights_straff[::] + [0] * 6)
+            self.fullbody.setPostureWeights(
+                self.fullbody.postureWeights_straff[::] + [0] * 6
+            )
             print("Use weight for straff walk")
 
-    def load_limbs(self, heuristic="fixedStep06", analysis=None, nb_samples=None, octree_size=None):
+    def load_limbs(
+        self, heuristic="fixedStep06", analysis=None, nb_samples=None, octree_size=None
+    ):
         # heuristic used depend on the direction of the motion
         if abs(self.path_planner.q_goal[1]) <= abs(self.path_planner.q_goal[0]):
             heuristicR = "fixedStep08"
@@ -46,34 +52,42 @@ class ContactGenerator(TalosContactGenerator):
         t_start = time.time()
         # generate databases :
         nbSamples = 100000
-        self.fullbody.addLimb(self.fullbody.rLegId,
-                              self.fullbody.rleg,
-                              self.fullbody.rfoot,
-                              self.fullbody.rLegOffset,
-                              self.fullbody.rLegNormal,
-                              self.fullbody.rLegx,
-                              self.fullbody.rLegy,
-                              nbSamples,
-                              heuristicR,
-                              0.01,
-                              kinematicConstraintsPath=self.fullbody.rLegKinematicConstraints,
-                              kinematicConstraintsMin=0.85)
+        self.fullbody.addLimb(
+            self.fullbody.rLegId,
+            self.fullbody.rleg,
+            self.fullbody.rfoot,
+            self.fullbody.rLegOffset,
+            self.fullbody.rLegNormal,
+            self.fullbody.rLegx,
+            self.fullbody.rLegy,
+            nbSamples,
+            heuristicR,
+            0.01,
+            kinematicConstraintsPath=self.fullbody.rLegKinematicConstraints,
+            kinematicConstraintsMin=0.85,
+        )
         if heuristicR == "static":
-            self.fullbody.runLimbSampleAnalysis(self.fullbody.rLegId, "ReferenceConfiguration", True)
-        self.fullbody.addLimb(self.fullbody.lLegId,
-                              self.fullbody.lleg,
-                              self.fullbody.lfoot,
-                              self.fullbody.lLegOffset,
-                              self.fullbody.rLegNormal,
-                              self.fullbody.lLegx,
-                              self.fullbody.lLegy,
-                              nbSamples,
-                              heuristicL,
-                              0.01,
-                              kinematicConstraintsPath=self.fullbody.lLegKinematicConstraints,
-                              kinematicConstraintsMin=0.85)
+            self.fullbody.runLimbSampleAnalysis(
+                self.fullbody.rLegId, "ReferenceConfiguration", True
+            )
+        self.fullbody.addLimb(
+            self.fullbody.lLegId,
+            self.fullbody.lleg,
+            self.fullbody.lfoot,
+            self.fullbody.lLegOffset,
+            self.fullbody.rLegNormal,
+            self.fullbody.lLegx,
+            self.fullbody.lLegy,
+            nbSamples,
+            heuristicL,
+            0.01,
+            kinematicConstraintsPath=self.fullbody.lLegKinematicConstraints,
+            kinematicConstraintsMin=0.85,
+        )
         if heuristicL == "static":
-            self.fullbody.runLimbSampleAnalysis(self.fullbody.lLegId, "ReferenceConfiguration", True)
+            self.fullbody.runLimbSampleAnalysis(
+                self.fullbody.lLegId, "ReferenceConfiguration", True
+            )
 
         t_generate = time.time() - t_start
         print("Databases generated in : " + str(t_generate) + " s")

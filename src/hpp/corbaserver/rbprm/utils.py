@@ -8,7 +8,10 @@ import warnings
 
 try:
     from hpp.utils import ServerManager
-    warnings.warn('Please import ServerManager directly from hpp.utils', DeprecationWarning)
+
+    warn = "Please import ServerManager directly from hpp.utils"
+
+    warnings.warn(warn, DeprecationWarning)
 except ImportError:  # hpp-corbaserver < 4.9.1 fallback
 
     try:
@@ -19,24 +22,24 @@ except ImportError:  # hpp-corbaserver < 4.9.1 fallback
         def run(*args):
             subprocess.Popen(*args).wait()
 
-
     class ServerManager:
         """A context to ensure a server is running."""
+
         def __init__(self, server):
             self.server = server
-            run(['killall', self.server])
+            run(["killall", self.server])
 
         def __enter__(self):
             """Run the server in background
 
-            stdout and stderr outputs of the child process are redirected to devnull (hidden).
+            stdout and stderr outputs of the child process are redirected to devnull
+            (hidden).
             preexec_fn is used to ignore ctrl-c signal send to the main script
             (otherwise they are forwarded to the child process)
             """
-            self.process = subprocess.Popen(self.server,
-                                            stdout=DEVNULL,
-                                            stderr=DEVNULL,
-                                            preexec_fn=os.setpgrp)
+            self.process = subprocess.Popen(
+                self.server, stdout=DEVNULL, stderr=DEVNULL, preexec_fn=os.setpgrp
+            )
             # give it some time to start
             time.sleep(3)
 

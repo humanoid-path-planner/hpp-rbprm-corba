@@ -15,7 +15,7 @@ class PathPlanner(AnymalPathPlanner):
         self.a_max = 0.05
         self.v_init = 0.05
         self.v_goal = 0.01
-        self.radius = 1.
+        self.radius = 1.0
 
     def init_problem(self):
         super().init_problem()
@@ -30,11 +30,15 @@ class PathPlanner(AnymalPathPlanner):
         self.q_init[-6] = self.v_init
 
         random.seed()
-        alpha = random.uniform(0., 2. * np.pi)
-        #alpha = 4.
+        alpha = random.uniform(0.0, 2.0 * np.pi)
+        # alpha = 4.
         print("Test on a circle, alpha = ", alpha)
         self.q_goal = self.q_init[::]
-        self.q_goal[:3] = [self.radius * np.sin(alpha), -self.radius * np.cos(alpha), 0.465]
+        self.q_goal[:3] = [
+            self.radius * np.sin(alpha),
+            -self.radius * np.cos(alpha),
+            0.465,
+        ]
         # set final orientation to be along the circle :
         vx = np.matrix([1, 0, 0]).T
         v_goal = np.matrix([self.q_goal[0], self.q_goal[1], 0]).T

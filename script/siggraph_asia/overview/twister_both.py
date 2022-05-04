@@ -40,13 +40,13 @@ fullBody                 = None
 configs                  = None
 cl                       = None
 
-def save_globals():        
+def save_globals():
     robot_context["states"] = states
     robot_context["configs"] = configs
-    
-def set_globals():        
+
+def set_globals():
     global robot_context
-    
+
     global states
     global tp
     global model
@@ -64,7 +64,7 @@ def set_globals():
     global fullBody
     global configs
     global cl
-    
+
     states     = robot_context["states"]
     tp         = robot_context["tp"]
     model    = robot_context["model"]
@@ -80,11 +80,11 @@ def set_globals():
     larmId = model.larmId
     rarmId = model.rarmId
     path_planner = tp
-    
+
     init_plan_execute(fullBody, r, path_planner, pp)
     init_bezier_traj(fullBody, r, pp, configs, limbsCOMConstraints)
-    
-    
+
+
     #~ states     = robot_context["states"]
     #~ tp         = robot_context["tp"]
     #~ model    = robot_context["model"]
@@ -102,34 +102,34 @@ def set_globals():
 
 import importlib
 
-def init_context(path, wb, other_package ):    
+def init_context(path, wb, other_package ):
     global robot_contexts
-    rid = len(robot_contexts) 
-    
+    rid = len(robot_contexts)
+
     path_planner_1 = importlib.import_module(path)
-    path_planner_1.cl.problem.selectProblem("robot" + str(rid))  
+    path_planner_1.cl.problem.selectProblem("robot" + str(rid))
     global r_parent
     loaded = r_parent == None
     if loaded:
         r_parent = path_planner_1.r
-    r  = path_planner_1.Viewer (path_planner_1.ps, viewerClient=r_parent.client)  
+    r  = path_planner_1.Viewer (path_planner_1.ps, viewerClient=r_parent.client)
     path_planner_1.afftool.loadObstacleModel ('hpp-rbprm-corba', "twister", "planning", r)
     r.loadObstacleModel (*other_package)
-    model_1  = importlib.import_module(wb)    
+    model_1  = importlib.import_module(wb)
     model_1.fullBody.setJointBounds ("base_joint_xyz", [-2,2.5, -2, 2, 0, 2.2])
     ps1 =  path_planner_1.ProblemSolver( model_1.fullBody )
-    r  = path_planner_1.Viewer (ps1, viewerClient=r_parent.client)  
+    r  = path_planner_1.Viewer (ps1, viewerClient=r_parent.client)
     #~ if not loaded:
         #~ path_planner_1.afftool.loadObstacleModel ('hpp-rbprm-corba', "twister", "planning", r)
-    robot_contexts += [{"model" : model_1, 
+    robot_contexts += [{"model" : model_1,
     "states" : [], "tp" :  path_planner_1,
-    "ps" : ps1, 
+    "ps" : ps1,
     "fullBody" : model_1.fullBody,
     "r" : r, "fullBody" : model_1.fullBody,
     "configs" : [],
     "pp" : PathPlayer (model_1.fullBody.client.basic, r),
-    "cl" : path_planner_1.cl }]    
-  
+    "cl" : path_planner_1.cl }]
+
 def publishRobot_and_switch(context_to):
     #~ r.robot.setCurrentConfig (self.robotConfig)
     saves = {}
@@ -153,7 +153,7 @@ def publishRobot_and_switch(context_to):
         except:
             pass
     r.client.gui.refresh ()
-  
+
 def init_contexts():
     init_context("twister_path", "hrp2_model", ['hpp-rbprm-corba', "spiderman", "other"])
     init_context("twister_spidey_path", "spidey_model", ['hrp2_14_description', "hrp2_14_reduced", "other"])
@@ -161,24 +161,24 @@ def init_contexts():
     robot_context = robot_contexts[0]
     set_globals()
     switch_context(0)
-    #now loading each robot as an object in the other robot 
+    #now loading each robot as an object in the other robot
     #~ r.loadObstacleModel ('hpp-rbprm-corba', "spiderman", "other")
     #~ switch_context(1)
-    #now loading each robot as an object in the other robot 
+    #now loading each robot as an object in the other robot
     #~ r.loadObstacleModel ('hrp2_14_description', "hrp2_14_reduced", "other")
     #~ sc(0); sc(1)
     r.client.gui.setVisibility("spiderman_trunk", "OFF")
-    sc(0)    
+    sc(0)
 def switch_context(rid):
     save_globals()
-    global cl 
+    global cl
     name = "robot" + str(rid)
     cl.problem.selectProblem(name)
     fullBody.client.rbprm.rbprm.selectFullBody(name)
     global robot_context
     robot_context = robot_contexts[rid]
     set_globals()
-    
+
 def sc(rid):
     publishRobot_and_switch(rid)
 
@@ -186,7 +186,7 @@ def dist(q0,q1):
     return norm(array(q0[7:]) - array(q1[7:]) )
 
 def distq_ref(q0):
-    return lambda s: dist(s.q(),q0) 
+    return lambda s: dist(s.q(),q0)
 
 def computeNext(state, limb, projectToCom = False, max_num_samples = 10):
     global a
@@ -221,14 +221,14 @@ def plot_feasible_Kin(state):
                         #~ print "inactive"
                         createPtBox(r.client.gui, 0, c, color = [1,0,0,1])
     return -1
-    
+
 def compute_w(c, ddc=array([0.,0.,0.]), dL=array([0.,0.,0.]), m = 54., g_vec=array([0.,0.,-9.81])):
     w1 = m * (ddc - g_vec)
     return array(w1.tolist() + (cross(c, w1) + dL).tolist())
-    
+
 def plot_feasible_cone(state):
     com = array(state.getCenterOfMass())
-    #~ H, h = state.getContactCone(0.6)  
+    #~ H, h = state.getContactCone(0.6)
     ps = state.getContactPosAndNormals()
     p = ps[0][0]
     N = ps[1][0]
@@ -240,8 +240,8 @@ def plot_feasible_cone(state):
     for i in range(10):
         for j in range(10):
             for k in range(1):
-                c = com + array([(i - 5)*0.1, (j - 5)*0.1, k])   
-                w = compute_w(c)             
+                c = com + array([(i - 5)*0.1, (j - 5)*0.1, k])
+                w = compute_w(c)
                 print "w, " , w
                 if(H.dot( w )<= 0).all():
                     #~ print 'active'
@@ -262,7 +262,7 @@ def plot_feasible(state):
         for j in range(5):
             for k in range(10):
                 c = com + array([(i - 2.5)*0.2, (j - 2.5)*0.2, (k-5)*0.2])
-                w = compute_w(c)           
+                w = compute_w(c)
                 active_ineq = state.getComConstraint(limbsCOMConstraints,[])
                 if(active_ineq[0].dot( c )<= active_ineq[1]).all() and (H.dot( w )<= 0).all():
                     #~ print 'active'
@@ -272,7 +272,7 @@ def plot_feasible(state):
                         #~ print "inactive"
                         createPtBox(r.client.gui, 0, c, color = [1,0,0,1])
     return -1
- 
+
 def plot(c):
     createPtBox(r.client.gui, 0, c, color = [0,1,0,1])
 
@@ -306,7 +306,7 @@ scene = "bb"
 r.client.gui.createScene(scene)
 b_id = 0
 
-a = computeAffordanceCentroids(tp.afftool, ["Support"]) 
+a = computeAffordanceCentroids(tp.afftool, ["Support"])
 
 
 def setupHrp2():
@@ -321,7 +321,7 @@ def setupHrp2():
             ]; r (q_init)
 
     #~ q_init[1] = -1.05
-    s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId]) 
+    s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId])
     q0 = s1.q()[:]
     r(q0)
     return s1
@@ -332,7 +332,7 @@ def setupSpidey():
     q_init = fullBody.getCurrentConfig(); q_init[0:7] = tp.q_init[0:7]
     q_init[1] += 1.05
     #~ q_0[2] = 1.1
-    s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId]) 
+    s1 = State(fullBody,q=q_init, limbsIncontact = [rLegId, lLegId])
     q0 = s1.q()[:]
     r(q0)
     return s1
@@ -340,7 +340,7 @@ def setupSpidey():
 s1_hp = setupHrp2()
 states+=[s1_hp]
 r(s1_hp.q())
-#~ 
+#~
 s1_sp = setupSpidey()
 states+=[s1_sp]
 r(s1_sp.q())
@@ -365,14 +365,14 @@ def add(lId):
     global states
     states +=[ns]
     r(ns.q())
-    
+
 def rm(lId):
     sF = states[-1]
     ns = removeContact(sF,lId,True)[0]
     global states
     states +=[ns]
     r(ns.q())
-    
+
 def go():
     return go0(states, mu=0.6,num_optim=2)
 

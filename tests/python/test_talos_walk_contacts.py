@@ -10,10 +10,10 @@ PATH = "hpp.corbaserver.rbprm.scenarios.demos"
 
 class TestTalosWalkContact(unittest.TestCase):
     def test_talos_walk_contacts(self):
-        with ServerManager('hpp-rbprm-server'):
+        with ServerManager("hpp-rbprm-server"):
             module_scenario = import_module(PATH + ".talos_flatGround")
-            self.assertTrue(hasattr(module_scenario, 'ContactGenerator'))
-            ContactGenerator = getattr(module_scenario, 'ContactGenerator')
+            self.assertTrue(hasattr(module_scenario, "ContactGenerator"))
+            ContactGenerator = getattr(module_scenario, "ContactGenerator")
             cg = ContactGenerator()
             cg.run()
             self.assertGreater(len(cg.configs), 5)
@@ -22,5 +22,5 @@ class TestTalosWalkContact(unittest.TestCase):
             self.assertEqual(cg.q_goal, cg.configs[-1])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

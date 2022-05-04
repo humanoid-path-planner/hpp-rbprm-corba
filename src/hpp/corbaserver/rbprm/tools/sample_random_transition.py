@@ -1,9 +1,9 @@
-from numpy.linalg import norm
+# flake8: noqa
 from hpp.corbaserver.rbprm.rbprmstate import State, StateHelper
 import random
 import numpy as np
 from numpy.linalg import norm
-from pinocchio import SE3, se3ToXYZQUATtuple, Quaternion
+from pinocchio import SE3, se3ToXYZQUATtuple
 import sys
 from math import isnan
 
@@ -11,13 +11,13 @@ eff_x_range = [-0.4, 0.4]
 eff_y_range = [-0.4, 0.4]
 kin_distance_max = 0.84
 
-limb_ids = {'talos_rleg_rom': range(13, 19), 'talos_lleg_rom': range(7, 13)}
+limb_ids = {"talos_rleg_rom": range(13, 19), "talos_lleg_rom": range(7, 13)}
 
 
 def projectInKinConstraints(fullBody, state):
     fullBody.setCurrentConfig(state.q())
-    pL = np.matrix(fullBody.getJointPosition('leg_left_sole_fix_joint')[0:3])
-    pR = np.matrix(fullBody.getJointPosition('leg_right_sole_fix_joint')[0:3])
+    pL = np.matrix(fullBody.getJointPosition("leg_left_sole_fix_joint")[0:3])
+    pR = np.matrix(fullBody.getJointPosition("leg_right_sole_fix_joint")[0:3])
     com_l = fullBody.getCenterOfMass()
     com = np.matrix(com_l)
     distance = max(norm(pL - com), norm(pR - com))
@@ -30,8 +30,8 @@ def projectInKinConstraints(fullBody, state):
             successProj = False
         else:
             fullBody.setCurrentConfig(state.q())
-            pL = np.matrix(fullBody.getJointPosition('leg_left_sole_fix_joint')[0:3])
-            pR = np.matrix(fullBody.getJointPosition('leg_right_sole_fix_joint')[0:3])
+            pL = np.matrix(fullBody.getJointPosition("leg_left_sole_fix_joint")[0:3])
+            pR = np.matrix(fullBody.getJointPosition("leg_right_sole_fix_joint")[0:3])
             com_l = fullBody.getCenterOfMass()
             com = np.matrix(com_l)
             distance = max(norm(pL - com), norm(pR - com))
@@ -43,10 +43,10 @@ def projectInKinConstraints(fullBody, state):
 
 def __loosely_z_aligned(limb, config):
     fullBody.setCurrentConfig(config)
-    effectorName = limbsCOMConstraints[limb]['effector']
+    effectorName = limbsCOMConstraints[limb]["effector"]
     m = _getTransform(fullBody.getJointPosition(effectorName))
     P, N = fullBody.computeContactForConfig(config, limb)
-    #~ N_world = m.dot(array(N[0]+[1]))[:3]
+    # ~ N_world = m.dot(array(N[0]+[1]))[:3]
     N_world = m[:3, :3].dot(array(N[0]))
     N_world = N_world / np.linalg.norm(N_world)
     return N_world.dot(array([0, 0, 1])) > 0.7
@@ -55,10 +55,10 @@ def __loosely_z_aligned(limb, config):
 def projectMidFeet(fullBody, s):
     fullBody.setCurrentConfig(s.q())
     com = np.zeros(3)
-    num = 0.
+    num = 0.0
     for limb in s.getLimbsInContact():
         com += np.array(fullBody.getJointPosition(fullBody.dict_limb_joint[limb])[0:3])
-        num += 1.
+        num += 1.0
     com /= num
     com[2] = fullBody.getCenterOfMass()[2]
     successProj = s.projectToCOM(com.tolist(), 0)
@@ -69,7 +69,7 @@ def projectMidFeet(fullBody, s):
 
 
 def sampleRotationAlongZ(placement):
-    alpha = random.uniform(0., 2. * np.pi)
+    alpha = random.uniform(0.0, 2.0 * np.pi)
     rot = placement.rotation
     rot[0, 0] = np.cos(alpha)
     rot[0, 1] = -np.sin(alpha)
@@ -79,7 +79,8 @@ def sampleRotationAlongZ(placement):
     return placement
 
 
-# create a state with legs config and root orientation along z axis random, the rest is equal to the referenceConfig
+# create a state with legs config and root orientation along z axis random, the rest is
+# equal to the referenceConfig
 def createRandomState(fullBody, limbsInContact, root_at_origin=True):
     extraDof = int(fullBody.client.robot.getDimensionExtraConfigSpace())
     q0 = fullBody.referenceConfig[::]
@@ -114,7 +115,9 @@ def sampleRandomStateFlatFloor(fullBody, limbsInContact, z):
         for limb in limbsInContact:
             p = fullBody.getJointPosition(fullBody.dict_limb_joint[limb])[0:3]
             p[2] = z
-            s0, success = StateHelper.addNewContact(s0, limb, p, n, lockOtherJoints=True)
+            s0, success = StateHelper.addNewContact(
+                s0, limb, p, n, lockOtherJoints=True
+            )
             if not success:
                 break
         if success:
@@ -144,7 +147,9 @@ def sampleRandomStateStairs(fullBody, limbsInContact, zInterval, movingLimb, z_m
                 p[2] = z_moving
             else:
                 p[2] = zInterval[random.randint(0, len(zInterval) - 1)]
-            s0, success = StateHelper.addNewContact(s0, limb, p, n, lockOtherJoints=True)
+            s0, success = StateHelper.addNewContact(
+                s0, limb, p, n, lockOtherJoints=True
+            )
             if not success:
                 break
         if success:
@@ -166,7 +171,9 @@ def sampleRandomTranstionFromState(fullBody, s0, limbsInContact, movingLimb, z):
         # sample a random position for movingLimb and try to project s0 to this position
         qr = fullBody.shootRandomConfig()
         q1 = s0.q()[::]
-        q1[limb_ids[movingLimb][0]:limb_ids[movingLimb][1]] = qr[limb_ids[movingLimb][0]:limb_ids[movingLimb][1]]
+        q1[limb_ids[movingLimb][0] : limb_ids[movingLimb][1]] = qr[
+            limb_ids[movingLimb][0] : limb_ids[movingLimb][1]
+        ]
         s1 = State(fullBody, q=q1, limbsIncontact=limbsInContact)
         fullBody.setCurrentConfig(s1.q())
         p = fullBody.getJointPosition(fullBody.dict_limb_joint[movingLimb])[0:3]
@@ -196,14 +203,16 @@ def sampleRandomTranstionFromState(fullBody, s0, limbsInContact, movingLimb, z):
             success = projectInKinConstraints(fullBody, s1)
         # check if transition is feasible according to CROC
         if success:
-            #success = fullBody.isReachableFromState(s0.sId,s1.sId) or (len(fullBody.isDynamicallyReachableFromState(s0.sId,s1.sId, numPointsPerPhases=0)) > 0)
+            # success = fullBody.isReachableFromState(s0.sId,s1.sId) or
+            # (len(fullBody.isDynamicallyReachableFromState(s0.sId,s1.sId,
+            # numPointsPerPhases=0)) > 0)
             success = fullBody.isReachableFromState(s0.sId, s1.sId)
     return success, s1
 
 
-## return two states (with adjacent ID in fullBody)
-## LimbsInContact must contains the feet limbs, they are all in contact for both states
-## the only contact difference between both states is for movingLimbs
+# return two states (with adjacent ID in fullBody)
+# LimbsInContact must contains the feet limbs, they are all in contact for both states
+# the only contact difference between both states is for movingLimbs
 def sampleRandomTransitionFlatFloor(fullBody, limbsInContact, movingLimb, z=0):
     random.seed()
     success = False
@@ -211,7 +220,9 @@ def sampleRandomTransitionFlatFloor(fullBody, limbsInContact, movingLimb, z=0):
     while not success and it_tot < 1000:
         it_tot += 1
         s0 = sampleRandomStateFlatFloor(fullBody, limbsInContact, z)
-        success, s1 = sampleRandomTranstionFromState(fullBody, s0, limbsInContact, movingLimb, z)
+        success, s1 = sampleRandomTranstionFromState(
+            fullBody, s0, limbsInContact, movingLimb, z
+        )
     if not success:
         print("Timeout for generation of feasible transition")
         sys.exit(1)
@@ -221,19 +232,25 @@ def sampleRandomTransitionFlatFloor(fullBody, limbsInContact, movingLimb, z=0):
     return state0, state1
 
 
-## return two states (with adjacent ID in fullBody)
-## LimbsInContact must contains the feet limbs, they are all in contact for both states
-## the only contact difference between both states is for movingLimbs
-## the limbs have a contact z choosen randomly in zInterval,
-## exept for moving limb which go from zInterval_moving[0] to zInterval_moving[1]
-def sampleRandomTransitionStairs(fullBody, limbsInContact, zInterval, movingLimb, zInterval_moving):
+# return two states (with adjacent ID in fullBody)
+# LimbsInContact must contains the feet limbs, they are all in contact for both states
+# the only contact difference between both states is for movingLimbs
+# the limbs have a contact z choosen randomly in zInterval,
+# exept for moving limb which go from zInterval_moving[0] to zInterval_moving[1]
+def sampleRandomTransitionStairs(
+    fullBody, limbsInContact, zInterval, movingLimb, zInterval_moving
+):
     random.seed()
     success = False
     it_tot = 0
     while not success and it_tot < 1000:
         it_tot += 1
-        s0 = sampleRandomStateStairs(fullBody, limbsInContact, zInterval, movingLimb, zInterval_moving[0])
-        success, s1 = sampleRandomTranstionFromState(fullBody, s0, limbsInContact, movingLimb, zInterval_moving[1])
+        s0 = sampleRandomStateStairs(
+            fullBody, limbsInContact, zInterval, movingLimb, zInterval_moving[0]
+        )
+        success, s1 = sampleRandomTranstionFromState(
+            fullBody, s0, limbsInContact, movingLimb, zInterval_moving[1]
+        )
     if not success:
         print("Timeout for generation of feasible transition")
         sys.exit(1)

@@ -235,7 +235,3 @@ r(s5.q())
 
 s5.projectToCOM(s0.getCenterOfMass(),10000)
 r(s5.q())
-
-
-
-

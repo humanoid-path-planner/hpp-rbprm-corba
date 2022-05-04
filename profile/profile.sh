@@ -1,6 +1,6 @@
-#!/bin/bash         
+#!/bin/bash
 
-gepetto-viewer-server & 
+gepetto-viewer-server &
 hpp-rbprm-server &
 ipython ./scenarios/$1
 

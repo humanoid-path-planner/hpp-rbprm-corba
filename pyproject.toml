@@ -1,2 +1,2 @@
 [tool.black]
-exclude = "cmake"
+exclude = "cmake|script|profile|affordance-tests"

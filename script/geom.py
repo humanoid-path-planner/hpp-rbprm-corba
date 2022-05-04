@@ -15,7 +15,7 @@ def __filter_points(points):
         el_arr = array(el)
         add = True
         for al in res:
-            if (norm(al - el_arr) < __EPS):
+            if norm(al - el_arr) < __EPS:
                 add = False
                 break
         if add:
@@ -37,7 +37,10 @@ def __centroid(points):
 
 
 def __centroid_list(list_points):
-    return [[__centroid(__filter_points(flat(pts))).tolist(), __normal(pts[0])] for pts in list_points]
+    return [
+        [__centroid(__filter_points(flat(pts))).tolist(), __normal(pts[0])]
+        for pts in list_points
+    ]
 
 
 def computeAffordanceCentroids(afftool, affordances=["Support", "Lean"]):

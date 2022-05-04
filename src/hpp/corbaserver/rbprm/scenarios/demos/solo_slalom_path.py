@@ -2,7 +2,6 @@ from hpp.corbaserver.rbprm.scenarios.solo_path_planner import SoloPathPlanner
 
 
 class PathPlanner(SoloPathPlanner):
-
     def init_problem(self):
         self.a_max = 0.1
         super().init_problem()
@@ -11,19 +10,23 @@ class PathPlanner(SoloPathPlanner):
         # force the base orientation to follow the direction of motion along the Z axis
         self.ps.setParameter("Kinodynamic/forceYawOrientation", True)
 
-
     def run(self):
         self.init_problem()
 
         self.q_init[:2] = [-0.7, 0.95]
-        #self.q_goal[:2] = [1.05, 0.95]
+        # self.q_goal[:2] = [1.05, 0.95]
         self.q_goal[:2] = [-0.2, 0.95]
 
-        # Constraint the initial orientation when forceYawOrientation = True, expressed as a 3D vector (x,y,z)
-        #self.q_init[-6:-3] = [0.1, 0, 0]
-        #self.q_goal[-6:-3] = [0, -0.1, 0]
+        # Constraint the initial orientation when forceYawOrientation = True, expressed
+        # as a 3D vector (x,y,z).
+        # self.q_init[-6:-3] = [0.1, 0, 0]
+        # self.q_goal[-6:-3] = [0, -0.1, 0]
 
-        self.init_viewer("multicontact/slalom_debris", visualize_affordances=["Support"], reduce_sizes=[0.05, 0, 0])
+        self.init_viewer(
+            "multicontact/slalom_debris",
+            visualize_affordances=["Support"],
+            reduce_sizes=[0.05, 0, 0],
+        )
         self.init_planner(True, False)
         self.solve()
 

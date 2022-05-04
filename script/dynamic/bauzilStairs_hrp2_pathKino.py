@@ -25,7 +25,7 @@ class Robot (Parent):
 		self.tf_root = "base_footprint"
 		self.client.basic = Client ()
 		self.load = load
-		
+
 
 
 rootJointType = 'freeflyer'
@@ -107,7 +107,7 @@ ps.addGoalConfig (q_goal)
 # Choosing RBPRM shooter and path validation methods.
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmDynamicPathValidation",0.05)
-# Choosing kinodynamic methods : 
+# Choosing kinodynamic methods :
 ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
 ps.addPathOptimizer("RandomShortcutDynamic")
@@ -247,5 +247,3 @@ r.client.gui.captureTransformOnRefresh(False)
 r.client.gui.writeNodeFile('path_1_root','meshs/slalom_path.obj')
 
 """
-
-

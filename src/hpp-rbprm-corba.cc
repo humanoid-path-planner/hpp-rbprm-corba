@@ -20,9 +20,11 @@
 
 typedef hpp::corbaServer::Server CorbaServer;
 int main(int argc, char* argv[]) {
-  hpp::core::ProblemSolverPtr_t problemSolver(hpp::core::ProblemSolver::create());
+  hpp::core::ProblemSolverPtr_t problemSolver(
+      hpp::core::ProblemSolver::create());
 
-  CorbaServer corbaServer(problemSolver, argc, const_cast<const char**>(argv), true);
+  CorbaServer corbaServer(problemSolver, argc, const_cast<const char**>(argv),
+                          true);
 
   corbaServer.startCorbaServer();
   corbaServer.loadPlugin(corbaServer.mainContextId(), "rbprm-corba.so");

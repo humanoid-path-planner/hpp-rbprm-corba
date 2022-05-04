@@ -10,7 +10,7 @@ class PathPlanner(AnymalPathPlanner):
     status_filename = "/res/infos.log"
 
     X_BOUNDS = [0.4, 3.6]
-    Y_BOUNDS = [0.4, 2.]
+    Y_BOUNDS = [0.4, 2.0]
     Z_VALUE = 0.465
 
     def __init__(self):
@@ -26,8 +26,9 @@ class PathPlanner(AnymalPathPlanner):
 
     def set_rom_filters(self):
         super().set_rom_filters()
-        # TEMP fix, because of issue https://github.com/humanoid-path-planner/hpp-fcl/issues/134 in hpp-fcl
-        # we need to disable ROM checks in this scenario with really small contact surfaces
+        # TEMP fix, because of issue
+        # https://github.com/humanoid-path-planner/hpp-fcl/issues/134 in hpp-fcl we need
+        # to disable ROM checks in this scenario with really small contact surfaces.
         self.rbprmBuilder.setFilter([])
 
     def set_random_configs(self):
@@ -37,20 +38,24 @@ class PathPlanner(AnymalPathPlanner):
         random.seed()
         self.q_init[:3] = [
             random.uniform(self.X_BOUNDS[0], self.X_BOUNDS[1]),
-            random.uniform(self.Y_BOUNDS[0], self.Y_BOUNDS[1]), self.Z_VALUE
+            random.uniform(self.Y_BOUNDS[0], self.Y_BOUNDS[1]),
+            self.Z_VALUE,
         ]
         self.q_goal = self.q_init[::]
         for i in range(random.randint(0, 1000)):
-            random.uniform(0., 1.)
+            random.uniform(0.0, 1.0)
         self.q_goal[:3] = [
             random.uniform(self.X_BOUNDS[0], self.X_BOUNDS[1]),
-            random.uniform(self.Y_BOUNDS[0], self.Y_BOUNDS[1]), self.Z_VALUE
+            random.uniform(self.Y_BOUNDS[0], self.Y_BOUNDS[1]),
+            self.Z_VALUE,
         ]
 
         # compute the orientation such that q_init face q_goal :
         # set final orientation to be along the circle :
         vx = np.matrix([1, 0, 0]).T
-        v_init = np.matrix([self.q_goal[0] - self.q_init[0], self.q_goal[1] - self.q_init[1], 0]).T
+        v_init = np.matrix(
+            [self.q_goal[0] - self.q_init[0], self.q_goal[1] - self.q_init[1], 0]
+        ).T
         quat = Quaternion.FromTwoVectors(vx, v_init)
         self.q_init[3:7] = quat.coeffs().tolist()
         self.q_goal[3:7] = self.q_init[3:7]

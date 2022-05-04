@@ -18,14 +18,15 @@
 // <http://www.gnu.org/licenses/>.
 
 #include <hpp/corbaserver/rbprm/server.hh>
-
-#include <hpp/util/exception.hh>
-#include "rbprmbuilder.impl.hh"
 #include <hpp/corbaserver/server.hh>
+#include <hpp/util/exception.hh>
+
+#include "rbprmbuilder.impl.hh"
 
 namespace hpp {
 namespace rbprm {
-Server::Server(corbaServer::Server* server) : corbaServer::ServerPlugin(server), rbprmBuilder_(NULL) {}
+Server::Server(corbaServer::Server* server)
+    : corbaServer::ServerPlugin(server), rbprmBuilder_(NULL) {}
 
 Server::~Server() {
   if (rbprmBuilder_) delete rbprmBuilder_;
@@ -34,15 +35,15 @@ Server::~Server() {
 std::string Server::name() const { return "rbprm"; }
 
 /// Start corba server
-void Server::startCorbaServer(const std::string& contextId, const std::string& contextKind) {
-  initializeTplServer (rbprmBuilder_, contextId, contextKind, name(), "builder");
-  rbprmBuilder_->implementation ().setServer (this);
+void Server::startCorbaServer(const std::string& contextId,
+                              const std::string& contextKind) {
+  initializeTplServer(rbprmBuilder_, contextId, contextKind, name(), "builder");
+  rbprmBuilder_->implementation().setServer(this);
 }
 
-::CORBA::Object_ptr Server::servant(const std::string& name) const
-{
+::CORBA::Object_ptr Server::servant(const std::string& name) const {
   if (name == "builder") return rbprmBuilder_->implementation()._this();
-  throw std::invalid_argument ("No servant " + name);
+  throw std::invalid_argument("No servant " + name);
 }
 }  // namespace rbprm
 }  // namespace hpp

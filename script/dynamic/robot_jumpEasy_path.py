@@ -41,7 +41,7 @@ afftool.visualiseAffordances('Support', r, r.color.brown)
 q_init = rbprmBuilder.getCurrentConfig ();
 #q_init[(len(q_init)-3):]=[0,0,1] # set normal for init / goal config
 q_init [0:3] = [-4, 1, 0.9]; rbprmBuilder.setCurrentConfig
-q_init[3:7] = [0.7071,0,0,0.7071] 
+q_init[3:7] = [0.7071,0,0,0.7071]
 (q_init); r (q_init)
 
 
@@ -55,7 +55,7 @@ ps.addGoalConfig (q_goal)
 # Choosing RBPRM shooter and path validation methods.
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
 ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
-# Choosing kinodynamic methods : 
+# Choosing kinodynamic methods :
 ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
 ps.selectPathPlanner("DynamicPlanner")
@@ -106,4 +106,3 @@ math.sqrt((np.linalg.norm(u)*np.linalg.norm(u)) * (np.linalg.norm(v)*np.linalg.n
 
 from hpp import quaternion as Quaternion
 q = Quaternion.Quaternion([1,0,0],[2,3,-1])
-

@@ -19,12 +19,13 @@ class PathPlanner(TalosPathPlanner):
         self.a_max = 0.5
         self.v_init = 0.05
         self.v_goal = 0.01
-        self.root_translation_bounds = [0.1, 4., 0.2, 2.2, 0.95, 1.05]
+        self.root_translation_bounds = [0.1, 4.0, 0.2, 2.2, 0.95, 1.05]
 
     def set_rom_filters(self):
         super().set_rom_filters()
-        # TEMP fix, because of issue https://github.com/humanoid-path-planner/hpp-fcl/issues/134 in hpp-fcl
-        # we need to disable ROM checks in this scenario with really small contact surfaces
+        # TEMP fix, because of issue
+        # https://github.com/humanoid-path-planner/hpp-fcl/issues/134 in hpp-fcl we need
+        # to disable ROM checks in this scenario with really small contact surfaces.
         self.rbprmBuilder.setFilter([])
 
     def set_random_configs(self):
@@ -38,7 +39,7 @@ class PathPlanner(TalosPathPlanner):
         # end plateform is always after the init plateform on the x axis
         init_plateform_id = random.randint(0, 3)
         end_plateform_id = random.randint(init_plateform_id + 1, 4)
-        #if end_plateform_id >= init_plateform_id:
+        # if end_plateform_id >= init_plateform_id:
         #  end_plateform_id+=1
 
         # set x position from the plateform choosen :
@@ -49,7 +50,8 @@ class PathPlanner(TalosPathPlanner):
         y_init = random.uniform(self.Y_BOUNDS[0], self.Y_BOUNDS[1])
         self.q_init[:3] = [x_init, y_init, self.Z_VALUE]
 
-        # y_goal must be random inside Y_BOUNDS but such that the line between q_init and q_goal is between +- MAX_ANGLE radian from the x axis
+        # y_goal must be random inside Y_BOUNDS but such that the line between q_init
+        # and q_goal is between +- MAX_ANGLE radian from the x axis.
         y_bound_goal = self.Y_BOUNDS[::]
         y_angle_max = math.sin(self.MAX_ANGLE) * abs(x_init - x_goal) + y_init
         y_angle_min = math.sin(-self.MAX_ANGLE) * abs(x_init - x_goal) + y_init
@@ -76,9 +78,11 @@ class PathPlanner(TalosPathPlanner):
 
     def run(self):
         self.init_problem()
-        self.init_viewer("multicontact/plateforme_not_flat",
-                         reduce_sizes=[0.1, 0, 0],
-                         visualize_affordances=["Support"])
+        self.init_viewer(
+            "multicontact/plateforme_not_flat",
+            reduce_sizes=[0.1, 0, 0],
+            visualize_affordances=["Support"],
+        )
         self.set_random_configs()
         self.init_planner(kinodynamic=False, optimize=False)
         self.solve()

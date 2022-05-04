@@ -10,16 +10,23 @@ from hpp.corbaserver.rbprm.utils import ServerManager
 
 class TestRBPRMstate3D(unittest.TestCase):
     def test_contacts_3d(self):
-        with ServerManager('hpp-rbprm-server'):
+        with ServerManager("hpp-rbprm-server"):
             fullbody = Robot()
             fullbody.client.robot.setDimensionExtraConfigSpace(6)
             fullbody.setJointBounds("root_joint", [-10, 10, -10, 10, -10, 10])
-            fullbody.client.robot.setExtraConfigSpaceBounds([-10, 10, -10, 10, -10, 10, -10, 10, -10, 10, -10, 10])
+            fullbody.client.robot.setExtraConfigSpaceBounds(
+                [-10, 10, -10, 10, -10, 10, -10, 10, -10, 10, -10, 10]
+            )
             fullbody.loadAllLimbs("static", nbSamples=10000)
             q = fullbody.referenceConfig[::] + [0] * 6
             fullbody.setCurrentConfig(q)
             com = fullbody.getCenterOfMass()
-            contacts = [fullbody.rLegId, fullbody.lLegId, fullbody.rArmId, fullbody.lArmId]
+            contacts = [
+                fullbody.rLegId,
+                fullbody.lLegId,
+                fullbody.rArmId,
+                fullbody.lArmId,
+            ]
             state = State(fullbody, q=q, limbsIncontact=contacts)
             self.assertTrue(state.isBalanced())
             self.assertTrue(state.isValid()[0])
@@ -52,5 +59,5 @@ class TestRBPRMstate3D(unittest.TestCase):
             self.assertEqual(n, n_real)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

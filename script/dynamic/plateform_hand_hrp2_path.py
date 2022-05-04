@@ -7,120 +7,144 @@ import omniORB.any
 from planning.configs.platform_hand_config import *
 import time
 
-class Robot (Parent):
-	rootJointType = 'freeflyer'
-	packageName = 'hpp-rbprm-corba'
-	meshPackageName = 'hpp-rbprm-corba'
-	# URDF file describing the trunk of the robot HyQ
-	urdfName = 'hrp2_trunk_flexible'
-	urdfSuffix = ""
-	srdfSuffix = ""
-	def __init__ (self, robotName, load = True):
-		Parent.__init__ (self, robotName, self.rootJointType, load)
-		self.tf_root = "base_footprint"
-		self.client.basic = Client ()
-		self.load = load
-		
 
-rootJointType = 'freeflyer'
-packageName = 'hpp-rbprm-corba'
-meshPackageName = 'hpp-rbprm-corba'
-urdfName = 'hrp2_trunk_flexible'
-urdfNameRom =  ['hrp2_larm_rom','hrp2_rarm_rom','hrp2_lleg_rom','hrp2_rleg_rom']
+class Robot(Parent):
+    rootJointType = "freeflyer"
+    packageName = "hpp-rbprm-corba"
+    meshPackageName = "hpp-rbprm-corba"
+    # URDF file describing the trunk of the robot HyQ
+    urdfName = "hrp2_trunk_flexible"
+    urdfSuffix = ""
+    srdfSuffix = ""
+
+    def __init__(self, robotName, load=True):
+        Parent.__init__(self, robotName, self.rootJointType, load)
+        self.tf_root = "base_footprint"
+        self.client.basic = Client()
+        self.load = load
+
+
+rootJointType = "freeflyer"
+packageName = "hpp-rbprm-corba"
+meshPackageName = "hpp-rbprm-corba"
+urdfName = "hrp2_trunk_flexible"
+urdfNameRom = ["hrp2_larm_rom", "hrp2_rarm_rom", "hrp2_lleg_rom", "hrp2_rleg_rom"]
 urdfSuffix = ""
 srdfSuffix = ""
-vMax = omniORB.any.to_any(0.3);
-aMax = omniORB.any.to_any(1);
-#aMax = omniORB.any.to_any(0.3);
+vMax = omniORB.any.to_any(0.3)
+aMax = omniORB.any.to_any(1)
+# aMax = omniORB.any.to_any(0.3);
 extraDof = 6
-mu=omniORB.any.to_any(MU)
+mu = omniORB.any.to_any(MU)
 # Creating an instance of the helper class, and loading the robot
-rbprmBuilder = Builder ()
-rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-#rbprmBuilder.setJointBounds ("base_joint_xyz", [-1.25,2, -0.5, 5.5, 0.6, 1.8])
-rbprmBuilder.setJointBounds ("base_joint_xyz", [-1,2, -0.5, 0.5, 0.5, 0.8])
-rbprmBuilder.setJointBounds('CHEST_JOINT0',[0,0])
-rbprmBuilder.setJointBounds('CHEST_JOINT1',[-0.55,0.85])
-rbprmBuilder.setJointBounds('HEAD_JOINT0',[0,0])
-rbprmBuilder.setJointBounds('HEAD_JOINT1',[0,0])
+rbprmBuilder = Builder()
+rbprmBuilder.loadModel(
+    urdfName,
+    urdfNameRom,
+    rootJointType,
+    meshPackageName,
+    packageName,
+    urdfSuffix,
+    srdfSuffix,
+)
+# rbprmBuilder.setJointBounds ("base_joint_xyz", [-1.25,2, -0.5, 5.5, 0.6, 1.8])
+rbprmBuilder.setJointBounds("base_joint_xyz", [-1, 2, -0.5, 0.5, 0.5, 0.8])
+rbprmBuilder.setJointBounds("CHEST_JOINT0", [0, 0])
+rbprmBuilder.setJointBounds("CHEST_JOINT1", [-0.55, 0.85])
+rbprmBuilder.setJointBounds("HEAD_JOINT0", [0, 0])
+rbprmBuilder.setJointBounds("HEAD_JOINT1", [0, 0])
 
 # The following lines set constraint on the valid configurations:
 # a configuration is valid only if all limbs can create a contact ...
 rbprmBuilder.setFilter([])
-rbprmBuilder.setAffordanceFilter('hrp2_lleg_rom', ['Support',])
-rbprmBuilder.setAffordanceFilter('hrp2_rleg_rom', ['Support'])
-rbprmBuilder.setAffordanceFilter('hrp2_larm_rom', ['Support'])
+rbprmBuilder.setAffordanceFilter(
+    "hrp2_lleg_rom",
+    [
+        "Support",
+    ],
+)
+rbprmBuilder.setAffordanceFilter("hrp2_rleg_rom", ["Support"])
+rbprmBuilder.setAffordanceFilter("hrp2_larm_rom", ["Support"])
 # We also bound the rotations of the torso. (z, y, x)
-rbprmBuilder.boundSO3([-0.1,0.1,-0.65,0.65,-0.2,0.2])
+rbprmBuilder.boundSO3([-0.1, 0.1, -0.65, 0.65, -0.2, 0.2])
 rbprmBuilder.client.basic.robot.setDimensionExtraConfigSpace(extraDof)
-rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds([-1,1,-1,1,-0.5,0.5,0,0,0,0,0,0])
-indexECS = rbprmBuilder.getConfigSize() - rbprmBuilder.client.basic.robot.getDimensionExtraConfigSpace()
+rbprmBuilder.client.basic.robot.setExtraConfigSpaceBounds(
+    [-1, 1, -1, 1, -0.5, 0.5, 0, 0, 0, 0, 0, 0]
+)
+indexECS = (
+    rbprmBuilder.getConfigSize()
+    - rbprmBuilder.client.basic.robot.getDimensionExtraConfigSpace()
+)
 
 # Creating an instance of HPP problem solver and the viewer
 
-ps = ProblemSolver( rbprmBuilder )
-ps.client.problem.setParameter("aMax",aMax)
-ps.client.problem.setParameter("vMax",vMax)
-ps.client.problem.setParameter("sizeFootX",omniORB.any.to_any(0.24))
-ps.client.problem.setParameter("sizeFootY",omniORB.any.to_any(0.14))
-ps.client.problem.setParameter("friction",mu)
-r = Viewer (ps)
+ps = ProblemSolver(rbprmBuilder)
+ps.client.problem.setParameter("aMax", aMax)
+ps.client.problem.setParameter("vMax", vMax)
+ps.client.problem.setParameter("sizeFootX", omniORB.any.to_any(0.24))
+ps.client.problem.setParameter("sizeFootY", omniORB.any.to_any(0.14))
+ps.client.problem.setParameter("friction", mu)
+r = Viewer(ps)
 
 from hpp.corbaserver.affordance.affordance import AffordanceTool
-afftool = AffordanceTool ()
-afftool.setAffordanceConfig('Support', [0.5, 0.03, 0.00005])
-afftool.loadObstacleModel (ENV_PACKAGE_NAME, ENV_NAME, ENV_PREFIX, r)
-#afftool.loadObstacleModel (ENV_PACKAGE_NAME, ENV_NAME, ENV_PREFIX, r)
-#r.loadObstacleModel (packageName, "ground", "planning")
-afftool.visualiseAffordances('Support', r, r.color.lightBrown)
-#r.addLandmark(r.sceneName,1)
+
+afftool = AffordanceTool()
+afftool.setAffordanceConfig("Support", [0.5, 0.03, 0.00005])
+afftool.loadObstacleModel(ENV_PACKAGE_NAME, ENV_NAME, ENV_PREFIX, r)
+# afftool.loadObstacleModel (ENV_PACKAGE_NAME, ENV_NAME, ENV_PREFIX, r)
+# r.loadObstacleModel (packageName, "ground", "planning")
+afftool.visualiseAffordances("Support", r, r.color.lightBrown)
+# r.addLandmark(r.sceneName,1)
 
 # Setting initial and goal configurations
-q_init = rbprmBuilder.getCurrentConfig ();
-q_init[3:7] = [1,0,0,0]
-q_init [0:3] = [0.3, 0, 0.58]; r (q_init)
+q_init = rbprmBuilder.getCurrentConfig()
+q_init[3:7] = [1, 0, 0, 0]
+q_init[0:3] = [0.3, 0, 0.58]
+r(q_init)
 q_init[8] = 0.8
-#q_init[3:7] = [0.7071,0,0,0.7071]
-#q_init [0:3] = [1, 1, 0.65]
+# q_init[3:7] = [0.7071,0,0,0.7071]
+# q_init [0:3] = [1, 1, 0.65]
 
-rbprmBuilder.setCurrentConfig (q_init)
-q_goal = q_init [::]
+rbprmBuilder.setCurrentConfig(q_init)
+q_goal = q_init[::]
 
 
-q_goal[3:7] = [1,0,0,0]
-q_goal [0:3] = [1.28, 0, 0.58]; r (q_goal)
+q_goal[3:7] = [1, 0, 0, 0]
+q_goal[0:3] = [1.28, 0, 0.58]
+r(q_goal)
 q_goal[8] = 0
-r (q_goal)
-#~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
+r(q_goal)
+# ~ q_goal [0:3] = [-1.5, 0, 0.63]; r (q_goal)
 
 # Choosing a path optimizer
-ps.setInitialConfig (q_init)
-ps.addGoalConfig (q_goal)
+ps.setInitialConfig(q_init)
+ps.addGoalConfig(q_goal)
 # Choosing RBPRM shooter and path validation methods.
 ps.client.problem.selectConFigurationShooter("RbprmShooter")
-ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
+ps.client.problem.selectPathValidation("RbprmPathValidation", 0.05)
 # Choosing kinodynamic methods :
 ps.selectSteeringMethod("RBPRMKinodynamic")
 ps.selectDistance("KinodynamicDistance")
 ps.selectPathPlanner("DynamicPlanner")
-ps.selectPathProjector('Progressive',0.05)
-#solve the problem :
+ps.selectPathProjector("Progressive", 0.05)
+# solve the problem :
 r(q_init)
 
 
-#r.solveAndDisplay("rm",1,0.01)
-tStart=time.time()
+# r.solveAndDisplay("rm",1,0.01)
+tStart = time.time()
 ps.client.problem.prepareSolveStepByStep()
 ps.client.problem.finishSolveStepByStep()
-#t = ps.solve ()
+# t = ps.solve ()
 
-tPlanning = time.time() -tStart
+tPlanning = time.time() - tStart
 
 from hpp.gepetto import PathPlayer
-pp = PathPlayer (rbprmBuilder.client.basic, r)
-pp.dt=0.03
+
+pp = PathPlayer(rbprmBuilder.client.basic, r)
+pp.dt = 0.03
 pp.displayVelocityPath(0)
-r.client.gui.setVisibility("path_0_root","ALWAYS_ON_TOP")
+r.client.gui.setVisibility("path_0_root", "ALWAYS_ON_TOP")
 
 
 """
@@ -135,7 +159,7 @@ f.close()
 for i in range(0,9):
   t = ps.solve()
   if isinstance(t, list):
-    ts = t[0]* 3600. + t[1] * 60. + t[2] + t[3]/1000.	
+    ts = t[0]* 3600. + t[1] * 60. + t[2] + t[3]/1000.
   f= open("/local/dev_hpp/logs/benchHrp2_slope_LP.txt","a")
   f.write("t = "+str(ts) + "\n")
   f.write("path_length = "+str(ps.client.problem.pathLength(i)) + "\n")
@@ -143,16 +167,13 @@ for i in range(0,9):
   print "problem "+str(i)+" solved \n"
   ps.clearRoadmap()
 """
-#ps.client.problem.prepareSolveStepByStep()
+# ps.client.problem.prepareSolveStepByStep()
 
-#ps.client.problem.finishSolveStepByStep()
+# ps.client.problem.finishSolveStepByStep()
 
 q_far = q_init[::]
 q_far[2] = +10
 r(q_far)
-
-
-
 
 
 """
@@ -178,7 +199,7 @@ for i in range(0,ps.numberNodes()):
 
 """
 # for seed 1486657707
-ps.client.problem.extractPath(0,0,2.15) 
+ps.client.problem.extractPath(0,0,2.15)
 
 # Playing the computed path
 from hpp.gepetto import PathPlayer
@@ -190,9 +211,7 @@ r.client.gui.setVisibility("path_1_root","ALWAYS_ON_TOP")
 pp.speed=0.3
 #pp (0)
 """
-#display path with post-optimisation
-
-
+# display path with post-optimisation
 
 
 """
@@ -202,9 +221,7 @@ r(q_far)
 """
 
 
-
-
- # Manually add waypoints to roadmap:
+# Manually add waypoints to roadmap:
 """
 ps.client.problem.prepareSolveStepByStep()
 pbCl = rbprmBuilder.client.basic.problem
@@ -223,4 +240,3 @@ pbCl.addEdgeToRoadmap (q_init, q1, 1, False)
 pbCl.addEdgeToRoadmap (q1, q_goal, 0, False)
 
 """
-

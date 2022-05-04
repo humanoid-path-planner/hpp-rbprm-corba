@@ -1,6 +1,7 @@
 from hpp.corbaserver.rbprm.scenarios.memmo.talos_platform_random_path import PathPlanner
-from hpp.corbaserver.rbprm.scenarios.memmo.talos_contact_generator import TalosContactGenerator
-import time
+from hpp.corbaserver.rbprm.scenarios.memmo.talos_contact_generator import (
+    TalosContactGenerator,
+)
 
 
 class ContactGenerator(TalosContactGenerator):
@@ -18,8 +19,10 @@ class ContactGenerator(TalosContactGenerator):
 
     def load_limbs(self):
         super().load_limbs("fixedStep08", nb_samples=100000)
-        # define init gait according to the direction of motion, try to move first the leg on the outside of the turn :
-        if self.path_planner.q_goal[0] > self.path_planner.q_init[0]:  # go toward x positif
+        # define init gait according to the direction of motion, try to move first the
+        # leg on the outside of the turn :
+        if self.path_planner.q_goal[0] > self.path_planner.q_init[0]:
+            # go toward x positif
             if self.path_planner.q_goal[1] > self.path_planner.q_init[1]:  # turn left
                 gait = [self.fullbody.rLegId, self.fullbody.lLegId]
             else:  # turn right

@@ -1,5 +1,6 @@
 import matplotlib
-#~ matplotlib.use('Agg')
+
+# ~ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
@@ -7,11 +8,13 @@ from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 from hpp.gepetto import Viewer
 
 from os import environ
-ins_dir = environ['DEVEL_DIR']
+
+ins_dir = environ["DEVEL_DIR"]
 db_dir = ins_dir + "/install/share/hyq-rbprm/database/hyq_"
 
 import ground_crouch_hyq_path as tp
-#~ import ground_crouch_hyq_path_bridge as tp
+
+# ~ import ground_crouch_hyq_path_bridge as tp
 
 packageName = "hyq_description"
 meshPackageName = "hyq_description"
@@ -24,7 +27,9 @@ srdfSuffix = ""
 
 fullBody = FullBody()
 
-fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
+fullBody.loadFullBodyModel(
+    urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix
+)
 fullBody.setJointBounds("base_joint_xyz", [-6, 5, -4, 4, 0.6, 2])
 
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
@@ -34,19 +39,19 @@ nbSamples = 20000
 ps = tp.ProblemSolver(fullBody)
 r = tp.Viewer(ps, viewerClient=tp.r.client)
 
-rootName = 'base_joint_xyz'
+rootName = "base_joint_xyz"
 
 #  Creating limbs
 # cType is "_3_DOF": positional constraint, but no rotation (contacts are punctual)
 cType = "_3_DOF"
 # string identifying the limb
-rLegId = 'rfleg'
+rLegId = "rfleg"
 # First joint of the limb, as in urdf file
-rLeg = 'rf_haa_joint'
+rLeg = "rf_haa_joint"
 # Last joint of the limb, as in urdf file
-rfoot = 'rf_foot_joint'
+rfoot = "rf_foot_joint"
 # Specifying the distance between last joint and contact surface
-offset = [0., -0.021, 0.]
+offset = [0.0, -0.021, 0.0]
 # Specifying the contact surface direction when the limb is in rest pose
 normal = [0, 1, 0]
 # Specifying the rectangular contact surface length
@@ -56,25 +61,39 @@ legy = 0.02
 
 
 def addLimbDb(limbId, heuristicName, loadValues=True, disableEffectorCollision=False):
-    fullBody.addLimbDatabase(str(db_dir + limbId + '.db'), limbId, heuristicName, loadValues, disableEffectorCollision)
+    fullBody.addLimbDatabase(
+        str(db_dir + limbId + ".db"),
+        limbId,
+        heuristicName,
+        loadValues,
+        disableEffectorCollision,
+    )
 
 
-fullBody.addLimb(rLegId, rLeg, rfoot, offset, normal, legx, legy, nbSamples, "forward", 0.1, cType)
+fullBody.addLimb(
+    rLegId, rLeg, rfoot, offset, normal, legx, legy, nbSamples, "forward", 0.1, cType
+)
 
-lLegId = 'lhleg'
-lLeg = 'lh_haa_joint'
-lfoot = 'lh_foot_joint'
-fullBody.addLimb(lLegId, lLeg, lfoot, offset, normal, legx, legy, nbSamples, "backward", 0.05, cType)
+lLegId = "lhleg"
+lLeg = "lh_haa_joint"
+lfoot = "lh_foot_joint"
+fullBody.addLimb(
+    lLegId, lLeg, lfoot, offset, normal, legx, legy, nbSamples, "backward", 0.05, cType
+)
 
-rarmId = 'rhleg'
-rarm = 'rh_haa_joint'
-rHand = 'rh_foot_joint'
-fullBody.addLimb(rarmId, rarm, rHand, offset, normal, legx, legy, nbSamples, "backward", 0.05, cType)
-#~
-larmId = 'lfleg'
-larm = 'lf_haa_joint'
-lHand = 'lf_foot_joint'
-fullBody.addLimb(larmId, larm, lHand, offset, normal, legx, legy, nbSamples, "forward", 0.05, cType)
+rarmId = "rhleg"
+rarm = "rh_haa_joint"
+rHand = "rh_foot_joint"
+fullBody.addLimb(
+    rarmId, rarm, rHand, offset, normal, legx, legy, nbSamples, "backward", 0.05, cType
+)
+# ~
+larmId = "lfleg"
+larm = "lf_haa_joint"
+lHand = "lf_foot_joint"
+fullBody.addLimb(
+    larmId, larm, lHand, offset, normal, legx, legy, nbSamples, "forward", 0.05, cType
+)
 
 fullBody.runLimbSampleAnalysis(rLegId, "jointLimitsDistance", True)
 fullBody.runLimbSampleAnalysis(rarmId, "jointLimitsDistance", True)
@@ -100,64 +119,63 @@ fullBody.setEndState(q_goal, [rLegId, lLegId, rarmId, larmId])
 r(q_init)
 
 configs = []
-#~ configs = fullBody.interpolate(0.08,1,5) # bridge
+# ~ configs = fullBody.interpolate(0.08,1,5) # bridge
 
 from hpp.gepetto import PathPlayer
+
 pp = PathPlayer(fullBody.client.basic, r)
 
-from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import step, clean, stats, saveAllData, play_traj
+from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import (
+    step,
+    clean,
+    stats,
+    saveAllData,
+    play_traj,
+)
 
 limbsCOMConstraints = {
-    rLegId: {
-        'file': "hyq/" + rLegId + "_com.ineq",
-        'effector': rfoot
-    },
-    lLegId: {
-        'file': "hyq/" + lLegId + "_com.ineq",
-        'effector': lfoot
-    },
-    rarmId: {
-        'file': "hyq/" + rarmId + "_com.ineq",
-        'effector': rHand
-    },
-    larmId: {
-        'file': "hyq/" + larmId + "_com.ineq",
-        'effector': lHand
-    }
+    rLegId: {"file": "hyq/" + rLegId + "_com.ineq", "effector": rfoot},
+    lLegId: {"file": "hyq/" + lLegId + "_com.ineq", "effector": lfoot},
+    rarmId: {"file": "hyq/" + rarmId + "_com.ineq", "effector": rHand},
+    larmId: {"file": "hyq/" + larmId + "_com.ineq", "effector": lHand},
 }
 
 
-def act(i,
-        numOptim=0,
-        use_window=0,
-        friction=0.5,
-        optim_effectors=True,
-        time_scale=20,
-        verbose=False,
-        draw=False,
-        trackedEffectors=[]):
-    return step(fullBody,
-                configs,
-                i,
-                numOptim,
-                pp,
-                limbsCOMConstraints,
-                friction,
-                optim_effectors=optim_effectors,
-                time_scale=time_scale,
-                useCOMConstraints=False,
-                use_window=use_window,
-                verbose=verbose,
-                draw=draw,
-                trackedEffectors=trackedEffectors)
+def act(
+    i,
+    numOptim=0,
+    use_window=0,
+    friction=0.5,
+    optim_effectors=True,
+    time_scale=20,
+    verbose=False,
+    draw=False,
+    trackedEffectors=[],
+):
+    return step(
+        fullBody,
+        configs,
+        i,
+        numOptim,
+        pp,
+        limbsCOMConstraints,
+        friction,
+        optim_effectors=optim_effectors,
+        time_scale=time_scale,
+        useCOMConstraints=False,
+        use_window=use_window,
+        verbose=verbose,
+        draw=draw,
+        trackedEffectors=trackedEffectors,
+    )
 
 
-#~ for i in range(6,25):
-#~ act(i, 60, optim_effectors = True)
+# ~ for i in range(6,25):
+# ~ act(i, 60, optim_effectors = True)
 
 import time
 
-#DEMO METHODS
+# DEMO METHODS
 
 
 def initConfig():

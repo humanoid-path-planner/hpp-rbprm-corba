@@ -19,7 +19,7 @@ pp = PathPlayer (fullBody.client.basic, r)
 from plan_execute import a, b, c, d, e, init_plan_execute
 init_plan_execute(model.fullBody, r, path_planner, pp)
 
-q_0 = model.fullBody.getCurrentConfig(); 
+q_0 = model.fullBody.getCurrentConfig();
 #~ fullBody.createOctreeBoxes(r.client.gui, 1, rarmId, q_0,)
 q_goal = model.fullBody.getCurrentConfig(); q_goal[0:7] = path_planner.q_goal[0:7]
 
@@ -32,7 +32,7 @@ q_init =  [
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # LLEG       25-30
         0.0, 0.0, -0.453785606, 0.872664626, -0.41887902, 0.0,               # RLEG       31-36
         ]; r (q_init)
-        
+
 q_init[0:7] = path_planner.q_init[0:7]
 
 model.fullBody.setCurrentConfig (q_goal)
@@ -64,23 +64,23 @@ def sc(ec):
 def pl(iid = None):
     global path
     if iid == None:
-        iid = len(path) -1 
+        iid = len(path) -1
     play_trajectory(fullBody,pp,path[iid])
-    
+
 def plc(ctx = 0, iid = None):
     sc(ctx)
     pl(iid)
 
 def go():
     return go0(states, mu=0.6,num_optim=2, use_kin = context == 0)
-    
+
 def plall(first = 0):
     global path
     sc(first)
     for pId in range(len(path)):
         play_trajectory(fullBody,pp,path[pId])
-        
-        
+
+
 
 from pickle import load, dump
 def save(fname):
@@ -107,7 +107,7 @@ def load_save(fname):
     for _, s in enumerate(all_data[0]):
         states+=[State(fullBody,q=s[0], limbsIncontact = s[1]) ]
 	r(states[0].q())
-    
+
 def onepath(ol, ctxt=1, nopt=1, mu=1, effector = False):
     reset()
     sc(ctxt)
@@ -122,7 +122,7 @@ def onepath(ol, ctxt=1, nopt=1, mu=1, effector = False):
     else:
         path[ol]=go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = False, s=s, effector = effector)
     all_paths[ctxt] = path
-    
+
 def onepath2(states_subset, ctxt=1, nopt=1, mu=1, effector = False, init_vel =None, init_acc = None):
     reset()
     sc(ctxt)
@@ -137,7 +137,7 @@ def onepath2(states_subset, ctxt=1, nopt=1, mu=1, effector = False, init_vel =No
     path += [go2(states_subset, num_optim=nopt, mu=mu, use_kin = False, s=None, effector = effector)]
     #~ else:
         #~ path[ol]=go2(states_subset, num_optim=nopt, mu=mu, use_kin = False, s=s, effector = effector)
-    all_paths[ctxt] = path    
+    all_paths[ctxt] = path
 
 def save_paths(fname):
     f = open(fname, "w")
@@ -151,7 +151,7 @@ def save_paths(fname):
     f = open(fname+"all", "w")
     dump(all_paths,f)
     f.close()
-    
+
 def load_paths(fname):
     f = open(fname, "r")
     global all_paths
@@ -160,21 +160,21 @@ def load_paths(fname):
     sc(0)
     global path
     path = all_paths[0][:]
-    
+
 def sh(ctxt, i):
     sc(ctxt)
     r(states[i].q())
-    
+
 def lc():
     load_save("19_06_s")
     load_paths("19_06_p")
     save_paths("19_06_p_save")
     save("19_06_s_save")
-    
+
 def sac():
     save("19_06_s")
     save_paths("19_06_p")
-    
+
 init_bezier_traj(fullBody, r, pp, [], limbsCOMConstraints)
 
 all_paths = [[],[]]

@@ -21,16 +21,18 @@ from hpp.corbaserver.rbprm.rbprmstate import State
 # from hpp.corbaserver.rbprm.tools.com_constraints import *
 
 
-def _interpolateState(ps,
-                      fullBody,
-                      stepsize,
-                      pathId,
-                      robustnessTreshold=0,
-                      filterStates=False,
-                      testReachability=True,
-                      quasiStatic=False,
-                      erasePreviousStates=True):
-    if (filterStates):
+def _interpolateState(
+    ps,
+    fullBody,
+    stepsize,
+    pathId,
+    robustnessTreshold=0,
+    filterStates=False,
+    testReachability=True,
+    quasiStatic=False,
+    erasePreviousStates=True,
+):
+    if filterStates:
         filt = 1
     else:
         filt = 0
@@ -38,18 +40,26 @@ def _interpolateState(ps,
     # discretize path
     totalLength = ps.pathLength(pathId)
     configsPlan = []
-    step = 0.
-    configSize = fullBody.getConfigSize() - len(ps.configAtParam(pathId, 0.))
-    z = [0. for _ in range(configSize)]
+    step = 0.0
+    configSize = fullBody.getConfigSize() - len(ps.configAtParam(pathId, 0.0))
+    z = [0.0 for _ in range(configSize)]
     while step < totalLength:
         configsPlan += [ps.configAtParam(pathId, step) + z[:]]
         step += stepsize
     configsPlan += [ps.configAtParam(pathId, totalLength) + z[:]]
 
-    configs = fullBody.clientRbprm.rbprm.interpolateConfigs(configsPlan, robustnessTreshold, filt, testReachability,
-                                                            quasiStatic, erasePreviousStates)
+    configs = fullBody.clientRbprm.rbprm.interpolateConfigs(
+        configsPlan,
+        robustnessTreshold,
+        filt,
+        testReachability,
+        quasiStatic,
+        erasePreviousStates,
+    )
     firstStateId = fullBody.clientRbprm.rbprm.getNumStates() - len(configs)
-    return [State(fullBody, i) for i in range(firstStateId, firstStateId + len(configs))], configs
+    return [
+        State(fullBody, i) for i in range(firstStateId, firstStateId + len(configs))
+    ], configs
 
 
 def _guidePath(problemSolver, fromPos, toPos):
@@ -62,15 +72,17 @@ def _guidePath(problemSolver, fromPos, toPos):
 
 
 class FewStepPlanner(object):
-    def __init__(self,
-                 client,
-                 problemSolver,
-                 rbprmBuilder,
-                 fullBody,
-                 planContext="rbprm_path",
-                 fullBodyContext="default",
-                 pathPlayer=None,
-                 viewer=None):
+    def __init__(
+        self,
+        client,
+        problemSolver,
+        rbprmBuilder,
+        fullBody,
+        planContext="rbprm_path",
+        fullBodyContext="default",
+        pathPlayer=None,
+        viewer=None,
+    ):
         self.fullBody = fullBody
         self.rbprmBuilder = rbprmBuilder
         self.client = client
@@ -100,7 +112,9 @@ class FewStepPlanner(object):
         return res
 
     def guidePath(self, fromPos, toPos, displayPath=False):
-        pId = self._actInContext(self.planContext, _guidePath, self.problemSolver, fromPos, toPos)
+        pId = self._actInContext(
+            self.planContext, _guidePath, self.problemSolver, fromPos, toPos
+        )
         self.setPlanningContext()
         names = self.rbprmBuilder.getAllJointNames()[1:]
         if displayPath:
@@ -112,25 +126,38 @@ class FewStepPlanner(object):
         self.setFullBodyContext()
         return pId
 
-    def interpolateStates(self,
-                          stepsize,
-                          pathId=1,
-                          robustnessTreshold=0,
-                          filterStates=False,
-                          testReachability=True,
-                          quasiStatic=False,
-                          erasePreviousStates=True):
-        return _interpolateState(self.problemSolver, self.fullBody, stepsize, pathId, robustnessTreshold, filterStates,
-                                 testReachability, quasiStatic, erasePreviousStates)
+    def interpolateStates(
+        self,
+        stepsize,
+        pathId=1,
+        robustnessTreshold=0,
+        filterStates=False,
+        testReachability=True,
+        quasiStatic=False,
+        erasePreviousStates=True,
+    ):
+        return _interpolateState(
+            self.problemSolver,
+            self.fullBody,
+            stepsize,
+            pathId,
+            robustnessTreshold,
+            filterStates,
+            testReachability,
+            quasiStatic,
+            erasePreviousStates,
+        )
 
-    def goToQuasiStatic(self,
-                        currentState,
-                        toPos,
-                        stepsize=0.002,
-                        goalLimbsInContact=None,
-                        goalNormals=None,
-                        displayGuidePath=False,
-                        erasePreviousStates=False):
+    def goToQuasiStatic(
+        self,
+        currentState,
+        toPos,
+        stepsize=0.002,
+        goalLimbsInContact=None,
+        goalNormals=None,
+        displayGuidePath=False,
+        erasePreviousStates=False,
+    ):
         pId = self.guidePath(currentState.q()[:7], toPos, displayPath=displayGuidePath)
         self.fullBody.setStartStateId(currentState.sId)
         targetState = currentState.q()[:]
@@ -138,11 +165,13 @@ class FewStepPlanner(object):
         if goalLimbsInContact is None:
             goalLimbsInContact = currentState.getLimbsInContact()
         if goalNormals is None:
-            goalNormals = [[0., 0., 1.] for _ in range(len(goalLimbsInContact))]
+            goalNormals = [[0.0, 0.0, 1.0] for _ in range(len(goalLimbsInContact))]
         self.fullBody.setEndState(targetState, goalLimbsInContact, goalNormals)
-        return self.interpolateStates(stepsize,
-                                      pathId=pId,
-                                      robustnessTreshold=1,
-                                      filterStates=True,
-                                      quasiStatic=True,
-                                      erasePreviousStates=erasePreviousStates)
+        return self.interpolateStates(
+            stepsize,
+            pathId=pId,
+            robustnessTreshold=1,
+            filterStates=True,
+            quasiStatic=True,
+            erasePreviousStates=erasePreviousStates,
+        )

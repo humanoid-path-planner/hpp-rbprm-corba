@@ -1,73 +1,72 @@
-
-
 import time
-pp.dt = 1/30.
-pp.speed=0.25
-r(pp.client.problem.configAtParam(ps.numberPaths ()-1,0)) 
-r.startCapture ("capture/capture","png")
+
+pp.dt = 1 / 30.0
+pp.speed = 0.25
+r(pp.client.problem.configAtParam(ps.numberPaths() - 1, 0))
+r.startCapture("capture/capture", "png")
 time.sleep(2)
-pp(ps.numberPaths ()-1)
-#r(pp.client.problem.configAtParam(ps.numberPaths ()-1,pp.client.problem.pathLength(ps.numberPaths() - 1)))
-time.sleep(2);
-r.stopCapture ()
+pp(ps.numberPaths() - 1)
+# r(pp.client.problem.configAtParam(ps.numberPaths ()-1,pp.client.problem.pathLength(ps.numberPaths() - 1)))
+time.sleep(2)
+r.stopCapture()
 
 
 import time
-r(configs[1]) 
-r.client.gui.startCapture (0,"capture/capture","png")
+
+r(configs[1])
+r.client.gui.startCapture(0, "capture/capture", "png")
 time.sleep(2)
 player.play()
-r(configs[len(configs)-2])
-time.sleep(2);
+r(configs[len(configs) - 2])
+time.sleep(2)
 r.client.gui.stopCapture(0)
 
 import time
+
 r(configs[0])
-tp.r.startCapture ("capture/capture","png")
+tp.r.startCapture("capture/capture", "png")
 time.sleep(2)
 player.displayContactPlan(1)
-tp.r.stopCapture ()
+tp.r.stopCapture()
 
 import time
+
 r(configs[6])
-tp.r.startCapture ("capture/capture","png")
+tp.r.startCapture("capture/capture", "png")
 time.sleep(2)
-player.play(1/2.)
-tp.r.stopCapture ()
+player.play(1 / 2.0)
+tp.r.stopCapture()
 
 
 r(configs[0])
-tp.r.startCapture ("capture/capture","png")
+tp.r.startCapture("capture/capture", "png")
 time.sleep(2)
-play_trajectory(fullBody,pp, trajectory)
+play_trajectory(fullBody, pp, trajectory)
 time.sleep(1)
-tp.r.stopCapture ()
+tp.r.stopCapture()
 
 id = r.client.gui.getWindowID("window_hpp_")
-r.client.gui.attachCameraToNode( 'hrp2_14/BODY_0',id)
+r.client.gui.attachCameraToNode("hrp2_14/BODY_0", id)
 
 
-tp.r.startCapture ("capture/capture","png")
-tp.r.stopCapture ()
+tp.r.startCapture("capture/capture", "png")
+tp.r.stopCapture()
 
 
-r.startCapture ("capture/capture","png")
-r.stopCapture ()
+r.startCapture("capture/capture", "png")
+r.stopCapture()
 
 
+gui.startCapture(1, "capture/capture", "png")
 
-gui.startCapture (1,"capture/capture","png")
-
-gui.stopCapture (1)
-
+gui.stopCapture(1)
 
 
-tp.r.startCapture ("capture/capture","png")
+tp.r.startCapture("capture/capture", "png")
 time.sleep(1)
 pp(int(total_paths_ids[10]))
 time.sleep(1)
-tp.r.stopCapture ()
-
+tp.r.stopCapture()
 
 
 """

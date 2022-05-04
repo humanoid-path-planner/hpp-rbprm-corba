@@ -30,7 +30,7 @@ urdfSuffix = ""
 srdfSuffix = ""
 
 #  This time we load the full body model of HyQ
-fullBody = FullBody () 
+fullBody = FullBody ()
 fullBody.loadFullBodyModel(urdfName, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
 fullBody.setJointBounds ("base_joint_xyz", [-4,6, -1, 1, 0.3, 2.5])
 
@@ -59,7 +59,7 @@ lLegId = 'lhleg'
 lLeg = 'lh_haa_joint'
 lfoot = 'lh_foot_joint'
 fullBody.addLimb(lLegId,lLeg,lfoot,offset,normal, legx, legy, nbSamples, "jointlimits", 0.05, cType)
-#~ 
+#~
 rarmId = 'rhleg'
 rarm = 'rh_haa_joint'
 rHand = 'rh_foot_joint'
@@ -75,8 +75,8 @@ fullBody.runLimbSampleAnalysis(lLegId, "jointLimitsDistance", True)
 fullBody.runLimbSampleAnalysis(rarmId, "jointLimitsDistance", True)
 fullBody.runLimbSampleAnalysis(larmId, "jointLimitsDistance", True)
 
-#~ q_init = hyq_ref[:]; q_init[0:7] = tp.q_init[0:7]; 
-#~ q_goal = hyq_ref[:]; q_goal[0:7] = tp.q_goal[0:7]; 
+#~ q_init = hyq_ref[:]; q_init[0:7] = tp.q_init[0:7];
+#~ q_goal = hyq_ref[:]; q_goal[0:7] = tp.q_goal[0:7];
 q_init = hyq_ref[:]; q_init[0:7] = tp.q_init[0:7]; q_init[2]=hyq_ref[2]+0.02
 q_goal = hyq_ref[:]; q_goal[0:7] = tp.q_goal[0:7]; q_init[2]=hyq_ref[2]+0.02
 
@@ -105,14 +105,14 @@ pp = PathPlayer (fullBody.client.basic, r)
 
 from hpp.corbaserver.rbprm.tools.cwc_trajectory_helper import step, clean,stats, saveAllData, play_traj
 
-	
-	
-#~ limbsCOMConstraints = { rLegId : {'file': "hyq/"+rLegId+"_com.ineq", 'effector' : rfoot},  
-						#~ lLegId : {'file': "hyq/"+lLegId+"_com.ineq", 'effector' : lfoot},  
-						#~ rarmId : {'file': "hyq/"+rarmId+"_com.ineq", 'effector' : rHand},  
+
+
+#~ limbsCOMConstraints = { rLegId : {'file': "hyq/"+rLegId+"_com.ineq", 'effector' : rfoot},
+						#~ lLegId : {'file': "hyq/"+lLegId+"_com.ineq", 'effector' : lfoot},
+						#~ rarmId : {'file': "hyq/"+rarmId+"_com.ineq", 'effector' : rHand},
 						#~ larmId : {'file': "hyq/"+larmId+"_com.ineq", 'effector' : lHand} }
-						
-limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : rfoot},  
+
+limbsCOMConstraints = { rLegId : {'file': "hrp2/RL_com.ineq", 'effector' : rfoot},
 						lLegId : {'file': "hrp2/LL_com.ineq", 'effector' : lfoot},
 						rarmId : {'file': "hrp2/RA_com.ineq", 'effector' : rHand},
 						larmId : {'file': "hrp2/LA_com.ineq", 'effector' : lHand} }
@@ -125,14 +125,14 @@ def initConfig():
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	r(q_init)
-	
+
 def endConfig():
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	r(q_goal)
-	
+
 
 def rootPath():
 	r.client.gui.setVisibility("hyq", "OFF")
@@ -144,18 +144,18 @@ def rootPath():
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
-	
+
 def genPlan(stepsize=0.06):
 	tp.cl.problem.selectProblem("default")
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.r.client.gui.setVisibility("toto", "OFF")
 	tp.r.client.gui.setVisibility("hyq_trunk_large", "OFF")
 	global configs
-	start = time.clock() 
+	start = time.clock()
 	configs = fullBody.interpolate(stepsize, 5, 5, True)
-	end = time.clock() 
+	end = time.clock()
 	print "Contact plan generated in " + str(end-start) + "seconds"
-	
+
 def contactPlan(step = 0.5):
 	r.client.gui.setVisibility("hyq", "ON")
 	tp.cl.problem.selectProblem("default")
@@ -164,25 +164,25 @@ def contactPlan(step = 0.5):
 	global configs
 	for i in range(0,len(configs)):
 		r(configs[i]);
-		time.sleep(step)		
-		
-		
+		time.sleep(step)
+
+
 def a():
 	print "initial configuration"
 	initConfig()
-		
+
 def b():
 	print "end configuration"
 	endConfig()
-		
+
 def c():
 	print "displaying root path"
 	rootPath()
-	
+
 def d(step=0.06):
 	print "computing contact plan"
 	genPlan(step)
-	
+
 def e(step = 0.5):
 	print "displaying contact plan"
 	contactPlan(step)
@@ -204,23 +204,23 @@ def sc(ec):
 def pl(iid = None):
     global path
     if iid == None:
-        iid = len(path) -1 
+        iid = len(path) -1
     play_trajectory(fullBody,pp,path[iid])
-    
+
 def plc(ctx = 0, iid = None):
     sc(ctx)
     pl(iid)
 
 def go():
     return go0(states, mu=0.6,num_optim=2, use_kin = context == 0)
-    
+
 def plall(first = 0):
     global path
     sc(first)
     for pId in range(len(path)):
         play_trajectory(fullBody,pp,path[pId])
-        
-        
+
+
 
 from pickle import load, dump
 def save(fname):
@@ -247,7 +247,7 @@ def load_save(fname):
     for _, s in enumerate(all_data[0]):
         states+=[State(fullBody,q=s[0], limbsIncontact = s[1]) ]
 	r(states[0].q())
-    
+
 def onepath(ol, ctxt=1, nopt=1, mu=1, effector = False):
     reset()
     sc(ctxt)
@@ -262,7 +262,7 @@ def onepath(ol, ctxt=1, nopt=1, mu=1, effector = False):
     else:
         path[ol]=go0([states[ol],states[ol+1]], num_optim=nopt, mu=mu, use_kin = False, s=s, effector = effector)
     all_paths[ctxt] = path
-    
+
 def onepath2(states_subset, ctxt=1, nopt=1, mu=1, effector = False):
     reset()
     sc(ctxt)
@@ -277,7 +277,7 @@ def onepath2(states_subset, ctxt=1, nopt=1, mu=1, effector = False):
     path += [go2(states_subset, num_optim=nopt, mu=mu, use_kin = False, s=None, effector = effector)]
     #~ else:
         #~ path[ol]=go2(states_subset, num_optim=nopt, mu=mu, use_kin = False, s=s, effector = effector)
-    all_paths[ctxt] = path    
+    all_paths[ctxt] = path
 
 def save_paths(fname):
     f = open(fname, "w")
@@ -291,7 +291,7 @@ def save_paths(fname):
     f = open(fname+"all", "w")
     dump(all_paths,f)
     f.close()
-    
+
 def load_paths(fname):
     f = open(fname, "r")
     global all_paths
@@ -300,21 +300,21 @@ def load_paths(fname):
     sc(0)
     global path
     path = all_paths[0][:]
-    
+
 def sh(ctxt, i):
     sc(ctxt)
     r(states[i].q())
-    
+
 def lc():
     load_save("19_06_s")
     load_paths("19_06_p")
     #~ save_paths("19_06_p_save")
     save("19_06_s_save")
-    
+
 def sac():
     save("19_06_s")
     save_paths("19_06_p")
-    
+
 init_bezier_traj(fullBody, r, pp, configs, limbsCOMConstraints)
 
 all_paths = [[],[]]

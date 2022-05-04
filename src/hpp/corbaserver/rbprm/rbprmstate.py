@@ -26,11 +26,14 @@ from numpy import array
 #  trunk of the robot, one for the range of motion
 class State(object):
     # # Constructor
-    def __init__(self, fullBody, sId=-1, isIntermediate=False, q=None, limbsIncontact=[]):
-        assert ((sId > -1 and len(limbsIncontact) == 0)
-                or sId == -1), "state created from existing id can't specify limbs in contact"
+    def __init__(
+        self, fullBody, sId=-1, isIntermediate=False, q=None, limbsIncontact=[]
+    ):
+        assert (
+            sId > -1 and len(limbsIncontact) == 0
+        ) or sId == -1, "state created from existing id can't specify limbs in contact"
         self.cl = fullBody.clientRbprm.rbprm
-        if (sId == -1):
+        if sId == -1:
             self.sId = self.cl.createState(q, limbsIncontact)
             self.isIntermediate = False
         else:
@@ -60,7 +63,7 @@ class State(object):
     # \param limb name of the limb for which the request aplies
     # \return whether the limb is in contact at this state
     def isLimbInContact(self, limbname):
-        if (self.isIntermediate):
+        if self.isIntermediate:
             return self.cl.isLimbInContactIntermediary(limbname, self.sId) > 0
         else:
             return self.cl.isLimbInContact(limbname, self.sId) > 0
@@ -70,13 +73,19 @@ class State(object):
     # \param limb name of the limb for which the request aplies
     # \return all limbs in contact at this state
     def getLimbsInContact(self):
-        return [limbName for limbName in self.fullBody.limbNames if self.isLimbInContact(limbName)]
+        return [
+            limbName
+            for limbName in self.fullBody.limbNames
+            if self.isLimbInContact(limbName)
+        ]
 
     # # Get the end effector position for a given configuration, assuming z normal
     # \param limbName name of the limb from which to retrieve a sample
     # \param configuration configuration of the robot
-    # \return world position of the limb end effector given the current robot configuration.
-    # array of size 4, where each entry is the position of a corner of the contact surface
+    # \return world position of the limb end effector given the current robot
+    # configuration.
+    # array of size 4, where each entry is the position of a corner of the contact
+    # surface
     def getEffectorPosition(self, limbName):
         self._cni()
         return self.cl.getEffectorPosition(limbName, self.q())
@@ -84,35 +93,51 @@ class State(object):
     # # Get the end effector position for a given configuration, assuming z normal
     # \param limbName name of the limb from which to retrieve a sample
     # \param configuration configuration of the robot
-    # \return world position of the limb end effector given the current robot configuration.
-    # array of size 4, where each entry is the position of a corner of the contact surface
+    # \return world position of the limb end effector given the current robot
+    # configuration.
+    # array of size 4, where each entry is the position of a corner of the contact
+    # surface
     def getContactPosAndNormals(self):
-        if (self.isIntermediate):
+        if self.isIntermediate:
             rawdata = self.cl.computeContactPointsAtState(self.sId, 1)
         else:
             rawdata = self.cl.computeContactPointsAtState(self.sId, 0)
-        return [[b[i:i + 3] for i in range(0, len(b), 6)]
-                for b in rawdata], [[b[i + 3:i + 6] for i in range(0, len(b), 6)] for b in rawdata]
+        return [[b[i : i + 3] for i in range(0, len(b), 6)] for b in rawdata], [
+            [b[i + 3 : i + 6] for i in range(0, len(b), 6)] for b in rawdata
+        ]
 
     # # Get the end effector position for a given configuration, assuming z normal
     # \param limbName name of the limb from which to retrieve a sample
     # \param configuration configuration of the robot
-    # \return world position of the limb end effector given the current robot configuration.
-    # array of size 4, where each entry is the position of a corner of the contact surface
+    # \return world position of the limb end effector given the current robot
+    # configuration.
+    # array of size 4, where each entry is the position of a corner of the contact
+    # surface
     def getContactPosAndNormalsForLimb(self, limbName):
-        assert self.isLimbInContact(
-            limbName), "in getContactPosAndNormals: limb " + limbName + "is not in contact at  state" + str(stateId)
-        if (self.isIntermediate):
+        assert self.isLimbInContact(limbName), (
+            "in getContactPosAndNormals: limb "
+            + limbName
+            + "is not in contact at  state"
+            # + str(stateId)
+        )
+        if self.isIntermediate:
             rawdata = self.cl.computeContactPointsAtStateForLimb(self.sId, 1, limbName)
         else:
             rawdata = self.cl.computeContactPointsAtStateForLimb(self.sId, 0, limbName)
-        return [[b[i:i + 3] for i in range(0, len(b), 6)]
-                for b in rawdata], [[b[i + 3:i + 6] for i in range(0, len(b), 6)] for b in rawdata]
+        return [[b[i : i + 3] for i in range(0, len(b), 6)] for b in rawdata], [
+            [b[i + 3 : i + 6] for i in range(0, len(b), 6)] for b in rawdata
+        ]
 
     def getCenterOfContactForLimb(self, limbName):
-        assert self.isLimbInContact(
-            limbName), "in getContactPosAndNormals: limb " + limbName + "is not in contact at  state" + str(stateId)
-        return self.cl.computeCenterOfContactAtStateForLimb(self.sId, self.isIntermediate, limbName)
+        assert self.isLimbInContact(limbName), (
+            "in getContactPosAndNormals: limb "
+            + limbName
+            + "is not in contact at  state"
+            # + str(stateId)
+        )
+        return self.cl.computeCenterOfContactAtStateForLimb(
+            self.sId, self.isIntermediate, limbName
+        )
 
     # # Get position of center of mass
     def getCenterOfMass(self):
@@ -125,12 +150,14 @@ class State(object):
     # # Get the end effector position for a given configuration, assuming z normal
     # \param limbName name of the limb from which to retrieve a sample
     # \param configuration configuration of the robot
-    # \return world position of the limb end effector given the current robot configuration.
-    # array of size 4, where each entry is the position of a corner of the contact surface
+    # \return world position of the limb end effector given the current robot
+    # configuration.
+    # array of size 4, where each entry is the position of a corner of the contact
+    # surface
     def getContactCone(self, friction):
         if self.H_h is None or self.__last_used_friction != friction:
             self.__last_used_friction = friction
-            if (self.isIntermediate):
+            if self.isIntermediate:
                 rawdata = self.cl.getContactIntermediateCone(self.sId, friction)
             else:
                 rawdata = self.cl.getContactCone(self.sId, friction)
@@ -141,24 +168,29 @@ class State(object):
         if toNewState:
             return self.fullBody.projectToCom(self.sId, targetCom)
         else:
-            return self.fullBody.projectStateToCOM(self.sId, targetCom, maxNumSample) > 0
+            return (
+                self.fullBody.projectStateToCOM(self.sId, targetCom, maxNumSample) > 0
+            )
 
     # # Project a state into a given root position and orientation
     #
     # \param stateId target state
     # \param root the root configuration (size 7)
-    # \param offset specific point to be projected in root frame. If different than 0 root orientation is ignored
+    # \param offset specific point to be projected in root frame. If different than 0
+    # root orientation is ignored
     # \return Whether the projection has been successful or not
-    def projectToRoot(self, targetRoot, offset=[0., 0., 0.]):
+    def projectToRoot(self, targetRoot, offset=[0.0, 0.0, 0.0]):
         return self.fullBody.projectStateToRoot(self.sId, targetRoot, offset) > 0
 
     def getComConstraint(self, limbsCOMConstraints, exceptList=[]):
-        return get_com_constraint(self.fullBody,
-                                  self.sId,
-                                  self.cl.getConfigAtState(self.sId),
-                                  limbsCOMConstraints,
-                                  interm=self.isIntermediate,
-                                  exceptList=exceptList)
+        return get_com_constraint(
+            self.fullBody,
+            self.sId,
+            self.cl.getConfigAtState(self.sId),
+            limbsCOMConstraints,
+            interm=self.isIntermediate,
+            exceptList=exceptList,
+        )
 
     def contactsVariations(self, state):
         return self.fullBody.getContactsVariations(self.sId, state.sId)
@@ -183,26 +215,42 @@ class StateHelper(object):
     # \param limbName name of the considered limb to create contact with
     # \param p 3d position of the point
     # \param n 3d normal of the contact location center
-    # \param max_num_sample number of times it will try to randomly sample a configuration before failing
-    # \param lockOtherJoints : if True, the values of all the joints exepct the ones of 'limbName' are constrained to
+    # \param max_num_sample number of times it will try to randomly sample a
+    # configuration before failing
+    # \param lockOtherJoints : if True, the values of all the joints exepct the ones of
+    # 'limbName' are constrained to
     # be constant.
-    # \param rotation : desired rotation of the end-effector in contact, expressed as Quaternion (x,y,z,w). If
-    # different from zero, the normal is ignored. Otherwise the rotation is automatically computed from the normal
+    # \param rotation : desired rotation of the end-effector in contact, expressed as
+    # Quaternion (x,y,z,w). If
+    # different from zero, the normal is ignored. Otherwise the rotation is
+    # automatically computed from the normal
     # (with one axis of freedom)
-    #                This only affect the first projection, if max_num_sample > 0 and the first projection was
+    #                This only affect the first projection, if max_num_sample > 0 and
+    #                the first projection was
     #                unsuccessfull, the parameter is ignored
-    # \return (State, success) whether the creation was successful, as well as the new state
+    # \return (State, success) whether the creation was successful, as well as the new
+    # state
     @staticmethod
-    def addNewContact(state, limbName, p, n, num_max_sample=0, lockOtherJoints=False, rotation=[0, 0, 0, 0]):
-        sId = state.cl.addNewContact(state.sId, limbName, p, n, num_max_sample, lockOtherJoints, rotation)
-        if (sId != -1):
+    def addNewContact(
+        state,
+        limbName,
+        p,
+        n,
+        num_max_sample=0,
+        lockOtherJoints=False,
+        rotation=[0, 0, 0, 0],
+    ):
+        sId = state.cl.addNewContact(
+            state.sId, limbName, p, n, num_max_sample, lockOtherJoints, rotation
+        )
+        if sId != -1:
             return State(state.fullBody, sId=sId), True
         return state, False
 
     @staticmethod
     def cloneState(state):
         sId = state.cl.cloneState(state.sId)
-        if (sId != -1):
+        if sId != -1:
             return State(state.fullBody, sId=sId), True
         return state, False
 
@@ -212,11 +260,12 @@ class StateHelper(object):
     # # collision and equilibrium are NOT considered.
     # \param state State considered
     # \param limbName name of the considered limb to create contact with
-    # \return (State, success) whether the removal was successful, as well as the new state
+    # \return (State, success) whether the removal was successful, as well as the new
+    # state
     @staticmethod
     def removeContact(state, limbName):
         sId = state.cl.removeContact(state.sId, limbName)
-        if (sId != -1):
+        if sId != -1:
             s = State(state.fullBody, sId=sId)
             return s, True
         return state, False
@@ -231,10 +280,14 @@ class StateHelper(object):
     def moveAndContact(state, rootOffset, limbName):
         s, success = StateHelper.removeContact(state, limbName)
         assert success
-        success = s.projectToRoot((array(s.q()[:3]) + array(rootOffset)).tolist() + s.q()[3:7])
+        success = s.projectToRoot(
+            (array(s.q()[:3]) + array(rootOffset)).tolist() + s.q()[3:7]
+        )
         if not success:
             return state, False
-        sId = s.fullBody.clientRbprm.rbprm.generateContactState(s.sId, limbName, rootOffset)
+        sId = s.fullBody.clientRbprm.rbprm.generateContactState(
+            s.sId, limbName, rootOffset
+        )
         if sId < 0:
             return state, False
         s = State(s.fullBody, sId=sId)

@@ -22,7 +22,9 @@ import numpy as np
 from hpp.corbaserver.rbprm.rbprmstate import State
 
 try:
-    from hpp.corbaserver.rbprm.tools.com_constraints import get_com_constraint_at_transform
+    from hpp.corbaserver.rbprm.tools.com_constraints import (
+        get_com_constraint_at_transform,
+    )
     from CWC_methods import compute_CWC
     from lp_find_point import find_valid_c_cwc_qp, lp_ineq_4D
 except Exception:
@@ -59,10 +61,16 @@ def isContactReachable(state, limbName, p, n, limbsCOMConstraints):
     tr = closestTransform(state, limbName, p, n)
     new_ineq = get_com_constraint_at_transform(tr, limbName, limbsCOMConstraints)
     active_ineq = state.getComConstraint(limbsCOMConstraints, [limbName])
-    res_ineq = [np.vstack([new_ineq[0], active_ineq[0]]), np.hstack([new_ineq[1], active_ineq[1]])]
+    res_ineq = [
+        np.vstack([new_ineq[0], active_ineq[0]]),
+        np.hstack([new_ineq[1], active_ineq[1]]),
+    ]
     success, status_ok, res = lp_ineq_4D(res_ineq[0], -res_ineq[1])
     if not success:
-        print("In isContactReachable no stability, Lp failed (should not happen) ", status_ok)
+        print(
+            "In isContactReachable no stability, Lp failed (should not happen) ",
+            status_ok,
+        )
         return False, [-1, -1, -1]
     return (res[3] >= 0), res[0:3]
 
@@ -86,9 +94,19 @@ def computeIntermediateState(sfrom, sto):
 # \param p 3d position of the point
 # \param n 3d normal of the contact location center
 # \return (State, success) whether the creation was successful, as well as the new state
-def addNewContact(state, limbName, p, n, num_max_sample=0, lockOtherJoints=False, rotation=[0 for _ in range (4)]):
-    sId = state.cl.addNewContact(state.sId, limbName, p, n, num_max_sample, lockOtherJoints, rotation)
-    if (sId != -1):
+def addNewContact(
+    state,
+    limbName,
+    p,
+    n,
+    num_max_sample=0,
+    lockOtherJoints=False,
+    rotation=[0 for _ in range(4)],
+):
+    sId = state.cl.addNewContact(
+        state.sId, limbName, p, n, num_max_sample, lockOtherJoints, rotation
+    )
+    if sId != -1:
         return State(state.fullBody, sId=sId), True
     return state, False
 
@@ -102,10 +120,12 @@ def addNewContact(state, limbName, p, n, num_max_sample=0, lockOtherJoints=False
 # \return (State, success) whether the removal was successful, as well as the new state
 def removeContact(state, limbName, projectToCOM=False, friction=0.6):
     sId = state.cl.removeContact(state.sId, limbName)
-    if (sId != -1):
+    if sId != -1:
         s = State(state.fullBody, sId=sId)
         if projectToCOM:
-            return s, projectToFeasibleCom(s, ddc=[0., 0., 0.], max_num_samples=10, friction=friction)
+            return s, projectToFeasibleCom(
+                s, ddc=[0.0, 0.0, 0.0], max_num_samples=10, friction=friction
+            )
         else:
             return s, True
     return state, False
@@ -122,22 +142,29 @@ def removeContact(state, limbName, projectToCOM=False, friction=0.6):
 # \param n 3d normal of the contact location center
 # \param max_num_samples max number of sampling in case projection ends up in collision
 # \return (State, success) whether the creation was successful, as well as the new state
-def addNewContactIfReachable(state,
-                             limbName,
-                             p,
-                             n,
-                             limbsCOMConstraints,
-                             projectToCom=False,
-                             max_num_samples=0,
-                             friction=0.6):
+def addNewContactIfReachable(
+    state,
+    limbName,
+    p,
+    n,
+    limbsCOMConstraints,
+    projectToCom=False,
+    max_num_samples=0,
+    friction=0.6,
+):
     if limbsCOMConstraints is None:
         ok = True
     else:
         ok, res = isContactReachable(state, limbName, p, n, limbsCOMConstraints)
-    if (ok):
+    if ok:
         s, success = addNewContact(state, limbName, p, n, max_num_samples)
         if success and projectToCom:
-            success = projectToFeasibleCom(s, ddc=[0., 0., 0.], max_num_samples=max_num_samples, friction=friction)
+            success = projectToFeasibleCom(
+                s,
+                ddc=[0.0, 0.0, 0.0],
+                max_num_samples=max_num_samples,
+                friction=friction,
+            )
         return s, success
     else:
         return state, False
@@ -149,7 +176,7 @@ def addNewContactIfReachable(state,
 # \param max_num_samples max number of sampling in case projection ends up in collision
 # \param friction considered friction coefficient
 # \return whether the projection was successful
-def projectToFeasibleCom(state, ddc=[0., 0., 0.], max_num_samples=10, friction=0.6):
+def projectToFeasibleCom(state, ddc=[0.0, 0.0, 0.0], max_num_samples=10, friction=0.6):
     # ~ H, h = state.getContactCone(friction)
     ps = state.getContactPosAndNormals()
     p = ps[0][0]
@@ -157,11 +184,19 @@ def projectToFeasibleCom(state, ddc=[0., 0., 0.], max_num_samples=10, friction=0
     print("p", p)
     print("N", N)
     # ~ try:
-    H = compute_CWC(p, N, state.fullBody.client.basic.robot.getMass(), mu=friction, simplify_cones=False)
+    H = compute_CWC(
+        p,
+        N,
+        state.fullBody.client.basic.robot.getMass(),
+        mu=friction,
+        simplify_cones=False,
+    )
     c_ref = state.getCenterOfMass()
     # ~ Kin = state.getComConstraint(limbsCOMConstraints, [])
     # ~ res = find_valid_c_cwc_qp(H, c_ref, Kin, ddc, state.fullBody.getMass())
-    success, p_solved, x = find_valid_c_cwc_qp(H, c_ref, None, ddc, state.fullBody.getMass())
+    success, p_solved, x = find_valid_c_cwc_qp(
+        H, c_ref, None, ddc, state.fullBody.getMass()
+    )
     # ~ except:
     # ~ success = False
     if success:
@@ -184,7 +219,7 @@ def isContactCreated(s1, s2):
     lcS15 = s15.getLimbsInContact()
     lcS1 = s1.getLimbsInContact()
     lcS2 = s2.getLimbsInContact()
-    if (len(lcS15) == len(lcS1)):  # no contact breaks
+    if len(lcS15) == len(lcS1):  # no contact breaks
         return True
     else:
         return not (len(lcS15) == len(lcS2))

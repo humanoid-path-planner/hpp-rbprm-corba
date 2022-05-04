@@ -1,5 +1,7 @@
 from hpp.corbaserver.rbprm.scenarios.demos.talos_stairs15_path import PathPlanner
-from hpp.corbaserver.rbprm.scenarios.talos_contact_generator import TalosContactGenerator
+from hpp.corbaserver.rbprm.scenarios.talos_contact_generator import (
+    TalosContactGenerator,
+)
 
 
 class ContactGenerator(TalosContactGenerator):
@@ -9,9 +11,16 @@ class ContactGenerator(TalosContactGenerator):
 
     def load_fullbody(self):
         super().load_fullbody()
-        self.q_ref = self.fullbody.referenceConfig_elbowsUp[::] + [0] * self.path_planner.extra_dof
+        self.q_ref = (
+            self.fullbody.referenceConfig_elbowsUp[::]
+            + [0] * self.path_planner.extra_dof
+        )
         # path planning use different limbs, reset it to right/left feet
-        self.used_limbs = [self.fullbody.lLegId, self.fullbody.rLegId, self.fullbody.rArmId]
+        self.used_limbs = [
+            self.fullbody.lLegId,
+            self.fullbody.rLegId,
+            self.fullbody.rArmId,
+        ]
         self.init_contacts = [self.fullbody.lLegId, self.fullbody.rLegId]
         self.end_contacts = self.used_limbs
 

@@ -1,6 +1,9 @@
-from hpp.corbaserver.rbprm.scenarios.memmo.talos_navBauzil_oriented_path import PathPlanner
-from hpp.corbaserver.rbprm.scenarios.memmo.talos_contact_generator import TalosContactGenerator
-import time
+from hpp.corbaserver.rbprm.scenarios.memmo.talos_navBauzil_oriented_path import (
+    PathPlanner,
+)
+from hpp.corbaserver.rbprm.scenarios.memmo.talos_contact_generator import (
+    TalosContactGenerator,
+)
 
 
 class ContactGenerator(TalosContactGenerator):
@@ -9,10 +12,15 @@ class ContactGenerator(TalosContactGenerator):
 
     def load_fullbody(self):
         from talos_rbprm.talos import Robot
+
         Robot.urdfSuffix += "_safeFeet"
         self.fullbody = Robot()
-        self.q_ref = self.fullbody.referenceConfig[::] + [0] * self.path_planner.extra_dof
-        self.weight_postural = self.fullbody.postureWeights[::] + [0] * self.path_planner.extra_dof
+        self.q_ref = (
+            self.fullbody.referenceConfig[::] + [0] * self.path_planner.extra_dof
+        )
+        self.weight_postural = (
+            self.fullbody.postureWeights[::] + [0] * self.path_planner.extra_dof
+        )
 
     def run(self):
         super().run()

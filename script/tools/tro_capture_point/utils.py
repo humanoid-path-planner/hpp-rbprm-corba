@@ -48,7 +48,7 @@ def select_contact_to_make(x_com, dx_com, robot, name_contact_to_break, contacts
     dc_pred = mat_zeros((3,len(contact_candidates)));
     v_pred = mat_zeros(len(contact_candidates));
     t_pred = mat_zeros(len(contact_candidates));
-    
+
     # compute contact points for all contacts except the one to move
     contacts_minus_one = dict(contacts);
     del contacts_minus_one[name_contact_to_break];
@@ -64,7 +64,7 @@ def select_contact_to_make(x_com, dx_com, robot, name_contact_to_break, contacts
         # compute new position of contact points
         for j in range(P_cand.shape[1]):
             p[:,i+j] = oMi.act(P_cand[:,j]);
-            N[:,i+j] = oMi.rotation * N_cand[:,j]; 
+            N[:,i+j] = oMi.rotation * N_cand[:,j];
 
         if(verb>0 and viewer is not None):
             # update contact points in viewer
@@ -85,16 +85,16 @@ def select_contact_to_make(x_com, dx_com, robot, name_contact_to_break, contacts
 #                raw_input();
         except Exception as e:
             print "ERROR while computing stability criterion:", e;
-        
+
     best_candidate_ids = np.where(abs(v_pred-np.min(v_pred))<EPS)[0];
     if(best_candidate_ids.shape[0]>1):
-        # if multiple contacts result in the same final com velocity (typically that would be 0), 
+        # if multiple contacts result in the same final com velocity (typically that would be 0),
         # pick the one who does it faster
         best_candidate_id = best_candidate_ids[np.argmin(t_pred[best_candidate_ids])];
     else:
         best_candidate_id = best_candidate_ids[0];
 
-    return Bunch(index=best_candidate_id, c=c_pred[:,best_candidate_id], 
+    return Bunch(index=best_candidate_id, c=c_pred[:,best_candidate_id],
                  dc=dc_pred[:,best_candidate_id], t=t_pred[best_candidate_id,0]);
 
 
@@ -116,7 +116,7 @@ def select_contact_to_break(x_com, dx_com, robot, mass, contacts, mu, gravity, s
         contacts_minus_one = dict(contacts);
         del contacts_minus_one[name_of_contact_to_break];
         (p,N) = compute_contact_points_from_contact_dictionary(robot, contacts_minus_one);
-        
+
         # predict future com state supposing to break name_of_contact_to_break
         stabilityCriterion.set_contacts(p.T, N.T, mu);
         try:
@@ -132,18 +132,18 @@ def select_contact_to_break(x_com, dx_com, robot, mass, contacts, mu, gravity, s
                 print "                          Predicted com state = (", res.c.T, res.dc.T, "), norm(dc)=%.3f"%norm(res.dc);
         except Exception as e:
             print "ERROR while computing stability criterion:", e;
-    
+
     t_pred_sorted = sorted(t_pred.A.squeeze());
     if(t_pred_sorted[-1] > t_pred_sorted[-2]+EPS):
         id_contact_to_break = np.argmax(t_pred);
     else:
         id_contact_to_break = np.argmin(v_pred);
     name_of_contact_to_break = contacts.keys()[id_contact_to_break];
-    return Bunch(name=name_of_contact_to_break, c=c_pred[:,id_contact_to_break], 
+    return Bunch(name=name_of_contact_to_break, c=c_pred[:,id_contact_to_break],
                  dc=dc_pred[:,id_contact_to_break], t=t_pred[id_contact_to_break,0],
                  t_min=t_min[id_contact_to_break,0], dc_min=dc_min[:,id_contact_to_break]);
-                 
-                 
+
+
 def predict_future_com_state(x_com, dx_com, robot, mass, contacts, mu, gravity, time, verb=0):
     ''' Predict future com state
     '''
@@ -157,7 +157,7 @@ def predict_future_com_state(x_com, dx_com, robot, mass, contacts, mu, gravity, 
     except Exception as e:
         print "ERROR while computing stability criterion predict_future_state:", e;
     return res;
-                 
+
 
 ''' Solve a QP to compute initial joint velocities that satisfy contact constraints and optionally other
     specified constraints, such as having the capture point inside the convex hull of the contact points.
@@ -170,14 +170,14 @@ def predict_future_com_state(x_com, dx_com, robot, mass, contacts, mu, gravity, 
     @param MAX_INITIAL_COM_VEL The maximum norm of the initial com velocity
     @param MAX_ITER Maximum number of iterations
     @return (success, v), where success is a boolean flag and v contains the joint velocities.
-'''    
+'''
 def compute_initial_joint_velocities(q, invDynForm, ZERO_INITIAL_ANGULAR_MOMENTUM, ZERO_INITIAL_VERTICAL_COM_VEL,
-                                     ENSURE_INITIAL_CAPTURE_POINT_OUT, ENSURE_INITIAL_CAPTURE_POINT_IN, 
+                                     ENSURE_INITIAL_CAPTURE_POINT_OUT, ENSURE_INITIAL_CAPTURE_POINT_IN,
                                      MAX_INITIAL_COM_VEL, MAX_ITER):
     nv = invDynForm.nv;
     na = invDynForm.na;
     (B_ch, b_ch) = invDynForm.getSupportPolygon();
-    
+
     k = invDynForm.Jc.shape[0];
     n_in = k+3 if ZERO_INITIAL_ANGULAR_MOMENTUM else k;
     n_in +=  1 if ZERO_INITIAL_VERTICAL_COM_VEL else 0;
@@ -200,21 +200,21 @@ def compute_initial_joint_velocities(q, invDynForm, ZERO_INITIAL_ANGULAR_MOMENTU
     cp_ub = np.matrix([ np.max(p[:,0])+0.1, np.max(p[:,1])+0.1 ]).T;
     cp_lb = np.matrix([ np.min(p[:,0])-0.1, np.min(p[:,1])-0.1 ]).T;
     dx_com_des = mat_zeros(3);
-    
+
     initial_state_generated = False;
     counter = 0;
     v0 = mat_zeros(3);
     while(not initial_state_generated):
-        counter += 1;        
+        counter += 1;
         if(counter > MAX_ITER):
             return (False, v0);
-        
+
         cp_des = cp_lb + np.multiply(mat_rand(2), (cp_ub-cp_lb));
         cp_ineq = np.min(np.dot(B_ch, cp_des) + b_ch);
         if((ENSURE_INITIAL_CAPTURE_POINT_OUT and cp_ineq>=0.0) or (ENSURE_INITIAL_CAPTURE_POINT_IN and cp_ineq<0.0)):
             continue;
-        
-        # compute com vel corresponding to desired capture point        
+
+        # compute com vel corresponding to desired capture point
         dx_com_des[:2] = sqrt(9.81/invDynForm.x_com[2]) * (cp_des - invDynForm.x_com[:2]);
         if(norm(dx_com_des)>=MAX_INITIAL_COM_VEL):
             continue;
@@ -225,16 +225,16 @@ def compute_initial_joint_velocities(q, invDynForm, ZERO_INITIAL_ANGULAR_MOMENTU
             dx_com_0 = np.dot(invDynForm.J_com, v0);
             cp_0     = invDynForm.x_com[:2] + dx_com_0[:2] / sqrt(9.81/invDynForm.x_com[2,0]);
             cp_ineq = np.min(np.dot(B_ch, cp_0) + b_ch);
-            
+
             if((ENSURE_INITIAL_CAPTURE_POINT_OUT and cp_ineq<0.0) or
                (ENSURE_INITIAL_CAPTURE_POINT_IN and cp_ineq>=0.0) or
                (ENSURE_INITIAL_CAPTURE_POINT_OUT==False and ENSURE_INITIAL_CAPTURE_POINT_IN==False)):
                 initial_state_generated = True;
-        
+
     return (True, v0);
 
 ''' Solve a QP to compute initial joint velocities that satisfy contact constraints and optionally other
-    specified constraints, such as multi-contact stability/unstability. Stability is computed using the 
+    specified constraints, such as multi-contact stability/unstability. Stability is computed using the
     multi-contact stability criterion, as implemented in the function can_I_stop.
     @param q Joint configuration
     @param robot An instance of RobotWrapper
@@ -250,15 +250,15 @@ def compute_initial_joint_velocities(q, invDynForm, ZERO_INITIAL_ANGULAR_MOMENTU
     @return (success, v), where success is a boolean flag and v contains the joint velocities.
     @note It assumes that the initial com position allows for static equilibrium. If this is not
           the case it returns False.
-'''       
-def compute_initial_joint_velocities_multi_contact(q, robot, contacts, constraint_mask, mu, 
-                                                   ZERO_INITIAL_ANGULAR_MOMENTUM, 
+'''
+def compute_initial_joint_velocities_multi_contact(q, robot, contacts, constraint_mask, mu,
+                                                   ZERO_INITIAL_ANGULAR_MOMENTUM,
                                                    ZERO_INITIAL_VERTICAL_COM_VEL,
-                                                   ENSURE_STABILITY, ENSURE_UNSTABILITY, 
+                                                   ENSURE_STABILITY, ENSURE_UNSTABILITY,
                                                    MAX_INITIAL_COM_VEL, MAX_MIN_JOINT_ACC, MAX_ITER):
     nv = robot.nv;
     na = robot.nv-6;
-    
+
     robot.computeAllTerms(q, mat_zeros(nv));
     robot.framesKinematics(q);
     x_com   = robot.com(q, update_kinematics=False);
@@ -309,12 +309,12 @@ def compute_initial_joint_velocities_multi_contact(q, robot, contacts, constrain
 
     # sample desired CoM velocities
     initial_state_generated = False;
-    counter = 0;        
+    counter = 0;
     while(not initial_state_generated):
-        counter += 1;        
+        counter += 1;
         if(counter > MAX_ITER):
             return (False, v0);
-        
+
         dx_com_des = MAX_INITIAL_COM_VEL * mat_rand(3) / sqrt(3.0);
         if(ENSURE_STABILITY or ENSURE_UNSTABILITY):
             try:
@@ -324,7 +324,7 @@ def compute_initial_joint_velocities_multi_contact(q, robot, contacts, constrain
             except Exception as e:
                 print "[compute_initial_joint_velocities_multi_contact] Error while checking stability of desired com velocity. %s"%str(e);
                 continue;
-        
+
         # solve QP to find joint velocities
         (imode,v0) = solveLeastSquare(A.A, dx_com_des.A, v_lb.A, v_ub.A, A_in.A, lb_in.A, ub_in.A, regularization=1e-4);
         if(imode==0):
@@ -336,5 +336,5 @@ def compute_initial_joint_velocities_multi_contact(q, robot, contacts, constrain
                     initial_state_generated = True;
             except Exception as e:
                 print "[compute_initial_joint_velocities_multi_contact] Error while checking stability of com velocity. %s"%str(e);
-        
+
     return (True, v0);
